@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<XnaContent xmlns:Graphics="Microsoft.Xna.Framework.Content.Pipeline.Graphics">
+  <!-- Palatino Linotype, the regular (upright) file. Named by its file path because asking for
+       the font by name can pick up the italic file instead. Every Windows PC has this file. -->
+  <Asset Type="Graphics:FontDescription">
+    <FontName>C:/Windows/Fonts/pala.ttf</FontName>
+    <Size>80</Size>
+    <Spacing>4</Spacing>
+    <UseKerning>true</UseKerning>
+    <Style>Regular</Style>
+    <CharacterRegions>
+      <CharacterRegion>
+        <Start>&#32;</Start>
+        <End>&#126;</End>
+      </CharacterRegion>
+    </CharacterRegions>
+  </Asset>
+</XnaContent>
