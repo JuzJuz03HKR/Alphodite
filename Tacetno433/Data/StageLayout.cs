@@ -1,4 +1,4 @@
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 
 namespace Tacetno433.Data
 {
@@ -57,15 +57,23 @@ namespace Tacetno433.Data
             return Rows[SeatRow[seat]];
         }
 
-        //Duel Position : the same nine seats on the duel page. The rows are shifted sideways
-        //so the band climbs up and to the right, away from the conductor's hand in the corner,
-        //and no musician hides behind the one in front.
-        public static Vector2[] DuelPos =
-        {
-            new Vector2(0.44f, 0.14f), new Vector2(0.64f, 0.12f), new Vector2(0.84f, 0.14f),   // back
-            new Vector2(0.30f, 0.42f), new Vector2(0.50f, 0.40f), new Vector2(0.70f, 0.42f),   // middle
-            new Vector2(0.16f, 0.72f), new Vector2(0.36f, 0.70f), new Vector2(0.56f, 0.72f),   // front
-        };
+        //Duel Stand : THE DUEL PAGE, seen from the side. The band stands in a line facing
+        //TACET on the right. Each orchestra row is one column: the back row furthest left,
+        //the front row nearest the enemy. The three seats of a row stand at three depths:
+        //further away is higher up the screen and a little smaller.
+        //All numbers are screen pixels, because the duel page never moves its stage.
+        //The boxes are sized for detailed pixel characters with room to swing an instrument,
+        //and the front row stays clear of the timing ring in the middle of the screen.
+        public static float[] DuelColumnX = { 196f, 316f, 436f };     // back, middle, front row
+        public static float[] DuelDepthY = { 506f, 530f, 554f };       // far, centre, near : the feet
+        public static float[] DuelDepthX = { -20f, 0f, 20f };
+        public static float[] DuelDepthScale = { 0.86f, 0.93f, 1f };   // placeholder boxes only, see CharacterArt
+        public const int StandW = 100;
+        public const int StandH = 170;
+        public const float DuelFloorY = 452f;                          // where the stage floor starts
+
+        //Duel Draw Order : the far players first, so nearer ones overlap them
+        public static int[] DuelDrawOrder = { 0, 3, 6, 1, 4, 7, 2, 5, 8 };
 
         //Seat Rect : where a seat's capsule sits inside a stage box
         public static Rectangle SeatRect(int seat, Rectangle stageBox, float scale)
@@ -73,10 +81,17 @@ namespace Tacetno433.Data
             return PlaceSeat(seat, SeatPos[seat], stageBox, scale);
         }
 
-        //Duel Seat Rect : the same, using the duel positions
-        public static Rectangle DuelSeatRect(int seat, Rectangle stageBox, float scale)
+        //Duel Stand Rect : the box a musician stands in on the duel page, feet on the floor
+        public static Rectangle DuelStandRect(int seat)
         {
-            return PlaceSeat(seat, DuelPos[seat], stageBox, scale);
+            int column = SeatRow[seat];
+            int depth = seat % 3;
+            float scale = DuelDepthScale[depth];
+            int w = (int)(StandW * scale);
+            int h = (int)(StandH * scale);
+            float feetX = DuelColumnX[column] + DuelDepthX[depth];
+            float feetY = DuelDepthY[depth];
+            return new Rectangle((int)(feetX - w / 2f), (int)(feetY - h), w, h);
         }
 
         private static Rectangle PlaceSeat(int seat, Vector2 pos, Rectangle stageBox, float scale)

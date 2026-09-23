@@ -29,7 +29,7 @@ namespace Tacetno433.Core
         public const float Heading = 0.92f;   // button words, section headings
         public const float Body = 0.72f;      // values and short lines
         public const float Label = 0.6f;      // captions, hints, small tags
-        public const float Tiny = 0.5f;       // widely spaced decorative capitals
+        public const float Tiny = 0.52f;      // widely spaced small capitals, was 0.5
 
         //StoryFont Sizes
         public const float Story = 0.92f;     // sentences. MUST match the scale used when the

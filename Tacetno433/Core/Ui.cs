@@ -1,4 +1,4 @@
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace Tacetno433.Core
@@ -13,6 +13,8 @@ namespace Tacetno433.Core
     //   Panel       the dark box with corner marks that holds content
     //   Pips        a row of small diamonds, used like rarity stars
     //   Tooltip     a box that explains whatever the mouse is over
+    //   Slider      a track with a diamond knob, used by the settings page
+    //   CheckBox    a small box with a tick in it when the option is on
     //
     //The fonts are handed over once by TacetGame, so every call stays short.
     public static class Ui
@@ -207,6 +209,42 @@ namespace Tacetno433.Core
             Ornament.DoubleFrame(sb, box, Palette.PaperDim);
             Gfx.Text(sb, BigFont, title, box.X + 14, box.Y + 10, Palette.Highlight, TextSize.Small);
             Gfx.Text(sb, StoryFont, body, box.X + 14, box.Y + 40, Palette.PaperDim, TextSize.StorySmall);
+        }
+
+        //Slider : a rail with tick marks and a diamond knob sitting on it.
+        //Like Button, this only draws. The page decides what a click or a drag means.
+        public static void Slider(SpriteBatch sb, Rectangle track, float value, bool hot, float alpha)
+        {
+            if (value < 0f) value = 0f;
+            if (value > 1f) value = 1f;
+
+            float cy = track.Center.Y;
+            Gfx.Rect(sb, track.X, cy - 1, track.Width, 2, Palette.LineGrey * alpha);
+            Gfx.Rect(sb, track.X, cy - 1, track.Width * value, 2, Palette.Paper * alpha);
+
+            //Gauge Marks : a tick every tenth, a taller one at each end and the middle
+            for (int i = 0; i <= 10; i++)
+                Gfx.Rect(sb, track.X + track.Width * i / 10f, cy + 7, 1, (i % 5 == 0) ? 7 : 4, Palette.LineGrey * alpha);
+
+            //Knob
+            float kx = track.X + track.Width * value;
+            float size = hot ? 9f : 7f;
+            if (hot) Gfx.DrawGlow(sb, kx, cy, 28f, Palette.Accent * (0.30f * alpha));
+            Gfx.Diamond(sb, kx, cy, size, Palette.Void * alpha);
+            Gfx.DiamondOutline(sb, kx, cy, size, (hot ? Palette.Accent : Palette.PaperDim) * alpha, 2f);
+            Gfx.Diamond(sb, kx, cy, 3f, (hot ? Palette.Accent : Palette.PaperDim) * alpha);
+        }
+
+        //Check Box : empty when the option is off, ticked when it is on
+        public static void CheckBox(SpriteBatch sb, Rectangle box, bool on, bool hot, float alpha)
+        {
+            Gfx.Rect(sb, box, Palette.Void * alpha);
+            Gfx.RectOutline(sb, box, (hot ? Palette.Accent : Palette.LineGrey) * alpha, 1);
+            if (!on) return;
+
+            Color tick = (hot ? Palette.Highlight : Palette.Paper) * alpha;
+            Gfx.Line(sb, box.X + 6, box.Center.Y, box.Center.X - 1, box.Bottom - 7, tick, 2f);
+            Gfx.Line(sb, box.Center.X - 1, box.Bottom - 7, box.Right - 5, box.Y + 6, tick, 2f);
         }
 
         //Capsule Bar : a rounded bar, used for stamina everywhere

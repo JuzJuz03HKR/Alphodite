@@ -95,6 +95,7 @@ namespace Tacetno433.Screens
             RunState run = Game.CurrentRun;
             RouteNode node = run.Options[index];
             run.Chosen = node;
+            run.RecordStop(node.Type);
             SoundBank.Play(Sfx.PathChosen);
 
             if (node.Type == NodeType.Battle || node.Type == NodeType.Elite || node.Type == NodeType.Boss)
@@ -138,11 +139,9 @@ namespace Tacetno433.Screens
 
                 Rectangle box = strip.DrawBase(sb, i);
 
-                //ARTWORK : sb.Draw(nodeTexture[(int)node.Type], box, Color.White);
-                //Placeholder Mark : delete once the panel art is in
-                float size = 1.2f + 0.4f * e;
-                DrawNodeSymbol(sb, node.Type, box.Center.X, box.Y + (box.Height - 150) * 0.45f, size,
-                               Palette.Paper * (0.45f + 0.45f * e));
+                //ARTWORK : Content/Art/Route/route_<kind>.png, see ArtBank
+                Texture2D art = ArtBank.RouteOf(node.Type);
+                if (art != null) sb.Draw(art, box, Color.White);
 
                 int type = (int)node.Type;
                 strip.DrawCaption(sb, i, RouteNodeInfo.PanelNumbers[i], node.Title, RouteNodeInfo.Tags[type],
@@ -174,61 +173,6 @@ namespace Tacetno433.Screens
 
             Gfx.TextSpacedRight(sb, Game.Font, run.FloorShort, 1244, 640, Palette.PaperDim, TextSize.Label, 3f);
             Gfx.TextSpacedRight(sb, Game.Font, "ARROWS  CHOOSE   /   ENTER  GO", 1244, 670, Palette.LineGrey, TextSize.Tiny, 2f);
-        }
-
-        //Node Symbol : every mark is built from music notation, no pictures anywhere.
-        //size scales the whole mark.
-        private void DrawNodeSymbol(SpriteBatch sb, NodeType type, float cx, float cy, float size, Color color)
-        {
-            float s = size;
-
-            if (type == NodeType.Battle)
-            {
-                //One note head with a stem, a single voice
-                Gfx.Circle(sb, cx, cy + 14 * s, 16 * s, color);
-                Gfx.Rect(sb, cx + 14 * s, cy - 44 * s, 3 * s, 58 * s, color);
-            }
-            else if (type == NodeType.Elite)
-            {
-                //Two heads on the same step, an accent, several playing at once
-                Gfx.Circle(sb, cx - 16 * s, cy + 20 * s, 15 * s, color);
-                Gfx.Circle(sb, cx + 12 * s, cy + 2 * s, 15 * s, color);
-                Gfx.Rect(sb, cx + 26 * s, cy - 44 * s, 3 * s, 48 * s, color);
-            }
-            else if (type == NodeType.Event)
-            {
-                //A question mark, the one place you cannot read in advance
-                Gfx.TextCentered(sb, Game.LogoFont, "?", cx, cy, color, 0.55f * s);
-            }
-            else if (type == NodeType.Shop)
-            {
-                //A coin
-                Gfx.CircleOutline(sb, cx, cy, 28 * s, color, 3f);
-                Gfx.Circle(sb, cx, cy, 10 * s, color);
-            }
-            else if (type == NodeType.Rest)
-            {
-                //A rest sign, a block hanging under a staff line. Silence on purpose.
-                Gfx.Rect(sb, cx - 38 * s, cy - 12 * s, 76 * s, 1, color);
-                Gfx.Rect(sb, cx - 22 * s, cy - 12 * s, 44 * s, 18 * s, color);
-            }
-            else if (type == NodeType.EraShift)
-            {
-                //A repeat sign, the mark that sends the music somewhere else
-                Gfx.Rect(sb, cx - 26 * s, cy - 34 * s, 4 * s, 68 * s, color);
-                Gfx.Rect(sb, cx - 16 * s, cy - 34 * s, 2 * s, 68 * s, color);
-                Gfx.Circle(sb, cx + 6 * s, cy - 12 * s, 6 * s, color);
-                Gfx.Circle(sb, cx + 6 * s, cy + 12 * s, 6 * s, color);
-                Gfx.Rect(sb, cx + 22 * s, cy - 34 * s, 2 * s, 68 * s, color);
-                Gfx.Rect(sb, cx + 30 * s, cy - 34 * s, 4 * s, 68 * s, color);
-            }
-            else
-            {
-                //Boss : a fermata, the mark that says hold this as long as you dare
-                Gfx.CircleOutline(sb, cx, cy, 36 * s, color, 3f);
-                Gfx.CircleOutline(sb, cx, cy, 27 * s, color, 2f);
-                Gfx.Circle(sb, cx, cy, 12 * s, color);
-            }
         }
     }
 }

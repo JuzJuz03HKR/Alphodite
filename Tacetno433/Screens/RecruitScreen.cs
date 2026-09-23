@@ -142,7 +142,7 @@ namespace Tacetno433.Screens
             Gfx.CircleOutline(sb, cx, figureCy, 150f, Palette.Paper * (0.12f * a), 1f);
 
             //Figure : rises into place as it appears
-            Rectangle figure = new Rectangle((int)cx - 80, column.Y + 44 + (int)((1f - a) * 40f), 160, 270);
+            Rectangle figure = new Rectangle((int)cx - 80, column.Y + 40 + (int)((1f - a) * 40f), 160, 236);
             MusicianArt.Figure(sb, figure, m, a);
 
             //New Tag and Instrument : printed up the side of the figure
@@ -151,23 +151,29 @@ namespace Tacetno433.Screens
             Gfx.Rect(sb, column.Right - 60, column.Y + 40, 1, 200, Palette.LineGrey * a);
 
             //Name : the big serif name with its slash
-            int y = column.Y + 322;
+            int y = column.Y + 282;
             Gfx.TextCentered(sb, Game.BigFont, m.NameTag, cx, y + 20, Palette.Highlight * a, TextSize.Hero);
             Gfx.TextSpacedCentered(sb, Game.Font, m.FamilyLabel, cx, y + 54, Palette.PaperDim * a, TextSize.Tiny, 3f);
 
-            //Stats : two numbers side by side
+            //Stats : two numbers side by side, the same numbers every page shows
+            RunState run = Game.CurrentRun;
             Gfx.TextSpacedRight(sb, Game.Font, "POWER", cx - 34, y + 84, Palette.LineGrey * a, TextSize.Tiny, 2f);
-            Gfx.Text(sb, Game.BigFont, m.PowerLabel, cx - 26, y + 70, Palette.Paper * a, TextSize.Subtitle);
+            Gfx.Text(sb, Game.BigFont, NumberText.Get(run.PowerOf(m)), cx - 26, y + 70, Palette.Paper * a, TextSize.Subtitle);
             Gfx.TextSpaced(sb, Game.Font, "COST", cx + 30, y + 84, Palette.LineGrey * a, TextSize.Tiny, 2f);
-            Gfx.Text(sb, Game.BigFont, m.CostLabel, cx + 76, y + 70, Palette.Paper * a, TextSize.Subtitle);
+            Gfx.Text(sb, Game.BigFont, NumberText.Get(run.CostOf(m)), cx + 76, y + 70, Palette.Paper * a, TextSize.Subtitle);
 
             Ornament.Divider(sb, cx, y + 116, 150, Palette.LineGrey * a);
-            Gfx.Text(sb, Game.StoryFont, m.LineWrapped, cx - TacetGame.MusicianWrapWidth / 2f, y + 130, Palette.Paper * a, TextSize.Story);
+            Gfx.Text(sb, Game.StoryFont, m.LineWrapped, cx - TacetGame.MusicianWrapWidth / 2f, y + 128, Palette.Paper * a, TextSize.Story);
 
-            //Where They Went : on stage or waiting on the bench
-            bool seated = Game.CurrentRun.Formation.SeatOf(m) >= 0;
-            string where = seated ? "TAKES A SEAT ON STAGE" : "WAITS ON THE BENCH";
-            Gfx.TextSpacedCentered(sb, Game.Font, where, cx, column.Bottom - 8, Palette.LineGrey * a, TextSize.Tiny, 3f);
+            //Trait : what they do in a duel, under the line it comes from
+            float tx = cx - TacetGame.MusicianWrapWidth / 2f;
+            Ui.Tag(sb, m.TraitName, tx, y + 190, true, a);
+            Gfx.Text(sb, Game.StoryFont, m.TraitWrapped, tx, y + 216, Palette.PaperDim * a, TextSize.StorySmall);
+
+            //Where They Went : on stage or waiting on the bench, printed up the side
+            bool seated = run.Formation.SeatOf(m) >= 0;
+            string where = seated ? "ON STAGE" : "ON THE BENCH";
+            Gfx.TextSpacedRight(sb, Game.Font, where, column.Right - 40, column.Y + 12, Palette.LineGrey * a, TextSize.Tiny, 3f);
         }
 
         private void DrawFooter(SpriteBatch sb, RunState run, float a)

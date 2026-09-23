@@ -1,8 +1,9 @@
-using System;
+﻿using System;
 using System.IO;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Media;
+using Tacetno433.Core;
 
 namespace Tacetno433.Audio
 {
@@ -22,12 +23,12 @@ namespace Tacetno433.Audio
         NoteOff,        // clearing a beat on the score
         RoundStart,     // the round banner
         BeatTick,       // the needle moving onto a new beat
-        QteBoost,       // player pressed F
-        QteNormal,      // player pressed G
-        QteEase,        // player pressed H
-        QtePerfect,     // pressed exactly on the ring
-        QteMiss,        // pressed badly off the ring
-        QteHesitate,    // never pressed at all
+        QteBoost,       // a big baton stroke (BOOST)
+        QteNormal,      // a middle stroke (PLAY)
+        QteEase,        // a small stroke (EASE)
+        QtePerfect,     // a stroke right on the ring
+        QteMiss,        // a stroke badly off the ring, or the wrong way
+        QteHesitate,    // the beat went by with no stroke
         ClashWin,       // our sound beat theirs on this beat
         ClashLose,      // theirs beat ours
         ClashEven,      // nobody moved
@@ -57,7 +58,6 @@ namespace Tacetno433.Audio
         Title,
         Gallery,
         Route,
-        Prep,
         Battle,
         Boss,
         Victory,
@@ -77,6 +77,12 @@ namespace Tacetno433.Audio
     //
     //Anything that is missing is skipped quietly, so the game already runs today with no
     //audio at all, and each sound switches on by itself the moment its file exists.
+    //
+    //PHRASE NOTES : the duel has no long song. Its melody is played ONE NOTE PER BEAT, so the
+    //music only happens when the player conducts (and stops when they miss one):
+    //   Audio/Phrase/answer_1 ... answer_8   the band's answer, note 1 on beat 1 and so on
+    //   Audio/Phrase/call_1   ... call_8     TACET's call
+    //Fewer files are fine: with 4 notes the melody simply repeats every bar.
     public static class SoundBank
     {
         //Sound Files : paths inside the Content folder, no extension
@@ -127,7 +133,6 @@ namespace Tacetno433.Audio
             "Audio/Music/title",
             "Audio/Music/gallery",
             "Audio/Music/route",
-            "Audio/Music/prep",
             "Audio/Music/battle",
             "Audio/Music/boss",
             "Audio/Music/victory",
@@ -138,9 +143,9 @@ namespace Tacetno433.Audio
             "Audio/Music/ending"
         };
 
-        //Volume : 0 to 1
-        public static float SfxVolume = 0.8f;
-        public static float MusicVolume = 0.55f;
+        //Volume : the numbers live in Core/Settings.cs, because the settings page owns them.
+        //Everything played here is multiplied by the master fader as well.
+        public static float MusicLevel { get { return Settings.Music * Settings.Master; } }
 
         //Load Report : shown on the F3 overlay so you can see what got picked up
         public static int LoadedSfx;
@@ -149,6 +154,14 @@ namespace Tacetno433.Audio
         private static SoundEffect[] sfx;
         private static Song[] songs;
         private static Music playing = Music.None;
+
+        //Phrase Notes : see the note at the top
+        public const int PhraseLength = 8;
+        private static SoundEffect[] answerNotes = new SoundEffect[PhraseLength];
+        private static SoundEffect[] callNotes = new SoundEffect[PhraseLength];
+        private static int answerCount;
+        private static int callCount;
+        public static int LoadedPhrase;
 
         //Sound Load : called once from LoadContent
         public static void Load(ContentManager content)
@@ -183,8 +196,48 @@ namespace Tacetno433.Audio
                 catch (Exception) { songs[i] = null; }
             }
 
+            answerCount = LoadPhrase(content, "Audio/Phrase/answer_", answerNotes);
+            callCount = LoadPhrase(content, "Audio/Phrase/call_", callNotes);
+            LoadedPhrase = answerCount + callCount;
+
             MediaPlayer.IsRepeating = true;
-            MediaPlayer.Volume = MusicVolume;
+            MediaPlayer.Volume = MusicLevel;
+        }
+
+        //Phrase Load : note files numbered from 1, stopping at the first one that is missing
+        private static int LoadPhrase(ContentManager content, string prefix, SoundEffect[] into)
+        {
+            int count = 0;
+            for (int n = 0; n < into.Length; n++)
+            {
+                string name = prefix + (n + 1);
+                if (!Exists(content, name)) break;
+                try
+                {
+                    into[n] = content.Load<SoundEffect>(name);
+                    count++;
+                }
+                catch (Exception) { break; }
+            }
+            return count;
+        }
+
+        //Play Answer : the band's note for this beat of the round. Returns false when there are
+        //no phrase files yet, so the caller can fall back to a plain sound effect.
+        //pitch 0 is in tune. The duel detunes a MISS a little, so a mistake sounds wrong.
+        public static bool PlayAnswer(int beat, float volume, float pitch)
+        {
+            if (answerCount == 0) return false;
+            answerNotes[beat % answerCount].Play(volume * Settings.Sfx * Settings.Master, pitch, 0f);
+            return true;
+        }
+
+        //Play Call : TACET's note for this beat of the round
+        public static bool PlayCall(int beat, float volume, float pitch)
+        {
+            if (callCount == 0) return false;
+            callNotes[beat % callCount].Play(volume * Settings.Sfx * Settings.Master, pitch, 0f);
+            return true;
         }
 
         //File Check : built content lives next to the game as .xnb files
@@ -207,7 +260,7 @@ namespace Tacetno433.Audio
             SoundEffect effect = sfx[(int)id];
             if (effect == null) return;
 
-            effect.Play(volume * SfxVolume, pitch, 0f);
+            effect.Play(volume * Settings.Sfx * Settings.Master, pitch, 0f);
         }
 
         //Play Music : switching to the track already playing does nothing,
@@ -226,8 +279,14 @@ namespace Tacetno433.Audio
                 return;
             }
 
-            MediaPlayer.Volume = MusicVolume;
+            MediaPlayer.Volume = MusicLevel;
             MediaPlayer.Play(song);
+        }
+
+        //Volume Changed : called by the settings page while a volume slider is moving
+        public static void ApplyVolume()
+        {
+            MediaPlayer.Volume = MusicLevel;
         }
 
         public static void StopMusic()

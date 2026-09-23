@@ -17,8 +17,10 @@ namespace Tacetno433.Core
         public static Color StageDeep = new Color(13, 13, 15);
         public static Color Panel = new Color(20, 20, 23);        // cards and plates on the dark pages
         public static Color Stage = new Color(30, 30, 33);
-        public static Color LineGrey = new Color(92, 92, 96);
-        public static Color PaperDim = new Color(152, 152, 154);
+        //Readable Greys : small labels are drawn in these two, so they sit high enough above
+        //the black to be read on a projector, and still well under white. Was 92 and 152.
+        public static Color LineGrey = new Color(118, 118, 122);
+        public static Color PaperDim = new Color(174, 174, 176);
         public static Color Paper = new Color(226, 226, 222);
 
         //Light Stage Tones : the duel page and the victory page flip the scheme.

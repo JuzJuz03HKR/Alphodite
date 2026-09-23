@@ -15,11 +15,23 @@ namespace Tacetno433.Screens
     //       after an elite a chance that a musician follows you home), and the run record
     //       is updated. Then a motif choice may follow.
     //LOSS : the run is over. The curtain call page sums it up.
+    //
+    //Beside the numbers sits THE PERFORMANCE : every beat of the fight in a small grid, one row
+    //per round. A filled box is a beat the band won, an empty one a beat TACET took. The arrow is
+    //the stroke, bigger for a BOOST and smaller for an EASE, and a small diamond marks a PERFECT.
+    //It is not there to be studied, just to look back at what was played.
     public class ResultScreen : GameScreen
     {
         private Rectangle continueButton = new Rectangle(490, 630, 300, 52);
-        private const int LedgerX = 390;
-        private const int LedgerW = 500;
+        private const int LedgerX = 110;
+        private const int LedgerW = 440;
+        private const int SheetX = 660;
+        private const int SheetY = 262;
+        private const int CellW = 50;
+        private const int CellH = 42;
+
+        private static string[] roundNumerals = { "I", "II", "III" };
+        private static Flick[] pattern = { Flick.Down, Flick.Left, Flick.Right, Flick.Up };
 
         //Result Data : worked out once in Load
         private bool won;
@@ -84,7 +96,7 @@ namespace Tacetno433.Screens
                 recruited = false;
             }
 
-            statNames[0] = "PERFECT PRESSES";  statValues[0] = NumberText.Get(battle.PerfectCount);
+            statNames[0] = "PERFECT BEATS";    statValues[0] = NumberText.Get(battle.PerfectCount);
             statNames[1] = "BEST COMBO";       statValues[1] = NumberText.Get(battle.BestCombo);
             statNames[2] = "FINAL LINE";       statValues[2] = NumberText.Signed((int)battle.Line);
             statNames[3] = "STAMINA BACK";     statValues[3] = NumberText.Signed(recovered);
@@ -111,6 +123,7 @@ namespace Tacetno433.Screens
             statCount = 4;
 
             footnote = "THE RUN ENDS HERE";
+            run.MarkLastStopLost();
 
             SoundBank.Play(Sfx.Defeat);
             SoundBank.PlayMusic(Music.Defeat);
@@ -147,6 +160,83 @@ namespace Tacetno433.Screens
                 RunFlow.NextStage(Game);
         }
 
+        //Sheet : the whole fight at a glance, one row of eight beats per round
+        private void DrawSheet(SpriteBatch sb, BattleState battle, Color ink, Color soft, bool bright, float e)
+        {
+            if (battle == null) return;
+
+            Gfx.TextSpaced(sb, Game.Font, "THE PERFORMANCE", SheetX, SheetY, soft * e, TextSize.Label, 4f);
+            int rounds = Math.Min(battle.Round, BattleRules.MaxRounds);
+            Color back = bright ? Palette.StageLight : Palette.Void;
+
+            for (int r = 0; r < rounds; r++)
+            {
+                float rowE = MathHelper.Clamp(e * 2f - 0.3f - r * 0.25f, 0f, 1f);
+                int y = SheetY + 30 + r * (CellH + 12);
+                Gfx.TextRight(sb, Game.BigFont, roundNumerals[r], SheetX + 22, y + 8, soft * rowE, TextSize.Small);
+
+                for (int b = 0; b < BattleRules.BeatsPerRound; b++)
+                {
+                    int x = SheetX + 34 + b * (CellW + 4) + (b >= 4 ? 10 : 0);    // a gap for the bar line
+                    Rectangle cell = new Rectangle(x, y, CellW, CellH);
+                    BeatResult mark = battle.Sheet[r][b];
+                    DrawSheetCell(sb, cell, mark, b, ink, back, rowE);
+                }
+            }
+        }
+
+        //Sheet Cell : filled when the band won the beat, outlined when TACET did
+        private void DrawSheetCell(SpriteBatch sb, Rectangle cell, BeatResult mark, int b, Color ink, Color back, float a)
+        {
+            if (!mark.Done)
+            {
+                Gfx.RectOutline(sb, cell, ink * (0.15f * a), 1);          // never played, the fight ended first
+                return;
+            }
+            if (mark.Grade == Grade.None)
+            {
+                Gfx.Rect(sb, cell.Center.X - 8, cell.Center.Y, 16, 2, ink * (0.4f * a));   // a rest
+                return;
+            }
+
+            bool won = mark.Push > 0;
+            if (won) Gfx.Rect(sb, cell, ink * (0.9f * a));
+            Gfx.RectOutline(sb, cell, ink * ((won ? 0.9f : 0.45f) * a), 1);
+            Color stroke = won ? back * a : ink * (0.8f * a);
+
+            if (mark.Grade == Grade.Hesitate)
+            {
+                Gfx.CircleOutline(sb, cell.Center.X, cell.Center.Y, 6, stroke, 1.5f);   // no stroke at all
+            }
+            else
+            {
+                float length = mark.PlayerChoice == Choice.Boost ? 26f : (mark.PlayerChoice == Choice.Ease ? 12f : 19f);
+                DrawWay(sb, pattern[b % 4], cell.Center.X, cell.Center.Y, length, stroke);
+                if (mark.Grade == Grade.Miss) Gfx.Line(sb, cell.X + 6, cell.Bottom - 6, cell.Right - 6, cell.Y + 6, stroke * 0.7f, 1.5f);
+            }
+
+            if (mark.Grade == Grade.Perfect) Gfx.Diamond(sb, cell.Right - 7, cell.Y + 7, 3, stroke);
+            if (mark.Signature) Gfx.DiamondOutline(sb, cell.Center.X, cell.Center.Y, CellH * 0.62f, stroke, 1.5f);
+        }
+
+        //Way : a straight arrow of the given length through (cx, cy)
+        private static void DrawWay(SpriteBatch sb, Flick way, float cx, float cy, float length, Color color)
+        {
+            Vector2 d = Vector2.Zero;
+            if (way == Flick.Up) d = new Vector2(0f, -1f);
+            if (way == Flick.Down) d = new Vector2(0f, 1f);
+            if (way == Flick.Left) d = new Vector2(-1f, 0f);
+            if (way == Flick.Right) d = new Vector2(1f, 0f);
+
+            Vector2 centre = new Vector2(cx, cy);
+            Vector2 tip = centre + d * (length / 2f);
+            Gfx.Line(sb, centre - d * (length / 2f), tip - d * 4f, color, 2f);
+            Vector2 c = tip - d * 3f;
+            if (way == Flick.Up) Gfx.Triangle(sb, c.X, c.Y, 7, true, color);
+            else if (way == Flick.Down) Gfx.Triangle(sb, c.X, c.Y, 7, false, color);
+            else Gfx.Arrow(sb, c.X, c.Y, 7, way == Flick.Right, color);
+        }
+
         public override void Draw(SpriteBatch sb)
         {
             float e = enter * enter * (3f - 2f * enter);
@@ -179,16 +269,18 @@ namespace Tacetno433.Screens
             Gfx.TextSpacedCentered(sb, Game.Font, enemyLine, cx, 200, soft * e, TextSize.Label, 4f);
             Ornament.Divider(sb, cx, 230, 200, soft * e);
 
-            //Rank : a letter in a diamond, beside the ledger
+            DrawSheet(sb, Game.CurrentRun.Battle, ink, soft, won, e);
+
+            //Rank : a letter in a diamond, under the performance
             if (won)
             {
-                float rx = LedgerX + LedgerW + 110;
-                float ry = 360;
+                float rx = 1050;
+                float ry = 548;
                 float spin = (1f - e) * 40f;
                 Gfx.Diamond(sb, rx, ry, 66 + spin, Palette.Ink * e);
                 Gfx.DiamondOutline(sb, rx, ry, 76 + spin, Palette.Ink * (0.5f * e), 1f);
                 Gfx.TextCentered(sb, Game.LogoFont, rank, rx, ry - 4, Palette.Paper * e, TextSize.Banner * 0.9f);
-                Gfx.TextSpacedCentered(sb, Game.Font, "RANK", rx, ry + 88, soft * e, TextSize.Tiny, 4f);
+                Gfx.TextSpacedCentered(sb, Game.Font, "RANK", rx - 110, ry - 6, soft * e, TextSize.Tiny, 4f);
             }
 
             //Ledger : rows with dotted leaders, sliding in one after the other

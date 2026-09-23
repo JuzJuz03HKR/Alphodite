@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -14,13 +14,13 @@ namespace Tacetno433.Screens
     //during a duel, so the title page teaches the core idea before the player presses
     //anything. The staff runs off to the right and gets swallowed by TACET.
     //
-    //Under the logo sit three slanted menu blades, and a small notice strip at the
+    //Under the logo sit four slanted menu blades, and a small notice strip at the
     //bottom cycles through play tips, the way a launcher shows news.
     public class TitleScreen : GameScreen
     {
         //Title Menu Data
-        private string[] menuItems = { "NEW RUN", "HOW TO PLAY", "QUIT" };
-        private string[] menuIndex = { "01", "02", "03" };
+        private string[] menuItems = { "NEW RUN", "HOW TO PLAY", "SETTINGS", "QUIT" };
+        private string[] menuIndex = { "01", "02", "03", "04" };
         private Rectangle[] menuBoxes;
         private int selected;
 
@@ -28,9 +28,9 @@ namespace Tacetno433.Screens
         private static string[] tips =
         {
             "Silent beats give stamina back. A plan with no rests runs dry.",
-            "PERFECT presses in a row build a combo. A miss breaks it.",
+            "PERFECT strokes in a row build a combo. A miss breaks it.",
             "The front row hits harder. The back row costs less.",
-            "TACET chooses its moves before the round begins. HEAVY beats tend to boost.",
+            "TACET's call shows how loud each note is: f loud, mf, p soft. Answer to match.",
             "A ??? beat hides its strength until the clash.",
             "Motifs last the whole run. Pick the ones that suit your conductor.",
         };
@@ -38,8 +38,8 @@ namespace Tacetno433.Screens
 
         //Title Layout
         private const int MenuX = 96;
-        private const int MenuY = 392;
-        private const int MenuStep = 58;
+        private const int MenuY = 364;
+        private const int MenuStep = 56;
         private const int MenuW = 400;
         private const int MenuH = 46;
 
@@ -119,6 +119,8 @@ namespace Tacetno433.Screens
                 Game.Screens.Change(new ConductorSelectScreen());
             else if (index == 1)
                 Game.Screens.Change(new GuideScreen());
+            else if (index == 2)
+                Game.Screens.Change(new SettingsScreen());
             else
                 Game.Exit();
         }
@@ -198,6 +200,16 @@ namespace Tacetno433.Screens
         //Dark Side : writing inside TACET's black, the poster side of the page
         private void DrawDarkSide(SpriteBatch sb, float edge)
         {
+            //Black Sun : TACET's eclipse hanging in its own dark, with holes of silence drifting up
+            Hollow.Eclipse(sb, 1050f, 330f, 108f, time * 0.2f, 1f);
+            for (int i = 0; i < 10; i++)
+            {
+                float x = 930f + (i * 67) % 260;
+                float y = 720f - ((i * 131) % 700 + time * (14f + i % 4 * 6f)) % 720f;
+                if (i % 3 == 0) Hollow.Ring(sb, x, y, 5f + i % 3 * 3f, 1.5f, 0.45f);
+                else Gfx.DrawGlow(sb, x, y, 7f, Palette.Paper * 0.25f);
+            }
+
             Gfx.TextVertical(sb, Game.Font, "SILENCE  IS  ALSO  A  SOUND", 1236, 90, Palette.PaperDim * 0.8f, TextSize.Label);
             Gfx.Rect(sb, 1222, 76, 1, 480, Palette.LineGrey * 0.4f);
 
@@ -205,20 +217,6 @@ namespace Tacetno433.Screens
             Ornament.Barcode(sb, 1060, 646, 130, 22, Palette.PaperDim * 0.6f);
             Gfx.TextSpacedRight(sb, Game.Font, "FOUR MINUTES  THIRTY THREE SECONDS", 1190, 676, Palette.LineGrey, TextSize.Tiny, 2f);
 
-            //Metronome Dial : a slow swinging needle, the one clock TACET cannot stop
-            float cx = 1060f;
-            float cy = 330f;
-            Gfx.Arc(sb, cx, cy, 120, MathHelper.Pi * 1.15f, MathHelper.Pi * 1.85f, Palette.LineGrey * 0.6f, 1f);
-            for (int i = 0; i <= 8; i++)
-            {
-                float a = MathHelper.Pi * (1.15f + 0.7f * i / 8f);
-                float r1 = (i % 4 == 0) ? 104f : 110f;
-                Gfx.Line(sb, cx + (float)Math.Cos(a) * r1, cy + (float)Math.Sin(a) * r1,
-                         cx + (float)Math.Cos(a) * 120f, cy + (float)Math.Sin(a) * 120f, Palette.LineGrey * 0.6f, 1f);
-            }
-            float swing = MathHelper.Pi * 1.5f + (float)Math.Sin(time * 2.2f) * 0.3f;
-            Gfx.Line(sb, cx, cy + 60, cx + (float)Math.Cos(swing) * 116f, cy + 60 + (float)Math.Sin(swing) * 116f, Palette.Paper * 0.7f, 2f);
-            Gfx.Diamond(sb, cx, cy + 60, 5, Palette.Paper * 0.7f);
         }
 
         //Logo : game name, subtitle and the hook line
@@ -287,7 +285,7 @@ namespace Tacetno433.Screens
         private void DrawFooter(SpriteBatch sb)
         {
             Gfx.TextSpaced(sb, Game.Font, "ARROWS OR MOUSE  /  ENTER TO CONFIRM  /  ESC TO QUIT", 82, 664, Palette.LineGrey, TextSize.Tiny, 2f);
-            Gfx.TextSpaced(sb, Game.Font, "PROTOTYPE BUILD  -  PLACEHOLDER ART", 82, 684, Palette.LineGrey * 0.7f, TextSize.Tiny, 2f);
+            Gfx.TextSpaced(sb, Game.Font, "PROTOTYPE BUILD", 82, 684, Palette.LineGrey * 0.7f, TextSize.Tiny, 2f);
         }
     }
 }

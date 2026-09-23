@@ -1,4 +1,4 @@
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Tacetno433.Core;
 
@@ -26,12 +26,18 @@ namespace Tacetno433.Data
         //Conductor Text
         public string Story = "";          // who they were
         public string MechanicName = "";   // the gimmick heading
+        public string SignatureMark = "";  // the same move as a marking written in a score, for the cut-in
         public string MechanicText = "";   // the gimmick body
 
         //Conductor Stats : 0 to 10, turned into real numbers by BattleRules
         public int Stamina;
         public int PushPower;
         public ConductorPerk Perk = ConductorPerk.None;
+
+        //Signature Recipe : how many notes of each instrument family the signature needs,
+        //in Family order : strings, winds, percussion. A good beat gives one note to every
+        //family that played on it.
+        public int[] Recipe = { 1, 1, 1 };
 
         //Conductor Look : brightness stand-in until the real portrait art goes in
         public Color ThemeColor = Palette.ToneC;
@@ -50,12 +56,16 @@ namespace Tacetno433.Data
         public string IndexLabel = "";     // "No.03"
         public string StaminaLabel = "";   // the real number the stat turns into
         public string PushLabel = "";
+        public string RecipeLabel = "";    // "NEEDS  1 STRING   3 PERCUSSION"
     }
 
     //ConductorList : THE PLACE TO EDIT CHARACTERS.
     //Add, remove or rewrite any block below and both select pages update by themselves.
     public static class ConductorList
     {
+        //Family Words : for the recipe label, in Family order
+        public static string[] FamilyWords = { "STRINGS", "WINDS", "PERCUSSION" };
+
         public static Conductor[] All = new Conductor[]
         {
             //Conductor 1 : starter class
@@ -68,6 +78,8 @@ namespace Tacetno433.Data
                 Story = "The one Endchestra called by mistake. No gift, no legend, "
                       + "no story anybody wrote down. Only a stick, and a refusal to let the music stop.",
                 MechanicName = "EVEN HAND",
+                SignatureMark = "Semplice",
+                Recipe = new int[] { 1, 1, 1 },     // a little of everything
                 MechanicText = "Every system sits at its standard value. No bonus, no penalty. "
                              + "The class to learn the game on.",
                 Stamina = 5, PushPower = 5,
@@ -85,6 +97,8 @@ namespace Tacetno433.Data
                 Story = "He wrote music like clockwork, and the clock never asked permission. "
                       + "Under his baton the ensemble never tires, because it never hurries.",
                 MechanicName = "LOCKED TEMPO",
+                SignatureMark = "Tempo giusto",
+                Recipe = new int[] { 2, 0, 2 },     // the rhythm section
                 MechanicText = "Boost and Ease are sealed, every beat is played as written. "
                              + "In exchange every note costs 40 percent less stamina.",
                 Stamina = 9, PushPower = 4, Perk = ConductorPerk.LockedTempo,
@@ -102,7 +116,9 @@ namespace Tacetno433.Data
                 Story = "He asked for a thousand players and meant it. "
                       + "Where others hear a mistake, he hears the next bar getting bigger.",
                 MechanicName = "RUNAWAY FIRE",
-                MechanicText = "The hardest push in the game. A missed press loses no power, "
+                SignatureMark = "Con fuoco",
+                Recipe = new int[] { 1, 0, 3 },     // drums above all
+                MechanicText = "The hardest push in the game. A missed stroke loses no power, "
                              + "and the beat after it hits 30 percent harder.",
                 Stamina = 3, PushPower = 9, Perk = ConductorPerk.RunawayFire,
                 ThemeColor = Palette.ToneA,
@@ -119,6 +135,8 @@ namespace Tacetno433.Data
                 Story = "Silence took his ears first and he kept writing anyway. "
                       + "He is the only conductor who is not afraid of TACET getting closer.",
                 MechanicName = "THE CLOSER THE LOUDER",
+                SignatureMark = "Sempre crescendo",
+                Recipe = new int[] { 3, 1, 0 },     // the strings carry it
                 MechanicText = "You start weaker than anyone. The nearer TACET creeps to your edge, "
                              + "the harder your ensemble hits, up to 60 percent.",
                 Stamina = 5, PushPower = 3, Perk = ConductorPerk.CloserLouder,
@@ -136,6 +154,8 @@ namespace Tacetno433.Data
                 Story = "He collected songs nobody had bothered to write down, "
                       + "and found out they all fit together.",
                 MechanicName = "EVERY ROAD HOME",
+                SignatureMark = "Alla rustica",
+                Recipe = new int[] { 1, 2, 1 },     // the pipes of every road
                 MechanicText = "Players from different cultures on the same beat hit harder together, "
                              + "but you begin the run with one seat fewer.",
                 Stamina = 6, PushPower = 6, Perk = ConductorPerk.EveryRoadHome,
@@ -158,6 +178,11 @@ namespace Tacetno433.Data
                 c.IndexLabel = "No." + (i + 1).ToString("00");
                 c.StaminaLabel = (BattleRules.StaminaBase + c.Stamina * BattleRules.StaminaPerPoint).ToString();
                 c.PushLabel = "x" + (BattleRules.PowerBase + c.PushPower * BattleRules.PowerPerPoint).ToString("0.00");
+
+                //Recipe Label : only the families the recipe asks for
+                c.RecipeLabel = "NEEDS";
+                for (int f = 0; f < c.Recipe.Length; f++)
+                    if (c.Recipe[f] > 0) c.RecipeLabel += "   " + c.Recipe[f] + " " + FamilyWords[f];
             }
         }
     }

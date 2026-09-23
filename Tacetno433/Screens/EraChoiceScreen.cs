@@ -121,7 +121,7 @@ namespace Tacetno433.Screens
 
             Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.Void);
 
-            //Panels : the era sketch is the placeholder art for now
+            //Panels : the era painting, or the empty panel slot until it exists
             for (int i = 0; i < offered.Length; i++)
             {
                 Era era = EraList.All[offered[i]];
@@ -129,10 +129,10 @@ namespace Tacetno433.Screens
                 float e = strip.Emphasis(i);
 
                 Rectangle box = strip.DrawBase(sb, i);
-                Rectangle sketch = new Rectangle(box.X + 20, box.Y + 70, box.Width - 40, box.Height - 230);
-                EraBackdrop.Draw(sb, offered[i], sketch, time, Palette.Paper * (0.25f + 0.45f * e));
 
-                //ARTWORK : sb.Draw(eraPanelTexture[offered[i]], box, Color.White);
+                //ARTWORK : Content/Art/Eras/era_<name>.png, see ArtBank
+                Texture2D art = ArtBank.EraOf(offered[i]);
+                if (art != null) sb.Draw(art, box, Color.White);
 
                 strip.DrawCaption(sb, i, RouteNodeInfo.PanelNumbers[i], era.Name, era.Years, -1, era.DescriptionWrapped, chosen);
                 Gfx.TextSpaced(sb, Game.Font, era.Subtitle, box.X + 24, box.Y + 72, Palette.PaperDim * (0.4f + 0.6f * e), TextSize.Tiny, 3f);

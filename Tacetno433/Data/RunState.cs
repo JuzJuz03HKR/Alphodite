@@ -20,6 +20,15 @@ namespace Tacetno433.Data
     //
     //Stamina belongs to the run, not to a single fight. Battles drain it, a win gives a
     //little back, and REST rooms refill it.
+
+    //Journey Stop : one place the run went through, kept for the curtain call
+    public class JourneyStop
+    {
+        public int Floor;
+        public NodeType Type;
+        public bool Lost;          // the run ended here
+    }
+
     public class RunState
     {
         //Run Identity
@@ -51,6 +60,7 @@ namespace Tacetno433.Data
         public int BattlesWon = 0;
         public int PerfectsTotal = 0;
         public int BestCombo = 0;
+        public List<JourneyStop> Journey = new List<JourneyStop>();   // every place picked, in order
 
         //Run Route
         public RouteNode[] Options = new RouteNode[0];
@@ -98,6 +108,7 @@ namespace Tacetno433.Data
             BattlesWon = 0;
             PerfectsTotal = 0;
             BestCombo = 0;
+            Journey.Clear();
             Roster.Clear();
             JustJoined.Clear();
             Motifs.Clear();
@@ -235,7 +246,20 @@ namespace Tacetno433.Data
         {
             if (!CanRehearse(m)) return;
             m.Rehearsed++;
-            m.RefreshLabels();
+        }
+
+        //Journey : called when a path is picked, and when the run ends on it
+        public void RecordStop(NodeType type)
+        {
+            JourneyStop stop = new JourneyStop();
+            stop.Floor = Floor;
+            stop.Type = type;
+            Journey.Add(stop);
+        }
+
+        public void MarkLastStopLost()
+        {
+            if (Journey.Count > 0) Journey[Journey.Count - 1].Lost = true;
         }
 
         //Stamina Change : always kept between zero and the maximum

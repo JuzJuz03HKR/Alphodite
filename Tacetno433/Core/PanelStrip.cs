@@ -91,12 +91,11 @@ namespace Tacetno433.Core
             Rectangle box = PanelRect(i);
             float e = Emphasis(i);
 
-            //ARTWORK AREA : a soft lit backdrop until the real painting goes in
+            //ARTWORK AREA : an empty slot until the page draws the painting over it
             Gfx.Rect(sb, box, Palette.Stage);
-            Gfx.DrawGlowBox(sb, new Rectangle(box.X - box.Width / 3, box.Y - box.Height / 8,
-                                              box.Width + box.Width * 2 / 3, box.Height * 3 / 4),
-                            Palette.Paper * (0.06f + 0.08f * e));
-            Gfx.TextSpacedCentered(sb, Ui.Font, "ART", box.Center.X, box.Y + 14, Palette.LineGrey * 0.6f, TextSize.Tiny, 3f);
+            Rectangle slot = box;
+            slot.Inflate(-8, -8);
+            ArtSlot.Draw(sb, slot, Palette.Paper, 0.6f + 0.4f * e);
             return box;
         }
 

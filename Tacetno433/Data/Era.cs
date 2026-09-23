@@ -19,7 +19,7 @@ namespace Tacetno433.Data
     //EraList : THE PLACE TO EDIT ERAS.
     //Add one here and it turns up on the era choice page by itself. Musicians below
     //point at eras by their number in this list, so adding in the middle shifts them.
-    //The background drawn for each era is in Core/EraBackdrop.cs, in the same order.
+    //The pictures for each era (panel and duel stage) are listed in Core/ArtBank.cs.
     public static class EraList
     {
         public static Era[] All = new Era[]

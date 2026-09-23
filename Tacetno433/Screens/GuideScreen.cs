@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -37,11 +37,11 @@ namespace Tacetno433.Screens
 
             "The top row is what TACET will play this round. Tick the beats each musician plays. "
             + "Answer its attacks, hit hard where it is silent, and leave some beats empty so the band can breathe. "
-            + "The bar at the bottom shows how much stamina the plan will leave.",
+            + "The FORECAST row names every beat, from DOMINATING down to HOPELESS. A framed word is the one to fix.",
 
-            "On every beat a ring closes on its mark. Press F to BOOST, G to PLAY, or H to EASE. "
-            + "Pressing right on the mark is PERFECT, and PERFECTs in a row build a COMBO. "
-            + "Pressing far off the mark, or not at all, makes the band weaker.",
+            "TACET plays a bar first, each note marked f (loud), mf or p (soft). Then you answer: hold the left "
+            + "mouse button and conduct in 4/4, DOWN, LEFT, RIGHT, UP. How big you swing is your order: small "
+            + "EASES, middle PLAYS, big BOOSTS. Stop as the ring closes. When your conductor's recipe is full, press SPACE.",
 
             "Each clash pushes the line between your light and TACET's dark. Push it all the way to win at once, "
             + "or be ahead after three rounds. Stamina carries across the whole run, "
@@ -62,12 +62,18 @@ namespace Tacetno433.Screens
         private static int[] demoEnemy = { 3, 0, 0, 3, 0, 0, 4, 0 };
         private static bool[,] demoPlan =
         {
-            { true, false, true, true, false, false, true, false },
+            { true, false, true, false, false, false, true, false },
             { false, false, false, false, true, false, true, false },
         };
-        private static string[] demoTags = { "COVER", "GAP", "FREE", "COVER", "FREE", "REST", "ACCENT", "REST" };
-        private static string[] demoWords = { "BOOST", "PLAY", "EASE" };
-        private static string[] demoKeys = { "F", "G", "H" };
+        private static string[] demoTags = { "FAVORED", "REST", "FREE HIT", "UNGUARDED", "FREE HIT", "REST", "DOMINATING", "REST" };
+        private static string[] demoSizes = { "EASE", "PLAY", "BOOST" };
+        private static string[] demoBeats = { "1", "2", "3", "4" };
+
+        //Demo Pattern : the four points of the 4/4 shape, in beat order, around the centre
+        private static Vector2[] demoPoints =
+        {
+            new Vector2(0f, 1f), new Vector2(-1f, 0f), new Vector2(1f, 0f), new Vector2(0f, -1f)
+        };
 
         //Guide State
         private static string[] wrapped;
@@ -154,13 +160,11 @@ namespace Tacetno433.Screens
                 Rectangle p = new Rectangle(110 + i * 176, 150 + (i == 1 ? 0 : 24), 160 + (i == 1 ? 20 : 0), 280);
                 Gfx.Rect(sb, p, (i == 1 ? Palette.Stage : Palette.CanvasDark) * a);
                 if (i == 1) Gfx.Rect(sb, p.X, p.Y, p.Width, 3, Palette.Accent * a);
+                Rectangle art = p;
+                art.Inflate(-8, -8);
+                ArtSlot.Draw(sb, art, Palette.Paper, a * (i == 1 ? 1f : 0.6f));
                 Ornament.FadeUp(sb, new Rectangle(p.X, p.Bottom - 70, p.Width, 70), 0.9f * a);
             }
-            Gfx.Circle(sb, 190, 290, 12, Palette.PaperDim * a);
-            Gfx.Rect(sb, 200, 240, 2, 50, Palette.PaperDim * a);
-            Gfx.TextCentered(sb, Game.BigFont, "?", 376, 280, Palette.Highlight * a, TextSize.Title);
-            Gfx.CircleOutline(sb, 552, 290, 22, Palette.PaperDim * a, 2f);
-            Gfx.Circle(sb, 552, 290, 8, Palette.PaperDim * a);
 
             Gfx.Text(sb, Game.BigFont, "ENCOUNTER", 122, 400, Palette.Paper * a, TextSize.Small);
             Gfx.Text(sb, Game.BigFont, "???", 300, 380, Palette.Highlight * a, TextSize.Subtitle);
@@ -197,15 +201,15 @@ namespace Tacetno433.Screens
                     int h = (int)(110 * size);
                     Rectangle cap = new Rectangle(340 + (s - 1) * (130 + r * 20) - w / 2 + 90, (int)y, w, h);
                     bool filled = (r + s) % 2 == 0 || s == 1;
-                    if (filled) Gfx.Capsule(sb, cap, Palette.Paper * (0.85f * a));
-                    Gfx.CapsuleOutline(sb, cap, (filled ? Palette.Void : Palette.LineGrey) * a, 2f);
+                    if (filled) ArtSlot.Draw(sb, cap, Palette.Paper, a);
+                    else Gfx.RectOutline(sb, cap, Palette.LineGrey * a, 1);
                 }
             }
 
             //Drag Hint : a capsule on its way to a seat
             float t = (time * 0.5f) % 1f;
             Rectangle ghost = new Rectangle((int)(600 - t * 90), (int)(470 - t * 60), 30, 80);
-            Gfx.Capsule(sb, ghost, Palette.Highlight * (0.6f * a));
+            ArtSlot.Draw(sb, ghost, Palette.Highlight, 0.8f * a);
             Gfx.Arrow(sb, ghost.X - 14, ghost.Center.Y, 7, false, Palette.PaperDim * a);
         }
 
@@ -241,39 +245,81 @@ namespace Tacetno433.Screens
                 }
             }
 
+            //Forecast : the word under every beat, the one to fix framed
+            Gfx.TextSpaced(sb, Game.Font, "FORECAST", 110, 404, Palette.LineGrey * a, TextSize.Tiny, 2f);
             for (int b = 0; b < 8; b++)
-                Gfx.TextSpacedCentered(sb, Game.Font, demoTags[b], x0 + b * cw + cw / 2f, 420, Palette.PaperDim * a, TextSize.Tiny, 1f);
+            {
+                float cx = x0 + b * cw + cw / 2f;
+                bool fix = b == 3;
+                Gfx.TextSpacedCentered(sb, Game.Font, demoTags[b], cx, 424, (fix ? Palette.Accent : Palette.PaperDim) * a, TextSize.Tiny, 1f);
+                if (fix) Gfx.RectOutline(sb, new Rectangle((int)cx - 30, 419, 60, 18), Palette.Accent * a, 1);
+            }
 
             Gfx.TextSpaced(sb, Game.Font, "STAMINA AFTER THIS ROUND", 110, 470, Palette.LineGrey * a, TextSize.Tiny, 2f);
             Ui.CapsuleBar(sb, new Rectangle(110, 490, 500, 12), 0.62f, Palette.Paper, a);
         }
 
-        //Page 4 : the ring and the three keys
+        //Page 4 : the 4/4 pattern, the stroke sizes, the ring and the meter
         private void DrawDuel(SpriteBatch sb, float a)
         {
-            float cx = 370;
-            float cy = 280;
-            float t = (time * 0.8f) % 1f;
-            float radius = 120f - 80f * t;
+            //Pattern : four points, a line for each stroke, the baton tip travelling round them
+            float px = 220f;
+            float py = 270f;
+            float arm = 80f;
 
-            Gfx.CircleOutline(sb, cx, cy, 40, Palette.Highlight * a, 3f);
-            Gfx.CircleOutline(sb, cx, cy, 52, Palette.PaperDim * (0.5f * a), 1f);
-            Gfx.CircleOutline(sb, cx, cy, 28, Palette.PaperDim * (0.5f * a), 1f);
-            Gfx.CircleOutline(sb, cx, cy, radius, Palette.Paper * a, 2f);
-            Gfx.Diamond(sb, cx, cy, 6, Palette.Highlight * a);
-            if (t > 0.9f) Gfx.TextSpacedCentered(sb, Game.Font, "PERFECT", cx, cy + 60, Palette.Highlight * a, TextSize.Heading, 3f);
-
-            for (int k = 0; k < 3; k++)
+            for (int i = 0; i < 4; i++)
             {
-                Rectangle key = new Rectangle(190 + k * 126, 440, 112, 70);
-                Gfx.Rect(sb, key, Palette.Paper * a);
-                Gfx.RectOutline(sb, key, Palette.Void * a, 2);
-                Gfx.TextSpaced(sb, Game.Font, demoWords[k], key.X + 10, key.Y + 8, Palette.InkSoft * a, TextSize.Tiny, 2f);
-                Gfx.TextRight(sb, Game.BigFont, demoKeys[k], key.Right - 10, key.Y + 28, Palette.Ink * a, TextSize.Subtitle);
+                Vector2 from = new Vector2(px, py) + demoPoints[(i + 3) % 4] * arm;
+                Vector2 to = new Vector2(px, py) + demoPoints[i] * arm;
+                Gfx.Line(sb, from, to, Palette.LineGrey * a, 2f);
+                Gfx.Diamond(sb, to.X, to.Y, 6, Palette.Paper * a);
+                Vector2 label = new Vector2(px, py) + demoPoints[i] * (arm + 22f);
+                Gfx.TextCentered(sb, Game.Font, demoBeats[i], label.X, label.Y, Palette.Highlight * a, TextSize.Body);
             }
 
-            Gfx.TextSpaced(sb, Game.Font, "COMBO", 520, 250, Palette.PaperDim * a, TextSize.Tiny, 3f);
-            Gfx.Text(sb, Game.LogoFont, "3", 520, 262, Palette.Highlight * a, TextSize.Banner * 0.7f);
+            float legTime = 0.6f;
+            int leg = (int)(time / legTime) % 4;
+            float t = MathHelper.Clamp((time % legTime) / legTime * 1.6f, 0f, 1f);
+            t = t * t * (3f - 2f * t);
+            Vector2 tip = new Vector2(px, py) + Vector2.Lerp(demoPoints[(leg + 3) % 4], demoPoints[leg], t) * arm;
+            Gfx.DrawGlow(sb, tip.X, tip.Y, 24f, Palette.Paper * (0.4f * a));
+            Gfx.Circle(sb, tip.X, tip.Y, 6f, Palette.Highlight * a);
+            Gfx.TextSpacedCentered(sb, Game.Font, "THE 4/4 PATTERN", px, py + arm + 60, Palette.PaperDim * a, TextSize.Tiny, 3f);
+
+            //Sizes : a ruler with three zones, a stroke growing along it
+            float rx = 380f;
+            float ry = 220f;
+            float rw = 260f;
+            Gfx.Rect(sb, rx, ry, rw, 2, Palette.LineGrey * a);
+            Gfx.Rect(sb, rx + rw / 3f, ry - 8, 2, 18, Palette.Paper * a);
+            Gfx.Rect(sb, rx + rw * 2f / 3f, ry - 8, 2, 18, Palette.Paper * a);
+            float grow = ((float)Math.Sin(time * 1.3f) * 0.5f + 0.5f) * rw;
+            Gfx.Rect(sb, rx, ry - 2, grow, 6, Palette.Highlight * a);
+            for (int k = 0; k < 3; k++)
+            {
+                bool here = grow >= rw * k / 3f && grow < rw * (k + 1) / 3f;
+                Gfx.TextSpacedCentered(sb, Game.Font, demoSizes[k], rx + rw * (k + 0.5f) / 3f, ry + 16,
+                                       (here ? Palette.Highlight : Palette.PaperDim) * a, TextSize.Label, 2f);
+            }
+            Gfx.TextSpaced(sb, Game.Font, "HOW BIG  =  HOW LOUD", rx, ry - 34, Palette.PaperDim * a, TextSize.Tiny, 3f);
+
+            //Ring : the stroke should stop just as the ring meets its mark
+            float cx = 510f;
+            float cy = 350f;
+            float ringT = (time * 0.8f) % 1f;
+            Gfx.CircleOutline(sb, cx, cy, 30, Palette.Highlight * a, 3f);
+            Gfx.CircleOutline(sb, cx, cy, 90f - 60f * ringT, Palette.Paper * a, 2f);
+            Gfx.Diamond(sb, cx, cy, 5, Palette.Highlight * a);
+            Gfx.TextSpacedCentered(sb, Game.Font, ringT > 0.9f ? "PERFECT" : "STOP ON THE RING", cx, cy + 58,
+                                   (ringT > 0.9f ? Palette.Highlight : Palette.PaperDim) * a, TextSize.Tiny, 2f);
+
+            //Left Hand : the meter and the key that lets the signature loose
+            Gfx.TextSpaced(sb, Game.Font, "LEFT HAND  /  SPACE WHEN THE RECIPE IS FULL", 110, 478, Palette.PaperDim * a, TextSize.Tiny, 2f);
+            Rectangle meter = new Rectangle(110, 498, 300, 12);
+            Gfx.Rect(sb, meter, Palette.Void * a);
+            Gfx.RectOutline(sb, meter, Palette.PaperDim * a, 1);
+            Gfx.Rect(sb, meter.X + 2, meter.Y + 2, meter.Width - 4, meter.Height - 4, Palette.Highlight * a);
+            Ui.Tag(sb, "SIGNATURE", 426, 495, true, a);
         }
 
         //Page 5 : the line and the stamina bar

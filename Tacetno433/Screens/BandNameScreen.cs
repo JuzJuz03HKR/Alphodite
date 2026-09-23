@@ -131,7 +131,7 @@ namespace Tacetno433.Screens
                 float x = left + i * gap;
                 float bob = (float)Math.Sin(time * 2f + i) * 2f;
                 Rectangle cap = new Rectangle((int)x - 22, (int)(420 + bob), 44, 116);
-                MusicianArt.Capsule(sb, cap, roster[i], Palette.Paper, Palette.Void, 0f);
+                MusicianArt.Token(sb, cap, roster[i], 1f, 0f);
                 Gfx.TextSpacedCentered(sb, Game.Font, roster[i].NameTag, x, 552, Palette.PaperDim, TextSize.Tiny, 2f);
             }
         }

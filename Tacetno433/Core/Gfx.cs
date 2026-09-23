@@ -134,6 +134,22 @@ namespace Tacetno433.Core
             }
         }
 
+        //Draw Ellipse Outline : a ring squashed flat, like a ripple seen on the floor.
+        //rx is half the width, ry half the height.
+        public static void EllipseOutline(SpriteBatch sb, float cx, float cy, float rx, float ry, Color color, float thickness)
+        {
+            int segments = 32;
+            Vector2 previous = new Vector2(cx + rx, cy);
+
+            for (int i = 1; i <= segments; i++)
+            {
+                float angle = MathHelper.TwoPi * i / segments;
+                Vector2 now = new Vector2(cx + (float)Math.Cos(angle) * rx, cy + (float)Math.Sin(angle) * ry);
+                Line(sb, previous, now, color, thickness);
+                previous = now;
+            }
+        }
+
         //Draw Arc : part of a ring, used for sound waves travelling across the duel.
         //Angles are in radians, 0 points right. Eight segments is plenty for a short arc.
         public static void Arc(SpriteBatch sb, float cx, float cy, float radius, float fromAngle, float toAngle, Color color, float thickness)

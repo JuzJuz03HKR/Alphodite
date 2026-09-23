@@ -15,6 +15,18 @@ HOW TO ADD ONE
 The list of names lives in  Audio/SoundBank.cs  (SfxFiles and MusicFiles).
 Change a name there if you would rather name your file differently.
 
+THE DUEL HAS NO LONG SONG
+  The melody of a fight is played ONE NOTE PER BEAT, and only when the player conducts.
+  Record one short phrase, cut it into notes, and name the notes in order:
+       Content/Audio/Phrase/answer_1.wav ... answer_8.wav    the band's answer
+       Content/Audio/Phrase/call_1.wav   ... call_8.wav      TACET's call
+  Note 1 plays on beat 1 of a round, note 2 on beat 2, and so on. With only 4 notes the
+  melody repeats every bar. Keep each note short (under a second) and in the same key.
+  The game plays a note louder for a BOOST, softer for an EASE, a little out of tune for a
+  MISS, and not at all when the player hesitates. TACET's call is loud for an f and soft for
+  a p. Until the notes exist the duel falls back to note_on and beat_tick below.
+  F3 in game shows PHRASE = how many notes were found.
+
 SOUND EFFECTS  (Content/Audio/Sfx)
   ui_move         moving between menu items, cards, paintings
   ui_confirm      pressing a button
@@ -28,12 +40,12 @@ SOUND EFFECTS  (Content/Audio/Sfx)
   note_off        clearing a beat on the score page
   round_start     the ROUND banner in a duel
   beat_tick       the needle moving onto a new beat
-  qte_boost       pressing F
-  qte_normal      pressing G
-  qte_ease        pressing H
-  qte_perfect     pressing right on the mark
-  qte_miss        pressing badly off the mark
-  qte_hesitate    the ring ran out with no press
+  qte_boost       a big baton stroke (BOOST)
+  qte_normal      a middle stroke (PLAY)
+  qte_ease        a small stroke (EASE)
+  qte_perfect     a stroke right on the ring
+  qte_miss        a stroke badly off the ring, or the wrong way
+  qte_hesitate    the beat went by with no stroke
   clash_win       our sound beat theirs on a beat
   clash_lose      theirs beat ours
   clash_even      nobody moved, or both silent
@@ -58,9 +70,10 @@ MUSIC  (Content/Audio/Music, loops)
   title           title page
   gallery         conductor gallery
   route           route and era pages
-  prep            stage and score pages
-  battle          normal and elite duels
-  boss            boss duels
+  battle          a whole normal or elite fight: the stage page, the score page and every duel
+                  round. It never restarts between rounds. Keep it quiet, ambient, with no
+                  strong beat of its own, because the melody comes from the baton (above).
+  boss            the same for a boss fight
   victory         win result page
   defeat          loss result page
   shop            shop page

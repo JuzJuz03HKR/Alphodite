@@ -30,7 +30,6 @@ namespace Tacetno433.Screens
         private Rectangle pickPanel = new Rectangle(0, 400, TacetGame.ScreenW, 320);
         private Rectangle moveButton = new Rectangle(930, 636, 310, 54);
         private Rectangle cancelButton = new Rectangle(40, 660, 170, 44);
-        private Vector2 lamp = new Vector2(640, 310);
 
         //Rest State
         private Phase phase;
@@ -126,7 +125,7 @@ namespace Tacetno433.Screens
                     {
                         run.Rehearse(m);
                         SoundBank.Play(Sfx.Rehearse);
-                        Done("REHEARSED", m.Name + " plays the part again and again until it is perfect. Power is now " + m.PowerLabel + ".");
+                        Done("REHEARSED", m.Name + " plays the part again and again until it is perfect. Power is now " + run.PowerOf(m) + ".");
                     }
                 }
 
@@ -208,43 +207,12 @@ namespace Tacetno433.Screens
             RunHud.DrawTips(sb, run);
         }
 
-        //Room : PLACEHOLDER for the rest painting. A lamp, and the band sitting around it.
+        //Room : the rest room painting, or an empty slot where it goes.
+        //ARTWORK : Content/Art/Places/rest.png (the band resting is part of the picture), see ArtBank.
         private void DrawRoom(SpriteBatch sb, RunState run)
         {
             Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.Void);
-
-            float flicker = 1f + (float)Math.Sin(time * 7f) * 0.03f + (float)Math.Sin(time * 11.3f) * 0.02f;
-            Gfx.DrawGlow(sb, lamp.X, lamp.Y + 40, 520f * flicker, Palette.Paper * 0.13f);
-            Gfx.DrawGlow(sb, lamp.X, lamp.Y, 160f * flicker, Palette.Paper * 0.20f);
-
-            //Floor Rings : the light falling on the floor
-            Gfx.DrawGlowBox(sb, new Rectangle((int)lamp.X - 360, (int)lamp.Y + 50, 720, 120), Palette.Paper * 0.10f);
-
-            //Band : capsules on a half ring behind the lamp, breathing slowly
-            int count = run.Roster.Count;
-            for (int i = 0; i < count; i++)
-            {
-                float t = count == 1 ? 0.5f : (float)i / (count - 1);
-                float angle = MathHelper.Pi + t * MathHelper.Pi;
-                float x = lamp.X + (float)Math.Cos(angle) * 330f;
-                float y = lamp.Y + 70 + (float)Math.Sin(angle) * 60f;
-                float breathe = (float)Math.Sin(time * 1.5f + i) * 2f;
-                float near = 1f - Math.Abs(t - 0.5f);
-                Rectangle cap = new Rectangle((int)x - 18, (int)(y - 80 + breathe), 36, 92);
-                MusicianArt.Capsule(sb, cap, run.Roster[i], Palette.Paper * (0.35f + 0.4f * near), Palette.Void, 0f);
-                if (run.Roster[i].Rehearsed > 0)
-                    Ui.Pips(sb, x - (run.Roster[i].Rehearsed - 1) * 5, cap.Y - 10, run.Roster[i].Rehearsed, run.Roster[i].Rehearsed, 2, 10, 1f);
-            }
-
-            //Lamp : a stand and a shade
-            Gfx.Rect(sb, lamp.X - 1, lamp.Y + 10, 3, 110, Palette.PaperDim);
-            Gfx.Rect(sb, lamp.X - 24, lamp.Y + 118, 50, 4, Palette.PaperDim);
-            Gfx.Line(sb, lamp.X - 26, lamp.Y + 6, lamp.X - 14, lamp.Y - 22, Palette.Paper, 3f);
-            Gfx.Line(sb, lamp.X + 26, lamp.Y + 6, lamp.X + 14, lamp.Y - 22, Palette.Paper, 3f);
-            Gfx.Rect(sb, lamp.X - 26, lamp.Y + 5, 53, 3, Palette.Paper);
-            Gfx.Circle(sb, lamp.X, lamp.Y + 12, 6 * flicker, Palette.Highlight);
-            Gfx.TextSpacedCentered(sb, Game.Font, "ART  /  REST ROOM", lamp.X, lamp.Y - 90, Palette.LineGrey, TextSize.Tiny, 2f);
-
+            ArtBank.DrawOrSlot(sb, ArtBank.Rest, new Rectangle(160, 186, 960, 236), Palette.Paper, 1f);
             Ornament.Vignette(sb, 80, 0.7f);
         }
 

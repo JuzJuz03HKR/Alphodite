@@ -303,22 +303,18 @@ namespace Tacetno433.Screens
             RunHud.DrawTips(sb, run);
         }
 
-        //Illustration : PLACEHOLDER for the event painting, a framed scene with the era behind it
+        //Illustration : the event painting, or an empty slot for it, in a double frame.
+        //ARTWORK : Content/Art/Events/event_<title>.png, see ArtBank.
         private void DrawIllustration(SpriteBatch sb, RunState run)
         {
             Gfx.Rect(sb, artBox, Palette.CanvasDark);
-            Gfx.DrawGlowBox(sb, new Rectangle(artBox.X - 60, artBox.Y - 40, artBox.Width + 120, artBox.Height), Palette.Paper * 0.08f);
-            EraBackdrop.Draw(sb, run.Era, new Rectangle(artBox.X + 20, artBox.Y + 60, artBox.Width - 40, artBox.Height - 80), time, Palette.Paper * 0.14f);
-
-            //Scene Mark : a big question mark hanging in the middle of the frame
-            float bob = (float)Math.Sin(time * 1.4f) * 6f;
-            Gfx.DrawGlow(sb, artBox.Center.X, artBox.Center.Y, 120f, Palette.Paper * 0.10f);
-            Gfx.TextCentered(sb, Game.LogoFont, "?", artBox.Center.X, artBox.Center.Y + bob, Palette.Paper * 0.8f, TextSize.Logo);
+            Rectangle picture = artBox;
+            picture.Inflate(-10, -10);
+            ArtBank.DrawOrSlot(sb, ArtBank.EventOf(ev), picture, Palette.Paper, 1f);
 
             Ornament.FadeUp(sb, new Rectangle(artBox.X, artBox.Bottom - 80, artBox.Width, 80), 0.9f);
             Ornament.DoubleFrame(sb, artBox, Palette.PaperDim);
             Gfx.TextSpaced(sb, Game.Font, ev.Place, artBox.X + 20, artBox.Bottom - 30, Palette.Paper, TextSize.Label, 3f);
-            Gfx.TextSpacedRight(sb, Game.Font, "ART", artBox.Right - 16, artBox.Y + 14, Palette.LineGrey, TextSize.Tiny, 3f);
         }
 
         //Text : where we are, the title, and the story

@@ -53,9 +53,6 @@ namespace Tacetno433.Screens
         private Rectangle leaveButton = new Rectangle(930, 630, 310, 54);
         private const int RowH = 68;
 
-        //Shelf Pattern : book spine heights, fixed so the shelves never flicker
-        private static int[] spines = { 38, 44, 30, 46, 40, 36, 48, 28, 42, 34, 46, 38, 30, 44, 40, 32 };
-
         //Shop State
         private Motif[] motifs = new Motif[0];
         private string[] names = new string[RowCount];
@@ -234,67 +231,12 @@ namespace Tacetno433.Screens
             RunHud.DrawTips(sb, run);
         }
 
-        //Interior : PLACEHOLDER for the shop painting. Shelves of books, a lamp, a counter,
-        //and the shopkeeper standing behind it.
+        //Interior : the shop painting, or an empty slot where it goes.
+        //ARTWORK : Content/Art/Places/shop.png (the shopkeeper is part of the picture), see ArtBank.
         private void DrawInterior(SpriteBatch sb)
         {
             Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.StageDeep);
-
-            //Shelves
-            for (int shelf = 0; shelf < 4; shelf++)
-            {
-                int y = 150 + shelf * 76;
-                int x = 30;
-                for (int b = 0; x < 690; b++)
-                {
-                    int h = spines[(b + shelf * 5) % spines.Length];
-                    int w = 10 + (b * 7 + shelf) % 9;
-                    float tone = 0.05f + ((b + shelf) % 4) * 0.02f;
-                    Gfx.Rect(sb, x, y - h, w, h, Palette.Paper * tone);
-                    Gfx.Rect(sb, x, y - h + 6, w, 1, Palette.Paper * (tone * 0.8f));
-                    x += w + 2;
-                }
-                Gfx.Rect(sb, 20, y, 680, 5, Palette.Stage);
-                Gfx.Rect(sb, 20, y, 680, 1, Palette.PaperDim * 0.3f);
-            }
-
-            //Lamp : a warm pool of light over the counter, swaying very slightly
-            float sway = (float)Math.Sin(time * 0.8f) * 6f;
-            Gfx.Line(sb, 520, 64, 520 + sway, 170, Palette.LineGrey, 1f);
-            Gfx.Circle(sb, 520 + sway, 176, 9, Palette.Paper);
-            Gfx.DrawGlow(sb, 520 + sway, 190, 260f, Palette.Paper * 0.14f);
-
-            //Shopkeeper : head and shoulders behind the counter
-            float kx = 330;
-            float ky = 330 + (float)Math.Sin(time * 1.2f) * 2f;
-            Gfx.DrawGlow(sb, kx, ky, 150f, Palette.Paper * 0.08f);
-            Gfx.Circle(sb, kx, ky - 60, 34, Palette.ToneD * 0.8f);
-            Gfx.Arc(sb, kx, ky - 60, 34, -1.3f, 0.7f, Palette.Paper * 0.5f, 2f);
-            for (int y = (int)ky - 24; y < 440; y += 2)
-            {
-                float t = (y - (ky - 24)) / (440 - (ky - 24));
-                float half = 44 + t * 50;
-                Gfx.Rect(sb, kx - half, y, half * 2f, 2, Palette.ToneD * 0.7f);
-            }
-            Gfx.Rect(sb, kx - 14, ky - 66, 28, 6, Palette.Paper * 0.6f);   // spectacles
-            Gfx.TextSpacedCentered(sb, Game.Font, "ART  /  SHOPKEEPER", kx, 214, Palette.LineGrey, TextSize.Tiny, 2f);
-
-            //Counter : a heavy wooden top with a cash box on it
-            Gfx.Rect(sb, 0, 440, 720, 110, Palette.Stage);
-            Gfx.Rect(sb, 0, 440, 720, 3, Palette.PaperDim * 0.5f);
-            Gfx.Rect(sb, 0, 456, 720, 1, Palette.Void);
-            Rectangle till = new Rectangle(520, 386, 120, 56);
-            Gfx.Rect(sb, till, Palette.CanvasDark);
-            Gfx.RectOutline(sb, till, Palette.PaperDim * 0.5f, 1);
-            for (int k = 0; k < 4; k++)
-                Gfx.Rect(sb, till.X + 12 + k * 26, till.Y + 12, 18, 10, Palette.LineGrey * 0.6f);
-
-            //Price Tag : a card leaning on the counter
-            Rectangle card = new Rectangle(80, 392, 120, 48);
-            Gfx.Rect(sb, card, Palette.Paper * 0.85f);
-            Gfx.TextSpacedCentered(sb, Game.Font, "OPEN", card.Center.X, card.Y + 8, Palette.Ink, TextSize.Label, 4f);
-            Gfx.TextSpacedCentered(sb, Game.Font, "NO REFUNDS", card.Center.X, card.Y + 28, Palette.InkSoft, TextSize.Tiny, 1.5f);
-
+            ArtBank.DrawOrSlot(sb, ArtBank.Shop, new Rectangle(24, 80, 672, 470), Palette.Paper, 1f);
             Ornament.Vignette(sb, 60, 0.6f);
         }
 

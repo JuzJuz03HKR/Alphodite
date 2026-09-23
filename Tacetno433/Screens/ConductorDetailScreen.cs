@@ -93,7 +93,7 @@ namespace Tacetno433.Screens
             Game.CurrentRun = new RunState();
             Game.CurrentRun.Start(c, Game.StoryFont, PanelStrip.CaptionWrapWidth);
             SoundBank.Play(Sfx.UiConfirm);
-            Game.Screens.Change(new EraChoiceScreen(true));
+            Game.Screens.Change(new ChapterScreen());
         }
 
         public override void Draw(SpriteBatch sb)

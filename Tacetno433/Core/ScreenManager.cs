@@ -19,6 +19,10 @@ namespace Tacetno433.Core
         //Screen Update : dt is seconds since the last frame
         public virtual void Update(float dt) { }
 
+        //Screen Lost Focus : called once when the window goes to the back (alt tab). Pages
+        //with a clock running, like the duel, pause themselves here.
+        public virtual void LostFocus() { }
+
         //Screen Draw
         public abstract void Draw(SpriteBatch sb);
     }

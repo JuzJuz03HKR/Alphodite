@@ -1,7 +1,8 @@
-using System;
+﻿using System;
 using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using Tacetno433.Battle;
 using Tacetno433.Data;
 using Tacetno433.Screens;
@@ -56,6 +57,28 @@ namespace Tacetno433.Core
             Active = names.Length > 0 && outDir.Length > 0;
         }
 
+        //Fake Mouse : DEVELOPER TOOL ONLY.
+        //While pictures are taken the window is parked off screen, so the real pointer is
+        //nowhere near it. An imaginary pointer is swung about instead, which is enough for
+        //the baton and its flicks to show up in the picture.
+        public static void FakeMouse(float dt)
+        {
+            //The four corners of a conductor's 4/4 shape, visited in order: a quick move
+            //to the next corner, then a short rest, so the baton makes real strokes
+            mouseClock += dt;
+            Input.PretendHeld = true;
+            int leg = (int)(mouseClock / 0.7f) % 4;
+            float t = MathHelper.Clamp((mouseClock % 0.7f) / 0.7f * 2f, 0f, 1f);
+            t = t * t * (3f - 2f * t);
+            Input.MousePos = Vector2.Lerp(fakeCorners[(leg + 3) % 4], fakeCorners[leg], t);
+        }
+
+        private static float mouseClock;
+        private static Vector2[] fakeCorners =
+        {
+            new Vector2(640f, 560f), new Vector2(430f, 420f), new Vector2(850f, 420f), new Vector2(640f, 250f)
+        };
+
         //Shots Begin : called from LoadContent instead of opening the title page
         public static void Begin(TacetGame game)
         {
@@ -83,7 +106,7 @@ namespace Tacetno433.Core
             string report = "TACET BALANCE CHECK  (floor 1, 300 fights per line)\r\n"
                           + "AUDIO LOADED  SFX " + Audio.SoundBank.LoadedSfx + "  MUSIC " + Audio.SoundBank.LoadedMusic + "\r\n\r\n";
             EnemyKind[] kinds = { EnemyKind.Normal, EnemyKind.Elite, EnemyKind.Boss };
-            string[] habits = { "AUTO PLAN, ALWAYS GOOD PLAY", "AUTO PLAN, NEVER PRESSES", "AUTO PLAN, PERFECT BOOST ON HEAVY",
+            string[] habits = { "AUTO PLAN, ALWAYS GOOD PLAY", "AUTO PLAN, NEVER STROKES", "AUTO PLAN, PERFECT BOOST ON HEAVY",
                                 "NO PLAN, ALWAYS EASE", "AUTO PLAN, ALWAYS PERFECT (COMBO)" };
             Random random = new Random(7);
 
@@ -268,6 +291,12 @@ namespace Tacetno433.Core
         public static void AfterDraw(TacetGame game)
         {
             frames++;
+
+            //Pretend Keys : a few pages need one key pressed shortly before their picture
+            Input.PretendPress = Keys.None;
+            if (names[index] == "duelcutin" && frames == waits[index] - 22) Input.PretendPress = Keys.Space;
+            if (names[index] == "duelpause" && frames == waits[index] - 10) Input.PretendPress = Keys.Escape;
+
             if (frames < waits[index]) return;
 
             string path = Path.Combine(outDir, names[index] + ".png");
@@ -285,8 +314,9 @@ namespace Tacetno433.Core
         }
 
         //Page Open : build a sample run that suits the page, then show it.
-        //Names: title guide gallery detail era crossing recruit bandname route view stage score
-        //       duel duelcombo duelboss result defeat reward shop event rest curtain curtainwin
+        //Names: title guide settings gallery detail chapter era crossing recruit bandname route view
+        //       stage score scoretrait bargain duel duelcombo duelboss duelcutin duelpause
+        //       result defeat reward shop event rest curtain curtainwin
         private static void Open(TacetGame game, string name)
         {
             RunState run = SampleRun(game, name);
@@ -294,8 +324,10 @@ namespace Tacetno433.Core
 
             GameScreen screen = new TitleScreen();
             if (name == "guide") screen = new GuideScreen();
+            if (name == "settings") screen = new SettingsScreen();
             if (name == "gallery") screen = new ConductorSelectScreen(2);
             if (name == "detail") screen = new ConductorDetailScreen(2, new Rectangle(475, 126, 330, 450));
+            if (name == "chapter") screen = new ChapterScreen();
             if (name == "era") screen = new EraChoiceScreen(true);
             if (name == "crossing") screen = new EraChoiceScreen(false);
             if (name == "recruit") screen = new RecruitScreen();
@@ -303,8 +335,8 @@ namespace Tacetno433.Core
             if (name == "route") screen = new RouteScreen();
             if (name == "view") screen = new FormationScreen(false);
             if (name == "stage") screen = new FormationScreen(true);
-            if (name == "score") screen = new ScoreScreen();
-            if (name == "duel" || name == "duelboss" || name == "duelcombo") screen = new DuelScreen();
+            if (name == "score" || name == "scoretrait" || name == "bargain") screen = new ScoreScreen();
+            if (name == "duel" || name == "duelboss" || name == "duelcombo" || name == "duelcutin" || name == "duelpause") screen = new DuelScreen();
             if (name == "result" || name == "defeat") screen = new ResultScreen();
             if (name == "reward") screen = new MotifRewardScreen(false);
             if (name == "shop") screen = new ShopScreen();
@@ -379,12 +411,60 @@ namespace Tacetno433.Core
                 run.Battle.Line = -35f;
             }
 
+            //Trait Pictures : an ordinary enemy on floor two shows its trait, the devil makes its offer
+            Random pick = new Random(5);
+            if (name == "scoretrait" || name == "duelboss")
+            {
+                run.Floor = 2;
+                run.Battle = new BattleState(run, name == "duelboss" ? EnemyList.All[7] : EnemyList.All[0], pick);
+                run.Battle.AutoPlan();
+            }
+            if (name == "bargain")
+            {
+                run.Battle = new BattleState(run, EnemyList.All[8], pick);
+                run.Battle.AutoPlan();
+                run.Battle.EndRound();
+            }
+
+            //Signature Picture : the recipe is full, so SPACE (pressed by the tool) lets it loose
+            if (name == "duelcutin")
+                for (int f = 0; f < run.Battle.Notes.Length; f++) run.Battle.Notes[f] = run.Battle.NeedFor(f);
+
             if (name == "result" || name == "defeat")
             {
                 run.Battle.Finished = true;
                 run.Battle.PlayerWon = name == "result";
                 run.Battle.Line = name == "result" ? 64f : -100f;
                 run.Battle.PerfectCount = 3;
+
+                //Performance Sheet : two rounds and a half of made up beats
+                run.Battle.Round = 3;
+                for (int r = 0; r < 3; r++)
+                    for (int b = 0; b < BattleRules.BeatsPerRound; b++)
+                    {
+                        if (r == 2 && b > 4) continue;
+                        BeatResult mark = run.Battle.Sheet[r][b];
+                        int roll = pick.Next(10);
+                        mark.Done = true;
+                        mark.Grade = roll < 1 ? Grade.None : (roll < 5 ? Grade.Perfect : (roll < 8 ? Grade.Good : (roll < 9 ? Grade.Miss : Grade.Hesitate)));
+                        mark.PlayerChoice = (Choice)pick.Next(3);
+                        mark.Push = pick.Next(3) == 0 ? -6 : 9;
+                        mark.Signature = r == 1 && b == 6;
+                    }
+            }
+
+            //Journey : a floor and a half of places, for the curtain call
+            if (name == "curtain" || name == "curtainwin")
+            {
+                NodeType[] path = { NodeType.Battle, NodeType.Event, NodeType.Battle, NodeType.Shop, NodeType.Elite,
+                                    NodeType.Rest, NodeType.Battle, NodeType.Boss };
+                for (int i = 0; i < path.Length; i++) run.RecordStop(path[i]);
+                run.Floor = 2;
+                run.RecordStop(NodeType.Battle);
+                run.RecordStop(NodeType.EraShift);
+                run.RecordStop(NodeType.Elite);
+                if (name == "curtain") run.MarkLastStopLost();
+                run.Floor = 1;
             }
 
             run.RefreshLabels();

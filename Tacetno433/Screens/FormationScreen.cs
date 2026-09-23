@@ -57,7 +57,7 @@ namespace Tacetno433.Screens
 
         public override void Load()
         {
-            SoundBank.PlayMusic(battleMode ? Music.Prep : Music.Route);
+            SoundBank.PlayMusic(battleMode ? RunFlow.FightMusic(Game.CurrentRun) : Music.Route);
             Game.CurrentRun.RefreshLabels();
         }
 
@@ -229,7 +229,8 @@ namespace Tacetno433.Screens
             if (held != null)
             {
                 Rectangle ghost = new Rectangle((int)Input.MousePos.X - 22, (int)Input.MousePos.Y - 56, 44, 112);
-                MusicianArt.Capsule(sb, ghost, held, Palette.Paper * 0.9f, Palette.Void, 0.6f);
+                Gfx.Rect(sb, ghost, Palette.Void * 0.6f);
+                MusicianArt.Token(sb, ghost, held, 1f, 0.6f);
                 Gfx.TextCentered(sb, Game.BigFont, held.NameTag, ghost.Center.X, ghost.Bottom + 14, Palette.Highlight, TextSize.Small);
             }
 
@@ -278,7 +279,8 @@ namespace Tacetno433.Screens
             Gfx.TextSpacedCentered(sb, Game.Font, "CONDUCTOR", px, py + 6, Palette.LineGrey, TextSize.Tiny, 3f);
         }
 
-        //Seats : locked, empty or filled, back row first so the front row overlaps it
+        //Seats : locked, empty or filled, back row first so the front row overlaps it.
+        //A filled seat shows the musician's pixel sprite, or an empty slot until it exists.
         private void DrawSeats(SpriteBatch sb, RunState run)
         {
             Formation f = run.Formation;
@@ -297,7 +299,7 @@ namespace Tacetno433.Screens
                 if (!unlocked)
                 {
                     //Locked Seat
-                    Gfx.CapsuleOutline(sb, r, Palette.LineGrey * 0.3f, 1f);
+                    Gfx.RectOutline(sb, r, Palette.LineGrey * 0.3f, 1);
                     DrawLock(sb, r.Center.X, r.Center.Y, Palette.LineGrey * 0.45f);
                     continue;
                 }
@@ -307,16 +309,16 @@ namespace Tacetno433.Screens
                     //Empty Seat : a hollow slot with a plus, brighter while something hovers over it
                     Color line = hover && held != null ? Palette.Highlight : Palette.LineGrey;
                     if (hover && held != null) Gfx.DrawGlow(sb, r.Center.X, r.Center.Y, r.Height * 0.7f, Palette.Paper * 0.2f);
-                    Gfx.CapsuleOutline(sb, r, line, 2f);
+                    Gfx.RectOutline(sb, r, line, 1);
                     Gfx.Rect(sb, r.Center.X - 8, r.Center.Y - 1, 16, 2, line);
                     Gfx.Rect(sb, r.Center.X - 1, r.Center.Y - 8, 2, 16, line);
                     continue;
                 }
 
-                //Filled Seat : pale capsule with a dark outline, the storyboard look
+                //Filled Seat : the musician standing in their seat
                 float lit = hover ? 0.5f : 0f;
-                MusicianArt.Capsule(sb, r, m, Color.Lerp(Palette.Paper, m.ThemeColor, 0.3f), Palette.Void, lit);
-                if (hover) Gfx.CapsuleOutline(sb, r, Palette.Highlight, 2f);
+                MusicianArt.Token(sb, r, m, 1f, lit);
+                if (hover) Gfx.RectOutline(sb, r, Palette.Highlight, 2);
 
                 //Name Band : across the foot of the capsule, so it never reaches the row below
                 float nameW = Gfx.TextWidth(Game.BigFont, m.NameTag, TextSize.Small * 0.8f) + 14f;
@@ -387,13 +389,17 @@ namespace Tacetno433.Screens
                 Gfx.TextSpaced(sb, Game.Font, m.Instrument, x + 102, y + 34, Palette.Paper, TextSize.Label, 2f);
                 Gfx.TextSpaced(sb, Game.Font, m.FamilyLabel, x + 102, y + 54, Palette.LineGrey, TextSize.Tiny, 2f);
 
+                //Numbers : the same power and cost as the cards, rehearsals and motifs included
                 Gfx.TextSpaced(sb, Game.Font, "POWER", x + 300, y + 4, Palette.LineGrey, TextSize.Tiny, 2f);
-                Gfx.Text(sb, Game.BigFont, m.PowerLabel, x + 300, y + 16, Palette.Paper, TextSize.Subtitle);
+                Gfx.Text(sb, Game.BigFont, NumberText.Get(run.PowerOf(m)), x + 300, y + 16, Palette.Paper, TextSize.Subtitle);
                 Gfx.TextSpaced(sb, Game.Font, "COST", x + 370, y + 4, Palette.LineGrey, TextSize.Tiny, 2f);
-                Gfx.Text(sb, Game.BigFont, m.CostLabel, x + 370, y + 16, Palette.Paper, TextSize.Subtitle);
+                Gfx.Text(sb, Game.BigFont, NumberText.Get(run.CostOf(m)), x + 370, y + 16, Palette.Paper, TextSize.Subtitle);
+                if (m.Rehearsed > 0) Ui.Pips(sb, x + 302, y + 66, m.Rehearsed, BattleRules.RehearseMax, 3, 10, 1f);
 
+                //Trait : what this musician does that nobody else does
                 Gfx.Rect(sb, x + 430, y, 1, 80, Palette.LineGrey * 0.5f);
-                Gfx.Text(sb, Game.StoryFont, m.LineWrapped, x + 446, y + 4, Palette.PaperDim, TextSize.Story);
+                Ui.Tag(sb, m.TraitName, x + 446, y + 2, true, 1f);
+                Gfx.Text(sb, Game.StoryFont, m.TraitWrapped, x + 446, y + 30, Palette.Paper, TextSize.StorySmall);
             }
             else if (hoverSeat >= 0)
             {

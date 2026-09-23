@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -9,7 +9,8 @@ using Tacetno433.Data;
 namespace Tacetno433.Screens
 {
     //CurtainCallScreen : the end of a run, won or lost.
-    //The band takes a bow, and the run record is printed like a concert programme.
+    //The band takes a bow, the run record is printed like a concert programme, and THE JOURNEY
+    //under the bow shows every place the run went through, floor by floor, to look back on.
     //After this the run is thrown away and the game returns to the title.
     public class CurtainCallScreen : GameScreen
     {
@@ -17,7 +18,12 @@ namespace Tacetno433.Screens
         private const int LedgerX = 760;
         private const int LedgerW = 460;
 
+        //Journey Marks : one letter per kind of place, in NodeType order
+        private static string[] journeyMark = { "E", "?", "$", "!", "R", "B", "X" };
+        private static string[] journeyKey = { "E ENCOUNTER", "! ELITE", "B BOSS", "? UNKNOWN", "$ SHOP", "R REST", "X CROSSING" };
+
         private bool won;
+        private RunState run;            // kept here, because Game.CurrentRun is cleared when we leave
         private string[] names = new string[7];
         private string[] values = new string[7];
         private string headline = "";
@@ -32,7 +38,7 @@ namespace Tacetno433.Screens
 
         public override void Load()
         {
-            RunState run = Game.CurrentRun;
+            run = Game.CurrentRun;
 
             headline = won ? "BRAVO" : "SILENCE";
             subline = won ? "The last silence is broken. The music goes on." : "The music stopped here. It can always start again.";
@@ -41,7 +47,7 @@ namespace Tacetno433.Screens
             names[1] = "CONDUCTOR";       values[1] = run.Conductor.Name;
             names[2] = "REACHED";         values[2] = "FLOOR " + run.Floor + "  /  " + run.StageLabel;
             names[3] = "DUELS WON";       values[3] = run.BattlesWon.ToString();
-            names[4] = "PERFECT PRESSES"; values[4] = run.PerfectsTotal.ToString();
+            names[4] = "PERFECT BEATS";   values[4] = run.PerfectsTotal.ToString();
             names[5] = "BEST COMBO";      values[5] = run.BestCombo.ToString();
             names[6] = "SHARDS LEFT";     values[6] = run.Shards.ToString();
 
@@ -58,17 +64,22 @@ namespace Tacetno433.Screens
             if (Input.KeyPressed(Keys.Enter) || Input.KeyPressed(Keys.Escape) || Input.ClickedOn(titleButton))
             {
                 SoundBank.Play(Sfx.UiConfirm);
-
-                //Run Over : everything about this run is thrown away
-                Game.CurrentRun = null;
                 SoundBank.StopMusic();
                 Game.Screens.Change(new TitleScreen());
             }
         }
 
+        //Screen Leave : the run is thrown away here, once the fade has finished and this page
+        //is really gone. Clearing it inside Update would leave Draw with nothing to draw for
+        //the few frames the fade is still running.
+        public override void Leave()
+        {
+            //only throw away the run this page was showing, in case a new one has already started
+            if (Game.CurrentRun == run) Game.CurrentRun = null;
+        }
+
         public override void Draw(SpriteBatch sb)
         {
-            RunState run = Game.CurrentRun;
             float e = enter * enter * (3f - 2f * enter);
 
             //Background : a bright stage for a win, TACET's dark for a loss
@@ -95,6 +106,7 @@ namespace Tacetno433.Screens
             Gfx.Text(sb, Game.StoryFont, subline, 92, 170, Palette.Paper * e, TextSize.Story);
 
             DrawBow(sb, run, e);
+            DrawJourney(sb, run, e);
             DrawLedger(sb, run, e);
 
             Ui.Button(sb, titleButton, "RETURN TO TITLE", "ENTER", true, enter >= 1f, e);
@@ -113,12 +125,50 @@ namespace Tacetno433.Screens
             }
         }
 
+        //Journey : one small box per place, floors split by a gap. The place the run ended on
+        //is crossed out. The key underneath says what each letter means.
+        private void DrawJourney(SpriteBatch sb, RunState run, float e)
+        {
+            float x = 92;
+            float y = 606;
+            Gfx.TextSpaced(sb, Game.Font, "THE JOURNEY", x, y - 22, Palette.PaperDim * e, TextSize.Tiny, 4f);
+
+            int floor = 1;
+            for (int i = 0; i < run.Journey.Count; i++)
+            {
+                JourneyStop stop = run.Journey[i];
+                if (stop.Floor != floor)
+                {
+                    floor = stop.Floor;
+                    Gfx.Rect(sb, x + 3, y - 2, 1, 24, Palette.PaperDim * e);    // a floor line
+                    x += 10;
+                }
+
+                Rectangle box = new Rectangle((int)x, (int)y, 18, 20);
+                bool fight = stop.Type == NodeType.Battle || stop.Type == NodeType.Elite || stop.Type == NodeType.Boss;
+                if (fight) Gfx.Rect(sb, box, Palette.Paper * (0.85f * e));
+                Gfx.RectOutline(sb, box, Palette.Paper * (0.7f * e), 1);
+                Gfx.TextCentered(sb, Game.Font, journeyMark[(int)stop.Type], box.Center.X, box.Center.Y,
+                                 (fight ? Palette.Ink : Palette.Paper) * e, TextSize.Tiny);
+                if (stop.Lost) Gfx.Line(sb, box.X - 3, box.Bottom + 3, box.Right + 3, box.Y - 3, Palette.Highlight * e, 2f);
+                x += 22;
+            }
+
+            //Key : what the letters stand for
+            float kx = 92;
+            for (int i = 0; i < journeyKey.Length; i++)
+            {
+                Gfx.TextSpaced(sb, Game.Font, journeyKey[i], kx, y + 32, Palette.LineGrey * e, TextSize.Tiny, 1.5f);
+                kx += Gfx.SpacedWidth(Game.Font, journeyKey[i], TextSize.Tiny, 1.5f) + 18;
+            }
+        }
+
         //Bow : the band standing in a row, bowing in turn, the conductor at the head of the line
         private void DrawBow(SpriteBatch sb, RunState run, float e)
         {
             int count = run.Roster.Count;
             float cx = 360;
-            float floor = 540;
+            float floor = 520;
             int gap = count > 8 ? 42 : 56;
             float left = cx + 50 - (count - 1) * gap / 2f;
 
@@ -130,8 +180,8 @@ namespace Tacetno433.Screens
                 //Bow Wave : each musician dips a little after the one before
                 float dip = Math.Max(0f, (float)Math.Sin(time * 1.6f - i * 0.5f)) * 10f;
                 float x = left + i * gap;
-                Rectangle cap = new Rectangle((int)x - 18, (int)(floor - 120 + dip), 36, 110);
-                MusicianArt.Capsule(sb, cap, run.Roster[i], Palette.Paper * (0.8f * e), Palette.Void, 0f);
+                Rectangle cap = new Rectangle((int)x - 22, (int)(floor - 120 + dip), 44, 110);
+                MusicianArt.Token(sb, cap, run.Roster[i], e, 0f);
                 Gfx.TextSpacedCentered(sb, Game.Font, run.Roster[i].NameTag, x, floor + 10, Palette.PaperDim * e, TextSize.Tiny, 1.5f);
             }
 
@@ -140,7 +190,6 @@ namespace Tacetno433.Screens
             Rectangle figure = new Rectangle((int)left - 110, (int)(floor - 170 + bow), 76, 170 - (int)bow);
             PortraitBox.DrawFigure(sb, figure, run.Conductor, e);
             Gfx.TextSpacedCentered(sb, Game.Font, run.Conductor.Name, figure.Center.X, floor + 10, Palette.Paper * e, TextSize.Tiny, 1.5f);
-            Gfx.TextSpacedCentered(sb, Game.Font, "ART  /  THE BOW", cx, floor + 150, Palette.LineGrey * e, TextSize.Tiny, 2f);
         }
 
         //Ledger : the run record, like the back page of a programme

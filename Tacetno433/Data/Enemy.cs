@@ -1,11 +1,29 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Tacetno433.Core;
 
 namespace Tacetno433.Data
 {
     public enum EnemyKind { Normal, Elite, Boss }
+
+    //EnemyTrait : the one rule a shape of TACET bends. BattleState and the duel check these by
+    //name. A trait is always told to the player BEFORE it matters: its name sits on the score
+    //page (point at the enemy to read it) and the duel's story box says it when the fight opens.
+    public enum EnemyTrait
+    {
+        None,
+        EchoFades,       // HUSH         the f / mf / p marks on its notes fade before they arrive
+        FillsGaps,       // DEAD AIR     beats nobody on your side plays hit 50 percent harder
+        Lullaby,         // THE LULL     round three slows down instead of speeding up
+        FalseNotes,      // STATIC       one note in every bar shows the wrong loudness
+        SilentMouths,    // MUTE CHOIR   some of its notes are hidden ???
+        NoRest,          // WHITE NOISE  silent beats give no stamina back
+        Unfinished,      // REQUIEM      round three plays its part backwards, and faster
+        Mirror,          // NAMELESS     from round two it plays YOUR last plan back at you
+        Bargain          // DEVIL'S STRING  before round two it offers a deal
+    }
 
     //Enemy : one shape TACET takes. It has no face, only a written part it plays against you.
     public class Enemy
@@ -29,11 +47,20 @@ namespace Tacetno433.Data
         //Temper : above 0 it boosts more often, below 0 it eases more often (percent)
         public int Temper = 0;
 
+        //Trait : see EnemyTrait. TraitFloor is the first floor it switches on, so ordinary
+        //enemies play plainly on floor 1 while the player learns, and show their trick later.
+        public EnemyTrait Trait = EnemyTrait.None;
+        public string TraitName = "";
+        public string TraitText = "";
+        public int TraitFloor = 1;
+
         //Enemy Look : brightness stand-in until the real figure goes in
         public Color Tone = Palette.ToneC;
 
         //Prepared Text
         public string KindLabel = "";
+        public string TraitWrapped = "";
+        public string TraitStory = "";        // the story box line, "* HUSH : ..."
     }
 
     //EnemyList : THE PLACE TO EDIT ENEMIES.
@@ -43,36 +70,59 @@ namespace Tacetno433.Data
         {
             //Normal : any era
             new Enemy { Name = "HUSH",      Title = "The first thing to go is the echo.",
+                        Trait = EnemyTrait.EchoFades, TraitName = "ECHO FADES", TraitFloor = 2,
+                        TraitText = "The f, mf and p marks on its notes fade before they reach you. Remember them.",
                         Kind = EnemyKind.Normal, Pattern = new int[] { 3, 0, 0, 3, 0, 0, 4, 0 }, Tone = Palette.ToneD },
             new Enemy { Name = "DEAD AIR",  Title = "It waits between your notes.",
+                        Trait = EnemyTrait.FillsGaps, TraitName = "FILLS THE GAPS", TraitFloor = 2,
+                        TraitText = "Beats nobody on your side plays hit 50 percent harder.",
                         Kind = EnemyKind.Normal, Pattern = new int[] { 0, 4, 0, 4, 0, 4, 0, 5 }, Tone = Palette.ToneE },
             new Enemy { Name = "THE LULL",  Title = "Soft, patient, and never finished.",
+                        Trait = EnemyTrait.Lullaby, TraitName = "LULLABY", TraitFloor = 2,
+                        TraitText = "Round three slows down instead of speeding up.",
                         Kind = EnemyKind.Normal, Pattern = new int[] { 2, 2, 0, 0, 5, 0, 2, 2 }, Tone = Palette.ToneC, Temper = -10 },
             new Enemy { Name = "STATIC",    Title = "It sounds like something. It is not.",
+                        Trait = EnemyTrait.FalseNotes, TraitName = "FALSE NOTES", TraitFloor = 2,
+                        TraitText = "One note in every bar shows the wrong loudness.",
                         Kind = EnemyKind.Normal, Pattern = new int[] { 4, 0, 3, 0, 4, 0, 3, 6 }, Tone = Palette.ToneB, Temper = 10 },
 
             //Elite : any era
             new Enemy { Name = "THE MUTE CHOIR", Title = "A hundred mouths, open, making nothing.",
+                        Trait = EnemyTrait.SilentMouths, TraitName = "SILENT MOUTHS", TraitFloor = 1,
+                        TraitText = "Some of its notes stay hidden as ??? until they land.",
                         Kind = EnemyKind.Elite, Pattern = new int[] { 5, 0, 5, 0, 7, 0, 5, 8 }, Hidden = new int[] { 3, 7 }, Tone = Palette.ToneB },
             new Enemy { Name = "WHITE NOISE",    Title = "Every beat, all the time, forever.",
+                        Trait = EnemyTrait.NoRest, TraitName = "NO REST", TraitFloor = 1,
+                        TraitText = "It never stops, so silent beats give no stamina back.",
                         Kind = EnemyKind.Elite, Pattern = new int[] { 3, 3, 3, 3, 3, 3, 3, 3 }, Hidden = new int[] { 5 }, Tone = Palette.ToneA, Temper = 15 },
 
             //Boss : one per era
             new Enemy { Name = "REQUIEM",            Title = "The piece that was never finished.",
+                        Trait = EnemyTrait.Unfinished, TraitName = "UNFINISHED", TraitFloor = 1,
+                        TraitText = "In round three it plays its part backwards, and faster.",
                         Kind = EnemyKind.Boss, Era = 0, Pattern = new int[] { 6, 0, 4, 0, 8, 0, 4, 9 }, Hidden = new int[] { 2, 6 }, Tone = Palette.ToneA },
             new Enemy { Name = "THE NAMELESS MASTER", Title = "He plays a phrase. You must answer better.",
+                        Trait = EnemyTrait.Mirror, TraitName = "ANSWER BETTER", TraitFloor = 1,
+                        TraitText = "From round two it plays your last plan back at you.",
                         Kind = EnemyKind.Boss, Era = 1, Pattern = new int[] { 4, 4, 0, 6, 4, 4, 0, 9 }, Hidden = new int[] { 3, 7 }, Tone = Palette.ToneB },
             new Enemy { Name = "THE DEVIL'S STRING",  Title = "One string, one bow, one bargain.",
+                        Trait = EnemyTrait.Bargain, TraitName = "THE BARGAIN", TraitFloor = 1,
+                        TraitText = "Before round two it offers a deal: more power now, less stamina for ever.",
                         Kind = EnemyKind.Boss, Era = 2, Pattern = new int[] { 7, 0, 7, 0, 0, 9, 0, 9 }, Hidden = new int[] { 4 }, Tone = Palette.ToneA, Temper = 20 },
         };
 
         private static string[] kindNames = { "ENCOUNTER", "ELITE", "BOSS" };
 
         //Text Prepare : called once from LoadContent
-        public static void PrepareText()
+        public static void PrepareText(SpriteFont storyFont, float wrapWidth)
         {
             for (int i = 0; i < All.Length; i++)
-                All[i].KindLabel = kindNames[(int)All[i].Kind];
+            {
+                Enemy e = All[i];
+                e.KindLabel = kindNames[(int)e.Kind];
+                e.TraitWrapped = Gfx.WrapText(storyFont, e.TraitText, wrapWidth, TextSize.StorySmall);
+                e.TraitStory = "* " + e.Name + " : " + e.TraitText;
+            }
         }
 
         //Enemy Pick : a random enemy of this kind that fits the era.
