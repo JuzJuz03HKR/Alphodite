@@ -67,6 +67,13 @@ namespace Tacetno433.Core
             //to the next corner, then a short rest, so the baton makes real strokes
             mouseClock += dt;
             Input.PretendHeld = true;
+
+            //Still Hand : the fermata picture needs the baton held still
+            if (index < names.Length && names[index] == "duelfermata")
+            {
+                Input.MousePos = new Vector2(760f, 470f);
+                return;
+            }
             int leg = (int)(mouseClock / 0.7f) % 4;
             float t = MathHelper.Clamp((mouseClock % 0.7f) / 0.7f * 2f, 0f, 1f);
             t = t * t * (3f - 2f * t);
@@ -93,6 +100,15 @@ namespace Tacetno433.Core
                 return;
             }
 
+            //Save Check : write a run and the settings to files in the output folder, read them
+            //back, and report every value that did not come back the same
+            if (names[0] == "savecheck")
+            {
+                SaveCheck(game);
+                game.Exit();
+                return;
+            }
+
             index = 0;
             frames = 0;
             Open(game, names[0]);
@@ -114,7 +130,7 @@ namespace Tacetno433.Core
             {
                 for (int h = 0; h < habits.Length; h++)
                 {
-                    int wins = 0, roundsTotal = 0, staminaTotal = 0, lowest = 999;
+                    int wins = 0, roundsTotal = 0, staminaTotal = 0, lowest = 999, finales = 0;
 
                     for (int n = 0; n < 300; n++)
                     {
@@ -136,16 +152,19 @@ namespace Tacetno433.Core
                                 if (h == 2 && b.IsHeavy(beat)) { choice = Choice.Boost; grade = Grade.Perfect; }
                                 if (h == 3) choice = Choice.Ease;
                                 if (h == 4) grade = Grade.Perfect;
-                                if (!b.HasAction(beat)) grade = Grade.None;
 
-                                b.Resolve(beat, choice, grade);
+                                int strokes = h == 1 ? 0 : (h == 4 || h == 2 ? 8 : 5);
+                                PlayBeat(b, beat, choice, grade, strokes);
                                 if (run.Stamina < lowest) lowest = run.Stamina;
                             }
 
+                            //Finale : every habit that strokes at all tries it, and lands it (GOOD is enough)
+                            if (b.FinaleOffered && h != 1) b.WinFinale();
                             if (!b.Finished) b.EndRound();
                         }
 
                         if (b.PlayerWon) wins++;
+                        if (b.FinaleWon) finales++;
                         roundsTotal += Math.Min(b.Round, BattleRules.MaxRounds);
                         staminaTotal += run.Stamina;
                     }
@@ -155,13 +174,106 @@ namespace Tacetno433.Core
                             + "WIN " + (wins * 100 / 300).ToString().PadLeft(3) + "%"
                             + "   AVG ROUNDS " + (roundsTotal / 300f).ToString("0.0")
                             + "   AVG STAMINA LEFT " + (staminaTotal / 300)
-                            + "   LOWEST " + lowest + "\r\n";
+                            + "   LOWEST " + lowest
+                            + "   FINALE " + (finales * 100 / 300) + "%\r\n";
                 }
                 report += "\r\n";
             }
 
             report += SimulateRuns(game, random);
             File.WriteAllText(Path.Combine(outDir, "simulate.txt"), report);
+        }
+
+        //Save Check : a sample run half way into a fight, saved and loaded again. The real save
+        //folder is never used, the files go to the output folder instead.
+        private static void SaveCheck(TacetGame game)
+        {
+            string report = "TACET SAVE CHECK\r\n";
+            SaveFile.Enabled = true;
+            SaveFile.FolderOverride = outDir;
+
+            RunState run = SampleRun(game, "savecheck");
+            run.Floor = 2;
+            run.Rehearse(run.Roster[1]);
+            run.RecordStop(NodeType.Battle);
+            run.RecordStop(NodeType.Shop);
+            run.Chosen = run.Options[1];
+            run.CurrentEvent = EventList.All[2];
+            run.Formation.Plan[run.Formation.SeatOf(run.Roster[0]), 3] = true;
+            SaveFile.SaveRun(run);
+
+            RunState back = SaveFile.LoadRun(game);
+            if (back == null)
+            {
+                report += "FAIL  the run did not load at all\r\n";
+            }
+            else
+            {
+                report += Same("conductor", run.Conductor.Name, back.Conductor.Name);
+                report += Same("band", run.BandName, back.BandName);
+                report += Same("floor / stage", run.Floor + "/" + run.Stage + "/" + run.StagesThisFloor, back.Floor + "/" + back.Stage + "/" + back.StagesThisFloor);
+                report += Same("era", run.Era.ToString(), back.Era.ToString());
+                report += Same("shards / seats", run.Shards + "/" + run.Seats + "/" + run.SeatsBoughtThisFloor, back.Shards + "/" + back.Seats + "/" + back.SeatsBoughtThisFloor);
+                report += Same("stamina", run.StaminaValue, back.StaminaValue);
+                report += Same("record", run.BattlesWon + "/" + run.PerfectsTotal + "/" + run.BestCombo, back.BattlesWon + "/" + back.PerfectsTotal + "/" + back.BestCombo);
+                report += Same("roster", Names(run), Names(back));
+                report += Same("rehearsed", run.Roster[0].Rehearsed + "/" + run.Roster[1].Rehearsed, back.Roster[0].Rehearsed + "/" + back.Roster[1].Rehearsed);
+                report += Same("seats and plan", Plan(run), Plan(back));
+                report += Same("motifs", run.Motifs.Count + (run.Motifs.Count > 0 ? run.Motifs[0].Name : ""), back.Motifs.Count + (back.Motifs.Count > 0 ? back.Motifs[0].Name : ""));
+                report += Same("journey", run.Journey.Count + "/" + run.Journey[run.Journey.Count - 1].Type, back.Journey.Count + "/" + back.Journey[back.Journey.Count - 1].Type);
+                report += Same("options", Options(run), Options(back));
+                report += Same("chosen", Array.IndexOf(run.Options, run.Chosen).ToString(), Array.IndexOf(back.Options, back.Chosen).ToString());
+                report += Same("enemy", run.Battle.Enemy.Name, SaveFile.LoadedEnemy != null ? SaveFile.LoadedEnemy.Name : "none");
+                report += Same("event", run.CurrentEvent.Title, SaveFile.LoadedEvent != null ? SaveFile.LoadedEvent.Title : "none");
+                report += Same("summary", "THE INFERNO  /  FLOOR 2  /  STAGE 5", SaveFile.RunSummary());
+            }
+
+            //Settings : change them, save, scramble, load, compare, then put the defaults back
+            Settings.Master = 0.35f; Settings.Sfx = 0.6f; Settings.Music = 0.1f; Settings.Language = 1; Settings.SetTiming(0.045f);
+            SaveFile.SaveSettings();
+            Settings.Master = 1f; Settings.Sfx = 1f; Settings.Music = 1f; Settings.Language = 0; Settings.SetTiming(0f);
+            SaveFile.LoadSettings();
+            report += Same("settings", "0.35/0.6/0.1/1/" + Settings.TimingLabel(0.045f),
+                           Settings.Master + "/" + Settings.Sfx + "/" + Settings.Music + "/" + Settings.Language + "/" + Settings.TimingLabel(Settings.TimingOffset));
+            Settings.Master = 0.8f; Settings.Sfx = 0.8f; Settings.Music = 0.55f; Settings.Language = 0; Settings.SetTiming(0f);
+
+            SaveFile.DeleteRun();
+            report += Same("delete", "False", SaveFile.HasRun.ToString());
+
+            SaveFile.FolderOverride = "";
+            SaveFile.Enabled = false;
+            File.WriteAllText(Path.Combine(outDir, "savecheck.txt"), report);
+        }
+
+        private static string Same(string what, string saved, string loaded)
+        {
+            return (saved == loaded ? "PASS  " : "FAIL  ") + what.PadRight(16) + saved + "   ->   " + loaded + "\r\n";
+        }
+
+        private static string Names(RunState run)
+        {
+            string s = "";
+            for (int i = 0; i < run.Roster.Count; i++) s += run.Roster[i].Name + " ";
+            return s;
+        }
+
+        private static string Plan(RunState run)
+        {
+            string s = "";
+            for (int seat = 0; seat < StageLayout.SeatCount; seat++)
+            {
+                s += run.Formation.Seated[seat] == null ? "-" : run.Formation.Seated[seat].Name.Substring(0, 1);
+                for (int b = 0; b < BattleRules.BeatsPerRound; b++) s += run.Formation.Plan[seat, b] ? "1" : "0";
+                s += " ";
+            }
+            return s;
+        }
+
+        private static string Options(RunState run)
+        {
+            string s = "";
+            for (int i = 0; i < run.Options.Length; i++) s += run.Options[i].Type + " ";
+            return s;
         }
 
         //Whole Runs : plays complete runs from the first era choice to the end, 200 per habit,
@@ -171,7 +283,7 @@ namespace Tacetno433.Core
         private static string SimulateRuns(TacetGame game, Random random)
         {
             string[] habits = { "GOOD PLAY EVERY BEAT, NEVER BOOSTS", "SKILLED  (PERFECT, BOOST HEAVY, EASE WHEN LOW)",
-                                "AVERAGE  (40% PERFECT, 10% MISS, SAME CHOICES)" };
+                                "AVERAGE  (40% PERFECT, 10% MISS, SAME CHOICES)", "STRONG   (70% PERFECT, 5% MISS, SAME CHOICES)" };
             string report = "WHOLE RUNS  (" + BattleRules.FloorsPerRun + " floors, 200 runs per line, conductor THE APPRENTICE)\r\n";
 
             for (int h = 0; h < habits.Length; h++)
@@ -254,6 +366,28 @@ namespace Tacetno433.Core
             return report;
         }
 
+        //Play Beat : one beat the way the duel plays it. A roll gets its strokes counted first,
+        //a pair gets its flick back with the same grade as its first note. Strokes below zero
+        //mean the flick back slipped (a MISS) on an ordinary beat.
+        private static void PlayBeat(BattleState b, int beat, Choice choice, Grade grade, int strokes)
+        {
+            Grade flick = strokes < 0 ? Grade.Miss : grade;
+            if (strokes < 0) strokes = 5;
+            if (!b.HasAction(beat)) grade = Grade.None;
+            if (b.IsTremolo(beat))
+            {
+                b.RollStrokes = strokes;
+                grade = BattleState.RollGrade(strokes);
+                choice = Choice.Normal;
+            }
+
+            //Fermata : a steady hand holds it to the end, a shaky one lets go part way
+            if (b.IsFermata(beat)) b.HoldFraction = grade == Grade.Hesitate || grade == Grade.Miss ? 0f : (flick == Grade.Miss ? 0.5f : (grade == Grade.Perfect ? 1f : 0.8f));
+
+            b.Resolve(beat, choice, grade);
+            if (b.EnemyDouble[beat] && !b.Finished) b.ResolveGrace(beat, grade == Grade.None ? Grade.Hesitate : flick);
+        }
+
         //Play Fight : one whole fight with a fixed habit. Returns true when it was won.
         private static bool PlayFight(RunState run, int habit, Random random)
         {
@@ -274,13 +408,25 @@ namespace Tacetno433.Core
                             int roll = random.Next(100);
                             grade = roll < 40 ? Grade.Perfect : (roll < 90 ? Grade.Good : Grade.Miss);
                         }
+                        if (habit == 3)
+                        {
+                            int roll = random.Next(100);
+                            grade = roll < 70 ? Grade.Perfect : (roll < 95 ? Grade.Good : Grade.Miss);
+                        }
                         bool low = run.Stamina < run.MaxStamina * 0.3f;
                         if (b.IsHeavy(beat) && !low) choice = Choice.Boost;
                         if (low && !b.IsHeavy(beat)) choice = Choice.Ease;
                     }
-                    if (!b.HasAction(beat)) grade = Grade.None;
+                    int strokes = habit == 0 ? 5 : (habit == 1 ? 8 : 5 + random.Next(4));
+                    if (habit >= 2 && b.EnemyDouble[beat] && random.Next(100) < (habit == 2 ? 30 : 10)) strokes = -1;   // the flick back slips
+                    PlayBeat(b, beat, choice, grade, strokes);
+                }
 
-                    b.Resolve(beat, choice, grade);
+                //Finale : steady players land it, average ones about half the time
+                if (b.FinaleOffered)
+                {
+                    if (habit != 2 || random.Next(2) == 0) b.WinFinale();
+                    else b.FailFinale();
                 }
                 if (!b.Finished) b.EndRound();
             }
@@ -295,7 +441,11 @@ namespace Tacetno433.Core
             //Pretend Keys : a few pages need one key pressed shortly before their picture
             Input.PretendPress = Keys.None;
             if (names[index] == "duelcutin" && frames == waits[index] - 22) Input.PretendPress = Keys.Space;
-            if (names[index] == "duelpause" && frames == waits[index] - 10) Input.PretendPress = Keys.Escape;
+            if ((names[index] == "duelpause" || names[index] == "pause") && frames == waits[index] - 30) Input.PretendPress = Keys.Escape;
+            if (names[index] == "titlequit" && frames == waits[index] - 10) Input.PretendPress = Keys.Escape;
+            if (names[index] == "shopleave" && frames == waits[index] - 10) Input.PretendPress = Keys.Enter;
+            if (names[index] == "guide4" && (frames == 10 || frames == 20 || frames == 30)) Input.PretendPress = Keys.Right;
+            if (names[index] == "guide5" && (frames == 10 || frames == 20 || frames == 30 || frames == 40)) Input.PretendPress = Keys.Right;
 
             if (frames < waits[index]) return;
 
@@ -314,17 +464,20 @@ namespace Tacetno433.Core
         }
 
         //Page Open : build a sample run that suits the page, then show it.
-        //Names: title guide settings gallery detail chapter era crossing recruit bandname route view
-        //       stage score scoretrait bargain duel duelcombo duelboss duelcutin duelpause
-        //       result defeat reward shop event rest curtain curtainwin
+        //Names: title titlecontinue titlequit guide guide4 guide5 settings calibrate gallery detail chapter era
+        //       crossing recruit bandname route pause view stage score scoretrait scorepairs bargain
+        //       duel duelcombo duelboss duelcutin duelpause dueldouble dueltremolo duelfermata duelfire finale
+        //       result defeat reward shop shopleave event rest curtain curtainwin
         private static void Open(TacetGame game, string name)
         {
             RunState run = SampleRun(game, name);
             game.CurrentRun = run;
+            game.Pause.Open = false;
+            SaveFile.PretendRun = name == "titlecontinue";
 
             GameScreen screen = new TitleScreen();
-            if (name == "guide") screen = new GuideScreen();
-            if (name == "settings") screen = new SettingsScreen();
+            if (name.StartsWith("guide")) screen = new GuideScreen();
+            if (name == "settings" || name == "calibrate") screen = new SettingsScreen();
             if (name == "gallery") screen = new ConductorSelectScreen(2);
             if (name == "detail") screen = new ConductorDetailScreen(2, new Rectangle(475, 126, 330, 450));
             if (name == "chapter") screen = new ChapterScreen();
@@ -332,19 +485,34 @@ namespace Tacetno433.Core
             if (name == "crossing") screen = new EraChoiceScreen(false);
             if (name == "recruit") screen = new RecruitScreen();
             if (name == "bandname") screen = new BandNameScreen();
-            if (name == "route") screen = new RouteScreen();
+            if (name == "route" || name == "pause") screen = new RouteScreen();
             if (name == "view") screen = new FormationScreen(false);
             if (name == "stage") screen = new FormationScreen(true);
-            if (name == "score" || name == "scoretrait" || name == "bargain") screen = new ScoreScreen();
-            if (name == "duel" || name == "duelboss" || name == "duelcombo" || name == "duelcutin" || name == "duelpause") screen = new DuelScreen();
+            if (name == "score" || name == "scoretrait" || name == "bargain" || name == "scorepairs") screen = new ScoreScreen();
+            if (name.StartsWith("duel") || name == "finale") screen = new DuelScreen();
             if (name == "result" || name == "defeat") screen = new ResultScreen();
             if (name == "reward") screen = new MotifRewardScreen(false);
-            if (name == "shop") screen = new ShopScreen();
+            if (name == "shop" || name == "shopleave") screen = new ShopScreen();
             if (name == "event") screen = new EventScreen();
             if (name == "rest") screen = new RestScreen();
             if (name == "curtain" || name == "curtainwin") screen = new CurtainCallScreen(name == "curtainwin");
 
             game.Screens.ChangeNow(screen);
+
+            //Picture Hooks : start the moment the picture is about
+            if (name == "calibrate") ((SettingsScreen)screen).BeginTest();
+            if (name == "finale") ((DuelScreen)screen).BeginFinaleForPicture();
+            if (name == "dueltremolo") ((DuelScreen)screen).JumpForPicture(BattleRules.BeatsPerRound - 1);
+            if (name == "dueldouble") ((DuelScreen)screen).JumpForPicture(FirstPair(run.Battle));
+            if (name == "duelfermata") ((DuelScreen)screen).HoldForPicture();
+        }
+
+        //First Pair : the first beat of the round that TACET plays as a pair, for the picture
+        private static int FirstPair(BattleState b)
+        {
+            for (int n = 0; n < BattleRules.BeatsPerRound; n++)
+                if (b.EnemyDouble[n]) return n;
+            return 0;
         }
 
         //Sample Run : a run part way through floor one, with four musicians and a fight ready
@@ -397,7 +565,9 @@ namespace Tacetno433.Core
             //Battle
             run.Chosen = new RouteNode();
             run.Chosen.Type = name == "duelboss" ? NodeType.Boss : NodeType.Battle;
-            if (name == "reward") run.Chosen.Type = NodeType.Elite;
+            if (name == "reward" || name == "dueltremolo" || name == "scorepairs") run.Chosen.Type = NodeType.Elite;
+            if (name == "dueldouble" || name == "scorepairs") run.Floor = 3;          // pairs only on the last floor
+            if (name == "duelfermata") run.Floor = 2;                                 // held notes from floor two
             run.Chosen.Title = RouteNodeInfo.TitleOf(run.Chosen.Type);
             run.Chosen.Caption = RouteNodeInfo.CaptionOf(run.Chosen.Type);
             run.BeginBattle();
@@ -410,6 +580,18 @@ namespace Tacetno433.Core
                 run.Battle.Combo = 3;
                 run.Battle.Line = -35f;
             }
+
+            //Fire Picture : the band is on fire
+            if (name == "duelfire")
+            {
+                run.Battle.Combo = 6;
+                run.Battle.FortissimoLeft = BattleRules.FortissimoBeats;
+                run.Battle.Line = 20f;
+            }
+
+            //Finale Picture : far enough ahead to finish it
+            if (name == "finale") run.Battle.Line = 86f;
+
 
             //Trait Pictures : an ordinary enemy on floor two shows its trait, the devil makes its offer
             Random pick = new Random(5);

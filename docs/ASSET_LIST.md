@@ -118,6 +118,7 @@
 - `Content/Audio/Phrase/answer_1.wav` … `answer_8.wav` = วงของเราตอบ
 - `Content/Audio/Phrase/call_1.wav` … `call_8.wav` = TACET เล่นก่อน (ควรฟังดูเป็นอีกฝ่าย ทุ้ม/หลอน)
 - เกมเล่นดังขึ้นตอน BOOST เบาลงตอน EASE เพี้ยนนิดๆ ตอน MISS และเงียบตอนลังเล
+- (รอบ 6) ดวลตวัดทุกบีตต่อเนื่องที่ 88–116 BPM **แต่ละโน้ตควรสั้น ~0.3 วิ** ไม่งั้นจะทับกัน · โน้ตตัวหลังของโน้ตคู่ใช้ไฟล์เดียวกันแต่เสียงสูงขึ้น
 
 ### 2. เสียงประกอบ (SFX) — `Content/Audio/Sfx/<ชื่อ>.wav` รวม 37 เสียง
 **ชุดแรก 12 เสียงที่หน้าดวลใช้ (ทำก่อน)** : `beat_tick` · `note_on` · `qte_normal` · `qte_boost` · `qte_ease` · `qte_perfect` ·
@@ -127,6 +128,10 @@
 `round_start` `enemy_boost` `enemy_ease` `stamina_empty` `rest_recover` `victory` `defeat` `recruit` `combo_break`
 `motif_get` `buy` `page_turn` `check_pass` `check_fail` `rehearse` `run_complete`
 (ความหมายแต่ละเสียงอยู่ใน `Content/Audio/README.txt`)
+
+รอบ 6 ใช้เสียงเดิมเพิ่ม ไม่ต้องทำไฟล์ใหม่ : `beat_tick` = นับเข้า + FINALE + **เครื่องวัด STROKE TIMING ในหน้าตั้งค่า** (ต้องสั้นและคม) ·
+`note_on` = เสียงรัวของ TREMOLO ฝั่ง TACET · `qte_normal` = ทุกครั้งที่รัวไม้ (เสียงสูงขึ้นเรื่อยๆ) · `clash_win` + `enemy_boost` = COUNTER ·
+`combo_up` = FORTISSIMO / FINALE · `page_turn` = กล่องถามยืนยันเปิด
 
 ### 3. เพลง (วนซ้ำ) — `Content/Audio/Music/<ชื่อ>.ogg` รวม 11 เพลง
 `title` · `gallery` · `route` · `battle` · `boss` · `victory` · `defeat` · `shop` · `event` · `rest` · `ending`

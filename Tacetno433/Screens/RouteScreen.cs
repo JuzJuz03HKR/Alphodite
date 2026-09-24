@@ -15,6 +15,7 @@ namespace Tacetno433.Screens
     //Forward only, there is no going back.
     //
     //TAB (or the button) opens the stage so the ensemble can be rearranged between fights.
+    //ESC opens the pause menu, like every page of a run. Arriving here saves the run.
     public class RouteScreen : GameScreen
     {
         //Route Layout
@@ -37,6 +38,9 @@ namespace Tacetno433.Screens
             strip.AreaBottom = FooterY;
             strip.Reset(Game.CurrentRun.Options.Length, selected);
             lastMouse = Input.MousePos;
+
+            //Save : every arrival on the route is a point CONTINUE can come back to
+            SaveFile.SaveRun(Game.CurrentRun);
 
             SoundBank.PlayMusic(Music.Route);
         }
@@ -80,13 +84,6 @@ namespace Tacetno433.Screens
                 if (Input.ClickedOn(strip.PanelRect(i))) { selected = i; confirm = true; }
 
             if (confirm) Choose(selected);
-
-            //Route Abandon : prototype shortcut back to the menu, remove this later
-            if (Input.KeyPressed(Keys.Escape))
-            {
-                SoundBank.Play(Sfx.UiBack);
-                Game.Screens.Change(new TitleScreen());
-            }
         }
 
         //Route Choose : send the player to the page that matches the place
@@ -97,30 +94,7 @@ namespace Tacetno433.Screens
             run.Chosen = node;
             run.RecordStop(node.Type);
             SoundBank.Play(Sfx.PathChosen);
-
-            if (node.Type == NodeType.Battle || node.Type == NodeType.Elite || node.Type == NodeType.Boss)
-            {
-                //Fight : set up the battle, then open the stage to prepare
-                run.BeginBattle();
-                Game.Screens.Change(new FormationScreen(true));
-            }
-            else if (node.Type == NodeType.EraShift)
-            {
-                Game.Screens.Change(new EraChoiceScreen(false));
-            }
-            else if (node.Type == NodeType.Shop)
-            {
-                Game.Screens.Change(new ShopScreen());
-            }
-            else if (node.Type == NodeType.Rest)
-            {
-                Game.Screens.Change(new RestScreen());
-            }
-            else
-            {
-                run.CurrentEvent = EventList.Pick(run.Rng);
-                Game.Screens.Change(new EventScreen());
-            }
+            RunFlow.Enter(Game, node, null, null);      // this also saves the run
         }
 
         public override void Draw(SpriteBatch sb)

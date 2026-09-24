@@ -11,7 +11,7 @@ namespace Tacetno433.Screens
 {
     //DuelScreen.Hud : what sits on top of the world. The strip along the top (round, stamina,
     //the tug bar, TACET's name), the ring at the hit point, the clash numbers, the combo,
-    //the round banners, the signature cut-in, the count-in and the pause screen.
+    //the round banners, the signature and finale cut-in, the count-in and the finale card.
     public partial class DuelScreen
     {
         //Plates : round, beat, tempo and stamina on the left, TACET's name and trait on the right
@@ -74,29 +74,73 @@ namespace Tacetno433.Screens
         private void DrawAnswerRing(SpriteBatch sb)
         {
             float t = AnswerProgress();
-            if (t < 0f) return;
+            if (t < 0f || rolling || holding) return;
 
             float cx = RingX();
             float cy = RingY;
             float a = MathHelper.Clamp(t * 4f, 0f, 1f);
 
-            //Mark : where the ring has to be when the stroke lands
-            Gfx.CircleOutline(sb, cx, cy, RingTarget, Palette.Ink * a, 5f);
-            Gfx.CircleOutline(sb, cx, cy, RingTarget, Palette.Highlight * a, 3f);
+            //Flick Back : a smaller ring for the second note of a pair
+            float mark = onGrace ? RingTarget * 0.7f : RingTarget;
+            float start = onGrace ? RingStart * 0.7f : RingStart;
+
+            //Mark : where the ring has to be when the stroke lands, swelling with the beat
+            float swell = BeatPulse() * 3f;
+            Gfx.CircleOutline(sb, cx, cy, mark + swell, Palette.Ink * a, 5f);
+            Gfx.CircleOutline(sb, cx, cy, mark + swell, Palette.Highlight * a, 3f);
 
             //Closing Ring : shrinks to the mark on the beat, then keeps going a little
-            float radius = RingStart - (RingStart - RingTarget) * t;
+            float radius = start - (start - mark) * t;
             if (radius < 8f) radius = 8f;
             Gfx.CircleOutline(sb, cx, cy, radius, Palette.Ink * a, 6f);
             Gfx.CircleOutline(sb, cx, cy, radius, Palette.Highlight * a, 3f);
 
+            //Spark : the second note of a pair takes any way, so the ring holds a spark instead
+            if (onGrace)
+            {
+                NoteGlyph.Spark(sb, cx, cy - mark - 26f, 14f, Palette.Highlight * a);
+                return;
+            }
+
             //Arrow : outside the mark, on the side the baton should travel toward
-            Flick want = pattern[pending];
+            Flick want = WantedWay();
             Vector2 d = DirVector(want);
-            float ax = cx + d.X * (RingTarget + 30f);
-            float ay = cy + d.Y * (RingTarget + 30f);
+            float ax = cx + d.X * (mark + 30f);
+            float ay = cy + d.Y * (mark + 30f);
             DrawDirection(sb, want, ax, ay, 36f, 12f, Palette.Ink * a, 9f);
             DrawDirection(sb, want, ax, ay, 32f, 9f, Palette.Highlight * a, 4f);
+        }
+
+        //Ready : while TACET plays its first bar, the band counts the player in, 3 2 1, so the
+        //first answer never comes as a surprise
+        private void DrawReady(SpriteBatch sb)
+        {
+            if (phase != Phase.Play || pending > 0 || clock < beatLen || clock >= AnswerTime(0)) return;
+
+            int count = 4 - (int)(clock / beatLen);           // 3 on beat two, 2 on beat three, 1 on beat four
+            float within = (clock / beatLen) % 1f;
+            float a = 1f - within * 0.7f;
+            float y = RingY - 118f;
+            Gfx.Circle(sb, HitX, y + 2f, 34f, Palette.Void * (0.85f * a));
+            Gfx.CircleOutline(sb, HitX, y + 2f, 34f, Palette.Paper * (0.6f * a), 2f);
+            Gfx.TextCentered(sb, Game.LogoFont, countWords[count], HitX, y, Palette.Highlight * a, TextSize.Banner * 0.6f);
+        }
+
+        //Judge : the word for the last stroke on a small dark plate under the hit point, so it
+        //reads on the bright stage and in TACET's dark alike. It jumps in, rises and fades.
+        private void DrawJudge(SpriteBatch sb)
+        {
+            const float Life = 0.6f;
+            if (judgeTimer >= Life || judgeWord.Length == 0) return;
+
+            float t = judgeTimer / Life;
+            float a = 1f - t * t;
+            float pop = 1f + (1f - Math.Min(1f, judgeTimer / 0.08f)) * 0.25f;
+            float y = RingY + 92f - t * 16f;
+
+            Rectangle plate = new Rectangle((int)(RingX() - judgeWidth * pop / 2f - 18f), (int)(y - 18f), (int)(judgeWidth * pop + 36f), 36);
+            Gfx.SlantBox(sb, plate, 10, Palette.Void * (0.85f * a));
+            Gfx.TextCentered(sb, Game.BigFont, judgeWord, RingX(), y - 2f, Palette.Highlight * a, judgeScale * pop);
         }
 
         //Clash Numbers : our number against TACET's, counting up side by side above the line.
@@ -138,19 +182,42 @@ namespace Tacetno433.Screens
             Gfx.Diamond(sb, cx, ClashY, 6, Palette.Highlight * a);
         }
 
-        //Combo : a small plate right under the tug bar, where the eye already is
+        //Combo : a small plate right under the tug bar, where the eye already is.
+        //While the band is on fire a second plate beside it says FORTISSIMO, with a pip for
+        //every beat of fire still to come.
         private void DrawCombo(SpriteBatch sb)
         {
-            if (battle.Combo < 2) return;
+            if (battle.Combo >= 2)
+            {
+                float grow = 1f + comboPulse * 0.25f;
+                Rectangle plate = new Rectangle(560, 70, 160, 40);
+                Gfx.SlantBox(sb, plate, Ui.Slant, Palette.Void * 0.88f);
+                Gfx.Rect(sb, plate.X + 14, plate.Bottom - 3, plate.Width - 28, 2, Palette.Accent);
+                Gfx.TextSpaced(sb, Game.Font, "COMBO", plate.X + 22, plate.Y + 8, Palette.PaperDim, TextSize.Tiny, 3f);
+                Gfx.TextCentered(sb, Game.LogoFont, NumberText.Get(battle.Combo), plate.X + 100, plate.Center.Y - 2, Palette.Accent, 0.34f * grow);
+                Gfx.Text(sb, Game.Font, comboBonusWords[Math.Min(battle.Combo, BattleRules.ComboMax)], plate.X + 116, plate.Y + 10, Palette.Paper, TextSize.Label);
 
-            float grow = 1f + comboPulse * 0.25f;
-            Rectangle plate = new Rectangle(560, 70, 160, 40);
-            Gfx.SlantBox(sb, plate, Ui.Slant, Palette.Void * 0.88f);
-            Gfx.Rect(sb, plate.X + 14, plate.Bottom - 3, plate.Width - 28, 2, Palette.Accent);
-            Gfx.TextSpaced(sb, Game.Font, "COMBO", plate.X + 22, plate.Y + 8, Palette.PaperDim, TextSize.Tiny, 3f);
-            Gfx.TextCentered(sb, Game.LogoFont, NumberText.Get(battle.Combo), plate.X + 100, plate.Center.Y - 2, Palette.Accent, 0.34f * grow);
-            Gfx.Text(sb, Game.Font, comboBonusWords[Math.Min(battle.Combo, BattleRules.ComboMax)], plate.X + 116, plate.Y + 10, Palette.Paper, TextSize.Label);
-            Ui.Pips(sb, plate.X + 24, plate.Y + 28, Math.Min(battle.Combo, BattleRules.ComboMax), BattleRules.ComboMax, 3, 9, 1f);
+                //Pips : how close the combo is to setting the band on fire
+                int toFire = battle.Combo % BattleRules.FortissimoCombo;
+                if (battle.FortissimoLeft > 0) toFire = BattleRules.FortissimoCombo;
+                Ui.Pips(sb, plate.X + 24, plate.Y + 28, toFire, BattleRules.FortissimoCombo, 3, 9, 1f);
+            }
+
+            if (fireGlow > 0.02f)
+            {
+                Rectangle fire = new Rectangle(730, 70, 196, 40);
+                float a = fireGlow;
+                Gfx.DrawGlowBox(sb, fire, Palette.Highlight * (0.35f * a));
+                Gfx.SlantBox(sb, fire, Ui.Slant, Palette.Paper * a);
+                Gfx.TextCentered(sb, Game.BigFont, "ff", fire.X + 30, fire.Center.Y - 2, Palette.Ink * a, TextSize.Small);
+                Gfx.TextSpaced(sb, Game.Font, "FORTISSIMO", fire.X + 52, fire.Y + 8, Palette.Ink * a, TextSize.Tiny, 2f);
+                for (int i = 0; i < BattleRules.FortissimoBeats; i++)
+                {
+                    float px = fire.X + 56 + i * 11;
+                    if (i < battle.FortissimoLeft) Gfx.Diamond(sb, px, fire.Y + 28, 3, Palette.Ink * a);
+                    else Gfx.DiamondOutline(sb, px, fire.Y + 28, 3, Palette.InkSoft * a, 1f);
+                }
+            }
         }
 
         //Banner : a band across the middle of the screen for round starts and endings
@@ -175,7 +242,8 @@ namespace Tacetno433.Screens
         private void DrawCutIn(SpriteBatch sb)
         {
             Conductor c = Game.CurrentRun.Conductor;
-            float t = 1f - cutIn / BattleRules.CutInTime;               // 0 at the start, 1 at the end
+            float length = cutInFinale ? BattleRules.CutInTime * 1.3f : BattleRules.CutInTime;
+            float t = 1f - cutIn / length;                              // 0 at the start, 1 at the end
             float slideIn = MathHelper.Clamp(t / 0.18f, 0f, 1f);
             slideIn = slideIn * slideIn * (3f - 2f * slideIn);
             float slideOut = MathHelper.Clamp((t - 0.82f) / 0.18f, 0f, 1f);
@@ -221,12 +289,14 @@ namespace Tacetno433.Screens
             //Eye Line : the streak of light through the picture, like the key art
             Hollow.Flare(sb, cx + 180f, 300f, 1300f, dim * 0.8f);
 
-            //Names : a tag, the conductor, the marking in italian, and the move
+            //Names : a tag, the conductor, the marking in italian, and the move.
+            //The finale writes "Fine" (the end, as a score marks it) and the band's own name.
             int nx = x + 560;
-            Ui.Tag(sb, "SIGNATURE", nx, 292, true, dim);
-            Gfx.TextSpaced(sb, Game.Font, c.Name, nx + Ui.TagWidth("SIGNATURE") + 16, 297, Palette.PaperDim * dim, TextSize.Tiny, 4f);
-            Gfx.Text(sb, Game.BigFont, c.SignatureMark, nx, 318, Palette.Paper * dim, TextSize.Title);
-            Gfx.Text(sb, Game.LogoFont, signatureName, nx - 4, 360, Palette.Highlight * dim, TextSize.Banner * 0.85f);
+            string tag = cutInFinale ? "FINALE" : "SIGNATURE";
+            Ui.Tag(sb, tag, nx, 292, true, dim);
+            Gfx.TextSpaced(sb, Game.Font, c.Name, nx + Ui.TagWidth(tag) + 16, 297, Palette.PaperDim * dim, TextSize.Tiny, 4f);
+            Gfx.Text(sb, Game.BigFont, cutInFinale ? "Fine" : c.SignatureMark, nx, 318, Palette.Paper * dim, TextSize.Title);
+            Gfx.Text(sb, Game.LogoFont, cutInFinale ? Game.CurrentRun.BandName : signatureName, nx - 4, 360, Palette.Highlight * dim, TextSize.Banner * 0.85f);
 
             //Flash : the first instant is pure white
             float flash = 1f - t / 0.1f;
@@ -245,15 +315,5 @@ namespace Tacetno433.Screens
             Gfx.TextSpacedCentered(sb, Game.Font, "THE BAND COUNTS YOU IN", HitX, RingY - 80f, Palette.Paper * a, TextSize.Label, 4f);
         }
 
-        //Pause : the duel stands still until ESC or a click
-        private void DrawPause(SpriteBatch sb)
-        {
-            Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Color.Black * 0.72f);
-            Gfx.Rect(sb, 0, 290, TacetGame.ScreenW, 1, Palette.Paper * 0.7f);
-            Gfx.Rect(sb, 0, 430, TacetGame.ScreenW, 1, Palette.Paper * 0.7f);
-            Gfx.TextSpacedCentered(sb, Game.Font, battle.EnemyTitle, 640, 306, Palette.PaperDim, TextSize.Tiny, 4f);
-            Gfx.TextCentered(sb, Game.LogoFont, "FERMATA", 640, 360, Palette.Highlight, TextSize.Banner * 0.8f);
-            Gfx.TextSpacedCentered(sb, Game.Font, "PAUSED   /   ESC OR CLICK TO PLAY ON", 640, 404, Palette.Paper, TextSize.Label, 3f);
-        }
     }
 }

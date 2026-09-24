@@ -412,13 +412,35 @@ namespace Tacetno433.Screens
                 //Attack : the note grows with its power, heavy ones get a ring
                 float radius = Math.Min(16f, 4f + power * 1.1f);
                 bool heavy = battle.IsHeavy(b);
-                Gfx.Circle(sb, cx, cy - 2, radius, heavy ? Palette.Highlight : Palette.PaperDim);
-                Gfx.Rect(sb, cx + radius - 2, cy - 2 - radius * 2.2f, 2, radius * 2.2f, heavy ? Palette.Highlight : Palette.PaperDim);
-                if (heavy) Gfx.CircleOutline(sb, cx, cy - 2, radius + 5, Palette.Paper * 0.5f, 1f);
+                bool pair = battle.EnemyDouble[b];
+                bool roll = battle.IsTremolo(b);
+                bool held = battle.IsFermata(b);
+                float noteX = pair ? cx - 7f : cx;
+                Color ink = heavy || roll || held ? Palette.Highlight : Palette.PaperDim;
+                Gfx.Circle(sb, noteX, cy - 2, radius, ink);
+                Gfx.Rect(sb, noteX + radius - 2, cy - 2 - radius * 2.2f, 2, radius * 2.2f, ink);
+                if (heavy && !pair) Gfx.CircleOutline(sb, noteX, cy - 2, radius + 5, Palette.Paper * 0.5f, 1f);
 
-                Gfx.TextCentered(sb, Game.Font, NumberText.Get(power), cx, EnemyRowY + 70, Palette.Paper, TextSize.Label);
-                Gfx.TextSpacedCentered(sb, Game.Font, heavy ? "HEAVY" : "LIGHT", cx, EnemyRowY + 6,
-                                       heavy ? Palette.Highlight : Palette.LineGrey, TextSize.Tiny, 2f);
+                //Pair : a ribbon from the note to a spark, the same as the duel shows it
+                if (pair)
+                {
+                    float gx = cx + 16f;
+                    Gfx.Rect(sb, noteX, cy - 6, gx - noteX, 8, ink * 0.4f);
+                    NoteGlyph.Spark(sb, gx, cy - 2, 10f, Palette.Highlight);
+                }
+
+                //Roll : the zigzag bar of TACET's roll under the note
+                if (roll)
+                    for (int z = 0; z < 4; z++)
+                        Gfx.Line(sb, cx - 14 + z * 7, cy + 13 + (z % 2) * 4, cx - 7 + z * 7, cy + 17 - (z % 2) * 4, Palette.Highlight, 1.5f);
+
+                Gfx.TextCentered(sb, Game.Font, NumberText.Get(battle.EnemyStrikeAt(b)), cx, EnemyRowY + 70, Palette.Paper, TextSize.Label);
+                //Fermata : the held note carries its sign beside the head
+                if (held) NoteGlyph.FermataSign(sb, cx + 20f, cy - 16f, 9f, Palette.Highlight);
+
+                string word = roll ? "TREMOLO" : (held ? "FERMATA" : (pair ? "PAIR" : (heavy ? "HEAVY" : "LIGHT")));
+                Gfx.TextSpacedCentered(sb, Game.Font, word, cx, EnemyRowY + 6,
+                                       heavy || roll || pair || held ? Palette.Highlight : Palette.LineGrey, TextSize.Tiny, 2f);
             }
         }
 

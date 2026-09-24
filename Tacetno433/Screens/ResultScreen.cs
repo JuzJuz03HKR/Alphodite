@@ -124,6 +124,7 @@ namespace Tacetno433.Screens
 
             footnote = "THE RUN ENDS HERE";
             run.MarkLastStopLost();
+            SaveFile.DeleteRun();          // a lost fight ends the run, there is nothing to continue
 
             SoundBank.Play(Sfx.Defeat);
             SoundBank.PlayMusic(Music.Defeat);
@@ -217,6 +218,20 @@ namespace Tacetno433.Screens
 
             if (mark.Grade == Grade.Perfect) Gfx.Diamond(sb, cell.Right - 7, cell.Y + 7, 3, stroke);
             if (mark.Signature) Gfx.DiamondOutline(sb, cell.Center.X, cell.Center.Y, CellH * 0.62f, stroke, 1.5f);
+
+            //Extras : a ring in the corner for a COUNTER, a small mark low down for the spark of a
+            //pair (filled when it landed), a short zigzag for TACET's roll, an arch for its fermata
+            if (mark.Counter) Gfx.CircleOutline(sb, cell.X + 7, cell.Y + 7, 4, stroke, 1.5f);
+            if (mark.Double)
+            {
+                bool flicked = mark.GraceGrade == Grade.Perfect || mark.GraceGrade == Grade.Good;
+                if (flicked) Gfx.Diamond(sb, cell.X + 7, cell.Bottom - 7, 3, stroke);
+                else Gfx.DiamondOutline(sb, cell.X + 7, cell.Bottom - 7, 3, stroke, 1f);
+            }
+            if (mark.Fermata) NoteGlyph.FermataSign(sb, cell.Right - 12, cell.Bottom - 5, 5f, stroke);
+            if (mark.Tremolo)
+                for (int z = 0; z < 3; z++)
+                    Gfx.Line(sb, cell.Right - 18 + z * 4, cell.Bottom - 5 - (z % 2) * 4, cell.Right - 14 + z * 4, cell.Bottom - 9 + (z % 2) * 4, stroke, 1f);
         }
 
         //Way : a straight arrow of the given length through (cx, cy)

@@ -25,7 +25,8 @@ namespace Tacetno433.Screens
             if (battle.ChoicesLocked) choice = Choice.Normal;                  // THE METRONOME can only play
 
             //Timing Grade : judged where the baton stopped, against the beat
-            float off = Math.Abs(clock - target);
+            float now = StrokeClock();
+            float off = Math.Abs(now - target);
             Grade grade = Grade.Miss;
             if (off <= battle.GoodWindow) grade = Grade.Good;
             if (off <= battle.PerfectWindowAt(b)) grade = Grade.Perfect;
@@ -38,7 +39,7 @@ namespace Tacetno433.Screens
             }
 
             //FASHIONABLY LATE : a late stroke on her beat is forgiven as GOOD
-            if (grade == Grade.Miss && clock > target && battle.LateForgivenAt(b))
+            if (grade == Grade.Miss && now > target && battle.LateForgivenAt(b))
             {
                 grade = Grade.Good;
                 int iris = TraitSeat(MusicianTrait.Forgiven, b);
@@ -63,15 +64,24 @@ namespace Tacetno433.Screens
             hand.Play(signature ? HandPose.Signature : PoseFor(gesture.Direction));
             WhipBaton(gesture.Direction);
 
-            //Judgement : ONE word at the hit point, how well it landed and what the band was told
+            //Judgement : ONE word at the hit point, how well it landed and what the band was told,
+            //and the shape of the order opening out from the hit point
             string word = (!rightWay && !signature) ? "WRONG WAY" : judgeText[(int)grade * 3 + (int)choice];
-            effects.SpawnPop(RingX(), RingY + 80f, word, Palette.Highlight, 0.55f);
+            ShowJudge(word, 0.55f);
 
             if (choice == Choice.Boost) SoundBank.Play(Sfx.QteBoost);
             if (choice == Choice.Normal) SoundBank.Play(Sfx.QteNormal);
             if (choice == Choice.Ease) SoundBank.Play(Sfx.QteEase);
             if (grade == Grade.Perfect) SoundBank.Play(Sfx.QtePerfect);
             if (grade == Grade.Miss) SoundBank.Play(Sfx.QteMiss);
+
+            //Fermata : a stroke that lands on TACET's held note opens the hold instead of settling
+            //the beat at once. A missed one settles it straight away, there is nothing to hold.
+            if (battle.IsFermata(b) && grade != Grade.Miss && !battle.Finished)
+            {
+                StartHold(choice, grade, signature);
+                return;
+            }
 
             ResolveAnswer(b, choice, grade, signature);
         }
@@ -144,7 +154,8 @@ namespace Tacetno433.Screens
                     Vector2 b = gesture.TrailPoint(i);
                     float fresh = 1f - gesture.TrailAge(i);
                     if (fresh <= 0.06f) continue;
-                    Gfx.Line(sb, a, b, Palette.Highlight * (0.45f * fresh), 1f + fresh * 3f);
+                    Gfx.Line(sb, a, b, Palette.Ink * (0.25f * fresh), 4f + fresh * 8f);
+                    Gfx.Line(sb, a, b, Palette.Highlight * (0.7f * fresh), 2f + fresh * 5f);
                 }
             }
 
@@ -171,10 +182,28 @@ namespace Tacetno433.Screens
         //the way instead of guessed.
         private void DrawStrokeGuide(SpriteBatch sb)
         {
-            if (AnswerProgress() < 0f || cutIn > 0f) return;
+            if (AnswerProgress() < 0f || cutIn > 0f || rolling) return;
             if (!gesture.Held) return;                  // only while the baton is raised
 
-            Vector2 d = DirVector(pattern[pending]);
+            //Fermata : the baton should stay where it is, so the sign sits beside it
+            if (holding)
+            {
+                Vector2 at = Input.MousePos + new Vector2(30f, -30f);
+                Gfx.Circle(sb, at.X, at.Y - 4f, 20f, Palette.Void * 0.85f);
+                NoteGlyph.FermataSign(sb, at.X, at.Y + 4f, 13f, Palette.Highlight);
+                return;
+            }
+
+            //Spark : the second note of a pair takes any way, so a spark sits by the baton instead
+            if (onGrace)
+            {
+                Vector2 at = Input.MousePos + new Vector2(26f, -26f);
+                Gfx.Circle(sb, at.X, at.Y, 18f, Palette.Void * 0.85f);
+                NoteGlyph.Spark(sb, at.X, at.Y, 13f, Palette.Highlight);
+                return;
+            }
+
+            Vector2 d = DirVector(WantedWay());
             Vector2 anchor = gesture.InStroke ? gesture.StrokeStart : Input.MousePos;
             float full = GestureReader.BigLength + 50f;
             float fade = 1f;
@@ -189,14 +218,20 @@ namespace Tacetno433.Screens
             Gfx.Line(sb, anchor, end, Palette.Paper * (0.55f * fade), 2f);
             if (along > 0f) Gfx.Line(sb, anchor, anchor + d * along, Palette.Highlight, 4f);
 
+            //Size Zones : only where the size gives an order. The finale only needs the right
+            //way at the right time.
+            if (phase == Phase.Finale) return;
+
             DrawGuideMark(sb, anchor + d * GestureReader.MiddleLength, d, along >= GestureReader.MiddleLength);
             DrawGuideMark(sb, anchor + d * GestureReader.BigLength, d, along >= GestureReader.BigLength);
 
-            //Zone Words : beside the ruler, in the middle of each zone
+            //Zone Words : beside the ruler, in the middle of each zone. The zone the stroke has
+            //reached is bright, the others faint.
+            int zone = gesture.InStroke ? SizeOf(along) : -1;
             Vector2 side = new Vector2(-d.Y, d.X) * 18f;
-            DrawGuideWord(sb, sizeWord[0], anchor + d * (GestureReader.MiddleLength * 0.5f) + side);
-            DrawGuideWord(sb, sizeWord[1], anchor + d * ((GestureReader.MiddleLength + GestureReader.BigLength) * 0.5f) + side);
-            DrawGuideWord(sb, sizeWord[2], anchor + d * (GestureReader.BigLength + 30f) + side);
+            DrawGuideWord(sb, sizeWord[0], anchor + d * (GestureReader.MiddleLength * 0.5f) + side, zone == 0);
+            DrawGuideWord(sb, sizeWord[1], anchor + d * ((GestureReader.MiddleLength + GestureReader.BigLength) * 0.5f) + side, zone == 1);
+            DrawGuideWord(sb, sizeWord[2], anchor + d * (GestureReader.BigLength + 30f) + side, zone == 2);
         }
 
         private void DrawGuideMark(SpriteBatch sb, Vector2 at, Vector2 d, bool passed)
@@ -206,10 +241,11 @@ namespace Tacetno433.Screens
             Gfx.Line(sb, at - side, at + side, passed ? Palette.Highlight : Palette.Paper * 0.7f, 2f);
         }
 
-        private void DrawGuideWord(SpriteBatch sb, string word, Vector2 at)
+        private void DrawGuideWord(SpriteBatch sb, string word, Vector2 at, bool reached)
         {
-            Gfx.TextSpacedCentered(sb, Game.Font, word, at.X + 1, at.Y - 6, Color.Black * 0.6f, TextSize.Tiny, 1.5f);
-            Gfx.TextSpacedCentered(sb, Game.Font, word, at.X, at.Y - 7, Palette.Highlight * 0.9f, TextSize.Tiny, 1.5f);
+            float a = reached ? 1f : 0.55f;
+            Gfx.TextSpacedCentered(sb, Game.Font, word, at.X + 1, at.Y - 6, Color.Black * (0.6f * a), TextSize.Tiny, 1.5f);
+            Gfx.TextSpacedCentered(sb, Game.Font, word, at.X, at.Y - 7, Palette.Highlight * a, TextSize.Tiny, 1.5f);
         }
 
         //Direction : a straight arrow of the given length, centred on (cx, cy)

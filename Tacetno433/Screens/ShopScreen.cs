@@ -19,8 +19,18 @@ namespace Tacetno433.Screens
     //   TUNING        stamina back
     //   HIRE          a musician from the current era joins
     //   three motifs, rolled when the shop opens
+    //Leaving asks first, because the shelves are gone once the band walks out.
     public class ShopScreen : GameScreen
     {
+        //Leave Box : "are you sure?" before walking out
+        private ConfirmBox confirm = new ConfirmBox();
+
+        //Uses Escape : while the box is open, ESC answers it instead of opening the pause menu
+        public override bool UsesEscape
+        {
+            get { return confirm.Open; }
+        }
+
         //Shop Text : THE PLACE TO EDIT WHAT THE SHOPKEEPER SAYS
         private const string KeeperName = "THE ARCHIVIST";
         private static string[] greetings =
@@ -137,6 +147,13 @@ namespace Tacetno433.Screens
             time += dt;
             lineAge += dt;
 
+            //Leaving : only once the player has said yes
+            if (confirm.Open)
+            {
+                if (confirm.Update(dt) == 1) RunFlow.NextStage(Game);
+                return;
+            }
+
             //Hover : describe whatever is being pointed at
             hoverRow = -1;
             for (int r = 0; r < RowCount; r++)
@@ -151,11 +168,8 @@ namespace Tacetno433.Screens
 
             if (Input.MouseClicked() && hoverRow >= 0) Buy(hoverRow);
 
-            if (Input.KeyPressed(Keys.Escape) || Input.KeyPressed(Keys.Enter) || Input.ClickedOn(leaveButton))
-            {
-                SoundBank.Play(Sfx.UiConfirm);
-                RunFlow.NextStage(Game);
-            }
+            if (Input.KeyPressed(Keys.Enter) || Input.ClickedOn(leaveButton))
+                confirm.Show("LEAVE THE SHOP?", "Whatever stays on the shelves is gone once the band walks out.", "LEAVE", "STAY");
         }
 
         //Buy : check, pay, then hand the thing over
@@ -224,11 +238,12 @@ namespace Tacetno433.Screens
             DrawWares(sb, run);
             DrawDialogue(sb);
 
-            Ui.Button(sb, leaveButton, "LEAVE THE SHOP", "ESC", true);
+            Ui.Button(sb, leaveButton, "LEAVE THE SHOP", "ENTER", true);
             Gfx.TextSpacedRight(sb, Game.Font, "CLICK A WARE TO BUY IT", leaveButton.Right, leaveButton.Y - 22, Palette.LineGrey, TextSize.Tiny, 2f);
 
             RunHud.DrawTop(sb, run, "SHOP");
             RunHud.DrawTips(sb, run);
+            confirm.Draw(sb);
         }
 
         //Interior : the shop painting, or an empty slot where it goes.

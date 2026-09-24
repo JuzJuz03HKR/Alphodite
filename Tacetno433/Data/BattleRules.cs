@@ -30,15 +30,16 @@
         //Stamina Cost : every note the band plays costs this much more (1.2 = 20 percent more)
         public static float StaminaCostScale = 1.15f;   // was 1.0
 
-        //Timing Grades
-        //A flick of the mouse is never as exact as a key press, so both windows are wider
-        //than they were when the duel was played on the keyboard.
-        public static float PerfectWindow = 0.12f; // seconds either side of the ring closing, was 0.08
-        public static float GoodWindow = 0.30f;    // was 0.22
+        //Timing Grades (HARD, 25 Sep : players found the wide windows far too easy)
+        //The stroke settings page can move every judgement earlier or later for one player's
+        //hand and screen (Settings.TimingOffset), so the windows can stay narrow.
+        public static float PerfectWindow = 0.08f; // seconds either side of the beat, was 0.12
+        public static float GoodWindow = 0.18f;    // was 0.30
+        public static float EarlyTime = 0.24f;     // a stroke ending earlier than this before its beat is the hand getting ready
         public static float PerfectBonus = 1.2f;   // a PERFECT stroke multiplies the choice
-        public static float MissPower = 0.7f;      // PENALTY : a bad stroke still counts, but weaker
+        public static float MissPower = 0.55f;     // PENALTY : a bad stroke still counts, but weaker, was 0.7
         public static int MissExtraCost = 4;       // PENALTY : and costs extra stamina
-        public static float HesitatePower = 0.75f; // PENALTY : no stroke at all plays normal, weaker
+        public static float HesitatePower = 0.3f;  // PENALTY : no stroke, the band barely plays, was 0.75
 
         //Signature : PERFECT and GOOD beats collect notes for the instrument families that
         //played them. When the conductor's recipe is complete (see Conductor.Recipe), SPACE lets
@@ -46,9 +47,58 @@
         public static float SignaturePower = 1.5f;      // on top of everything else on that beat
 
         //Tempo : beats per minute in round 1, 2 and 3. The duel speeds up as the fight goes on.
-        public static int[] TempoBpm = { 72, 84, 96 };
-        public static float PhraseTail = 0.5f;      // after the last answer, before the bar is summed up
-        public static float BarEndTime = 1.1f;      // the pause between TACET's two phrases
+        //TACET's second bar is called while the first is being answered, so the player
+        //conducts on every beat without waiting.
+        public static int[] TempoBpm = { 88, 100, 116 };   // was 72 / 84 / 96
+        public static float PhraseTail = 0.5f;      // after the last answer, before the round is summed up
+
+        //Teaching Order : the special notes arrive one floor at a time, so floor one teaches the
+        //plain game (the enemy traits also start on floor two). Keep the game simple to learn.
+        public static int TremoloFromFloor = 1;     // elites and bosses roll from the start, shaking is easy
+        public static int FermataFromFloor = 2;     // ordinary enemies hold their last note from floor two
+        public static int PairsFromFloor = 3;       // pairs only on the last floor
+
+        //Double Notes : some of TACET's notes come in pairs, a note tied to a spark. The note is
+        //answered on the beat, the spark half a beat later with one more flick, any way.
+        public static int[] DoubleNotes = { 1, 2, 3 };     // how many pairs in round 1 / 2 / 3, from PairsFromFloor on
+        public static int DoubleMost = 4;
+        public static float GraceShare = 0.5f;      // the second note is worth this much of its beat, on both sides
+
+        //Tremolo : elites and bosses end every round with a roll two beats long. Shake the baton
+        //as fast as you can: every stroke adds power, and costs stamina.
+        public static float TremoloBeats = 2f;
+        public static float TremoloEnemy = 1.5f;    // TACET's roll hits this much harder than its note
+        public static float TremoloBase = 0.4f;     // our part with no strokes at all
+        public static float TremoloStep = 0.15f;    // each stroke adds this much of our part
+        public static int TremoloMost = 10;         // strokes past this add nothing, but still cost
+        public static int TremoloCost = 2;          // stamina per stroke, only while somebody plays the beat
+        public static int TremoloPerfect = 7;       // strokes for a PERFECT roll
+        public static int TremoloGood = 4;          // strokes for a GOOD roll, fewer than 1 is a HESITATE
+
+        //Fermata : ordinary enemies end every round with a held note two beats long (elites and
+        //bosses end theirs with the tremolo instead). Stroke it on the beat, then keep the button
+        //held and the baton still. The longer it is held the harder it pushes, and every moment
+        //held costs stamina, so letting go early is a real choice.
+        public static float FermataBeats = 2f;
+        public static float FermataEnemy = 1.3f;    // TACET's held note hits this much harder than its note
+        public static float FermataBase = 0.6f;     // our part when it is let go at once
+        public static float FermataHold = 0.8f;     // added over the whole hold, so holding to the end is x1.4
+        public static int FermataCost = 6;          // stamina for holding all the way, only while somebody plays
+        public static float FermataStill = 260f;    // pixels per second the baton may drift and still be still
+
+        //Counter : a PERFECT BOOST against TACET's real f note knocks part of it back
+        public static float CounterKeep = 0.7f;     // TACET keeps only this much of the note
+
+        //Fortissimo : a combo this long sets the band on fire for the next few beats
+        public static int FortissimoCombo = 8;
+        public static int FortissimoBeats = 4;
+        public static float FortissimoPower = 1.3f;
+
+        //Finale : once the line is this far our way at the end of a round, the band may try to
+        //finish the piece. Four strokes of the 4/4 pattern on the beat end the fight at once.
+        public static float FinaleLine = 80f;
+        public static float FinaleFailPush = 12f;   // TACET claws back this much when the finale falls apart
+        public static int FinaleShards = 25;        // extra reward for ending it this way
 
         //Clash Feel (seconds)
         public static float CutInTime = 1.0f;       // the signature picture across the screen
@@ -64,8 +114,8 @@
         public static float ForecastStruggling = 0.6f;   // below this it is HOPELESS
 
         //Enemy Traits : the numbers behind each EnemyTrait (see Data/Enemy.cs)
-        public static int LullabyBpm = 66;          // THE LULL, round three slows down
-        public static int UnfinishedBpm = 108;      // REQUIEM, round three rushes
+        public static int LullabyBpm = 80;          // THE LULL, round three slows down, was 66
+        public static int UnfinishedBpm = 128;      // REQUIEM, round three rushes, was 108
         public static float FillsGapsPower = 1.5f;  // DEAD AIR, on beats nobody on your side plays
         public static float MirrorScale = 0.9f;     // THE NAMELESS MASTER, your last plan played back
         public static float BargainPower = 1.5f;    // THE DEVIL'S STRING, the deal : this much power
@@ -97,9 +147,9 @@
 
         //Enemy Scaling
         public static float FloorScale = 0.25f;    // each floor below the first adds 25 percent
-        public static float NormalScale = 1.25f;  // ordinary encounters, was 1.15 (the musicians' traits made them too easy)
-        public static float EliteScale = 1.25f;   // was 1.35, eased because stamina costs more now
-        public static float BossScale = 1.75f;    // was 1.7
+        public static float NormalScale = 1.35f;  // ordinary encounters, was 1.25 (25 Sep : counter, pairs and rolls give the band more)
+        public static float EliteScale = 1.35f;   // was 1.25
+        public static float BossScale = 1.85f;    // was 1.75
 
         //Conductor Stats : the 0 to 10 numbers on the select page become real values here
         public static int StaminaBase = 60;

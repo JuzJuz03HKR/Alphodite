@@ -9,15 +9,18 @@ using Tacetno433.Data;
 
 namespace Tacetno433.Screens
 {
-    //DuelScreen : one round of the fight, played as two phrases of call and answer.
+    //DuelScreen : one round of the fight, conducted beat after beat without a break.
     //
-    //A ROUND is eight beats, played as two bars of four. Each bar is a PHRASE:
-    //   CALL    TACET plays its four notes first, one on each beat. Every note leaves the right
-    //           edge and slides along the lane for exactly one bar, so it reaches the hit point
-    //           in the middle of the screen on the very beat where it has to be answered.
-    //           Each note is written with how loud TACET plays it: f (loud), mf, or p (soft).
-    //   ANSWER  the player conducts four beats in a row, at the round's tempo. The tempo rises
-    //           each round (see BattleState.Tempo), so the fight speeds up as it goes on.
+    //A ROUND is eight beats, written as two bars of four.
+    //   CALL    TACET plays its eight notes, one on each beat. Every note leaves the right edge
+    //           and slides along the lane for exactly one bar, so it reaches the hit point in the
+    //           middle of the screen on the very beat where it has to be answered.
+    //           Each note is written with how loud TACET plays it: f (loud), mf, or p (soft), and
+    //           the small pointer on its edge is the way to swing. The note to answer next is bright,
+    //           the ones behind it are dimmed, so there is always one clear thing to do.
+    //   ANSWER  starts one bar after the call, so from then on TACET's second bar is still
+    //           arriving while the player answers its first. The player conducts on every beat,
+    //           at the round's tempo. The tempo rises each round (see BattleState.Tempo).
     //
     //THE MOUSE IS THE BATON, and it only counts while the LEFT BUTTON IS HELD. The strokes follow
     //a real conductor's 4/4 pattern: beat 1 DOWN, beat 2 LEFT, beat 3 RIGHT, beat 4 UP. How BIG a
@@ -25,20 +28,35 @@ namespace Tacetno433.Screens
     //baton stops or turns. There is no long song: every answered beat plays the next note of
     //the band's melody, so the music only happens when the player conducts.
     //
+    //Extra notes and moments:
+    //   PAIR       a note tied to a spark. The spark is answered half a beat later with one
+    //              more flick, any way at all (the conductor's rebound).
+    //   FERMATA    ordinary enemies end each round with a held note two beats long. Stroke it,
+    //              then keep the button held and the baton still. Holding pushes, and costs breath.
+    //   TREMOLO    elites and bosses end each round with a roll two beats long instead. Shake the
+    //              baton: every stroke adds power and costs stamina.
+    //   COUNTER    a PERFECT BOOST against TACET's real f note knocks part of it back.
+    //   FORTISSIMO a long combo sets the band on fire for a few beats.
+    //   FINALE     far enough ahead at the end of a round, four strokes of the pattern on the
+    //              beat end the fight at once.
+    //
     //Good beats give notes to the instrument families that played them. When the conductor's
     //recipe is complete, SPACE lets the signature loose: a cut-in, then the next stroke is a
-    //PERFECT BOOST, harder still. ESC pauses; coming back, the band counts three beats in.
+    //PERFECT BOOST, harder still. ESC opens the pause menu (see PauseMenu); coming back, the band
+    //counts three beats in.
     //
-    //THIS CLASS IS SPLIT OVER FIVE FILES, all called DuelScreen (the "partial" keyword lets one
+    //THIS CLASS IS SPLIT OVER SEVEN FILES, all called DuelScreen (the "partial" keyword lets one
     //class be written in several files; the compiler joins them back into one):
-    //   DuelScreen.cs          the state, Load, Update, and the order of a phrase
+    //   DuelScreen.cs          the state, Load, Update, and the order of a round
     //   DuelScreen.Baton.cs    reading and judging a stroke, drawing the baton
+    //   DuelScreen.Notes.cs    pairs, the fermata, TACET's roll, the counter and FORTISSIMO
+    //   DuelScreen.Finale.cs   the FINALE that ends a fight early
     //   DuelScreen.Stage.cs    the stage, the band, TACET's eclipse, the lane and its notes
-    //   DuelScreen.Hud.cs      the top strip, the ring, the clash numbers, banners, cut-in, pause
+    //   DuelScreen.Hud.cs      the top strip, the ring, the clash numbers, banners, cut-in
     //   DuelScreen.Panels.cs   the three panels along the bottom
     public partial class DuelScreen : GameScreen
     {
-        private enum Phase { Intro, Phrase, BarEnd, RoundEnd }
+        private enum Phase { Intro, Play, Finale, RoundEnd }
 
         //Duel Layout
         private Rectangle stageBox = new Rectangle(40, 196, 600, 420);   // the band area, for pop ups
@@ -52,6 +70,7 @@ namespace Tacetno433.Screens
         private const float AnswerWaveSpeed = 1600f;         // fast, so it reaches the hit point on the beat
         private const float ClashY = 236f;                   // the clash numbers sit above the lane
         private const float EnemyFeetY = 520f;               // TACET's shape stands on this line
+        private const float FinaleTitleTime = 1.4f;          // the FINALE card before its bar starts
         private Rectangle roundPlate = new Rectangle(0, 10, 282, 100);
         private Rectangle enemyPlate = new Rectangle(1000, 10, 280, 64);
         private Rectangle handBox = new Rectangle(20, 122, 190, 190);
@@ -72,8 +91,12 @@ namespace Tacetno433.Screens
         private static string[] comboBonusWords = { "+0%", "+6%", "+12%", "+18%", "+24%", "+30%" };
         private static string[] countWords = { "", "1", "2", "3" };
 
-        //Judgement Words : "PERFECT  /  BOOST" and so on, one per grade and choice, made in Load
+        //Judgement Words : "PERFECT  /  BOOST" and so on, one per grade and choice, made in Load.
+        //The grace and the roll get their own short words, also made once.
         private string[] judgeText = new string[15];
+        private string[] graceText = new string[5];
+        private string[] rollText = new string[5];
+        private static string[] holdText = { "LET GO", "FERMATA" };
 
         //Band Panel Order : front row first, the same order as the score page
         private static int[] panelOrder = { 6, 7, 8, 3, 4, 5, 0, 1, 2 };
@@ -94,13 +117,21 @@ namespace Tacetno433.Screens
         private const int SayBreath = 11;
         private const int SaySoft = 12;
         private const int SayTrait = 13;
+        private const int SayDouble = 14;
+        private const int SayTremolo = 15;
+        private const int SayFire = 16;
+        private const int SayCounter = 17;
+        private const int SayFinale = 18;
+        private const int SayFinaleFail = 19;
+        private const int SayFinaleWin = 20;
+        private const int SayFermata = 21;
         private static string[] sayText =
         {
             "* It hums a phrase. Listen...",
             "* It swells. Loud f notes are coming. Answer big!",
             "* Something is hidden in its phrase.",
             "* It holds its breath.",
-            "* Your turn. Hold the mouse and conduct!",
+            "* Your turn. Keep conducting, every beat!",
             "* The band looks to you. Press SPACE.",
             "",
             "* Your band drowns it out!",
@@ -109,14 +140,22 @@ namespace Tacetno433.Screens
             "* The silence presses closer...",
             "* The band is gasping for air...",
             "* It plays softly. A small answer saves your breath.",
-            ""
+            "",
+            "* A note tied to a spark. Flick once more, any way, on the half beat!",
+            "* It winds up a long trill. Shake the baton!",
+            "* FORTISSIMO! The band is on fire!",
+            "* You threw its loudest note right back at it!",
+            "* The silence staggers. Finish the piece!",
+            "* The ending falls apart. It claws its way back.",
+            "* The last chord rings out. The silence breaks.",
+            "* It draws out a long note. Stroke it, then hold still!"
         };
         private const float SayWrap = 350f;
         private const float SaySpeed = 520f;     // pixels of text uncovered per second
-        private string[] sayLineA = new string[14];
-        private string[] sayLineB = new string[14];
-        private float[] sayWidthA = new float[14];
-        private float[] sayWidthB = new float[14];
+        private string[] sayLineA = new string[22];
+        private string[] sayLineB = new string[22];
+        private float[] sayWidthA = new float[22];
+        private float[] sayWidthB = new float[22];
         private int saying = -1;
         private float sayTimer;
 
@@ -131,6 +170,9 @@ namespace Tacetno433.Screens
         private float comboPulse;
         private float staminaFlash;     // the stamina bar lights up when it changes
         private float tugFlash;         // the tug marker lights up when the line is pushed
+        private float fireGlow;         // how much of FORTISSIMO's light is on the stage
+        private float fireFlash;        // the instant the band catches fire
+        private float counterFlash;     // the instant of a COUNTER
         private float[] lit = new float[StageLayout.SeatCount];
         private CharacterAnimator[] actors = new CharacterAnimator[StageLayout.SeatCount];
         private string roundEndLabel = "";
@@ -139,16 +181,53 @@ namespace Tacetno433.Screens
         private string tempoLabel = "";
         private string signatureName = "";
 
-        //Phrase State : one phrase is TACET's bar (the call) followed by ours (the answer)
-        private int bar;                // 0 or 1, which half of the round
-        private float clock;            // seconds since the phrase began
+        //Round State : the whole round is one run of beats. TACET's note n sounds at n beats,
+        //and is answered at n + 4 beats, so the answers start one bar after the call.
+        private float clock;            // seconds since TACET's first note of the round
         private float beatLen;          // seconds per beat at this round's tempo
-        private int called = -1;        // the last note of the call that has sounded, -1 for none
-        private int pending;            // the answer waiting for a stroke, 0 to 3, 4 when all are in
-        private int barPush;            // how far the line moved over this bar
+        private int called = -1;        // the last of TACET's notes that has sounded, -1 for none
+        private int graceCalled = -1;   // the last beat whose second note time has passed
+        private int trillTicks;         // how many ticks of TACET's roll have sounded
+        private int ticked = -1;        // the last beat the metronome clicked on
 
-        //Pause State : ESC or the window going to the back stops the duel. Coming back, the band
-        //counts in for three beats, so nobody has to find the beat again from nothing.
+        //Fermata State : the stroke that opened the hold is kept until the hold ends, then the
+        //beat is settled with it. heldTime only grows while the baton is still.
+        private bool holding;
+        private float holdEnd;          // when the held note ends, on the stroke clock
+        private float holdClock;        // the clock at the last check
+        private float holdSteady;       // the first moment after the stroke is never counted as moving
+        private float heldTime;
+        private Choice holdChoice;
+        private Grade holdGrade;
+        private bool holdSignature;
+
+        //Trait Pops : each musician's trait name rises at most once in this many seconds, so a
+        //trait that works every beat does not bury the stage in words
+        private const float TraitPopGap = 1.6f;
+        private float[] traitPopAt = new float[StageLayout.SeatCount];
+
+        //Metronome : a soft click on every beat once the band is answering, so the pulse can be
+        //heard all the way through the round
+        private const float MetronomeVolume = 0.25f;
+        private int pending;            // the beat waiting for its stroke, 0 to 7, 8 when all are in
+        private bool onGrace;           // that beat's first note is answered, its pair is still due
+        private bool rolling;           // TACET's roll is being answered
+        private int rollStrokes;
+        private float rollEnd;          // when the roll closes, on the stroke clock
+        private float rollPulse;        // the roll counter jumps on every stroke
+        private float doneAt = -1f;     // when the last answer went in
+        private int barPush;            // how far the line moved over this bar
+        private bool doubleTold;        // the story box has explained pairs once this fight
+
+        //Finale State : four strokes of the pattern, one bar after a one bar count
+        private float finaleClock;      // below zero while the FINALE card is up
+        private int finaleCalled;
+        private int finaleStep;         // strokes landed so far, 0 to 4
+        private bool finaleDone;
+        private float finaleEnd;
+
+        //Pause State : ESC or the window going to the back opens the pause menu, which stops
+        //this page. Coming back, the band counts in for three beats.
         private bool paused;
         private float countIn;
         private int countShown;
@@ -158,6 +237,7 @@ namespace Tacetno433.Screens
         private HandAnim hand = new HandAnim();
         private float strokeGlow;       // fades away right after a stroke is read
         private float cutIn;            // counts down while the signature picture is on screen
+        private bool cutInFinale;       // the picture is the finale's, not the signature's
 
         //Baton Swing : the stick is held at the pointer and swings behind it like a blade
         private const float BatonLength = 118f;
@@ -169,12 +249,19 @@ namespace Tacetno433.Screens
         private Vector2 batonLast;
         private Vector2 batonVelocity;
 
+        //Judgement : ONE word under the hit point at a time. A new judgement replaces the last,
+        //so quick beats never pile words on top of each other. Its width is measured once.
+        private string judgeWord = "";
+        private float judgeTimer = 9f;
+        private float judgeScale;
+        private float judgeWidth;
+
         //Clash State
         private bool clashShown;
         private float clashTimer;
         private int clashOurs;
         private int clashTheirs;
-        private float hitStop;          // the whole duel freezes for a blink at the end of a bar
+        private float hitStop;          // the whole duel freezes for a blink at the end of a round
         private float shake;            // how hard the world is shaking, fades by itself
         private float ripple;           // how hard the middle line is shuddering
         private float rippleY;
@@ -193,8 +280,12 @@ namespace Tacetno433.Screens
 
             //Judgement Words : made once here, so a beat never builds a string
             for (int g = 0; g < gradeWord.Length; g++)
+            {
                 for (int c = 0; c < choiceWord.Length; c++)
                     judgeText[g * 3 + c] = gradeWord[g].Length == 0 ? "" : gradeWord[g] + "  /  " + choiceWord[c];
+                graceText[g] = gradeWord[g].Length == 0 ? "" : gradeWord[g] + "  /  FLICK";
+                rollText[g] = gradeWord[g].Length == 0 ? "" : gradeWord[g] + "  /  ROLL";
+            }
 
             for (int s = 0; s < actors.Length; s++) actors[s] = new CharacterAnimator();
 
@@ -220,10 +311,28 @@ namespace Tacetno433.Screens
             Game.IsMouseVisible = true;
         }
 
-        //Lost Focus : the window went to the back, so the duel waits for the player
-        public override void LostFocus()
+        //Paused : the pause menu is open. The pointer comes back so the menu can be clicked.
+        public override void Paused()
         {
-            Pause();
+            paused = true;
+            Game.IsMouseVisible = true;
+        }
+
+        //Resumed : the menu closed. The band counts three beats in if a bar was under way.
+        public override void Resumed()
+        {
+            paused = false;
+            Game.IsMouseVisible = false;
+            gesture.Clear();
+
+            //Fermata : a hold cannot survive a pause, it ends with what was held so far
+            if (holding) FinishHold(pending);
+
+            if (phase == Phase.Play || (phase == Phase.Finale && finaleClock >= 0f && !finaleDone))
+            {
+                countIn = 3f * beatLen;
+                countShown = 0;
+            }
         }
 
         //Story Prepare : wrap every line into at most two lines and measure them, once
@@ -253,6 +362,16 @@ namespace Tacetno433.Screens
             sayTimer = 0f;
         }
 
+        //Judge Show : the word for the stroke that just landed, in place of the last one
+        private void ShowJudge(string word, float scale)
+        {
+            if (word.Length == 0) return;
+            judgeWord = word;
+            judgeScale = scale;
+            judgeTimer = 0f;
+            judgeWidth = Game.BigFont.MeasureString(word).X * scale;
+        }
+
         //Edge X : where the bright stage ends and TACET begins
         private float EdgeX()
         {
@@ -276,43 +395,51 @@ namespace Tacetno433.Screens
             return HitX;
         }
 
-        //Pause and Resume
-        private void Pause()
+        //Beat Pulse : 1 right on a beat, falling quickly to 0 before the next one. The hit point,
+        //the ring and TACET's eclipse swell with it, so the tempo can be seen as well as heard.
+        private float BeatPulse()
         {
-            if (paused) return;
-            paused = true;
-            Game.IsMouseVisible = true;
+            float c = phase == Phase.Finale ? finaleClock : clock;
+            if ((phase != Phase.Play && phase != Phase.Finale) || c < 0f) return 0f;
+            float along = (c / beatLen) % 1f;
+            float left = 1f - along;
+            return left * left * left;
         }
 
-        private void Resume()
+        //Answer Time : when beat n has to be answered, one bar after TACET played it
+        private float AnswerTime(int n)
         {
-            paused = false;
-            Game.IsMouseVisible = false;
-            gesture.Clear();
+            return (n + 4) * beatLen;
+        }
 
-            //Count In : only needed while the band is in the middle of a phrase
-            if (phase == Phase.Phrase)
-            {
-                countIn = 3f * beatLen;
-                countShown = 0;
-            }
+        //Stroke Clock : the clock a stroke is judged by. The player's own timing setting is taken
+        //off here, and only here, so the whole duel follows it.
+        private float StrokeClock()
+        {
+            return clock - Settings.TimingOffset;
+        }
+
+        //Early Limit : a stroke ending further before its beat than this is the hand getting
+        //ready, and is not an answer at all
+        private float EarlyLimit()
+        {
+            return Math.Min(BattleRules.EarlyTime, beatLen * 0.45f);
+        }
+
+        //Late Limit : after this the beat has gone by without a stroke
+        private float LateLimit()
+        {
+            return Math.Min(BattleRules.LateTime, beatLen * 0.45f);
+        }
+
+        //Grace Late : the flick back has less room, the next beat is only half a beat away
+        private float GraceLate()
+        {
+            return Math.Min(battle.GoodWindow, beatLen * 0.3f);
         }
 
         public override void Update(float dt)
         {
-            //Pause Key : not during the signature picture, which is over in a second anyway
-            if (Input.KeyPressed(Keys.Escape) && cutIn <= 0f)
-            {
-                if (paused) Resume();
-                else Pause();
-                return;
-            }
-            if (paused)
-            {
-                if (Input.MouseClicked()) Resume();
-                return;
-            }
-
             time += dt;
             sayTimer += dt;
 
@@ -325,7 +452,15 @@ namespace Tacetno433.Screens
             shake = Math.Max(0f, shake - dt * 3.5f);
             staminaFlash = Math.Max(0f, staminaFlash - dt * 2.5f);
             tugFlash = Math.Max(0f, tugFlash - dt * 2.5f);
+            fireFlash = Math.Max(0f, fireFlash - dt * 3f);
+            counterFlash = Math.Max(0f, counterFlash - dt * 4f);
+            rollPulse = Math.Max(0f, rollPulse - dt * 6f);
+            judgeTimer += dt;
             if (clashShown) clashTimer += dt;
+
+            //Fire Light : fades in while the band is on fire, out when it is not
+            float fireWanted = battle.FortissimoLeft > 0 ? 1f : 0f;
+            fireGlow += (fireWanted - fireGlow) * Math.Min(1f, dt * 5f);
 
             //Band Animation : every seated musician keeps breathing, whatever the phase
             Formation f = Game.CurrentRun.Formation;
@@ -333,7 +468,7 @@ namespace Tacetno433.Screens
                 if (f.Seated[s] != null) actors[s].Update(dt, f.Seated[s]);
 
             //Freeze : the signature picture stops the fight, and so does the accent at the end
-            //of a bar. The baton keeps following the mouse, and the sparks keep flying.
+            //of a round. The baton keeps following the mouse, and the sparks keep flying.
             if (cutIn > 0f)
             {
                 cutIn -= dt;
@@ -347,7 +482,7 @@ namespace Tacetno433.Screens
                 return;
             }
 
-            //Count In : three ticks after a pause, then the phrase carries on from where it stopped
+            //Count In : three ticks after a pause, then the round carries on from where it stopped
             if (countIn > 0f)
             {
                 countIn -= dt;
@@ -380,20 +515,15 @@ namespace Tacetno433.Screens
             if (phase == Phase.Intro)
             {
                 phaseTimer += dt;
-                if (phaseTimer >= BattleRules.IntroTime) StartPhrase(0);
+                if (phaseTimer >= BattleRules.IntroTime) StartRound();
             }
-            else if (phase == Phase.Phrase)
+            else if (phase == Phase.Play)
             {
-                UpdatePhrase(dt);
+                UpdatePlay(dt);
             }
-            else if (phase == Phase.BarEnd)
+            else if (phase == Phase.Finale)
             {
-                phaseTimer += dt;
-                if (phaseTimer >= BattleRules.BarEndTime)
-                {
-                    if (battle.Finished || bar >= 1) EndRound();
-                    else StartPhrase(1);
-                }
+                UpdateFinale(dt);
             }
             else if (phase == Phase.RoundEnd)
             {
@@ -402,27 +532,32 @@ namespace Tacetno433.Screens
             }
         }
 
-        //Phrase Start : TACET is about to play one bar. The story box warns what kind.
-        //The very first phrase of a fight tells the enemy's trait instead, so the player hears
+        //Round Start : TACET is about to play. The story box warns what kind of bar comes first.
+        //The very first bar of a fight tells the enemy's trait instead, so the player hears
         //the cause before they feel the effect.
-        private void StartPhrase(int which)
+        private void StartRound()
         {
-            bar = which;
-            phase = Phase.Phrase;
+            phase = Phase.Play;
             clock = 0f;
             called = -1;
+            graceCalled = -1;
+            trillTicks = 0;
             pending = 0;
+            onGrace = false;
+            rolling = false;
+            holding = false;
+            ticked = -1;
+            doneAt = -1f;
             barPush = 0;
-            beat = bar * 4;
+            beat = 0;
             gesture.Clear();
 
             bool loud = false;
             bool hidden = false;
             int notes = 0;
             int soft = 0;
-            for (int k = 0; k < 4; k++)
+            for (int n = 0; n < 4; n++)
             {
-                int n = bar * 4 + k;
                 if (battle.EnemyHidden[n]) { hidden = true; continue; }
                 if (battle.EnemyPower[n] <= 0) continue;
                 notes++;
@@ -430,7 +565,7 @@ namespace Tacetno433.Screens
                 if (battle.ShownChoice[n] == Choice.Ease) soft++;
             }
 
-            if (which == 0 && battle.Round == 1 && battle.TraitShown) Say(SayTrait);
+            if (battle.Round == 1 && battle.TraitShown) Say(SayTrait);
             else if (hidden) Say(SayHidden);
             else if (notes == 0) Say(SayQuiet);
             else if (loud) Say(SayLoud);
@@ -438,28 +573,46 @@ namespace Tacetno433.Screens
             else Say(SayCall);
         }
 
-        //Phrase Update : the call plays on its own, the answer waits for the baton
-        private void UpdatePhrase(float dt)
+        //Play Update : TACET's part plays on its own, the answers wait for the baton
+        private void UpdatePlay(float dt)
         {
             clock += dt;
 
-            //Call : one note of TACET's bar on each beat
-            while (called < 3 && clock >= (called + 1) * beatLen)
+            //Call : one of TACET's notes on each beat, all eight in a row
+            while (called < BattleRules.BeatsPerRound - 1 && clock >= (called + 1) * beatLen)
             {
                 called++;
-                CallNote(bar * 4 + called);
+                CallNote(called);
             }
 
-            if (pending < 4) UpdateAnswer();
+            //Grace Call : the second note of a pair sounds half a beat after the first
+            while (graceCalled < called && clock >= (graceCalled + 1.5f) * beatLen)
+            {
+                graceCalled++;
+                if (battle.EnemyDouble[graceCalled]) CallGrace(graceCalled);
+            }
 
-            //Beat On Show : the note being played during the call, the one being answered after
-            if (clock < 4f * beatLen) beat = bar * 4 + Math.Max(called, 0);
-            else beat = bar * 4 + Math.Min(pending, 3);
+            UpdateTrill();
 
-            //Phrase Over : every answer is in and the last clash has had its moment,
+            //Metronome : one click on every beat from the first answer on
+            int beatNow = (int)(clock / beatLen);
+            if (beatNow != ticked)
+            {
+                ticked = beatNow;
+                if (beatNow >= 4) SoundBank.Play(Sfx.BeatTick, MetronomeVolume, 0f);
+            }
+
+            if (pending < BattleRules.BeatsPerRound) UpdateAnswer();
+
+            //Beat On Show : the note being played during the first bar, the one being answered after
+            if (pending < BattleRules.BeatsPerRound && clock >= AnswerTime(0) - beatLen * 0.5f) beat = pending;
+            else beat = Math.Max(called, 0);
+
+            //Round Over : every answer is in and the last clash has had its moment,
             //or the line reached an edge and the fight is decided
-            if (battle.Finished || (pending >= 4 && clock >= 8f * beatLen + BattleRules.PhraseTail))
-                EndBar();
+            if (pending >= BattleRules.BeatsPerRound && doneAt < 0f) doneAt = clock;
+            if (battle.Finished || (doneAt >= 0f && clock >= doneAt + BattleRules.PhraseTail))
+                EndPlay();
         }
 
         //Call Note : TACET plays one note, as loud as its mark says. Its note leaves now and
@@ -481,40 +634,81 @@ namespace Tacetno433.Screens
                 SoundBank.Play(Sfx.BeatTick, 0.5f, 0f);
             }
 
-            //Last Note Of The Call : the answer is next
-            if (n % 4 == 3) Say(SayAnswer);
+            if (battle.IsTremolo(n)) Say(SayTremolo);
+            else if (battle.IsFermata(n)) Say(SayFermata);
+
+            //Last Note Of The First Bar : the answers start on the next beat
+            else if (n == 3) Say(SayAnswer);
         }
 
-        //Answer Update : the beat being answered, its window, and what happens if it is missed
+        //Answer Update : the beat being answered, its window, and what happens if it is missed.
+        //Each beat goes through at most three steps: the roll, or the stroke, then the flick back.
         private void UpdateAnswer()
         {
-            int k = pending;
-            int b = bar * 4 + k;
-            float target = (4 + k) * beatLen;
-            float late = Math.Min(BattleRules.LateTime, beatLen * 0.45f);
-
+            int b = pending;
+            float target = AnswerTime(b);
+            float now = StrokeClock();
             bool stroked = gesture.Read();
+
+            if (holding) { UpdateHold(b, now); return; }
+            if (rolling) { UpdateRoll(b, stroked, now); return; }
+            if (onGrace) { UpdateGrace(b, stroked, now); return; }
 
             //Silent Beat : nobody on either side, so nothing to conduct. The band breathes.
             if (!battle.HasAction(b))
             {
-                if (clock >= target) ResolveAnswer(b, Choice.Normal, Grade.None, false);
+                if (clock >= target)
+                {
+                    ResolveAnswer(b, Choice.Normal, Grade.None, false);
+                    AdvanceBeat();
+                }
                 return;
             }
 
-            //Stroke : one made more than half a beat early is the hand getting ready, not an answer
-            if (stroked && clock >= target - beatLen * 0.5f)
+            //Tremolo : the roll opens a moment before its beat and lasts two beats
+            if (battle.IsTremolo(b))
+            {
+                if (now >= target - battle.GoodWindow)
+                {
+                    rolling = true;
+                    rollStrokes = 0;
+                    rollEnd = target + BattleRules.TremoloBeats * beatLen;
+                    if (stroked) RollStroke();
+                }
+                return;
+            }
+
+            //Stroke : one made well before the beat is the hand getting ready, not an answer
+            if (stroked && now >= target - EarlyLimit())
             {
                 JudgeStroke(b, target);
+                AfterStroke(b);
                 return;
             }
 
             //Hesitate : the beat went by without a stroke
-            if (clock > target + late)
+            if (now > target + LateLimit())
             {
                 SoundBank.Play(Sfx.QteHesitate);
                 ResolveAnswer(b, Choice.Normal, Grade.Hesitate, false);
+                AfterStroke(b);
             }
+        }
+
+        //After Stroke : a pair waits for its flick back, anything else moves to the next beat
+        private void AfterStroke(int b)
+        {
+            if (holding) return;                         // the fermata settles the beat itself
+            if (battle.EnemyDouble[b] && !battle.Finished) onGrace = true;
+            else AdvanceBeat();
+        }
+
+        //Beat Advance : move on, and sum up a bar whenever one is finished
+        private void AdvanceBeat()
+        {
+            pending++;
+            onGrace = false;
+            if (pending == 4 || pending == BattleRules.BeatsPerRound) EndBar();
         }
 
         //Answer Resolve : ask the rules what happened on this beat, then show it at once.
@@ -527,7 +721,6 @@ namespace Tacetno433.Screens
             int held = battle.HeldNoteSeat(b);
 
             BeatResult r = battle.Resolve(b, choice, grade);
-            pending++;
             barPush += r.Push;
             if (r.StaminaChange != 0) staminaFlash = 1f;
 
@@ -556,20 +749,22 @@ namespace Tacetno433.Screens
 
             //Melody : the band's note for this beat, only when somebody really plays it.
             //Loud for BOOST, soft for EASE, a little sour for a MISS, and nothing at all when
-            //the conductor hesitates. The silence is the punishment.
-            if (r.Played && grade != Grade.Hesitate)
+            //the conductor hesitates. The silence is the punishment. On fire, it rings brighter.
+            if (r.Played && grade != Grade.Hesitate && !r.Fermata)          // a fermata sang when it was struck
             {
                 float volume = choice == Choice.Boost ? 1f : (choice == Choice.Ease ? 0.5f : 0.8f);
-                SoundBank.PlayAnswer(b, volume, grade == Grade.Miss ? -0.12f : 0f);
+                float pitch = grade == Grade.Miss ? -0.12f : (r.Fortissimo ? 0.08f : 0f);
+                if (r.Fortissimo) volume = 1f;
+                SoundBank.PlayAnswer(b, volume, pitch);
             }
 
-            if (grade == Grade.Hesitate)
-                effects.SpawnPop(RingX(), RingY + 80f, gradeWord[(int)Grade.Hesitate], Palette.Highlight, 0.55f);
+            if (grade == Grade.Hesitate) ShowJudge(gradeWord[(int)Grade.Hesitate], 0.55f);
             if (falseNote)
                 effects.SpawnPop(RingX() + 90f, RingY - 60f, "FALSE NOTE", Palette.Highlight, 0.45f);
 
             if (r.OurPower > 0) effects.SpawnWave(BandX, RingY, 1f, r.OurPower / 14f, AnswerWaveSpeed);
             StartClash(r, grade);
+            if (r.Counter) ShowCounter();
 
             //Notes : a good beat feeds the signature, but the signature itself does not
             if (!signature && (grade == Grade.Perfect || grade == Grade.Good)) battle.AddNotes(b);
@@ -580,13 +775,8 @@ namespace Tacetno433.Screens
                 SoundBank.Play(Sfx.ComboUp, 1f, 0.5f);
             }
 
-            //Combo : grows on a PERFECT, breaks on a miss or no stroke
-            if (r.Combo > comboBefore && r.Combo >= 2)
-            {
-                comboPulse = 1f;
-                SoundBank.Play(Sfx.ComboUp, 1f, Math.Min(0.5f, r.Combo * 0.08f));
-            }
-            if (r.ComboBroken) SoundBank.Play(Sfx.ComboBreak);
+            ShowCombo(r, comboBefore);
+            ShowFire(r);
 
             //Special Moments : rare, so they still get a word of their own
             if (r.OutOfBreath)
@@ -601,11 +791,24 @@ namespace Tacetno433.Screens
                 effects.SpawnPop(stageBox.Center.X, stageBox.Y + 60, "RUNAWAY FIRE", Palette.Accent, 0.5f);
         }
 
+        //Combo Show : grows on a PERFECT, breaks on a miss or no stroke
+        private void ShowCombo(BeatResult r, int comboBefore)
+        {
+            if (r.Combo > comboBefore && r.Combo >= 2)
+            {
+                comboPulse = 1f;
+                SoundBank.Play(Sfx.ComboUp, 1f, Math.Min(0.5f, r.Combo * 0.08f));
+            }
+            if (r.ComboBroken) SoundBank.Play(Sfx.ComboBreak);
+        }
+
         //Trait Pop : the musician's trait name rises over their head when it changes a beat
         private void PopTrait(int seat)
         {
             Musician m = Game.CurrentRun.Formation.Seated[seat];
             if (m == null || m.TraitName.Length == 0) return;
+            if (time - traitPopAt[seat] < TraitPopGap && traitPopAt[seat] > 0f) return;
+            traitPopAt[seat] = time;
             Rectangle stand = StandRect(seat);
             effects.SpawnPop(stand.Center.X, stand.Y - 20, m.TraitName, Palette.Highlight, 0.36f);
         }
@@ -650,19 +853,29 @@ namespace Tacetno433.Screens
             if (r.EnemyChoice == Choice.Ease) SoundBank.Play(Sfx.EnemyEase);
         }
 
-        //Bar End : the phrase is over. A short freeze and a shake mark the end of the bar,
-        //and the story box says how it went.
+        //Bar End : a bar is over. A shake marks it, and the story box says how it went.
+        //The picture does not freeze in the middle of a round, the beat has to keep going.
         private void EndBar()
         {
-            phase = Phase.BarEnd;
-            phaseTimer = 0f;
-            hitStop = BattleRules.HitStopTime;
-            shake = Math.Min(1f, 0.5f + Math.Abs(barPush) / 60f);
+            shake = Math.Max(shake, Math.Min(1f, 0.4f + Math.Abs(barPush) / 60f));
 
             if (barPush >= 25) Say(SayWin);
             else if (barPush > 4) Say(SayAhead);
             else if (barPush < -4) Say(SayBehind);
             else Say(SayEven);
+            barPush = 0;
+        }
+
+        //Play End : the round's beats are done. A short freeze, then either the finale (when the
+        //line is far enough our way) or the end of the round.
+        private void EndPlay()
+        {
+            hitStop = BattleRules.HitStopTime;
+            rolling = false;
+            onGrace = false;
+
+            if (battle.FinaleOffered) StartFinale();
+            else EndRound();
         }
 
         //Round End : pick the banner without changing the battle yet
@@ -689,11 +902,12 @@ namespace Tacetno433.Screens
                 SoundBank.Play(Sfx.UiDenied, 0.4f, 0f);
                 return;
             }
-            if (phase != Phase.Phrase || pending >= 4) return;
+            if (phase != Phase.Play || pending >= BattleRules.BeatsPerRound || rolling || holding) return;
 
             battle.SpendNotes();
             battle.SignatureArmed = true;
             cutIn = BattleRules.CutInTime;
+            cutInFinale = false;
             Say(SaySignature);
             SoundBank.Play(Sfx.ComboUp, 1f, 0.6f);
         }
@@ -715,15 +929,38 @@ namespace Tacetno433.Screens
             return tugBar.X + tugBar.Width * t;
         }
 
-        //Answer Timing : how far the ring of the beat being answered has closed.
+        //Answer Timing : how far the ring of the stroke being waited for has closed.
         //Below 0 it has not started, 1 is the beat itself. Returns -1 when nothing is being answered.
+        //The flick back of a pair closes over half a beat, the finale's strokes like any other.
         private float AnswerProgress()
         {
-            if (phase != Phase.Phrase || pending >= 4) return -1f;
-            if (!battle.HasAction(bar * 4 + pending)) return -1f;
+            if (phase == Phase.Finale)
+            {
+                if (finaleClock < 0f || finaleDone) return -1f;
+                float due = (4 + finaleStep) * beatLen;
+                return (finaleClock - (due - beatLen)) / beatLen;
+            }
 
-            float target = (4 + pending) * beatLen;
+            if (phase != Phase.Play || pending >= BattleRules.BeatsPerRound) return -1f;
+            if (rolling || holding) return 1f;
+
+            if (onGrace)
+            {
+                float grace = AnswerTime(pending) + beatLen * 0.5f;
+                return (clock - (grace - beatLen * 0.5f)) / (beatLen * 0.5f);
+            }
+
+            if (!battle.HasAction(pending)) return -1f;
+            float target = AnswerTime(pending);
             return (clock - (target - beatLen)) / beatLen;
+        }
+
+        //Wanted Way : the stroke the ring is asking for right now
+        private Flick WantedWay()
+        {
+            if (phase == Phase.Finale) return pattern[Math.Min(finaleStep, 3)];
+            if (onGrace) return Flick.None;              // the spark takes any way
+            return pattern[pending % 4];
         }
 
         public override void Draw(SpriteBatch sb)
@@ -748,6 +985,7 @@ namespace Tacetno433.Screens
 
             //World : see DuelScreen.Stage.cs
             DrawStageSide(sb);
+            DrawFireLight(sb, edge);
             effects.DrawRipples(sb, false);
             DrawMusicianGlow(sb);
 
@@ -759,7 +997,7 @@ namespace Tacetno433.Screens
 
             if (Game.CurrentRun.Stamina == 0)
                 Gfx.Rect(sb, 0, 0, edge, TacetGame.ScreenH, Color.Black * 0.35f);    // out of breath, lights down
-            TacetField.Draw(sb, edge, time, 0.2f + danger * 0.8f, ripple, rippleY);
+            TacetField.Draw(sb, edge, time, 0.2f + danger * 0.8f - fireGlow * 0.15f, ripple, rippleY);
             DrawTacetSide(sb, edge, danger);
             effects.DrawWaves(sb);
             effects.DrawBursts(sb);
@@ -772,8 +1010,14 @@ namespace Tacetno433.Screens
             //Play Area : the lane, the notes and the ring never shake
             DrawLane(sb);
             DrawIncoming(sb);
+            DrawFinaleNotes(sb);
             DrawAnswerRing(sb);
+            DrawReady(sb);
+            DrawRoll(sb);
+            DrawHold(sb);
+            DrawJudge(sb);
             effects.DrawFlares(sb);
+            DrawCounterFlash(sb);
             DrawClashNumbers(sb);
 
             //Top Strip : see DuelScreen.Hud.cs
@@ -790,18 +1034,17 @@ namespace Tacetno433.Screens
 
             if (phase == Phase.Intro) DrawBanner(sb, battle.RoundLabel, phaseTimer / BattleRules.IntroTime);
             if (phase == Phase.RoundEnd) DrawBanner(sb, bannerText, phaseTimer / BattleRules.RoundEndTime);
+            if (phase == Phase.Finale && finaleClock < 0f) DrawFinaleCard(sb);
             if (cutIn > 0f) DrawCutIn(sb);
             if (countIn > 0f && !paused) DrawCountIn(sb);
+            if (fireFlash > 0f) Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Color.White * (0.25f * fireFlash));
 
             //Baton : the size guide and the stick itself, over everything else. See DuelScreen.Baton.cs
+            //While the pause menu is open the ordinary pointer is back, so the stick is hidden.
             if (!paused)
             {
                 DrawStrokeGuide(sb);
                 DrawBaton(sb);
-            }
-            else
-            {
-                DrawPause(sb);
             }
         }
     }

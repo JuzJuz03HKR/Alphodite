@@ -14,6 +14,12 @@ namespace Tacetno433.Screens
     //Bottom: the page track, click a diamond to jump
     public class GuideScreen : GameScreen
     {
+        //Can Pause : a menu page outside the run, ESC here means going back
+        public override bool CanPause
+        {
+            get { return false; }
+        }
+
         //Guide Text : THE PLACE TO EDIT THE TUTORIAL
         private static string[] steps = { "ROUTE", "STAGE", "SCORE", "DUEL", "LINE" };
         private static string[] numbers = { "01", "02", "03", "04", "05" };
@@ -39,12 +45,14 @@ namespace Tacetno433.Screens
             + "Answer its attacks, hit hard where it is silent, and leave some beats empty so the band can breathe. "
             + "The FORECAST row names every beat, from DOMINATING down to HOPELESS. A framed word is the one to fix.",
 
-            "TACET plays a bar first, each note marked f (loud), mf or p (soft). Then you answer: hold the left "
-            + "mouse button and conduct in 4/4, DOWN, LEFT, RIGHT, UP. How big you swing is your order: small "
-            + "EASES, middle PLAYS, big BOOSTS. Stop as the ring closes. When your conductor's recipe is full, press SPACE.",
+            "TACET plays a bar first, each note marked f (loud), mf or p (soft), then the band counts you in: 3, 2, 1. "
+            + "Hold the left mouse button and conduct on every beat, the way the pointer on the bright note says. A small "
+            + "swing EASES, a middle one PLAYS, a big one BOOSTS. Stop as the ring closes. A PERFECT BOOST against f is a "
+            + "COUNTER. Later floors add one thing each: a zigzag bar to shake, a note under an arch to hold still, a spark to flick.",
 
             "Each clash pushes the line between your light and TACET's dark. Push it all the way to win at once, "
-            + "or be ahead after three rounds. Stamina carries across the whole run, "
+            + "or be ahead after three rounds. Far enough ahead at a round's end, conduct the FINALE to finish it. "
+            + "Eight PERFECTs in a row set the band on fire. Stamina carries across the whole run, "
             + "so plan your rests and choose your motifs well."
         };
 
@@ -298,8 +306,10 @@ namespace Tacetno433.Screens
             for (int k = 0; k < 3; k++)
             {
                 bool here = grow >= rw * k / 3f && grow < rw * (k + 1) / 3f;
-                Gfx.TextSpacedCentered(sb, Game.Font, demoSizes[k], rx + rw * (k + 0.5f) / 3f, ry + 16,
+                float zx = rx + rw * (k + 0.5f) / 3f;
+                Gfx.TextSpacedCentered(sb, Game.Font, demoSizes[k], zx, ry + 16,
                                        (here ? Palette.Highlight : Palette.PaperDim) * a, TextSize.Label, 2f);
+
             }
             Gfx.TextSpaced(sb, Game.Font, "HOW BIG  =  HOW LOUD", rx, ry - 34, Palette.PaperDim * a, TextSize.Tiny, 3f);
 

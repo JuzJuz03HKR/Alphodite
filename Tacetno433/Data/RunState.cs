@@ -323,11 +323,18 @@ namespace Tacetno433.Data
         //Battle Begin : pick an enemy that fits the chosen path and set up the fight
         public void BeginBattle()
         {
+            BeginBattle(null);
+        }
+
+        //Battle Begin Against : the same, with the enemy already known (a loaded save walks back
+        //into the fight it left). Null picks one as usual.
+        public void BeginBattle(Enemy known)
+        {
             EnemyKind kind = EnemyKind.Normal;
             if (Chosen != null && Chosen.Type == NodeType.Elite) kind = EnemyKind.Elite;
             if (Chosen != null && Chosen.Type == NodeType.Boss) kind = EnemyKind.Boss;
 
-            Enemy enemy = EnemyList.Pick(kind, Era, random);
+            Enemy enemy = known != null ? known : EnemyList.Pick(kind, Era, random);
             Battle = new BattleState(this, enemy, random);
         }
 
@@ -419,6 +426,14 @@ namespace Tacetno433.Data
                 NodeType swap = Options[0].Type == NodeType.Battle ? NodeType.Event : NodeType.Battle;
                 Options[0] = MakeNode(swap);
             }
+        }
+
+        //Options Restore : the paths a save file wrote down, built again with their captions
+        public void RestoreOptions(NodeType[] types)
+        {
+            Options = new RouteNode[types.Length];
+            for (int i = 0; i < types.Length; i++)
+                Options[i] = MakeNode(types[i]);
         }
 
         //Route Weights : how often each kind of place turns up.

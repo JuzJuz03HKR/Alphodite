@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Xna.Framework;
 using Tacetno433.Core;
 using Tacetno433.Data;
 
@@ -35,6 +36,19 @@ namespace Tacetno433.Battle
         public bool Fired;             // THE INFERNO's bonus beat
         public bool Signature;         // the conductor's signature landed on this beat
         public bool Played;            // somebody on our side made a sound
+        public bool Counter;           // a PERFECT BOOST knocked TACET's f note back
+        public bool Fortissimo;        // the band was on fire for this beat
+        public bool FortissimoStarted; // the combo just set the band on fire
+        public bool FortissimoLost;    // a slip put the fire out
+        public bool Tremolo;           // this beat was TACET's roll
+        public int RollStrokes;        //     and how many strokes answered it
+        public bool Fermata;           // this beat was TACET's held note
+        public float Held;             //     and how much of it was held, 0 to 1
+
+        //Double : the second note of a pair, answered half a beat after the first
+        public bool Double;
+        public Grade GraceGrade;
+        public int GracePush;
 
         //Trait Fired : one flag per seat, true when that musician's trait changed this beat
         public bool[] TraitFired = new bool[StageLayout.SeatCount];
@@ -49,7 +63,14 @@ namespace Tacetno433.Battle
     //   to -100 and you lose. After 3 rounds, whoever is ahead wins.
     //   every note costs stamina. Silent beats and Ease give some back. At zero stamina the
     //   band can only play as much as it can still pay for.
-    //   PERFECT strokes in a row build a COMBO that makes every beat stronger.
+    //   PERFECT strokes in a row build a COMBO that makes every beat stronger, and a long
+    //   combo sets the band on fire (FORTISSIMO) for a few beats.
+    //   some of TACET's notes come in pairs (the second one is a grace, see ResolveGrace).
+    //   every round ends on a special note: ordinary enemies HOLD it (FERMATA, keep the baton
+    //   still), elites and bosses ROLL it (TREMOLO, shake the baton).
+    //   a PERFECT BOOST against TACET's real f note is a COUNTER that knocks part of it back.
+    //   the special notes arrive one floor at a time (BattleRules teaching order).
+    //   far enough ahead at the end of a round, the band may try the FINALE and end it at once.
     //
     //Motifs, the conductor's perk, each musician's trait and the enemy's trait bend these rules.
     //Each place that checks one is marked with its name, so searching for it finds every effect.
@@ -68,6 +89,17 @@ namespace Tacetno433.Battle
         //Combo
         public int Combo;                        // PERFECT strokes in a row
         public int BestCombo;
+        public int FortissimoLeft;               // beats the band is still on fire for
+
+        //Finale : the band tried to end the piece this round, and whether it worked
+        public bool FinaleTried;
+        public bool FinaleWon;
+
+        //Roll Strokes : how many strokes the duel counted during TACET's tremolo, read by Resolve
+        public int RollStrokes;
+
+        //Hold Fraction : how much of TACET's fermata the baton was held still for, 0 to 1, read by Resolve
+        public float HoldFraction;
 
         //Signature : the notes live here so they carry over from one round to the next
         public int[] Notes = new int[3];         // gathered per family : strings, winds, percussion
@@ -79,6 +111,9 @@ namespace Tacetno433.Battle
         public bool[] EnemyHidden = new bool[BattleRules.BeatsPerRound];
         public Choice[] EnemyChoice = new Choice[BattleRules.BeatsPerRound];
         public Choice[] ShownChoice = new Choice[BattleRules.BeatsPerRound];   // what the note SAYS it is (FALSE NOTES can lie)
+        public bool[] EnemyDouble = new bool[BattleRules.BeatsPerRound];       // the note comes in a pair
+        public int TremoloBeat = -1;                                           // the beat TACET rolls on, -1 for none
+        public int FermataBeat = -1;                                           // the beat TACET holds, -1 for none
         public BeatResult[] Results = new BeatResult[BattleRules.BeatsPerRound];
 
         //Sheet : every beat of every round, kept for the result page. Sheet[round - 1][beat]
@@ -218,9 +253,24 @@ namespace Tacetno433.Battle
                     if (!EnemyHidden[b])
                         EnemyPower[b] = Math.Max((int)Math.Round(lastPlan[b] * BattleRules.MirrorScale), EnemyPower[b] / 2);
 
+            //Last Note : every round ends on a special note two beats long. Elites and bosses
+            //ROLL it (tremolo), ordinary enemies HOLD it (fermata). It always has a note, and it is
+            //never hidden, so the player can plan for it on the score page.
+            //Each one only from its floor in the teaching order, before that the round simply ends.
+            int last = BattleRules.BeatsPerRound - 1;
+            bool roll = Enemy.Kind != EnemyKind.Normal && Run.Floor >= BattleRules.TremoloFromFloor;
+            bool hold = Enemy.Kind == EnemyKind.Normal && Run.Floor >= BattleRules.FermataFromFloor;
+            TremoloBeat = roll ? last : -1;
+            FermataBeat = hold ? last : -1;
+            if (roll || hold)
+            {
+                EnemyHidden[last] = false;
+                if (EnemyPower[last] <= 0) EnemyPower[last] = Math.Max(1, Strongest() * 6 / 10);
+            }
+
             for (int b = 0; b < BattleRules.BeatsPerRound; b++)
             {
-                EnemyChoice[b] = RollEnemyChoice(b);
+                EnemyChoice[b] = b == TremoloBeat ? Choice.Normal : RollEnemyChoice(b);
                 ShownChoice[b] = EnemyChoice[b];
             }
 
@@ -228,6 +278,8 @@ namespace Tacetno433.Battle
             if (EnemyHas(EnemyTrait.FalseNotes))
                 for (int bar = 0; bar < BattleRules.BeatsPerRound / 4; bar++)
                     PlantFalseNote(bar);
+
+            PlantDoubles();
 
             RoundLabel = "ROUND " + Round + " / " + BattleRules.MaxRounds;
             TempoLabel = Tempo + " BPM";
@@ -241,7 +293,7 @@ namespace Tacetno433.Battle
             for (int k = 0; k < 4; k++)
             {
                 int b = bar * 4 + k;
-                if (EnemyPower[b] <= 0 || EnemyHidden[b]) continue;
+                if (EnemyPower[b] <= 0 || EnemyHidden[b] || b == TremoloBeat) continue;
                 picks++;
                 if (random.Next(picks) == 0) chosen = b;     // every candidate gets a fair chance
             }
@@ -253,14 +305,66 @@ namespace Tacetno433.Battle
             else ShownChoice[chosen] = random.Next(2) == 0 ? Choice.Boost : Choice.Ease;
         }
 
-        //Heavy Beat : a beat at or above 60 percent of this round's strongest
-        public bool IsHeavy(int beat)
+        //Doubles Plant : pick which notes come in pairs, from PairsFromFloor on, a few more each
+        //round. Hidden notes and the last note of the round never double.
+        private void PlantDoubles()
+        {
+            for (int b = 0; b < BattleRules.BeatsPerRound; b++) EnemyDouble[b] = false;
+            if (Run.Floor < BattleRules.PairsFromFloor) return;
+
+            int want = BattleRules.DoubleNotes[Math.Min(Round, BattleRules.DoubleNotes.Length) - 1];
+            if (want > BattleRules.DoubleMost) want = BattleRules.DoubleMost;
+
+            for (int i = 0; i < want; i++)
+            {
+                //Fair Pick : every note still free gets the same chance
+                int picks = 0;
+                int chosen = -1;
+                for (int b = 0; b < BattleRules.BeatsPerRound; b++)
+                {
+                    if (EnemyPower[b] <= 0 || EnemyHidden[b] || EnemyDouble[b] || b == TremoloBeat || b == FermataBeat) continue;
+                    picks++;
+                    if (random.Next(picks) == 0) chosen = b;
+                }
+                if (chosen < 0) return;
+                EnemyDouble[chosen] = true;
+            }
+        }
+
+        //Strongest : the biggest note TACET plays this round
+        private int Strongest()
         {
             int strongest = 1;
             for (int b = 0; b < BattleRules.BeatsPerRound; b++)
                 if (EnemyPower[b] > strongest) strongest = EnemyPower[b];
+            return strongest;
+        }
 
-            return EnemyPower[beat] >= strongest * BattleRules.HeavyThreshold;
+        //Heavy Beat : a beat at or above 60 percent of this round's strongest
+        public bool IsHeavy(int beat)
+        {
+            return EnemyPower[beat] >= Strongest() * BattleRules.HeavyThreshold;
+        }
+
+        //Is Tremolo : this beat is TACET's roll
+        public bool IsTremolo(int beat)
+        {
+            return beat == TremoloBeat;
+        }
+
+        //Is Fermata : this beat is TACET's held note
+        public bool IsFermata(int beat)
+        {
+            return beat == FermataBeat;
+        }
+
+        //Roll Grade : how a roll of this many strokes is graded
+        public static Grade RollGrade(int strokes)
+        {
+            if (strokes >= BattleRules.TremoloPerfect) return Grade.Perfect;
+            if (strokes >= BattleRules.TremoloGood) return Grade.Good;
+            if (strokes >= 1) return Grade.Miss;
+            return Grade.Hesitate;
         }
 
         //Enemy Choice Roll : heavy beats tend to boost, light beats tend to ease
@@ -440,12 +544,14 @@ namespace Tacetno433.Battle
         }
 
         //Enemy Strike : TACET's written power on a beat, as it will really land.
-        //FILLS THE GAPS hits harder where nobody on our side plays.
+        //FILLS THE GAPS hits harder where nobody on our side plays, and a roll hits harder still.
         public int EnemyStrikeAt(int beat)
         {
             int power = EnemyPower[beat];
             if (power > 0 && EnemyHas(EnemyTrait.FillsGaps) && OurPowerAt(beat) == 0)
                 power = (int)Math.Round(power * BattleRules.FillsGapsPower);
+            if (beat == TremoloBeat) power = (int)Math.Round(power * BattleRules.TremoloEnemy);     // TREMOLO
+            if (beat == FermataBeat) power = (int)Math.Round(power * BattleRules.FermataEnemy);     // FERMATA
             return power;
         }
 
@@ -647,6 +753,31 @@ namespace Tacetno433.Battle
                 recover += easeRecover;
             }
 
+            //TREMOLO : TACET's roll is answered by many strokes instead of one. Every stroke adds
+            //a little, up to a limit, and every stroke costs breath while somebody is playing.
+            r.Tremolo = beat == TremoloBeat;
+            r.RollStrokes = 0;
+            if (r.Tremolo)
+            {
+                int counted = Math.Min(RollStrokes, BattleRules.TremoloMost);
+                power *= BattleRules.TremoloBase + BattleRules.TremoloStep * counted;
+                if (basePower > 0) cost += RollStrokes * BattleRules.TremoloCost;
+                r.RollStrokes = RollStrokes;
+                RollStrokes = 0;
+            }
+
+            //FERMATA : TACET's held note. Our part grows with how long the baton was held still
+            //after the stroke, and holding costs breath while somebody is playing.
+            r.Fermata = beat == FermataBeat;
+            r.Held = 0f;
+            if (r.Fermata)
+            {
+                r.Held = MathHelper.Clamp(HoldFraction, 0f, 1f);
+                power *= BattleRules.FermataBase + BattleRules.FermataHold * r.Held;
+                if (basePower > 0) cost += BattleRules.FermataCost * r.Held;
+                HoldFraction = 0f;
+            }
+
             //Timing Grade : perfect helps and builds the combo, a bad stroke or no stroke hurts
             int comboBefore = Combo;
             bool runaway = Run.Conductor.Perk == ConductorPerk.RunawayFire;
@@ -682,6 +813,16 @@ namespace Tacetno433.Battle
             //Combo Bonus
             power *= ComboBonus;
 
+            //FORTISSIMO : the band is on fire for a few beats after a long combo
+            r.Fortissimo = false;
+            if (FortissimoLeft > 0 && basePower > 0)
+            {
+                power *= BattleRules.FortissimoPower;
+                r.Fortissimo = true;
+            }
+            if (FortissimoLeft > 0 && grade != Grade.None) FortissimoLeft--;
+            UpdateFortissimo(r, grade);
+
             //SIGNATURE : the conductor's own move lands on this beat
             r.Signature = SignatureNext;
             if (SignatureNext)
@@ -715,6 +856,15 @@ namespace Tacetno433.Battle
             //COUNTERPOINT : answering a boost
             if (enemyChoice == Choice.Boost && Run.Has(MotifId.Counterpoint))
                 power *= BattleRules.CounterpointPower;
+
+            //COUNTER : a PERFECT BOOST against a real f note knocks most of it back.
+            //A FALSE NOTE that only looked loud cannot be countered.
+            r.Counter = false;
+            if (enemyChoice == Choice.Boost && choice == Choice.Boost && grade == Grade.Perfect && basePower > 0 && enemyPower > 0)
+            {
+                enemyPower *= BattleRules.CounterKeep;
+                r.Counter = true;
+            }
 
             //Out Of Breath : the band can only play as much as it can still pay for
             int costPaid = (int)Math.Round(cost);
@@ -761,6 +911,9 @@ namespace Tacetno433.Battle
             r.PlayerChoice = choice;
             r.EnemyChoice = enemyChoice;
             r.Grade = grade;
+            r.Double = EnemyDouble[beat];
+            r.GraceGrade = Grade.None;
+            r.GracePush = 0;
             r.Done = true;
             WriteSheet(beat, r);
 
@@ -785,6 +938,100 @@ namespace Tacetno433.Battle
             mark.Grade = r.Grade;
             mark.Signature = r.Signature;
             mark.Played = r.Played;
+            mark.Counter = r.Counter;
+            mark.Tremolo = r.Tremolo;
+            mark.Fermata = r.Fermata;
+            mark.Double = r.Double;
+            mark.GraceGrade = r.GraceGrade;
+        }
+
+        //Fortissimo Update : a miss or no stroke puts the fire out, and every FortissimoCombo
+        //PERFECTs in a row light it again. The beat that lights it is not part of it yet.
+        private void UpdateFortissimo(BeatResult r, Grade grade)
+        {
+            r.FortissimoStarted = false;
+            r.FortissimoLost = false;
+
+            if (grade == Grade.Miss || grade == Grade.Hesitate)
+            {
+                if (FortissimoLeft > 0) r.FortissimoLost = true;
+                FortissimoLeft = 0;
+            }
+
+            if (grade == Grade.Perfect && Combo > 0 && Combo % BattleRules.FortissimoCombo == 0 && FortissimoLeft == 0)
+            {
+                FortissimoLeft = BattleRules.FortissimoBeats;
+                r.FortissimoStarted = true;
+            }
+        }
+
+        //Grace Resolve : the second note of a pair, half a beat after the first. It is worth part
+        //of the beat on both sides: ours as the first note landed, TACET's the same. Missing the
+        //flick back lets TACET's second note land with nothing against it.
+        //The same BeatResult is handed back with the grace filled in, so the duel can show it.
+        public BeatResult ResolveGrace(int beat, Grade grade)
+        {
+            BeatResult r = Results[beat];
+            float ours = r.OurPower * BattleRules.GraceShare;
+            float theirs = r.EnemyPower * BattleRules.GraceShare;
+            int comboBefore = Combo;
+
+            if (grade == Grade.Perfect)
+            {
+                ours *= BattleRules.PerfectBonus;
+                PerfectCount++;
+                Combo++;
+            }
+            else if (grade == Grade.Miss)
+            {
+                ours *= BattleRules.MissPower;
+                Combo = 0;
+            }
+            else if (grade == Grade.Hesitate)
+            {
+                ours = 0f;
+                Combo = 0;
+            }
+
+            if (Combo > BestCombo) BestCombo = Combo;
+            r.Combo = Combo;
+            r.ComboBroken = comboBefore >= 2 && Combo == 0;
+            UpdateFortissimo(r, grade);
+
+            float push = ((int)Math.Round(ours) - (int)Math.Round(theirs)) * BattleRules.PushPerPower;
+            Line += push;
+            if (Line > BattleRules.LineLimit) Line = BattleRules.LineLimit;
+            if (Line < -BattleRules.LineLimit) Line = -BattleRules.LineLimit;
+
+            r.GraceGrade = grade;
+            r.GracePush = (int)Math.Round(push);
+            if (Round >= 1 && Round <= Sheet.Length) Sheet[Round - 1][beat].GraceGrade = grade;
+
+            if (Line >= BattleRules.LineLimit) { Finished = true; PlayerWon = true; }
+            if (Line <= -BattleRules.LineLimit) { Finished = true; PlayerWon = false; }
+            return r;
+        }
+
+        //Finale : offered at the end of a round while the line is far enough our way.
+        //One try per round. Winning it ends the fight on the spot.
+        public bool FinaleOffered
+        {
+            get { return !Finished && !FinaleTried && Line >= BattleRules.FinaleLine; }
+        }
+
+        public void WinFinale()
+        {
+            FinaleTried = true;
+            FinaleWon = true;
+            Line = BattleRules.LineLimit;
+            Finished = true;
+            PlayerWon = true;
+        }
+
+        public void FailFinale()
+        {
+            FinaleTried = true;
+            Line = Math.Max(-BattleRules.LineLimit, Line - BattleRules.FinaleFailPush);
         }
 
         //Round End : move to the next round, or decide the fight on points after the last one
@@ -797,6 +1044,7 @@ namespace Tacetno433.Battle
                 lastPlan[b] = OurPowerAt(b);
 
             Round++;
+            FinaleTried = false;
             if (Round > BattleRules.MaxRounds)
             {
                 Finished = true;
@@ -837,6 +1085,7 @@ namespace Tacetno433.Battle
 
             reward += PerfectCount * BattleRules.ShardsPerPerfect;
             if (Line > 0f) reward += (int)(Line / 10f);
+            if (FinaleWon) reward += BattleRules.FinaleShards;                           // FINALE
 
             if (Run.Has(MotifId.PatronsPurse)) reward = (int)(reward * BattleRules.PurseBonus);   // PATRON'S PURSE
             return reward;
@@ -865,7 +1114,7 @@ namespace Tacetno433.Battle
             //Pass 1 : cover attacks. Hidden beats are guessed at a middling strength.
             for (int b = 0; b < BattleRules.BeatsPerRound; b++)
             {
-                int need = EnemyHidden[b] ? (int)(5 * scale) : EnemyPower[b];
+                int need = EnemyHidden[b] ? (int)(5 * scale) : EnemyStrikeAt(b);
                 if (need == 0) continue;
 
                 bool[] used = new bool[StageLayout.SeatCount];

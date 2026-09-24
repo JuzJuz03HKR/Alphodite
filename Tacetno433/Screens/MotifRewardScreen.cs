@@ -98,7 +98,7 @@ namespace Tacetno433.Screens
             }
 
             //Skip
-            bool skip = Input.ClickedOn(skipButton) || Input.KeyPressed(Keys.Escape);
+            bool skip = Input.ClickedOn(skipButton);
             if (offer.Length == 0 && Input.KeyPressed(Keys.Enter)) skip = true;
             if (skip && picked == -1)
             {
@@ -148,7 +148,7 @@ namespace Tacetno433.Screens
             }
 
             Gfx.TextCentered(sb, Game.StoryFont, "It stays with the band until the run ends.", cx, 594, Palette.PaperDim, TextSize.StorySmall);
-            Ui.Button(sb, skipButton, skipLabel, "ESC", false, picked == -1, 1f);
+            Ui.Button(sb, skipButton, skipLabel, "", false, picked == -1, 1f);
 
             RunHud.DrawTop(sb, run, "REWARD");
             RunHud.DrawTips(sb, run);

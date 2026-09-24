@@ -130,7 +130,7 @@ namespace Tacetno433.Screens
             bool next = Input.KeyPressed(Keys.Enter) || Input.ClickedOn(primaryButton);
             if (battleMode && Input.KeyPressed(Keys.Tab)) next = true;
             if (battleMode && Input.ClickedOn(Ui.StepRect(steps.Length, 1, 640, NavY, NavSpacing))) next = true;
-            if (!battleMode && (Input.KeyPressed(Keys.Escape) || Input.KeyPressed(Keys.Tab))) next = true;
+            if (!battleMode && Input.KeyPressed(Keys.Tab)) next = true;
 
             if (next && held == null) GoNext(run);
         }
@@ -218,7 +218,7 @@ namespace Tacetno433.Screens
             DrawRoster(sb, run);
             DrawDetail(sb, run);
 
-            Ui.Button(sb, primaryButton, battleMode ? "NEXT  /  SCORE" : "BACK TO ROUTE", battleMode ? "TAB" : "ESC", true);
+            Ui.Button(sb, primaryButton, battleMode ? "NEXT  /  SCORE" : "BACK TO ROUTE", "TAB", true);
 
             //Top Bar and Steps
             RunHud.DrawTop(sb, run, battleMode ? run.Battle.EnemyTitle : "THE STAGE");

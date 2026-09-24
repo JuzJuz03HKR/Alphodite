@@ -12,6 +12,12 @@ namespace Tacetno433.Screens
     //a spotlight follows whoever is in front of you, and clicking the painting steps inside it.
     public class ConductorSelectScreen : GameScreen
     {
+        //Can Pause : a menu page outside the run, ESC here means going back
+        public override bool CanPause
+        {
+            get { return false; }
+        }
+
         //Gallery Layout : move these numbers to reposition everything
         private const int FrameW = 330;
         private const int FrameH = 430;

@@ -20,6 +20,12 @@ namespace Tacetno433.Screens
     //a vignette and two letterbox bars to make it read like a shot from a film.
     public class ConductorDetailScreen : GameScreen
     {
+        //Can Pause : a menu page outside the run, ESC here means going back
+        public override bool CanPause
+        {
+            get { return false; }
+        }
+
         //Detail Layout : move these to reposition the page
         private const int LetterboxH = 40;
         private const int LeftX = 70;

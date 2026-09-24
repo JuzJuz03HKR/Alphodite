@@ -41,12 +41,15 @@ namespace Tacetno433.Screens
             lineLabel = lines[floor - 1];
             floorLabel = Game.CurrentRun.FloorShort;
             SoundBank.Play(Sfx.PageTurn);
+
+            //Save : a new floor opens here, so CONTINUE comes back to its choice of era
+            SaveFile.SaveRun(Game.CurrentRun);
         }
 
         public override void Update(float dt)
         {
             time += dt;
-            bool skip = time > 0.6f && (Input.MouseClicked() || Input.KeyPressed(Keys.Enter) || Input.KeyPressed(Keys.Space) || Input.KeyPressed(Keys.Escape));
+            bool skip = time > 0.6f && (Input.MouseClicked() || Input.KeyPressed(Keys.Enter) || Input.KeyPressed(Keys.Space));
             if (time >= ShowTime || skip)
                 Game.Screens.Change(new EraChoiceScreen(true));
         }

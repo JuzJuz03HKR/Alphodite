@@ -42,6 +42,9 @@ namespace Tacetno433
         //Screen Manager
         public ScreenManager Screens;
 
+        //Pause Menu : opened by ESC on every page of a run, drawn over the page, see PauseMenu
+        public PauseMenu Pause;
+
         //Run Data : everything about the run in progress. Null until a run starts.
         public RunState CurrentRun;
 
@@ -94,6 +97,11 @@ namespace Tacetno433
             NumberText.Build();
             Settings.Build();
 
+            //Saved Settings : read back what the player chose last time. The capture tool leaves
+            //the real save files alone, so its pictures always use the plain defaults.
+            SaveFile.Enabled = !DebugShots.Active;
+            SaveFile.LoadSettings();
+
             Font = Content.Load<SpriteFont>("MainFont");
             BigFont = Content.Load<SpriteFont>("BigFont");
             StoryFont = Content.Load<SpriteFont>("StoryFont");
@@ -115,6 +123,7 @@ namespace Tacetno433
 
             //Audio : picks up whatever sound files exist, silently skips the rest
             SoundBank.Load(Content);
+            SoundBank.ApplyVolume();
 
             //Hand Art : the same idea for the conductor hand pictures in the duel
             HandArt.Load(Content);
@@ -124,6 +133,9 @@ namespace Tacetno433
 
             //Pixel Musicians : the animated band on the duel stage
             CharacterArt.Load(Content);
+
+            Pause = new PauseMenu(this);
+            if (Settings.Fullscreen) ApplyFullscreen();
 
             //Text Prepare : wrap all the long text ONCE, never while drawing
             ConductorList.PrepareText(StoryFont, TextWrapWidth, TextSize.Story);
@@ -193,16 +205,34 @@ namespace Tacetno433
             if (DebugShots.Active) DebugShots.FakeMouse(dt);
 
             //Window Focus : when the player alt tabs away the game stops where it is. The page
-            //on screen is told once (the duel pauses itself), then nothing moves until they return.
+            //on screen is told once, the pause menu opens on pages that can pause, and then
+            //nothing moves until they return.
             bool active = IsActive || DebugShots.Active;
-            if (!active && wasActive && Screens.Current != null) Screens.Current.LostFocus();
+            if (!active && wasActive && Screens.Current != null)
+            {
+                Screens.Current.LostFocus();
+                if (CanOpenPause()) Pause.Show();
+            }
             wasActive = active;
 
-            if (active) Screens.Update(dt);
+            //Pause Menu : while it is open the page underneath gets no Update at all.
+            //ESC opens it, unless the page is using ESC to close something of its own.
+            if (active)
+            {
+                if (Pause.Open) Pause.Update(dt);
+                else if (Input.KeyPressed(Keys.Escape) && CanOpenPause() && !Screens.Current.UsesEscape) Pause.Show();
+                else Screens.Update(dt);
+            }
             Ornament.UpdateGrain(dt);
             UpdateDebug(dt);
 
             base.Update(gameTime);
+        }
+
+        //Can Open Pause : a page of a run is on show and is not in the middle of changing
+        private bool CanOpenPause()
+        {
+            return Screens.Current != null && Screens.Current.CanPause && !Screens.Busy && CurrentRun != null;
         }
 
         //Debug Update : count frames and read how much memory is in use
@@ -235,6 +265,7 @@ namespace Tacetno433
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp);
 
             Screens.Draw(spriteBatch);
+            if (Pause.Open) Pause.Draw(spriteBatch);
 
             //Grain : one layer of film grain over every page, so flat greys feel like print
             Ornament.Grain(spriteBatch);

@@ -36,6 +36,13 @@ namespace Tacetno433.Screens
         //Event State
         private GameEvent ev;
         private Phase phase;
+
+        //Uses Escape : while picking who takes the chance, ESC puts the choice back
+        //instead of opening the pause menu
+        public override bool UsesEscape
+        {
+            get { return phase == Phase.Pick; }
+        }
         private int hoverChoice = -1;
         private int chosen = -1;
         private int hoverCard = -1;

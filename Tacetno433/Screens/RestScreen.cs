@@ -33,6 +33,13 @@ namespace Tacetno433.Screens
 
         //Rest State
         private Phase phase;
+
+        //Uses Escape : while picking who rehearses, ESC goes back to the three choices
+        //instead of opening the pause menu
+        public override bool UsesEscape
+        {
+            get { return phase == Phase.Pick; }
+        }
         private int hoverOption = -1;
         private int hoverCard = -1;
         private string[] optionTexts = new string[3];
@@ -102,7 +109,7 @@ namespace Tacetno433.Screens
                 if (Input.MouseClicked() && hoverOption >= 0) Choose(hoverOption);
 
                 //Skip : leaving without resting is allowed
-                if (Input.KeyPressed(Keys.Escape) || Input.ClickedOn(moveButton))
+                if (Input.ClickedOn(moveButton))
                 {
                     SoundBank.Play(Sfx.UiBack);
                     RunFlow.NextStage(Game);
@@ -138,7 +145,7 @@ namespace Tacetno433.Screens
             }
             else
             {
-                if (phaseTimer > 0.4f && (Input.KeyPressed(Keys.Enter) || Input.KeyPressed(Keys.Escape) || Input.ClickedOn(moveButton)))
+                if (phaseTimer > 0.4f && (Input.KeyPressed(Keys.Enter) || Input.ClickedOn(moveButton)))
                 {
                     SoundBank.Play(Sfx.UiConfirm);
                     RunFlow.NextStage(Game);
@@ -239,7 +246,7 @@ namespace Tacetno433.Screens
                 Ui.Tag(sb, optionPrices[i], r.X + 20, r.Bottom - 30, i == DeepRest, a);
             }
 
-            Ui.Button(sb, moveButton, "MOVE ON", "ESC", false);
+            Ui.Button(sb, moveButton, "MOVE ON", "", false);
         }
 
         //Pick : who rehearses. Musicians who cannot improve further are dimmed.

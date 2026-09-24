@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Tacetno433.Audio;
 using Tacetno433.Core;
+using Tacetno433.Data;
 
 namespace Tacetno433.Screens
 {
@@ -14,15 +15,32 @@ namespace Tacetno433.Screens
     //during a duel, so the title page teaches the core idea before the player presses
     //anything. The staff runs off to the right and gets swallowed by TACET.
     //
-    //Under the logo sit four slanted menu blades, and a small notice strip at the
+    //Under the logo sit the slanted menu blades, and a small notice strip at the
     //bottom cycles through play tips, the way a launcher shows news.
+    //When a run is saved, CONTINUE sits on top and says where the run was left.
+    //Quitting, and starting over a saved run, both ask first.
     public class TitleScreen : GameScreen
     {
-        //Title Menu Data
-        private string[] menuItems = { "NEW RUN", "HOW TO PLAY", "SETTINGS", "QUIT" };
-        private string[] menuIndex = { "01", "02", "03", "04" };
+        //Can Pause : a menu page outside the run, ESC here means going back
+        public override bool CanPause
+        {
+            get { return false; }
+        }
+
+        //Title Menu Data : CONTINUE is only there when a run is saved
+        private const int ItemContinue = 0;
+        private const int ItemNewRun = 1;
+        private const int ItemGuide = 2;
+        private const int ItemSettings = 3;
+        private const int ItemQuit = 4;
+        private static string[] allItems = { "CONTINUE", "NEW RUN", "HOW TO PLAY", "SETTINGS", "QUIT" };
+        private static string[] allIndex = { "01", "02", "03", "04", "05" };
+        private int[] menu;                 // which items are on the menu, top to bottom
         private Rectangle[] menuBoxes;
         private int selected;
+        private string continueNote = "";   // where the saved run was left
+        private ConfirmBox askBox = new ConfirmBox();
+        private int confirmFor = -1;        // the item waiting for a yes
 
         //Title Tips : the notice strip at the bottom, one every few seconds
         private static string[] tips =
@@ -33,13 +51,20 @@ namespace Tacetno433.Screens
             "TACET's call shows how loud each note is: f loud, mf, p soft. Answer to match.",
             "A ??? beat hides its strength until the clash.",
             "Motifs last the whole run. Pick the ones that suit your conductor.",
+            "A PERFECT BOOST against a real f note is a COUNTER. It throws part of the note back.",
+            "On the last floor, a note tied to a spark: answer it, then flick once more, any way, on the half beat.",
+            "Elites and bosses end each round with a roll. Shake the baton, but every stroke costs breath.",
+            "From floor two, a note under an arch is a fermata. Stroke it, then hold still. Holding costs breath.",
+            "Eight PERFECTs in a row set the band on fire. FORTISSIMO hits harder for four beats.",
+            "Far enough ahead at the end of a round, conduct the FINALE and end the duel at once.",
+            "Strokes judged early or late? Settings has a STROKE TIMING test.",
         };
         private const float TipTime = 6f;
 
         //Title Layout
         private const int MenuX = 96;
-        private const int MenuY = 364;
-        private const int MenuStep = 56;
+        private const int MenuY = 350;
+        private const int MenuStep = 50;
         private const int MenuW = 400;
         private const int MenuH = 46;
 
@@ -63,9 +88,19 @@ namespace Tacetno433.Screens
 
         public override void Load()
         {
+            //No Run : the title page is outside any run
+            Game.CurrentRun = null;
+
+            //Menu Lines : CONTINUE first when there is a saved run, and it starts chosen
+            bool saved = SaveFile.HasRun;
+            if (saved) menu = new int[] { ItemContinue, ItemNewRun, ItemGuide, ItemSettings, ItemQuit };
+            else menu = new int[] { ItemNewRun, ItemGuide, ItemSettings, ItemQuit };
+            continueNote = saved ? SaveFile.RunSummary() : "";
+            selected = 0;
+
             //Menu Boxes : one clickable box per line, built once
-            menuBoxes = new Rectangle[menuItems.Length];
-            for (int i = 0; i < menuItems.Length; i++)
+            menuBoxes = new Rectangle[menu.Length];
+            for (int i = 0; i < menu.Length; i++)
                 menuBoxes[i] = new Rectangle(MenuX, MenuY + i * MenuStep, MenuW, MenuH);
 
             selectSlide = selected;
@@ -82,11 +117,19 @@ namespace Tacetno433.Screens
             playhead += dt * 170f;
             if (playhead > 1180f) playhead = StaffLeft;
 
+            //Asking : while the box is open nothing else on the page moves
+            if (askBox.Open)
+            {
+                int answer = askBox.Update(dt);
+                if (answer == 1) Act(confirmFor);
+                return;
+            }
+
             //Menu Keyboard
             if (Input.KeyPressed(Keys.Down) || Input.KeyPressed(Keys.S))
-                selected = (selected + 1) % menuItems.Length;
+                selected = (selected + 1) % menu.Length;
             if (Input.KeyPressed(Keys.Up) || Input.KeyPressed(Keys.W))
-                selected = (selected - 1 + menuItems.Length) % menuItems.Length;
+                selected = (selected - 1 + menu.Length) % menu.Length;
 
             //Menu Mouse : only take over the selection when the mouse actually moves,
             //otherwise a resting cursor would fight the arrow keys
@@ -105,21 +148,56 @@ namespace Tacetno433.Screens
             for (int i = 0; i < menuBoxes.Length; i++)
                 if (Input.ClickedOn(menuBoxes[i])) { selected = i; confirm = true; }
 
-            if (confirm) Choose(selected);
+            if (confirm) Choose(menu[selected]);
 
-            if (Input.KeyPressed(Keys.Escape)) Game.Exit();
+            if (Input.KeyPressed(Keys.Escape)) Choose(ItemQuit);
+        }
+
+        //Menu Choose : the two lines that cannot be undone ask first
+        private void Choose(int item)
+        {
+            if (item == ItemQuit)
+            {
+                Ask(item, "QUIT THE GAME?", "Your settings are kept. A run in progress is saved at its last path.", "QUIT", "STAY");
+                return;
+            }
+            if (item == ItemNewRun && SaveFile.HasRun)
+            {
+                Ask(item, "START A NEW RUN?", "The saved run will be thrown away. There is only room for one.", "NEW RUN", "KEEP IT");
+                return;
+            }
+            Act(item);
+        }
+
+        private void Ask(int item, string title, string line, string yes, string no)
+        {
+            confirmFor = item;
+            askBox.Show(title, line, yes, no);
         }
 
         //Menu Action : what each line does
-        private void Choose(int index)
+        private void Act(int item)
         {
             SoundBank.Play(Sfx.UiConfirm);
 
-            if (index == 0)
+            if (item == ItemContinue)
+            {
+                if (!RunFlow.Continue(Game))
+                {
+                    //Broken Save : a file from another version, or damaged. Start clean.
+                    SaveFile.DeleteRun();
+                    SoundBank.Play(Sfx.UiDenied);
+                    Game.Screens.Change(new TitleScreen());
+                }
+            }
+            else if (item == ItemNewRun)
+            {
+                SaveFile.DeleteRun();
                 Game.Screens.Change(new ConductorSelectScreen());
-            else if (index == 1)
+            }
+            else if (item == ItemGuide)
                 Game.Screens.Change(new GuideScreen());
-            else if (index == 2)
+            else if (item == ItemSettings)
                 Game.Screens.Change(new SettingsScreen());
             else
                 Game.Exit();
@@ -139,6 +217,7 @@ namespace Tacetno433.Screens
             DrawMenu(sb);
             DrawNotice(sb);
             DrawFooter(sb);
+            askBox.Draw(sb);
         }
 
         //Background : dark stage with a soft pool of light, and darker edges
@@ -245,14 +324,18 @@ namespace Tacetno433.Screens
             Gfx.SlantBox(sb, blade, Ui.Slant, Palette.Paper);
             Gfx.Rect(sb, blade.Right, blade.Center.Y, 300, 1, Palette.Paper * 0.35f);
 
-            for (int i = 0; i < menuItems.Length; i++)
+            for (int i = 0; i < menu.Length; i++)
             {
                 Rectangle box = menuBoxes[i];
                 float closeness = 1f - Math.Min(1f, Math.Abs(selectSlide - i));
                 Color textColor = Color.Lerp(Palette.PaperDim, Palette.Ink, closeness);
 
-                Gfx.Text(sb, Game.Font, menuIndex[i], box.X + 8, box.Y + 16, Color.Lerp(Palette.LineGrey, Palette.InkSoft, closeness), TextSize.Label);
-                Gfx.TextSpaced(sb, Game.BigFont, menuItems[i], box.X + 48 + closeness * 8f, box.Y + 6, textColor, TextSize.Small, 3f);
+                Gfx.Text(sb, Game.Font, allIndex[i], box.X + 8, box.Y + 16, Color.Lerp(Palette.LineGrey, Palette.InkSoft, closeness), TextSize.Label);
+                Gfx.TextSpaced(sb, Game.BigFont, allItems[menu[i]], box.X + 48 + closeness * 8f, box.Y + 6, textColor, TextSize.Small, 3f);
+
+                //Continue Note : who, which floor, which stage, beside the blade
+                if (menu[i] == ItemContinue)
+                    Gfx.TextSpaced(sb, Game.Font, continueNote, box.Right + 20, box.Y + 6, Palette.PaperDim, TextSize.Tiny, 2f);
 
                 if (i == selected)
                 {

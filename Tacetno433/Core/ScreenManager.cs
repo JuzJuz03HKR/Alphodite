@@ -19,9 +19,29 @@ namespace Tacetno433.Core
         //Screen Update : dt is seconds since the last frame
         public virtual void Update(float dt) { }
 
-        //Screen Lost Focus : called once when the window goes to the back (alt tab). Pages
-        //with a clock running, like the duel, pause themselves here.
+        //Screen Lost Focus : called once when the window goes to the back (alt tab).
+        //On pages that can pause, the pause menu opens by itself as well.
         public virtual void LostFocus() { }
+
+        //Screen Can Pause : true on every page of a run, where ESC opens the pause menu.
+        //Menu pages outside a run (title, settings, the guide, conductor select) say false and
+        //keep ESC for going back.
+        public virtual bool CanPause
+        {
+            get { return true; }
+        }
+
+        //Screen Uses Escape : true while the page has something of its own open that ESC
+        //should close first, for example picking a musician on an event page
+        public virtual bool UsesEscape
+        {
+            get { return false; }
+        }
+
+        //Screen Paused / Resumed : the pause menu opened over this page, or closed again.
+        //While it is open this page gets no Update, but it is still drawn underneath.
+        public virtual void Paused() { }
+        public virtual void Resumed() { }
 
         //Screen Draw
         public abstract void Draw(SpriteBatch sb);
@@ -44,6 +64,9 @@ namespace Tacetno433.Core
         }
 
         public GameScreen Current { get { return current; } }
+
+        //Busy : a fade is under way, so the page on show is about to change or has just changed
+        public bool Busy { get { return fadingOut || fade > 0f; } }
 
         //Screen Change : fade out, swap, fade back in
         public void Change(GameScreen screen)

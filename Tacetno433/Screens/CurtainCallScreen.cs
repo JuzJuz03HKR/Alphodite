@@ -39,6 +39,7 @@ namespace Tacetno433.Screens
         public override void Load()
         {
             run = Game.CurrentRun;
+            SaveFile.DeleteRun();          // the run is over either way
 
             headline = won ? "BRAVO" : "SILENCE";
             subline = won ? "The last silence is broken. The music goes on." : "The music stopped here. It can always start again.";
@@ -61,7 +62,7 @@ namespace Tacetno433.Screens
             enter = Math.Min(1f, enter + dt * 1.2f);
             if (enter < 1f) return;
 
-            if (Input.KeyPressed(Keys.Enter) || Input.KeyPressed(Keys.Escape) || Input.ClickedOn(titleButton))
+            if (Input.KeyPressed(Keys.Enter) || Input.ClickedOn(titleButton))
             {
                 SoundBank.Play(Sfx.UiConfirm);
                 SoundBank.StopMusic();

@@ -30,10 +30,12 @@ namespace Tacetno433.Screens
             return r;
         }
 
-        //Up Next : this seat plays the beat being answered right now
+        //Up Next : this seat plays the beat being answered right now. In the finale, everyone does.
         private bool UpNext(int seat)
         {
-            return AnswerProgress() >= 0f && Game.CurrentRun.Formation.Plays(seat, bar * 4 + pending);
+            if (AnswerProgress() < 0f) return false;
+            if (phase == Phase.Finale) return Game.CurrentRun.Formation.Seated[seat] != null;
+            return Game.CurrentRun.Formation.Plays(seat, pending);
         }
 
         //Musician Glow : the light behind whoever is playing or about to. Drawn before the band
@@ -97,7 +99,7 @@ namespace Tacetno433.Screens
             Enemy e = battle.Enemy;
             float size = e.Kind == EnemyKind.Boss ? 1.3f : (e.Kind == EnemyKind.Elite ? 1.15f : 1f);
             float cx = EnemyX();
-            float breathe = 1f + (float)Math.Sin(time * 1.6f) * 0.02f;
+            float breathe = 1f + (float)Math.Sin(time * 1.6f) * 0.02f + BeatPulse() * 0.025f;
 
             Hollow.Eclipse(sb, cx, 250f, 96f * size * breathe, time * 0.3f, 1f);
             effects.DrawMotes(sb, edge, danger, time);
@@ -122,11 +124,37 @@ namespace Tacetno433.Screens
             Gfx.Rect(sb, left, top, width, 1, Palette.Paper * 0.25f);
             Gfx.Rect(sb, left, top + LaneHalf * 2f - 1f, width, 1, Palette.Paper * 0.25f);
 
-            Gfx.Rect(sb, HitX - 3, top - 8, 6, LaneHalf * 2f + 16f, Palette.Ink);
-            Gfx.Rect(sb, HitX - 1, top - 8, 2, LaneHalf * 2f + 16f, Palette.Highlight);
+            //Beat Lines : a line for every beat slides down the lane with the notes, a stronger
+            //one for every bar, the way Taiko no Tatsujin shows its bars. The eye can count along.
+            if (phase == Phase.Play)
+            {
+                for (int j = 0; j < BattleRules.BeatsPerRound + 6; j++)
+                {
+                    float sent = j * beatLen;
+                    if (clock < sent || clock > sent + 4f * beatLen) continue;
+                    float lx = LaneX(sent);
+                    bool barLine = j % 4 == 0;
+                    Gfx.Rect(sb, lx - (barLine ? 1f : 0.5f), top + 2, barLine ? 2f : 1f, LaneHalf * 2f - 4f,
+                             Palette.Paper * (barLine ? 0.4f : 0.16f));
+                }
+            }
+
+            //Hit Point : swells a little on every beat
+            float pulse = BeatPulse();
+            if (pulse > 0f) Gfx.DrawGlow(sb, HitX, RingY, 40f + pulse * 30f, Palette.Highlight * (0.35f * pulse));
+            Gfx.Rect(sb, HitX - 3 - pulse * 2f, top - 8, 6 + pulse * 4f, LaneHalf * 2f + 16f, Palette.Ink);
+            Gfx.Rect(sb, HitX - 1 - pulse, top - 8, 2 + pulse * 2f, LaneHalf * 2f + 16f, Palette.Highlight);
         }
 
-        //Incoming : TACET's phrase on its way. Every note leaves the right edge on its beat of
+        //Lane Spot : where a note sent down the lane at this moment is now. Every note takes one
+        //bar to go from TACET's edge to the hit point, and stops there.
+        private float LaneX(float sentAt)
+        {
+            float t = MathHelper.Clamp((clock - sentAt) / (4f * beatLen), 0f, 1f);
+            return MathHelper.Lerp(TacetGame.ScreenW - 30f, HitX, t);
+        }
+
+        //Incoming : TACET's part on its way. Every note leaves the right edge on its beat of
         //the call and slides for exactly one bar, so its middle reaches the hit point on the
         //beat where it is answered, right inside the timing ring.
         //Each note is a hollow ring with its loudness written in it, the way music marks it:
@@ -134,30 +162,66 @@ namespace Tacetno433.Screens
         //   mf  plain.
         //   p   soft, a thin dim ring. TACET will EASE.
         //   ?   a hidden note, nobody can tell.
-        //The small arrow over each note is the stroke that answers it. A dash is a beat where
-        //nobody plays at all.
+        //   tr  TACET's roll (later floors), with a zigzag bar as long as the roll lasts.
+        //The pointer on the ring's edge is the way to swing, the same as the answer ring shows.
+        //The note to answer next is bright, the next one a little dimmer, the rest faint.
+        //A pair (last floor) is a note tied to a spark: one more flick, any way, on the spark.
+        //A note under an arch (from floor two) is held still after its stroke.
+        //A dash is a beat where nobody plays at all.
         private void DrawIncoming(SpriteBatch sb)
         {
-            if (phase != Phase.Phrase) return;
+            if (phase != Phase.Play) return;
 
-            float fromX = TacetGame.ScreenW - 30f;
             bool echoFades = battle.EnemyHas(EnemyTrait.EchoFades);
 
-            for (int k = 0; k < 4; k++)
+            for (int n = 0; n < BattleRules.BeatsPerRound; n++)
             {
-                if (k > called || k < pending) continue;          // not played yet, or already answered
-                int n = bar * 4 + k;
-                float t = MathHelper.Clamp((clock - k * beatLen) / (4f * beatLen), 0f, 1f);
-                float x = MathHelper.Lerp(fromX, HitX, t);
+                if (n > called || n < pending) continue;          // not played yet, or already answered
+                float x = LaneX(n * beatLen);
+                float t = MathHelper.Clamp((clock - n * beatLen) / (4f * beatLen), 0f, 1f);
                 int power = battle.EnemyPower[n];
+                bool firstDone = n == pending && (onGrace || rolling);
+
+                //Pair : a ribbon from the note back to its spark, half a beat behind
+                if (battle.EnemyDouble[n] && n <= graceCalled)
+                {
+                    float gx = LaneX((n + 0.5f) * beatLen);
+                    if (gx > x + 2f)
+                    {
+                        Gfx.Rect(sb, x, RingY - 9f, gx - x, 18f, Palette.Paper * 0.3f);
+                        Gfx.Rect(sb, x, RingY - 9f, gx - x, 2f, Palette.Paper * 0.8f);
+                        Gfx.Rect(sb, x, RingY + 7f, gx - x, 2f, Palette.Paper * 0.8f);
+                    }
+                    NoteGlyph.Spark(sb, gx, RingY, 14f, Palette.Highlight * Focus(n));
+                }
+
+                //Roll : the tail runs back up the lane for as long as the roll lasts
+                if (battle.IsTremolo(n))
+                {
+                    float tailEnd = LaneX((n + BattleRules.TremoloBeats) * beatLen);
+                    DrawTrillTail(sb, x, tailEnd);
+                }
+
+                //Fermata : a wide ribbon for as long as the note is held, and the fermata sign on top
+                if (battle.IsFermata(n))
+                {
+                    float holdX = LaneX((n + BattleRules.FermataBeats) * beatLen);
+                    DrawHoldRibbon(sb, x, holdX);
+                    if (!holding) NoteGlyph.FermataSign(sb, x, RingY - 30f, 14f, Palette.Highlight);
+                }
+
+                if (holding && n == pending) continue;             // the hold draws itself at the hit point
+                if (firstDone && !rolling) continue;               // the first of the pair is answered
+
+                float focus = Focus(n);
 
                 if (power <= 0)
                 {
-                    //Silent Note : a dash, or a hollow mark with an arrow when we still play here
+                    //Silent Note : a dash, or a hollow diamond with its pointer when we still play here
                     if (battle.HasAction(n))
                     {
-                        Gfx.DiamondOutline(sb, x, RingY, 12f, Palette.Paper * 0.7f, 1.5f);
-                        DrawDirection(sb, pattern[k], x, RingY, 14f, 5f, Palette.Highlight, 2f);
+                        Gfx.DiamondOutline(sb, x, RingY, 14f, Palette.Paper * (0.8f * focus), 2f);
+                        DrawPointer(sb, pattern[n % 4], x, RingY, 14f, focus);
                     }
                     else
                     {
@@ -167,37 +231,64 @@ namespace Tacetno433.Screens
                 }
 
                 bool hidden = battle.EnemyHidden[n];
+                bool roll = battle.IsTremolo(n);
                 Choice shown = battle.ShownChoice[n];
-                float size = hidden ? 0.55f : MathHelper.Clamp(power / 14f, 0.25f, 1f);
+                bool plain = !hidden && !roll;
+                float size = plain ? MathHelper.Clamp(power / 14f, 0.25f, 1f) : 0.6f;
                 float radius = 19f + size * 12f;
                 float thick = 2.5f;
-                float alpha = 1f;
-                if (!hidden && shown == Choice.Boost) thick = 4.5f;
-                if (!hidden && shown == Choice.Ease) { thick = 1.5f; alpha = 0.65f; }
+                float alpha = focus;
+                if (plain && shown == Choice.Boost) thick = 4.5f;
+                if (plain && shown == Choice.Ease) { thick = 1.5f; alpha *= 0.75f; }
 
                 Hollow.Ring(sb, x, RingY, radius, thick, alpha);
 
                 //Crown : a loud note bristles
-                if (!hidden && shown == Choice.Boost)
+                if (plain && shown == Choice.Boost)
                 {
                     for (int i = 0; i < 8; i++)
                     {
                         float angle = i * MathHelper.PiOver4 + time * 1.5f;
                         Vector2 d = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
-                        Gfx.Line(sb, new Vector2(x, RingY) + d * (radius + 3f), new Vector2(x, RingY) + d * (radius + 10f), Palette.Highlight, 2f);
+                        Gfx.Line(sb, new Vector2(x, RingY) + d * (radius + 3f), new Vector2(x, RingY) + d * (radius + 9f), Palette.Highlight * alpha, 2f);
                     }
                 }
 
-                //Mark : the loudness in the middle. ECHO FADES wipes it out before it arrives.
+                //Letter : how loud TACET plays it. ECHO FADES wipes it out before it arrives.
                 float markAlpha = 1f;
-                if (echoFades) markAlpha = MathHelper.Clamp(1f - (t - 0.35f) / 0.2f, 0f, 1f);
-                string mark = hidden ? "?" : dynamicMark[(int)shown];
-                float markSize = TextSize.Small * (hidden ? 0.9f : (shown == Choice.Boost ? 1.15f : (shown == Choice.Normal ? 0.72f : 0.9f)));
+                if (echoFades && !roll) markAlpha = MathHelper.Clamp(1f - (t - 0.35f) / 0.2f, 0f, 1f);
+                string mark = roll ? "tr" : (hidden ? "?" : dynamicMark[(int)shown]);
+                float markSize = TextSize.Small * (plain ? (shown == Choice.Boost ? 1.15f : (shown == Choice.Normal ? 0.72f : 0.9f)) : 0.9f);
                 Gfx.TextCentered(sb, Game.BigFont, mark, x, RingY - 2, Palette.Highlight * (alpha * markAlpha), markSize);
 
-                //Arrow : the stroke that answers this note, just above the lane
-                DrawDirection(sb, pattern[k], x, RingY - LaneHalf - 12f, 14f, 5f, Palette.Highlight * 0.9f, 2f);
+                //Pointer : the way to swing. A roll takes any way, so it has none.
+                if (!roll) DrawPointer(sb, pattern[n % 4], x, RingY, radius, focus);
             }
         }
+
+        //Focus : the note to answer next is bright, the one after it a little dimmer, the rest faint
+        private float Focus(int n)
+        {
+            if (n <= pending) return 1f;
+            if (n == pending + 1) return 0.75f;
+            return 0.5f;
+        }
+
+        //Pointer : a small solid arrow head just outside a note's ring, on the side the baton
+        //has to travel toward. Outlined dark, so it reads over the bright stage as well.
+        private void DrawPointer(SpriteBatch sb, Flick dir, float cx, float cy, float radius, float alpha)
+        {
+            Vector2 c = new Vector2(cx, cy) + DirVector(dir) * (radius + 14f);
+            DrawHead(sb, dir, c, 15f, Palette.Ink * alpha);
+            DrawHead(sb, dir, c, 10f, Palette.Highlight * alpha);
+        }
+
+        private void DrawHead(SpriteBatch sb, Flick dir, Vector2 c, float size, Color color)
+        {
+            if (dir == Flick.Up) Gfx.Triangle(sb, c.X, c.Y, size, true, color);
+            else if (dir == Flick.Down) Gfx.Triangle(sb, c.X, c.Y, size, false, color);
+            else Gfx.Arrow(sb, c.X, c.Y, size, dir == Flick.Right, color);
+        }
+
     }
 }
