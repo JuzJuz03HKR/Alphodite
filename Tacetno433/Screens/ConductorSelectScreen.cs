@@ -18,6 +18,12 @@ namespace Tacetno433.Screens
             get { return false; }
         }
 
+        //Uses Curtain : the gallery hangs between curtains, so the stage curtain opens on it
+        public override bool UsesCurtain
+        {
+            get { return true; }
+        }
+
         //Gallery Layout : move these numbers to reposition everything
         private const int FrameW = 330;
         private const int FrameH = 430;
