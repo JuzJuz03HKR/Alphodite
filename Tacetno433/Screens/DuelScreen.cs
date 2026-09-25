@@ -125,6 +125,7 @@ namespace Tacetno433.Screens
         private const int SayFinaleFail = 19;
         private const int SayFinaleWin = 20;
         private const int SayFermata = 21;
+        private const int SayCollapse = 22;
         private static string[] sayText =
         {
             "* It hums a phrase. Listen...",
@@ -138,7 +139,7 @@ namespace Tacetno433.Screens
             "* The silence gives a little ground.",
             "* Neither side gives way.",
             "* The silence presses closer...",
-            "* The band is gasping for air...",
+            "* The band is gasping for air. One more blow could finish it!",
             "* It plays softly. A small answer saves your breath.",
             "",
             "* A note tied to a spark. Flick once more, any way, on the half beat!",
@@ -148,14 +149,15 @@ namespace Tacetno433.Screens
             "* The silence staggers. Finish the piece!",
             "* The ending falls apart. It claws its way back.",
             "* The last chord rings out. The silence breaks.",
-            "* It draws out a long note. Stroke it, then hold still!"
+            "* It draws out a long note. Stroke it, then hold still!",
+            "* The band runs out of breath. The music stops."
         };
         private const float SayWrap = 350f;
         private const float SaySpeed = 520f;     // pixels of text uncovered per second
-        private string[] sayLineA = new string[22];
-        private string[] sayLineB = new string[22];
-        private float[] sayWidthA = new float[22];
-        private float[] sayWidthB = new float[22];
+        private string[] sayLineA = new string[23];
+        private string[] sayLineB = new string[23];
+        private float[] sayWidthA = new float[23];
+        private float[] sayWidthB = new float[23];
         private int saying = -1;
         private float sayTimer;
 
@@ -169,6 +171,8 @@ namespace Tacetno433.Screens
         private float displayLine;
         private float comboPulse;
         private float staminaFlash;     // the stamina bar lights up when it changes
+        private float staminaJolt;      // the stamina plate shakes when TACET'S BLOW lands
+        private bool breathWarned;      // the story box has warned about low breath this fight
         private float tugFlash;         // the tug marker lights up when the line is pushed
         private float fireGlow;         // how much of FORTISSIMO's light is on the stage
         private float fireFlash;        // the instant the band catches fire
@@ -212,6 +216,9 @@ namespace Tacetno433.Screens
         //Metronome : a soft click on every beat once the band is answering, so the pulse can be
         //heard all the way through the round
         private const float MetronomeVolume = 0.25f;
+
+        //Low Breath : under this share of stamina the screen closes in with the beat, a warning
+        private const float LowBreath = 0.25f;
         private int pending;            // the beat waiting for its stroke, 0 to 7, 8 when all are in
         private bool onGrace;           // that beat's first note is answered, its pair is still due
         private bool rolling;           // TACET's roll is being answered
@@ -457,6 +464,7 @@ namespace Tacetno433.Screens
             ripple = Math.Max(0f, ripple - dt * 1.8f);
             shake = Math.Max(0f, shake - dt * 3.5f);
             staminaFlash = Math.Max(0f, staminaFlash - dt * 2.5f);
+            staminaJolt = Math.Max(0f, staminaJolt - dt * 3f);
             tugFlash = Math.Max(0f, tugFlash - dt * 2.5f);
             fireFlash = Math.Max(0f, fireFlash - dt * 3f);
             counterFlash = Math.Max(0f, counterFlash - dt * 4f);
@@ -791,14 +799,7 @@ namespace Tacetno433.Screens
             ShowFire(r);
 
             //Special Moments : rare, so they still get a word of their own
-            if (r.OutOfBreath)
-            {
-                effects.SpawnPop(stageBox.Center.X, stageBox.Y + 20, "OUT OF BREATH", Palette.Highlight, 0.6f);
-                SoundBank.Play(Sfx.StaminaEmpty);
-                Say(SayBreath);
-            }
-            if (r.SecondWind)
-                effects.SpawnPop(stageBox.Center.X, stageBox.Y + 60, "SECOND WIND", Palette.Accent, 0.6f);
+            ShowBreath(r, b);
             if (r.Fired)
                 effects.SpawnPop(stageBox.Center.X, stageBox.Y + 60, "RUNAWAY FIRE", Palette.Accent, 0.5f);
         }
@@ -812,6 +813,57 @@ namespace Tacetno433.Screens
                 SoundBank.Play(Sfx.ComboUp, 1f, Math.Min(0.5f, r.Combo * 0.08f));
             }
             if (r.ComboBroken) SoundBank.Play(Sfx.ComboBreak);
+        }
+
+        //Breath Show : what the beat did to the band's breath.
+        //   TACET'S BLOW  its note flies on into the band, the stamina plate jolts, the loss pops up
+        //   SECOND WIND   the motif caught the band this once
+        //   COLLAPSE      out of breath, the fight is over
+        //   low breath    the first time it drops under a quarter, the story box warns
+        private void ShowBreath(BeatResult r, int b)
+        {
+            RunState run = Game.CurrentRun;
+            if (r.Blow > 0)
+            {
+                Vector2 target = BlowTarget(b);
+                effects.SpawnBlow(HitX, RingY, target.X, target.Y, r.Blow / 16f);
+                staminaJolt = 1f;
+                staminaFlash = 1f;
+                shake = Math.Max(shake, Math.Min(1f, 0.35f + r.Blow / 24f));
+                effects.SpawnPop(310f, 100f, NumberText.Signed(-r.Blow), Palette.Highlight, 0.5f);
+            }
+
+            if (r.SecondWind)
+                effects.SpawnPop(stageBox.Center.X, stageBox.Y + 60, "SECOND WIND", Palette.Accent, 0.6f);
+
+            if (r.Collapsed)
+            {
+                effects.SpawnPop(stageBox.Center.X, stageBox.Y + 20, "OUT OF BREATH", Palette.Highlight, 0.8f);
+                SoundBank.Play(Sfx.StaminaEmpty);
+                Say(SayCollapse);
+            }
+            else if (!breathWarned && run.Stamina <= run.MaxStamina * LowBreath)
+            {
+                breathWarned = true;
+                Say(SayBreath);
+            }
+        }
+
+        //Blow Target : the front most player on this beat takes TACET's blow, or the middle of
+        //the band when nobody was playing it
+        private Vector2 BlowTarget(int b)
+        {
+            Formation f = Game.CurrentRun.Formation;
+            for (int i = 0; i < panelOrder.Length; i++)
+            {
+                int s = panelOrder[i];
+                if (f.Seated[s] != null && f.Plays(s, b))
+                {
+                    Rectangle stand = StandRect(s);
+                    return new Vector2(stand.Center.X, stand.Center.Y);
+                }
+            }
+            return new Vector2(stageBox.Center.X - 20, stageBox.Center.Y + 40);
         }
 
         //Trait Pop : the musician's trait name rises over their head when it changes a beat
@@ -905,7 +957,9 @@ namespace Tacetno433.Screens
             phase = Phase.RoundEnd;
             phaseTimer = 0f;
 
-            if (battle.Finished)
+            if (battle.Finished && battle.Collapsed)
+                bannerText = "OUT OF BREATH";
+            else if (battle.Finished)
                 bannerText = battle.PlayerWon ? "THE SILENCE BREAKS" : "THE SILENCE WINS";
             else if (battle.Round >= BattleRules.MaxRounds)
                 bannerText = battle.Line > 0f ? "YOU HOLD THE STAGE" : "TACET HOLDS THE STAGE";
@@ -1029,12 +1083,17 @@ namespace Tacetno433.Screens
             sb.End();
             sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp);
 
+            //Low Breath : the edges close in with the beat, see DuelScreen.Hud.cs
+            DrawLowBreath(sb);
+
             //Play Area : the lane, the notes and the ring never shake
             DrawLane(sb);
             DrawIncoming(sb);
             DrawFinaleNotes(sb);
             effects.DrawShards(sb);
             effects.DrawHits(sb);
+            effects.DrawBlows(sb);
+            effects.DrawSlashes(sb);
             DrawAnswerRing(sb);
             DrawReady(sb);
             DrawRoll(sb);

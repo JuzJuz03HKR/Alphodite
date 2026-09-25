@@ -27,7 +27,8 @@ namespace Tacetno433.Battle
         public Choice PlayerChoice;
         public Choice EnemyChoice;
         public Grade Grade;
-        public bool OutOfBreath;
+        public int Blow;               // TACET'S BLOW : stamina knocked out of the band on this beat (or its spark)
+        public bool Collapsed;         // COLLAPSE : the band ran out of breath on this beat, the fight is lost
 
         //Extras : the duel page shows a word for each of these
         public int Combo;              // the combo after this beat
@@ -61,8 +62,10 @@ namespace Tacetno433.Battle
     //   on every beat both sides add up their power, both pick Normal / Boost / Ease,
     //   and the difference pushes a line. Push it to +100 and you win on the spot, get pushed
     //   to -100 and you lose. After 3 rounds, whoever is ahead wins.
-    //   every note costs stamina. Silent beats and Ease give some back. At zero stamina the
-    //   band can only play as much as it can still pay for.
+    //   STAMINA is the band's breath, carried across the whole run. Planned notes cost some,
+    //   silent beats and EASE give some back. A beat TACET wins knocks breath out of the band
+    //   (TACET'S BLOW), and so does a MISS. At zero the band COLLAPSES and the fight is lost.
+    //   Big strokes, rolls and holds cost nothing extra: the flashy moves are free.
     //   PERFECT strokes in a row build a COMBO that makes every beat stronger, and a long
     //   combo sets the band on fire (FORTISSIMO) for a few beats.
     //   some of TACET's notes come in pairs (the second one is a grace, see ResolveGrace).
@@ -84,6 +87,7 @@ namespace Tacetno433.Battle
         public float Line = 0f;                  // -100 we lose  ..  +100 we win
         public bool Finished;
         public bool PlayerWon;
+        public bool Collapsed;                   // lost by running out of breath, not by the line
         public int PerfectCount;
 
         //Combo
@@ -209,7 +213,7 @@ namespace Tacetno433.Battle
             }
         }
 
-        //Choices Locked : THE METRONOME can only play what is written
+        //Choices Locked : THE METRONOME's every stroke is a BOOST, whatever its size, and he can never EASE
         public bool ChoicesLocked
         {
             get { return Run.Conductor.Perk == ConductorPerk.LockedTempo; }
@@ -545,6 +549,13 @@ namespace Tacetno433.Battle
             return (int)Math.Round(total * harmony * Run.PowerMultiplier);
         }
 
+        //Expected Power : what a beat should bring when it is answered the usual way, with a big
+        //stroke. BOOST costs nothing extra, so the forecast and the auto plan count on it.
+        public int ExpectedPowerAt(int beat)
+        {
+            return (int)Math.Round(OurPowerAt(beat) * BattleRules.BoostPower);
+        }
+
         //Our Cost : stamina this beat will take, before any choice
         public int OurCostAt(int beat)
         {
@@ -670,12 +681,12 @@ namespace Tacetno433.Battle
             for (int f = 0; f < Notes.Length; f++) Notes[f] = 0;
         }
 
-        //Forecast For : how a beat looks on paper if it is simply played, our planned power
-        //against TACET's written power. TACET's own choice stays secret until its call, and
+        //Forecast For : how a beat looks on paper, our planned power answered with a big stroke
+        //(ExpectedPowerAt) against TACET's written power. TACET's own choice stays secret until its call, and
         //a hidden beat is never guessed, so the forecast gives nothing away.
         public Forecast ForecastFor(int beat)
         {
-            int ours = OurPowerAt(beat);
+            int ours = ExpectedPowerAt(beat);
             int theirs = EnemyStrikeAt(beat);
 
             if (EnemyHidden[beat]) return Forecast.Unknown;
@@ -691,7 +702,7 @@ namespace Tacetno433.Battle
             return Forecast.Hopeless;
         }
 
-        //Forecast Line : where the line would end the round if every beat were played plainly.
+        //Forecast Line : where the line would end the round if every beat were answered big.
         //Hidden beats are left out, because nobody knows yet what they hold.
         public float ForecastLine()
         {
@@ -699,7 +710,7 @@ namespace Tacetno433.Battle
             for (int b = 0; b < BattleRules.BeatsPerRound; b++)
             {
                 if (EnemyHidden[b]) continue;
-                line += (OurPowerAt(b) - EnemyStrikeAt(b)) * BattleRules.PushPerPower;
+                line += (ExpectedPowerAt(b) - EnemyStrikeAt(b)) * BattleRules.PushPerPower;
             }
 
             if (line > BattleRules.LineLimit) line = BattleRules.LineLimit;
@@ -718,7 +729,7 @@ namespace Tacetno433.Battle
         public BeatResult Resolve(int beat, Choice choice, Grade grade)
         {
             BeatResult r = Results[beat];
-            if (ChoicesLocked) choice = Choice.Normal;                                  // LOCKED TEMPO
+            if (ChoicesLocked) choice = Choice.Boost;                                   // LOCKED TEMPO
             for (int s = 0; s < r.TraitFired.Length; s++) r.TraitFired[s] = false;
 
             int basePower = OurPowerAt(beat);
@@ -757,9 +768,9 @@ namespace Tacetno433.Battle
             }
             else if (choice == Choice.Boost)
             {
+                //BOOST : hits harder and costs nothing extra, a big stroke is always worth making
                 bool sforzando = Run.Has(MotifId.Sforzando);                          // SFORZANDO
                 power *= sforzando ? BattleRules.SforzandoPower : BattleRules.BoostPower;
-                cost *= BattleRules.BoostCost;
             }
             else if (choice == Choice.Ease)
             {
@@ -772,20 +783,19 @@ namespace Tacetno433.Battle
             }
 
             //TREMOLO : TACET's roll is answered by many strokes instead of one. Every stroke adds
-            //a little, up to a limit, and every stroke costs breath while somebody is playing.
+            //a little, up to a limit. Shaking is free, so shake hard.
             r.Tremolo = beat == TremoloBeat;
             r.RollStrokes = 0;
             if (r.Tremolo)
             {
                 int counted = Math.Min(RollStrokes, TremoloMost);                     // ACCELERANDO inside
                 power *= BattleRules.TremoloBase + BattleRules.TremoloStep * counted;
-                if (basePower > 0) cost += RollStrokes * BattleRules.TremoloCost;
                 r.RollStrokes = RollStrokes;
                 RollStrokes = 0;
             }
 
             //FERMATA : TACET's held note. Our part grows with how long the baton was held still
-            //after the stroke, and holding costs breath while somebody is playing.
+            //after the stroke. Holding is free, the test is keeping the hand still.
             r.Fermata = beat == FermataBeat;
             r.Held = 0f;
             if (r.Fermata)
@@ -793,7 +803,6 @@ namespace Tacetno433.Battle
                 r.Held = MathHelper.Clamp(HoldFraction, 0f, 1f);
                 float hold = Run.Has(MotifId.Tenuto) ? BattleRules.TenutoHold : BattleRules.FermataHold;   // TENUTO
                 power *= BattleRules.FermataBase + hold * r.Held;
-                if (basePower > 0) cost += BattleRules.FermataCost * r.Held;
                 HoldFraction = 0f;
             }
 
@@ -887,14 +896,13 @@ namespace Tacetno433.Battle
                 r.Counter = true;
             }
 
-            //Out Of Breath : the band can only play as much as it can still pay for
+            //Short Of Breath : the band can only play as much as it can still pay for, and paying
+            //the very last of it means the band COLLAPSES (see CheckBreath)
             int costPaid = (int)Math.Round(cost);
-            r.OutOfBreath = false;
             if (costPaid > Run.Stamina)
             {
                 if (costPaid > 0) power *= Run.Stamina / (float)costPaid;
                 costPaid = Run.Stamina;
-                r.OutOfBreath = true;
             }
 
             //Clash : the difference pushes the line
@@ -915,18 +923,12 @@ namespace Tacetno433.Battle
                 MarkTrait(r, MusicianTrait.Thunder, beat);
             }
 
-            //Stamina
-            r.StaminaChange = (int)Math.Round(recover) - costPaid;
-            Run.ChangeStamina(r.StaminaChange);
+            //TACET'S BLOW : a beat TACET wins hits the band for whatever got through
+            r.Blow = BlowFor(r.OurPower, r.EnemyPower);
 
-            //SECOND WIND : the first time the band runs dry, it gets a third back
-            r.SecondWind = false;
-            if (Run.Stamina == 0 && !secondWindUsed && Run.Has(MotifId.SecondWind))
-            {
-                Run.ChangeStamina((int)(Run.MaxStamina * BattleRules.SecondWindRefill));
-                secondWindUsed = true;
-                r.SecondWind = true;
-            }
+            //Stamina
+            r.StaminaChange = (int)Math.Round(recover) - costPaid - r.Blow;
+            Run.ChangeStamina(r.StaminaChange);
 
             r.Push = (int)Math.Round(push);
             r.PlayerChoice = choice;
@@ -938,11 +940,43 @@ namespace Tacetno433.Battle
             r.Done = true;
             WriteSheet(beat, r);
 
-            //Instant Result : the line reached an edge
+            //Instant Result : the line reached an edge, or the band ran out of breath
             if (Line >= BattleRules.LineLimit) { Finished = true; PlayerWon = true; }
             if (Line <= -BattleRules.LineLimit) { Finished = true; PlayerWon = false; }
+            CheckBreath(r);
 
             return r;
+        }
+
+        //Blow For : TACET'S BLOW, the stamina a beat costs the band when TACET wins it
+        private static int BlowFor(int ours, int theirs)
+        {
+            if (theirs <= ours) return 0;
+            return (int)Math.Round((theirs - ours) * BattleRules.BlowPerPower);
+        }
+
+        //Breath Check : breath at zero is a COLLAPSE, the band stops and the fight is lost.
+        //SECOND WIND catches the band once. A fight the line already won is not lost this way.
+        private void CheckBreath(BeatResult r)
+        {
+            r.SecondWind = false;
+            r.Collapsed = false;
+            if (Run.Stamina > 0 || Finished) return;
+
+            //SECOND WIND : the first time the band would collapse, a third of its breath comes back
+            if (!secondWindUsed && Run.Has(MotifId.SecondWind))
+            {
+                Run.ChangeStamina((int)(Run.MaxStamina * BattleRules.SecondWindRefill));
+                secondWindUsed = true;
+                r.SecondWind = true;
+                return;
+            }
+
+            //COLLAPSE
+            r.Collapsed = true;
+            Collapsed = true;
+            Finished = true;
+            PlayerWon = false;
         }
 
         //Sheet Write : copy the beat into the record the result page reads
@@ -1023,10 +1057,16 @@ namespace Tacetno433.Battle
             r.ComboBroken = comboBefore >= 2 && Combo == 0;
             UpdateFortissimo(r, grade);
 
-            float push = ((int)Math.Round(ours) - (int)Math.Round(theirs)) * BattleRules.PushPerPower;
+            int ourPart = (int)Math.Round(ours);
+            int theirPart = (int)Math.Round(theirs);
+            float push = (ourPart - theirPart) * BattleRules.PushPerPower;
             Line += push;
             if (Line > BattleRules.LineLimit) Line = BattleRules.LineLimit;
             if (Line < -BattleRules.LineLimit) Line = -BattleRules.LineLimit;
+
+            //TACET'S BLOW : its second note gets through too
+            r.Blow = BlowFor(ourPart, theirPart);
+            Run.ChangeStamina(-r.Blow);
 
             r.GraceGrade = grade;
             r.GracePush = (int)Math.Round(push);
@@ -1034,6 +1074,7 @@ namespace Tacetno433.Battle
 
             if (Line >= BattleRules.LineLimit) { Finished = true; PlayerWon = true; }
             if (Line <= -BattleRules.LineLimit) { Finished = true; PlayerWon = false; }
+            CheckBreath(r);
             return r;
         }
 
@@ -1143,7 +1184,7 @@ namespace Tacetno433.Battle
                 if (need == 0) continue;
 
                 bool[] used = new bool[StageLayout.SeatCount];
-                while (OurPowerAt(b) <= need)
+                while (ExpectedPowerAt(b) <= need)
                 {
                     int pick = StrongestFree(used);
                     if (pick < 0) break;

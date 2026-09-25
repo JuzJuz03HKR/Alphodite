@@ -22,7 +22,7 @@ namespace Tacetno433.Screens
 
             //Stroke Size : small eases, middle plays, big boosts
             Choice choice = sizeChoice[SizeOf(gesture.Length)];
-            if (battle.ChoicesLocked) choice = Choice.Normal;                  // THE METRONOME can only play
+            if (battle.ChoicesLocked) choice = Choice.Boost;                   // THE METRONOME : every stroke is a BOOST
 
             //Timing Grade : judged where the baton stopped, against the beat
             float now = StrokeClock();
@@ -55,7 +55,7 @@ namespace Tacetno433.Screens
             if (signature)
             {
                 battle.SignatureArmed = false;
-                if (!battle.ChoicesLocked) choice = Choice.Boost;
+                choice = Choice.Boost;
                 grade = Grade.Perfect;
                 battle.SignatureNext = true;
             }
@@ -63,6 +63,11 @@ namespace Tacetno433.Screens
             //Hand And Stick : the hand picture changes pose, the stick gets a flick
             hand.Play(signature ? HandPose.Signature : PoseFor(gesture.Direction));
             WhipBaton(gesture.Direction);
+
+            //Slash : a big stroke the right way leaves a blade of light along its path, brighter
+            //for a PERFECT. The band's own blow, the answer to TACET's.
+            if (choice == Choice.Boost && (rightWay || signature))
+                effects.SpawnSlash(gesture.From, gesture.To, grade == Grade.Perfect ? 1f : 0.55f);
 
             //Judgement : ONE word at the hit point, how well it landed and what the band was told,
             //and the shape of the order opening out from the hit point

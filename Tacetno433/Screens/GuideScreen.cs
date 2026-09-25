@@ -42,18 +42,18 @@ namespace Tacetno433.Screens
             + "More seats can be bought in shops.",
 
             "The top row is what TACET will play this round. Tick the beats each musician plays. "
-            + "Answer its attacks, hit hard where it is silent, and leave some beats empty so the band can breathe. "
+            + "Answer its attacks, a beat it wins hits the band's breath. Leave some beats empty so the band can breathe. "
             + "The FORECAST row names every beat, from DOMINATING down to HOPELESS. A framed word is the one to fix.",
 
             "TACET plays a bar first, each note marked f (loud), mf or p (soft), then the band counts you in: 3, 2, 1. "
             + "Hold the left mouse button and conduct on every beat, the way the pointer on the bright note says. A small "
-            + "swing EASES, a middle one PLAYS, a big one BOOSTS. Stop as the ring closes. A PERFECT BOOST against f is a "
+            + "swing EASES, a middle one PLAYS, a big one BOOSTS for free. Stop as the ring closes. A PERFECT BOOST against f is a "
             + "COUNTER. Later floors add one thing each: a zigzag bar to shake, a note under an arch to hold still, a spark to flick.",
 
             "Each clash pushes the line between your light and TACET's dark. Push it all the way to win at once, "
             + "or be ahead after three rounds. Far enough ahead at a round's end, conduct the FINALE to finish it. "
-            + "Eight PERFECTs in a row set the band on fire. Stamina carries across the whole run, "
-            + "so plan your rests and choose your motifs well."
+            + "Every beat TACET wins knocks breath out of the band. Out of breath, the band collapses and the "
+            + "fight is lost. Stamina carries across the whole run, so rest and choose your motifs well."
         };
 
         //Guide Layout
@@ -347,7 +347,7 @@ namespace Tacetno433.Screens
             Ui.CapsuleBar(sb, new Rectangle(120, 430, 500, 14), (split - 100f) / 540f, Palette.Paper, a);
             Gfx.TextSpaced(sb, Game.Font, "THE LINE", 120, 412, Palette.LineGrey * a, TextSize.Tiny, 2f);
 
-            Gfx.TextSpaced(sb, Game.Font, "STAMINA  /  CARRIES ACROSS THE RUN", 120, 476, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            Gfx.TextSpaced(sb, Game.Font, "STAMINA  /  AT ZERO THE BAND COLLAPSES", 120, 476, Palette.LineGrey * a, TextSize.Tiny, 2f);
             Ui.CapsuleBar(sb, new Rectangle(120, 494, 500, 10), 0.45f, Palette.PaperDim, a);
         }
     }

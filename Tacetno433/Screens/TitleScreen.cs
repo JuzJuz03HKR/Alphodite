@@ -45,7 +45,8 @@ namespace Tacetno433.Screens
         //Title Tips : the notice strip at the bottom, one every few seconds
         private static string[] tips =
         {
-            "Silent beats give stamina back. A plan with no rests runs dry.",
+            "A beat TACET wins knocks breath out of the band. At zero, it collapses.",
+            "Big strokes cost nothing extra. Swing big and win the beat.",
             "PERFECT strokes in a row build a combo. A miss breaks it.",
             "The front row hits harder. The back row costs less.",
             "TACET's call shows how loud each note is: f loud, mf, p soft. Answer to match.",
@@ -53,8 +54,8 @@ namespace Tacetno433.Screens
             "Motifs last the whole run. Pick the ones that suit your conductor.",
             "A PERFECT BOOST against a real f note is a COUNTER. It throws part of the note back.",
             "On the last floor, a note tied to a spark: answer it, then flick once more, any way, on the half beat.",
-            "Elites and bosses end each round with a roll. Shake the baton, but every stroke costs breath.",
-            "From floor two, a note under an arch is a fermata. Stroke it, then hold still. Holding costs breath.",
+            "Elites and bosses end each round with a roll. Shake the baton as fast as you can.",
+            "From floor two, a note under an arch is a fermata. Stroke it, then hold still to the end.",
             "Eight PERFECTs in a row set the band on fire. FORTISSIMO hits harder for four beats.",
             "Far enough ahead at the end of a round, conduct the FINALE and end the duel at once.",
             "Strokes judged early or late? Settings has a STROKE TIMING test.",

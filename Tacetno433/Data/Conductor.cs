@@ -8,7 +8,7 @@ namespace Tacetno433.Data
     public enum ConductorPerk
     {
         None,            // THE APPRENTICE
-        LockedTempo,     // THE METRONOME   no boost or ease, much cheaper notes
+        LockedTempo,     // THE METRONOME   every stroke a boost, never ease, much cheaper notes
         RunawayFire,     // THE INFERNO     a miss is not weaker and powers up the next beat
         CloserLouder,    // THE UNHEARING   stronger the further TACET has pushed
         EveryRoadHome    // THE FOLK LEADER mixed cultures on a beat hit harder, one seat fewer
@@ -99,8 +99,8 @@ namespace Tacetno433.Data
                 MechanicName = "LOCKED TEMPO",
                 SignatureMark = "Tempo giusto",
                 Recipe = new int[] { 2, 0, 2 },     // the rhythm section
-                MechanicText = "Boost and Ease are sealed, every beat is played as written. "
-                             + "In exchange every note costs 40 percent less stamina.",
+                MechanicText = "Every stroke is a BOOST, whatever its size, but Ease is sealed. "
+                             + "Every note costs 40 percent less stamina.",
                 Stamina = 9, PushPower = 4, Perk = ConductorPerk.LockedTempo,
                 ThemeColor = Palette.ToneC,
                 Unlocked = true

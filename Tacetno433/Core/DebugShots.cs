@@ -282,7 +282,7 @@ namespace Tacetno433.Core
         //So it is a slightly harsh picture of a real run, where the player also collects motifs.
         private static string SimulateRuns(TacetGame game, Random random)
         {
-            string[] habits = { "GOOD PLAY EVERY BEAT, NEVER BOOSTS", "SKILLED  (PERFECT, BOOST HEAVY, EASE WHEN LOW)",
+            string[] habits = { "GOOD PLAY EVERY BEAT, NEVER BOOSTS", "SKILLED  (PERFECT, BOOST, EASE LIGHT WHEN LOW)",
                                 "AVERAGE  (40% PERFECT, 10% MISS, SAME CHOICES)", "STRONG   (70% PERFECT, 5% MISS, SAME CHOICES)" };
             string report = "WHOLE RUNS  (" + BattleRules.FloorsPerRun + " floors, 200 runs per line, conductor THE APPRENTICE)\r\n";
 
@@ -291,7 +291,7 @@ namespace Tacetno433.Core
                 int won = 0;
                 int[] lostOnFloor = new int[BattleRules.FloorsPerRun + 1];
                 int[] lostTo = new int[3];
-                int bossStamina = 0, bossCount = 0;
+                int bossStamina = 0, bossCount = 0, outOfBreath = 0;
 
                 for (int n = 0; n < 200; n++)
                 {
@@ -323,6 +323,7 @@ namespace Tacetno433.Core
                                 alive = false;
                                 lostOnFloor[run.Floor]++;
                                 lostTo[(int)run.Battle.Enemy.Kind]++;
+                                if (run.Battle.Collapsed) outOfBreath++;
                                 break;
                             }
 
@@ -361,6 +362,7 @@ namespace Tacetno433.Core
                 report += habits[h].PadRight(50) + "RUN WON " + (won * 100 / 200).ToString().PadLeft(3) + "%"
                         + "   LOST ON FLOOR 1/2/3  " + lostOnFloor[1] + " / " + lostOnFloor[2] + " / " + lostOnFloor[3]
                         + "   LOST TO NORMAL/ELITE/BOSS  " + lostTo[0] + " / " + lostTo[1] + " / " + lostTo[2]
+                        + "   OUT OF BREATH " + outOfBreath
                         + "   STAMINA AT BOSS " + (bossCount > 0 ? bossStamina / bossCount : 0) + "%\r\n";
             }
             return report;
@@ -413,8 +415,10 @@ namespace Tacetno433.Core
                             int roll = random.Next(100);
                             grade = roll < 70 ? Grade.Perfect : (roll < 95 ? Grade.Good : Grade.Miss);
                         }
+                        //BOOST costs nothing extra (round 8), so a good player swings big on every
+                        //beat, and only eases the light ones to catch breath when it runs low
                         bool low = run.Stamina < run.MaxStamina * 0.3f;
-                        if (b.IsHeavy(beat) && !low) choice = Choice.Boost;
+                        choice = Choice.Boost;
                         if (low && !b.IsHeavy(beat)) choice = Choice.Ease;
                     }
                     int strokes = habit == 0 ? 5 : (habit == 1 ? 8 : 5 + random.Next(4));

@@ -127,7 +127,7 @@ namespace Tacetno433.Screens
             statNames[3] = "FINAL LINE";    statValues[3] = NumberText.Signed((int)battle.Line);
             statCount = 4;
 
-            footnote = "THE RUN ENDS HERE";
+            footnote = battle.Collapsed ? "OUT OF BREATH  -  THE RUN ENDS HERE" : "THE RUN ENDS HERE";
             run.MarkLastStopLost();
             SaveFile.DeleteRun();          // a lost fight ends the run, there is nothing to continue
 

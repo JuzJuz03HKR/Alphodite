@@ -101,6 +101,7 @@ namespace Tacetno433.Screens
 
             ShowCombo(r, r.Combo);
             ShowFire(r);
+            ShowBreath(r, b);
             AdvanceBeat();
         }
 
@@ -244,7 +245,6 @@ namespace Tacetno433.Screens
             bool counts = rollStrokes <= battle.TremoloMost;            // ACCELERANDO counts more
             effects.SpawnSparks(HitX, RingY, counts ? 4 : 1, 1f);
             SoundBank.Play(Sfx.QteNormal, counts ? 0.7f : 0.3f, Math.Min(0.6f, rollStrokes * 0.05f));
-            if (battle.OurPowerAt(pending) > 0) staminaFlash = 1f;      // every stroke costs breath
         }
 
         //Roll : while TACET's roll is answered, the ring becomes a counter. The number jumps with

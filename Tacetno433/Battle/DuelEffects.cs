@@ -24,6 +24,10 @@ namespace Tacetno433.Battle
     //And the HIT effects at the hit point, studied from the tap effects of Project Sekai:
     //   HitBurst rings of light opening from the hit point, bigger and brighter for a better grade
     //   Shard    a piece of TACET's hollow note, broken off when the band wins the beat
+    //
+    //And the two blows that make a fight feel like an exchange (round 8):
+    //   Blow     TACET's note, when it wins the beat, flies on into the band and bursts in ink
+    //   Slash    a blade of light left along a big stroke, the band's own blow
     public class DuelEffects
     {
         //Wave : one arc of sound travelling toward the line
@@ -88,6 +92,28 @@ namespace Tacetno433.Battle
             public float X, Y, VX, VY, Angle, Spin, Life, Radius;
         }
 
+        //Blow : TACET's note flying from the hit point into the band, then bursting there
+        private class Blow
+        {
+            public bool On;
+            public float FromX, FromY, ToX, ToY, Life, Power;
+        }
+
+        //Slash : a blade of light along the path of a big stroke
+        private class Slash
+        {
+            public bool On;
+            public Vector2 From, To;
+            public float Life, Strength;
+        }
+
+        private const float BlowLife = 0.5f;
+        private const float BlowFlight = 0.36f;    // the first part of its life is the flight, the rest the burst
+        private const float SlashLife = 0.3f;
+
+        private Blow[] blows = new Blow[6];
+        private Slash[] slashes = new Slash[6];
+
         private const float SparkLife = 0.55f;
         private const float FlareLife = 0.28f;
         private const float RippleLife = 0.9f;
@@ -141,6 +167,8 @@ namespace Tacetno433.Battle
             for (int i = 0; i < ripples.Length; i++) ripples[i] = new Ripple();
             for (int i = 0; i < hits.Length; i++) hits[i] = new HitBurst();
             for (int i = 0; i < shards.Length; i++) shards[i] = new Shard();
+            for (int i = 0; i < blows.Length; i++) blows[i] = new Blow();
+            for (int i = 0; i < slashes.Length; i++) slashes[i] = new Slash();
 
             for (int i = 0; i < MoteCount; i++)
             {
@@ -235,6 +263,38 @@ namespace Tacetno433.Battle
                 shards[i].Radius = radius;
                 shards[i].Life = ShardLife;
                 count--;
+            }
+        }
+
+        //Blow Spawn : power 0 to 1, how big the ring and its burst are
+        public void SpawnBlow(float fromX, float fromY, float toX, float toY, float power)
+        {
+            for (int i = 0; i < blows.Length; i++)
+            {
+                if (blows[i].On) continue;
+                blows[i].On = true;
+                blows[i].FromX = fromX;
+                blows[i].FromY = fromY;
+                blows[i].ToX = toX;
+                blows[i].ToY = toY;
+                blows[i].Power = MathHelper.Clamp(power, 0.2f, 1f);
+                blows[i].Life = BlowLife;
+                return;
+            }
+        }
+
+        //Slash Spawn : strength 0 to 1, how thick and bright the blade is
+        public void SpawnSlash(Vector2 from, Vector2 to, float strength)
+        {
+            for (int i = 0; i < slashes.Length; i++)
+            {
+                if (slashes[i].On) continue;
+                slashes[i].On = true;
+                slashes[i].From = from;
+                slashes[i].To = to;
+                slashes[i].Strength = strength;
+                slashes[i].Life = SlashLife;
+                return;
             }
         }
 
@@ -386,6 +446,20 @@ namespace Tacetno433.Battle
                 if (hits[i].Life <= 0f) hits[i].On = false;
             }
 
+            for (int i = 0; i < blows.Length; i++)
+            {
+                if (!blows[i].On) continue;
+                blows[i].Life -= dt;
+                if (blows[i].Life <= 0f) blows[i].On = false;
+            }
+
+            for (int i = 0; i < slashes.Length; i++)
+            {
+                if (!slashes[i].On) continue;
+                slashes[i].Life -= dt;
+                if (slashes[i].Life <= 0f) slashes[i].On = false;
+            }
+
             //Shards : fly out, slow down, fall a little and spin
             for (int i = 0; i < shards.Length; i++)
             {
@@ -478,6 +552,77 @@ namespace Tacetno433.Battle
                         float from = k * MathHelper.PiOver2 + 0.25f;
                         Gfx.Arc(sb, h.X, h.Y + sink, r, from, from + 1.0f, Palette.PaperDim * (0.8f * a), 2f);
                     }
+                }
+            }
+        }
+
+        //Blows Draw : first the note flies, speeding up (t squared), with a dark streak behind it.
+        //Then it bursts where it lands: an ink ring opens and eight spikes stab outward.
+        public void DrawBlows(SpriteBatch sb)
+        {
+            for (int i = 0; i < blows.Length; i++)
+            {
+                Blow b = blows[i];
+                if (!b.On) continue;
+                float age = BlowLife - b.Life;
+                float radius = 14f + b.Power * 14f;
+
+                if (age < BlowFlight)
+                {
+                    float t = age / BlowFlight;
+                    t = t * t;                                          // speeds up on the way in
+                    float x = MathHelper.Lerp(b.FromX, b.ToX, t);
+                    float y = MathHelper.Lerp(b.FromY, b.ToY, t);
+                    float tailT = Math.Max(0f, t - 0.25f);
+                    float tx = MathHelper.Lerp(b.FromX, b.ToX, tailT);
+                    float ty = MathHelper.Lerp(b.FromY, b.ToY, tailT);
+                    Gfx.Line(sb, tx, ty, x, y, Palette.Ink * 0.5f, radius * 0.9f);
+                    Gfx.Circle(sb, x, y, radius, Palette.Ink);
+                    Gfx.CircleOutline(sb, x, y, radius, Palette.Highlight, 2f);
+                }
+                else
+                {
+                    float t = (age - BlowFlight) / (BlowLife - BlowFlight);     // 0 on impact .. 1 gone
+                    float open = 1f - (1f - t) * (1f - t);
+                    float a = 1f - t;
+                    float r = radius + open * (40f + b.Power * 60f);
+                    Gfx.CircleOutline(sb, b.ToX, b.ToY, r, Palette.Ink * a, 3f + 6f * a);
+                    for (int k = 0; k < 8; k++)
+                    {
+                        float angle = k * MathHelper.PiOver4 + 0.3f;
+                        Vector2 d = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
+                        Vector2 c = new Vector2(b.ToX, b.ToY);
+                        Gfx.Line(sb, c + d * (r * 0.6f), c + d * (r * 1.25f), Palette.Ink * a, 4f * a + 1f);
+                    }
+                }
+            }
+        }
+
+        //Slashes Draw : the blade is thin at both ends and thickest in the middle (a sine curve
+        //along its length), and it slides a little past where the stroke ended as it fades
+        public void DrawSlashes(SpriteBatch sb)
+        {
+            const int Pieces = 10;
+            for (int i = 0; i < slashes.Length; i++)
+            {
+                Slash s = slashes[i];
+                if (!s.On) continue;
+                float t = 1f - s.Life / SlashLife;                  // 0 new .. 1 gone
+                float a = 1f - t;
+                Vector2 along = s.To - s.From;
+                Vector2 from = s.From + along * (t * 0.25f);        // the tail catches up
+                Vector2 to = s.To + along * (t * 0.15f);            // the tip runs on
+                float widest = (6f + s.Strength * 10f) * a;
+
+                for (int p = 0; p < Pieces; p++)
+                {
+                    float u0 = p / (float)Pieces;
+                    float u1 = (p + 1) / (float)Pieces;
+                    float thick = widest * (float)Math.Sin((u0 + u1) * 0.5f * MathHelper.Pi);
+                    Vector2 a0 = Vector2.Lerp(from, to, u0);
+                    Vector2 a1 = Vector2.Lerp(from, to, u1);
+                    Gfx.Line(sb, a0, a1, Palette.Ink * (0.6f * a), thick + 4f);
+                    Gfx.Line(sb, a0, a1, Palette.Highlight * a, thick);
                 }
             }
         }
@@ -599,6 +744,8 @@ namespace Tacetno433.Battle
             for (int i = 0; i < ripples.Length; i++) ripples[i].On = false;
             for (int i = 0; i < hits.Length; i++) hits[i].On = false;
             for (int i = 0; i < shards.Length; i++) shards[i].On = false;
+            for (int i = 0; i < blows.Length; i++) blows[i].On = false;
+            for (int i = 0; i < slashes.Length; i++) slashes[i].On = false;
         }
     }
 }

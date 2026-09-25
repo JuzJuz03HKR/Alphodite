@@ -89,7 +89,7 @@ namespace Tacetno433.Data
             new Motif { Id = MotifId.Sforzando,    Name = "SFORZANDO",     Mark = "sfz",  Rarity = 3,
                         Text = "BOOST hits much harder, x1.8 instead of x1.5." },
             new Motif { Id = MotifId.SecondWind,   Name = "SECOND WIND",   Mark = "V",    Rarity = 3,
-                        Text = "Once per fight, running out of stamina refills a third of it." },
+                        Text = "Once per fight, when the band would collapse, a third of its stamina comes back." },
             new Motif { Id = MotifId.Overture,     Name = "OVERTURE",      Mark = "I",    Rarity = 3,
                         Text = "The first beat of every round hits 50 percent harder." },
             new Motif { Id = MotifId.Counterpoint, Name = "COUNTERPOINT",  Mark = "+",    Rarity = 3,

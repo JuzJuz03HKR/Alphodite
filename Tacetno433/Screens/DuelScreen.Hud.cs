@@ -27,11 +27,15 @@ namespace Tacetno433.Screens
             Gfx.Text(sb, Game.Font, beatsLabel, 90, roundPlate.Y + 35, Palette.LineGrey, TextSize.Body);
             Gfx.TextSpacedRight(sb, Game.Font, tempoLabel, 250, roundPlate.Y + 40, Palette.PaperDim, TextSize.Tiny, 2f);
 
-            //Stamina : the bar lights up when it changes, instead of a number popping up
-            Gfx.TextSpaced(sb, Game.Font, "STAMINA", 22, roundPlate.Y + 64, Palette.LineGrey, TextSize.Tiny, 2f);
-            Gfx.TextRight(sb, Game.Font, run.StaminaValue, 250, roundPlate.Y + 58, Palette.Paper, TextSize.Body);
-            Rectangle bar = new Rectangle(22, roundPlate.Y + 80, 228, 10);
-            if (staminaFlash > 0f) Gfx.DrawGlowBox(sb, bar, Palette.Highlight * (0.6f * staminaFlash));
+            //Stamina : the bar lights up when it changes, jolts when TACET'S BLOW lands, and
+            //throbs with the beat once the band is low on breath
+            int jolt = (int)((float)Math.Sin(time * 70f) * 6f * staminaJolt);
+            bool low = run.Stamina <= run.MaxStamina * LowBreath;
+            Gfx.TextSpaced(sb, Game.Font, "STAMINA", 22 + jolt, roundPlate.Y + 64, low ? Palette.Highlight : Palette.LineGrey, TextSize.Tiny, 2f);
+            Gfx.TextRight(sb, Game.Font, run.StaminaValue, 250 + jolt, roundPlate.Y + 58, Palette.Paper, TextSize.Body);
+            Rectangle bar = new Rectangle(22 + jolt, roundPlate.Y + 80, 228, 10);
+            float glow = Math.Max(staminaFlash, low ? BeatPulse() : 0f);
+            if (glow > 0f) Gfx.DrawGlowBox(sb, bar, Palette.Highlight * (0.6f * glow));
             Ui.CapsuleBar(sb, bar, run.Stamina / (float)run.MaxStamina, Palette.Paper, 1f);
 
             //Enemy Plate : taller when the enemy has a trait on this floor, to name it
@@ -42,6 +46,18 @@ namespace Tacetno433.Screens
             Gfx.TextSpacedRight(sb, Game.Font, battle.Enemy.KindLabel, enemyPlate.Right - 18, enemyPlate.Y + 40, Palette.LineGrey, TextSize.Tiny, 3f);
             if (trait)
                 Gfx.TextSpacedRight(sb, Game.Font, battle.Enemy.TraitName, enemyPlate.Right - 18, enemyPlate.Y + 62, Palette.Paper, TextSize.Tiny, 3f);
+        }
+
+        //Low Breath : under a quarter of stamina the edges of the screen close in on every beat,
+        //like a heartbeat, so the danger is felt without reading the number
+        private void DrawLowBreath(SpriteBatch sb)
+        {
+            RunState run = Game.CurrentRun;
+            float share = run.Stamina / (float)run.MaxStamina;
+            if (share > LowBreath) return;
+
+            float depth = 1f - share / LowBreath;                  // 0 at the warning line, 1 when empty
+            Ornament.Vignette(sb, 160, 0.25f + depth * 0.35f + BeatPulse() * 0.25f);
         }
 
         //Tug Bar : who is winning, in the middle of the top strip. White is our ground, black is

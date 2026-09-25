@@ -143,7 +143,7 @@ namespace Tacetno433.Screens
 
             //Forecast : where the line ends if every beat is simply played as written
             forecastLine = battle.ForecastLine();
-            forecastLabel = "AS WRITTEN  " + NumberText.Signed((int)Math.Round(forecastLine - battle.Line));
+            forecastLabel = "ANSWERED BIG  " + NumberText.Signed((int)Math.Round(forecastLine - battle.Line));
         }
 
         public override void Update(float dt)
@@ -526,13 +526,13 @@ namespace Tacetno433.Screens
         private void DrawForecast(SpriteBatch sb, BattleState battle)
         {
             Gfx.TextSpaced(sb, Game.Font, "FORECAST", 36, SummaryY + 4, Palette.Paper, TextSize.Label, 3f);
-            Gfx.TextSpaced(sb, Game.Font, "IF PLAYED AS WRITTEN", 36, SummaryY + 26, Palette.LineGrey, TextSize.Tiny, 2f);
+            Gfx.TextSpaced(sb, Game.Font, "IF EVERY STROKE IS BIG", 36, SummaryY + 26, Palette.LineGrey, TextSize.Tiny, 2f);
 
             for (int b = 0; b < BattleRules.BeatsPerRound; b++)
             {
                 float cx = GridX + b * ColW + ColW / 2f;
                 Forecast forecast = battle.ForecastFor(b);
-                int ours = battle.OurPowerAt(b);
+                int ours = battle.ExpectedPowerAt(b);
                 int theirs = battle.EnemyStrikeAt(b);
                 bool hidden = battle.EnemyHidden[b];
 
@@ -608,7 +608,7 @@ namespace Tacetno433.Screens
 
             //Breath Warning : blinks when the plan costs more than the band has
             if (projected <= 0 && (int)(time * 3f) % 2 == 0)
-                Gfx.TextSpaced(sb, Game.Font, "THE BAND WILL RUN OUT OF BREATH", 36, FooterY + 82, Palette.Accent, TextSize.Tiny, 2f);
+                Gfx.TextSpaced(sb, Game.Font, "OUT OF BREATH, THE BAND WILL COLLAPSE", 36, FooterY + 82, Palette.Accent, TextSize.Tiny, 2f);
 
             Ui.Button(sb, previewButton, preview >= 0f ? "PLAYING" : "PREVIEW", "P", false);
             Ui.Button(sb, autoButton, "AUTO", "A", false);

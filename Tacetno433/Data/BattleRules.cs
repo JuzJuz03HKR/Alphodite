@@ -17,9 +17,10 @@
         //Each extra player adds this much, so three players give x1.30.
         public static float HarmonyPerExtra = 0.15f;
 
-        //Player Choices : picked by how big the baton stroke is
+        //Player Choices : picked by how big the baton stroke is.
+        //A big stroke costs no extra stamina (it did until round 8): the flashy moves are free,
+        //stamina is only lost to TACET's blows and to mistakes, see Stamina Pressure below.
         public static float BoostPower = 1.5f;     // a big stroke : hit harder
-        public static float BoostCost = 1.6f;      //     and pay more stamina
         public static float EasePower = 0.6f;      // a small stroke : hit softer
         public static float EaseCost = 0.5f;       //     pay less
         public static int EaseRecover = 8;         //     and breathe a little
@@ -29,6 +30,13 @@
 
         //Stamina Cost : every note the band plays costs this much more (1.2 = 20 percent more)
         public static float StaminaCostScale = 1.15f;   // was 1.0
+
+        //Stamina Pressure (round 8) : stamina is the band's breath. It is not spent on big
+        //strokes, rolls or holds any more. It is knocked out of the band instead:
+        //   TACET'S BLOW  a beat TACET wins hits the band for what got through
+        //   a MISS costs MissExtraCost on top of the note
+        //   COLLAPSE      breath at zero ends the fight, the band is silenced (SECOND WIND saves it once)
+        public static float BlowPerPower = 1.0f;    // stamina lost per point TACET wins a beat by
 
         //Timing Grades (HARD, 25 Sep : players found the wide windows far too easy)
         //The stroke settings page can move every judgement earlier or later for one player's
@@ -65,25 +73,23 @@
         public static float GraceShare = 0.5f;      // the second note is worth this much of its beat, on both sides
 
         //Tremolo : elites and bosses end every round with a roll two beats long. Shake the baton
-        //as fast as you can: every stroke adds power, and costs stamina.
+        //as fast as you can: every stroke adds power (the strokes are free since round 8).
         public static float TremoloBeats = 2f;
         public static float TremoloEnemy = 1.5f;    // TACET's roll hits this much harder than its note
         public static float TremoloBase = 0.4f;     // our part with no strokes at all
         public static float TremoloStep = 0.15f;    // each stroke adds this much of our part
-        public static int TremoloMost = 10;         // strokes past this add nothing, but still cost
-        public static int TremoloCost = 2;          // stamina per stroke, only while somebody plays the beat
+        public static int TremoloMost = 10;         // strokes past this add nothing
         public static int TremoloPerfect = 7;       // strokes for a PERFECT roll
         public static int TremoloGood = 4;          // strokes for a GOOD roll, fewer than 1 is a HESITATE
 
         //Fermata : ordinary enemies end every round with a held note two beats long (elites and
         //bosses end theirs with the tremolo instead). Stroke it on the beat, then keep the button
-        //held and the baton still. The longer it is held the harder it pushes, and every moment
-        //held costs stamina, so letting go early is a real choice.
+        //held and the baton still. The longer it is held the harder it pushes (holding is free
+        //since round 8, the test is keeping the hand still under pressure).
         public static float FermataBeats = 2f;
         public static float FermataEnemy = 1.3f;    // TACET's held note hits this much harder than its note
         public static float FermataBase = 0.6f;     // our part when it is let go at once
         public static float FermataHold = 0.8f;     // added over the whole hold, so holding to the end is x1.4
-        public static int FermataCost = 6;          // stamina for holding all the way, only while somebody plays
         public static float FermataStill = 260f;    // pixels per second the baton may drift and still be still
 
         //Counter : a PERFECT BOOST against TACET's real f note knocks part of it back
@@ -151,9 +157,12 @@
 
         //Enemy Scaling
         public static float FloorScale = 0.25f;    // each floor below the first adds 25 percent
-        public static float NormalScale = 1.35f;  // ordinary encounters, was 1.25 (25 Sep : counter, pairs and rolls give the band more)
-        public static float EliteScale = 1.35f;   // was 1.25
-        public static float BossScale = 1.85f;    // was 1.75
+        //Round 8 : BOOST costs nothing extra, so a big stroke on every beat is the normal way to
+        //play. TACET hits about 1.5 times harder to match, which kept the simulated win rates
+        //of ordinary players where they were (see PROJECT_STATUS section 8).
+        public static float NormalScale = 2.0f;   // ordinary encounters, was 1.35
+        public static float EliteScale = 2.0f;    // was 1.35
+        public static float BossScale = 2.8f;     // was 1.85
 
         //Conductor Stats : the 0 to 10 numbers on the select page become real values here
         public static int StaminaBase = 60;
