@@ -141,6 +141,15 @@ namespace Tacetno433.Screens
             Rectangle plate = new Rectangle((int)(RingX() - judgeWidth * pop / 2f - 18f), (int)(y - 18f), (int)(judgeWidth * pop + 36f), 36);
             Gfx.SlantBox(sb, plate, 10, Palette.Void * (0.85f * a));
             Gfx.TextCentered(sb, Game.BigFont, judgeWord, RingX(), y - 2f, Palette.Highlight * a, judgeScale * pop);
+
+            //EARLY / LATE : a small tag hanging under the plate, on the side it fell
+            if (judgeTiming != 0)
+            {
+                string tag = timingWord[judgeTiming + 1];
+                float tx = RingX() + judgeTiming * (judgeWidth * 0.5f);
+                Gfx.TextSpacedCentered(sb, Game.Font, tag, tx, plate.Bottom + 4, Palette.Void * a, TextSize.Tiny, 2f);
+                Gfx.TextSpacedCentered(sb, Game.Font, tag, tx - 1, plate.Bottom + 3, Palette.Highlight * a, TextSize.Tiny, 2f);
+            }
         }
 
         //Clash Numbers : our number against TACET's, counting up side by side above the line.

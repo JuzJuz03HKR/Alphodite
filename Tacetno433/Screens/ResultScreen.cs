@@ -33,6 +33,11 @@ namespace Tacetno433.Screens
         private static string[] roundNumerals = { "I", "II", "III" };
         private static Flick[] pattern = { Flick.Down, Flick.Left, Flick.Right, Flick.Up };
 
+        //Key : what the marks in the grid mean, two columns under it, left of the rank
+        private static string[] keyWords = { "WON", "PERFECT", "MISS", "NO STROKE", "COUNTER", "SPARK", "FERMATA", "ROLL" };
+        private const int KeyColumn = 108;
+        private const int KeyRow = 18;
+
         //Result Data : worked out once in Load
         private bool won;
         private bool recruited;
@@ -183,6 +188,36 @@ namespace Tacetno433.Screens
                     BeatResult mark = battle.Sheet[r][b];
                     DrawSheetCell(sb, cell, mark, b, ink, back, rowE);
                 }
+            }
+
+            DrawKey(sb, ink, soft, e);
+        }
+
+        //Key : a tiny cell for each mark with its word beside it, so the grid can be read
+        //without the guide. Placed under the third row, whether or not it was played.
+        private void DrawKey(SpriteBatch sb, Color ink, Color soft, float e)
+        {
+            int top = SheetY + 30 + BattleRules.MaxRounds * (CellH + 12) + 2;
+            for (int i = 0; i < keyWords.Length; i++)
+            {
+                int x = SheetX + 34 + (i % 2) * KeyColumn;
+                int y = top + (i / 2) * KeyRow;
+                Rectangle cell = new Rectangle(x, y, 18, 14);
+                Color mark = ink * (0.8f * e);
+
+                if (i == 0) Gfx.Rect(sb, cell, ink * (0.9f * e));                                         // WON
+                else Gfx.RectOutline(sb, cell, ink * (0.45f * e), 1);
+                if (i == 1) Gfx.Diamond(sb, cell.Right - 4, cell.Y + 4, 2, mark);                           // PERFECT
+                if (i == 2) Gfx.Line(sb, cell.X + 3, cell.Bottom - 3, cell.Right - 3, cell.Y + 3, mark, 1.5f);   // MISS
+                if (i == 3) Gfx.CircleOutline(sb, cell.Center.X, cell.Center.Y, 4, mark, 1f);              // NO STROKE
+                if (i == 4) Gfx.CircleOutline(sb, cell.X + 5, cell.Y + 5, 3, mark, 1f);                    // COUNTER
+                if (i == 5) Gfx.Diamond(sb, cell.X + 4, cell.Bottom - 4, 2, mark);                          // SPARK
+                if (i == 6) NoteGlyph.FermataSign(sb, cell.Right - 6, cell.Bottom - 2, 4f, mark);           // FERMATA
+                if (i == 7)                                                                                 // ROLL
+                    for (int z = 0; z < 3; z++)
+                        Gfx.Line(sb, cell.Right - 13 + z * 3, cell.Bottom - 3 - (z % 2) * 3, cell.Right - 10 + z * 3, cell.Bottom - 6 + (z % 2) * 3, mark, 1f);
+
+                Gfx.TextSpaced(sb, Game.Font, keyWords[i], x + 24, y + 1, soft * e, TextSize.Tiny, 1.5f);
             }
         }
 

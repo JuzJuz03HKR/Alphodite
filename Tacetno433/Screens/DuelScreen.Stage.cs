@@ -20,6 +20,15 @@ namespace Tacetno433.Screens
             ArtBank.DrawStage(sb, Game.CurrentRun.Era, new Rectangle(0, 0, TacetGame.ScreenW, TacetGame.ScreenH), StageLayout.DuelFloorY);
         }
 
+        //Staff : five lines of music across the upper stage, from the hand's picture to TACET's
+        //edge. Won beats set them ringing, see Core/StageStaff.cs. A little darker while shaking.
+        private void DrawStaff(SpriteBatch sb, float edge)
+        {
+            float energy = staffEnergy + BeatPulse() * 0.12f;
+            float ink = 0.14f + Math.Min(1f, staffEnergy) * 0.16f;
+            StageStaff.Draw(sb, 232f, edge, 150f, energy, time, ink);
+        }
+
         //Stand Rect : where a seat's musician stands. Whoever plays the beat being answered is
         //lifted a little, and whoever just played leans toward TACET.
         private Rectangle StandRect(int seat)
@@ -101,7 +110,12 @@ namespace Tacetno433.Screens
             float cx = EnemyX();
             float breathe = 1f + (float)Math.Sin(time * 1.6f) * 0.02f + BeatPulse() * 0.025f;
 
-            Hollow.Eclipse(sb, cx, 250f, 96f * size * breathe, time * 0.3f, 1f);
+            float sun = 96f * size * breathe;
+            Hollow.Eclipse(sb, cx, 250f, sun, time * 0.3f, 1f);
+
+            //Call Flare : rays shoot out of the sun's rim whenever TACET plays a note, longer for f
+            if (callPulse > 0f)
+                Ornament.Rays(sb, cx, 250f, sun + 10f, sun + 30f + callPulse * 70f, 24, time * 0.2f, Palette.Highlight * (0.45f * callPulse));
             effects.DrawMotes(sb, edge, danger, time);
             effects.DrawRipples(sb, true);
 
@@ -120,9 +134,23 @@ namespace Tacetno433.Screens
             float top = RingY - LaneHalf;
             float width = TacetGame.ScreenW - left;
 
+            float pulse = BeatPulse();
+
+            //Lane Edges : brighten a little on every beat, so the tempo can be seen along the lane
             Gfx.Rect(sb, left, top, width, LaneHalf * 2f, Color.Black * 0.5f);
-            Gfx.Rect(sb, left, top, width, 1, Palette.Paper * 0.25f);
-            Gfx.Rect(sb, left, top + LaneHalf * 2f - 1f, width, 1, Palette.Paper * 0.25f);
+            Gfx.Rect(sb, left, top, width, 1, Palette.Paper * (0.25f + pulse * 0.3f));
+            Gfx.Rect(sb, left, top + LaneHalf * 2f - 1f, width, 1, Palette.Paper * (0.25f + pulse * 0.3f));
+
+            //LANE FLASH : a good hit lights the lane from the hit point outward and fades, grown out of
+            //the tap effects of Project Sekai. Eight steps, each a little fainter.
+            if (laneFlash > 0f)
+            {
+                for (int i = 0; i < 8; i++)
+                {
+                    float fade = 1f - i / 8f;
+                    Gfx.Rect(sb, left + i * 70f, top + 1, 70f, LaneHalf * 2f - 2f, Palette.Highlight * (0.22f * laneFlash * fade));
+                }
+            }
 
             //Beat Lines : a line for every beat slides down the lane with the notes, a stronger
             //one for every bar, the way Taiko no Tatsujin shows its bars. The eye can count along.
@@ -139,8 +167,14 @@ namespace Tacetno433.Screens
                 }
             }
 
+            //Hit Well : a calm dark disc at the head of the lane, like the drum target of Taiko no
+            //Tatsujin. TACET's torn edge flickers all the time and often passes right behind the
+            //hit point, so the one spot the eye has to watch gets a steady ground of its own.
+            float well = RingTarget + 26f;
+            Gfx.Circle(sb, HitX, RingY, well, Palette.Void * 0.82f);
+            Gfx.CircleOutline(sb, HitX, RingY, well, Palette.Paper * (0.2f + pulse * 0.4f), 2f);
+
             //Hit Point : swells a little on every beat
-            float pulse = BeatPulse();
             if (pulse > 0f) Gfx.DrawGlow(sb, HitX, RingY, 40f + pulse * 30f, Palette.Highlight * (0.35f * pulse));
             Gfx.Rect(sb, HitX - 3 - pulse * 2f, top - 8, 6 + pulse * 4f, LaneHalf * 2f + 16f, Palette.Ink);
             Gfx.Rect(sb, HitX - 1 - pulse, top - 8, 2 + pulse * 2f, LaneHalf * 2f + 16f, Palette.Highlight);
@@ -235,7 +269,7 @@ namespace Tacetno433.Screens
                 Choice shown = battle.ShownChoice[n];
                 bool plain = !hidden && !roll;
                 float size = plain ? MathHelper.Clamp(power / 14f, 0.25f, 1f) : 0.6f;
-                float radius = 19f + size * 12f;
+                float radius = (19f + size * 12f) * (0.85f + 0.25f * t);     // a note grows as it comes closer
                 float thick = 2.5f;
                 float alpha = focus;
                 if (plain && shown == Choice.Boost) thick = 4.5f;

@@ -94,7 +94,10 @@ namespace Tacetno433.Screens
                 effects.SpawnFlare(HitX, RingY, grade == Grade.Perfect ? 0.6f : 0.35f);
             }
             effects.SpawnSparks(HitX, RingY, 5, r.GracePush > 0 ? 1f : -1f);
+            effects.SpawnHit(HitX, RingY, grade);
+            if (grade == Grade.Perfect) laneFlash = Math.Max(laneFlash, 0.7f);
             if (grade != Grade.None) ShowJudge(graceText[(int)grade], 0.45f);
+            if (grade != Grade.Hesitate) ShowTiming(grade, StrokeClock(), AnswerTime(b) + beatLen * 0.5f);
 
             ShowCombo(r, r.Combo);
             ShowFire(r);

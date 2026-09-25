@@ -68,6 +68,7 @@ namespace Tacetno433.Screens
             //and the shape of the order opening out from the hit point
             string word = (!rightWay && !signature) ? "WRONG WAY" : judgeText[(int)grade * 3 + (int)choice];
             ShowJudge(word, 0.55f);
+            if (rightWay && !signature) ShowTiming(grade, now, target);
 
             if (choice == Choice.Boost) SoundBank.Play(Sfx.QteBoost);
             if (choice == Choice.Normal) SoundBank.Play(Sfx.QteNormal);
@@ -84,6 +85,15 @@ namespace Tacetno433.Screens
             }
 
             ResolveAnswer(b, choice, grade, signature);
+        }
+
+        //EARLY / LATE : like the FAST and LATE marks of Project Sekai. A stroke that counted but
+        //was not PERFECT says which side of the beat it fell on, so the player knows what to fix
+        //(always LATE on a good mouse usually means the STROKE TIMING setting should move).
+        private void ShowTiming(Grade grade, float now, float target)
+        {
+            if (grade == Grade.Good || grade == Grade.Miss)
+                judgeTiming = now < target ? -1 : 1;
         }
 
         //Size Of : 0 small, 1 middle, 2 big

@@ -173,6 +173,9 @@ namespace Tacetno433.Screens
         private float fireGlow;         // how much of FORTISSIMO's light is on the stage
         private float fireFlash;        // the instant the band catches fire
         private float counterFlash;     // the instant of a COUNTER
+        private float laneFlash;        // the lane lights up after a good hit, see DrawLane
+        private float callPulse;        // TACET's sun flares when it plays a note, see DrawTacetSide
+        private float staffEnergy;      // how hard the staff lines behind the band shake, see StageStaff
         private float[] lit = new float[StageLayout.SeatCount];
         private CharacterAnimator[] actors = new CharacterAnimator[StageLayout.SeatCount];
         private string roundEndLabel = "";
@@ -255,6 +258,8 @@ namespace Tacetno433.Screens
         private float judgeTimer = 9f;
         private float judgeScale;
         private float judgeWidth;
+        private int judgeTiming;        // EARLY / LATE : -1 early, +1 late, 0 nothing to say
+        private static string[] timingWord = { "EARLY", "", "LATE" };
 
         //Clash State
         private bool clashShown;
@@ -369,6 +374,7 @@ namespace Tacetno433.Screens
             judgeWord = word;
             judgeScale = scale;
             judgeTimer = 0f;
+            judgeTiming = 0;
             judgeWidth = Game.BigFont.MeasureString(word).X * scale;
         }
 
@@ -454,13 +460,18 @@ namespace Tacetno433.Screens
             tugFlash = Math.Max(0f, tugFlash - dt * 2.5f);
             fireFlash = Math.Max(0f, fireFlash - dt * 3f);
             counterFlash = Math.Max(0f, counterFlash - dt * 4f);
+            laneFlash = Math.Max(0f, laneFlash - dt * 4f);
+            callPulse = Math.Max(0f, callPulse - dt * 3f);
+            staffEnergy = Math.Max(0f, staffEnergy - dt * 1.5f);
             rollPulse = Math.Max(0f, rollPulse - dt * 6f);
             judgeTimer += dt;
             if (clashShown) clashTimer += dt;
 
-            //Fire Light : fades in while the band is on fire, out when it is not
+            //Fire Light : fades in while the band is on fire, out when it is not.
+            //On fire, the staff behind the band never stops singing.
             float fireWanted = battle.FortissimoLeft > 0 ? 1f : 0f;
             fireGlow += (fireWanted - fireGlow) * Math.Min(1f, dt * 5f);
+            if (fireGlow > 0.5f) staffEnergy = Math.Max(staffEnergy, 1f);
 
             //Band Animation : every seated musician keeps breathing, whatever the phase
             Formation f = Game.CurrentRun.Formation;
@@ -628,6 +639,7 @@ namespace Tacetno433.Screens
                     SoundBank.Play(Sfx.NoteOn, volume, shown == Choice.Boost ? -0.4f : 0.2f);
 
                 effects.SpawnRipple(EnemyX(), EnemyFeetY, shown == Choice.Boost ? 170f : 110f, true);
+                callPulse = shown == Choice.Boost ? 1f : 0.6f;       // its sun flares with the note
             }
             else
             {
@@ -845,6 +857,15 @@ namespace Tacetno433.Screens
             float lean = r.Push > 0 ? 1f : (r.Push < 0 ? -1f : 0f);
             effects.SpawnSparks(HitX, RingY, Math.Min(24, 6 + (int)(gap * 10f) + (grade == Grade.Perfect ? 6 : 0)), lean);
 
+            //Hit Burst : rings of light as good as the grade, the lane lights up after a good
+            //stroke, and when the band wins the beat TACET's note breaks apart and the staff
+            //behind the band rings like a plucked string
+            effects.SpawnHit(HitX, RingY, grade);
+            if (grade == Grade.Perfect) laneFlash = 1f;
+            else if (grade == Grade.Good) laneFlash = 0.6f;
+            if (r.Push > 0 && r.EnemyPower > 0) effects.SpawnShatter(HitX, RingY, 30f);
+            if (r.Push > 0) staffEnergy = Math.Min(1.5f, staffEnergy + 0.5f + gap * 0.5f);
+
             if (r.Push > 0) SoundBank.Play(Sfx.ClashWin);
             else if (r.Push < 0) SoundBank.Play(Sfx.ClashLose);
             else SoundBank.Play(Sfx.ClashEven);
@@ -986,6 +1007,7 @@ namespace Tacetno433.Screens
             //World : see DuelScreen.Stage.cs
             DrawStageSide(sb);
             DrawFireLight(sb, edge);
+            DrawStaff(sb, edge);
             effects.DrawRipples(sb, false);
             DrawMusicianGlow(sb);
 
@@ -997,7 +1019,7 @@ namespace Tacetno433.Screens
 
             if (Game.CurrentRun.Stamina == 0)
                 Gfx.Rect(sb, 0, 0, edge, TacetGame.ScreenH, Color.Black * 0.35f);    // out of breath, lights down
-            TacetField.Draw(sb, edge, time, 0.2f + danger * 0.8f - fireGlow * 0.15f, ripple, rippleY);
+            TacetField.Draw(sb, edge, time, 0.2f + danger * 0.8f - fireGlow * 0.15f + callPulse * 0.15f, ripple, rippleY);
             DrawTacetSide(sb, edge, danger);
             effects.DrawWaves(sb);
             effects.DrawBursts(sb);
@@ -1011,6 +1033,8 @@ namespace Tacetno433.Screens
             DrawLane(sb);
             DrawIncoming(sb);
             DrawFinaleNotes(sb);
+            effects.DrawShards(sb);
+            effects.DrawHits(sb);
             DrawAnswerRing(sb);
             DrawReady(sb);
             DrawRoll(sb);

@@ -47,14 +47,16 @@ namespace Tacetno433.Core
         public abstract void Draw(SpriteBatch sb);
     }
 
-    //ScreenManager : holds the screen we are on, and fades to black when swapping to another one
+    //ScreenManager : holds the screen we are on, and closes the stage curtain when swapping to
+    //another one (see Core/Curtain.cs). The old page goes behind the curtain, the new one is
+    //revealed when it opens again.
     public class ScreenManager
     {
         private TacetGame game;
         private GameScreen current;
-        private GameScreen waiting;      // the screen we will swap to once the fade finishes
+        private GameScreen waiting;      // the screen we will swap to once the curtain is closed
 
-        private float fade;              // 0 = normal picture, 1 = fully black
+        private float fade;              // 0 = curtain open, 1 = curtain fully closed
         private bool fadingOut;
         private const float FadeSpeed = 3f;
 
@@ -68,7 +70,7 @@ namespace Tacetno433.Core
         //Busy : a fade is under way, so the page on show is about to change or has just changed
         public bool Busy { get { return fadingOut || fade > 0f; } }
 
-        //Screen Change : fade out, swap, fade back in
+        //Screen Change : close the curtain, swap, open it again
         public void Change(GameScreen screen)
         {
             waiting = screen;
@@ -85,7 +87,7 @@ namespace Tacetno433.Core
             current.Load();
         }
 
-        //Screen Update : run the fade, then update the active screen
+        //Screen Update : run the curtain, then update the active screen
         public void Update(float dt)
         {
             if (fadingOut)
@@ -113,13 +115,12 @@ namespace Tacetno433.Core
             if (current != null) current.Update(dt);
         }
 
-        //Screen Draw : the active screen, then the black fade on top
+        //Screen Draw : the active screen, then the curtain on top while it is moving
         public void Draw(SpriteBatch sb)
         {
             if (current != null) current.Draw(sb);
 
-            if (fade > 0f)
-                Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Color.Black * fade);
+            if (fade > 0f) Curtain.Draw(sb, fade);
         }
     }
 }

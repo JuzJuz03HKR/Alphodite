@@ -20,6 +20,10 @@ namespace Tacetno433.Battle
     //   Flare    a streak of light across the hit point
     //   Ripple   a flat ring spreading on the floor under whoever just played, like sound on water
     //   Motes    specks of light and small hollow rings drifting up through TACET's dark
+    //
+    //And the HIT effects at the hit point, studied from the tap effects of Project Sekai:
+    //   HitBurst rings of light opening from the hit point, bigger and brighter for a better grade
+    //   Shard    a piece of TACET's hollow note, broken off when the band wins the beat
     public class DuelEffects
     {
         //Wave : one arc of sound travelling toward the line
@@ -68,14 +72,35 @@ namespace Tacetno433.Battle
             public float X, Y, Life, Size;
         }
 
+        //Hit Burst : one burst at the hit point, drawn by grade
+        private class HitBurst
+        {
+            public bool On;
+            public float X, Y, Life;
+            public Grade Grade;
+        }
+
+        //Shard : one arc of TACET's broken note. X, Y is the middle of the ring it came from,
+        //which flies outward, so the arc drawn around it flies away from the hit point.
+        private class Shard
+        {
+            public bool On;
+            public float X, Y, VX, VY, Angle, Spin, Life, Radius;
+        }
+
         private const float SparkLife = 0.55f;
         private const float FlareLife = 0.28f;
         private const float RippleLife = 0.9f;
+        private const float HitLife = 0.42f;
+        private const float ShardLife = 0.5f;
+        private const float ShardArc = 0.8f;       // how much of the ring one shard is, in radians
         private const int MoteCount = 22;
 
         private Spark[] sparks = new Spark[60];
         private Flare[] flares = new Flare[6];
         private Ripple[] ripples = new Ripple[20];
+        private HitBurst[] hits = new HitBurst[8];
+        private Shard[] shards = new Shard[24];
 
         //Motes : fixed specks, each with its own place across the dark (0 to 1), height and speed
         private float[] moteAcross = new float[MoteCount];
@@ -114,6 +139,8 @@ namespace Tacetno433.Battle
             for (int i = 0; i < sparks.Length; i++) sparks[i] = new Spark();
             for (int i = 0; i < flares.Length; i++) flares[i] = new Flare();
             for (int i = 0; i < ripples.Length; i++) ripples[i] = new Ripple();
+            for (int i = 0; i < hits.Length; i++) hits[i] = new HitBurst();
+            for (int i = 0; i < shards.Length; i++) shards[i] = new Shard();
 
             for (int i = 0; i < MoteCount; i++)
             {
@@ -170,6 +197,44 @@ namespace Tacetno433.Battle
                 ripples[i].Size = size;
                 ripples[i].Life = RippleLife;
                 return;
+            }
+        }
+
+        //Hit Spawn : the burst for a stroke that just landed. A HESITATE has no stroke, so no burst.
+        public void SpawnHit(float x, float y, Grade grade)
+        {
+            if (grade == Grade.None || grade == Grade.Hesitate) return;
+            for (int i = 0; i < hits.Length; i++)
+            {
+                if (hits[i].On) continue;
+                hits[i].On = true;
+                hits[i].X = x;
+                hits[i].Y = y;
+                hits[i].Life = HitLife;
+                hits[i].Grade = grade;
+                return;
+            }
+        }
+
+        //Shatter Spawn : TACET's note, a ring of this radius, breaks into six arcs that fly apart
+        public void SpawnShatter(float x, float y, float radius)
+        {
+            int count = 6;
+            for (int i = 0; i < shards.Length && count > 0; i++)
+            {
+                if (shards[i].On) continue;
+                float angle = MathHelper.TwoPi * count / 6f + (float)scatter.NextDouble() * 0.3f;
+                float speed = 170f + (float)scatter.NextDouble() * 150f;
+                shards[i].On = true;
+                shards[i].X = x;
+                shards[i].Y = y;
+                shards[i].VX = (float)Math.Cos(angle) * speed;
+                shards[i].VY = (float)Math.Sin(angle) * speed - 60f;
+                shards[i].Angle = angle - ShardArc / 2f;          // the arc sits on the side it flies toward
+                shards[i].Spin = ((float)scatter.NextDouble() - 0.5f) * 8f;
+                shards[i].Radius = radius;
+                shards[i].Life = ShardLife;
+                count--;
             }
         }
 
@@ -314,6 +379,27 @@ namespace Tacetno433.Battle
                 if (ripples[i].Life <= 0f) ripples[i].On = false;
             }
 
+            for (int i = 0; i < hits.Length; i++)
+            {
+                if (!hits[i].On) continue;
+                hits[i].Life -= dt;
+                if (hits[i].Life <= 0f) hits[i].On = false;
+            }
+
+            //Shards : fly out, slow down, fall a little and spin
+            for (int i = 0; i < shards.Length; i++)
+            {
+                Shard s = shards[i];
+                if (!s.On) continue;
+                s.X += s.VX * dt;
+                s.Y += s.VY * dt;
+                s.VX *= 1f - 2f * dt;
+                s.VY += 500f * dt;
+                s.Angle += s.Spin * dt;
+                s.Life -= dt;
+                if (s.Life <= 0f) s.On = false;
+            }
+
             //Motes : drift up forever, coming back in at the bottom
             for (int i = 0; i < MoteCount; i++)
             {
@@ -347,6 +433,66 @@ namespace Tacetno433.Battle
                 float t = f.Life / FlareLife;
                 float open = 1f - t * t * 0.4f;
                 Hollow.Flare(sb, f.X, f.Y, (220f + f.Strength * 620f) * open, t * (0.4f + 0.6f * f.Strength));
+            }
+        }
+
+        //Hits Draw : t runs from 0 (just landed) to 1 (gone). "open" rushes out fast and then
+        //slows down (ease out), which is what makes a burst feel like a hit and not a slide.
+        //   PERFECT  two rings, a four point star and four specks flying out on the diagonals
+        //   GOOD     one ring
+        //   MISS     a ring broken into four pieces, sinking and grey
+        public void DrawHits(SpriteBatch sb)
+        {
+            for (int i = 0; i < hits.Length; i++)
+            {
+                HitBurst h = hits[i];
+                if (!h.On) continue;
+                float t = 1f - h.Life / HitLife;
+                float open = 1f - (1f - t) * (1f - t);
+                float a = 1f - t;
+
+                if (h.Grade == Grade.Perfect)
+                {
+                    float r = 30f + open * 72f;
+                    Gfx.CircleOutline(sb, h.X, h.Y, r, Palette.Highlight * a, 2f + 4f * a);
+                    Gfx.CircleOutline(sb, h.X, h.Y, r * 0.62f, Palette.Paper * (0.7f * a), 1.5f);
+                    NoteGlyph.Spark(sb, h.X, h.Y, 16f + open * 26f, Palette.Highlight * a);
+                    for (int k = 0; k < 4; k++)
+                    {
+                        float angle = MathHelper.PiOver4 + k * MathHelper.PiOver2;
+                        float reach = r * 1.15f;
+                        Gfx.Diamond(sb, h.X + (float)Math.Cos(angle) * reach, h.Y + (float)Math.Sin(angle) * reach, 4f * a, Palette.Highlight * a);
+                    }
+                }
+                else if (h.Grade == Grade.Good)
+                {
+                    float r = 26f + open * 46f;
+                    Gfx.CircleOutline(sb, h.X, h.Y, r, Palette.Paper * (0.85f * a), 1.5f + 3f * a);
+                }
+                else
+                {
+                    float r = 36f;
+                    float sink = t * 22f;
+                    for (int k = 0; k < 4; k++)
+                    {
+                        float from = k * MathHelper.PiOver2 + 0.25f;
+                        Gfx.Arc(sb, h.X, h.Y + sink, r, from, from + 1.0f, Palette.PaperDim * (0.8f * a), 2f);
+                    }
+                }
+            }
+        }
+
+        //Shards Draw : each piece is a short arc of the ring it broke from, dark under light
+        //so it reads on the bright stage as well as in TACET's dark
+        public void DrawShards(SpriteBatch sb)
+        {
+            for (int i = 0; i < shards.Length; i++)
+            {
+                Shard s = shards[i];
+                if (!s.On) continue;
+                float a = s.Life / ShardLife;
+                Gfx.Arc(sb, s.X, s.Y, s.Radius, s.Angle, s.Angle + ShardArc, Palette.Ink * (0.6f * a), 5f);
+                Gfx.Arc(sb, s.X, s.Y, s.Radius, s.Angle, s.Angle + ShardArc, Palette.Highlight * a, 2.5f);
             }
         }
 
@@ -451,6 +597,8 @@ namespace Tacetno433.Battle
             for (int i = 0; i < sparks.Length; i++) sparks[i].On = false;
             for (int i = 0; i < flares.Length; i++) flares[i].On = false;
             for (int i = 0; i < ripples.Length; i++) ripples[i].On = false;
+            for (int i = 0; i < hits.Length; i++) hits[i].On = false;
+            for (int i = 0; i < shards.Length; i++) shards[i].On = false;
         }
     }
 }
