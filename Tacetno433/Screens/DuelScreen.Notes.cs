@@ -55,7 +55,6 @@ namespace Tacetno433.Screens
         //the first stroke already gave the order for the whole beat.
         private void JudgeGrace(int b, float target)
         {
-            strokeGlow = 1f;
             float now = StrokeClock();
             float off = Math.Abs(now - target);
 
@@ -65,7 +64,7 @@ namespace Tacetno433.Screens
             if (grade == Grade.Miss && now > target && battle.LateForgivenAt(b)) grade = Grade.Good;    // FASHIONABLY LATE
 
             hand.Play(PoseFor(gesture.Direction));
-            WhipBaton(gesture.Direction);
+            baton.Whip(gesture.Direction);
 
             if (grade == Grade.Perfect) SoundBank.Play(Sfx.QtePerfect, 0.7f, 0.3f);
             if (grade == Grade.Miss) SoundBank.Play(Sfx.QteMiss, 0.7f, 0.3f);
@@ -149,7 +148,7 @@ namespace Tacetno433.Screens
             //Settling : right after the stroke the hand is still slowing down, so moving does not
             //end the hold yet, but only truly still moments count as held
             bool down = Input.MouseDown();
-            bool moving = batonVelocity.Length() >= BattleRules.FermataStill;
+            bool moving = baton.Velocity.Length() >= BattleRules.FermataStill;
             if (down && !moving) heldTime += clock - holdClock;
             holdClock = clock;
             bool still = !moving || clock < holdSteady;
@@ -195,17 +194,6 @@ namespace Tacetno433.Screens
             NoteGlyph.FermataSign(sb, cx, cy - RingTarget - 34f, 20f, Palette.Highlight);
         }
 
-        //Hold Ribbon : the body of the fermata in the lane, a wide pale band like the hold notes of
-        //Project Sekai, from the note back up the lane to where the hold ends
-        private void DrawHoldRibbon(SpriteBatch sb, float fromX, float toX)
-        {
-            if (toX <= fromX + 4f) return;
-            Gfx.Rect(sb, fromX, RingY - 15f, toX - fromX, 30f, Palette.Paper * 0.28f);
-            Gfx.Rect(sb, fromX, RingY - 15f, toX - fromX, 2f, Palette.Paper * 0.8f);
-            Gfx.Rect(sb, fromX, RingY + 13f, toX - fromX, 2f, Palette.Paper * 0.8f);
-            Gfx.Rect(sb, toX - 3f, RingY - 18f, 6f, 36f, Palette.Highlight);
-        }
-
         //Hold For Picture : DEVELOPER TOOL hook, the round skipped to TACET's fermata with the
         //hold already going, so a picture can show it
         public void HoldForPicture()
@@ -238,8 +226,7 @@ namespace Tacetno433.Screens
         {
             rollStrokes++;
             rollPulse = 1f;
-            strokeGlow = 1f;
-            WhipBaton(gesture.Direction);
+            baton.Whip(gesture.Direction);
             hand.Play(PoseFor(gesture.Direction));
 
             bool counts = rollStrokes <= battle.TremoloMost;            // ACCELERANDO counts more
@@ -273,28 +260,6 @@ namespace Tacetno433.Screens
             Gfx.Arrow(sb, sx + 14f, cy + 25f, 5f, true, Palette.Paper);
 
             Ui.Pips(sb, cx - battle.TremoloMost * 7f, cy + RingTarget + 34f, Math.Min(rollStrokes, battle.TremoloMost), battle.TremoloMost, 4, 14, 1f);
-        }
-
-        //Roll Bar : the body of TACET's roll, like the drum roll bar of Taiko no Tatsujin. A pale
-        //band from the head of the roll back up the lane to where it ends, with a zigzag in it.
-        //While the roll is being answered its head waits at the hit point and the bar shrinks.
-        private void DrawTrillTail(SpriteBatch sb, float fromX, float toX)
-        {
-            if (toX <= fromX + 4f) return;
-            Gfx.Rect(sb, fromX, RingY - 13f, toX - fromX, 26f, Palette.Paper * 0.22f);
-            Gfx.Rect(sb, fromX, RingY - 13f, toX - fromX, 2f, Palette.Paper * 0.7f);
-            Gfx.Rect(sb, fromX, RingY + 11f, toX - fromX, 2f, Palette.Paper * 0.7f);
-
-            float step = 10f;
-            float x = fromX + 26f;
-            bool up = true;
-            while (x + step < toX)
-            {
-                Gfx.Line(sb, x, RingY + (up ? -6f : 6f), x + step, RingY + (up ? 6f : -6f), Palette.Highlight * 0.9f, 2f);
-                x += step;
-                up = !up;
-            }
-            Gfx.Rect(sb, toX - 2f, RingY - 16f, 4f, 32f, Palette.Highlight);
         }
 
         //Counter Show : TACET's loudest note thrown back. A white flash, a streak across the whole

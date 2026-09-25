@@ -68,7 +68,6 @@ namespace Tacetno433.Screens
         //and the ending falls apart.
         private void JudgeFinale(float target, float now)
         {
-            strokeGlow = 1f;
             float off = Math.Abs(now - target);
             Grade grade = Grade.Miss;
             if (off <= battle.GoodWindow) grade = Grade.Good;
@@ -76,7 +75,7 @@ namespace Tacetno433.Screens
             bool rightWay = gesture.Direction == pattern[finaleStep];
 
             hand.Play(PoseFor(gesture.Direction));
-            WhipBaton(gesture.Direction);
+            baton.Whip(gesture.Direction);
 
             if (grade == Grade.Miss || !rightWay)
             {
@@ -145,7 +144,7 @@ namespace Tacetno433.Screens
                 Gfx.DrawGlow(sb, x, RingY, 40f, Palette.Highlight * 0.5f);
                 Gfx.Diamond(sb, x, RingY, 20f, Palette.Paper);
                 Gfx.DiamondOutline(sb, x, RingY, 24f, Palette.Highlight, 2f);
-                DrawDirection(sb, pattern[i], x, RingY, 18f, 7f, Palette.Ink, 3f);
+                NoteGlyph.Arrow(sb, pattern[i], x, RingY, 18f, 7f, Palette.Ink, 3f);
             }
 
             //Progress : four marks over the lane, filled as the strokes land
@@ -173,7 +172,7 @@ namespace Tacetno433.Screens
             Gfx.TextSpacedCentered(sb, Game.Font, "CONDUCT THE WHOLE BAR ON THE BEAT", 640, 386, Palette.Paper * a, TextSize.Label, 3f);
 
             for (int i = 0; i < 4; i++)
-                DrawDirection(sb, pattern[i], 568f + i * 48f, 426f, 22f, 8f, Palette.Highlight * a, 3f);
+                NoteGlyph.Arrow(sb, pattern[i], 568f + i * 48f, 426f, 22f, 8f, Palette.Highlight * a, 3f);
         }
 
         //Finale For Picture : DEVELOPER TOOL hook, so the capture tool can picture the finale

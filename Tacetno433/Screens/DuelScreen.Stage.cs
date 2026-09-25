@@ -167,17 +167,10 @@ namespace Tacetno433.Screens
                 }
             }
 
-            //Hit Well : a calm dark disc at the head of the lane, like the drum target of Taiko no
-            //Tatsujin. TACET's torn edge flickers all the time and often passes right behind the
-            //hit point, so the one spot the eye has to watch gets a steady ground of its own.
-            float well = RingTarget + 26f;
-            Gfx.Circle(sb, HitX, RingY, well, Palette.Void * 0.82f);
-            Gfx.CircleOutline(sb, HitX, RingY, well, Palette.Paper * (0.2f + pulse * 0.4f), 2f);
-
-            //Hit Point : swells a little on every beat
-            if (pulse > 0f) Gfx.DrawGlow(sb, HitX, RingY, 40f + pulse * 30f, Palette.Highlight * (0.35f * pulse));
-            Gfx.Rect(sb, HitX - 3 - pulse * 2f, top - 8, 6 + pulse * 4f, LaneHalf * 2f + 16f, Palette.Ink);
-            Gfx.Rect(sb, HitX - 1 - pulse, top - 8, 2 + pulse * 2f, LaneHalf * 2f + 16f, Palette.Highlight);
+            //Hit Point : the dark well and the bright bar, swelling a little on every beat.
+            //TACET's torn edge flickers all the time and often passes right behind the hit point,
+            //so the well gives the one spot the eye has to watch a steady ground (Core/NoteGlyph.cs).
+            NoteGlyph.HitPoint(sb, HitX, RingY, LaneHalf, pulse);
         }
 
         //Lane Spot : where a note sent down the lane at this moment is now. Every note takes one
@@ -233,14 +226,14 @@ namespace Tacetno433.Screens
                 if (battle.IsTremolo(n))
                 {
                     float tailEnd = LaneX((n + BattleRules.TremoloBeats) * beatLen);
-                    DrawTrillTail(sb, x, tailEnd);
+                    NoteGlyph.RollBar(sb, x, tailEnd, RingY);
                 }
 
                 //Fermata : a wide ribbon for as long as the note is held, and the fermata sign on top
                 if (battle.IsFermata(n))
                 {
                     float holdX = LaneX((n + BattleRules.FermataBeats) * beatLen);
-                    DrawHoldRibbon(sb, x, holdX);
+                    NoteGlyph.HoldRibbon(sb, x, holdX, RingY);
                     if (!holding) NoteGlyph.FermataSign(sb, x, RingY - 30f, 14f, Palette.Highlight);
                 }
 
@@ -255,7 +248,7 @@ namespace Tacetno433.Screens
                     if (battle.HasAction(n))
                     {
                         Gfx.DiamondOutline(sb, x, RingY, 14f, Palette.Paper * (0.8f * focus), 2f);
-                        DrawPointer(sb, pattern[n % 4], x, RingY, 14f, focus);
+                        NoteGlyph.Pointer(sb, pattern[n % 4], x, RingY, 14f, focus);
                     }
                     else
                     {
@@ -278,15 +271,7 @@ namespace Tacetno433.Screens
                 Hollow.Ring(sb, x, RingY, radius, thick, alpha);
 
                 //Crown : a loud note bristles
-                if (plain && shown == Choice.Boost)
-                {
-                    for (int i = 0; i < 8; i++)
-                    {
-                        float angle = i * MathHelper.PiOver4 + time * 1.5f;
-                        Vector2 d = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
-                        Gfx.Line(sb, new Vector2(x, RingY) + d * (radius + 3f), new Vector2(x, RingY) + d * (radius + 9f), Palette.Highlight * alpha, 2f);
-                    }
-                }
+                if (plain && shown == Choice.Boost) NoteGlyph.Crown(sb, x, RingY, radius, time, alpha);
 
                 //Letter : how loud TACET plays it. ECHO FADES wipes it out before it arrives.
                 float markAlpha = 1f;
@@ -296,7 +281,7 @@ namespace Tacetno433.Screens
                 Gfx.TextCentered(sb, Game.BigFont, mark, x, RingY - 2, Palette.Highlight * (alpha * markAlpha), markSize);
 
                 //Pointer : the way to swing. A roll takes any way, so it has none.
-                if (!roll) DrawPointer(sb, pattern[n % 4], x, RingY, radius, focus);
+                if (!roll) NoteGlyph.Pointer(sb, pattern[n % 4], x, RingY, radius, focus);
             }
         }
 
@@ -306,22 +291,6 @@ namespace Tacetno433.Screens
             if (n <= pending) return 1f;
             if (n == pending + 1) return 0.75f;
             return 0.5f;
-        }
-
-        //Pointer : a small solid arrow head just outside a note's ring, on the side the baton
-        //has to travel toward. Outlined dark, so it reads over the bright stage as well.
-        private void DrawPointer(SpriteBatch sb, Flick dir, float cx, float cy, float radius, float alpha)
-        {
-            Vector2 c = new Vector2(cx, cy) + DirVector(dir) * (radius + 14f);
-            DrawHead(sb, dir, c, 15f, Palette.Ink * alpha);
-            DrawHead(sb, dir, c, 10f, Palette.Highlight * alpha);
-        }
-
-        private void DrawHead(SpriteBatch sb, Flick dir, Vector2 c, float size, Color color)
-        {
-            if (dir == Flick.Up) Gfx.Triangle(sb, c.X, c.Y, size, true, color);
-            else if (dir == Flick.Down) Gfx.Triangle(sb, c.X, c.Y, size, false, color);
-            else Gfx.Arrow(sb, c.X, c.Y, size, dir == Flick.Right, color);
         }
 
     }

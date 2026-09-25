@@ -30,11 +30,12 @@ namespace Tacetno433.Screens
         //Title Menu Data : CONTINUE is only there when a run is saved
         private const int ItemContinue = 0;
         private const int ItemNewRun = 1;
-        private const int ItemGuide = 2;
-        private const int ItemSettings = 3;
-        private const int ItemQuit = 4;
-        private static string[] allItems = { "CONTINUE", "NEW RUN", "HOW TO PLAY", "SETTINGS", "QUIT" };
-        private static string[] allIndex = { "01", "02", "03", "04", "05" };
+        private const int ItemTutorial = 2;
+        private const int ItemGuide = 3;
+        private const int ItemSettings = 4;
+        private const int ItemQuit = 5;
+        private static string[] allItems = { "CONTINUE", "NEW RUN", "TUTORIAL", "HOW TO PLAY", "SETTINGS", "QUIT" };
+        private static string[] allIndex = { "01", "02", "03", "04", "05", "06" };
         private int[] menu;                 // which items are on the menu, top to bottom
         private Rectangle[] menuBoxes;
         private int selected;
@@ -62,12 +63,13 @@ namespace Tacetno433.Screens
         };
         private const float TipTime = 6f;
 
-        //Title Layout
+        //Title Layout : up to six blades between the hook line and the tip strip
         private const int MenuX = 96;
         private const int MenuY = 350;
-        private const int MenuStep = 50;
+        private const int MenuStep = 44;
         private const int MenuW = 400;
-        private const int MenuH = 46;
+        private const int MenuH = 40;
+        private const int NoticeY = 616;
 
         //Staff Layout : five lines, sixteen pixels apart, so half a step is eight pixels
         private const int StaffTop = 70;
@@ -94,8 +96,8 @@ namespace Tacetno433.Screens
 
             //Menu Lines : CONTINUE first when there is a saved run, and it starts chosen
             bool saved = SaveFile.HasRun;
-            if (saved) menu = new int[] { ItemContinue, ItemNewRun, ItemGuide, ItemSettings, ItemQuit };
-            else menu = new int[] { ItemNewRun, ItemGuide, ItemSettings, ItemQuit };
+            if (saved) menu = new int[] { ItemContinue, ItemNewRun, ItemTutorial, ItemGuide, ItemSettings, ItemQuit };
+            else menu = new int[] { ItemNewRun, ItemTutorial, ItemGuide, ItemSettings, ItemQuit };
             continueNote = saved ? SaveFile.RunSummary() : "";
             selected = 0;
 
@@ -196,6 +198,8 @@ namespace Tacetno433.Screens
                 SaveFile.DeleteRun();
                 Game.Screens.Change(new ConductorSelectScreen());
             }
+            else if (item == ItemTutorial)
+                Game.Screens.Change(new TutorialScreen());
             else if (item == ItemGuide)
                 Game.Screens.Change(new GuideScreen());
             else if (item == ItemSettings)
@@ -331,12 +335,12 @@ namespace Tacetno433.Screens
                 float closeness = 1f - Math.Min(1f, Math.Abs(selectSlide - i));
                 Color textColor = Color.Lerp(Palette.PaperDim, Palette.Ink, closeness);
 
-                Gfx.Text(sb, Game.Font, allIndex[i], box.X + 8, box.Y + 16, Color.Lerp(Palette.LineGrey, Palette.InkSoft, closeness), TextSize.Label);
-                Gfx.TextSpaced(sb, Game.BigFont, allItems[menu[i]], box.X + 48 + closeness * 8f, box.Y + 6, textColor, TextSize.Small, 3f);
+                Gfx.Text(sb, Game.Font, allIndex[i], box.X + 8, box.Y + 13, Color.Lerp(Palette.LineGrey, Palette.InkSoft, closeness), TextSize.Label);
+                Gfx.TextSpaced(sb, Game.BigFont, allItems[menu[i]], box.X + 48 + closeness * 8f, box.Y + 3, textColor, TextSize.Small, 3f);
 
                 //Continue Note : who, which floor, which stage, beside the blade
                 if (menu[i] == ItemContinue)
-                    Gfx.TextSpaced(sb, Game.Font, continueNote, box.Right + 20, box.Y + 6, Palette.PaperDim, TextSize.Tiny, 2f);
+                    Gfx.TextSpaced(sb, Game.Font, continueNote, box.Right + 20, box.Y + 4, Palette.PaperDim, TextSize.Tiny, 2f);
 
                 if (i == selected)
                 {
@@ -353,11 +357,11 @@ namespace Tacetno433.Screens
             float phase = (time % TipTime) / TipTime;
             float a = phase < 0.1f ? phase / 0.1f : (phase > 0.9f ? (1f - phase) / 0.1f : 1f);
 
-            Rectangle strip = new Rectangle(80, 604, 720, 40);
+            Rectangle strip = new Rectangle(80, NoticeY, 720, 38);
             Gfx.Rect(sb, strip, Palette.Void * 0.6f);
             Gfx.Rect(sb, strip.X, strip.Y, 3, strip.Height, Palette.Paper);
-            Ui.Tag(sb, "NOTE", strip.X + 16, strip.Y + 11, true, 1f);
-            Gfx.Text(sb, Game.StoryFont, tips[index], strip.X + 78, strip.Y + 10, Palette.Paper * a, TextSize.StorySmall);
+            Ui.Tag(sb, "NOTE", strip.X + 16, strip.Y + 10, true, 1f);
+            Gfx.Text(sb, Game.StoryFont, tips[index], strip.X + 78, strip.Y + 9, Palette.Paper * a, TextSize.StorySmall);
 
             //Tip Dots : which tip out of how many
             for (int i = 0; i < tips.Length; i++)
@@ -368,8 +372,8 @@ namespace Tacetno433.Screens
         //Footer : controls and build tag
         private void DrawFooter(SpriteBatch sb)
         {
-            Gfx.TextSpaced(sb, Game.Font, "ARROWS OR MOUSE  /  ENTER TO CONFIRM  /  ESC TO QUIT", 82, 664, Palette.LineGrey, TextSize.Tiny, 2f);
-            Gfx.TextSpaced(sb, Game.Font, "PROTOTYPE BUILD", 82, 684, Palette.LineGrey * 0.7f, TextSize.Tiny, 2f);
+            Gfx.TextSpaced(sb, Game.Font, "ARROWS OR MOUSE  /  ENTER TO CONFIRM  /  ESC TO QUIT", 82, 668, Palette.LineGrey, TextSize.Tiny, 2f);
+            Gfx.TextSpaced(sb, Game.Font, "PROTOTYPE BUILD", 82, 688, Palette.LineGrey * 0.7f, TextSize.Tiny, 2f);
         }
     }
 }

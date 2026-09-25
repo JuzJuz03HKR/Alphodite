@@ -100,16 +100,8 @@ namespace Tacetno433.Screens
             float mark = onGrace ? RingTarget * 0.7f : RingTarget;
             float start = onGrace ? RingStart * 0.7f : RingStart;
 
-            //Mark : where the ring has to be when the stroke lands, swelling with the beat
-            float swell = BeatPulse() * 3f;
-            Gfx.CircleOutline(sb, cx, cy, mark + swell, Palette.Ink * a, 5f);
-            Gfx.CircleOutline(sb, cx, cy, mark + swell, Palette.Highlight * a, 3f);
-
-            //Closing Ring : shrinks to the mark on the beat, then keeps going a little
-            float radius = start - (start - mark) * t;
-            if (radius < 8f) radius = 8f;
-            Gfx.CircleOutline(sb, cx, cy, radius, Palette.Ink * a, 6f);
-            Gfx.CircleOutline(sb, cx, cy, radius, Palette.Highlight * a, 3f);
+            //Mark And Closing Ring : the ring meets its mark on the beat, the mark swells with it
+            NoteGlyph.TimingRing(sb, cx, cy, t, mark, start, BeatPulse() * 3f, a);
 
             //Spark : the second note of a pair takes any way, so the ring holds a spark instead
             if (onGrace)
@@ -120,11 +112,11 @@ namespace Tacetno433.Screens
 
             //Arrow : outside the mark, on the side the baton should travel toward
             Flick want = WantedWay();
-            Vector2 d = DirVector(want);
+            Vector2 d = NoteGlyph.Way(want);
             float ax = cx + d.X * (mark + 30f);
             float ay = cy + d.Y * (mark + 30f);
-            DrawDirection(sb, want, ax, ay, 36f, 12f, Palette.Ink * a, 9f);
-            DrawDirection(sb, want, ax, ay, 32f, 9f, Palette.Highlight * a, 4f);
+            NoteGlyph.Arrow(sb, want, ax, ay, 36f, 12f, Palette.Ink * a, 9f);
+            NoteGlyph.Arrow(sb, want, ax, ay, 32f, 9f, Palette.Highlight * a, 4f);
         }
 
         //Ready : while TACET plays its first bar, the band counts the player in, 3 2 1, so the

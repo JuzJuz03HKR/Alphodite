@@ -481,6 +481,7 @@ namespace Tacetno433.Core
 
             GameScreen screen = new TitleScreen();
             if (name.StartsWith("guide")) screen = new GuideScreen();
+            if (name.StartsWith("tutorial")) screen = new TutorialScreen();
             if (name == "settings" || name == "calibrate") screen = new SettingsScreen();
             if (name == "gallery") screen = new ConductorSelectScreen(2);
             if (name == "detail") screen = new ConductorDetailScreen(2, new Rectangle(475, 126, 330, 450));
@@ -509,6 +510,12 @@ namespace Tacetno433.Core
             if (name == "dueltremolo") ((DuelScreen)screen).JumpForPicture(BattleRules.BeatsPerRound - 1);
             if (name == "dueldouble") ((DuelScreen)screen).JumpForPicture(FirstPair(run.Battle));
             if (name == "duelfermata") ((DuelScreen)screen).HoldForPicture();
+            if (name == "tutorialsize") ((TutorialScreen)screen).JumpForPicture(3, 0f);
+            if (name == "tutorialtiming") ((TutorialScreen)screen).JumpForPicture(4, 5.6f);
+            if (name == "tutorialloud") ((TutorialScreen)screen).JumpForPicture(6, 6.6f);
+            if (name == "tutorialbreath") ((TutorialScreen)screen).JumpForPicture(7, 7.6f);
+            if (name == "tutorialroll") ((TutorialScreen)screen).JumpForPicture(8, 5.8f);
+            if (name == "tutorialready") ((TutorialScreen)screen).JumpForPicture(11, 0f);
         }
 
         //First Pair : the first beat of the round that TACET plays as a pair, for the picture

@@ -83,7 +83,6 @@ namespace Tacetno433.Screens
 
         //Stroke Sizes : small, middle and big, and the order each one gives the band
         private static Choice[] sizeChoice = { Choice.Ease, Choice.Normal, Choice.Boost };
-        private static string[] sizeWord = { "EASE", "PLAY", "BOOST" };
 
         private static string[] choiceWord = { "PLAY", "BOOST", "EASE" };   // in Choice order
         private static string[] dynamicMark = { "mf", "f", "p" };           // in Choice order, as music writes loudness
@@ -245,19 +244,11 @@ namespace Tacetno433.Screens
         //Baton State
         private GestureReader gesture = new GestureReader();
         private HandAnim hand = new HandAnim();
-        private float strokeGlow;       // fades away right after a stroke is read
         private float cutIn;            // counts down while the signature picture is on screen
         private bool cutInFinale;       // the picture is the finale's, not the signature's
 
-        //Baton Swing : the stick is held at the pointer and swings behind it like a blade
-        private const float BatonLength = 118f;
-        private const float BatonWidth = 10f;
-        private const float BatonRest = -1.3f;      // radians : 0 points right, minus a half turn points up
-        private const float BatonLowered = 0.9f;    // hanging down to the right while the button is up
-        private float batonAngle = BatonRest;
-        private float batonSpin;                    // how fast the angle is changing
-        private Vector2 batonLast;
-        private Vector2 batonVelocity;
+        //Baton : the stick is held at the pointer and swings behind it like a blade (Core/Baton.cs)
+        private Baton baton = new Baton();
 
         //Judgement : ONE word under the hit point at a time. A new judgement replaces the last,
         //so quick beats never pile words on top of each other. Its width is measured once.
@@ -307,7 +298,7 @@ namespace Tacetno433.Screens
             //is put away until the duel is over
             Game.IsMouseVisible = false;
             gesture.Clear();
-            batonLast = Input.MousePos;
+            baton.Reset(Input.MousePos);
 
             phase = Phase.Intro;
             phaseTimer = 0f;
@@ -458,9 +449,8 @@ namespace Tacetno433.Screens
 
             //Baton : read every frame, whatever else is happening. It only counts while held.
             gesture.Update(dt, Input.MouseDown());
-            UpdateBaton(dt);
+            baton.Update(dt, gesture.Held);
             hand.Update(dt);
-            strokeGlow = Math.Max(0f, strokeGlow - dt * 2.5f);
             ripple = Math.Max(0f, ripple - dt * 1.8f);
             shake = Math.Max(0f, shake - dt * 3.5f);
             staminaFlash = Math.Max(0f, staminaFlash - dt * 2.5f);
@@ -1127,7 +1117,7 @@ namespace Tacetno433.Screens
             if (!paused)
             {
                 DrawStrokeGuide(sb);
-                DrawBaton(sb);
+                baton.Draw(sb, gesture);
             }
         }
     }
