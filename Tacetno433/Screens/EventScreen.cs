@@ -223,7 +223,7 @@ namespace Tacetno433.Screens
 
             if (reward == Reward.Motif)
             {
-                Motif[] found = MotifList.Roll(run.Motifs, 1, amount, run.Rng);
+                Motif[] found = MotifList.Roll(run.Motifs, 1, amount, run.Floor, run.Rng);
                 if (found.Length == 0)
                 {
                     run.AddShards(BattleRules.SkipMotifShards);

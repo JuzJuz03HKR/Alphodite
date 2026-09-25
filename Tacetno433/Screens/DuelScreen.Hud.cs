@@ -198,9 +198,9 @@ namespace Tacetno433.Screens
                 Gfx.Text(sb, Game.Font, comboBonusWords[Math.Min(battle.Combo, BattleRules.ComboMax)], plate.X + 116, plate.Y + 10, Palette.Paper, TextSize.Label);
 
                 //Pips : how close the combo is to setting the band on fire
-                int toFire = battle.Combo % BattleRules.FortissimoCombo;
-                if (battle.FortissimoLeft > 0) toFire = BattleRules.FortissimoCombo;
-                Ui.Pips(sb, plate.X + 24, plate.Y + 28, toFire, BattleRules.FortissimoCombo, 3, 9, 1f);
+                int toFire = battle.Combo % battle.FortissimoCombo;          // CON BRIO needs fewer
+                if (battle.FortissimoLeft > 0) toFire = battle.FortissimoCombo;
+                Ui.Pips(sb, plate.X + 24, plate.Y + 28, toFire, battle.FortissimoCombo, 3, 9, 1f);
             }
 
             if (fireGlow > 0.02f)

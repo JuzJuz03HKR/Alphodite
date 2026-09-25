@@ -215,6 +215,24 @@ namespace Tacetno433.Battle
             get { return Run.Conductor.Perk == ConductorPerk.LockedTempo; }
         }
 
+        //Tremolo Most : strokes past this add nothing to a roll. ACCELERANDO counts more.
+        public int TremoloMost
+        {
+            get { return BattleRules.TremoloMost + (Run.Has(MotifId.Accelerando) ? BattleRules.AccelerandoStrokes : 0); }
+        }
+
+        //Fortissimo Combo : PERFECTs in a row that set the band on fire. CON BRIO needs fewer.
+        public int FortissimoCombo
+        {
+            get { return Run.Has(MotifId.ConBrio) ? BattleRules.ConBrioCombo : BattleRules.FortissimoCombo; }
+        }
+
+        //Finale Line : how far our way the line must be for the finale. CODA offers it sooner.
+        public float FinaleLine
+        {
+            get { return Run.Has(MotifId.Coda) ? BattleRules.CodaLine : BattleRules.FinaleLine; }
+        }
+
         //Combo Bonus : the power multiplier the current combo gives
         public float ComboBonus
         {
@@ -562,7 +580,7 @@ namespace Tacetno433.Battle
             {
                 if (EnemyHas(EnemyTrait.NoRest)) return 0;                              // NO REST
                 float recover = BattleRules.RestRecover;
-                if (Run.Has(MotifId.Fermata)) recover *= BattleRules.FermataRecover;    // FERMATA
+                if (Run.Has(MotifId.BreathMark)) recover *= BattleRules.BreathMarkRecover;   // BREATH MARK
                 return (int)recover;
             }
         }
@@ -759,7 +777,7 @@ namespace Tacetno433.Battle
             r.RollStrokes = 0;
             if (r.Tremolo)
             {
-                int counted = Math.Min(RollStrokes, BattleRules.TremoloMost);
+                int counted = Math.Min(RollStrokes, TremoloMost);                     // ACCELERANDO inside
                 power *= BattleRules.TremoloBase + BattleRules.TremoloStep * counted;
                 if (basePower > 0) cost += RollStrokes * BattleRules.TremoloCost;
                 r.RollStrokes = RollStrokes;
@@ -773,7 +791,8 @@ namespace Tacetno433.Battle
             if (r.Fermata)
             {
                 r.Held = MathHelper.Clamp(HoldFraction, 0f, 1f);
-                power *= BattleRules.FermataBase + BattleRules.FermataHold * r.Held;
+                float hold = Run.Has(MotifId.Tenuto) ? BattleRules.TenutoHold : BattleRules.FermataHold;   // TENUTO
+                power *= BattleRules.FermataBase + hold * r.Held;
                 if (basePower > 0) cost += BattleRules.FermataCost * r.Held;
                 HoldFraction = 0f;
             }
@@ -813,11 +832,13 @@ namespace Tacetno433.Battle
             //Combo Bonus
             power *= ComboBonus;
 
-            //FORTISSIMO : the band is on fire for a few beats after a long combo
+            //FORTISSIMO : the band is on fire for a few beats after a long combo. It hits harder,
+            //and it does not tire (BattleRules.FortissimoCost), so the peak is never cut short.
             r.Fortissimo = false;
             if (FortissimoLeft > 0 && basePower > 0)
             {
                 power *= BattleRules.FortissimoPower;
+                cost *= BattleRules.FortissimoCost;
                 r.Fortissimo = true;
             }
             if (FortissimoLeft > 0 && grade != Grade.None) FortissimoLeft--;
@@ -858,11 +879,11 @@ namespace Tacetno433.Battle
                 power *= BattleRules.CounterpointPower;
 
             //COUNTER : a PERFECT BOOST against a real f note knocks most of it back.
-            //A FALSE NOTE that only looked loud cannot be countered.
+            //A FALSE NOTE that only looked loud cannot be countered. MARCATO knocks back more.
             r.Counter = false;
             if (enemyChoice == Choice.Boost && choice == Choice.Boost && grade == Grade.Perfect && basePower > 0 && enemyPower > 0)
             {
-                enemyPower *= BattleRules.CounterKeep;
+                enemyPower *= Run.Has(MotifId.Marcato) ? BattleRules.MarcatoKeep : BattleRules.CounterKeep;   // MARCATO
                 r.Counter = true;
             }
 
@@ -946,7 +967,7 @@ namespace Tacetno433.Battle
         }
 
         //Fortissimo Update : a miss or no stroke puts the fire out, and every FortissimoCombo
-        //PERFECTs in a row light it again. The beat that lights it is not part of it yet.
+        //PERFECTs in a row light it again (CON BRIO needs fewer). The beat that lights it is not part of it yet.
         private void UpdateFortissimo(BeatResult r, Grade grade)
         {
             r.FortissimoStarted = false;
@@ -958,7 +979,7 @@ namespace Tacetno433.Battle
                 FortissimoLeft = 0;
             }
 
-            if (grade == Grade.Perfect && Combo > 0 && Combo % BattleRules.FortissimoCombo == 0 && FortissimoLeft == 0)
+            if (grade == Grade.Perfect && Combo > 0 && Combo % FortissimoCombo == 0 && FortissimoLeft == 0)
             {
                 FortissimoLeft = BattleRules.FortissimoBeats;
                 r.FortissimoStarted = true;
@@ -987,6 +1008,10 @@ namespace Tacetno433.Battle
                 ours *= BattleRules.MissPower;
                 Combo = 0;
             }
+
+            //GRACE NOTE : a spark that lands on time counts twice
+            if ((grade == Grade.Perfect || grade == Grade.Good) && Run.Has(MotifId.GraceNote))
+                ours *= BattleRules.GraceNotePower;
             else if (grade == Grade.Hesitate)
             {
                 ours = 0f;
@@ -1016,7 +1041,7 @@ namespace Tacetno433.Battle
         //One try per round. Winning it ends the fight on the spot.
         public bool FinaleOffered
         {
-            get { return !Finished && !FinaleTried && Line >= BattleRules.FinaleLine; }
+            get { return !Finished && !FinaleTried && Line >= FinaleLine; }       // CODA inside FinaleLine
         }
 
         public void WinFinale()

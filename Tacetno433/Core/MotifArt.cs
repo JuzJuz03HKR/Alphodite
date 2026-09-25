@@ -23,7 +23,7 @@ namespace Tacetno433.Core
             Mark(sb, m, cx, cy, size / 30f, Palette.Highlight * alpha);
         }
 
-        //Mark : the notation symbol. Two of them are drawn as shapes, the rest are letters.
+        //Mark : the notation symbol. A few are drawn as shapes, the rest are letters.
         public static void Mark(SpriteBatch sb, Motif m, float cx, float cy, float s, Color color)
         {
             if (m.Id == MotifId.Crescendo)
@@ -34,11 +34,27 @@ namespace Tacetno433.Core
                 return;
             }
 
-            if (m.Id == MotifId.Fermata)
+            if (m.Id == MotifId.BreathMark)
             {
-                //Fermata : an arch with a dot under it
-                Gfx.Arc(sb, cx, cy + 5 * s, 12 * s, MathHelper.Pi, MathHelper.TwoPi, color, 2f);
-                Gfx.Circle(sb, cx, cy + 1 * s, 2.5f * s, color);
+                //Breath Mark : the small comma a score writes where the player may breathe
+                Gfx.Circle(sb, cx, cy - 4 * s, 5f * s, color);
+                Gfx.Line(sb, cx + 4 * s, cy - 3 * s, cx - 3 * s, cy + 10 * s, color, 3f * s);
+                return;
+            }
+
+            if (m.Id == MotifId.Tenuto)
+            {
+                //Tenuto : a short flat bar, "hold this note for all it is worth"
+                Gfx.Rect(sb, cx - 12 * s, cy - 2 * s, 24 * s, 4 * s, color);
+                return;
+            }
+
+            if (m.Id == MotifId.Coda)
+            {
+                //Coda : a ring crossed by a longer upright and a longer flat line
+                Gfx.CircleOutline(sb, cx, cy, 9 * s, color, 2f);
+                Gfx.Line(sb, cx, cy - 15 * s, cx, cy + 15 * s, color, 2f);
+                Gfx.Line(sb, cx - 15 * s, cy, cx + 15 * s, cy, color, 2f);
                 return;
             }
 

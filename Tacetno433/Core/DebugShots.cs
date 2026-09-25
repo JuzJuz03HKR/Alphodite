@@ -542,7 +542,7 @@ namespace Tacetno433.Core
             //The balance check skips these so its numbers stay plain.
             if (name != "sim")
             {
-                run.AddMotif(MotifList.Get(MotifId.Fermata));
+                run.AddMotif(MotifList.Get(MotifId.BreathMark));
                 run.AddMotif(MotifList.Get(MotifId.Sforzando));
                 run.AddMotif(MotifList.Get(MotifId.Resin));
                 run.AddShards(120);

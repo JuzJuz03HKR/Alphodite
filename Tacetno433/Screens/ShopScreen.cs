@@ -80,7 +80,7 @@ namespace Tacetno433.Screens
         public override void Load()
         {
             RunState run = Game.CurrentRun;
-            motifs = MotifList.Roll(run.Motifs, 3, 1, run.Rng);
+            motifs = MotifList.Roll(run.Motifs, 3, 1, run.Floor, run.Rng);
 
             names[SeatRow] = "EXTRA SEAT";
             notes[SeatRow] = "One more musician on stage. Two per floor at most.";

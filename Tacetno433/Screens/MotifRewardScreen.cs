@@ -44,7 +44,7 @@ namespace Tacetno433.Screens
             int minRarity = 1;
             if (run.Battle != null && run.Battle.Enemy.Kind == EnemyKind.Elite) minRarity = 2;
             if (run.Battle != null && run.Battle.Enemy.Kind == EnemyKind.Boss) minRarity = 3;
-            offer = MotifList.Roll(run.Motifs, BattleRules.MotifChoices, minRarity, run.Rng);
+            offer = MotifList.Roll(run.Motifs, BattleRules.MotifChoices, minRarity, run.Floor, run.Rng);
 
             cards = new Rectangle[offer.Length];
             int totalW = offer.Length * CardW + (offer.Length - 1) * CardGap;

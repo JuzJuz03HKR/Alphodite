@@ -14,7 +14,7 @@ namespace Tacetno433.Data
         SpareSticks,
         Pianissimo,
         PatronsPurse,
-        Fermata,
+        BreathMark,         // was Fermata, renamed so it is not mixed up with TACET's held note
         Tutti,
         SteadyPulse,
         Encore,
@@ -23,7 +23,16 @@ namespace Tacetno433.Data
         Sforzando,
         SecondWind,
         Overture,
-        Counterpoint
+        Counterpoint,
+
+        //Special Notes (25 Sep) : one for each of the special notes and moments of the duel.
+        //Added at the END, because the save file keeps motifs by their place in this list.
+        Accelerando,
+        Tenuto,
+        GraceNote,
+        Marcato,
+        ConBrio,
+        Coda
     }
 
     //Motif : a small thing the band carries for the rest of the run, which changes how
@@ -35,6 +44,7 @@ namespace Tacetno433.Data
         public string Name = "";
         public string Mark = "";          // the notation mark drawn on its badge, like "sfz"
         public int Rarity = 1;            // 1 common, 2 rare, 3 treasured
+        public int FromFloor = 1;         // never offered before this floor (its note is not in play yet)
         public string Text = "";
 
         //Prepared Text
@@ -62,7 +72,7 @@ namespace Tacetno433.Data
                         Text = "Won fights pay 30 percent more shards." },
 
             //Rarity 2
-            new Motif { Id = MotifId.Fermata,      Name = "FERMATA",       Mark = "U",    Rarity = 2,
+            new Motif { Id = MotifId.BreathMark,   Name = "BREATH MARK",   Mark = ",",    Rarity = 2,
                         Text = "Silent beats give back twice the stamina." },
             new Motif { Id = MotifId.Tutti,        Name = "TUTTI",         Mark = "tutti", Rarity = 2,
                         Text = "Playing together is stronger. Each extra player adds 10 percent more." },
@@ -84,6 +94,21 @@ namespace Tacetno433.Data
                         Text = "The first beat of every round hits 50 percent harder." },
             new Motif { Id = MotifId.Counterpoint, Name = "COUNTERPOINT",  Mark = "+",    Rarity = 3,
                         Text = "When TACET boosts, your answer hits 30 percent harder." },
+
+            //Special Notes : each bends one of the four notes or one big moment of the duel.
+            //FromFloor keeps a motif away until its note has arrived (BattleRules teaching order).
+            new Motif { Id = MotifId.Accelerando,  Name = "ACCELERANDO",   Mark = "accel.", Rarity = 1, FromFloor = BattleRules.TremoloFromFloor,
+                        Text = "A TREMOLO counts 14 strokes instead of 10. Shake harder!" },
+            new Motif { Id = MotifId.Tenuto,       Name = "TENUTO",        Mark = "-",    Rarity = 1, FromFloor = BattleRules.FermataFromFloor,
+                        Text = "A FERMATA held to the end hits x1.8 instead of x1.4." },
+            new Motif { Id = MotifId.GraceNote,    Name = "GRACE NOTE",    Mark = "gr.",  Rarity = 2, FromFloor = BattleRules.PairsFromFloor,
+                        Text = "A spark that lands on time hits twice as hard." },
+            new Motif { Id = MotifId.Marcato,      Name = "MARCATO",       Mark = "^",    Rarity = 2,
+                        Text = "A COUNTER leaves TACET only 55 percent of its note, not 70." },
+            new Motif { Id = MotifId.ConBrio,      Name = "CON BRIO",      Mark = "brio", Rarity = 3,
+                        Text = "FORTISSIMO lights after 6 PERFECTs in a row instead of 8." },
+            new Motif { Id = MotifId.Coda,         Name = "CODA",          Mark = "coda", Rarity = 3,
+                        Text = "The FINALE is offered from +60 on the line instead of +80." },
         };
 
         private static string[] rarityNames = { "", "COMMON", "RARE", "TREASURED" };
@@ -106,18 +131,19 @@ namespace Tacetno433.Data
         }
 
         //Motif Roll : up to count different motifs the band does not own yet.
-        //minRarity lets elites and bosses skip the common ones.
-        public static Motif[] Roll(List<Motif> owned, int count, int minRarity, Random random)
+        //minRarity lets elites and bosses skip the common ones. floor is where the run is now,
+        //so a motif for a note that has not arrived yet is never offered.
+        public static Motif[] Roll(List<Motif> owned, int count, int minRarity, int floor, Random random)
         {
             List<Motif> pool = new List<Motif>();
             for (int i = 0; i < All.Length; i++)
-                if (All[i].Rarity >= minRarity && !owned.Contains(All[i]))
+                if (All[i].Rarity >= minRarity && All[i].FromFloor <= floor && !owned.Contains(All[i]))
                     pool.Add(All[i]);
 
             //Fallback : nothing rare enough is left, take any the band does not own
             if (pool.Count < count)
                 for (int i = 0; i < All.Length; i++)
-                    if (!owned.Contains(All[i]) && !pool.Contains(All[i]))
+                    if (All[i].FromFloor <= floor && !owned.Contains(All[i]) && !pool.Contains(All[i]))
                         pool.Add(All[i]);
 
             if (count > pool.Count) count = pool.Count;

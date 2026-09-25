@@ -93,6 +93,10 @@
         public static int FortissimoCombo = 8;
         public static int FortissimoBeats = 4;
         public static float FortissimoPower = 1.3f;
+        //On fire the band does not tire : stamina paid on a burning beat is multiplied by this.
+        //25 Sep : friends who played said stamina cuts the best moments short, so the peak of
+        //a fight is free. Only a long run of PERFECTs earns it. Set to 1 for the old rule.
+        public static float FortissimoCost = 0f;
 
         //Finale : once the line is this far our way at the end of a round, the band may try to
         //finish the piece. Four strokes of the 4/4 pattern on the beat end the fight at once.
@@ -191,7 +195,7 @@
         public static int ReedCaseDiscount = 1;      // REED CASE
         public static int PianissimoRecover = 6;     // PIANISSIMO
         public static float PurseBonus = 1.3f;       // PATRON'S PURSE
-        public static float FermataRecover = 2f;     // FERMATA
+        public static float BreathMarkRecover = 2f;  // BREATH MARK (was called FERMATA)
         public static float TuttiPerExtra = 0.10f;   // TUTTI
         public static float SteadyWindowBonus = 0.05f;   // STEADY PULSE, added to both windows
         public static float EncoreRecover = 0.15f;   // ENCORE
@@ -200,6 +204,14 @@
         public static float SecondWindRefill = 0.33f;// SECOND WIND
         public static float OverturePower = 1.5f;    // OVERTURE
         public static float CounterpointPower = 1.3f;// COUNTERPOINT
+
+        //Motifs For The Special Notes (25 Sep). The card texts in Data/Motif.cs say these numbers.
+        public static int AccelerandoStrokes = 4;    // ACCELERANDO, a TREMOLO counts TremoloMost + 4 strokes
+        public static float TenutoHold = 1.2f;       // TENUTO, a full FERMATA hold is x(0.6 + 1.2) = x1.8 instead of x1.4
+        public static float GraceNotePower = 2f;     // GRACE NOTE, a spark that lands counts twice
+        public static float MarcatoKeep = 0.55f;     // MARCATO, a COUNTER leaves TACET 55 percent instead of CounterKeep
+        public static int ConBrioCombo = 6;          // CON BRIO, FORTISSIMO after this many PERFECTs instead of 8
+        public static float CodaLine = 60f;          // CODA, the FINALE is offered from here instead of FinaleLine
 
         //Conductor Perks
         public static float LockedTempoCost = 0.6f;  // THE METRONOME pays 60 percent

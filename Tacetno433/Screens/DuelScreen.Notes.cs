@@ -238,7 +238,7 @@ namespace Tacetno433.Screens
             WhipBaton(gesture.Direction);
             hand.Play(PoseFor(gesture.Direction));
 
-            bool counts = rollStrokes <= BattleRules.TremoloMost;
+            bool counts = rollStrokes <= battle.TremoloMost;            // ACCELERANDO counts more
             effects.SpawnSparks(HitX, RingY, counts ? 4 : 1, 1f);
             SoundBank.Play(Sfx.QteNormal, counts ? 0.7f : 0.3f, Math.Min(0.6f, rollStrokes * 0.05f));
             if (battle.OurPowerAt(pending) > 0) staminaFlash = 1f;      // every stroke costs breath
@@ -269,7 +269,7 @@ namespace Tacetno433.Screens
             Gfx.Arrow(sb, sx - 14f, cy + 25f, 5f, false, Palette.Paper);
             Gfx.Arrow(sb, sx + 14f, cy + 25f, 5f, true, Palette.Paper);
 
-            Ui.Pips(sb, cx - 70f, cy + RingTarget + 34f, Math.Min(rollStrokes, BattleRules.TremoloMost), BattleRules.TremoloMost, 4, 14, 1f);
+            Ui.Pips(sb, cx - battle.TremoloMost * 7f, cy + RingTarget + 34f, Math.Min(rollStrokes, battle.TremoloMost), battle.TremoloMost, 4, 14, 1f);
         }
 
         //Roll Bar : the body of TACET's roll, like the drum roll bar of Taiko no Tatsujin. A pale
