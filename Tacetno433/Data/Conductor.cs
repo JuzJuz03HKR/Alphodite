@@ -8,7 +8,7 @@ namespace Tacetno433.Data
     public enum ConductorPerk
     {
         None,            // THE APPRENTICE
-        LockedTempo,     // THE METRONOME   every stroke a boost, never ease, much cheaper notes
+        LockedTempo,     // THE METRONOME   every stroke a boost, whatever its size, never ease
         RunawayFire,     // THE INFERNO     a miss is not weaker and powers up the next beat
         CloserLouder,    // THE UNHEARING   stronger the further TACET has pushed
         EveryRoadHome    // THE FOLK LEADER mixed cultures on a beat hit harder, one seat fewer
@@ -99,9 +99,9 @@ namespace Tacetno433.Data
                 MechanicName = "LOCKED TEMPO",
                 SignatureMark = "Tempo giusto",
                 Recipe = new int[] { 2, 0, 2 },     // the rhythm section
-                MechanicText = "Every stroke is a BOOST, whatever its size, but Ease is sealed. "
-                             + "Every note costs 40 percent less stamina.",
-                Stamina = 9, PushPower = 4, Perk = ConductorPerk.LockedTempo,
+                MechanicText = "Every stroke is a BOOST, whatever its size, so a small flick hits as hard "
+                             + "as a big swing. Ease is sealed.",
+                Stamina = 7, PushPower = 4, Perk = ConductorPerk.LockedTempo,        // round 10 : stamina 9 -> 7, no cheaper notes
                 ThemeColor = Palette.ToneC,
                 Unlocked = true
             },
@@ -137,9 +137,9 @@ namespace Tacetno433.Data
                 MechanicName = "THE CLOSER THE LOUDER",
                 SignatureMark = "Sempre crescendo",
                 Recipe = new int[] { 3, 1, 0 },     // the strings carry it
-                MechanicText = "You start weaker than anyone. The nearer TACET creeps to your edge, "
-                             + "the harder your ensemble hits, up to 60 percent.",
-                Stamina = 5, PushPower = 3, Perk = ConductorPerk.CloserLouder,
+                MechanicText = "You start weak. The nearer TACET creeps to your edge, "
+                             + "the harder your ensemble hits, up to 130 percent.",
+                Stamina = 5, PushPower = 4, Perk = ConductorPerk.CloserLouder,       // round 10 : push 3 -> 4, perk up to 130 percent
                 ThemeColor = Palette.ToneD,
                 Unlocked = true
             },

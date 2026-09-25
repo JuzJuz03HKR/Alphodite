@@ -73,7 +73,7 @@ namespace Tacetno433.Data
 
             //Rarity 2
             new Motif { Id = MotifId.BreathMark,   Name = "BREATH MARK",   Mark = ",",    Rarity = 2,
-                        Text = "Silent beats give back twice the stamina." },
+                        Text = "Silent beats give back 7 stamina instead of 6." },
             new Motif { Id = MotifId.Tutti,        Name = "TUTTI",         Mark = "tutti", Rarity = 2,
                         Text = "Playing together is stronger. Each extra player adds 10 percent more." },
             new Motif { Id = MotifId.SteadyPulse,  Name = "STEADY PULSE",  Mark = "=",    Rarity = 2,

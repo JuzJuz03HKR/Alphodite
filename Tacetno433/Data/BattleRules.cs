@@ -50,7 +50,8 @@
         //   TACET'S BLOW  a beat TACET wins hits the band for what got through
         //   a MISS costs MissExtraCost on top of the note
         //   COLLAPSE      breath at zero ends the fight, the band is silenced (SECOND WIND saves it once)
-        public static float BlowPerPower = 0.7f;    // stamina lost per point TACET wins a beat by, was 1.0 (longer duels, round 9)
+        public static float BlowPerPower = 0.63f;   // stamina lost per point TACET wins a beat by, was 1.0, 0.7 in round 9
+                                                    // round 10 : 0.63 keeps the whole game as hard as round 9 after BREATH MARK was cut
 
         //Timing Grades (HARD, 25 Sep : players found the wide windows far too easy)
         //The stroke settings page can move every judgement earlier or later for one player's
@@ -221,7 +222,8 @@
         public static int ReedCaseDiscount = 1;      // REED CASE
         public static int PianissimoRecover = 6;     // PIANISSIMO
         public static float PurseBonus = 1.3f;       // PATRON'S PURSE
-        public static float BreathMarkRecover = 2f;  // BREATH MARK (was called FERMATA)
+        public static float BreathMarkRecover = 1.25f; // BREATH MARK : 6 x 1.25 = 7.5, counted as 7. Was 2 (x2), round 10 :
+                                                        // one card alone lifted a run from 8 to 46 percent in the simulation
         public static float TuttiPerExtra = 0.10f;   // TUTTI
         public static float SteadyWindowBonus = 0.05f;   // STEADY PULSE, added to both windows
         public static float EncoreRecover = 0.15f;   // ENCORE
@@ -240,9 +242,11 @@
         public static float CodaLine = 60f;          // CODA, the FINALE is offered from here instead of FinaleLine
 
         //Conductor Perks
-        public static float LockedTempoCost = 0.6f;  // THE METRONOME pays 60 percent
+        public static float LockedTempoCost = 1.0f;  // THE METRONOME pays this share. Was 0.6 : since BOOST is free (round 8)
+                                                     // his lock cost him nothing, and he won 98 percent of simulated runs (round 10)
         public static float RunawayFireBonus = 1.3f; // THE INFERNO, the beat after a miss
-        public static float CloserLouderMax = 0.6f;  // THE UNHEARING, +60 percent at the very edge
+        public static float CloserLouderMax = 1.3f;  // THE UNHEARING, +130 percent at the very edge. Was 0.6 : with the PUSH CAP
+                                                     // the line rarely falls far, so he was the weakest conductor (round 10)
         public static float CrossCultureHarmony = 0.15f; // THE FOLK LEADER, per extra culture on a beat
 
         //Shop
