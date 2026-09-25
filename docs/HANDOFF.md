@@ -1,6 +1,6 @@
 # TACET 4'33 — เอกสารส่งต่อให้ฝ่ายโค้ด
 
-อัปเดต : 25 กันยายน 2026 (รอบ 6.3) · repo `github.com/JuzJuz03HKR/Alphodite` branch **`Alpha2`** · กติกาสำหรับ Claude อยู่ `CLAUDE.md` · อ่านคู่กับ [`PROJECT_STATUS.md`](PROJECT_STATUS.md) (รายละเอียดทุกระบบ)
+อัปเดต : 25 กันยายน 2026 (รอบ 7) · repo `github.com/JuzJuz03HKR/Alphodite` branch **`Alpha2`** · กติกาสำหรับ Claude อยู่ `CLAUDE.md` · อ่านคู่กับ [`PROJECT_STATUS.md`](PROJECT_STATUS.md) (รายละเอียดทุกระบบ)
 และ [`ASSET_LIST.md`](ASSET_LIST.md) (ไฟล์ภาพ/เสียงที่ต้องใส่)
 
 ---
@@ -13,6 +13,8 @@
   โน้ตเขียน f / mf / p มีหัวลูกศรที่ขอบบอกทิศ โน้ตถัดไปสว่าง · โน้ตพิเศษมาทีละชั้น : TREMOLO (ชั้น 1, Elite/บอส) · FERMATA (ชั้น 2) · โน้ตคู่ (ชั้น 3) ·
   COUNTER · FORTISSIMO · FINALE (รอบ 6–6.3, 25 ก.ย.)
 - Esc = เมนูหยุดทุกหน้าในรัน · มีเซฟตั้งค่า + เซฟรัน + CONTINUE · STROKE TIMING (calibration) ในหน้าตั้งค่า
+- **รอบ 7** : ภาพและความรู้สึก (หลุมจุดตี · EARLY/LATE · แสงแตกตามเกรด · เลนสว่าง · โน้ต TACET แตก · บรรทัดห้าเส้นสั่น · ม่านเวทีแทนเฟดดำ) ·
+  Motif ใหม่ 6 ชิ้นที่ดัดโน้ตพิเศษ · Motif FERMATA → BREATH MARK · FORTISSIMO ไม่เสียสตามิน่า · **ระบบสตามิน่ารอคุยกับผู้ใช้**
 - **ยังไม่มีไฟล์ภาพและเสียงเลย** ทุกช่องเป็นกรอบว่าง / เงียบ ใส่ไฟล์ตามชื่อแล้วขึ้นเองโดยไม่ต้องแก้โค้ด
 - เพื่อนต่างกลุ่มเล่นระบบรอบ 5 แล้ว (ง่ายเกิน) · **ระบบรอบ 6 ยังไม่มีคนเล่นจริง** ตัวเลขได้จากการจำลอง
 
@@ -69,6 +71,12 @@ Tacetno433/
 | โน้ตคู่ TREMOLO COUNTER FORTISSIMO | กติกา `Battle/BattleState.cs` (ค้น `TREMOLO` `COUNTER` `FORTISSIMO` `ResolveGrace`) · หน้าจอ `Screens/DuelScreen.Notes.cs` |
 | FINALE | `Screens/DuelScreen.Finale.cs` + `BattleState.FinaleOffered / WinFinale / FailFinale` |
 | calibration | `Settings.TimingOffset` ใช้ใน `DuelScreen.StrokeClock()` จุดเดียว · หน้า TEST ใน `Screens/SettingsScreen.cs` |
+| เอฟเฟกต์ที่จุดตี (แสงแตก โน้ตแตก) | `Battle/DuelEffects.cs` (`SpawnHit` / `SpawnShatter` + `DrawHits` / `DrawShards`) · เรียกจาก `DuelScreen.StartClash` |
+| หลุมจุดตี · เลนสว่าง · ขอบเลนเต้น | `DuelScreen.Stage.cs` `DrawLane` (ค้น `Hit Well`, `LANE FLASH`) |
+| EARLY / LATE | `DuelScreen.Baton.cs` `ShowTiming` · วาดใน `DuelScreen.Hud.cs` `DrawJudge` |
+| บรรทัดห้าเส้นหลังวง | `Core/StageStaff.cs` · ความแรงคือ `staffEnergy` ใน `DuelScreen.cs` |
+| ม่านเวทีตอนเปลี่ยนหน้า | `Core/Curtain.cs` · เรียกจาก `Core/ScreenManager.cs` จุดเดียว (ความเร็ว `FadeSpeed`) |
+| Motif ของโน้ตพิเศษ / ชั้นที่เริ่มสุ่มให้ | `Data/Motif.cs` (`FromFloor`) · ผลใน `BattleState` (ค้น `ACCELERANDO` `TENUTO` `GRACE NOTE` `MARCATO` `CON BRIO` `CODA`) |
 | ช่องภาพ | `Core/ArtBank.cs` (ภาพนิ่ง) · `Core/CharacterArt.cs` (นักดนตรี pixel) · `Core/HandArt.cs` (มือ) |
 | ชื่อไฟล์เสียง | `Audio/SoundBank.cs` |
 
@@ -79,7 +87,7 @@ Tacetno433/
 - **ห้ามสร้าง string ใน `Draw`** ข้อความเตรียมตอนโหลด ตัวเลขใช้ `NumberText.Get()`
 - ขาวดำล้วน สีทั้งเกมอยู่ `Core/Palette.cs` สีเน้นเปลี่ยนที่ `Palette.Accent` จุดเดียว
 - **ห้ามเจนภาพ** ภาพที่ยังไม่มี = กรอบว่าง `ArtSlot` เท่านั้น
-- ไฟล์ .cs ในโปรเจกต์ใช้ encoding ปนกัน (บางไฟล์ BOM+CRLF บางไฟล์ LF) แก้แล้วให้คงแบบเดิม
+- ไฟล์ .cs บางไฟล์มี BOM บางไฟล์ไม่มี แก้แล้วให้คงแบบเดิม · บรรทัดใน git เก็บเป็น LF ทุกไฟล์ (`.gitattributes` `text=auto`) Windows แปลงเป็น CRLF ตอน checkout เอง
 
 **เครื่องมือ** `Core/DebugShots.cs` (ลบได้ ไม่ใช่ส่วนของเกม)
 - `Tacetno433.exe --shots title,duel@150,result --out C:\pics` แคปหน้าจอนอกจอ ไม่ยุ่งกับเมาส์/คีย์บอร์ด
@@ -90,7 +98,8 @@ Tacetno433/
 ## 4. งานที่เหลือ (เรียงตามความสำคัญ)
 
 ### ต้องทำก่อน (P1)
-1. **เล่นทดสอบรอบ 6 ด้วยเมาส์จริง แล้วจูน** (ทำ STROKE TIMING test ก่อน) : 116 BPM ตวัดทันไหม · โน้ตคู่อ่านออกไหม ·
+0. **คุยเรื่องระบบสตามิน่ากับผู้ใช้** (เพื่อนรีวิวว่าขัดความมันส์) — ทางเลือก ก–ง ใน `DESIGN_RESEARCH.md` หัวข้อ 6.6 · ยังไม่แก้จนกว่าจะเลือก
+1. **เล่นทดสอบรอบ 6–7 ด้วยเมาส์จริง แล้วจูน** (รอบ 7 : ดูว่าเอฟเฟกต์ใหม่รกไหม ม่านเวทีช้าไปไหม) (ทำ STROKE TIMING test ก่อน) : 116 BPM ตวัดทันไหม · โน้ตคู่อ่านออกไหม ·
    TREMOLO รัวได้กี่ครั้ง (ตั้ง `TremoloPerfect` ตามจริง) · COUNTER / FORTISSIMO / FINALE แรงไปไหม ·
    ค่าใน `GestureReader`, `PerfectWindow` / `GoodWindow` / `EarlyTime` · **ผู้ใช้ต้องการให้ยาก ห้ามลดความยากโดยไม่ถาม**
 2. ~~เมนูหยุดเต็ม~~ ✅ รอบ 6 · ~~ถามยืนยัน~~ ✅ · ~~เซฟ + CONTINUE~~ ✅ (ไฟล์ข้อความ ไม่ใช่ JSON) · ~~Calibration~~ ✅
@@ -102,8 +111,8 @@ Tacetno433/
 6. **โหมด Tutorial ที่หน้าแรก** + ช่วงแรกของชั้น 1 สอนทีละระบบ (ผู้ใช้สั่งให้ทำตอนเกมใกล้สมบูรณ์)
 7. **ปรับใหญ่ (ต้องคุยกับผู้ใช้ก่อน)** : ห้องซ้อม · การเลือกเส้นทาง (ให้ง่ายขึ้น/เหมือนเกมตลาด เช่นแผนที่ที่เห็นข้างหน้า) ·
    การจัดทีม · หน้าจัดจังหวะ
-8. ทุกอย่างบนหน้าดวลเต้นตาม BPM · เปลี่ยนหน้าแบบม่านเวทีแทนเฟดดำ · ตัวเลขปะทะนับพร้อมเสียงไต่ระดับ ·
-   ตาราง THE PERFORMANCE ยังไม่มีคำอธิบายสัญลักษณ์ (วง = COUNTER, เพชรล่าง = สะบัดกลับ, ซิกแซก = TREMOLO)
+8. ~~เปลี่ยนหน้าแบบม่านเวที~~ ✅ รอบ 7 · ~~คำอธิบายตาราง THE PERFORMANCE~~ ✅ รอบ 7 · ~~เลน/จุดตีเต้นตาม BPM~~ ✅ รอบ 7 ·
+   ยังเหลือ : ตัวเลขปะทะนับพร้อมเสียงไต่ระดับ (รอไฟล์เสียง) · แผงวงด้านล่างเต้นตาม BPM
 9. เนื้อหาเพิ่ม : เหตุการณ์ (6 → 12+) · บอสยุคละ 2 · นักดนตรี · Motif
 10. ต่อไฟล์ภาพ/เสียงเมื่อทีมส่งมา (เพิ่มใน `Content.mgcb` เท่านั้น ไม่ต้องแก้โค้ด) และเช็กขนาดในเกม
 
@@ -122,6 +131,9 @@ Tacetno433/
 - ฟอนต์อ้าง `C:/Windows/Fonts/pala.ttf` แบบ path เต็ม (ใช้ได้ทุกเครื่อง Windows ที่ติดตั้งที่ไดรฟ์ C)
 - ตอน cut-in ของ SIGNATURE เกมหยุดนาฬิกาจังหวะ 1 วินาที (ตั้งใจ) ถ้ารู้สึกหลุดจังหวะให้ย้ายไปเล่นตอนจบห้อง
 - โน้ตทำนอง (`Audio/Phrase`) เล่นตามลำดับบีต 1–8 ไม่สนว่าใครเล่น ถ้าอยากให้แต่ละเครื่องดนตรีมีเสียงของตัวเองต้องต่อยอด
+- การจำลองยังไม่รวม Motif (รวม 6 ชิ้นใหม่) · ผลจำลองแกว่ง ±5–8% ระหว่างรัน ต้องรันหลายครั้ง
+- ข้อความบนการ์ด Motif เขียนตัวเลขไว้ตรงๆ ถ้าแก้ตัวเลข Motif ใน `BattleRules` ต้องแก้ข้อความใน `Data/Motif.cs` ด้วย
+- เอฟเฟกต์รอบ 7 ตรวจแค่ด้วยภาพนิ่ง (เมาส์ปลอม) ยังไม่มีคนเล่นจริง
 
 ## 6. สิ่งที่ผู้ใช้ตัดสินใจแล้ว (ห้ามเปลี่ยนเองโดยไม่ถาม)
 
