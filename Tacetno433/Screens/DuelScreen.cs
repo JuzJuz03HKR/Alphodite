@@ -29,12 +29,13 @@ namespace Tacetno433.Screens
     //the band's melody, so the music only happens when the player conducts.
     //
     //Extra notes and moments:
-    //   PAIR       a note tied to a spark. The spark is answered half a beat later with one
-    //              more flick, any way at all (the conductor's rebound).
-    //   FERMATA    ordinary enemies end each round with a held note two beats long. Stroke it,
-    //              then keep the button held and the baton still. Holding pushes, and costs breath.
-    //   TREMOLO    elites and bosses end each round with a roll two beats long instead. Shake the
-    //              baton: every stroke adds power and costs stamina.
+    //   PAIR       a note tied to a spark (from floor two). The spark is answered half a beat
+    //              later with one more flick, any way at all (the conductor's rebound).
+    //   FERMATA    from floor two, ordinary enemies end each round with a held note two beats
+    //              long. Stroke it, then keep the button held and the baton still. Holding pushes.
+    //   TREMOLO    everyone else ends each round with a roll two beats long instead (every enemy
+    //              on floor one, elites and bosses after). Shake the baton: every stroke adds power.
+    //   Big strokes, holds and rolls cost no stamina (round 8).
     //   COUNTER    a PERFECT BOOST against TACET's real f note knocks part of it back.
     //   FORTISSIMO a long combo sets the band on fire for a few beats.
     //   FINALE     far enough ahead at the end of a round, four strokes of the pattern on the
@@ -48,7 +49,7 @@ namespace Tacetno433.Screens
     //THIS CLASS IS SPLIT OVER SEVEN FILES, all called DuelScreen (the "partial" keyword lets one
     //class be written in several files; the compiler joins them back into one):
     //   DuelScreen.cs          the state, Load, Update, and the order of a round
-    //   DuelScreen.Baton.cs    reading and judging a stroke, drawing the baton
+    //   DuelScreen.Baton.cs    judging a stroke and the stroke guide (the stick is Core/Baton.cs)
     //   DuelScreen.Notes.cs    pairs, the fermata, TACET's roll, the counter and FORTISSIMO
     //   DuelScreen.Finale.cs   the FINALE that ends a fight early
     //   DuelScreen.Stage.cs    the stage, the band, TACET's eclipse, the lane and its notes

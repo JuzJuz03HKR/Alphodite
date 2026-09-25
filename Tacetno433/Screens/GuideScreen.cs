@@ -48,7 +48,7 @@ namespace Tacetno433.Screens
             "TACET plays a bar first, each note marked f (loud), mf or p (soft), then the band counts you in: 3, 2, 1. "
             + "Hold the left mouse button and conduct on every beat, the way the pointer on the bright note says. A small "
             + "swing EASES, a middle one PLAYS, a big one BOOSTS for free. Stop as the ring closes. A PERFECT BOOST against f is a "
-            + "COUNTER. Later floors add one thing each: a zigzag bar to shake, a note under an arch to hold still, a spark to flick.",
+            + "COUNTER. Rounds end on a zigzag bar to shake, or from floor two on an arch to hold still. Sparks join on floor two.",
 
             "Each clash pushes the line between your light and TACET's dark. Push it all the way to win at once, "
             + "or be ahead after three rounds. Far enough ahead at a round's end, conduct the FINALE to finish it. "

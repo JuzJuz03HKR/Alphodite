@@ -189,10 +189,10 @@ namespace Tacetno433.Screens
         //   mf  plain.
         //   p   soft, a thin dim ring. TACET will EASE.
         //   ?   a hidden note, nobody can tell.
-        //   tr  TACET's roll (later floors), with a zigzag bar as long as the roll lasts.
+        //   tr  TACET's roll, with a zigzag bar as long as the roll lasts.
         //The pointer on the ring's edge is the way to swing, the same as the answer ring shows.
         //The note to answer next is bright, the next one a little dimmer, the rest faint.
-        //A pair (last floor) is a note tied to a spark: one more flick, any way, on the spark.
+        //A pair (from floor two) is a note tied to a spark: one more flick, any way, on the spark.
         //A note under an arch (from floor two) is held still after its stroke.
         //A dash is a beat where nobody plays at all.
         private void DrawIncoming(SpriteBatch sb)

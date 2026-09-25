@@ -62,6 +62,8 @@ namespace Tacetno433.Battle
     //   on every beat both sides add up their power, both pick Normal / Boost / Ease,
     //   and the difference pushes a line. Push it to +100 and you win on the spot, get pushed
     //   to -100 and you lose. After 3 rounds, whoever is ahead wins.
+    //   no single note pushes further than PUSH CAP, and elites and bosses are a HEAVY LINE
+    //   (their pushes count less), so a duel is a run of beats, never one big hit (round 9).
     //   STAMINA is the band's breath, carried across the whole run. Planned notes cost some,
     //   silent beats and EASE give some back. A beat TACET wins knocks breath out of the band
     //   (TACET'S BLOW), and so does a MISS. At zero the band COLLAPSES and the fight is lost.
@@ -69,8 +71,8 @@ namespace Tacetno433.Battle
     //   PERFECT strokes in a row build a COMBO that makes every beat stronger, and a long
     //   combo sets the band on fire (FORTISSIMO) for a few beats.
     //   some of TACET's notes come in pairs (the second one is a grace, see ResolveGrace).
-    //   every round ends on a special note: ordinary enemies HOLD it (FERMATA, keep the baton
-    //   still), elites and bosses ROLL it (TREMOLO, shake the baton).
+    //   every round ends on a special note: from floor two ordinary enemies HOLD it (FERMATA,
+    //   keep the baton still), everyone else ROLLS it (TREMOLO, shake the baton).
     //   a PERFECT BOOST against TACET's real f note is a COUNTER that knocks part of it back.
     //   the special notes arrive one floor at a time (BattleRules teaching order).
     //   far enough ahead at the end of a round, the band may try the FINALE and end it at once.
@@ -130,6 +132,7 @@ namespace Tacetno433.Battle
 
         private Random random;
         private float scale;                     // floor and kind scaling for the enemy
+        private float lineWeight = 1f;           // HEAVY LINE : elites and bosses move the line less
         private bool secondWindUsed;
         private bool fireNext;                   // THE INFERNO : the next played beat is stronger
         private int[] lastPlan = new int[BattleRules.BeatsPerRound];   // ANSWER BETTER : last round's plan
@@ -147,6 +150,10 @@ namespace Tacetno433.Battle
             if (enemy.Kind == EnemyKind.Normal) scale *= BattleRules.NormalScale;
             if (enemy.Kind == EnemyKind.Elite) scale *= BattleRules.EliteScale;
             if (enemy.Kind == EnemyKind.Boss) scale *= BattleRules.BossScale;
+
+            //HEAVY LINE : an elite or a boss is heavier to move, so its duel lasts longer
+            if (enemy.Kind == EnemyKind.Elite) lineWeight = BattleRules.EliteLine;
+            if (enemy.Kind == EnemyKind.Boss) lineWeight = BattleRules.BossLine;
 
             EnemyTitle = enemy.KindLabel + "  /  " + enemy.Name;
 
@@ -275,13 +282,13 @@ namespace Tacetno433.Battle
                     if (!EnemyHidden[b])
                         EnemyPower[b] = Math.Max((int)Math.Round(lastPlan[b] * BattleRules.MirrorScale), EnemyPower[b] / 2);
 
-            //Last Note : every round ends on a special note two beats long. Elites and bosses
-            //ROLL it (tremolo), ordinary enemies HOLD it (fermata). It always has a note, and it is
-            //never hidden, so the player can plan for it on the score page.
-            //Each one only from its floor in the teaching order, before that the round simply ends.
+            //Last Note : every round ends on a special note two beats long. Ordinary enemies HOLD
+            //it (fermata) from FermataFromFloor on, everyone else ROLLS it (tremolo), so on floor
+            //one every enemy rolls. It always has a note, and it is never hidden, so the player can
+            //plan for it on the score page.
             int last = BattleRules.BeatsPerRound - 1;
-            bool roll = Enemy.Kind != EnemyKind.Normal && Run.Floor >= BattleRules.TremoloFromFloor;
             bool hold = Enemy.Kind == EnemyKind.Normal && Run.Floor >= BattleRules.FermataFromFloor;
+            bool roll = !hold && Run.Floor >= BattleRules.TremoloFromFloor;     // round 9 : whoever does not hold, rolls
             TremoloBeat = roll ? last : -1;
             FermataBeat = hold ? last : -1;
             if (roll || hold)
@@ -710,7 +717,7 @@ namespace Tacetno433.Battle
             for (int b = 0; b < BattleRules.BeatsPerRound; b++)
             {
                 if (EnemyHidden[b]) continue;
-                line += (ExpectedPowerAt(b) - EnemyStrikeAt(b)) * BattleRules.PushPerPower;
+                line += PushFor(ExpectedPowerAt(b), EnemyStrikeAt(b));
             }
 
             if (line > BattleRules.LineLimit) line = BattleRules.LineLimit;
@@ -909,7 +916,7 @@ namespace Tacetno433.Battle
             r.OurPower = (int)Math.Round(power);
             r.EnemyPower = (int)Math.Round(enemyPower);
             r.Played = r.OurPower > 0;
-            float push = (r.OurPower - r.EnemyPower) * BattleRules.PushPerPower;
+            float push = PushFor(r.OurPower, r.EnemyPower);                             // PUSH CAP inside
 
             Line += push;
             if (Line > BattleRules.LineLimit) Line = BattleRules.LineLimit;
@@ -946,6 +953,16 @@ namespace Tacetno433.Battle
             CheckBreath(r);
 
             return r;
+        }
+
+        //Push For : how far one note moves the line. The power difference times PushPerPower,
+        //but never further than PUSH CAP either way, so no single note decides the fight.
+        //Against an elite or a boss the whole push is lighter still (HEAVY LINE).
+        private float PushFor(int ours, int theirs)
+        {
+            float push = (ours - theirs) * BattleRules.PushPerPower;
+            push = MathHelper.Clamp(push, -BattleRules.PushCap, BattleRules.PushCap);   // PUSH CAP
+            return push * lineWeight;                                                   // HEAVY LINE
         }
 
         //Blow For : TACET'S BLOW, the stamina a beat costs the band when TACET wins it
@@ -1059,7 +1076,7 @@ namespace Tacetno433.Battle
 
             int ourPart = (int)Math.Round(ours);
             int theirPart = (int)Math.Round(theirs);
-            float push = (ourPart - theirPart) * BattleRules.PushPerPower;
+            float push = PushFor(ourPart, theirPart);                                   // PUSH CAP inside
             Line += push;
             if (Line > BattleRules.LineLimit) Line = BattleRules.LineLimit;
             if (Line < -BattleRules.LineLimit) Line = -BattleRules.LineLimit;

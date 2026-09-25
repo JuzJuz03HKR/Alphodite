@@ -10,8 +10,21 @@
         public const int MaxRounds = 3;           // after this, whoever is ahead wins
         public const float LineLimit = 100f;      // push the line this far to win outright
 
-        //Push : how far the line moves for each point of power difference on a beat
-        public static float PushPerPower = 2.2f;
+        //Push : how far the line moves for each point of power difference on a beat.
+        //Round 9 (25 Sep) : playtesters won by putting the whole band on the first four beats,
+        //the fight was over in two to four beats. The push is much lighter now, so a duel
+        //takes a normal enemy about a round and a half and a boss two to three rounds.
+        public static float PushPerPower = 1.0f;   // was 2.2
+
+        //PUSH CAP : no single note moves the line further than this, either way. No fight is
+        //won or lost in one blow, however strong the band has grown (see BattleState.PushFor).
+        //So a beat won by a mile pushes no further than a beat won well: spread the band out.
+        public static float PushCap = 10f;
+
+        //HEAVY LINE : elites and bosses are heavier to move. Every note in their duels, ours and
+        //theirs, moves the line only this share of the usual push, so those duels last longer.
+        public static float EliteLine = 0.85f;
+        public static float BossLine = 0.7f;
 
         //Harmony : several musicians on the same beat hit harder together.
         //Each extra player adds this much, so three players give x1.30.
@@ -28,15 +41,16 @@
         //Rest : a beat where we play nothing gives stamina back
         public static int RestRecover = 6;
 
-        //Stamina Cost : every note the band plays costs this much more (1.2 = 20 percent more)
-        public static float StaminaCostScale = 1.15f;   // was 1.0
+        //Stamina Cost : every note the band plays costs its written cost times this (0.7 = 30 percent less)
+        //Round 9 : duels last two to three times as many beats, so each note costs less
+        public static float StaminaCostScale = 0.7f;    // was 1.15
 
         //Stamina Pressure (round 8) : stamina is the band's breath. It is not spent on big
         //strokes, rolls or holds any more. It is knocked out of the band instead:
         //   TACET'S BLOW  a beat TACET wins hits the band for what got through
         //   a MISS costs MissExtraCost on top of the note
         //   COLLAPSE      breath at zero ends the fight, the band is silenced (SECOND WIND saves it once)
-        public static float BlowPerPower = 1.0f;    // stamina lost per point TACET wins a beat by
+        public static float BlowPerPower = 0.7f;    // stamina lost per point TACET wins a beat by, was 1.0 (longer duels, round 9)
 
         //Timing Grades (HARD, 25 Sep : players found the wide windows far too easy)
         //The stroke settings page can move every judgement earlier or later for one player's
@@ -57,29 +71,32 @@
         //Tempo : beats per minute in round 1, 2 and 3. The duel speeds up as the fight goes on.
         //TACET's second bar is called while the first is being answered, so the player
         //conducts on every beat without waiting.
-        public static int[] TempoBpm = { 88, 100, 116 };   // was 72 / 84 / 96
+        public static int[] TempoBpm = { 96, 112, 128 };   // round 9 : quicker strokes, was 88 / 100 / 116
         public static float PhraseTail = 0.5f;      // after the last answer, before the round is summed up
 
         //Teaching Order : the special notes arrive one floor at a time, so floor one teaches the
-        //plain game (the enemy traits also start on floor two). Keep the game simple to learn.
-        public static int TremoloFromFloor = 1;     // elites and bosses roll from the start, shaking is easy
+        //plain game with the roll (the enemy traits also start on floor two). Keep it simple to learn.
+        //Round 9 : every round ends on a special note. Whoever does not HOLD it ROLLS it, so on
+        //floor one every enemy rolls, and from floor two ordinary enemies hold instead.
+        public static int TremoloFromFloor = 1;     // rolls from the start, shaking is easy
         public static int FermataFromFloor = 2;     // ordinary enemies hold their last note from floor two
-        public static int PairsFromFloor = 3;       // pairs only on the last floor
+        public static int PairsFromFloor = 2;       // round 9 : pairs from floor two for quicker flicks, was 3
 
         //Double Notes : some of TACET's notes come in pairs, a note tied to a spark. The note is
         //answered on the beat, the spark half a beat later with one more flick, any way.
-        public static int[] DoubleNotes = { 1, 2, 3 };     // how many pairs in round 1 / 2 / 3, from PairsFromFloor on
+        public static int[] DoubleNotes = { 2, 3, 4 };     // how many pairs in round 1 / 2 / 3, from PairsFromFloor on, was 1 / 2 / 3
         public static int DoubleMost = 4;
         public static float GraceShare = 0.5f;      // the second note is worth this much of its beat, on both sides
 
-        //Tremolo : elites and bosses end every round with a roll two beats long. Shake the baton
-        //as fast as you can: every stroke adds power (the strokes are free since round 8).
+        //Tremolo : elites and bosses (and everyone on floor one) end every round with a roll two
+        //beats long. Shake the baton as fast as you can: every stroke adds power (the strokes are
+        //free since round 8).
         public static float TremoloBeats = 2f;
         public static float TremoloEnemy = 1.5f;    // TACET's roll hits this much harder than its note
         public static float TremoloBase = 0.4f;     // our part with no strokes at all
         public static float TremoloStep = 0.15f;    // each stroke adds this much of our part
         public static int TremoloMost = 10;         // strokes past this add nothing
-        public static int TremoloPerfect = 7;       // strokes for a PERFECT roll
+        public static int TremoloPerfect = 6;       // strokes for a PERFECT roll, was 7 : the roll is shorter at 128 BPM
         public static int TremoloGood = 4;          // strokes for a GOOD roll, fewer than 1 is a HESITATE
 
         //Fermata : ordinary enemies end every round with a held note two beats long (elites and
@@ -124,8 +141,8 @@
         public static float ForecastStruggling = 0.6f;   // below this it is HOPELESS
 
         //Enemy Traits : the numbers behind each EnemyTrait (see Data/Enemy.cs)
-        public static int LullabyBpm = 80;          // THE LULL, round three slows down, was 66
-        public static int UnfinishedBpm = 128;      // REQUIEM, round three rushes, was 108
+        public static int LullabyBpm = 88;          // THE LULL, round three slows down, was 80 (kept a third under round three)
+        public static int UnfinishedBpm = 140;      // REQUIEM, round three rushes, was 128 (kept above round three)
         public static float FillsGapsPower = 1.5f;  // DEAD AIR, on beats nobody on your side plays
         public static float MirrorScale = 0.9f;     // THE NAMELESS MASTER, your last plan played back
         public static float BargainPower = 1.5f;    // THE DEVIL'S STRING, the deal : this much power
@@ -177,7 +194,7 @@
         public static int ShardsNormal = 20;
         public static int ShardsElite = 40;
         public static int ShardsBoss = 80;
-        public static int ShardsPerPerfect = 2;
+        public static int ShardsPerPerfect = 1;      // was 2 : duels are longer, so there are more PERFECTs (round 9)
         public static int EliteRecruitChance = 50;   // percent
 
         //Party
