@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -20,7 +21,7 @@ namespace Tacetno433.Core
     //
     //ADVANCED PARTS : RenderTarget2D (drawing into a picture instead of the window) and
     //writing a PNG file. Neither is used anywhere else in the game.
-    public static class DebugShots
+    public static partial class DebugShots
     {
         public static bool Active;
         public static RenderTarget2D Target;
@@ -96,6 +97,14 @@ namespace Tacetno433.Core
             if (names[0] == "simulate")
             {
                 Simulate(game);
+                game.Exit();
+                return;
+            }
+
+            //Balance Audit : whole runs split by conductor, motif, enemy and era (DebugShots.Audit.cs)
+            if (names[0] == "audit")
+            {
+                Audit(game);
                 game.Exit();
                 return;
             }
@@ -296,93 +305,111 @@ namespace Tacetno433.Core
 
             for (int h = 0; h < habits.Length; h++)
             {
-                int won = 0;
-                int[] lostOnFloor = new int[BattleRules.FloorsPerRun + 1];
-                int[] lostTo = new int[3];
-                int bossStamina = 0, bossCount = 0, outOfBreath = 0;
-                fightCount = 0;
-                fightBeats = 0;
-
+                RunRecord rec = new RunRecord();
                 for (int n = 0; n < 200; n++)
-                {
-                    RunState run = new RunState();
-                    run.Start(ConductorList.All[0], game.StoryFont, PanelStrip.CaptionWrapWidth);
-                    run.BandName = "SIM";
-                    bool alive = true;
+                    PlayRun(game, ConductorList.All[0], h, null, true, random, rec);
 
-                    for (int guard = 0; guard < 200 && alive && !run.RunComplete; guard++)
-                    {
-                        if (run.AtFloorOpening)
-                        {
-                            run.ChooseEra(random.Next(EraList.All.Length));
-                            run.RecruitAtOpening();
-                            run.LeaveOpening();
-                            continue;
-                        }
-
-                        run.Chosen = run.Options[random.Next(run.Options.Length)];
-                        NodeType type = run.Chosen.Type;
-
-                        if (type == NodeType.Battle || type == NodeType.Elite || type == NodeType.Boss)
-                        {
-                            run.BeginBattle();
-                            if (type == NodeType.Boss) { bossStamina += run.Stamina * 100 / run.MaxStamina; bossCount++; }
-
-                            if (!PlayFight(run, h, random))
-                            {
-                                alive = false;
-                                lostOnFloor[run.Floor]++;
-                                lostTo[(int)run.Battle.Enemy.Kind]++;
-                                if (run.Battle.Collapsed) outOfBreath++;
-                                break;
-                            }
-
-                            //Win Rewards : the same as the result page hands out
-                            run.AddShards(run.Battle.ShardsEarned());
-                            run.ChangeStamina((int)(run.MaxStamina * BattleRules.RecoverAfterWin));
-                            if (type == NodeType.Elite && run.RollPercent() < BattleRules.EliteRecruitChance) run.RecruitOne();
-                            TakeMotif(run, type, random);
-                        }
-                        else if (type == NodeType.Rest)
-                        {
-                            run.ChangeStamina((int)(run.MaxStamina * BattleRules.BreatheRecover));
-                        }
-                        else if (type == NodeType.Shop)
-                        {
-                            if (run.Stamina < run.MaxStamina * 0.6f && run.SpendShards(BattleRules.TuningPrice))
-                                run.ChangeStamina((int)(run.MaxStamina * BattleRules.TuningRecover));
-                            if (run.SeatForSale && run.Roster.Count > run.Seats && run.SpendShards(run.SeatPrice))
-                            {
-                                run.AddSeat();
-                                for (int i = 0; i < run.Roster.Count; i++)
-                                    if (run.Formation.SeatOf(run.Roster[i]) < 0) run.Formation.AutoSeat(run.Roster[i], run.Seats);
-                            }
-                        }
-                        else if (type == NodeType.EraShift)
-                        {
-                            run.ChooseEra((run.Era + 1) % EraList.All.Length);
-                        }
-
-                        run.FinishBattle();
-                        run.Advance();
-                    }
-
-                    if (alive && run.RunComplete) won++;
-                }
-
-                report += habits[h].PadRight(50) + "RUN WON " + (won * 100 / 200).ToString().PadLeft(3) + "%"
-                        + "   LOST ON FLOOR 1/2/3  " + lostOnFloor[1] + " / " + lostOnFloor[2] + " / " + lostOnFloor[3]
-                        + "   LOST TO NORMAL/ELITE/BOSS  " + lostTo[0] + " / " + lostTo[1] + " / " + lostTo[2]
-                        + "   OUT OF BREATH " + outOfBreath
-                        + "   STAMINA AT BOSS " + (bossCount > 0 ? bossStamina / bossCount : 0) + "%"
-                        + "   BEATS PER FIGHT " + (fightCount > 0 ? fightBeats / (float)fightCount : 0f).ToString("0.0") + "\r\n";
+                report += habits[h].PadRight(50) + "RUN WON " + (rec.Won * 100 / rec.Runs).ToString().PadLeft(3) + "%"
+                        + "   LOST ON FLOOR 1/2/3  " + rec.LostOnFloor[1] + " / " + rec.LostOnFloor[2] + " / " + rec.LostOnFloor[3]
+                        + "   LOST TO NORMAL/ELITE/BOSS  " + rec.LostTo[0] + " / " + rec.LostTo[1] + " / " + rec.LostTo[2]
+                        + "   OUT OF BREATH " + rec.OutOfBreath
+                        + "   STAMINA AT BOSS " + (rec.BossCount > 0 ? rec.BossStamina / rec.BossCount : 0) + "%"
+                        + "   BEATS PER FIGHT " + (rec.Fights > 0 ? rec.Beats / (float)rec.Fights : 0f).ToString("0.0") + "\r\n";
             }
             return report;
         }
 
-        //Fight Counters : how many beats the whole-run fights lasted, for the report
-        private static int fightCount;
-        private static int fightBeats;
+        //Run Record : what a batch of simulated runs added up to, for the reports
+        private class RunRecord
+        {
+            public int Runs, Won, OutOfBreath, BossStamina, BossCount, Fights, Beats;
+            public int[] LostOnFloor = new int[BattleRules.FloorsPerRun + 1];
+            public int[] LostTo = new int[3];                         // by EnemyKind
+            public int[] EraRuns = new int[3], EraWon = new int[3];   // by the first era chosen
+            public Dictionary<string, int[]> Enemies = new Dictionary<string, int[]>();   // "NAME (floor)" -> fights, losses
+        }
+
+        //Play Run : one whole run with a fixed habit, from the first era choice to the end.
+        //startMotif (or null) is owned from the start, takeMotifs picks one after every win.
+        //Everything that happened is added to rec. Returns true when the run was won.
+        private static bool PlayRun(TacetGame game, Conductor conductor, int habit, Motif startMotif, bool takeMotifs, Random random, RunRecord rec)
+        {
+            RunState run = new RunState();
+            run.Start(conductor, game.StoryFont, PanelStrip.CaptionWrapWidth);
+            run.BandName = "SIM";
+            if (startMotif != null) run.AddMotif(startMotif);
+            bool alive = true;
+            int firstEra = -1;
+
+            for (int guard = 0; guard < 200 && alive && !run.RunComplete; guard++)
+            {
+                if (run.AtFloorOpening)
+                {
+                    int era = random.Next(EraList.All.Length);
+                    if (firstEra < 0) firstEra = era;
+                    run.ChooseEra(era);
+                    run.RecruitAtOpening();
+                    run.LeaveOpening();
+                    continue;
+                }
+
+                run.Chosen = run.Options[random.Next(run.Options.Length)];
+                NodeType type = run.Chosen.Type;
+
+                if (type == NodeType.Battle || type == NodeType.Elite || type == NodeType.Boss)
+                {
+                    run.BeginBattle();
+                    if (type == NodeType.Boss) { rec.BossStamina += run.Stamina * 100 / run.MaxStamina; rec.BossCount++; }
+                    string key = run.Battle.Enemy.Name + " (" + run.Floor + ")";
+                    if (!rec.Enemies.ContainsKey(key)) rec.Enemies[key] = new int[2];
+                    rec.Enemies[key][0]++;
+
+                    if (!PlayFight(run, habit, random, rec))
+                    {
+                        alive = false;
+                        rec.Enemies[key][1]++;
+                        rec.LostOnFloor[run.Floor]++;
+                        rec.LostTo[(int)run.Battle.Enemy.Kind]++;
+                        if (run.Battle.Collapsed) rec.OutOfBreath++;
+                        break;
+                    }
+
+                    //Win Rewards : the same as the result page hands out
+                    run.AddShards(run.Battle.ShardsEarned());
+                    run.ChangeStamina((int)(run.MaxStamina * BattleRules.RecoverAfterWin));
+                    if (type == NodeType.Elite && run.RollPercent() < BattleRules.EliteRecruitChance) run.RecruitOne();
+                    if (takeMotifs) TakeMotif(run, type, random);
+                }
+                else if (type == NodeType.Rest)
+                {
+                    run.ChangeStamina((int)(run.MaxStamina * BattleRules.BreatheRecover));
+                }
+                else if (type == NodeType.Shop)
+                {
+                    if (run.Stamina < run.MaxStamina * 0.6f && run.SpendShards(BattleRules.TuningPrice))
+                        run.ChangeStamina((int)(run.MaxStamina * BattleRules.TuningRecover));
+                    if (run.SeatForSale && run.Roster.Count > run.Seats && run.SpendShards(run.SeatPrice))
+                    {
+                        run.AddSeat();
+                        for (int i = 0; i < run.Roster.Count; i++)
+                            if (run.Formation.SeatOf(run.Roster[i]) < 0) run.Formation.AutoSeat(run.Roster[i], run.Seats);
+                    }
+                }
+                else if (type == NodeType.EraShift)
+                {
+                    run.ChooseEra((run.Era + 1) % EraList.All.Length);
+                }
+
+                run.FinishBattle();
+                run.Advance();
+            }
+
+            bool won = alive && run.RunComplete;
+            rec.Runs++;
+            if (won) rec.Won++;
+            if (firstEra >= 0) { rec.EraRuns[firstEra]++; if (won) rec.EraWon[firstEra]++; }
+            return won;
+        }
 
         //Front Load : everyone seated plays the first four beats and rests after. Players found
         //this plan on 25 Sep and won in two to four beats, so the sim keeps checking it.
@@ -431,10 +458,10 @@ namespace Tacetno433.Core
         }
 
         //Play Fight : one whole fight with a fixed habit. Returns true when it was won.
-        private static bool PlayFight(RunState run, int habit, Random random)
+        private static bool PlayFight(RunState run, int habit, Random random, RunRecord rec)
         {
             BattleState b = run.Battle;
-            fightCount++;
+            rec.Fights++;
             while (!b.Finished)
             {
                 if (habit == 4) FrontLoad(run); else b.AutoPlan();
@@ -442,7 +469,7 @@ namespace Tacetno433.Core
                 {
                     Choice choice = Choice.Normal;
                     Grade grade = Grade.Good;
-                    fightBeats++;
+                    rec.Beats++;
 
                     if (habit >= 1)
                     {
