@@ -123,14 +123,15 @@ namespace Tacetno433.Core
                           + "AUDIO LOADED  SFX " + Audio.SoundBank.LoadedSfx + "  MUSIC " + Audio.SoundBank.LoadedMusic + "\r\n\r\n";
             EnemyKind[] kinds = { EnemyKind.Normal, EnemyKind.Elite, EnemyKind.Boss };
             string[] habits = { "AUTO PLAN, ALWAYS GOOD PLAY", "AUTO PLAN, NEVER STROKES", "AUTO PLAN, PERFECT BOOST ON HEAVY",
-                                "NO PLAN, ALWAYS EASE", "AUTO PLAN, ALWAYS PERFECT (COMBO)" };
+                                "NO PLAN, ALWAYS EASE", "AUTO PLAN, ALWAYS PERFECT (COMBO)", "AUTO PLAN, PERFECT BOOST",
+                                "FRONT 4, PERFECT BOOST" };
             Random random = new Random(7);
 
             for (int k = 0; k < kinds.Length; k++)
             {
                 for (int h = 0; h < habits.Length; h++)
                 {
-                    int wins = 0, roundsTotal = 0, staminaTotal = 0, lowest = 999, finales = 0;
+                    int wins = 0, roundsTotal = 0, staminaTotal = 0, lowest = 999, finales = 0, beatsTotal = 0;
 
                     for (int n = 0; n < 300; n++)
                     {
@@ -142,7 +143,9 @@ namespace Tacetno433.Core
 
                         while (!b.Finished)
                         {
-                            if (h == 3) run.Formation.ClearAll(); else b.AutoPlan();
+                            if (h == 3) run.Formation.ClearAll();
+                            else if (h == 6) FrontLoad(run);
+                            else b.AutoPlan();
 
                             for (int beat = 0; beat < BattleRules.BeatsPerRound && !b.Finished; beat++)
                             {
@@ -152,9 +155,11 @@ namespace Tacetno433.Core
                                 if (h == 2 && b.IsHeavy(beat)) { choice = Choice.Boost; grade = Grade.Perfect; }
                                 if (h == 3) choice = Choice.Ease;
                                 if (h == 4) grade = Grade.Perfect;
+                                if (h >= 5) { choice = Choice.Boost; grade = Grade.Perfect; }
 
-                                int strokes = h == 1 ? 0 : (h == 4 || h == 2 ? 8 : 5);
+                                int strokes = h == 1 ? 0 : (h == 4 || h == 2 || h >= 5 ? 8 : 5);
                                 PlayBeat(b, beat, choice, grade, strokes);
+                                beatsTotal++;
                                 if (run.Stamina < lowest) lowest = run.Stamina;
                             }
 
@@ -173,6 +178,7 @@ namespace Tacetno433.Core
                             + habits[h].PadRight(36)
                             + "WIN " + (wins * 100 / 300).ToString().PadLeft(3) + "%"
                             + "   AVG ROUNDS " + (roundsTotal / 300f).ToString("0.0")
+                            + "   AVG BEATS " + (beatsTotal / 300f).ToString("0.0").PadLeft(4)
                             + "   AVG STAMINA LEFT " + (staminaTotal / 300)
                             + "   LOWEST " + lowest
                             + "   FINALE " + (finales * 100 / 300) + "%\r\n";
@@ -278,13 +284,15 @@ namespace Tacetno433.Core
 
         //Whole Runs : plays complete runs from the first era choice to the end, 200 per habit,
         //with THE APPRENTICE. Paths are picked at random. Rests breathe, shops buy stamina when
-        //the band is low and a seat when someone waits on the bench, events and motifs are skipped.
-        //So it is a slightly harsh picture of a real run, where the player also collects motifs.
+        //the band is low and a seat when someone waits on the bench, events are skipped.
+        //After a win the sim takes a motif at random from the same offer the reward page makes
+        //(round 9 : before that motifs were skipped, so late runs looked harder than they play).
         private static string SimulateRuns(TacetGame game, Random random)
         {
             string[] habits = { "GOOD PLAY EVERY BEAT, NEVER BOOSTS", "SKILLED  (PERFECT, BOOST, EASE LIGHT WHEN LOW)",
-                                "AVERAGE  (40% PERFECT, 10% MISS, SAME CHOICES)", "STRONG   (70% PERFECT, 5% MISS, SAME CHOICES)" };
-            string report = "WHOLE RUNS  (" + BattleRules.FloorsPerRun + " floors, 200 runs per line, conductor THE APPRENTICE)\r\n";
+                                "AVERAGE  (40% PERFECT, 10% MISS, SAME CHOICES)", "STRONG   (70% PERFECT, 5% MISS, SAME CHOICES)",
+                                "FRONT-LOAD (ALL ON BEATS 1-4, 70% PERFECT)" };
+            string report = "WHOLE RUNS  (" + BattleRules.FloorsPerRun + " floors, 200 runs per line, conductor THE APPRENTICE, motifs taken)\r\n";
 
             for (int h = 0; h < habits.Length; h++)
             {
@@ -292,6 +300,8 @@ namespace Tacetno433.Core
                 int[] lostOnFloor = new int[BattleRules.FloorsPerRun + 1];
                 int[] lostTo = new int[3];
                 int bossStamina = 0, bossCount = 0, outOfBreath = 0;
+                fightCount = 0;
+                fightBeats = 0;
 
                 for (int n = 0; n < 200; n++)
                 {
@@ -331,6 +341,7 @@ namespace Tacetno433.Core
                             run.AddShards(run.Battle.ShardsEarned());
                             run.ChangeStamina((int)(run.MaxStamina * BattleRules.RecoverAfterWin));
                             if (type == NodeType.Elite && run.RollPercent() < BattleRules.EliteRecruitChance) run.RecruitOne();
+                            TakeMotif(run, type, random);
                         }
                         else if (type == NodeType.Rest)
                         {
@@ -363,9 +374,38 @@ namespace Tacetno433.Core
                         + "   LOST ON FLOOR 1/2/3  " + lostOnFloor[1] + " / " + lostOnFloor[2] + " / " + lostOnFloor[3]
                         + "   LOST TO NORMAL/ELITE/BOSS  " + lostTo[0] + " / " + lostTo[1] + " / " + lostTo[2]
                         + "   OUT OF BREATH " + outOfBreath
-                        + "   STAMINA AT BOSS " + (bossCount > 0 ? bossStamina / bossCount : 0) + "%\r\n";
+                        + "   STAMINA AT BOSS " + (bossCount > 0 ? bossStamina / bossCount : 0) + "%"
+                        + "   BEATS PER FIGHT " + (fightCount > 0 ? fightBeats / (float)fightCount : 0f).ToString("0.0") + "\r\n";
             }
             return report;
+        }
+
+        //Fight Counters : how many beats the whole-run fights lasted, for the report
+        private static int fightCount;
+        private static int fightBeats;
+
+        //Front Load : everyone seated plays the first four beats and rests after. Players found
+        //this plan on 25 Sep and won in two to four beats, so the sim keeps checking it.
+        private static void FrontLoad(RunState run)
+        {
+            Formation f = run.Formation;
+            f.ClearAll();
+            for (int s = 0; s < StageLayout.SeatCount; s++)
+                if (f.Seated[s] != null)
+                    for (int beat = 0; beat < 4; beat++) f.Plan[s, beat] = true;
+        }
+
+        //Take Motif : the reward page's offer after a win (elites and bosses always offer, normal
+        //fights sometimes), and the sim picks one of the cards at random
+        private static void TakeMotif(RunState run, NodeType type, Random random)
+        {
+            bool lastBoss = type == NodeType.Boss && run.Floor >= BattleRules.FloorsPerRun;
+            if (lastBoss) return;
+            if (type == NodeType.Battle && run.RollPercent() >= BattleRules.MotifChanceNormal) return;
+
+            int minRarity = type == NodeType.Boss ? 3 : (type == NodeType.Elite ? 2 : 1);
+            Motif[] offer = MotifList.Roll(run.Motifs, BattleRules.MotifChoices, minRarity, run.Floor, run.Rng);
+            if (offer.Length > 0) run.AddMotif(offer[random.Next(offer.Length)]);
         }
 
         //Play Beat : one beat the way the duel plays it. A roll gets its strokes counted first,
@@ -394,13 +434,15 @@ namespace Tacetno433.Core
         private static bool PlayFight(RunState run, int habit, Random random)
         {
             BattleState b = run.Battle;
+            fightCount++;
             while (!b.Finished)
             {
-                b.AutoPlan();
+                if (habit == 4) FrontLoad(run); else b.AutoPlan();
                 for (int beat = 0; beat < BattleRules.BeatsPerRound && !b.Finished; beat++)
                 {
                     Choice choice = Choice.Normal;
                     Grade grade = Grade.Good;
+                    fightBeats++;
 
                     if (habit >= 1)
                     {
@@ -410,7 +452,7 @@ namespace Tacetno433.Core
                             int roll = random.Next(100);
                             grade = roll < 40 ? Grade.Perfect : (roll < 90 ? Grade.Good : Grade.Miss);
                         }
-                        if (habit == 3)
+                        if (habit >= 3)
                         {
                             int roll = random.Next(100);
                             grade = roll < 70 ? Grade.Perfect : (roll < 95 ? Grade.Good : Grade.Miss);
@@ -577,7 +619,7 @@ namespace Tacetno433.Core
             run.Chosen = new RouteNode();
             run.Chosen.Type = name == "duelboss" ? NodeType.Boss : NodeType.Battle;
             if (name == "reward" || name == "dueltremolo" || name == "scorepairs") run.Chosen.Type = NodeType.Elite;
-            if (name == "dueldouble" || name == "scorepairs") run.Floor = 3;          // pairs only on the last floor
+            if (name == "dueldouble" || name == "scorepairs") run.Floor = 3;          // pairs from floor two, more on the last
             if (name == "duelfermata") run.Floor = 2;                                 // held notes from floor two
             run.Chosen.Title = RouteNodeInfo.TitleOf(run.Chosen.Type);
             run.Chosen.Caption = RouteNodeInfo.CaptionOf(run.Chosen.Type);
