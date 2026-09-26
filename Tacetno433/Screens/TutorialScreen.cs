@@ -92,17 +92,17 @@ namespace Tacetno433.Screens
                      + "mf : anything but small.",
                 Goal = "Six notes on time, with the right size." },
 
-            new Lesson { Kind = Kind.Breath, Title = "KEEP BREATHING", Need = 10, Bpm = 88,
+            new Lesson { Kind = Kind.Breath, Title = "KEEP BREATHING", Need = 10, Bpm = BattleRules.TempoBpm[0],
                 Body = "The bar at the top is the band's breath. A beat TACET wins knocks breath out "
                      + "of the band, and a missed stroke lets it through. When the breath is gone the "
                      + "band collapses and the fight is lost. This is the real speed of a first round.",
                 Goal = "Play ten notes. Watch the bar." },
 
             new Lesson { Kind = Kind.Roll, Title = "TREMOLO", Need = 1, Bpm = 76,
-                Body = "A zigzag bar is a roll. Elites and bosses end every round with one. "
+                Body = "A zigzag bar is a roll. On the first floor every round ends with one, and so does every elite and boss round. "
                      + "Shake the baton back and forth as fast as you can until the bar runs out. "
                      + "Every shake counts, and shaking is free.",
-                Goal = "Seven shakes in one roll." },
+                Goal = "Six shakes in one roll." },
 
             new Lesson { Kind = Kind.Fermata, Title = "FERMATA", Need = 1, Bpm = 76,
                 Body = "A note under an arch is held, from the second floor on. Stroke it on the beat, "
@@ -110,7 +110,7 @@ namespace Tacetno433.Screens
                 Goal = "Hold one fermata to the end." },
 
             new Lesson { Kind = Kind.Spark, Title = "THE SPARK", Need = 2, Bpm = 70,
-                Body = "On the last floor some notes come tied to a spark. Stroke the note as usual, "
+                Body = "From the second floor some notes come tied to a spark. Stroke the note as usual, "
                      + "then flick once more, any way at all, half a beat later.",
                 Goal = "Land two sparks." },
 

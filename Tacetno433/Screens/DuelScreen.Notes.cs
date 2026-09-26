@@ -39,7 +39,7 @@ namespace Tacetno433.Screens
         //next beat's stroke is never taken by mistake.
         private void UpdateGrace(int b, bool stroked, float now)
         {
-            float target = AnswerTime(b) + beatLen * 0.5f;
+            float target = AnswerAt(pending) + beatLen * 0.5f;
 
             //Early Wobble : the hand's own bounce right after the first stroke is not the flick
             if (stroked && now >= target - battle.GoodWindow - 0.02f)
@@ -96,7 +96,7 @@ namespace Tacetno433.Screens
             effects.SpawnHit(HitX, RingY, grade);
             if (grade == Grade.Perfect) laneFlash = Math.Max(laneFlash, 0.7f);
             if (grade != Grade.None) ShowJudge(graceText[(int)grade], 0.45f);
-            if (grade != Grade.Hesitate) ShowTiming(grade, StrokeClock(), AnswerTime(b) + beatLen * 0.5f);
+            if (grade != Grade.Hesitate) ShowTiming(grade, StrokeClock(), AnswerAt(pending) + beatLen * 0.5f);
 
             ShowCombo(r, r.Combo);
             ShowFire(r);
@@ -104,15 +104,12 @@ namespace Tacetno433.Screens
             AdvanceBeat();
         }
 
-        //Trill : TACET's roll sounds as quick ticks for its whole length when it is called
+        //Trill : TACET's roll sounds as quick ticks for its whole length when it is called.
+        //CallNote sets trillStart each time the roll comes round (REPEATS).
         private void UpdateTrill()
         {
-            int n = battle.TremoloBeat;
-            if (n < 0) return;
-
-            float start = n * beatLen;
-            if (clock < start) return;
-            int due = (int)((clock - start) / (beatLen * 0.25f));
+            if (trillStart < 0f || clock < trillStart) return;
+            int due = (int)((clock - trillStart) / (beatLen * 0.25f));
             int most = (int)(BattleRules.TremoloBeats * 4f);
             while (trillTicks <= due && trillTicks < most)
             {
@@ -132,13 +129,14 @@ namespace Tacetno433.Screens
             heldTime = 0f;
             holdClock = clock;
             holdSteady = clock + 0.3f;
-            holdEnd = AnswerTime(pending) + BattleRules.FermataBeats * beatLen;
+            holdEnd = AnswerAt(pending) + BattleRules.FermataBeats * beatLen;
 
+            int b = BeatOf(pending);
             float volume = choice == Choice.Boost ? 1f : (choice == Choice.Ease ? 0.5f : 0.8f);
-            if (!SoundBank.PlayAnswer(pending, volume, 0f)) SoundBank.Play(Sfx.NoteOn, volume, 0.3f);
+            if (!SoundBank.PlayAnswer(b, volume, 0f)) SoundBank.Play(Sfx.NoteOn, volume, 0.3f);
             Formation f = Game.CurrentRun.Formation;
             for (int s = 0; s < StageLayout.SeatCount; s++)
-                if (f.Plays(s, pending)) lit[s] = 1f;
+                if (f.Plays(s, b)) lit[s] = 1f;
         }
 
         //Hold Update : the hold lasts while the button stays down and the baton stays still.
@@ -199,7 +197,7 @@ namespace Tacetno433.Screens
         public void HoldForPicture()
         {
             JumpForPicture(BattleRules.BeatsPerRound - 1);
-            clock = AnswerTime(pending);
+            clock = AnswerAt(pending);
             called = BattleRules.BeatsPerRound - 1;
             StartHold(Choice.Normal, Grade.Perfect, false);
         }
@@ -229,7 +227,7 @@ namespace Tacetno433.Screens
             baton.Whip(gesture.Direction);
             hand.Play(PoseFor(gesture.Direction));
 
-            bool counts = rollStrokes <= battle.TremoloMost;            // ACCELERANDO counts more
+            bool counts = battle.RollCounted(rollStrokes - 1) < BattleRules.TremoloMost;   // ACCELERANDO counts twice
             effects.SpawnSparks(HitX, RingY, counts ? 4 : 1, 1f);
             SoundBank.Play(Sfx.QteNormal, counts ? 0.7f : 0.3f, Math.Min(0.6f, rollStrokes * 0.05f));
         }
@@ -259,7 +257,7 @@ namespace Tacetno433.Screens
             Gfx.Arrow(sb, sx - 14f, cy + 25f, 5f, false, Palette.Paper);
             Gfx.Arrow(sb, sx + 14f, cy + 25f, 5f, true, Palette.Paper);
 
-            Ui.Pips(sb, cx - battle.TremoloMost * 7f, cy + RingTarget + 34f, Math.Min(rollStrokes, battle.TremoloMost), battle.TremoloMost, 4, 14, 1f);
+            Ui.Pips(sb, cx - BattleRules.TremoloMost * 7f, cy + RingTarget + 34f, battle.RollCounted(rollStrokes), BattleRules.TremoloMost, 4, 14, 1f);
         }
 
         //Counter Show : TACET's loudest note thrown back. A white flash, a streak across the whole
@@ -329,8 +327,9 @@ namespace Tacetno433.Screens
         public void JumpForPicture(int n)
         {
             StartRound();
-            clock = AnswerTime(n) - beatLen * 0.4f;
-            called = Math.Min(BattleRules.BeatsPerRound - 1, n + 3);
+            clock = AnswerAt(n) - beatLen * 0.4f;
+            called = n;
+            while (called + 1 < total && CallAt(called + 1) <= clock) called++;    // REPEATS : the next pass may be on its way
             graceCalled = called;
             trillTicks = 99;
             pending = n;

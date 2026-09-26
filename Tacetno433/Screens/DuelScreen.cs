@@ -21,6 +21,10 @@ namespace Tacetno433.Screens
     //   ANSWER  starts one bar after the call, so from then on TACET's second bar is still
     //           arriving while the player answers its first. The player conducts on every beat,
     //           at the round's tempo. The tempo rises each round (see BattleState.Tempo).
+    //   REPEATS round two plays the phrase twice and round three three times, without a stop
+    //           (BattleRules.PassesPerRound). The next time through comes down the lane while the
+    //           last one is still being answered, with fresh f / mf / p marks. Note g of the
+    //           round is beat g % 8 of pass g / 8 (see BeatOf, PassOf, CallAt).
     //
     //THE MOUSE IS THE BATON, and it only counts while the LEFT BUTTON IS HELD. The strokes follow
     //a real conductor's 4/4 pattern: beat 1 DOWN, beat 2 LEFT, beat 3 RIGHT, beat 4 UP. How BIG a
@@ -29,12 +33,13 @@ namespace Tacetno433.Screens
     //the band's melody, so the music only happens when the player conducts.
     //
     //Extra notes and moments:
-    //   PAIR       a note tied to a spark. The spark is answered half a beat later with one
-    //              more flick, any way at all (the conductor's rebound).
-    //   FERMATA    ordinary enemies end each round with a held note two beats long. Stroke it,
-    //              then keep the button held and the baton still. Holding pushes, and costs breath.
-    //   TREMOLO    elites and bosses end each round with a roll two beats long instead. Shake the
-    //              baton: every stroke adds power and costs stamina.
+    //   PAIR       a note tied to a spark (from floor two). The spark is answered half a beat
+    //              later with one more flick, any way at all (the conductor's rebound).
+    //   FERMATA    from floor two, ordinary enemies end each round with a held note two beats
+    //              long. Stroke it, then keep the button held and the baton still. Holding pushes.
+    //   TREMOLO    everyone else ends each round with a roll two beats long instead (every enemy
+    //              on floor one, elites and bosses after). Shake the baton: every stroke adds power.
+    //   Big strokes, holds and rolls cost no stamina (round 8).
     //   COUNTER    a PERFECT BOOST against TACET's real f note knocks part of it back.
     //   FORTISSIMO a long combo sets the band on fire for a few beats.
     //   FINALE     far enough ahead at the end of a round, four strokes of the pattern on the
@@ -48,7 +53,7 @@ namespace Tacetno433.Screens
     //THIS CLASS IS SPLIT OVER SEVEN FILES, all called DuelScreen (the "partial" keyword lets one
     //class be written in several files; the compiler joins them back into one):
     //   DuelScreen.cs          the state, Load, Update, and the order of a round
-    //   DuelScreen.Baton.cs    reading and judging a stroke, drawing the baton
+    //   DuelScreen.Baton.cs    judging a stroke and the stroke guide (the stick is Core/Baton.cs)
     //   DuelScreen.Notes.cs    pairs, the fermata, TACET's roll, the counter and FORTISSIMO
     //   DuelScreen.Finale.cs   the FINALE that ends a fight early
     //   DuelScreen.Stage.cs    the stage, the band, TACET's eclipse, the lane and its notes
@@ -89,6 +94,7 @@ namespace Tacetno433.Screens
         private static string[] gradeWord = { "", "PERFECT", "GOOD", "MISS", "HESITATE" };
         private static string[] comboBonusWords = { "+0%", "+6%", "+12%", "+18%", "+24%", "+30%" };
         private static string[] countWords = { "", "1", "2", "3" };
+        private static string[] timeWords = { "1ST TIME", "2ND TIME", "3RD TIME" };   // REPEATS, by pass
 
         //Judgement Words : "PERFECT  /  BOOST" and so on, one per grade and choice, made in Load.
         //The grace and the roll get their own short words, also made once.
@@ -125,6 +131,7 @@ namespace Tacetno433.Screens
         private const int SayFinaleWin = 20;
         private const int SayFermata = 21;
         private const int SayCollapse = 22;
+        private const int SayAgain = 23;
         private static string[] sayText =
         {
             "* It hums a phrase. Listen...",
@@ -149,14 +156,15 @@ namespace Tacetno433.Screens
             "* The ending falls apart. It claws its way back.",
             "* The last chord rings out. The silence breaks.",
             "* It draws out a long note. Stroke it, then hold still!",
-            "* The band runs out of breath. The music stops."
+            "* The band runs out of breath. The music stops.",
+            "* It plays the phrase again. Read the marks, they change!"
         };
         private const float SayWrap = 350f;
         private const float SaySpeed = 520f;     // pixels of text uncovered per second
-        private string[] sayLineA = new string[23];
-        private string[] sayLineB = new string[23];
-        private float[] sayWidthA = new float[23];
-        private float[] sayWidthB = new float[23];
+        private string[] sayLineA = new string[sayText.Length];
+        private string[] sayLineB = new string[sayText.Length];
+        private float[] sayWidthA = new float[sayText.Length];
+        private float[] sayWidthB = new float[sayText.Length];
         private int saying = -1;
         private float sayTimer;
 
@@ -189,11 +197,16 @@ namespace Tacetno433.Screens
 
         //Round State : the whole round is one run of beats. TACET's note n sounds at n beats,
         //and is answered at n + 4 beats, so the answers start one bar after the call.
+        //With REPEATS the notes are counted across the whole round: note g is beat g % 8 of
+        //pass g / 8, and each pass starts passBeats after the one before.
         private float clock;            // seconds since TACET's first note of the round
         private float beatLen;          // seconds per beat at this round's tempo
+        private int total;              // notes in the whole round, eight for every pass
+        private int passBeats;          // beats one pass takes, ten when its last note lasts two
         private int called = -1;        // the last of TACET's notes that has sounded, -1 for none
-        private int graceCalled = -1;   // the last beat whose second note time has passed
-        private int trillTicks;         // how many ticks of TACET's roll have sounded
+        private int graceCalled = -1;   // the last note whose second note time has passed
+        private float trillStart = -1f; // when TACET's latest roll began to sound, -1 for none yet
+        private int trillTicks;         // how many ticks of that roll have sounded
         private int ticked = -1;        // the last beat the metronome clicked on
 
         //Fermata State : the stroke that opened the hold is kept until the hold ends, then the
@@ -218,7 +231,7 @@ namespace Tacetno433.Screens
 
         //Low Breath : under this share of stamina the screen closes in with the beat, a warning
         private const float LowBreath = 0.25f;
-        private int pending;            // the beat waiting for its stroke, 0 to 7, 8 when all are in
+        private int pending;            // the note waiting for its stroke, 0 to total - 1, total when all are in
         private bool onGrace;           // that beat's first note is answered, its pair is still due
         private bool rolling;           // TACET's roll is being answered
         private int rollStrokes;
@@ -410,10 +423,27 @@ namespace Tacetno433.Screens
             return left * left * left;
         }
 
-        //Answer Time : when beat n has to be answered, one bar after TACET played it
-        private float AnswerTime(int n)
+        //Beat Of, Pass Of : note g of the round is this beat of the plan, in this time through
+        private static int BeatOf(int g)
         {
-            return (n + 4) * beatLen;
+            return g % BattleRules.BeatsPerRound;
+        }
+
+        private static int PassOf(int g)
+        {
+            return g / BattleRules.BeatsPerRound;
+        }
+
+        //Call At : when TACET plays note g of the round. Each pass starts passBeats after the last.
+        private float CallAt(int g)
+        {
+            return (PassOf(g) * passBeats + BeatOf(g)) * beatLen;
+        }
+
+        //Answer At : when note g has to be answered, one bar after TACET played it
+        private float AnswerAt(int g)
+        {
+            return CallAt(g) + 4f * beatLen;
         }
 
         //Stroke Clock : the clock a stroke is judged by. The player's own timing setting is taken
@@ -550,8 +580,18 @@ namespace Tacetno433.Screens
             clock = 0f;
             called = -1;
             graceCalled = -1;
+            trillStart = -1f;
             trillTicks = 0;
             pending = 0;
+
+            //REPEATS : eight notes for every time through. When the last note is rolled or held
+            //for two beats, the hand is busy right up to its end, so the next pass waits one more
+            //beat after it: the same one beat to swing in as between any two notes.
+            int lastBeats = 1;
+            if (battle.TremoloBeat >= 0) lastBeats = (int)BattleRules.TremoloBeats;
+            if (battle.FermataBeat >= 0) lastBeats = (int)BattleRules.FermataBeats;
+            passBeats = BattleRules.BeatsPerRound + (lastBeats > 1 ? lastBeats : 0);
+            total = BattleRules.BeatsPerRound * battle.Passes;
             onGrace = false;
             rolling = false;
             holding = false;
@@ -587,18 +627,18 @@ namespace Tacetno433.Screens
         {
             clock += dt;
 
-            //Call : one of TACET's notes on each beat, all eight in a row
-            while (called < BattleRules.BeatsPerRound - 1 && clock >= (called + 1) * beatLen)
+            //Call : one of TACET's notes on each beat, all of the round's in a row
+            while (called < total - 1 && clock >= CallAt(called + 1))
             {
                 called++;
                 CallNote(called);
             }
 
             //Grace Call : the second note of a pair sounds half a beat after the first
-            while (graceCalled < called && clock >= (graceCalled + 1.5f) * beatLen)
+            while (graceCalled < called && clock >= CallAt(graceCalled + 1) + beatLen * 0.5f)
             {
                 graceCalled++;
-                if (battle.EnemyDouble[graceCalled]) CallGrace(graceCalled);
+                if (battle.DoubleAt(PassOf(graceCalled), BeatOf(graceCalled))) CallGrace(BeatOf(graceCalled));
             }
 
             UpdateTrill();
@@ -611,27 +651,29 @@ namespace Tacetno433.Screens
                 if (beatNow >= 4) SoundBank.Play(Sfx.BeatTick, MetronomeVolume, 0f);
             }
 
-            if (pending < BattleRules.BeatsPerRound) UpdateAnswer();
+            if (pending < total) UpdateAnswer();
 
             //Beat On Show : the note being played during the first bar, the one being answered after
-            if (pending < BattleRules.BeatsPerRound && clock >= AnswerTime(0) - beatLen * 0.5f) beat = pending;
-            else beat = Math.Max(called, 0);
+            if (pending < total && clock >= AnswerAt(0) - beatLen * 0.5f) beat = BeatOf(pending);
+            else beat = BeatOf(Math.Max(called, 0));
 
             //Round Over : every answer is in and the last clash has had its moment,
             //or the line reached an edge and the fight is decided
-            if (pending >= BattleRules.BeatsPerRound && doneAt < 0f) doneAt = clock;
+            if (pending >= total && doneAt < 0f) doneAt = clock;
             if (battle.Finished || (doneAt >= 0f && clock >= doneAt + BattleRules.PhraseTail))
                 EndPlay();
         }
 
         //Call Note : TACET plays one note, as loud as its mark says. Its note leaves now and
         //reaches the hit point exactly one bar later, on the beat where it is answered.
-        //FALSE NOTES lie in the sound as well as on the page.
-        private void CallNote(int n)
+        //FALSE NOTES lie in the sound as well as on the page. g counts across the whole round.
+        private void CallNote(int g)
         {
-            if (battle.EnemyPower[n] > 0)
+            int n = BeatOf(g);
+            int pass = PassOf(g);
+            if (battle.PowerAt(pass, n) > 0)
             {
-                Choice shown = battle.EnemyHidden[n] ? Choice.Normal : battle.ShownChoice[n];
+                Choice shown = battle.EnemyHidden[n] ? Choice.Normal : battle.ShownAt(pass, n);
                 float volume = shown == Choice.Boost ? 1f : (shown == Choice.Ease ? 0.45f : 0.75f);
                 if (!SoundBank.PlayCall(n, volume, 0f))
                     SoundBank.Play(Sfx.NoteOn, volume, shown == Choice.Boost ? -0.4f : 0.2f);
@@ -644,19 +686,27 @@ namespace Tacetno433.Screens
                 SoundBank.Play(Sfx.BeatTick, 0.5f, 0f);
             }
 
-            if (battle.IsTremolo(n)) Say(SayTremolo);
+            if (battle.IsTremolo(n))
+            {
+                Say(SayTremolo);
+                trillStart = CallAt(g);                          // its ticks sound from now, see UpdateTrill
+                trillTicks = 0;
+            }
             else if (battle.IsFermata(n)) Say(SayFermata);
 
             //Last Note Of The First Bar : the answers start on the next beat
-            else if (n == 3) Say(SayAnswer);
+            else if (g == 3) Say(SayAnswer);
+
+            //REPEATS : the phrase starts over, and its marks may have changed
+            else if (n == 0 && pass > 0) Say(SayAgain);
         }
 
         //Answer Update : the beat being answered, its window, and what happens if it is missed.
         //Each beat goes through at most three steps: the roll, or the stroke, then the flick back.
         private void UpdateAnswer()
         {
-            int b = pending;
-            float target = AnswerTime(b);
+            int b = BeatOf(pending);
+            float target = AnswerAt(pending);
             float now = StrokeClock();
             bool stroked = gesture.Read();
 
@@ -718,7 +768,11 @@ namespace Tacetno433.Screens
         {
             pending++;
             onGrace = false;
-            if (pending == 4 || pending == BattleRules.BeatsPerRound) EndBar();
+            int b = BeatOf(pending);
+            if (b == 4 || b == 0) EndBar();
+
+            //REPEATS : the first answer of the next time through, its marks take over
+            if (b == 0 && pending < total) battle.BeginPass(PassOf(pending));
         }
 
         //Answer Resolve : ask the rules what happened on this beat, then show it at once.
@@ -967,7 +1021,7 @@ namespace Tacetno433.Screens
                 SoundBank.Play(Sfx.UiDenied, 0.4f, 0f);
                 return;
             }
-            if (phase != Phase.Play || pending >= BattleRules.BeatsPerRound || rolling || holding) return;
+            if (phase != Phase.Play || pending >= total || rolling || holding) return;
 
             battle.SpendNotes();
             battle.SignatureArmed = true;
@@ -1006,17 +1060,17 @@ namespace Tacetno433.Screens
                 return (finaleClock - (due - beatLen)) / beatLen;
             }
 
-            if (phase != Phase.Play || pending >= BattleRules.BeatsPerRound) return -1f;
+            if (phase != Phase.Play || pending >= total) return -1f;
             if (rolling || holding) return 1f;
 
             if (onGrace)
             {
-                float grace = AnswerTime(pending) + beatLen * 0.5f;
+                float grace = AnswerAt(pending) + beatLen * 0.5f;
                 return (clock - (grace - beatLen * 0.5f)) / (beatLen * 0.5f);
             }
 
-            if (!battle.HasAction(pending)) return -1f;
-            float target = AnswerTime(pending);
+            if (!battle.HasAction(BeatOf(pending))) return -1f;
+            float target = AnswerAt(pending);
             return (clock - (target - beatLen)) / beatLen;
         }
 
@@ -1025,7 +1079,7 @@ namespace Tacetno433.Screens
         {
             if (phase == Phase.Finale) return pattern[Math.Min(finaleStep, 3)];
             if (onGrace) return Flick.None;              // the spark takes any way
-            return pattern[pending % 4];
+            return pattern[BeatOf(pending) % 4];
         }
 
         public override void Draw(SpriteBatch sb)
