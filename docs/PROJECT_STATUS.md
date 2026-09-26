@@ -10,13 +10,13 @@
 
 ---
 
-## 0. เริ่มตรงนี้ (อัปเดต 26 ก.ย. หลังรอบ 11a)
+## 0. เริ่มตรงนี้ (อัปเดต 26 ก.ย. หลังรอบ 11b)
 
 **สรุปสำหรับแชทใหม่ (อ่าน 6 บรรทัดนี้ก่อน)**
-- งานล่าสุด : branch **`Alpha3`** บน GitHub ([PR #1](https://github.com/JuzJuz03HKR/Alphodite/pull/1) `Alpha3` → `Alpha2` เปิดไว้ ยังไม่ merge) · ทำถึง **รอบ 11a** (ศัตรู + Motif อ่อน + FOLK LEADER) ·
-  **รอบ 11b กำลังทำ** (แผน 1 ชุดเล่นวน 1→2→3 ครั้ง + บีตพักคืนสตามิน่ามากขึ้น) · รอบ 6–8 อยู่ `Alpha2` · commit/push เมื่อผู้ใช้สั่งเท่านั้น
+- งานล่าสุด : branch **`Alpha3`** บน GitHub ([PR #1](https://github.com/JuzJuz03HKR/Alphodite/pull/1) `Alpha3` → `Alpha2` เปิดไว้ ยังไม่ merge) · ทำถึง **รอบ 11b** (แผนเล่นวน 1→2→3 ครั้ง + บีตพักคืน 10) ·
+  รอบ 11a–11b push แล้ว · **รอบ 11b ยังไม่มีคนเล่นจริง** · รอบ 6–8 อยู่ `Alpha2` · commit/push เมื่อผู้ใช้สั่งเท่านั้น
 - เพลย์เทส 25 ก.ย. (5 คน) : ชอบการตวัด · **เข้าใจยาก** (ยังไม่แก้) · **ง่ายไป** (แก้แล้วรอบ 9) → ดูข้อ "ทดสอบกับคนจริง" ด้านล่าง
-- ความยากปัจจุบัน (ตัวจำลอง นับ Motif, รอบ 11a) : ผู้เล่นทั่วไปจบรัน ~8% · เก่ง ~63% · ไร้ที่ติ ~99% · ดวลผู้เล่นเก่ง ธรรมดา ~10 บีต · Elite ~13 · บอส ~16
+- ความยากปัจจุบัน (ตัวจำลอง นับ Motif, รอบ 11b) : ผู้เล่นทั่วไปจบรัน ~9% · เก่ง ~67% · ไร้ที่ติ ~99% · ดวลผู้เล่นไร้ที่ติ ธรรมดา ~16 บีต (2 แผน) · Elite ~23 · บอส ~31 (3 แผน)
 - **ยังไม่มีใครเล่นรอบ 9–11 ด้วยเมาส์จริง** — ผู้ใช้ต้อง Rebuild ใน Visual Studio แล้วลอง
 - **ข้อเสนอที่รอผู้ใช้เลือก** : สอนเล่น ก–ซ (ด้านล่าง "ข้อเสนอที่รอผู้ใช้เลือก") · หน้าเตรียมตัวเข้าใจยาก
 - ตรวจก่อน commit : build 0 warning · `--shots simulate` · `--shots savecheck` · ถ้าแตะตัวเลขบาลานซ์ให้รัน `--shots audit` ด้วย
@@ -88,7 +88,7 @@
   `savecheck` ผ่านครบ · `simulate` ผ่าน · แคปภาพได้ผ่านจอเสมือน (วิธีทำอยู่ `CLAUDE.md` ข้อ 5) — **ยังต้อง Rebuild และเล่นจริงบน Windows**
 
 **Git** : repo เปลี่ยนชื่อเป็น **`github.com/JuzJuz03HKR/Alphodite`** (ชื่อเดิม Tacetno433 ยัง redirect ได้) ·
-**งานล่าสุดอยู่ branch `Alpha3`** (แตกจาก `Alpha2` ที่ `c0c7e77`) : รอบ 9 (`431ebd6` `7476f0b` `f1c4011` `d7d4a22`) · รอบ 10 (`32d72f3` `4215301` `150ce0a`) · เอกสาร 26 ก.ย. (`9804088`) · รอบ 11a (commit ต่อจากนี้) · **`Alpha2`** : รอบ 6–6.3 (`b6a55d1`) · รอบ 7 (`10ad1fa` `1b9212e` `076e80d`) · รอบ 8 (`977dcc8` `12f9c70` `d47cce7` `c0c7e77`) · `Alpha` และ `master` = งานถึง 23 ก.ย. (`8d4d9c8`) ·
+**งานล่าสุดอยู่ branch `Alpha3`** (แตกจาก `Alpha2` ที่ `c0c7e77`) : รอบ 9 (`431ebd6` `7476f0b` `f1c4011` `d7d4a22`) · รอบ 10 (`32d72f3` `4215301` `150ce0a`) · เอกสาร 26 ก.ย. (`9804088`) · รอบ 11a (`251257b` `80c2867`) · รอบ 11b (`d2bb88a` + เอกสาร) · **`Alpha2`** : รอบ 6–6.3 (`b6a55d1`) · รอบ 7 (`10ad1fa` `1b9212e` `076e80d`) · รอบ 8 (`977dcc8` `12f9c70` `d47cce7` `c0c7e77`) · `Alpha` และ `master` = งานถึง 23 ก.ย. (`8d4d9c8`) ·
 commit/push ทำเมื่อผู้ใช้สั่งเท่านั้น · ผู้ใช้ย้ายไปทำต่อในแชท cloud ที่เชื่อม GitHub → กติกาทั้งหมดสำหรับ Claude อยู่ **`CLAUDE.md`** ที่ราก repo
 
 **ทดสอบกับคนจริง** : เพื่อนต่างกลุ่มเล่นระบบรอบ 5 แล้ว (ง่ายเกินไป) ·
@@ -98,7 +98,7 @@ commit/push ทำเมื่อผู้ใช้สั่งเท่าน�
 ระบบรอบ 6–9 ยังไม่มีใครเล่นจนจบรันด้วยเมาส์จริงแบบจับข้อมูล ภาพทดสอบใช้เมาส์ปลอม ·
 ผู้ใช้เล่า (25 ก.ย. รอบ 7) : เพื่อนที่ลองเล่นรีวิวว่า **สตามิน่าขัดความมันส์** "จะมันส์ก็มีอะไรมาขัด แทนที่จะเป็นอุปสรรคที่ทำให้มันส์ขึ้น" → ผู้ใช้ขอคุยเรื่องระบบสตามิน่า (ข้อ 1 ด้านล่าง)
 
-**ผู้ใช้ตัดสินใจแล้ว (รอบ 11, 26 ก.ย.)** : ทำกลุ่ม 3 (สมดุลที่เหลือ) ก่อนแล้ว commit/push → ACCELERANDO รัวนับ 2 · TENUTO ค้างครบคืนสตามิน่า 8 · MARCATO COUNTER ดันได้ถึง 20 ·
+**ผู้ใช้ตัดสินใจแล้ว (รอบ 11, 26 ก.ย.)** : ทำกลุ่ม 3 (สมดุลที่เหลือ) ก่อนแล้ว commit/push → ACCELERANDO รัวนับ 2 · TENUTO ค้างครบคืนสตามิน่า 8 · MARCATO COUNTER ดันได้ 2 เท่าเพดาน (20, รอบ 11b เป็น 16) ·
 **รอบ 11b** : แผน 1 ชุดเล่นวนตามรอบ **1 → 2 → 3 ครั้ง** แล้วค่อยกลับไปจัดใหม่ · ตอนวน TACET **เล่นบีตเดิม แต่สุ่ม f/mf/p ใหม่** ·
 ดวลผู้เล่นเก่ง ธรรมดา ~2 แผน · Elite 2–3 · บอส 3 · บีตพักคืนสตามิน่ามากขึ้น · **ความยากรวมง่ายลงได้นิดหน่อย**
 
@@ -127,7 +127,8 @@ commit/push ทำเมื่อผู้ใช้สั่งเท่าน�
 3. **ปรับใหญ่** : ห้องซ้อม · การเลือกเส้นทาง (ให้ง่ายขึ้น/เหมือนเกมตลาด) · การจัดทีม · การจัดจังหวะ — ต้องคุยก่อน
 
 **งานถัดไปที่แนะนำ**
-0. **รอบ 11b** (กำลังทำ) : แผนเล่นวน 1→2→3 ครั้ง + บีตพักคืนมากขึ้น · หลังจากนั้นลองเล่นจริง : METRONOME / UNHEARING / WHITE NOISE ใหม่ / ศัตรูธรรมดาที่แรงขึ้น ·
+0. **ลองเล่นรอบ 11b** : แผนเล่นวน 1→2→3 ครั้งเล่นแล้วเหนื่อย/สนุกไหม · อ่าน f/mf/p ที่เปลี่ยนทุกรอบวนทันไหม · บีตพักคืน 10 พอไหม ·
+   รอบ 3 เล่นต่อเนื่อง ~15 วินาทีที่ 128 BPM มือล้าไหม · แล้วลอง METRONOME / UNHEARING / WHITE NOISE ใหม่ / ศัตรูธรรมดาที่แรงขึ้น ·
    Motif ความสามารถใหม่ (ACCELERANDO TENUTO MARCATO) — ตัวจำลองไม่ได้วัด SIGNATURE และความสบายของ "ตวัดขนาดไหนก็ BOOST"
 1. **Rebuild แล้วเล่นรอบ 9 ด้วยเมาส์จริง** (branch `Alpha3`) : ดวลยาวขึ้นพอดีไหม (ธรรมดา ~10 บีต บอส ~16 บีต) · 128 BPM + โน้ตคู่ชั้น 2 ตวัดทันไหม ·
    รัว PERFECT 6 ครั้งใน 2 บีตที่ 128 BPM ไหวไหม · **ยากขึ้นมาก** (ผู้เล่นทั่วไปจบรัน 35% → 7.5%) ถ้าเกินไปให้ **ถามผู้ใช้ก่อน** แล้วลด `BlowPerPower` 0.7 → 0.6 ก่อน
@@ -759,7 +760,45 @@ THE METRONOME : ทุกการตวัดเป็น BOOST ไม่ว่
 - คอนดักเตอร์ เก่ง / ทั่วไป (เฉลี่ย 4 ชุด) : APPRENTICE 63 / 8 · METRONOME 65 / 5 · INFERNO 68 / 16 · UNHEARING 58 / 5 · FOLK LEADER 64 / 9
 - Motif ใบเดียว (เก่ง) : ACCELERANDO +0.4 → **+4.5** · TENUTO −1.8 → **+3.5** · MARCATO +0.6 → **+6** · REED CASE +3 → **+6** · GRACE NOTE +1.8 → **+3.7** ·
   ENCORE +12 (เดิมวัดไม่ได้) · ยังอ่อน : OVERTURE +3 (หายากขั้น 3, PUSH CAP) · PATRON'S PURSE / STEADY PULSE ตัวจำลองวัดไม่ได้
-- ตรวจแล้ว (แชท cloud) : คอมไพล์ 0 error 0 warning · savecheck 19/19 (4 ครั้ง) · **ยังไม่ได้เล่นจริง**
+- ตรวจแล้ว (แชท cloud) : คอมไพล์ 0 error 0 warning · savecheck 19/19 (4 ครั้ง) · **ยังไม่ได้เล่นจริง** · commit + push ขึ้น `Alpha3` (`251257b` `80c2867`)
+
+### รอบ 11b (26 ก.ย., แชท cloud, `Alpha3`) — REPEATS : แผน 1 ชุดเล่นวน 1 → 2 → 3 ครั้ง · บีตพักคืนมากขึ้น
+
+ที่มา : ผู้ใช้ "จังหวะพักคืน stamina น้อยเกินไป" · "ค่อยๆ ตั้งใจวางจังหวะเอง แต่เล่นจบภายในไม่ถึงนาที อยากให้ 1 รอบเล่นวนไป 1–3 รอบ แล้วกลับไปจัดใหม่" ·
+ผู้ใช้เลือก : วนตามรอบ **1 → 2 → 3** · ตอนวน TACET **เล่นบีตเดิม สุ่ม f/mf/p (และโน้ตคู่) ใหม่** · ดวลผู้เล่นเก่ง ธรรมดา ~2 แผน Elite 2–3 บอส 3 · ความยาก **ง่ายลงได้นิดหน่อย**
+
+**ระบบ (REPEATS)**
+- รอบ 1 เล่นแผน 1 ครั้ง · รอบ 2 เล่น 2 ครั้ง · รอบ 3 เล่น 3 ครั้ง **ต่อเนื่องไม่หยุด** (`BattleRules.PassesPerRound`) แล้วค่อยกลับหน้าโน้ต
+- รอบวนถัดไปไหลเข้าเลนระหว่างที่ยังตอบรอบวนก่อน (แบบเดียวกับที่ห้องสองของ TACET มาระหว่างตอบห้องแรก) · หลังโน้ตรัว/ค้าง 2 บีตเว้น 1 บีตให้ง้างไม้
+  → รอบวนละ 10 บีต · เวลาเล่นต่อแผน รอบ 1 ~8 วิ · รอบ 2 ~12 วิ · รอบ 3 ~15.5 วิ (เดิมทุกรอบ ~5–8 วิ)
+- TACET ตัดสินใจ f/mf/p + FALSE NOTES + โน้ตคู่ของทุกรอบวนตอนเริ่มรอบ (`BattleState.PrepareRound` → `BeginPass`) · THE WHOLE FLOOR (BORIS) ลดโน้ตได้แค่ในรอบวนนั้น
+- หน้าโน้ต : ป้าย **PLAYED x2 / x3** ข้าง BPM · COST / BACK / ENDS AT และ ANSWERED BIG คิดทุกรอบวนแล้ว (AUTO วางแผนเผื่อด้วย)
+- คู่มือหน้า 3 + tip หน้าแรก : "Round two plays your plan twice, round three three times."
+- หน้าดวล : ป้าย **1ST / 2ND / 3RD TIME** มุมบนซ้าย · กล่องข้อความ "It plays the phrase again. Read the marks, they change!" · เส้นห้องบนเลนนับใหม่ทุกรอบวน
+- FINALE ยังเสนอตอนจบรอบ (หลังรอบวนสุดท้าย) · OVERTURE แรงแค่บีตแรกของรอบวนแรก (ตรงข้อความการ์ด "every round") · ตาราง THE PERFORMANCE เก็บรอบวนสุดท้ายของแต่ละรอบ
+- โค้ด : `DuelScreen` นับโน้ตทั้งรอบเป็นเลขเดียว (`pending` `called` 0 ถึง 8 × รอบวน) แปลงด้วย `BeatOf` `PassOf` `CallAt` `AnswerAt` ·
+  ตัวจำลองเล่นทุกรอบวน · หน้าแคปใหม่ `scorerepeat` `duelrepeat` (รอบ 3 Elite)
+
+**ตัวเลข (หาจากตัวจำลอง)**
+| ค่า | ก่อน | รอบ 11b | ทำไม |
+|---|---|---|---|
+| `RestRecover` บีตพัก | 6 | **10** | ผู้ใช้ขอ · ลองแล้ว +4 ทำให้ผู้เล่นทั่วไปจบรัน 1.5% → 15% (สตามิน่าจากบีตพักมีผลมากจริง) |
+| `PushCap` | 10 | **8** | ผู้เล่นที่ชนะทุกบีต ความยาวดวล = 100 ÷ เพดาน · ลองเพดาน 6 แล้วยาวเกิน (บอสชนะแค่ 30%) |
+| `EliteLine` / `BossLine` | ×0.85 / ×0.7 | **×0.7 / ×0.6** | ให้ Elite ~2–3 แผน บอส 3 แผน |
+| `BlowPerPower` | 0.68 | **0.78** | ชดเชยบีตพักที่คืนมากขึ้น (ผู้ใช้อนุญาตให้ง่ายลงนิดหน่อย) |
+| THE METRONOME | สตามิน่า 9 Push 4 | **10 / 6** | บีตพักกับ EASE มีค่าขึ้น แต่เขา EASE ไม่ได้ (ตกไป 52% ขณะที่คนอื่น 64–69%) |
+| `MarcatoCap` · BREATH MARK | 20 · 7 แทน 6 | **16 (2 เท่าเพดาน) · 12 แทน 10** | ข้อความการ์ดตามตัวเลขใหม่ |
+
+**ผล** (`--shots simulate` + `--shots audit` อย่างละ 4 ชุด บน repo จริง)
+- ความยาวดวล (ชั้น 1 ผู้เล่นไร้ที่ติ) : ธรรมดา **16 บีต** (2 แผน) · Elite **23** · บอส **31.5** (3 แผน) — เดิม 10 / 12.8 / 16
+- ความยาก : ทั่วไป **~9%** (7–11) · เก่ง **~67%** (65–69) · ไร้ที่ติ 99% · เล่นโถม 0% — รอบ 11a 8% / 63% → ง่ายลงนิดหน่อยตามที่ผู้ใช้อนุญาต
+- คอนดักเตอร์ เก่ง / ทั่วไป : APPRENTICE 67 / 8 · METRONOME 65 / 7.6 · INFERNO 68 / 19 · UNHEARING 64 / 7 · FOLK LEADER 68 / 8 — **ใกล้กันที่สุดเท่าที่เคยวัด** (INFERNO ยังดีกับคนพลาดบ่อย)
+- Motif ใบเดียว (เก่ง) : ดีสุด SECOND WIND ~+18 · PIANISSIMO / BREATH MARK / SFORZANDO / COUNTERPOINT ~+14 · MARCATO ~+11 · GRACE NOTE ~+7 ·
+  อ่อน : TENUTO ~+3 · OVERTURE ~+3 · ACCELERANDO ~+4.5
+- ตรวจแล้ว (แชท cloud) : คอมไพล์ 0 error 0 warning · savecheck 19/19 · แคปภาพ `scorerepeat` `duelrepeat` · **ยังไม่ได้เล่นจริง** · commit + push ขึ้น `Alpha3` (`d2bb88a` + เอกสาร)
+
+**ข้อควรระวัง (รีวิว)** : แผนผิดในรอบ 3 ถูกเล่น 3 ครั้งแก้ไม่ได้จนจบรอบ (หน้าโน้ตโชว์ค่าทั้ง 3 ครั้งแล้ว) · f/mf/p เปลี่ยนทุกรอบวน แผนเดิมอาจไม่พอดี →
+ผู้เล่นต้องใช้ขนาดการตวัด (EASE/BOOST) แก้เอง · รอบ 3 ตวัดต่อเนื่อง 24 โน้ต ~15 วิ ที่ 128 BPM ยังไม่รู้ว่ามือล้าไหม · FINALE มาหลังรอบวนสุดท้ายเท่านั้น
 
 ### หน้าจัดจังหวะ (ปรับรอบ 2)
 - ข้างเลขบีตมีลูกศรทิศการตวัดของบีตนั้น
@@ -818,15 +857,17 @@ THE METRONOME : ทุกการตวัดเป็น BOOST ไม่ว่
 |---|---|---|
 | `StaminaCostScale` สตามิน่าที่เสียต่อโน้ต | ×0.7 (รอบ 9) | ×1.15 รอบ 6–8 · ×1.0 |
 | `PushPerPower` ดันเส้นต่อแต้มที่ต่าง | 1.0 (รอบ 9) | 2.2 |
-| `PushCap` เพดานการดันต่อโน้ต (ทั้งสองฝั่ง) | 10 (รอบ 9) | — |
-| `EliteLine` / `BossLine` HEAVY LINE | ×0.85 / ×0.7 (รอบ 9) | — |
+| `PushCap` เพดานการดันต่อโน้ต (ทั้งสองฝั่ง) | 8 (รอบ 11b) | 10 รอบ 9–11a |
+| `PassesPerRound` REPEATS แผนเล่นกี่ครั้งต่อรอบ | 1 / 2 / 3 (รอบ 11b) | 1 / 1 / 1 |
+| `RestRecover` บีตพัก | 10 (รอบ 11b) | 6 |
+| `EliteLine` / `BossLine` HEAVY LINE | ×0.7 / ×0.6 (รอบ 11b) | ×0.85 / ×0.7 รอบ 9–11a |
 | `NormalScale` ความแรงศัตรูธรรมดา | ×3.1 (รอบ 11a) | ×2.0 รอบ 8–10 · ×1.35 รอบ 6–7 · ×1.25 ก่อนนั้น |
 | `NoRestShare` NO REST ของ WHITE NOISE | บีตพัก/EASE ได้คืนครึ่งเดียว (รอบ 11a) | ไม่ได้คืนเลย |
 | `HeldNoteShare` เสียงค้างของ CHAI | 40% | — |
 | `EliteScale` | 2.0 (รอบ 8) | 1.35 · 1.25 |
 | `BossScale` | 2.8 (รอบ 8) | 1.85 · 1.75 |
-| `BlowPerPower` TACET ซัด : สตามิน่าที่เสียต่อแต้มที่แพ้บีต (รอบ 8) | 0.68 (รอบ 11a) | 0.63 รอบ 10 · 0.7 รอบ 9 · 1.0 |
-| `BreathMarkRecover` BREATH MARK | ×1.25 (6 → 7, รอบ 10) | ×2 |
+| `BlowPerPower` TACET ซัด : สตามิน่าที่เสียต่อแต้มที่แพ้บีต (รอบ 8) | 0.78 (รอบ 11b) | 0.68 รอบ 11a · 0.63 รอบ 10 · 0.7 รอบ 9 · 1.0 |
+| `BreathMarkRecover` BREATH MARK | ×1.25 (10 → 12, รอบ 11b) | ×2 |
 | `LockedTempoCost` METRONOME · `CloserLouderMax` UNHEARING | ×1.0 · +130% (รอบ 10) | ×0.6 · +60% |
 | `BoostCost` / `TremoloCost` / `FermataCost` | **ลบแล้ว** (รอบ 8 ท่าเท่ๆ ฟรี) | 1.6 / 2 / 6 |
 | `PerfectWindow` ช่วงเวลาที่นับเป็น PERFECT | 0.08 วิ | 0.12 |
@@ -841,7 +882,7 @@ THE METRONOME : ทุกการตวัดเป็น BOOST ไม่ว่
 | `CounterKeep` | TACET เหลือ 70% | (ลองที่ 25% / 50% แล้วแรงเกิน ดวลจบในรอบเดียว) |
 | `FortissimoCombo` / `Beats` / `Power` | 8 / 4 บีต / ×1.3 | (ลองที่ 6 / ×1.5 แรงเกิน) |
 | `FortissimoCost` สตามิน่าที่จ่ายตอนไฟลุก (รอบ 7) | ×0 (ไม่เสีย) | ×1 |
-| Motif โน้ตพิเศษ : `AccelerandoCount` / `TenutoRecover` / `GraceNotePower` / `MarcatoCap` / `ConBrioCombo` / `CodaLine` | ×2 / 8 / ×3 / 20 / 6 / +60 (รอบ 11a) | +4 ครั้ง / ×1.8 / ×2 / เหลือ 55% (รอบ 7) |
+| Motif โน้ตพิเศษ : `AccelerandoCount` / `TenutoRecover` / `GraceNotePower` / `MarcatoCap` / `ConBrioCombo` / `CodaLine` | ×2 / 8 / ×3 / 16 / 6 / +60 (รอบ 11a–b) | +4 ครั้ง / ×1.8 / ×2 / เหลือ 55% (รอบ 7) |
 | `ReedCaseDiscount` · `CrossCultureHarmony` | 2 · +7% (รอบ 11a) | 1 · +15% |
 | `FinaleLine` / `FinaleFailPush` / `FinaleShards` | +80 / −12 / +25 | — |
 | `Conductor.Recipe` สูตร SIGNATURE | ดูตารางในหัวข้อ 6 | (เดิมเกจเดียว) |
@@ -866,6 +907,8 @@ THE METRONOME : ทุกการตวัดเป็น BOOST ไม่ว่
 | **จบรัน — ผู้เล่นเก่ง** (PERFECT 70% พลาด 5% สะบัดกลับพลาด 10%) | **50%** | — |
 | **จบรัน — ผู้เล่นทั่วไป** (PERFECT 40% พลาด 10% สะบัดกลับพลาด 30%) | **11%** | 9% |
 | จบรัน — GOOD ทุกบีต ไม่เคย BOOST | 0% | — |
+
+**รอบ 11b (26 ก.ย., REPEATS, simulate 4 รัน + audit 4 รัน)** : ทั่วไป **~9%** · เก่ง **~67%** · ไร้ที่ติ **~99%** · เล่นโถม **0%** · บีตต่อดวล (ชั้น 1 PERFECT BOOST) ธรรมดา 16 / Elite 23 / บอส 31.5 · คอนดักเตอร์ 64–68% (เก่ง) (หัวข้อ 6 "รอบ 11b")
 
 **รอบ 11a (26 ก.ย., simulate 4 รัน + audit 4 รัน)** : ทั่วไป **~8%** · เก่ง **~63%** · ไร้ที่ติ **~99.8%** · เล่นโถม **0%** · GOOD อย่างเดียว 0% · บีตต่อดวล (ชั้น 1 PERFECT BOOST) ธรรมดา 10 / Elite 12.7 / บอส 16.2 · ศัตรูธรรมดาชนะได้บ้างแล้ว (หัวข้อ 6 "รอบ 11a")
 
@@ -955,9 +998,9 @@ Tacetno433.exe --shots simulate --out C:\temp
 ```
 จำลองการต่อสู้หลายพันครั้ง + จำลองการเล่นทั้งรัน แล้วเขียนผลลง `simulate.txt`
 
-ชื่อหน้าที่แคปได้ : title titlecontinue titlequit guide guide4 guide5 settings calibrate gallery detail chapter era crossing
-recruit bandname route pause view stage score scoretrait scorepairs bargain duel duelcombo duelboss duelcutin duelpause
-dueldouble dueltremolo duelfire finale result defeat reward shop shopleave event rest curtain curtainwin
+ชื่อหน้าที่แคปได้ : title titlecontinue titlequit guide guide3 guide4 guide5 settings calibrate gallery detail chapter era crossing
+recruit bandname route pause view stage score scoretrait scorepairs scorerepeat bargain duel duelcombo duelboss duelcutin duelpause
+dueldouble dueltremolo duelfire duelrepeat finale result defeat reward shop shopleave event rest curtain curtainwin
 tutorial tutorialsize tutorialtiming tutorialloud tutorialbreath tutorialroll tutorialready (รอบ 8)
 (บางหน้าให้เครื่องมือแกล้งกดปุ่มก่อนแคป ผ่าน `Input.PretendPress` เช่น Esc ของ `pause`/`duelpause`/`titlequit`, Enter ของ `shopleave` ·
 `dueldouble`/`dueltremolo`/`finale`/`calibrate` กระโดดไปจังหวะนั้นเลยผ่าน hook สำหรับถ่ายภาพ)
@@ -1006,6 +1049,7 @@ Tacetno433.exe --shots savecheck --out C:\temp
 
 | วันที่ | ทำอะไร |
 |---|---|
+| 26 ก.ย. | **รอบ 11b (แชท cloud, `Alpha3`)** REPEATS แผนเล่นวน 1→2→3 ครั้งต่อเนื่อง (TACET สุ่ม f/mf/p ใหม่ทุกรอบวน) · บีตพัก 6 → 10 · PUSH CAP 8 · HEAVY LINE 0.7/0.6 · `BlowPerPower` 0.78 · METRONOME 10/6 · ป้าย PLAYED x2/x3 + 1ST/2ND/3RD TIME · หน้าแคป `scorerepeat` `duelrepeat` `guide3` · commit + push ขึ้น `Alpha3` (`d2bb88a` + เอกสาร) |
 | 26 ก.ย. | **รอบ 11a (แชท cloud, `Alpha3`)** WHITE NOISE โน้ต 2 + NO REST คืนครึ่ง · ศัตรูธรรมดาแรงขึ้น (×3.1, HUSH/LULL โน้ตหนักขึ้น) · `BlowPerPower` 0.68 · METRONOME สตามิน่า 9 · FOLK LEADER +7% · REED CASE 2 · GRACE NOTE ×3 · ACCELERANDO รัวนับ 2 · TENUTO คืนสตามิน่า 8 · MARCATO ดันถึง 20 · ตัวจำลองนับ ENCORE · แก้ชื่อ/คำอธิบาย PR #1 |
 | 26 ก.ย. | อัปเดตเอกสารทุกไฟล์ให้ตรงเกมปัจจุบัน (เตรียม compact) : สรุปสำหรับแชทใหม่ + ข้อเสนอที่รอเลือกในหัวข้อ 0 · หัวข้อ 1/2/4/10/13/14 · GAME_REVIEW รอบ 9–10 · DESIGN_RESEARCH 6.8 · คอมเมนต์หัว `TacetField.cs` |
 | 25 ก.ย. | **รอบ 10 (แชท cloud, `Alpha3`)** ตรวจสมดุลทั้งระบบ (`--shots audit`) · METRONOME ไม่มีส่วนลด + สตามิน่า 7 · UNHEARING +130% + Push 4 · BREATH MARK ×1.25 · `BlowPerPower` 0.63 · commit + push ขึ้น `Alpha3` (`32d72f3` `4215301` + เอกสาร) |
