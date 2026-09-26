@@ -1,6 +1,6 @@
 # TACET 4'33 — เอกสารส่งต่อให้ฝ่ายโค้ด
 
-อัปเดต : 25 กันยายน 2026 (รอบ 10) · repo `github.com/JuzJuz03HKR/Alphodite` branch **`Alpha3`** (รอบ 6–8 อยู่ `Alpha2`) · กติกาสำหรับ Claude อยู่ `CLAUDE.md` · อ่านคู่กับ [`PROJECT_STATUS.md`](PROJECT_STATUS.md) (รายละเอียดทุกระบบ)
+อัปเดต : 26 กันยายน 2026 (หลังรอบ 10) · repo `github.com/JuzJuz03HKR/Alphodite` branch **`Alpha3`** (รอบ 6–8 อยู่ `Alpha2`) · กติกาสำหรับ Claude อยู่ `CLAUDE.md` · อ่านคู่กับ [`PROJECT_STATUS.md`](PROJECT_STATUS.md) (รายละเอียดทุกระบบ)
 และ [`ASSET_LIST.md`](ASSET_LIST.md) (ไฟล์ภาพ/เสียงที่ต้องใส่)
 
 ---
@@ -10,7 +10,7 @@
 - MonoGame DesktopGL 3.8 · .NET 9 · เปิด `Tacetno433.sln` แล้วกด F5 · build ต้องได้ **0 error 0 warning**
 - เล่นได้ครบลูป : เมนู → เลือกคอนดักเตอร์ → รัน 3 ชั้น (เส้นทาง / เวที / โน้ต / ดวล / ผลลัพธ์ / ร้าน / เหตุการณ์ / พัก) → Curtain Call
 - ดวล = ใช้เมาส์เป็นไม้บาตอง กดค้างแล้วตวัดตามท่า 4/4 **ทุกบีตต่อเนื่อง** ขนาดการตวัดคือคำสั่ง (EASE / PLAY / BOOST) ·
-  โน้ตเขียน f / mf / p มีหัวลูกศรที่ขอบบอกทิศ โน้ตถัดไปสว่าง · โน้ตพิเศษมาทีละชั้น : TREMOLO (ชั้น 1, Elite/บอส) · FERMATA (ชั้น 2) · โน้ตคู่ (ชั้น 3) ·
+  โน้ตเขียน f / mf / p มีหัวลูกศรที่ขอบบอกทิศ โน้ตถัดไปสว่าง · โน้ตพิเศษมาทีละชั้น : TREMOLO (ชั้น 1 ทุกศัตรู · Elite/บอสทุกชั้น) · FERMATA (ชั้น 2) · โน้ตคู่ (ชั้น 2 ตั้งแต่รอบ 9) ·
   COUNTER · FORTISSIMO · FINALE (รอบ 6–6.3, 25 ก.ย.)
 - Esc = เมนูหยุดทุกหน้าในรัน · มีเซฟตั้งค่า + เซฟรัน + CONTINUE · STROKE TIMING (calibration) ในหน้าตั้งค่า
 - **รอบ 7** : ภาพและความรู้สึก (หลุมจุดตี · EARLY/LATE · แสงแตกตามเกรด · เลนสว่าง · โน้ต TACET แตก · บรรทัดห้าเส้นสั่น · ม่านเวทีแทนเฟดดำ) ·
@@ -22,20 +22,22 @@
 - **รอบ 10** : ตรวจสมดุลด้วย **`--shots audit`** (`Core/DebugShots.Audit.cs`) · METRONOME ไม่มีส่วนลดสตามิน่า + สตามิน่า 7 · UNHEARING +130% + Push 4 ·
   BREATH MARK ×1.25 · `BlowPerPower` 0.63 · คอนดักเตอร์ทุกคน 50–64% (เก่ง) ความยากรวมเท่าเดิม · ศัตรูยังไม่ปรับ
 - **ยังไม่มีไฟล์ภาพและเสียงเลย** ทุกช่องเป็นกรอบว่าง / เงียบ ใส่ไฟล์ตามชื่อแล้วขึ้นเองโดยไม่ต้องแก้โค้ด
-- เพื่อนต่างกลุ่มเล่นระบบรอบ 5 แล้ว (ง่ายเกิน) · **ระบบรอบ 6 ยังไม่มีคนเล่นจริง** ตัวเลขได้จากการจำลอง
+- เพื่อนต่างกลุ่มเล่นระบบรอบ 5 แล้ว (ง่ายเกิน) · **เพลย์เทส 25 ก.ย.** 5 คน เล่น build รอบ 8 : ชอบการตวัด · เข้าใจยาก · ง่ายไป (แก้แล้วรอบ 9) ·
+  **รอบ 9–10 ยังไม่มีคนเล่นจริง** ตัวเลขได้จากการจำลอง
+- **ข้อเสนอที่รอผู้ใช้เลือก** (สอนเล่น ก–ซ · WHITE NOISE · ศัตรูธรรมดา · Motif อ่อน · หน้าเตรียมตัว) อยู่ `PROJECT_STATUS.md` หัวข้อ 0
 
 ## 2. ความคืบหน้า (ประมาณการ)
 
 | ส่วน | % | หมายเหตุ |
 |---|---|---|
 | ระบบหลักของรัน (เส้นทาง จัดวง โน้ต ดวล ผลลัพธ์ Motif ร้าน เหตุการณ์ พัก จบรัน) | 90% | ครบวง ขาดการจูนหลังเล่นจริง |
-| ระบบดวล (ตวัดต่อเนื่อง โน้ตคู่ TREMOLO COUNTER FORTISSIMO FINALE ความสามารถ กลไก SIGNATURE) | 90% | ขาดการจูนกับคนเล่นจริง (โดยเฉพาะ 116 BPM) |
-| หน้าจอ UI 19 หน้า + เมนูหยุด + กล่องถามยืนยัน | 90% | ขาด Tutorial |
+| ระบบดวล (ตวัดต่อเนื่อง โน้ตคู่ TREMOLO COUNTER FORTISSIMO FINALE ความสามารถ กลไก SIGNATURE) | 90% | สมดุลด้วยตัวจำลองแล้ว (รอบ 9–10) ขาดการจูนกับคนเล่นจริง (128 BPM) |
+| หน้าจอ UI 20 หน้า (รวม TUTORIAL) + เมนูหยุด + กล่องถามยืนยัน | 90% | Tutorial สอนแค่การตวัด ยังไม่สอนหน้าเวที/หน้าโน้ต |
 | ระบบรอบนอก (ตั้งค่า เซฟ CONTINUE calibration ปลดล็อก) | 75% | ครบยกเว้นปลดล็อกถาวร · เซฟยังไม่จำจังหวะหน้าผลลัพธ์/Motif |
 | ช่องใส่ภาพ/เสียง (hooks) | 100% | ครบทุกหน้า รายการใน `ASSET_LIST.md` |
 | เนื้อหา (ตัวละคร ศัตรู เหตุการณ์ Motif) | 40% | พอเล่นได้ ยังน้อยสำหรับเกมเต็ม |
 | ภาษาไทย | 0% | ฟอนต์ที่ build ไว้มีแต่ตัวอังกฤษ |
-| การทดสอบ / บาลานซ์ | 40% | มีการจำลองอัตโนมัติ ยังไม่มีคนเล่นจริง |
+| การทดสอบ / บาลานซ์ | 55% | simulate + audit (นับ Motif) · เพลย์เทส 5 คน (build รอบ 8) · ยังไม่มีคนเล่นรอบ 9–10 |
 | **รวมเฉพาะระบบเกม (โค้ด)** | **~85%** | |
 | **รวมทั้งโปรเจกต์ (รวมอาร์ต เสียง เนื้อหา)** | **~53%** | อาร์ตและเสียงยัง 0% |
 
@@ -53,10 +55,11 @@
 ```
 Tacetno433/
 ├─ TacetGame.cs        เริ่มเกม โหลดฟอนต์ เสียง ภาพ เตรียมข้อความ · วาดทั้งเกมลงภาพ 1280x720 แล้วยืดใส่จอ
-├─ Core/               เครื่องมือวาด ชุด UI อ่านเมาส์/คีย์ ช่องภาพ (ArtBank ArtSlot CharacterArt HandArt) เอฟเฟกต์ (Hollow TacetField) กล่องถาม (ConfirmBox)
+├─ Core/               เครื่องมือวาด ชุด UI อ่านเมาส์/คีย์ ช่องภาพ (ArtBank ArtSlot CharacterArt HandArt) เอฟเฟกต์ (Hollow TacetField StageStaff)
+│                      กล่องถาม (ConfirmBox) · ไม้บาตอง (Baton) · สัญลักษณ์โน้ต (NoteGlyph) · เปลี่ยนหน้า (Curtain SilenceWave) · เครื่องมือทดสอบ (DebugShots .Audit)
 ├─ Data/               ข้อมูลทั้งหมด — แก้ตัวเลข/เนื้อหาที่นี่ (BattleRules = ตัวเลขบาลานซ์ทุกตัว) · SaveFile (เซฟ 2 ไฟล์)
 ├─ Battle/             กติกาการต่อสู้ BattleState (ไม่มีโค้ดวาด) + DuelEffects (เอฟเฟกต์แบบ object pool)
-├─ Screens/            หน้าจอ 19 หน้า + PauseMenu (DuelScreen แยก 7 ไฟล์แบบ partial)
+├─ Screens/            หน้าจอ 20 หน้า + PauseMenu (DuelScreen แยก 7 ไฟล์ · TutorialScreen แยก 2 ไฟล์ แบบ partial)
 └─ Audio/SoundBank.cs  เสียงทั้งหมด
 ```
 
@@ -72,8 +75,10 @@ Tacetno433/
 | เซฟ (ไฟล์อยู่ `%AppData%\TACET433\`) | `Data/SaveFile.cs` — **ห้ามสลับลำดับรายการใน `MusicianList` `MotifList` `EnemyList` `EventList` `ConductorList`** เซฟเก็บเป็นลำดับ |
 | เมนูหยุด / หน้าไหนกด Esc แล้วเปิดเมนู | `Screens/PauseMenu.cs` · `GameScreen.CanPause` / `UsesEscape` / `Paused` / `Resumed` ใน `Core/ScreenManager.cs` |
 | FERMATA (โน้ตค้าง) | กติกา `BattleState` (ค้น `FERMATA`, `HoldFraction`) · หน้าจอ `DuelScreen.Notes.cs` (`StartHold` / `UpdateHold` / `FinishHold`) |
-| หน้าตาโน้ตในเลน | `DuelScreen.Stage.cs` (`DrawIncoming` · `Focus` โน้ตไหนสว่าง · `DrawPointer` หัวลูกศร) · ✦ กับเครื่องหมายเฟอร์มาตาอยู่ `Core/NoteGlyph.cs` |
-| ชั้นที่โน้ตพิเศษเริ่มมา | `BattleRules.TremoloFromFloor / FermataFromFloor / PairsFromFloor` |
+| หน้าตาโน้ตในเลน | `DuelScreen.Stage.cs` (`DrawIncoming` · `Focus` โน้ตไหนสว่าง) · หัวลูกศร ✦ เฟอร์มาตา แถบรัว อยู่ `Core/NoteGlyph.cs` (`Pointer` `Spark` `FermataSign` `RollBar`) |
+| ชั้นที่โน้ตพิเศษเริ่มมา | `BattleRules.TremoloFromFloor / FermataFromFloor / PairsFromFloor` · ใครรัว/ใครค้าง `BattleState.PrepareRound` |
+| ดาเมจ / เพดานต่อโน้ต / Elite-บอสดันยาก | `BattleRules.PushPerPower` `PushCap` `EliteLine` `BossLine` · ใช้ที่ `BattleState.PushFor` จุดเดียว (ค้น `PUSH CAP`, `HEAVY LINE`) |
+| ความสามารถคอนดักเตอร์ (ตัวเลข) | `BattleRules` หัวข้อ Conductor Perks · ค่าพลัง/สตามิน่าใน `Data/Conductor.cs` |
 | โน้ตคู่ TREMOLO COUNTER FORTISSIMO | กติกา `Battle/BattleState.cs` (ค้น `TREMOLO` `COUNTER` `FORTISSIMO` `ResolveGrace`) · หน้าจอ `Screens/DuelScreen.Notes.cs` |
 | FINALE | `Screens/DuelScreen.Finale.cs` + `BattleState.FinaleOffered / WinFinale / FailFinale` |
 | calibration | `Settings.TimingOffset` ใช้ใน `DuelScreen.StrokeClock()` จุดเดียว · หน้า TEST ใน `Screens/SettingsScreen.cs` |
@@ -102,6 +107,7 @@ Tacetno433/
 **เครื่องมือ** `Core/DebugShots.cs` (ลบได้ ไม่ใช่ส่วนของเกม)
 - `Tacetno433.exe --shots title,duel@150,result --out C:\pics` แคปหน้าจอนอกจอ ไม่ยุ่งกับเมาส์/คีย์บอร์ด
 - `Tacetno433.exe --shots simulate --out C:\temp` จำลองการต่อสู้หลายพันครั้ง + ทั้งรัน เขียนผลลง `simulate.txt`
+- `Tacetno433.exe --shots audit --out C:\temp` ตรวจสมดุล (รอบ 10) แยกศัตรูต่อชั้น / ยุค / คอนดักเตอร์ / Motif ทีละใบ → `audit.txt` (~1 นาที)
 - `Tacetno433.exe --shots savecheck --out C:\temp` เซฟ/โหลดในโฟลเดอร์ทดสอบ (ไม่แตะเซฟจริง) แล้วเขียน PASS/FAIL ลง `savecheck.txt`
 - ในเกมกด **F3** ดู FPS และจำนวนไฟล์ที่โหลดได้ (SFX / MUSIC / PHRASE / HAND / ART / PIXEL)
 
@@ -118,7 +124,7 @@ Tacetno433/
 4. ใส่ไฟล์เสียงชุดแรก (ทำนอง `Phrase` + `BeatTick` + `QtePerfect`) — ตอนนี้เกมเงียบ (ผู้ใช้สั่งลบเสียงชั่วคราวจากโค้ดออก 25 ก.ย.)
 
 ### ควรทำ (P2)
-6. ~~โหมด Tutorial ที่หน้าแรก~~ ✅ รอบ 8 (12 บท) · ยังเหลือ : ปรับตามที่คนเล่นจริงบอก · ยังไม่มีบทสอนหน้าเวที/หน้าโน้ต (สอนแค่การตวัด)
+6. ~~โหมด Tutorial ที่หน้าแรก~~ ✅ รอบ 8 (12 บท) · ยังเหลือ : รีวิว 25 ก.ย. เสนอ ก–ซ ไว้ (`DESIGN_RESEARCH.md` 6.8) รอผู้ใช้เลือก · แนะนำ ก+ข+ค+ง ก่อน
 7. **ปรับใหญ่ (ต้องคุยกับผู้ใช้ก่อน)** : ห้องซ้อม · การเลือกเส้นทาง (ให้ง่ายขึ้น/เหมือนเกมตลาด เช่นแผนที่ที่เห็นข้างหน้า) ·
    การจัดทีม · หน้าจัดจังหวะ
 8. ~~เปลี่ยนหน้าแบบม่านเวที~~ ✅ รอบ 7 · ~~คำอธิบายตาราง THE PERFORMANCE~~ ✅ รอบ 7 · ~~เลน/จุดตีเต้นตาม BPM~~ ✅ รอบ 7 ·
@@ -134,7 +140,7 @@ Tacetno433/
 
 ## 5. ปัญหาที่รู้อยู่
 
-- ยังไม่มีคนเล่นระบบรอบ 6 (ตวัดต่อเนื่อง + โน้ตใหม่) ภาพทดสอบใช้เมาส์ปลอม
+- เพลย์เทส 25 ก.ย. เล่น build รอบ 8 · รอบ 9–10 ยังไม่มีคนเล่นจริง ภาพทดสอบใช้เมาส์ปลอม
 - การจำลองบาลานซ์ไม่รวมความสามารถนักดนตรีแบบตอบสนอง การอ่าน f/mf/p และ SIGNATURE (รวมโน้ตคู่ TREMOLO COUNTER FORTISSIMO FINALE แล้ว)
 - สตามิน่า (รอบ 8) กดดันภายในดวลแล้ว (แพ้เพราะหมดลมเป็นส่วนใหญ่) แต่ตอนถึงบอสยังเหลือ ~85% → การบริหารข้ามด่านยังเบา ผูกกับการปรับใหญ่ห้องซ้อม/เส้นทาง (ต้องคุยก่อน)
 - เซฟมีช่องเดียว · CONTINUE เข้าร้านเดิมจะสุ่มของในร้านใหม่
@@ -155,5 +161,8 @@ Tacetno433/
 - ไม่มีเพลงยาวในดวล เสียงทำนองขึ้นทีละโน้ตเมื่อตวัด · ตัดไอเดีย "ยุค = จังหวะ"
 - ภาพชั่วคราว = กรอบว่างเท่านั้น · ธีมภาพตาม Limbus Company Canto 10 / E.G.O Hollow แต่ยังขาวดำ
 - ความสามารถนักดนตรีและกลไกศัตรูเป็นฐานแรก ("ลองทำไปก่อน") เปลี่ยนได้หลังเล่นทดสอบ
-- รอบ 6 : ผู้ใช้เลือกครบ ตวัดต่อเนื่อง · BPM 88/100/116 · โน้ตคู่ · TREMOLO · COUNTER · FORTISSIMO · FINALE · ความยาก "หนัก"
+- รอบ 6 : ผู้ใช้เลือกครบ ตวัดต่อเนื่อง · BPM 88/100/116 (รอบ 9 → 96/112/128) · โน้ตคู่ · TREMOLO · COUNTER · FORTISSIMO · FINALE · ความยาก "หนัก"
+- รอบ 8 : สตามิน่า = ตัวกดดัน หมดลม = แพ้ · ท่าเท่ๆ ฟรี · ม่านเฉพาะหน้าเลือกคอนดักเตอร์ · Tutorial
+- รอบ 9 : ดาเมจเบาลง + PUSH CAP + HEAVY LINE · เป้าดวลผู้เล่นเก่ง ธรรมดา ~1.5 รอบ Elite ~2 บอส 2–3 · ตวัดถี่ขึ้น (BPM โน้ตคู่ชั้น 2 ชั้น 1 ทุกศัตรูรัว)
+- รอบ 10 : ปรับ METRONOME / UNHEARING / BREATH MARK · ความยากรวมเท่าเดิม · **ยังไม่ปรับศัตรู** (ผู้ใช้เลือก)
 - Esc = เมนูหยุดทุกหน้าในรัน · สิ่งที่ย้อนไม่ได้ต้องถามก่อน ค่าเริ่มเลือก "ไม่" · แพ้ดวล = ลบเซฟ (roguelike)

@@ -8,7 +8,8 @@ namespace Tacetno433.Core
     //A flat black area creeping in from the right. Its border is a RIFT : a torn seam of white
     //light, like a crack in the world with something blinding behind it. The seam never stops
     //moving, frays into streaks of light on the dark side, and throws off shards.
-    //Used on the title page, the duel, the result pages and the settings page.
+    //Used on the title page, the duel, the result and curtain call pages, the settings page, the
+    //tutorial, and the silence wave that changes pages (Core/SilenceWave.cs).
     //
     //Everything is drawn two pixel rows at a time from plain rectangles, so it stays cheap.
     public static class TacetField
