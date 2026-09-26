@@ -156,20 +156,25 @@ namespace Tacetno433.Core
                             else if (h == 6) FrontLoad(run);
                             else b.AutoPlan();
 
-                            for (int beat = 0; beat < BattleRules.BeatsPerRound && !b.Finished; beat++)
+                            //REPEATS : the plan is played once, twice or three times
+                            for (int pass = 0; pass < b.Passes && !b.Finished; pass++)
                             {
-                                Choice choice = Choice.Normal;
-                                Grade grade = Grade.Good;
-                                if (h == 1) grade = Grade.Hesitate;
-                                if (h == 2 && b.IsHeavy(beat)) { choice = Choice.Boost; grade = Grade.Perfect; }
-                                if (h == 3) choice = Choice.Ease;
-                                if (h == 4) grade = Grade.Perfect;
-                                if (h >= 5) { choice = Choice.Boost; grade = Grade.Perfect; }
+                                b.BeginPass(pass);
+                                for (int beat = 0; beat < BattleRules.BeatsPerRound && !b.Finished; beat++)
+                                {
+                                    Choice choice = Choice.Normal;
+                                    Grade grade = Grade.Good;
+                                    if (h == 1) grade = Grade.Hesitate;
+                                    if (h == 2 && b.IsHeavy(beat)) { choice = Choice.Boost; grade = Grade.Perfect; }
+                                    if (h == 3) choice = Choice.Ease;
+                                    if (h == 4) grade = Grade.Perfect;
+                                    if (h >= 5) { choice = Choice.Boost; grade = Grade.Perfect; }
 
-                                int strokes = h == 1 ? 0 : (h == 4 || h == 2 || h >= 5 ? 8 : 5);
-                                PlayBeat(b, beat, choice, grade, strokes);
-                                beatsTotal++;
-                                if (run.Stamina < lowest) lowest = run.Stamina;
+                                    int strokes = h == 1 ? 0 : (h == 4 || h == 2 || h >= 5 ? 8 : 5);
+                                    PlayBeat(b, beat, choice, grade, strokes);
+                                    beatsTotal++;
+                                    if (run.Stamina < lowest) lowest = run.Stamina;
+                                }
                             }
 
                             //Finale : every habit that strokes at all tries it, and lands it (GOOD is enough)
@@ -467,8 +472,12 @@ namespace Tacetno433.Core
             while (!b.Finished)
             {
                 if (habit == 4) FrontLoad(run); else b.AutoPlan();
-                for (int beat = 0; beat < BattleRules.BeatsPerRound && !b.Finished; beat++)
+                for (int g = 0; g < BattleRules.BeatsPerRound * b.Passes && !b.Finished; g++)
                 {
+                    //REPEATS : the plan again, with TACET's marks for this time through
+                    int beat = g % BattleRules.BeatsPerRound;
+                    if (beat == 0) b.BeginPass(g / BattleRules.BeatsPerRound);
+
                     Choice choice = Choice.Normal;
                     Grade grade = Grade.Good;
                     rec.Beats++;
@@ -519,6 +528,7 @@ namespace Tacetno433.Core
             if ((names[index] == "duelpause" || names[index] == "pause") && frames == waits[index] - 30) Input.PretendPress = Keys.Escape;
             if (names[index] == "titlequit" && frames == waits[index] - 10) Input.PretendPress = Keys.Escape;
             if (names[index] == "shopleave" && frames == waits[index] - 10) Input.PretendPress = Keys.Enter;
+            if (names[index] == "guide3" && (frames == 10 || frames == 20)) Input.PretendPress = Keys.Right;
             if (names[index] == "guide4" && (frames == 10 || frames == 20 || frames == 30)) Input.PretendPress = Keys.Right;
             if (names[index] == "guide5" && (frames == 10 || frames == 20 || frames == 30 || frames == 40)) Input.PretendPress = Keys.Right;
 
@@ -539,9 +549,9 @@ namespace Tacetno433.Core
         }
 
         //Page Open : build a sample run that suits the page, then show it.
-        //Names: title titlecontinue titlequit guide guide4 guide5 settings calibrate gallery detail chapter era
-        //       crossing recruit bandname route pause view stage score scoretrait scorepairs bargain
-        //       duel duelcombo duelboss duelcutin duelpause dueldouble dueltremolo duelfermata duelfire finale
+        //Names: title titlecontinue titlequit guide guide3 guide4 guide5 settings calibrate gallery detail chapter era
+        //       crossing recruit bandname route pause view stage score scoretrait scorepairs scorerepeat bargain
+        //       duel duelcombo duelboss duelcutin duelpause dueldouble dueltremolo duelfermata duelfire duelrepeat finale
         //       result defeat reward shop shopleave event rest curtain curtainwin
         private static void Open(TacetGame game, string name)
         {
@@ -564,7 +574,7 @@ namespace Tacetno433.Core
             if (name == "route" || name == "pause") screen = new RouteScreen();
             if (name == "view") screen = new FormationScreen(false);
             if (name == "stage") screen = new FormationScreen(true);
-            if (name == "score" || name == "scoretrait" || name == "bargain" || name == "scorepairs") screen = new ScoreScreen();
+            if (name == "score" || name == "scoretrait" || name == "bargain" || name == "scorepairs" || name == "scorerepeat") screen = new ScoreScreen();
             if (name.StartsWith("duel") || name == "finale") screen = new DuelScreen();
             if (name == "result" || name == "defeat") screen = new ResultScreen();
             if (name == "reward") screen = new MotifRewardScreen(false);
@@ -578,7 +588,7 @@ namespace Tacetno433.Core
             //Picture Hooks : start the moment the picture is about
             if (name == "calibrate") ((SettingsScreen)screen).BeginTest();
             if (name == "finale") ((DuelScreen)screen).BeginFinaleForPicture();
-            if (name == "dueltremolo") ((DuelScreen)screen).JumpForPicture(BattleRules.BeatsPerRound - 1);
+            if (name == "dueltremolo" || name == "duelrepeat") ((DuelScreen)screen).JumpForPicture(BattleRules.BeatsPerRound - 1);
             if (name == "dueldouble") ((DuelScreen)screen).JumpForPicture(FirstPair(run.Battle));
             if (name == "duelfermata") ((DuelScreen)screen).HoldForPicture();
             if (name == "tutorialsize") ((TutorialScreen)screen).JumpForPicture(3, 0f);
@@ -647,7 +657,7 @@ namespace Tacetno433.Core
             //Battle
             run.Chosen = new RouteNode();
             run.Chosen.Type = name == "duelboss" ? NodeType.Boss : NodeType.Battle;
-            if (name == "reward" || name == "dueltremolo" || name == "scorepairs") run.Chosen.Type = NodeType.Elite;
+            if (name == "reward" || name == "dueltremolo" || name == "scorepairs" || name.EndsWith("repeat")) run.Chosen.Type = NodeType.Elite;
             if (name == "dueldouble" || name == "scorepairs") run.Floor = 3;          // pairs from floor two, more on the last
             if (name == "duelfermata") run.Floor = 2;                                 // held notes from floor two
             run.Chosen.Title = RouteNodeInfo.TitleOf(run.Chosen.Type);
@@ -673,6 +683,14 @@ namespace Tacetno433.Core
 
             //Finale Picture : far enough ahead to finish it
             if (name == "finale") run.Battle.Line = 86f;
+
+            //Repeat Pictures : round three, the plan played three times (REPEATS)
+            if (name.EndsWith("repeat"))
+            {
+                run.Battle.EndRound();
+                run.Battle.EndRound();
+                run.Battle.AutoPlan();
+            }
 
 
             //Trait Pictures : an ordinary enemy on floor two shows its trait, the devil makes its offer

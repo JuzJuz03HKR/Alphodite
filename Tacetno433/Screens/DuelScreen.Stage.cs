@@ -44,7 +44,7 @@ namespace Tacetno433.Screens
         {
             if (AnswerProgress() < 0f) return false;
             if (phase == Phase.Finale) return Game.CurrentRun.Formation.Seated[seat] != null;
-            return Game.CurrentRun.Formation.Plays(seat, pending);
+            return Game.CurrentRun.Formation.Plays(seat, BeatOf(pending));
         }
 
         //Musician Glow : the light behind whoever is playing or about to. Drawn before the band
@@ -156,12 +156,13 @@ namespace Tacetno433.Screens
             //one for every bar, the way Taiko no Tatsujin shows its bars. The eye can count along.
             if (phase == Phase.Play)
             {
-                for (int j = 0; j < BattleRules.BeatsPerRound + 6; j++)
+                for (int j = 0; j < passBeats * battle.Passes + 6; j++)
                 {
                     float sent = j * beatLen;
                     if (clock < sent || clock > sent + 4f * beatLen) continue;
                     float lx = LaneX(sent);
-                    bool barLine = j % 4 == 0;
+                    int inPass = j % passBeats;                                  // REPEATS : bars count from each pass
+                    bool barLine = inPass % 4 == 0 && inPass < BattleRules.BeatsPerRound;
                     Gfx.Rect(sb, lx - (barLine ? 1f : 0.5f), top + 2, barLine ? 2f : 1f, LaneHalf * 2f - 4f,
                              Palette.Paper * (barLine ? 0.4f : 0.16f));
                 }
@@ -201,46 +202,50 @@ namespace Tacetno433.Screens
 
             bool echoFades = battle.EnemyHas(EnemyTrait.EchoFades);
 
-            for (int n = 0; n < BattleRules.BeatsPerRound; n++)
+            //REPEATS : g counts across the whole round, so the next time through can already be
+            //on its way while the last one is answered. Its marks are its own (ShownAt, DoubleAt).
+            for (int g = pending; g <= called; g++)
             {
-                if (n > called || n < pending) continue;          // not played yet, or already answered
-                float x = LaneX(n * beatLen);
-                float t = MathHelper.Clamp((clock - n * beatLen) / (4f * beatLen), 0f, 1f);
-                int power = battle.EnemyPower[n];
-                bool firstDone = n == pending && (onGrace || rolling);
+                int n = BeatOf(g);
+                int pass = PassOf(g);
+                float sentAt = CallAt(g);
+                float x = LaneX(sentAt);
+                float t = MathHelper.Clamp((clock - sentAt) / (4f * beatLen), 0f, 1f);
+                int power = battle.PowerAt(pass, n);
+                bool firstDone = g == pending && (onGrace || rolling);
 
                 //Pair : a ribbon from the note back to its spark, half a beat behind
-                if (battle.EnemyDouble[n] && n <= graceCalled)
+                if (battle.DoubleAt(pass, n) && g <= graceCalled)
                 {
-                    float gx = LaneX((n + 0.5f) * beatLen);
+                    float gx = LaneX(sentAt + 0.5f * beatLen);
                     if (gx > x + 2f)
                     {
                         Gfx.Rect(sb, x, RingY - 9f, gx - x, 18f, Palette.Paper * 0.3f);
                         Gfx.Rect(sb, x, RingY - 9f, gx - x, 2f, Palette.Paper * 0.8f);
                         Gfx.Rect(sb, x, RingY + 7f, gx - x, 2f, Palette.Paper * 0.8f);
                     }
-                    NoteGlyph.Spark(sb, gx, RingY, 14f, Palette.Highlight * Focus(n));
+                    NoteGlyph.Spark(sb, gx, RingY, 14f, Palette.Highlight * Focus(g));
                 }
 
                 //Roll : the tail runs back up the lane for as long as the roll lasts
                 if (battle.IsTremolo(n))
                 {
-                    float tailEnd = LaneX((n + BattleRules.TremoloBeats) * beatLen);
+                    float tailEnd = LaneX(sentAt + BattleRules.TremoloBeats * beatLen);
                     NoteGlyph.RollBar(sb, x, tailEnd, RingY);
                 }
 
                 //Fermata : a wide ribbon for as long as the note is held, and the fermata sign on top
                 if (battle.IsFermata(n))
                 {
-                    float holdX = LaneX((n + BattleRules.FermataBeats) * beatLen);
+                    float holdX = LaneX(sentAt + BattleRules.FermataBeats * beatLen);
                     NoteGlyph.HoldRibbon(sb, x, holdX, RingY);
                     if (!holding) NoteGlyph.FermataSign(sb, x, RingY - 30f, 14f, Palette.Highlight);
                 }
 
-                if (holding && n == pending) continue;             // the hold draws itself at the hit point
+                if (holding && g == pending) continue;             // the hold draws itself at the hit point
                 if (firstDone && !rolling) continue;               // the first of the pair is answered
 
-                float focus = Focus(n);
+                float focus = Focus(g);
 
                 if (power <= 0)
                 {
@@ -259,7 +264,7 @@ namespace Tacetno433.Screens
 
                 bool hidden = battle.EnemyHidden[n];
                 bool roll = battle.IsTremolo(n);
-                Choice shown = battle.ShownChoice[n];
+                Choice shown = battle.ShownAt(pass, n);
                 bool plain = !hidden && !roll;
                 float size = plain ? MathHelper.Clamp(power / 14f, 0.25f, 1f) : 0.6f;
                 float radius = (19f + size * 12f) * (0.85f + 0.25f * t);     // a note grows as it comes closer
@@ -286,10 +291,10 @@ namespace Tacetno433.Screens
         }
 
         //Focus : the note to answer next is bright, the one after it a little dimmer, the rest faint
-        private float Focus(int n)
+        private float Focus(int g)
         {
-            if (n <= pending) return 1f;
-            if (n == pending + 1) return 0.75f;
+            if (g <= pending) return 1f;
+            if (g == pending + 1) return 0.75f;
             return 0.5f;
         }
 

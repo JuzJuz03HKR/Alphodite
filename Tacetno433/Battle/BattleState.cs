@@ -59,6 +59,8 @@ namespace Tacetno433.Battle
     //
     //How a fight works:
     //   a round is 8 beats. Before each round the player decides which seat plays on which beat.
+    //   the round is then played through once, twice or three times in a row (REPEATS, round 11):
+    //   the same beats each time, but TACET decides its f / mf / p again for every pass.
     //   on every beat both sides add up their power, both pick Normal / Boost / Ease,
     //   and the difference pushes a line. Push it to +100 and you win on the spot, get pushed
     //   to -100 and you lose. After 3 rounds, whoever is ahead wins.
@@ -122,13 +124,27 @@ namespace Tacetno433.Battle
         public int FermataBeat = -1;                                           // the beat TACET holds, -1 for none
         public BeatResult[] Results = new BeatResult[BattleRules.BeatsPerRound];
 
-        //Sheet : every beat of every round, kept for the result page. Sheet[round - 1][beat]
+        //REPEATS : this round's phrase is played Passes times in a row. Pass is the time through
+        //being answered now, 0 for the first. EnemyChoice, ShownChoice and EnemyDouble above always
+        //hold the marks of that pass. The marks of every pass are decided when the round starts
+        //(see PrepareRound), so the duel can already show the next pass coming down the lane.
+        public int Passes = 1;
+        public int Pass;
+        private Choice[,] passChoice = new Choice[BattleRules.PassesMost, BattleRules.BeatsPerRound];
+        private Choice[,] passShown = new Choice[BattleRules.PassesMost, BattleRules.BeatsPerRound];
+        private bool[,] passDouble = new bool[BattleRules.PassesMost, BattleRules.BeatsPerRound];
+        private int[] writtenPower = new int[BattleRules.BeatsPerRound];       // the round's notes before THE WHOLE FLOOR knocks them
+
+        //Sheet : every beat of every round, kept for the result page. Sheet[round - 1][beat].
+        //When a round is played more than once, it keeps the last time through.
         public BeatResult[][] Sheet = new BeatResult[BattleRules.MaxRounds][];
 
         //Prepared Text
         public string RoundLabel = "";
         public string TempoLabel = "";
+        public string PassesLabel = "";          // "PLAYED x2", empty when the round is played once
         public string EnemyTitle = "";
+        private static string[] passesWords = { "", "", "PLAYED x2", "PLAYED x3" };
 
         private Random random;
         private float scale;                     // floor and kind scaling for the enemy
@@ -300,20 +316,70 @@ namespace Tacetno433.Battle
             }
 
             for (int b = 0; b < BattleRules.BeatsPerRound; b++)
+                writtenPower[b] = EnemyPower[b];
+
+            //REPEATS : the same beats every time through, but the marks and the pairs are
+            //decided afresh for each pass, all of them now
+            Passes = BattleRules.PassesPerRound[Math.Min(Round, BattleRules.PassesPerRound.Length) - 1];
+            for (int p = 0; p < Passes; p++)
             {
-                EnemyChoice[b] = b == TremoloBeat ? Choice.Normal : RollEnemyChoice(b);
-                ShownChoice[b] = EnemyChoice[b];
+                for (int b = 0; b < BattleRules.BeatsPerRound; b++)
+                {
+                    EnemyChoice[b] = b == TremoloBeat ? Choice.Normal : RollEnemyChoice(b);
+                    ShownChoice[b] = EnemyChoice[b];
+                }
+
+                //FALSE NOTES : one note in each bar shows the wrong loudness
+                if (EnemyHas(EnemyTrait.FalseNotes))
+                    for (int bar = 0; bar < BattleRules.BeatsPerRound / 4; bar++)
+                        PlantFalseNote(bar);
+
+                PlantDoubles();
+
+                for (int b = 0; b < BattleRules.BeatsPerRound; b++)
+                {
+                    passChoice[p, b] = EnemyChoice[b];
+                    passShown[p, b] = ShownChoice[b];
+                    passDouble[p, b] = EnemyDouble[b];
+                }
             }
-
-            //FALSE NOTES : one note in each bar shows the wrong loudness
-            if (EnemyHas(EnemyTrait.FalseNotes))
-                for (int bar = 0; bar < BattleRules.BeatsPerRound / 4; bar++)
-                    PlantFalseNote(bar);
-
-            PlantDoubles();
+            BeginPass(0);
 
             RoundLabel = "ROUND " + Round + " / " + BattleRules.MaxRounds;
             TempoLabel = Tempo + " BPM";
+            PassesLabel = passesWords[Passes];
+        }
+
+        //Pass Begin : the next time through the phrase. Its marks and pairs become the round's,
+        //and TACET's notes are whole again (THE WHOLE FLOOR only knocks a note down once).
+        public void BeginPass(int pass)
+        {
+            Pass = pass;
+            for (int b = 0; b < BattleRules.BeatsPerRound; b++)
+            {
+                EnemyChoice[b] = passChoice[pass, b];
+                ShownChoice[b] = passShown[pass, b];
+                EnemyDouble[b] = passDouble[pass, b];
+                EnemyPower[b] = writtenPower[b];
+                Results[b].Done = false;
+            }
+        }
+
+        //Pass Marks : how a note of any pass is written, so the duel can draw a pass that has
+        //not begun yet. The pass being answered reads the live arrays (THE WHOLE FLOOR inside).
+        public Choice ShownAt(int pass, int beat)
+        {
+            return passShown[pass, beat];
+        }
+
+        public bool DoubleAt(int pass, int beat)
+        {
+            return passDouble[pass, beat];
+        }
+
+        public int PowerAt(int pass, int beat)
+        {
+            return pass == Pass ? EnemyPower[beat] : writtenPower[beat];
         }
 
         //False Note : pick one plain, visible note in this bar and give it the wrong mark
@@ -605,13 +671,13 @@ namespace Tacetno433.Battle
             }
         }
 
-        //Plan Totals : used by the score page to preview the round
+        //Plan Totals : used by the score page to preview the round, every time through (REPEATS)
         public int PlannedCost()
         {
             int total = 0;
             for (int b = 0; b < BattleRules.BeatsPerRound; b++)
                 total += OurCostAt(b);
-            return total;
+            return total * Passes;
         }
 
         public int PlannedRecover()
@@ -619,7 +685,7 @@ namespace Tacetno433.Battle
             int total = 0;
             for (int b = 0; b < BattleRules.BeatsPerRound; b++)
                 if (OurPowerAt(b) == 0) total += SilentRecover;
-            return total;
+            return total * Passes;
         }
 
         public int ProjectedStamina()
@@ -711,15 +777,15 @@ namespace Tacetno433.Battle
             return Forecast.Hopeless;
         }
 
-        //Forecast Line : where the line would end the round if every beat were answered big.
-        //Hidden beats are left out, because nobody knows yet what they hold.
+        //Forecast Line : where the line would end the round if every beat were answered big,
+        //every time through (REPEATS). Hidden beats are left out, nobody knows yet what they hold.
         public float ForecastLine()
         {
             float line = Line;
             for (int b = 0; b < BattleRules.BeatsPerRound; b++)
             {
                 if (EnemyHidden[b]) continue;
-                line += PushFor(ExpectedPowerAt(b), EnemyStrikeAt(b));
+                line += PushFor(ExpectedPowerAt(b), EnemyStrikeAt(b)) * Passes;
             }
 
             if (line > BattleRules.LineLimit) line = BattleRules.LineLimit;
@@ -885,8 +951,8 @@ namespace Tacetno433.Battle
             }
             if (missedNow && runaway) fireNext = true;
 
-            //OVERTURE : the first beat of each round
-            if (beat == 0 && Run.Has(MotifId.Overture)) power *= BattleRules.OverturePower;
+            //OVERTURE : the first beat of each round, the first time through only
+            if (beat == 0 && Pass == 0 && Run.Has(MotifId.Overture)) power *= BattleRules.OverturePower;
 
             //THE CLOSER THE LOUDER : the further behind, the harder we hit
             if (Run.Conductor.Perk == ConductorPerk.CloserLouder && Line < 0f)

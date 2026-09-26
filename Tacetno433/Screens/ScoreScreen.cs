@@ -299,6 +299,13 @@ namespace Tacetno433.Screens
             Gfx.Text(sb, Game.BigFont, battle.RoundLabel, 36, GaugeY - 18, Palette.Paper, TextSize.Small);
             float roundW = Gfx.TextWidth(Game.BigFont, battle.RoundLabel, TextSize.Small);
             Gfx.TextSpaced(sb, Game.Font, battle.TempoLabel, 36 + roundW + 14, GaugeY - 10, Palette.PaperDim, TextSize.Tiny, 2f);
+
+            //REPEATS : this plan is played more than once before the next score page
+            if (battle.Passes > 1)
+            {
+                float tempoW = Gfx.SpacedWidth(Game.Font, battle.TempoLabel, TextSize.Tiny, 2f);
+                Gfx.TextSpaced(sb, Game.Font, battle.PassesLabel, 36 + roundW + 14 + tempoW + 12, GaugeY - 10, Palette.Highlight, TextSize.Tiny, 1.5f);
+            }
             Gfx.TextSpaced(sb, Game.Font, perkLabel, 36, GaugeY + 12, Palette.LineGrey, TextSize.Tiny, 2f);
             Gfx.TextSpaced(sb, Game.Font, Game.CurrentRun.Conductor.RecipeLabel, 36, GaugeY + 28, Palette.PaperDim, TextSize.Tiny, 1.5f);
 

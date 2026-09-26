@@ -22,6 +22,8 @@ namespace Tacetno433.Screens
             //Round Plate
             Gfx.SlantBox(sb, new Rectangle(-20, roundPlate.Y, roundPlate.Width + 20, roundPlate.Height), -Ui.Slant, Palette.Void * 0.88f);
             Gfx.Text(sb, Game.BigFont, battle.RoundLabel, 20, roundPlate.Y + 4, Palette.Highlight, TextSize.Small);
+            if (battle.Passes > 1)                                                   // REPEATS : which time through
+                Gfx.TextSpacedRight(sb, Game.Font, timeWords[battle.Pass], 250, roundPlate.Y + 14, Palette.Paper, TextSize.Tiny, 2f);
             Gfx.TextSpaced(sb, Game.Font, "BEAT", 22, roundPlate.Y + 40, Palette.LineGrey, TextSize.Tiny, 2f);
             Gfx.Text(sb, Game.Font, NumberText.Get(beat + 1), 72, roundPlate.Y + 35, Palette.Paper, TextSize.Body);
             Gfx.Text(sb, Game.Font, beatsLabel, 90, roundPlate.Y + 35, Palette.LineGrey, TextSize.Body);
@@ -123,7 +125,7 @@ namespace Tacetno433.Screens
         //first answer never comes as a surprise
         private void DrawReady(SpriteBatch sb)
         {
-            if (phase != Phase.Play || pending > 0 || clock < beatLen || clock >= AnswerTime(0)) return;
+            if (phase != Phase.Play || pending > 0 || clock < beatLen || clock >= AnswerAt(0)) return;
 
             int count = 4 - (int)(clock / beatLen);           // 3 on beat two, 2 on beat three, 1 on beat four
             float within = (clock / beatLen) % 1f;

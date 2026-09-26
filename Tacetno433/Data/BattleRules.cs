@@ -10,6 +10,13 @@
         public const int MaxRounds = 3;           // after this, whoever is ahead wins
         public const float LineLimit = 100f;      // push the line this far to win outright
 
+        //REPEATS (round 11) : the plan written on the score page is played more than once before
+        //the next score page, without a stop. TACET plays the same beats each time, but decides
+        //its f / mf / p and its pairs afresh for every time through, so they must be read again.
+        //Players found a round over in seconds after planning it with care.
+        public static int[] PassesPerRound = { 1, 2, 3 };   // round 1 once, round 2 twice, round 3 three times
+        public const int PassesMost = 3;                    // no entry above may be bigger than this
+
         //Push : how far the line moves for each point of power difference on a beat.
         //Round 9 (25 Sep) : playtesters won by putting the whole band on the first four beats,
         //the fight was over in two to four beats. The push is much lighter now, so a duel
@@ -19,12 +26,15 @@
         //PUSH CAP : no single note moves the line further than this, either way. No fight is
         //won or lost in one blow, however strong the band has grown (see BattleState.PushFor).
         //So a beat won by a mile pushes no further than a beat won well: spread the band out.
-        public static float PushCap = 10f;
+        //For a player who wins every beat, the cap is what decides how long a duel lasts.
+        //Round 11 (REPEATS) : 10 -> 8, so a good player needs about two plans for an ordinary
+        //enemy (16 beats), two to three for an elite (23) and three for a boss (31).
+        public static float PushCap = 8f;
 
         //HEAVY LINE : elites and bosses are heavier to move. Every note in their duels, ours and
         //theirs, moves the line only this share of the usual push, so those duels last longer.
-        public static float EliteLine = 0.85f;
-        public static float BossLine = 0.7f;
+        public static float EliteLine = 0.7f;      // round 11, was 0.85
+        public static float BossLine = 0.6f;       // round 11, was 0.7
 
         //Harmony : several musicians on the same beat hit harder together.
         //Each extra player adds this much, so three players give x1.30.
@@ -38,8 +48,9 @@
         public static float EaseCost = 0.5f;       //     pay less
         public static int EaseRecover = 8;         //     and breathe a little
 
-        //Rest : a beat where we play nothing gives stamina back
-        public static int RestRecover = 6;
+        //Rest : a beat where we play nothing gives stamina back.
+        //Round 11 : 6 -> 10, the player found rests gave back far too little to be worth planning.
+        public static int RestRecover = 10;
 
         //Stamina Cost : every note the band plays costs its written cost times this (0.7 = 30 percent less)
         //Round 9 : duels last two to three times as many beats, so each note costs less
@@ -50,9 +61,10 @@
         //   TACET'S BLOW  a beat TACET wins hits the band for what got through
         //   a MISS costs MissExtraCost on top of the note
         //   COLLAPSE      breath at zero ends the fight, the band is silenced (SECOND WIND saves it once)
-        public static float BlowPerPower = 0.68f;   // stamina lost per point TACET wins a beat by, was 1.0, 0.7 in round 9
+        public static float BlowPerPower = 0.78f;   // stamina lost per point TACET wins a beat by, was 1.0, 0.7 in round 9
                                                     // round 10 : 0.63 kept the whole game as hard as round 9 after BREATH MARK was cut
-                                                    // round 11 : 0.68 makes up for the softer WHITE NOISE (strong players a little better off)
+                                                    // round 11a : 0.68 made up for the softer WHITE NOISE
+                                                    // round 11b : 0.78 with the bigger rests (the player allowed it a little easier)
 
         //Timing Grades (HARD, 25 Sep : players found the wide windows far too easy)
         //The stroke settings page can move every judgement earlier or later for one player's
@@ -226,7 +238,7 @@
         public static int ReedCaseDiscount = 2;      // REED CASE, was 1 (round 11)
         public static int PianissimoRecover = 6;     // PIANISSIMO
         public static float PurseBonus = 1.3f;       // PATRON'S PURSE
-        public static float BreathMarkRecover = 1.25f; // BREATH MARK : 6 x 1.25 = 7.5, counted as 7. Was 2 (x2), round 10 :
+        public static float BreathMarkRecover = 1.25f; // BREATH MARK : 10 x 1.25 = 12.5, counted as 12 (round 11). Was 2 (x2), round 10 :
                                                         // one card alone lifted a run from 8 to 46 percent in the simulation
         public static float TuttiPerExtra = 0.10f;   // TUTTI
         public static float SteadyWindowBonus = 0.05f;   // STEADY PULSE, added to both windows
@@ -243,7 +255,7 @@
         public static int AccelerandoCount = 2;      // ACCELERANDO, every TREMOLO shake counts this many (was: 14 shakes counted, nobody shakes that fast)
         public static int TenutoRecover = 8;         // TENUTO, stamina back for a FERMATA held to the end (was: the hold hit x1.8)
         public static float GraceNotePower = 3f;     // GRACE NOTE, a spark that lands counts three times, was 2
-        public static float MarcatoCap = 20f;        // MARCATO, a COUNTER may push this far, past the PUSH CAP (was: TACET kept 55 percent)
+        public static float MarcatoCap = 16f;        // MARCATO, a COUNTER may push this far, twice the PUSH CAP (was: TACET kept 55 percent)
         public static int ConBrioCombo = 6;          // CON BRIO, FORTISSIMO after this many PERFECTs instead of 8
         public static float CodaLine = 60f;          // CODA, the FINALE is offered from here instead of FinaleLine
 

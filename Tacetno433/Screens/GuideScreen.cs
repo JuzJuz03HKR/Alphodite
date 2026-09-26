@@ -42,6 +42,7 @@ namespace Tacetno433.Screens
             + "More seats can be bought in shops.",
 
             "The top row is what TACET will play this round. Tick the beats each musician plays. "
+            + "Round two plays your plan twice, round three three times. "
             + "Answer its attacks, a beat it wins hits the band's breath. Leave some beats empty so the band can breathe. "
             + "The FORECAST row names every beat, from DOMINATING down to HOPELESS. A framed word is the one to fix.",
 

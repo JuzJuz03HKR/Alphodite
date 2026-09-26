@@ -73,7 +73,7 @@ namespace Tacetno433.Data
 
             //Rarity 2
             new Motif { Id = MotifId.BreathMark,   Name = "BREATH MARK",   Mark = ",",    Rarity = 2,
-                        Text = "Silent beats give back 7 stamina instead of 6." },
+                        Text = "Silent beats give back 12 stamina instead of 10." },
             new Motif { Id = MotifId.Tutti,        Name = "TUTTI",         Mark = "tutti", Rarity = 2,
                         Text = "Playing together is stronger. Each extra player adds 10 percent more." },
             new Motif { Id = MotifId.SteadyPulse,  Name = "STEADY PULSE",  Mark = "=",    Rarity = 2,
@@ -104,7 +104,7 @@ namespace Tacetno433.Data
             new Motif { Id = MotifId.GraceNote,    Name = "GRACE NOTE",    Mark = "gr.",  Rarity = 2, FromFloor = BattleRules.PairsFromFloor,
                         Text = "A spark that lands on time hits three times as hard." },
             new Motif { Id = MotifId.Marcato,      Name = "MARCATO",       Mark = "^",    Rarity = 2,
-                        Text = "A COUNTER can push the line up to 20 in one beat, not just 10." },
+                        Text = "A COUNTER can push the line up to 16 in one beat, not just 8." },
             new Motif { Id = MotifId.ConBrio,      Name = "CON BRIO",      Mark = "brio", Rarity = 3,
                         Text = "FORTISSIMO lights after 6 PERFECTs in a row instead of 8." },
             new Motif { Id = MotifId.Coda,         Name = "CODA",          Mark = "coda", Rarity = 3,

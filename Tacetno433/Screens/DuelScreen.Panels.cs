@@ -76,7 +76,7 @@ namespace Tacetno433.Screens
             float gap = 6f;
             float w = Math.Min(150f, (bandPanel.Width - 16 - gap * (count - 1)) / count);
             float x = bandPanel.X + 8;
-            int current = AnswerProgress() >= 0f && phase == Phase.Play ? pending : -1;
+            int current = AnswerProgress() >= 0f && phase == Phase.Play ? BeatOf(pending) : -1;
             bool roomForFace = w >= 110f;
 
             for (int i = 0; i < panelOrder.Length; i++)
