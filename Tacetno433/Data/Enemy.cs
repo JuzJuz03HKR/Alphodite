@@ -19,7 +19,7 @@ namespace Tacetno433.Data
         Lullaby,         // THE LULL     round three slows down instead of speeding up
         FalseNotes,      // STATIC       one note in every bar shows the wrong loudness
         SilentMouths,    // MUTE CHOIR   some of its notes are hidden ???
-        NoRest,          // WHITE NOISE  silent beats give no stamina back
+        NoRest,          // WHITE NOISE  silent beats give back only half the stamina
         Unfinished,      // REQUIEM      round three plays its part backwards, and faster
         Mirror,          // NAMELESS     from round two it plays YOUR last plan back at you
         Bargain          // DEVIL'S STRING  before round two it offers a deal
@@ -68,11 +68,12 @@ namespace Tacetno433.Data
     {
         public static Enemy[] All = new Enemy[]
         {
-            //Normal : any era
+            //Normal : any era. Round 11 : HUSH and THE LULL were given heavier parts, they were
+            //far weaker than the other two and never threatened anyone.
             new Enemy { Name = "HUSH",      Title = "The first thing to go is the echo.",
                         Trait = EnemyTrait.EchoFades, TraitName = "ECHO FADES", TraitFloor = 2,
                         TraitText = "The f, mf and p marks on its notes fade before they reach you. Remember them.",
-                        Kind = EnemyKind.Normal, Pattern = new int[] { 3, 0, 0, 3, 0, 0, 4, 0 }, Tone = Palette.ToneD },
+                        Kind = EnemyKind.Normal, Pattern = new int[] { 4, 0, 3, 4, 0, 0, 5, 0 }, Tone = Palette.ToneD, Temper = 5 },
             new Enemy { Name = "DEAD AIR",  Title = "It waits between your notes.",
                         Trait = EnemyTrait.FillsGaps, TraitName = "FILLS THE GAPS", TraitFloor = 2,
                         TraitText = "Beats nobody on your side plays hit 50 percent harder.",
@@ -80,7 +81,7 @@ namespace Tacetno433.Data
             new Enemy { Name = "THE LULL",  Title = "Soft, patient, and never finished.",
                         Trait = EnemyTrait.Lullaby, TraitName = "LULLABY", TraitFloor = 2,
                         TraitText = "Round three slows down instead of speeding up.",
-                        Kind = EnemyKind.Normal, Pattern = new int[] { 2, 2, 0, 0, 5, 0, 2, 2 }, Tone = Palette.ToneC, Temper = -10 },
+                        Kind = EnemyKind.Normal, Pattern = new int[] { 3, 3, 0, 0, 7, 0, 3, 3 }, Tone = Palette.ToneC, Temper = -10 },
             new Enemy { Name = "STATIC",    Title = "It sounds like something. It is not.",
                         Trait = EnemyTrait.FalseNotes, TraitName = "FALSE NOTES", TraitFloor = 2,
                         TraitText = "One note in every bar shows the wrong loudness.",
@@ -91,10 +92,12 @@ namespace Tacetno433.Data
                         Trait = EnemyTrait.SilentMouths, TraitName = "SILENT MOUTHS", TraitFloor = 1,
                         TraitText = "Some of its notes stay hidden as ??? until they land.",
                         Kind = EnemyKind.Elite, Pattern = new int[] { 5, 0, 5, 0, 7, 0, 5, 8 }, Hidden = new int[] { 3, 7 }, Tone = Palette.ToneB },
+            //WHITE NOISE : round 11, quieter notes (3 -> 2) and NO REST gives back half instead of
+            //nothing. It used to end more runs on floor one than any boss.
             new Enemy { Name = "WHITE NOISE",    Title = "Every beat, all the time, forever.",
                         Trait = EnemyTrait.NoRest, TraitName = "NO REST", TraitFloor = 1,
-                        TraitText = "It never stops, so silent beats give no stamina back.",
-                        Kind = EnemyKind.Elite, Pattern = new int[] { 3, 3, 3, 3, 3, 3, 3, 3 }, Hidden = new int[] { 5 }, Tone = Palette.ToneA, Temper = 15 },
+                        TraitText = "It never stops, so silent beats give back only half the stamina.",
+                        Kind = EnemyKind.Elite, Pattern = new int[] { 2, 2, 2, 2, 2, 2, 2, 2 }, Hidden = new int[] { 5 }, Tone = Palette.ToneA, Temper = 15 },
 
             //Boss : one per era
             new Enemy { Name = "REQUIEM",            Title = "The piece that was never finished.",

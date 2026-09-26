@@ -376,7 +376,9 @@ namespace Tacetno433.Core
 
                     //Win Rewards : the same as the result page hands out
                     run.AddShards(run.Battle.ShardsEarned());
-                    run.ChangeStamina((int)(run.MaxStamina * BattleRules.RecoverAfterWin));
+                    float recover = BattleRules.RecoverAfterWin;
+                    if (run.Has(MotifId.Encore)) recover += BattleRules.EncoreRecover;         // ENCORE
+                    run.ChangeStamina((int)(run.MaxStamina * recover));
                     if (type == NodeType.Elite && run.RollPercent() < BattleRules.EliteRecruitChance) run.RecruitOne();
                     if (takeMotifs) TakeMotif(run, type, random);
                 }

@@ -226,10 +226,12 @@ namespace Tacetno433.Battle
             get { return Run.Conductor.Perk == ConductorPerk.LockedTempo; }
         }
 
-        //Tremolo Most : strokes past this add nothing to a roll. ACCELERANDO counts more.
-        public int TremoloMost
+        //Roll Counted : how many of these shakes count towards a roll. Past TremoloMost they add
+        //nothing. ACCELERANDO counts every shake twice (round 11), so the top is reached sooner.
+        public int RollCounted(int strokes)
         {
-            get { return BattleRules.TremoloMost + (Run.Has(MotifId.Accelerando) ? BattleRules.AccelerandoStrokes : 0); }
+            if (Run.Has(MotifId.Accelerando)) strokes *= BattleRules.AccelerandoCount;      // ACCELERANDO
+            return Math.Min(strokes, BattleRules.TremoloMost);
         }
 
         //Fortissimo Combo : PERFECTs in a row that set the band on fire. CON BRIO needs fewer.
@@ -596,9 +598,9 @@ namespace Tacetno433.Battle
         {
             get
             {
-                if (EnemyHas(EnemyTrait.NoRest)) return 0;                              // NO REST
                 float recover = BattleRules.RestRecover;
                 if (Run.Has(MotifId.BreathMark)) recover *= BattleRules.BreathMarkRecover;   // BREATH MARK
+                if (EnemyHas(EnemyTrait.NoRest)) recover *= BattleRules.NoRestShare;       // NO REST
                 return (int)recover;
             }
         }
@@ -771,7 +773,8 @@ namespace Tacetno433.Battle
             {
                 //Silent Beat : the band breathes, and easing breathes deeper
                 recover += SilentRecover;
-                if (choice == Choice.Ease && !EnemyHas(EnemyTrait.NoRest)) recover += easeRecover;
+                if (choice == Choice.Ease)
+                    recover += EnemyHas(EnemyTrait.NoRest) ? easeRecover * BattleRules.NoRestShare : easeRecover;   // NO REST
             }
             else if (choice == Choice.Boost)
             {
@@ -795,7 +798,7 @@ namespace Tacetno433.Battle
             r.RollStrokes = 0;
             if (r.Tremolo)
             {
-                int counted = Math.Min(RollStrokes, TremoloMost);                     // ACCELERANDO inside
+                int counted = RollCounted(RollStrokes);                                // ACCELERANDO inside
                 power *= BattleRules.TremoloBase + BattleRules.TremoloStep * counted;
                 r.RollStrokes = RollStrokes;
                 RollStrokes = 0;
@@ -808,10 +811,13 @@ namespace Tacetno433.Battle
             if (r.Fermata)
             {
                 r.Held = MathHelper.Clamp(HoldFraction, 0f, 1f);
-                float hold = Run.Has(MotifId.Tenuto) ? BattleRules.TenutoHold : BattleRules.FermataHold;   // TENUTO
-                power *= BattleRules.FermataBase + hold * r.Held;
+                power *= BattleRules.FermataBase + BattleRules.FermataHold * r.Held;
                 HoldFraction = 0f;
             }
+
+            //TENUTO : a held note is a breath. Holding it to the end gives stamina back, holding
+            //half of it gives half. Added after the timing grade so the card's number is exact.
+            float tenutoBack = r.Fermata && Run.Has(MotifId.Tenuto) ? BattleRules.TenutoRecover * r.Held : 0f;
 
             //Timing Grade : perfect helps and builds the combo, a bad stroke or no stroke hurts
             int comboBefore = Combo;
@@ -840,6 +846,7 @@ namespace Tacetno433.Battle
                 Combo = 0;
                 power *= BattleRules.HesitatePower;
             }
+            recover += tenutoBack;                                                     // TENUTO
 
             if (Combo > BestCombo) BestCombo = Combo;
             r.Combo = Combo;
@@ -895,11 +902,11 @@ namespace Tacetno433.Battle
                 power *= BattleRules.CounterpointPower;
 
             //COUNTER : a PERFECT BOOST against a real f note knocks most of it back.
-            //A FALSE NOTE that only looked loud cannot be countered. MARCATO knocks back more.
+            //A FALSE NOTE that only looked loud cannot be countered. MARCATO lets it push further.
             r.Counter = false;
             if (enemyChoice == Choice.Boost && choice == Choice.Boost && grade == Grade.Perfect && basePower > 0 && enemyPower > 0)
             {
-                enemyPower *= Run.Has(MotifId.Marcato) ? BattleRules.MarcatoKeep : BattleRules.CounterKeep;   // MARCATO
+                enemyPower *= BattleRules.CounterKeep;
                 r.Counter = true;
             }
 
@@ -916,7 +923,8 @@ namespace Tacetno433.Battle
             r.OurPower = (int)Math.Round(power);
             r.EnemyPower = (int)Math.Round(enemyPower);
             r.Played = r.OurPower > 0;
-            float push = PushFor(r.OurPower, r.EnemyPower);                             // PUSH CAP inside
+            float cap = r.Counter && Run.Has(MotifId.Marcato) ? BattleRules.MarcatoCap : BattleRules.PushCap;   // MARCATO
+            float push = PushFor(r.OurPower, r.EnemyPower, cap);                        // PUSH CAP inside
 
             Line += push;
             if (Line > BattleRules.LineLimit) Line = BattleRules.LineLimit;
@@ -960,8 +968,14 @@ namespace Tacetno433.Battle
         //Against an elite or a boss the whole push is lighter still (HEAVY LINE).
         private float PushFor(int ours, int theirs)
         {
+            return PushFor(ours, theirs, BattleRules.PushCap);
+        }
+
+        //Push For, with its own cap : a MARCATO COUNTER may push past the usual PUSH CAP
+        private float PushFor(int ours, int theirs, float cap)
+        {
             float push = (ours - theirs) * BattleRules.PushPerPower;
-            push = MathHelper.Clamp(push, -BattleRules.PushCap, BattleRules.PushCap);   // PUSH CAP
+            push = MathHelper.Clamp(push, -cap, cap);                                   // PUSH CAP
             return push * lineWeight;                                                   // HEAVY LINE
         }
 
@@ -1060,7 +1074,7 @@ namespace Tacetno433.Battle
                 Combo = 0;
             }
 
-            //GRACE NOTE : a spark that lands on time counts twice
+            //GRACE NOTE : a spark that lands on time counts three times
             if ((grade == Grade.Perfect || grade == Grade.Good) && Run.Has(MotifId.GraceNote))
                 ours *= BattleRules.GraceNotePower;
             else if (grade == Grade.Hesitate)

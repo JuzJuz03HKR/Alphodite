@@ -101,7 +101,8 @@ namespace Tacetno433.Data
                 Recipe = new int[] { 2, 0, 2 },     // the rhythm section
                 MechanicText = "Every stroke is a BOOST, whatever its size, so a small flick hits as hard "
                              + "as a big swing. Ease is sealed.",
-                Stamina = 7, PushPower = 4, Perk = ConductorPerk.LockedTempo,        // round 10 : stamina 9 -> 7, no cheaper notes
+                Stamina = 9, PushPower = 4, Perk = ConductorPerk.LockedTempo,        // round 10 : 9 -> 7, no cheaper notes. Round 11 : back to 9,
+                                                                                     // stronger ordinary enemies hurt him most (he cannot EASE)
                 ThemeColor = Palette.ToneC,
                 Unlocked = true
             },

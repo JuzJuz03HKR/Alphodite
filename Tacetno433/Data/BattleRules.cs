@@ -50,8 +50,9 @@
         //   TACET'S BLOW  a beat TACET wins hits the band for what got through
         //   a MISS costs MissExtraCost on top of the note
         //   COLLAPSE      breath at zero ends the fight, the band is silenced (SECOND WIND saves it once)
-        public static float BlowPerPower = 0.63f;   // stamina lost per point TACET wins a beat by, was 1.0, 0.7 in round 9
-                                                    // round 10 : 0.63 keeps the whole game as hard as round 9 after BREATH MARK was cut
+        public static float BlowPerPower = 0.68f;   // stamina lost per point TACET wins a beat by, was 1.0, 0.7 in round 9
+                                                    // round 10 : 0.63 kept the whole game as hard as round 9 after BREATH MARK was cut
+                                                    // round 11 : 0.68 makes up for the softer WHITE NOISE (strong players a little better off)
 
         //Timing Grades (HARD, 25 Sep : players found the wide windows far too easy)
         //The stroke settings page can move every judgement earlier or later for one player's
@@ -145,6 +146,7 @@
         public static int LullabyBpm = 88;          // THE LULL, round three slows down, was 80 (kept a third under round three)
         public static int UnfinishedBpm = 140;      // REQUIEM, round three rushes, was 128 (kept above round three)
         public static float FillsGapsPower = 1.5f;  // DEAD AIR, on beats nobody on your side plays
+        public static float NoRestShare = 0.5f;     // WHITE NOISE, silent beats give back only this share (round 11, was nothing)
         public static float MirrorScale = 0.9f;     // THE NAMELESS MASTER, your last plan played back
         public static float BargainPower = 1.5f;    // THE DEVIL'S STRING, the deal : this much power
         public static int BargainStamina = 15;      //     for this much max stamina, for the whole run
@@ -178,7 +180,9 @@
         //Round 8 : BOOST costs nothing extra, so a big stroke on every beat is the normal way to
         //play. TACET hits about 1.5 times harder to match, which kept the simulated win rates
         //of ordinary players where they were (see PROJECT_STATUS section 8).
-        public static float NormalScale = 2.0f;   // ordinary encounters, was 1.35
+        //Round 11 : ordinary enemies never won a single fight in the simulation, they only cost
+        //breath. They hit harder now, so a band that arrives tired can lose to them.
+        public static float NormalScale = 3.1f;   // ordinary encounters, was 2.0 (1.35 before round 8)
         public static float EliteScale = 2.0f;    // was 1.35
         public static float BossScale = 2.8f;     // was 1.85
 
@@ -219,7 +223,7 @@
 
         //Motif Effects : the numbers each motif changes
         public static int FamilyMotifPower = 1;      // ROSIN, SPARE STICKS
-        public static int ReedCaseDiscount = 1;      // REED CASE
+        public static int ReedCaseDiscount = 2;      // REED CASE, was 1 (round 11)
         public static int PianissimoRecover = 6;     // PIANISSIMO
         public static float PurseBonus = 1.3f;       // PATRON'S PURSE
         public static float BreathMarkRecover = 1.25f; // BREATH MARK : 6 x 1.25 = 7.5, counted as 7. Was 2 (x2), round 10 :
@@ -234,10 +238,12 @@
         public static float CounterpointPower = 1.3f;// COUNTERPOINT
 
         //Motifs For The Special Notes (25 Sep). The card texts in Data/Motif.cs say these numbers.
-        public static int AccelerandoStrokes = 4;    // ACCELERANDO, a TREMOLO counts TremoloMost + 4 strokes
-        public static float TenutoHold = 1.2f;       // TENUTO, a full FERMATA hold is x(0.6 + 1.2) = x1.8 instead of x1.4
-        public static float GraceNotePower = 2f;     // GRACE NOTE, a spark that lands counts twice
-        public static float MarcatoKeep = 0.55f;     // MARCATO, a COUNTER leaves TACET 55 percent instead of CounterKeep
+        //Round 11 : the PUSH CAP (round 9) meant extra power on a beat already won by a mile did
+        //nothing, so ACCELERANDO, TENUTO and MARCATO were changed and GRACE NOTE made stronger.
+        public static int AccelerandoCount = 2;      // ACCELERANDO, every TREMOLO shake counts this many (was: 14 shakes counted, nobody shakes that fast)
+        public static int TenutoRecover = 8;         // TENUTO, stamina back for a FERMATA held to the end (was: the hold hit x1.8)
+        public static float GraceNotePower = 3f;     // GRACE NOTE, a spark that lands counts three times, was 2
+        public static float MarcatoCap = 20f;        // MARCATO, a COUNTER may push this far, past the PUSH CAP (was: TACET kept 55 percent)
         public static int ConBrioCombo = 6;          // CON BRIO, FORTISSIMO after this many PERFECTs instead of 8
         public static float CodaLine = 60f;          // CODA, the FINALE is offered from here instead of FinaleLine
 
@@ -247,7 +253,7 @@
         public static float RunawayFireBonus = 1.3f; // THE INFERNO, the beat after a miss
         public static float CloserLouderMax = 1.3f;  // THE UNHEARING, +130 percent at the very edge. Was 0.6 : with the PUSH CAP
                                                      // the line rarely falls far, so he was the weakest conductor (round 10)
-        public static float CrossCultureHarmony = 0.15f; // THE FOLK LEADER, per extra culture on a beat
+        public static float CrossCultureHarmony = 0.07f; // THE FOLK LEADER, per extra culture on a beat. Was 0.15 : he won the most runs (round 11)
 
         //Shop
         public static int SeatPriceBase = 55;        // the first extra seat

@@ -229,7 +229,7 @@ namespace Tacetno433.Screens
             baton.Whip(gesture.Direction);
             hand.Play(PoseFor(gesture.Direction));
 
-            bool counts = rollStrokes <= battle.TremoloMost;            // ACCELERANDO counts more
+            bool counts = battle.RollCounted(rollStrokes - 1) < BattleRules.TremoloMost;   // ACCELERANDO counts twice
             effects.SpawnSparks(HitX, RingY, counts ? 4 : 1, 1f);
             SoundBank.Play(Sfx.QteNormal, counts ? 0.7f : 0.3f, Math.Min(0.6f, rollStrokes * 0.05f));
         }
@@ -259,7 +259,7 @@ namespace Tacetno433.Screens
             Gfx.Arrow(sb, sx - 14f, cy + 25f, 5f, false, Palette.Paper);
             Gfx.Arrow(sb, sx + 14f, cy + 25f, 5f, true, Palette.Paper);
 
-            Ui.Pips(sb, cx - battle.TremoloMost * 7f, cy + RingTarget + 34f, Math.Min(rollStrokes, battle.TremoloMost), battle.TremoloMost, 4, 14, 1f);
+            Ui.Pips(sb, cx - BattleRules.TremoloMost * 7f, cy + RingTarget + 34f, battle.RollCounted(rollStrokes), BattleRules.TremoloMost, 4, 14, 1f);
         }
 
         //Counter Show : TACET's loudest note thrown back. A white flash, a streak across the whole
