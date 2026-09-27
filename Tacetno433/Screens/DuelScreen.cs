@@ -117,8 +117,12 @@ namespace Tacetno433.Screens
         private string[] rollText = new string[5];
         private static string[] holdText = { "LET GO", "FERMATA" };
 
-        //Band Panel Order : front row first, left to right inside each row
-        private static int[] panelOrder = { 6, 7, 8, 3, 4, 5, 0, 1, 2 };
+        //Band Panel Order : the same way round as the stage above it, back row (p) on the left to
+        //front row (f) on the right, left side to right side inside each row
+        private static int[] panelOrder = { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
+
+        //Front First : front row first, to find who stands nearest TACET
+        private static int[] frontFirst = { 6, 7, 8, 3, 4, 5, 0, 1, 2 };
 
         //Story Lines : what the box at the bottom right says. The signature line and the enemy's
         //trait are written in Load, because they need names. Every line is wrapped once, in Load.
@@ -153,7 +157,7 @@ namespace Tacetno433.Screens
             "* It swells. Loud f notes are coming. Answer big!",
             "* Something is hidden in its phrase.",
             "* It holds its breath.",
-            "* Your turn. Keep conducting, every beat!",
+            "* Your turn. Answer every note, let the silent beats pass!",
             "* The band looks to you. Press SPACE.",
             "",
             "* Your band drowns it out!",
@@ -922,9 +926,9 @@ namespace Tacetno433.Screens
         private Vector2 BlowTarget(BeatResult r)
         {
             Formation f = Game.CurrentRun.Formation;
-            for (int i = 0; i < panelOrder.Length; i++)
+            for (int i = 0; i < frontFirst.Length; i++)
             {
-                int s = panelOrder[i];
+                int s = frontFirst[i];
                 if (f.Seated[s] != null && r.Joined[s])
                 {
                     Rectangle stand = StandRect(s);

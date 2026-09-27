@@ -42,13 +42,13 @@ namespace Tacetno433.Screens
             + "only on big ones. The SIDE says on which beats the baton points at them, and then they hit harder. "
             + "The strip on top is TACET's next phrase, with the side each beat points at. Right click to bench.",
 
-            "There is no plan to write. How big you swing decides who plays: small (p) the back row, "
+            "How big you swing decides who plays: small (p) the back row, "
             + "middle (mf) the middle row too, big (f) the whole band. Everyone who plays pays stamina, "
             + "so read TACET's marks and answer p small and f big. Where TACET is silent, let the beat pass "
             + "to rest, or swing for a free hit. Round two plays its phrase twice, round three three times.",
 
             "TACET plays a bar first, each note marked f (loud), mf or p (soft), then the band counts you in: 3, 2, 1. "
-            + "Hold the left mouse button and conduct on every beat, the way the pointer on the bright note says. "
+            + "Hold the left mouse button and answer each note the way the pointer on the bright note says. "
             + "The ruler on the baton marks p, mf and f, and the band lights up as you pass them. Stop as the ring closes. "
             + "A PERFECT f against a real f is a COUNTER. Rounds end on a zigzag bar to shake, or from floor two on an arch "
             + "to hold still. Sparks join on floor two.",

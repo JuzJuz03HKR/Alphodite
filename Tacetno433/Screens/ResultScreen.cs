@@ -359,7 +359,8 @@ namespace Tacetno433.Screens
                 }
                 else
                 {
-                    Ui.Tag(sb, footnote, cx - Ui.TagWidth(footnote) / 2f, fy, true, e);
+                    //Lost : centred under the ledger, clear of THE PERFORMANCE legend on the right
+                    Ui.Tag(sb, footnote, LedgerX + (LedgerW - Ui.TagWidth(footnote)) / 2f, fy, true, e);
                 }
             }
 

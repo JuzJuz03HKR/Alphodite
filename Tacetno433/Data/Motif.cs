@@ -93,7 +93,7 @@ namespace Tacetno433.Data
             new Motif { Id = MotifId.Overture,     Name = "OVERTURE",      Mark = "I",    Rarity = 3,
                         Text = "The first beat of every round hits 50 percent harder." },
             new Motif { Id = MotifId.Counterpoint, Name = "COUNTERPOINT",  Mark = "+",    Rarity = 3,
-                        Text = "When TACET boosts, your answer hits 30 percent harder." },
+                        Text = "Against TACET's f notes, your answer hits 30 percent harder." },
 
             //Special Notes : each bends one of the four notes or one big moment of the duel.
             //FromFloor keeps a motif away until its note has arrived (BattleRules teaching order).
