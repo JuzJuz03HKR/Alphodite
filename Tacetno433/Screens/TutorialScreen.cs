@@ -69,9 +69,9 @@ namespace Tacetno433.Screens
                 Goal = "Draw the shape twice." },
 
             new Lesson { Kind = Kind.Size, Title = "SMALL, MIDDLE, BIG", Need = 3,
-                Body = "How far you swing is the order you give the band. A short stroke EASES, softer, "
-                     + "and gives breath back. A middle one PLAYS. A long one BOOSTS, the hardest hit, "
-                     + "and it costs nothing extra. The ruler shows how far you have come.",
+                Body = "How far you swing decides who plays. A short stroke (p) brings only the back row, "
+                     + "cheap on breath. A middle one (mf) brings the middle row too. A long one (f) "
+                     + "brings the whole band, the hardest hit and the most tiring. The ruler shows how far you have come.",
                 Goal = "Swing down : short, then middle, then long." },
 
             new Lesson { Kind = Kind.Timing, Title = "ON THE BEAT", Need = 6, Bpm = 70,
@@ -87,9 +87,9 @@ namespace Tacetno433.Screens
                 Goal = "Answer six notes GOOD or better." },
 
             new Lesson { Kind = Kind.Loudness, Title = "LOUD AND SOFT", Need = 6, Bpm = 76,
-                Body = "Each note says how loud TACET plays it. f is loud : answer it BIG. "
-                     + "p is soft : a SMALL stroke still wins it and gives breath back. "
-                     + "mf : anything but small.",
+                Body = "Each note says how loud TACET plays it, and the ruler on the baton says the same. "
+                     + "f is loud : answer it f, BIG, the whole band. p is soft : a SMALL stroke, the back row "
+                     + "alone. mf : a MIDDLE one. The right size is IN TUNE and weakens TACET's note.",
                 Goal = "Six notes on time, with the right size." },
 
             new Lesson { Kind = Kind.Breath, Title = "KEEP BREATHING", Need = 10, Bpm = BattleRules.TempoBpm[0],
@@ -115,9 +115,9 @@ namespace Tacetno433.Screens
                 Goal = "Land two sparks." },
 
             new Lesson { Kind = Kind.Finish, Title = "READY", Need = 0,
-                Body = "That is everything the baton does. In a run you also choose who plays each "
-                     + "beat on the score page. Three more things to know : a PERFECT BOOST against a "
-                     + "real f is a COUNTER. Eight PERFECTs in a row set the band on fire. Far enough "
+                Body = "That is everything the baton does. In a run you also seat the band : the row decides "
+                     + "which strokes bring each player in, and the side the beats the baton points at them. "
+                     + "Three more things to know : a PERFECT f against a real f is a COUNTER. Eight PERFECTs in a row set the band on fire. Far enough "
                      + "ahead, the FINALE ends a fight at once. SPACE lets your conductor's SIGNATURE "
                      + "loose when its recipe is full.",
                 Goal = "Start a run whenever you are ready." },
@@ -146,7 +146,7 @@ namespace Tacetno433.Screens
             "IN BETWEEN : PAST THE FIRST MARK, NOT THE SECOND",
             "A LONGER ONE : ALL THE WAY PAST THE SECOND MARK"
         };
-        private static string[] sizeDone = { "EASE. NOW A MIDDLE ONE.", "PLAY. NOW A LONG ONE.", "BOOST." };
+        private static string[] sizeDone = { "p, THE BACK ROW. NOW A MIDDLE ONE.", "mf, THE MIDDLE ROW TOO. NOW A LONG ONE.", "f, THE WHOLE BAND." };
         private const string HoldHint = "KEEP HOLDING...";
         private const string NiceHint = "GOOD. AGAIN.";
 

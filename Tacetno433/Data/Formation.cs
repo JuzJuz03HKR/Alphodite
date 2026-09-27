@@ -1,15 +1,14 @@
 namespace Tacetno433.Data
 {
-    //Formation : who sits in which seat, and which beats each seat plays.
+    //Formation : who sits in which seat.
     //
-    //The beat plan belongs to the SEAT:
-    //   moving a musician to another seat carries their beats with them
-    //   swapping someone in from the bench hands them the beats of that seat
-    //   sending someone to the bench clears that seat's beats
+    //There is no beat plan any more (round 12). Where a musician sits is how they play:
+    //   the ROW  decides which strokes bring them in, small the back row, middle the middle row
+    //            too, big everybody (see BattleState.Joins)
+    //   the SIDE decides on which beats the baton points at them (CUE, BattleRules.CueSide)
     public class Formation
     {
         public Musician[] Seated = new Musician[StageLayout.SeatCount];
-        public bool[,] Plan = new bool[StageLayout.SeatCount, BattleRules.BeatsPerRound];
 
         //Seat Unlocked : a seat is open if it is among the first seatsOwned in the unlock order
         public bool IsUnlocked(int seat, int seatsOwned)
@@ -47,21 +46,13 @@ namespace Tacetno433.Data
 
             Musician previous = Seated[seat];
             Seated[seat] = m;
-
-            if (from >= 0)
-            {
-                //Seat Swap : the two seats trade musicians and trade beat plans
-                Seated[from] = previous;
-                SwapRows(from, seat);
-                if (previous == null) ClearRow(from);
-            }
+            if (from >= 0) Seated[from] = previous;       // Seat Swap
         }
 
         //Remove : back to the bench
         public void Remove(int seat)
         {
             Seated[seat] = null;
-            ClearRow(seat);
         }
 
         //Auto Seat : first open empty seat, in unlock order. Returns false if the stage is full.
@@ -79,45 +70,17 @@ namespace Tacetno433.Data
             return false;
         }
 
-        //Beat Queries
-        public bool Plays(int seat, int beat)
-        {
-            return Seated[seat] != null && Plan[seat, beat];
-        }
-
-        public int PlayersOnBeat(int beat)
-        {
-            int count = 0;
-            for (int s = 0; s < Seated.Length; s++)
-                if (Plays(s, beat)) count++;
-            return count;
-        }
-
-        public void Toggle(int seat, int beat)
-        {
-            if (Seated[seat] == null) return;
-            Plan[seat, beat] = !Plan[seat, beat];
-        }
-
-        public void ClearRow(int seat)
-        {
-            for (int b = 0; b < BattleRules.BeatsPerRound; b++)
-                Plan[seat, b] = false;
-        }
-
-        public void ClearAll()
+        //Tidy : anyone sitting in a seat that is not open moves to the first open empty seat, or
+        //to the bench when the stage is full. A run saved before round 12 sat its first players
+        //down the centre, and those seats open later now (StageLayout.UnlockOrder).
+        public void Tidy(int seatsOwned)
         {
             for (int s = 0; s < Seated.Length; s++)
-                ClearRow(s);
-        }
-
-        private void SwapRows(int a, int b)
-        {
-            for (int beat = 0; beat < BattleRules.BeatsPerRound; beat++)
             {
-                bool keep = Plan[a, beat];
-                Plan[a, beat] = Plan[b, beat];
-                Plan[b, beat] = keep;
+                if (Seated[s] == null || IsUnlocked(s, seatsOwned)) continue;
+                Musician m = Seated[s];
+                Seated[s] = null;
+                AutoSeat(m, seatsOwned);
             }
         }
     }

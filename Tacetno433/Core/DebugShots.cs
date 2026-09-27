@@ -126,14 +126,24 @@ namespace Tacetno433.Core
         //Simulate : plays 300 fights per line with a fixed habit, no screen involved.
         //Every run in the report uses THE INFERNO (conductor 3) with no motifs.
         //The report shows how often each habit wins, so BattleRules can be tuned on evidence.
+        //Round 12 : there is no plan. A habit is how the player sizes strokes (see Habit), and
+        //"READS THE MARKS" answers p small, mf middle and f big, which is what the game teaches.
         private static void Simulate(TacetGame game)
         {
             string report = "TACET BALANCE CHECK  (floor 1, 300 fights per line)\r\n"
                           + "AUDIO LOADED  SFX " + Audio.SoundBank.LoadedSfx + "  MUSIC " + Audio.SoundBank.LoadedMusic + "\r\n\r\n";
             EnemyKind[] kinds = { EnemyKind.Normal, EnemyKind.Elite, EnemyKind.Boss };
-            string[] habits = { "AUTO PLAN, ALWAYS GOOD PLAY", "AUTO PLAN, NEVER STROKES", "AUTO PLAN, PERFECT BOOST ON HEAVY",
-                                "NO PLAN, ALWAYS EASE", "AUTO PLAN, ALWAYS PERFECT (COMBO)", "AUTO PLAN, PERFECT BOOST",
-                                "FRONT 4, PERFECT BOOST" };
+            Habit[] habits =
+            {
+                new Habit("MIDDLE STROKE EVERY BEAT, GOOD",   1, false, 0, 100, 0),
+                new Habit("NEVER STROKES",                     -2, true, 0, 0, 0),
+                new Habit("READS THE MARKS, GOOD",            -1, true, 0, 100, 0),
+                new Habit("SMALL STROKE EVERY BEAT, PERFECT",  0, false, 100, 0, 0),
+                new Habit("BIG STROKE EVERY NOTE, PERFECT",    2, true, 100, 0, 0),
+                new Habit("READS THE MARKS, PERFECT",         -1, true, 100, 0, 0),
+                new Habit("READS, PERFECT, NEVER RESTS",      -1, false, 100, 0, 0),
+                new Habit("READS AND SAVES, PERFECT",         -1, true, 100, 0, 0) { Saver = true },
+            };
             Random random = new Random(7);
 
             for (int k = 0; k < kinds.Length; k++)
@@ -152,33 +162,18 @@ namespace Tacetno433.Core
 
                         while (!b.Finished)
                         {
-                            if (h == 3) run.Formation.ClearAll();
-                            else if (h == 6) FrontLoad(run);
-                            else b.AutoPlan();
-
-                            //REPEATS : the plan is played once, twice or three times
-                            for (int pass = 0; pass < b.Passes && !b.Finished; pass++)
+                            //REPEATS : the phrase is played once, twice or three times
+                            for (int g = 0; g < BattleRules.BeatsPerRound * b.Passes && !b.Finished; g++)
                             {
-                                b.BeginPass(pass);
-                                for (int beat = 0; beat < BattleRules.BeatsPerRound && !b.Finished; beat++)
-                                {
-                                    Choice choice = Choice.Normal;
-                                    Grade grade = Grade.Good;
-                                    if (h == 1) grade = Grade.Hesitate;
-                                    if (h == 2 && b.IsHeavy(beat)) { choice = Choice.Boost; grade = Grade.Perfect; }
-                                    if (h == 3) choice = Choice.Ease;
-                                    if (h == 4) grade = Grade.Perfect;
-                                    if (h >= 5) { choice = Choice.Boost; grade = Grade.Perfect; }
-
-                                    int strokes = h == 1 ? 0 : (h == 4 || h == 2 || h >= 5 ? 8 : 5);
-                                    PlayBeat(b, beat, choice, grade, strokes);
-                                    beatsTotal++;
-                                    if (run.Stamina < lowest) lowest = run.Stamina;
-                                }
+                                int beat = g % BattleRules.BeatsPerRound;
+                                if (beat == 0) b.BeginPass(g / BattleRules.BeatsPerRound);
+                                PlayHabitBeat(run, b, beat, habits[h], random);
+                                beatsTotal++;
+                                if (run.Stamina < lowest) lowest = run.Stamina;
                             }
 
                             //Finale : every habit that strokes at all tries it, and lands it (GOOD is enough)
-                            if (b.FinaleOffered && h != 1) b.WinFinale();
+                            if (b.FinaleOffered && habits[h].Size != -2) b.WinFinale();
                             if (!b.Finished) b.EndRound();
                         }
 
@@ -189,7 +184,7 @@ namespace Tacetno433.Core
                     }
 
                     report += kinds[k].ToString().ToUpper().PadRight(8)
-                            + habits[h].PadRight(36)
+                            + habits[h].Name.PadRight(36)
                             + "WIN " + (wins * 100 / 300).ToString().PadLeft(3) + "%"
                             + "   AVG ROUNDS " + (roundsTotal / 300f).ToString("0.0")
                             + "   AVG BEATS " + (beatsTotal / 300f).ToString("0.0").PadLeft(4)
@@ -202,6 +197,75 @@ namespace Tacetno433.Core
 
             report += SimulateRuns(game, random);
             File.WriteAllText(Path.Combine(outDir, "simulate.txt"), report);
+        }
+
+        //Habit : how a simulated player conducts (round 12).
+        //   Size     -1 reads the marks (p small, mf middle, f big), 0 1 2 always that size, -2 never strokes
+        //   Rest     lets TACET's silent beats pass to breathe, instead of stroking them too
+        //   Perfect, Good   percent of strokes of each grade, the rest are MISSes
+        //   WrongSize       percent of strokes that come out a size off (a shaky hand)
+        //   Saver    answers mf small once breath runs low (under 30 percent)
+        private class Habit
+        {
+            public string Name;
+            public int Size, Perfect, Good, WrongSize;
+            public bool Rest, Saver;
+
+            public Habit(string name, int size, bool rest, int perfect, int good, int wrongSize)
+            {
+                Name = name;
+                Size = size;
+                Rest = rest;
+                Perfect = perfect;
+                Good = good;
+                WrongSize = wrongSize;
+            }
+        }
+
+        //Run Habits : the whole run players, in the order the audit names them (GOOD, SKILLED, AVERAGE, STRONG)
+        private static Habit[] runHabits =
+        {
+            new Habit("GOOD PLAY, MIDDLE STROKE EVERY BEAT",           1, false, 0, 100, 0),
+            new Habit("SKILLED  (READS THE MARKS, PERFECT)",           -1, true, 100, 0, 0),
+            new Habit("AVERAGE  (READS, 40% PERFECT, 10% MISS)",      -1, true, 40, 50, 15),
+            new Habit("STRONG   (READS, 70% PERFECT, 5% MISS)",        -1, true, 70, 25, 5),
+            new Habit("BIG EVERY NOTE (70% PERFECT, 5% MISS)",         2, true, 70, 25, 0),
+        };
+
+        //Read Mark : the stroke the game teaches for a note. p small, mf middle, f big. A hidden
+        //??? note could be anything, so it is met with the whole band, and so are a roll and a held note.
+        private static Choice ReadMark(BattleState b, int beat)
+        {
+            if (b.IsTremolo(beat) || b.IsFermata(beat) || b.EnemyHidden[beat]) return Choice.Boost;
+            return b.ShownChoice[beat];
+        }
+
+        //Play Habit Beat : one beat the way this habit plays it
+        private static void PlayHabitBeat(RunState run, BattleState b, int beat, Habit habit, Random random)
+        {
+            if (habit.Size == -2)
+            {
+                PlayBeat(b, beat, Choice.Normal, Grade.Hesitate, 0, true);
+                return;
+            }
+
+            //Grade
+            int roll = random.Next(100);
+            Grade grade = roll < habit.Perfect ? Grade.Perfect : (roll < habit.Perfect + habit.Good ? Grade.Good : Grade.Miss);
+
+            //Size : read, or fixed, sometimes a size off
+            Choice choice = habit.Size == 0 ? Choice.Ease : (habit.Size == 1 ? Choice.Normal : (habit.Size == 2 ? Choice.Boost : ReadMark(b, beat)));
+            if (habit.Saver && run.Stamina < run.MaxStamina * 0.3f && choice == Choice.Normal) choice = Choice.Ease;
+            if (random.Next(100) < habit.WrongSize) choice = choice == Choice.Normal ? (random.Next(2) == 0 ? Choice.Ease : Choice.Boost) : Choice.Normal;
+
+            //Silent Beat : a reader lets it pass, a fixed habit swings its usual size anyway
+            bool rest = habit.Rest && b.IsSilent(beat);
+            if (habit.Size == -1 && b.IsSilent(beat) && !habit.Rest) choice = Choice.Ease;
+
+            int strokes = habit.Perfect >= 100 ? 8 : (habit.Perfect == 0 ? 5 : 5 + random.Next(4));
+            int slip = habit.Perfect >= 100 ? 0 : (habit.Perfect >= 70 ? 10 : 30);
+            if (b.EnemyDouble[beat] && random.Next(100) < slip) strokes = -1;                 // the flick back slips
+            PlayBeat(b, beat, choice, grade, strokes, rest);
         }
 
         //Save Check : a sample run half way into a fight, saved and loaded again. The real save
@@ -219,7 +283,6 @@ namespace Tacetno433.Core
             run.RecordStop(NodeType.Shop);
             run.Chosen = run.Options[1];
             run.CurrentEvent = EventList.All[2];
-            run.Formation.Plan[run.Formation.SeatOf(run.Roster[0]), 3] = true;
             SaveFile.SaveRun(run);
 
             RunState back = SaveFile.LoadRun(game);
@@ -238,7 +301,7 @@ namespace Tacetno433.Core
                 report += Same("record", run.BattlesWon + "/" + run.PerfectsTotal + "/" + run.BestCombo, back.BattlesWon + "/" + back.PerfectsTotal + "/" + back.BestCombo);
                 report += Same("roster", Names(run), Names(back));
                 report += Same("rehearsed", run.Roster[0].Rehearsed + "/" + run.Roster[1].Rehearsed, back.Roster[0].Rehearsed + "/" + back.Roster[1].Rehearsed);
-                report += Same("seats and plan", Plan(run), Plan(back));
+                report += Same("seats", Seats(run), Seats(back));
                 report += Same("motifs", run.Motifs.Count + (run.Motifs.Count > 0 ? run.Motifs[0].Name : ""), back.Motifs.Count + (back.Motifs.Count > 0 ? back.Motifs[0].Name : ""));
                 report += Same("journey", run.Journey.Count + "/" + run.Journey[run.Journey.Count - 1].Type, back.Journey.Count + "/" + back.Journey[back.Journey.Count - 1].Type);
                 report += Same("options", Options(run), Options(back));
@@ -277,15 +340,11 @@ namespace Tacetno433.Core
             return s;
         }
 
-        private static string Plan(RunState run)
+        private static string Seats(RunState run)
         {
             string s = "";
             for (int seat = 0; seat < StageLayout.SeatCount; seat++)
-            {
-                s += run.Formation.Seated[seat] == null ? "-" : run.Formation.Seated[seat].Name.Substring(0, 1);
-                for (int b = 0; b < BattleRules.BeatsPerRound; b++) s += run.Formation.Plan[seat, b] ? "1" : "0";
-                s += " ";
-            }
+                s += (run.Formation.Seated[seat] == null ? "-" : run.Formation.Seated[seat].Name.Substring(0, 2)) + " ";
             return s;
         }
 
@@ -303,18 +362,15 @@ namespace Tacetno433.Core
         //(round 9 : before that motifs were skipped, so late runs looked harder than they play).
         private static string SimulateRuns(TacetGame game, Random random)
         {
-            string[] habits = { "GOOD PLAY EVERY BEAT, NEVER BOOSTS", "SKILLED  (PERFECT, BOOST, EASE LIGHT WHEN LOW)",
-                                "AVERAGE  (40% PERFECT, 10% MISS, SAME CHOICES)", "STRONG   (70% PERFECT, 5% MISS, SAME CHOICES)",
-                                "FRONT-LOAD (ALL ON BEATS 1-4, 70% PERFECT)" };
             string report = "WHOLE RUNS  (" + BattleRules.FloorsPerRun + " floors, 200 runs per line, conductor THE APPRENTICE, motifs taken)\r\n";
 
-            for (int h = 0; h < habits.Length; h++)
+            for (int h = 0; h < runHabits.Length; h++)
             {
                 RunRecord rec = new RunRecord();
                 for (int n = 0; n < 200; n++)
                     PlayRun(game, ConductorList.All[0], h, null, true, random, rec);
 
-                report += habits[h].PadRight(50) + "RUN WON " + (rec.Won * 100 / rec.Runs).ToString().PadLeft(3) + "%"
+                report += runHabits[h].Name.PadRight(50) + "RUN WON " + (rec.Won * 100 / rec.Runs).ToString().PadLeft(3) + "%"
                         + "   LOST ON FLOOR 1/2/3  " + rec.LostOnFloor[1] + " / " + rec.LostOnFloor[2] + " / " + rec.LostOnFloor[3]
                         + "   LOST TO NORMAL/ELITE/BOSS  " + rec.LostTo[0] + " / " + rec.LostTo[1] + " / " + rec.LostTo[2]
                         + "   OUT OF BREATH " + rec.OutOfBreath
@@ -418,17 +474,6 @@ namespace Tacetno433.Core
             return won;
         }
 
-        //Front Load : everyone seated plays the first four beats and rests after. Players found
-        //this plan on 25 Sep and won in two to four beats, so the sim keeps checking it.
-        private static void FrontLoad(RunState run)
-        {
-            Formation f = run.Formation;
-            f.ClearAll();
-            for (int s = 0; s < StageLayout.SeatCount; s++)
-                if (f.Seated[s] != null)
-                    for (int beat = 0; beat < 4; beat++) f.Plan[s, beat] = true;
-        }
-
         //Take Motif : the reward page's offer after a win (elites and bosses always offer, normal
         //fights sometimes), and the sim picks one of the cards at random
         private static void TakeMotif(RunState run, NodeType type, Random random)
@@ -444,24 +489,29 @@ namespace Tacetno433.Core
 
         //Play Beat : one beat the way the duel plays it. A roll gets its strokes counted first,
         //a pair gets its flick back with the same grade as its first note. Strokes below zero
-        //mean the flick back slipped (a MISS) on an ordinary beat.
-        private static void PlayBeat(BattleState b, int beat, Choice choice, Grade grade, int strokes)
+        //mean the flick back slipped (a MISS). A silent beat with rest set is let pass.
+        private static void PlayBeat(BattleState b, int beat, Choice choice, Grade grade, int strokes, bool rest)
         {
+            if (b.IsSilent(beat) && (rest || grade == Grade.Hesitate))
+            {
+                b.Resolve(beat, Choice.Normal, Grade.None);                             // a rest
+                return;
+            }
+
             Grade flick = strokes < 0 ? Grade.Miss : grade;
             if (strokes < 0) strokes = 5;
-            if (!b.HasAction(beat)) grade = Grade.None;
-            if (b.IsTremolo(beat))
+            if (b.IsTremolo(beat) && grade != Grade.Hesitate)
             {
                 b.RollStrokes = strokes;
                 grade = BattleState.RollGrade(strokes);
-                choice = Choice.Normal;
+                choice = Choice.Boost;                                                  // the whole band rolls
             }
 
             //Fermata : a steady hand holds it to the end, a shaky one lets go part way
             if (b.IsFermata(beat)) b.HoldFraction = grade == Grade.Hesitate || grade == Grade.Miss ? 0f : (flick == Grade.Miss ? 0.5f : (grade == Grade.Perfect ? 1f : 0.8f));
 
             b.Resolve(beat, choice, grade);
-            if (b.EnemyDouble[beat] && !b.Finished) b.ResolveGrace(beat, grade == Grade.None ? Grade.Hesitate : flick);
+            if (b.EnemyDouble[beat] && !b.Finished) b.ResolveGrace(beat, grade == Grade.Hesitate ? Grade.Hesitate : flick);
         }
 
         //Play Fight : one whole fight with a fixed habit. Returns true when it was won.
@@ -471,39 +521,13 @@ namespace Tacetno433.Core
             rec.Fights++;
             while (!b.Finished)
             {
-                if (habit == 4) FrontLoad(run); else b.AutoPlan();
                 for (int g = 0; g < BattleRules.BeatsPerRound * b.Passes && !b.Finished; g++)
                 {
-                    //REPEATS : the plan again, with TACET's marks for this time through
+                    //REPEATS : the phrase again, with TACET's marks for this time through
                     int beat = g % BattleRules.BeatsPerRound;
                     if (beat == 0) b.BeginPass(g / BattleRules.BeatsPerRound);
-
-                    Choice choice = Choice.Normal;
-                    Grade grade = Grade.Good;
                     rec.Beats++;
-
-                    if (habit >= 1)
-                    {
-                        grade = Grade.Perfect;
-                        if (habit == 2)
-                        {
-                            int roll = random.Next(100);
-                            grade = roll < 40 ? Grade.Perfect : (roll < 90 ? Grade.Good : Grade.Miss);
-                        }
-                        if (habit >= 3)
-                        {
-                            int roll = random.Next(100);
-                            grade = roll < 70 ? Grade.Perfect : (roll < 95 ? Grade.Good : Grade.Miss);
-                        }
-                        //BOOST costs nothing extra (round 8), so a good player swings big on every
-                        //beat, and only eases the light ones to catch breath when it runs low
-                        bool low = run.Stamina < run.MaxStamina * 0.3f;
-                        choice = Choice.Boost;
-                        if (low && !b.IsHeavy(beat)) choice = Choice.Ease;
-                    }
-                    int strokes = habit == 0 ? 5 : (habit == 1 ? 8 : 5 + random.Next(4));
-                    if (habit >= 2 && b.EnemyDouble[beat] && random.Next(100) < (habit == 2 ? 30 : 10)) strokes = -1;   // the flick back slips
-                    PlayBeat(b, beat, choice, grade, strokes);
+                    PlayHabitBeat(run, b, beat, runHabits[habit], random);
                 }
 
                 //Finale : steady players land it, average ones about half the time
@@ -573,8 +597,7 @@ namespace Tacetno433.Core
             if (name == "bandname") screen = new BandNameScreen();
             if (name == "route" || name == "pause") screen = new RouteScreen();
             if (name == "view") screen = new FormationScreen(false);
-            if (name == "stage") screen = new FormationScreen(true);
-            if (name == "score" || name == "scoretrait" || name == "bargain" || name == "scorepairs" || name == "scorerepeat") screen = new ScoreScreen();
+            if (name.StartsWith("stage") || name == "bargain") screen = new FormationScreen(true);
             if (name.StartsWith("duel") || name == "finale") screen = new DuelScreen();
             if (name == "result" || name == "defeat") screen = new ResultScreen();
             if (name == "reward") screen = new MotifRewardScreen(false);
@@ -657,13 +680,12 @@ namespace Tacetno433.Core
             //Battle
             run.Chosen = new RouteNode();
             run.Chosen.Type = name == "duelboss" ? NodeType.Boss : NodeType.Battle;
-            if (name == "reward" || name == "dueltremolo" || name == "scorepairs" || name.EndsWith("repeat")) run.Chosen.Type = NodeType.Elite;
-            if (name == "dueldouble" || name == "scorepairs") run.Floor = 3;          // pairs from floor two, more on the last
+            if (name == "reward" || name == "dueltremolo" || name.EndsWith("repeat")) run.Chosen.Type = NodeType.Elite;
+            if (name == "dueldouble") run.Floor = 3;                                  // pairs from floor two, more on the last
             if (name == "duelfermata") run.Floor = 2;                                 // held notes from floor two
             run.Chosen.Title = RouteNodeInfo.TitleOf(run.Chosen.Type);
             run.Chosen.Caption = RouteNodeInfo.CaptionOf(run.Chosen.Type);
             run.BeginBattle();
-            run.Battle.AutoPlan();
             run.ChangeStamina(-20);
 
             //Combo Picture : a fight already a few PERFECTs in
@@ -684,27 +706,36 @@ namespace Tacetno433.Core
             //Finale Picture : far enough ahead to finish it
             if (name == "finale") run.Battle.Line = 86f;
 
-            //Repeat Pictures : round three, the plan played three times (REPEATS)
+            //Repeat Pictures : round three, the phrase played three times (REPEATS)
             if (name.EndsWith("repeat"))
             {
                 run.Battle.EndRound();
                 run.Battle.EndRound();
-                run.Battle.AutoPlan();
             }
 
 
-            //Trait Pictures : an ordinary enemy on floor two shows its trait, the devil makes its offer
+            //Trait Pictures : an ordinary enemy on floor two shows its trait, the devil makes its offer,
+            //THE MUTE CHOIR silences a side, REQUIEM mirrors the stage in round three (round 12)
             Random pick = new Random(5);
-            if (name == "scoretrait" || name == "duelboss")
+            if (name == "stagetrait" || name == "duelboss")
             {
                 run.Floor = 2;
                 run.Battle = new BattleState(run, name == "duelboss" ? EnemyList.All[7] : EnemyList.All[0], pick);
-                run.Battle.AutoPlan();
             }
             if (name == "bargain")
             {
                 run.Battle = new BattleState(run, EnemyList.All[8], pick);
-                run.Battle.AutoPlan();
+                run.Battle.EndRound();
+            }
+            if (name == "stagemute" || name == "duelmute")
+            {
+                run.Battle = new BattleState(run, EnemyList.All[4], pick);
+                run.Battle.EndRound();                                                // it silences from round two
+            }
+            if (name == "stagemirror")
+            {
+                run.Battle = new BattleState(run, EnemyList.All[6], pick);
+                run.Battle.EndRound();
                 run.Battle.EndRound();
             }
 

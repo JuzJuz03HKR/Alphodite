@@ -31,9 +31,9 @@ namespace Tacetno433.Screens
         private static string[] dynamicMark = { "mf", "f", "p" };          // in Choice order
         private static string[] markHints =                                 // in Choice order
         {
-            "mf : ANYTHING BUT A SMALL STROKE",
-            "f IS LOUD : ANSWER IT BIG",
-            "p IS SOFT : ANSWER IT SMALL"
+            "mf : A MIDDLE STROKE, PAST THE FIRST MARK",
+            "f IS LOUD : BIG, THE WHOLE BAND",
+            "p IS SOFT : SMALL, THE BACK ROW"
         };
         private static string[] gradeWords = { "", "PERFECT", "GOOD", "MISS", "HESITATE" };
         private static string[] timingWords = { "EARLY", "", "LATE" };
@@ -283,7 +283,7 @@ namespace Tacetno433.Screens
         {
             if (mark == Choice.Boost) return size == 2;
             if (mark == Choice.Ease) return size == 0;
-            return size >= 1;
+            return size == 1;                                // round 12 : mf is a middle stroke, the size is who plays
         }
 
         //Note Won : the note breaks, the lane lights. The lessons with a beat count it here.
@@ -608,7 +608,7 @@ namespace Tacetno433.Screens
 
             //Size : the order to give next
             if (l.Kind == Kind.Size && done < 3)
-                Gfx.TextSpacedCentered(sb, Game.Font, sizeWordsBig[done], HitX, RingY + 104f, Palette.Ink, TextSize.Heading, 6f);
+                Gfx.TextCentered(sb, Game.BigFont, sizeWordsBig[done], HitX, RingY + 104f, Palette.Ink, TextSize.Title);
         }
 
         //Ruler : while the baton is raised, a ruler the way the stroke should go. The size zones
@@ -626,7 +626,7 @@ namespace Tacetno433.Screens
             Baton.DrawRuler(sb, anchor, d, along, gesture.InStroke ? Baton.SizeOf(along) : -1, zones);
         }
 
-        private static string[] sizeWordsBig = { "EASE", "PLAY", "BOOST" };
+        private static string[] sizeWordsBig = { "p", "mf", "f" };
 
         //Judge : the word for the last stroke on a dark plate under the hit point
         private void DrawJudge(SpriteBatch sb)

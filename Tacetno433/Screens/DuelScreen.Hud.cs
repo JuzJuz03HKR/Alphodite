@@ -98,6 +98,9 @@ namespace Tacetno433.Screens
             float cy = RingY;
             float a = MathHelper.Clamp(t * 4f, 0f, 1f);
 
+            //Rest : where TACET is silent the ring is faint. A stroke is allowed, not asked for.
+            if (!onGrace && phase == Phase.Play && battle.IsSilent(BeatOf(pending))) a *= 0.4f;
+
             //Flick Back : a smaller ring for the second note of a pair
             float mark = onGrace ? RingTarget * 0.7f : RingTarget;
             float start = onGrace ? RingStart * 0.7f : RingStart;
@@ -151,6 +154,13 @@ namespace Tacetno433.Screens
             Rectangle plate = new Rectangle((int)(RingX() - judgeWidth * pop / 2f - 18f), (int)(y - 18f), (int)(judgeWidth * pop + 36f), 36);
             Gfx.SlantBox(sb, plate, 10, Palette.Void * (0.85f * a));
             Gfx.TextCentered(sb, Game.BigFont, judgeWord, RingX(), y - 2f, Palette.Highlight * a, judgeScale * pop);
+
+            //IN TUNE : a small tag over the plate when the stroke matched TACET's real mark
+            if (judgeTune)
+            {
+                Gfx.TextSpacedCentered(sb, Game.Font, InTuneWord, RingX() + 1, plate.Y - 15, Palette.Void * a, TextSize.Tiny, 3f);
+                Gfx.TextSpacedCentered(sb, Game.Font, InTuneWord, RingX(), plate.Y - 16, Palette.Highlight * a, TextSize.Tiny, 3f);
+            }
 
             //EARLY / LATE : a small tag hanging under the plate, on the side it fell
             if (judgeTiming != 0)

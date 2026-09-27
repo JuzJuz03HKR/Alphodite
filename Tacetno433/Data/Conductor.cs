@@ -99,11 +99,12 @@ namespace Tacetno433.Data
                 MechanicName = "LOCKED TEMPO",
                 SignatureMark = "Tempo giusto",
                 Recipe = new int[] { 2, 0, 2 },     // the rhythm section
-                MechanicText = "Every stroke is a BOOST, whatever its size, so a small flick hits as hard "
-                             + "as a big swing. Ease is sealed.",
+                MechanicText = "Every stroke brings the whole band in, whatever its size, so a small flick "
+                             + "hits as hard as a big swing. The back row never plays alone.",
                 Stamina = 10, PushPower = 6, Perk = ConductorPerk.LockedTempo,       // round 10 : 9 -> 7, no cheaper notes. Round 11a : 9,
                                                                                      // round 11b : 10 and push 6. Bigger rests and EASE help
-                                                                                     // everyone but him (he cannot EASE)
+                                                                                     // everyone but him (he cannot EASE). Round 12 : he pays
+                                                                                     // for the whole band on every stroke
                 ThemeColor = Palette.ToneC,
                 Unlocked = true
             },

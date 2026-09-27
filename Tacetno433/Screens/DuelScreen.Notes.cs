@@ -16,7 +16,7 @@ namespace Tacetno433.Screens
     //               then hold the button with the baton still, see BattleRules.Fermata...
     //   TREMOLO     TACET's roll on the last beat of an elite's or a boss's round. Every shake of
     //               the baton for two beats counts, see BattleRules.Tremolo...
-    //   COUNTER     a PERFECT BOOST against a real f note, the rules live in BattleState.Resolve
+    //   COUNTER     a PERFECT big stroke (f) against a real f note, the rules live in BattleState.Resolve
     //   FORTISSIMO  the band on fire after a long combo, also in BattleState
     public partial class DuelScreen
     {
@@ -61,7 +61,7 @@ namespace Tacetno433.Screens
             Grade grade = Grade.Miss;
             if (off <= battle.GoodWindow) grade = Grade.Good;
             if (off <= battle.PerfectWindowAt(b)) grade = Grade.Perfect;
-            if (grade == Grade.Miss && now > target && battle.LateForgivenAt(b)) grade = Grade.Good;    // FASHIONABLY LATE
+            if (grade == Grade.Miss && now > target && battle.JoinedHas(battle.Results[b], MusicianTrait.Forgiven)) grade = Grade.Good;    // FASHIONABLY LATE
 
             hand.Play(PoseFor(gesture.Direction));
             baton.Whip(gesture.Direction);
@@ -100,7 +100,7 @@ namespace Tacetno433.Screens
 
             ShowCombo(r, r.Combo);
             ShowFire(r);
-            ShowBreath(r, b);
+            ShowBreath(r);
             AdvanceBeat();
         }
 
@@ -134,9 +134,8 @@ namespace Tacetno433.Screens
             int b = BeatOf(pending);
             float volume = choice == Choice.Boost ? 1f : (choice == Choice.Ease ? 0.5f : 0.8f);
             if (!SoundBank.PlayAnswer(b, volume, 0f)) SoundBank.Play(Sfx.NoteOn, volume, 0.3f);
-            Formation f = Game.CurrentRun.Formation;
             for (int s = 0; s < StageLayout.SeatCount; s++)
-                if (f.Plays(s, b)) lit[s] = 1f;
+                if (battle.Joins(s, choice)) lit[s] = 1f;
         }
 
         //Hold Update : the hold lasts while the button stays down and the baton stays still.
@@ -152,9 +151,8 @@ namespace Tacetno433.Screens
             bool still = !moving || clock < holdSteady;
 
             //Glow : the players holding the note stay lit
-            Formation f = Game.CurrentRun.Formation;
             for (int s = 0; s < StageLayout.SeatCount; s++)
-                if (f.Plays(s, b)) lit[s] = Math.Max(lit[s], 0.7f);
+                if (battle.Joins(s, holdChoice)) lit[s] = Math.Max(lit[s], 0.7f);
 
             if (!down || !still || now >= holdEnd) FinishHold(b);
         }
@@ -214,7 +212,7 @@ namespace Tacetno433.Screens
                 Grade grade = BattleState.RollGrade(rollStrokes);
                 if (grade != Grade.Hesitate) ShowJudge(rollText[(int)grade], 0.55f);
                 if (grade == Grade.Perfect) SoundBank.Play(Sfx.QtePerfect);
-                ResolveAnswer(b, Choice.Normal, grade, false);
+                ResolveAnswer(b, Choice.Boost, grade, false);         // TREMOLO : the whole band rolls
                 AdvanceBeat();
             }
         }

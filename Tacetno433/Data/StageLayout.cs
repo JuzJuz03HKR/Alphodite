@@ -18,6 +18,12 @@ namespace Tacetno433.Data
     //There are nine seats in three rows, like a small orchestra seen from the side.
     //Seat positions are written from 0 to 1 inside whatever box a page draws the stage in,
     //so the formation page and the duel page can show the same stage at different sizes.
+    //
+    //Where a musician sits is how they play (round 12, there is no beat plan any more):
+    //   ROW   which strokes bring them in. A small stroke brings the back row, a middle one the
+    //         middle row too, a big one everybody (BattleRules DYNAMICS).
+    //   SIDE  the column, left, centre or right. On every beat the baton points at one side,
+    //         and whoever sits there hits harder (BattleRules CUE).
     public static class StageLayout
     {
         public const int SeatCount = 9;
@@ -25,16 +31,25 @@ namespace Tacetno433.Data
         //Rows : index 0 is the back, 2 is the front
         public static StageRow[] Rows = new StageRow[]
         {
-            new StageRow { Name = "BACK",   Title = "BACK ROW",   Effect = "SUPPORT  -  POWER x0.8  /  STAMINA COST x0.7",
+            new StageRow { Name = "BACK",   Title = "BACK ROW",   Effect = "EVERY STROKE  -  POWER x0.8  /  STAMINA COST x0.7",
                            PowerScale = 0.8f, CostScale = 0.7f,  Size = 0.82f },
-            new StageRow { Name = "MIDDLE", Title = "MIDDLE ROW", Effect = "STEADY  -  NO CHANGE",
+            new StageRow { Name = "MIDDLE", Title = "MIDDLE ROW", Effect = "MIDDLE AND BIG STROKES  -  NO CHANGE",
                            PowerScale = 1.0f, CostScale = 1.0f,  Size = 0.91f },
-            new StageRow { Name = "FRONT",  Title = "FRONT ROW",  Effect = "LEAD  -  POWER x1.3  /  STAMINA COST x1.15",
+            new StageRow { Name = "FRONT",  Title = "FRONT ROW",  Effect = "BIG STROKES  -  POWER x1.3  /  STAMINA COST x1.15",
                            PowerScale = 1.3f, CostScale = 1.15f, Size = 1.0f },
         };
 
         //Seat Row : which row each seat belongs to
         public static int[] SeatRow = { 0, 0, 0, 1, 1, 1, 2, 2, 2 };
+
+        //Sides : the stage's three columns as the conductor sees them, 0 left, 1 centre, 2 right.
+        //The baton's CUE points at one of them on every beat (BattleRules.CueSide).
+        public static string[] SideNames = { "LEFT", "CENTRE", "RIGHT" };
+
+        public static int SeatSide(int seat)
+        {
+            return seat % 3;
+        }
 
         //Seat Position : centre of each seat, from 0 to 1 across and down the stage box
         public static Vector2[] SeatPos =
@@ -45,8 +60,10 @@ namespace Tacetno433.Data
         };
 
         //Unlock Order : seat numbers in the order they open up.
-        //A run with 3 seats uses the first three in this list: front, middle and back centre.
-        public static int[] UnlockOrder = { 7, 4, 1, 6, 8, 3, 5, 0, 2 };
+        //A run with 3 seats uses the first three in this list, a diagonal: front left, middle
+        //centre and back right. So the first band already has a row for every stroke size and a
+        //player on every side the baton points at (round 12, was the centre column 7, 4, 1).
+        public static int[] UnlockOrder = { 6, 4, 2, 7, 1, 3, 5, 8, 0 };
 
         //Seat Size : the capsule size at full scale, before the row shrinks it
         public const int CapsuleW = 58;

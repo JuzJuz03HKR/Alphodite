@@ -29,8 +29,8 @@ namespace Tacetno433.Screens
             StageStaff.Draw(sb, 232f, edge, 150f, energy, time, ink);
         }
 
-        //Stand Rect : where a seat's musician stands. Whoever plays the beat being answered is
-        //lifted a little, and whoever just played leans toward TACET.
+        //Stand Rect : where a seat's musician stands. Whoever the baton points at on the beat
+        //being answered is lifted a little, and whoever just played leans toward TACET.
         private Rectangle StandRect(int seat)
         {
             Rectangle r = StageLayout.DuelStandRect(seat);
@@ -39,24 +39,29 @@ namespace Tacetno433.Screens
             return r;
         }
 
-        //Up Next : this seat plays the beat being answered right now. In the finale, everyone does.
+        //Up Next : CUE, the baton points at this seat's side on the beat being answered.
+        //In the finale, everyone is.
         private bool UpNext(int seat)
         {
             if (AnswerProgress() < 0f) return false;
             if (phase == Phase.Finale) return Game.CurrentRun.Formation.Seated[seat] != null;
-            return Game.CurrentRun.Formation.Plays(seat, BeatOf(pending));
+            return battle.CanPlay(seat) && battle.IsCued(seat, BeatOf(pending));
         }
 
         //Musician Glow : the light behind whoever is playing or about to. Drawn before the band
         //switches to pixel sampling, because a soft glow must stay smooth.
+        //While a stroke is being drawn the rows it would bring in light up, one more row each
+        //time the stroke passes a mark on the ruler (DYNAMICS), so its size can be seen on stage.
         private void DrawMusicianGlow(SpriteBatch sb)
         {
             Formation f = Game.CurrentRun.Formation;
+            int live = LiveSize();
             for (int s = 0; s < StageLayout.SeatCount; s++)
             {
                 if (f.Seated[s] == null) continue;
                 float glow = lit[s];
                 if (UpNext(s)) glow = Math.Max(glow, 0.35f + (float)Math.Sin(time * 8f) * 0.15f);
+                if (live >= 0 && battle.Joins(s, sizeChoice[live])) glow = Math.Max(glow, 0.75f);
                 if (glow <= 0f) continue;
 
                 Rectangle r = StandRect(s);
@@ -81,20 +86,30 @@ namespace Tacetno433.Screens
 
                 int depth = s % 3;
                 float shade = 0.82f + depth * 0.09f;
+                if (!battle.CanPlay(s)) shade *= 0.35f;                     // SILENT MOUTHS : silenced this round
                 Color tint = new Color(shade, shade, shade);
                 CharacterArt.Draw(sb, m, actors[s].Anim, actors[s].Frame, StandRect(s), CharacterArt.PixelScale,
                                   tint, Palette.Ink, 0.7f + depth * 0.15f);
             }
         }
 
-        //Musician Marks : a small diamond over whoever plays the beat being answered
+        //Musician Marks : CUE, a small diamond over whoever the baton points at on the beat being
+        //answered, and a cross over anyone SILENT MOUTHS has silenced this round
         private void DrawMusicianMarks(SpriteBatch sb)
         {
             Formation f = Game.CurrentRun.Formation;
             for (int s = 0; s < StageLayout.SeatCount; s++)
             {
-                if (f.Seated[s] == null || !UpNext(s)) continue;
+                if (f.Seated[s] == null) continue;
                 Rectangle r = StandRect(s);
+                if (!battle.CanPlay(s))
+                {
+                    Gfx.Line(sb, r.Center.X - 7, r.Y - 21, r.Center.X + 7, r.Y - 7, Palette.Ink, 2f);
+                    Gfx.Line(sb, r.Center.X - 7, r.Y - 7, r.Center.X + 7, r.Y - 21, Palette.Ink, 2f);
+                    continue;
+                }
+                if (!UpNext(s)) continue;
+                Gfx.Diamond(sb, r.Center.X, r.Y - 14, 7, Palette.Paper);
                 Gfx.Diamond(sb, r.Center.X, r.Y - 14, 5, Palette.Ink);
             }
         }
@@ -195,7 +210,7 @@ namespace Tacetno433.Screens
         //The note to answer next is bright, the next one a little dimmer, the rest faint.
         //A pair (from floor two) is a note tied to a spark: one more flick, any way, on the spark.
         //A note under an arch (from floor two) is held still after its stroke.
-        //A dash is a beat where nobody plays at all.
+        //A dash is a beat where TACET is silent: let it pass to rest, or swing for a free hit.
         private void DrawIncoming(SpriteBatch sb)
         {
             if (phase != Phase.Play) return;
@@ -247,18 +262,12 @@ namespace Tacetno433.Screens
 
                 float focus = Focus(g);
 
-                if (power <= 0)
+                if (power <= 0 && !battle.EnemyHidden[n])
                 {
-                    //Silent Note : a dash, or a hollow diamond with its pointer when we still play here
-                    if (battle.HasAction(n))
-                    {
-                        Gfx.DiamondOutline(sb, x, RingY, 14f, Palette.Paper * (0.8f * focus), 2f);
-                        NoteGlyph.Pointer(sb, pattern[n % 4], x, RingY, 14f, focus);
-                    }
-                    else
-                    {
-                        Gfx.Rect(sb, x - 8, RingY - 2, 16, 4, Palette.PaperDim * 0.6f);
-                    }
+                    //Silent Beat : a dash, the band may rest here. A faint pointer says a stroke
+                    //is still allowed, a free hit for whoever it brings in.
+                    Gfx.Rect(sb, x - 10, RingY - 2, 20, 4, Palette.PaperDim * (0.7f * focus));
+                    NoteGlyph.Pointer(sb, pattern[n % 4], x, RingY, 14f, focus * 0.4f);
                     continue;
                 }
 

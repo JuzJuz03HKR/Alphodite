@@ -10,10 +10,10 @@
         public const int MaxRounds = 3;           // after this, whoever is ahead wins
         public const float LineLimit = 100f;      // push the line this far to win outright
 
-        //REPEATS (round 11) : the plan written on the score page is played more than once before
-        //the next score page, without a stop. TACET plays the same beats each time, but decides
-        //its f / mf / p and its pairs afresh for every time through, so they must be read again.
-        //Players found a round over in seconds after planning it with care.
+        //REPEATS (round 11) : TACET's phrase is played more than once before the band goes back to
+        //the stage page, without a stop. TACET plays the same beats each time, but decides its
+        //f / mf / p and its pairs afresh for every time through, so they must be read again.
+        //Players found a round over in seconds. Round 12 : kept as the length of a round.
         public static int[] PassesPerRound = { 1, 2, 3 };   // round 1 once, round 2 twice, round 3 three times
         public const int PassesMost = 3;                    // no entry above may be bigger than this
 
@@ -40,31 +40,48 @@
         //Each extra player adds this much, so three players give x1.30.
         public static float HarmonyPerExtra = 0.15f;
 
-        //Player Choices : picked by how big the baton stroke is.
-        //A big stroke costs no extra stamina (it did until round 8): the flashy moves are free,
-        //stamina is only lost to TACET's blows and to mistakes, see Stamina Pressure below.
-        public static float BoostPower = 1.5f;     // a big stroke : hit harder
-        public static float EasePower = 0.6f;      // a small stroke : hit softer
-        public static float EaseCost = 0.5f;       //     pay less
-        public static int EaseRecover = 8;         //     and breathe a little
+        //DYNAMICS (round 12) : there is no score page. How big a stroke is decides who plays:
+        //   small  (p)   the back row
+        //   middle (mf)  the back and middle rows
+        //   big    (f)   the whole band
+        //A row with nobody in it is skipped, so every stroke brings somebody in (BattleState.Joins).
+        //Whoever plays pays stamina for their note, so a big stroke is strong and tiring and a small
+        //one is cheap. Only a rest gives breath back. The players who come in ARE the power: the
+        //size itself multiplies nothing any more (round 8 to 11 : small x0.6, big x1.5).
+        //The numbers below stay here as tuning knobs.
+        public static float BoostPower = 1.0f;     // a big stroke, on top of the whole band coming in
+        public static float EasePower = 1.0f;      // a small stroke, the back row at full strength
+        public static float EaseCost = 1.0f;       // a small stroke pays this share of its notes
+        public static int EaseRecover = 0;         // breath a small stroke gives back (was 8). At 6, small strokes
+                                                   // on every beat won 90 percent of simulated fights (round 12)
 
-        //Rest : a beat where we play nothing gives stamina back.
+        //CUE (round 12) : the baton points at one side of the stage on every beat. Down and up point
+        //at the centre, left and right at their own side. Whoever sits on that side and plays hits
+        //harder. The sides are the stage's columns (StageLayout.SeatSide).
+        public static float CuePower = 1.5f;
+        public static int[] CueSide = { 1, 0, 2, 1 };      // beat of the bar -> side : 0 left, 1 centre, 2 right
+
+        //Rest : a beat where TACET is silent and the baton lets it pass gives stamina back.
         //Round 11 : 6 -> 10, the player found rests gave back far too little to be worth planning.
-        public static int RestRecover = 10;
+        //Round 12 : 12, a rest is now the only breath there is inside a fight.
+        public static int RestRecover = 12;
 
-        //Stamina Cost : every note the band plays costs its written cost times this (0.7 = 30 percent less)
-        //Round 9 : duels last two to three times as many beats, so each note costs less
-        public static float StaminaCostScale = 0.7f;    // was 1.15
+        //Stamina Cost : every player who comes in costs their written cost times this (0.72 = 28 percent less)
+        //Round 9 : duels last two to three times as many beats, so each note costs less.
+        //Round 12 : 0.72, so a big stroke on every note runs out of breath and reading the marks pays.
+        public static float StaminaCostScale = 0.72f;   // was 1.15, 0.7 in rounds 9 to 11
 
         //Stamina Pressure (round 8) : stamina is the band's breath. It is not spent on big
         //strokes, rolls or holds any more. It is knocked out of the band instead:
         //   TACET'S BLOW  a beat TACET wins hits the band for what got through
         //   a MISS costs MissExtraCost on top of the note
         //   COLLAPSE      breath at zero ends the fight, the band is silenced (SECOND WIND saves it once)
-        public static float BlowPerPower = 0.78f;   // stamina lost per point TACET wins a beat by, was 1.0, 0.7 in round 9
+        public static float BlowPerPower = 0.75f;   // stamina lost per point TACET wins a beat by, was 1.0, 0.7 in round 9
                                                     // round 10 : 0.63 kept the whole game as hard as round 9 after BREATH MARK was cut
                                                     // round 11a : 0.68 made up for the softer WHITE NOISE
                                                     // round 11b : 0.78 with the bigger rests (the player allowed it a little easier)
+                                                    // round 12 : 0.75 with the marks wider apart (EnemyBoostPower 2),
+                                                    // a misread f hurts, which is what sets careful players apart
 
         //Timing Grades (HARD, 25 Sep : players found the wide windows far too easy)
         //The stroke settings page can move every judgement earlier or later for one player's
@@ -72,10 +89,11 @@
         public static float PerfectWindow = 0.08f; // seconds either side of the beat, was 0.12
         public static float GoodWindow = 0.18f;    // was 0.30
         public static float EarlyTime = 0.24f;     // a stroke ending earlier than this before its beat is the hand getting ready
-        public static float PerfectBonus = 1.2f;   // a PERFECT stroke multiplies the choice
-        public static float MissPower = 0.55f;     // PENALTY : a bad stroke still counts, but weaker, was 0.7
+        public static float PerfectBonus = 1.3f;   // a PERFECT stroke multiplies the band's power (round 12, was 1.2)
+        public static float MissPower = 0.45f;     // PENALTY : a bad stroke still counts, but weaker, was 0.7, 0.55 until round 12
         public static int MissExtraCost = 4;       // PENALTY : and costs extra stamina
-        public static float HesitatePower = 0.3f;  // PENALTY : no stroke, the band barely plays, was 0.75
+        //No stroke on one of TACET's notes (HESITATE) : nobody comes in, so nobody pays, and the
+        //note lands whole. Round 12 : the band used to play its planned part at 30 percent.
 
         //Signature : PERFECT and GOOD beats collect notes for the instrument families that
         //played them. When the conductor's recipe is complete (see Conductor.Recipe), SPACE lets
@@ -123,7 +141,13 @@
         public static float FermataHold = 0.8f;     // added over the whole hold, so holding to the end is x1.4
         public static float FermataStill = 260f;    // pixels per second the baton may drift and still be still
 
-        //Counter : a PERFECT BOOST against TACET's real f note knocks part of it back
+        //IN TUNE (round 12) : a stroke on time (PERFECT or GOOD) whose size matches the mark TACET
+        //really plays, p small, mf middle, f big, takes the edge off its note. Reading the marks is
+        //the heart of the duel: an over-sized answer only wastes breath, an under-sized one loses.
+        //A FALSE NOTE's shown mark does not count, and a hidden ??? note has none to match.
+        public static float InTuneKeep = 0.6f;      // TACET keeps only this much of the note
+
+        //Counter : a PERFECT big stroke against TACET's real f note knocks more of it back
         public static float CounterKeep = 0.7f;     // TACET keeps only this much of the note
 
         //Fortissimo : a combo this long sets the band on fire for the next few beats
@@ -146,25 +170,19 @@
         public static float HitStopTime = 0.14f;    // the picture freezes at the end of every bar
         public static float ClashCountTime = 0.16f; // the two numbers count up for this long
         public static float ClashShowTime = 0.55f;  // and stay on screen for this long
-        public static float PreviewBeatTime = 0.3f; // one beat of the plan preview on the score page
-
-        //Forecast : how the score page names a beat, by our power divided by TACET's
-        public static float ForecastDominating = 1.6f;
-        public static float ForecastFavored = 1.15f;
-        public static float ForecastEven = 0.87f;
-        public static float ForecastStruggling = 0.6f;   // below this it is HOPELESS
 
         //Enemy Traits : the numbers behind each EnemyTrait (see Data/Enemy.cs)
         public static int LullabyBpm = 88;          // THE LULL, round three slows down, was 80 (kept a third under round three)
         public static int UnfinishedBpm = 140;      // REQUIEM, round three rushes, was 128 (kept above round three)
-        public static float FillsGapsPower = 1.5f;  // DEAD AIR, on beats nobody on your side plays
+        public static float FillsGapsPower = 1.5f;  // DEAD AIR, answered with a small stroke or none (round 12, was: beats nobody planned)
         public static float NoRestShare = 0.5f;     // WHITE NOISE, silent beats give back only this share (round 11, was nothing)
-        public static float MirrorScale = 0.9f;     // THE NAMELESS MASTER, your last plan played back
+        public static float MirrorScale = 0.35f;    // THE NAMELESS MASTER, your last round played back. Round 12 : 0.9 -> 0.35,
+                                                    // a round holds whole-band strokes now, not a planned few
         public static float BargainPower = 1.5f;    // THE DEVIL'S STRING, the deal : this much power
         public static int BargainStamina = 15;      //     for this much max stamina, for the whole run
 
         //Musician Traits : the numbers behind each MusicianTrait (see Data/Musician.cs)
-        public static float KeepsCountWindow = 0.05f;  // ANNA, added to the PERFECT window
+        public static float KeepsCountWindow = 0.05f;  // ANNA, added to the PERFECT window on beats cued to her side
         public static int MomentumStep = 1;            // OTTO, per beat in a row
         public static int MomentumMax = 3;
         public static float ByEarPower = 1.5f;         // MALI, on hidden beats
@@ -184,8 +202,10 @@
         public static int LightBoostChance = 15, LightEaseChance = 40;
         public static float HeavyThreshold = 0.6f; // a beat at 60 percent of its strongest counts as heavy
 
-        public static float EnemyBoostPower = 1.5f;
-        public static float EnemyEasePower = 0.6f;
+        //Round 12 : the marks are wider apart, so they match the band's rows. A small stroke (the back
+        //row) can answer p, a big one (the whole band) is needed for f. Was 1.5 and 0.6.
+        public static float EnemyBoostPower = 2.0f;
+        public static float EnemyEasePower = 0.5f;
 
         //Enemy Scaling
         public static float FloorScale = 0.25f;    // each floor below the first adds 25 percent
@@ -194,9 +214,10 @@
         //of ordinary players where they were (see PROJECT_STATUS section 8).
         //Round 11 : ordinary enemies never won a single fight in the simulation, they only cost
         //breath. They hit harder now, so a band that arrives tired can lose to them.
-        public static float NormalScale = 3.1f;   // ordinary encounters, was 2.0 (1.35 before round 8)
-        public static float EliteScale = 2.0f;    // was 1.35
-        public static float BossScale = 2.8f;     // was 1.85
+        //Round 12 : lower again, TACET's f doubles its note now and the band pays for every player.
+        public static float NormalScale = 2.2f;   // ordinary encounters, 3.1 in round 11 (2.0 in round 8, 1.35 before)
+        public static float EliteScale = 1.4f;    // was 2.0 (1.35 before round 8)
+        public static float BossScale = 1.8f;     // was 2.8 (1.85 before round 8)
 
         //Conductor Stats : the 0 to 10 numbers on the select page become real values here
         public static int StaminaBase = 60;
@@ -235,17 +256,17 @@
 
         //Motif Effects : the numbers each motif changes
         public static int FamilyMotifPower = 1;      // ROSIN, SPARE STICKS
-        public static int ReedCaseDiscount = 2;      // REED CASE, was 1 (round 11)
-        public static int PianissimoRecover = 6;     // PIANISSIMO
+        public static int ReedCaseDiscount = 1;      // REED CASE, 2 in round 11, back to 1 (round 12 : +10 to +13 percent alone)
+        public static int PianissimoRecover = 3;     // PIANISSIMO, a small stroke gives this back (was 6 on top of EASE's 8)
         public static float PurseBonus = 1.3f;       // PATRON'S PURSE
-        public static float BreathMarkRecover = 1.25f; // BREATH MARK : 10 x 1.25 = 12.5, counted as 12 (round 11). Was 2 (x2), round 10 :
+        public static float BreathMarkRecover = 1.25f; // BREATH MARK : 12 x 1.25 = 15 (round 12, 10 -> 12.5 in round 11). Was 2 (x2), round 10 :
                                                         // one card alone lifted a run from 8 to 46 percent in the simulation
         public static float TuttiPerExtra = 0.10f;   // TUTTI
         public static float SteadyWindowBonus = 0.05f;   // STEADY PULSE, added to both windows
         public static float EncoreRecover = 0.15f;   // ENCORE
         public static float RubatoMissPower = 0.85f; // RUBATO
-        public static float SforzandoPower = 1.8f;   // SFORZANDO
-        public static float SecondWindRefill = 0.33f;// SECOND WIND
+        public static float SforzandoPower = 1.3f;   // SFORZANDO, a big stroke (round 12 : 1.8 against BOOST's old x1.5, now against x1)
+        public static float SecondWindRefill = 0.25f;// SECOND WIND, was 0.33 (round 12 : +34 percent alone, the most of any motif)
         public static float OverturePower = 1.5f;    // OVERTURE
         public static float CounterpointPower = 1.3f;// COUNTERPOINT
 
@@ -260,8 +281,10 @@
         public static float CodaLine = 60f;          // CODA, the FINALE is offered from here instead of FinaleLine
 
         //Conductor Perks
-        public static float LockedTempoCost = 1.0f;  // THE METRONOME pays this share. Was 0.6 : since BOOST is free (round 8)
-                                                     // his lock cost him nothing, and he won 98 percent of simulated runs (round 10)
+        public static float LockedTempoCost = 1.25f; // THE METRONOME pays this share. Was 0.6 : since BOOST is free (round 8)
+                                                     // his lock cost him nothing, and he won 98 percent of simulated runs (round 10).
+                                                     // Round 12 : 1.25, the whole band on every stroke without reading any
+                                                     // mark won 74 percent at 1.0, the others 50 to 64
         public static float RunawayFireBonus = 1.3f; // THE INFERNO, the beat after a miss
         public static float CloserLouderMax = 1.3f;  // THE UNHEARING, +130 percent at the very edge. Was 0.6 : with the PUSH CAP
                                                      // the line rarely falls far, so he was the weakest conductor (round 10)

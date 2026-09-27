@@ -17,9 +17,10 @@ namespace Tacetno433.Core
         private const float Rest = -1.3f;       // radians : 0 points right, minus a half turn points up
         private const float Lowered = 0.9f;     // hanging down to the right while the button is up
 
-        //Ruler : how long the size ruler is, a little past the BOOST mark
+        //Ruler : how long the size ruler is, a little past the big mark. The zones carry the same
+        //marks as TACET's notes, so an f note is answered by reaching the f (round 12)
         public const float RulerLength = GestureReader.BigLength + 50f;
-        private static string[] sizeWords = { "EASE", "PLAY", "BOOST" };
+        private static string[] sizeWords = { "p", "mf", "f" };
 
         private float angle = Rest;
         private float spin;                     // how fast the angle is changing
@@ -111,7 +112,7 @@ namespace Tacetno433.Core
             if (Glow > 0f) Gfx.DrawGlow(sb, tip.X, tip.Y, 40f * Glow, Palette.Highlight * (0.6f * Glow));
         }
 
-        //Size Of : 0 small (EASE), 1 middle (PLAY), 2 big (BOOST)
+        //Size Of : 0 small (p, the back row), 1 middle (mf, the middle row too), 2 big (f, the whole band)
         public static int SizeOf(float length)
         {
             if (length < GestureReader.MiddleLength) return 0;
@@ -120,8 +121,8 @@ namespace Tacetno433.Core
         }
 
         //Ruler : a line coming off anchor the way d points, filled as far as the stroke has come
-        //(along). With zones on, marks show where EASE turns to PLAY and PLAY to BOOST, and the
-        //word of the zone reached (zone, -1 for none yet) is bright. Draw it only while held.
+        //(along). With zones on, marks show where p turns to mf and mf to f, and the mark of the
+        //zone reached (zone, -1 for none yet) is bright. Draw it only while held.
         public static void DrawRuler(SpriteBatch sb, Vector2 anchor, Vector2 d, float along, int zone, bool zones)
         {
             if (along < 0f) along = 0f;
@@ -150,11 +151,13 @@ namespace Tacetno433.Core
             Gfx.Line(sb, at - side, at + side, passed ? Palette.Highlight : Palette.Paper * 0.7f, 2f);
         }
 
+        //Ruler Word : the mark in the same italic letters as the notes, bigger once it is reached
         private static void RulerWord(SpriteBatch sb, string word, Vector2 at, bool reached)
         {
             float a = reached ? 1f : 0.55f;
-            Gfx.TextSpacedCentered(sb, Ui.Font, word, at.X + 1, at.Y - 6, Color.Black * (0.6f * a), TextSize.Tiny, 1.5f);
-            Gfx.TextSpacedCentered(sb, Ui.Font, word, at.X, at.Y - 7, Palette.Highlight * a, TextSize.Tiny, 1.5f);
+            float size = TextSize.Small * (reached ? 0.8f : 0.62f);
+            Gfx.TextCentered(sb, Ui.BigFont, word, at.X + 1, at.Y + 1, Color.Black * (0.6f * a), size);
+            Gfx.TextCentered(sb, Ui.BigFont, word, at.X, at.Y, Palette.Highlight * a, size);
         }
     }
 }

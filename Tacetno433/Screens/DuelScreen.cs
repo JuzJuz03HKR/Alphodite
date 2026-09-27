@@ -27,10 +27,20 @@ namespace Tacetno433.Screens
     //           round is beat g % 8 of pass g / 8 (see BeatOf, PassOf, CallAt).
     //
     //THE MOUSE IS THE BATON, and it only counts while the LEFT BUTTON IS HELD. The strokes follow
-    //a real conductor's 4/4 pattern: beat 1 DOWN, beat 2 LEFT, beat 3 RIGHT, beat 4 UP. How BIG a
-    //stroke is gives the order: small EASE, middle PLAY, big BOOST. The beat lands where the
-    //baton stops or turns. There is no long song: every answered beat plays the next note of
-    //the band's melody, so the music only happens when the player conducts.
+    //a real conductor's 4/4 pattern: beat 1 DOWN, beat 2 LEFT, beat 3 RIGHT, beat 4 UP. The beat
+    //lands where the baton stops or turns. There is no long song: every answered beat plays the
+    //next note of the band's melody, so the music only happens when the player conducts.
+    //
+    //WHO PLAYS is decided by the stroke itself (round 12, there is no score page any more):
+    //   DYNAMICS  how BIG the stroke is picks the rows that come in: small (p) the back row,
+    //             middle (mf) the middle row too, big (f) the whole band. The ruler on the baton
+    //             says p, mf and f, the same marks TACET's notes carry: answer f with f.
+    //             Everyone who comes in pays stamina, so a big stroke tires the band.
+    //   CUE       the way the baton goes points at one side of the stage (down and up the centre,
+    //             left and right their own side). Whoever sits there hits harder. The players the
+    //             baton points at wear a small mark over their heads.
+    //   REST      where TACET is silent, letting the beat pass is a rest and gives breath back.
+    //             A stroke there is a free hit instead. Either is fine, neither is a miss.
     //
     //Extra notes and moments:
     //   PAIR       a note tied to a spark (from floor two). The spark is answered half a beat
@@ -39,16 +49,18 @@ namespace Tacetno433.Screens
     //              long. Stroke it, then keep the button held and the baton still. Holding pushes.
     //   TREMOLO    everyone else ends each round with a roll two beats long instead (every enemy
     //              on floor one, elites and bosses after). Shake the baton: every stroke adds power.
-    //   Big strokes, holds and rolls cost no stamina (round 8).
-    //   COUNTER    a PERFECT BOOST against TACET's real f note knocks part of it back.
+    //   Holds and rolls cost nothing on top of the players who play them. A roll is the whole band.
+    //   IN TUNE    a stroke on time the same size as TACET's real mark (p small, mf middle, f big)
+    //              takes the edge off its note, a small tag over the judgement says so.
+    //   COUNTER    a PERFECT big stroke against TACET's real f note knocks more of it back.
     //   FORTISSIMO a long combo sets the band on fire for a few beats.
     //   FINALE     far enough ahead at the end of a round, four strokes of the pattern on the
     //              beat end the fight at once.
     //
     //Good beats give notes to the instrument families that played them. When the conductor's
     //recipe is complete, SPACE lets the signature loose: a cut-in, then the next stroke is a
-    //PERFECT BOOST, harder still. ESC opens the pause menu (see PauseMenu); coming back, the band
-    //counts three beats in.
+    //PERFECT big stroke, harder still. ESC opens the pause menu (see PauseMenu); coming back, the
+    //band counts three beats in.
     //
     //THIS CLASS IS SPLIT OVER SEVEN FILES, all called DuelScreen (the "partial" keyword lets one
     //class be written in several files; the compiler joins them back into one):
@@ -89,21 +101,23 @@ namespace Tacetno433.Screens
         //Stroke Sizes : small, middle and big, and the order each one gives the band
         private static Choice[] sizeChoice = { Choice.Ease, Choice.Normal, Choice.Boost };
 
-        private static string[] choiceWord = { "PLAY", "BOOST", "EASE" };   // in Choice order
+        private static string[] choiceWord = { "mf", "f", "p" };            // in Choice order, the stroke's mark
+        private static int[] tierChoice = { 2, 0, 1 };                      // row tier 0, 1, 2 -> Choice p, mf, f
+        private const string silencedWord = "SILENCED";
         private static string[] dynamicMark = { "mf", "f", "p" };           // in Choice order, as music writes loudness
         private static string[] gradeWord = { "", "PERFECT", "GOOD", "MISS", "HESITATE" };
         private static string[] comboBonusWords = { "+0%", "+6%", "+12%", "+18%", "+24%", "+30%" };
         private static string[] countWords = { "", "1", "2", "3" };
         private static string[] timeWords = { "1ST TIME", "2ND TIME", "3RD TIME" };   // REPEATS, by pass
 
-        //Judgement Words : "PERFECT  /  BOOST" and so on, one per grade and choice, made in Load.
+        //Judgement Words : "PERFECT  /  f" and so on, one per grade and choice, made in Load.
         //The grace and the roll get their own short words, also made once.
         private string[] judgeText = new string[15];
         private string[] graceText = new string[5];
         private string[] rollText = new string[5];
         private static string[] holdText = { "LET GO", "FERMATA" };
 
-        //Band Panel Order : front row first, the same order as the score page
+        //Band Panel Order : front row first, left to right inside each row
         private static int[] panelOrder = { 6, 7, 8, 3, 4, 5, 0, 1, 2 };
 
         //Story Lines : what the box at the bottom right says. The signature line and the enemy's
@@ -132,6 +146,7 @@ namespace Tacetno433.Screens
         private const int SayFermata = 21;
         private const int SayCollapse = 22;
         private const int SayAgain = 23;
+        private const int SayRest = 24;
         private static string[] sayText =
         {
             "* It hums a phrase. Listen...",
@@ -157,7 +172,8 @@ namespace Tacetno433.Screens
             "* The last chord rings out. The silence breaks.",
             "* It draws out a long note. Stroke it, then hold still!",
             "* The band runs out of breath. The music stops.",
-            "* It plays the phrase again. Read the marks, they change!"
+            "* It plays the phrase again. Read the marks, they change!",
+            "* Silence. Let it pass to breathe, or swing for a free hit."
         };
         private const float SayWrap = 350f;
         private const float SaySpeed = 520f;     // pixels of text uncovered per second
@@ -240,6 +256,7 @@ namespace Tacetno433.Screens
         private float doneAt = -1f;     // when the last answer went in
         private int barPush;            // how far the line moved over this bar
         private bool doubleTold;        // the story box has explained pairs once this fight
+        private bool restTold;          // the story box has explained rests once this fight
 
         //Finale State : four strokes of the pattern, one bar after a one bar count
         private float finaleClock;      // below zero while the FINALE card is up
@@ -270,7 +287,10 @@ namespace Tacetno433.Screens
         private float judgeScale;
         private float judgeWidth;
         private int judgeTiming;        // EARLY / LATE : -1 early, +1 late, 0 nothing to say
+        private bool judgeTune;         // IN TUNE : the stroke matched TACET's real mark
+        private const string InTuneWord = "IN TUNE";
         private static string[] timingWord = { "EARLY", "", "LATE" };
+        private const string restWord = "REST";
 
         //Clash State
         private bool clashShown;
@@ -386,6 +406,7 @@ namespace Tacetno433.Screens
             judgeScale = scale;
             judgeTimer = 0f;
             judgeTiming = 0;
+            judgeTune = false;
             judgeWidth = Game.BigFont.MeasureString(word).X * scale;
         }
 
@@ -423,7 +444,7 @@ namespace Tacetno433.Screens
             return left * left * left;
         }
 
-        //Beat Of, Pass Of : note g of the round is this beat of the plan, in this time through
+        //Beat Of, Pass Of : note g of the round is this beat of TACET's phrase, in this time through
         private static int BeatOf(int g)
         {
             return g % BattleRules.BeatsPerRound;
@@ -714,17 +735,6 @@ namespace Tacetno433.Screens
             if (rolling) { UpdateRoll(b, stroked, now); return; }
             if (onGrace) { UpdateGrace(b, stroked, now); return; }
 
-            //Silent Beat : nobody on either side, so nothing to conduct. The band breathes.
-            if (!battle.HasAction(b))
-            {
-                if (clock >= target)
-                {
-                    ResolveAnswer(b, Choice.Normal, Grade.None, false);
-                    AdvanceBeat();
-                }
-                return;
-            }
-
             //Tremolo : the roll opens a moment before its beat and lasts two beats
             if (battle.IsTremolo(b))
             {
@@ -746,9 +756,16 @@ namespace Tacetno433.Screens
                 return;
             }
 
-            //Hesitate : the beat went by without a stroke
+            //No Stroke : the beat went by. Where TACET is silent that is a REST, the band breathes
+            //and the combo holds. On one of TACET's notes it is a HESITATE, nobody answers.
             if (now > target + LateLimit())
             {
+                if (battle.IsSilent(b))
+                {
+                    ResolveAnswer(b, Choice.Normal, Grade.None, false);
+                    AdvanceBeat();
+                    return;
+                }
                 SoundBank.Play(Sfx.QteHesitate);
                 ResolveAnswer(b, Choice.Normal, Grade.Hesitate, false);
                 AfterStroke(b);
@@ -782,19 +799,19 @@ namespace Tacetno433.Screens
             int comboBefore = battle.Combo;
             bool wasReady = battle.SignatureReady;
             bool falseNote = battle.EnemyPower[b] > 0 && !battle.EnemyHidden[b] && battle.ShownChoice[b] != battle.EnemyChoice[b];
-            int held = battle.HeldNoteSeat(b);
 
             BeatResult r = battle.Resolve(b, choice, grade);
             barPush += r.Push;
+            if (r.InTune && !r.Counter) judgeTune = true;             // the COUNTER has a word of its own
             if (r.StaminaChange != 0) staminaFlash = 1f;
 
-            //Our Sound : whoever played lights up, plays (or flinches, if TACET won the beat),
+            //Our Sound : whoever came in lights up, plays (or flinches, if TACET won the beat),
             //and their sound spreads on the floor under their feet
             Formation f = Game.CurrentRun.Formation;
             for (int s = 0; s < StageLayout.SeatCount; s++)
             {
                 if (f.Seated[s] == null) continue;
-                bool played = f.Plays(s, b) || (s == held && r.Played);
+                bool played = r.Joined[s] || (s == r.HeldSeat && r.Played);
                 if (played)
                 {
                     lit[s] = 1f;
@@ -805,9 +822,16 @@ namespace Tacetno433.Screens
                 if (r.TraitFired[s]) PopTrait(s);
             }
 
+            //Rest : the baton let a silent beat pass. The story box says what a rest is, once.
             if (grade == Grade.None)
             {
                 SoundBank.Play(Sfx.RestRecover);
+                if (r.Rested) ShowJudge(restWord, 0.45f);
+                if (!restTold)
+                {
+                    restTold = true;
+                    Say(SayRest);
+                }
                 return;
             }
 
@@ -831,7 +855,7 @@ namespace Tacetno433.Screens
             if (r.Counter) ShowCounter();
 
             //Notes : a good beat feeds the signature, but the signature itself does not
-            if (!signature && (grade == Grade.Perfect || grade == Grade.Good)) battle.AddNotes(b);
+            if (!signature && (grade == Grade.Perfect || grade == Grade.Good)) battle.AddNotes(r);
             if (!wasReady && battle.SignatureReady && !battle.SignatureArmed)
             {
                 Say(SayReady);
@@ -843,7 +867,7 @@ namespace Tacetno433.Screens
             ShowFire(r);
 
             //Special Moments : rare, so they still get a word of their own
-            ShowBreath(r, b);
+            ShowBreath(r);
             if (r.Fired)
                 effects.SpawnPop(stageBox.Center.X, stageBox.Y + 60, "RUNAWAY FIRE", Palette.Accent, 0.5f);
         }
@@ -864,12 +888,12 @@ namespace Tacetno433.Screens
         //   SECOND WIND   the motif caught the band this once
         //   COLLAPSE      out of breath, the fight is over
         //   low breath    the first time it drops under a quarter, the story box warns
-        private void ShowBreath(BeatResult r, int b)
+        private void ShowBreath(BeatResult r)
         {
             RunState run = Game.CurrentRun;
             if (r.Blow > 0)
             {
-                Vector2 target = BlowTarget(b);
+                Vector2 target = BlowTarget(r);
                 effects.SpawnBlow(HitX, RingY, target.X, target.Y, r.Blow / 16f);
                 staminaJolt = 1f;
                 staminaFlash = 1f;
@@ -893,15 +917,15 @@ namespace Tacetno433.Screens
             }
         }
 
-        //Blow Target : the front most player on this beat takes TACET's blow, or the middle of
-        //the band when nobody was playing it
-        private Vector2 BlowTarget(int b)
+        //Blow Target : the front most player who came in takes TACET's blow, or the middle of
+        //the band when nobody answered it
+        private Vector2 BlowTarget(BeatResult r)
         {
             Formation f = Game.CurrentRun.Formation;
             for (int i = 0; i < panelOrder.Length; i++)
             {
                 int s = panelOrder[i];
-                if (f.Seated[s] != null && f.Plays(s, b))
+                if (f.Seated[s] != null && r.Joined[s])
                 {
                     Rectangle stand = StandRect(s);
                     return new Vector2(stand.Center.X, stand.Center.Y);
@@ -919,15 +943,6 @@ namespace Tacetno433.Screens
             traitPopAt[seat] = time;
             Rectangle stand = StandRect(seat);
             effects.SpawnPop(stand.Center.X, stand.Y - 20, m.TraitName, Palette.Highlight, 0.36f);
-        }
-
-        //Trait Seat : the first seat whose player has this trait and plays this beat, or -1
-        private int TraitSeat(MusicianTrait trait, int b)
-        {
-            Formation f = Game.CurrentRun.Formation;
-            for (int s = 0; s < StageLayout.SeatCount; s++)
-                if (f.Plays(s, b) && f.Seated[s].Trait == trait) return s;
-            return -1;
         }
 
         //Clash Start : our sound and TACET's meet at the hit point. The world shakes, the line
@@ -1012,7 +1027,7 @@ namespace Tacetno433.Screens
         }
 
         //Signature Arm : SPACE with the recipe complete. The conductor's picture sweeps across
-        //the screen, and the next stroke becomes a PERFECT BOOST with the signature bonus on top.
+        //the screen, and the next stroke becomes a PERFECT big stroke with the signature bonus on top.
         private void ArmSignature()
         {
             if (battle.SignatureArmed) return;
@@ -1035,10 +1050,11 @@ namespace Tacetno433.Screens
         {
             battle.EndRound();
 
+            //Next Round : back to the stage page, to see TACET's next part and move the band
             if (battle.Finished)
                 Game.Screens.Change(new ResultScreen());
             else
-                Game.Screens.Change(new ScoreScreen());
+                Game.Screens.Change(new FormationScreen(true));
         }
 
         //Tug Split : where the marker sits on the tug bar
@@ -1069,7 +1085,6 @@ namespace Tacetno433.Screens
                 return (clock - (grace - beatLen * 0.5f)) / (beatLen * 0.5f);
             }
 
-            if (!battle.HasAction(BeatOf(pending))) return -1f;
             float target = AnswerAt(pending);
             return (clock - (target - beatLen)) / beatLen;
         }
@@ -1080,6 +1095,16 @@ namespace Tacetno433.Screens
             if (phase == Phase.Finale) return pattern[Math.Min(finaleStep, 3)];
             if (onGrace) return Flick.None;              // the spark takes any way
             return pattern[BeatOf(pending) % 4];
+        }
+
+        //Live Size : how big the stroke being drawn is so far, 0 small, 1 middle, 2 big, so the
+        //band can light up row by row while the baton travels. -1 when no stroke is under way.
+        private int LiveSize()
+        {
+            if (phase != Phase.Play || !gesture.InStroke || rolling || holding || onGrace) return -1;
+            if (AnswerProgress() < 0f) return -1;
+            float along = Vector2.Dot(gesture.LiveVector, NoteGlyph.Way(WantedWay()));
+            return Baton.SizeOf(along);
         }
 
         public override void Draw(SpriteBatch sb)

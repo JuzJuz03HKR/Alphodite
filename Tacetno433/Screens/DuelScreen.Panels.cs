@@ -60,8 +60,9 @@ namespace Tacetno433.Screens
         }
 
         //Band Panel : one box per musician on stage, like a party panel. A box turns white when
-        //its player plays the beat being answered, and glows while their sound is out. The eight
-        //marks along the bottom are that player's part for this round, the current beat ringed.
+        //the baton points at its player's side on the beat being answered (CUE), and glows while
+        //their sound is out. Along the bottom : the smallest stroke that brings them in (p, mf or
+        //f, DYNAMICS) and their side of the stage.
         private void DrawBandPanel(SpriteBatch sb)
         {
             Formation f = Game.CurrentRun.Formation;
@@ -76,7 +77,6 @@ namespace Tacetno433.Screens
             float gap = 6f;
             float w = Math.Min(150f, (bandPanel.Width - 16 - gap * (count - 1)) / count);
             float x = bandPanel.X + 8;
-            int current = AnswerProgress() >= 0f && phase == Phase.Play ? BeatOf(pending) : -1;
             bool roomForFace = w >= 110f;
 
             for (int i = 0; i < panelOrder.Length; i++)
@@ -86,7 +86,8 @@ namespace Tacetno433.Screens
                 if (m == null) continue;
 
                 Rectangle box = new Rectangle((int)x, bandPanel.Y + 8, (int)w, bandPanel.Height - 16);
-                bool now = current >= 0 && f.Plays(s, current);
+                bool now = phase == Phase.Play && UpNext(s);
+                bool silenced = !battle.CanPlay(s);
                 Color ink = now ? Palette.Ink : Palette.Paper;
                 Color soft = now ? Palette.InkSoft : Palette.LineGrey;
 
@@ -105,19 +106,29 @@ namespace Tacetno433.Screens
                 Gfx.TextSpaced(sb, Game.Font, StageLayout.RowOf(s).Name, textX, box.Y + 28, soft, TextSize.Tiny, 1.5f);
                 MusicianArt.FamilyGlyph(sb, m.Family, box.Right - 14, box.Y + 16, 0.35f, soft);
 
-                //Part : eight marks, filled where this player plays
-                float step = (box.Width - 16) / 7f;
-                for (int n = 0; n < BattleRules.BeatsPerRound; n++)
+                //Stroke And Side : the mark of the smallest stroke that brings them in, and their side
+                if (silenced)
                 {
-                    float mx = box.X + 8 + n * step;
-                    float my = box.Bottom - 12;
-                    if (f.Plan[s, n]) Gfx.Diamond(sb, mx, my, 3, ink);
-                    else Gfx.Rect(sb, mx - 2, my, 4, 1, soft);
-                    if (n == current) Gfx.DiamondOutline(sb, mx, my, 6, ink, 1f);
+                    Gfx.TextSpaced(sb, Game.Font, silencedWord, box.X + 8, box.Bottom - 20, soft, TextSize.Tiny, 1.5f);
+                }
+                else
+                {
+                    int tier = StrokeTierOf(s);
+                    Gfx.Text(sb, Game.BigFont, choiceWord[tierChoice[tier]], box.X + 8, box.Bottom - 26, ink, TextSize.Small * 0.7f);
+                    Gfx.TextSpacedRight(sb, Game.Font, StageLayout.SideNames[StageLayout.SeatSide(s)], box.Right - 8, box.Bottom - 20, soft, TextSize.Tiny, 1.5f);
                 }
 
                 x += w + gap;
             }
+        }
+
+        //Stroke Tier : 0 when a small stroke brings this seat in, 1 a middle one, 2 only a big one.
+        //THE QUIET PART and LOCKED TEMPO come in on every stroke.
+        private int StrokeTierOf(int seat)
+        {
+            Musician m = Game.CurrentRun.Formation.Seated[seat];
+            if (battle.ChoicesLocked || m.Trait == MusicianTrait.QuietPart) return 0;
+            return Math.Max(0, battle.RowTier(StageLayout.SeatRow[seat]));
         }
 
         //Story Box : the line at the bottom right, typed out a little at a time

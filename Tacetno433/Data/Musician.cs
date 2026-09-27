@@ -15,15 +15,15 @@ namespace Tacetno433.Data
     public enum MusicianTrait
     {
         None,
-        KeepsCount,      // ANNA   her beats have a wider PERFECT window
-        QuietPart,       // KLARA  EASE does not soften her part
+        KeepsCount,      // ANNA   beats cued to her side have a wider PERFECT window
+        QuietPart,       // KLARA  she plays on every stroke, whatever her row
         Momentum,        // OTTO   each beat in a row he plays hits 1 harder, up to 3
         ByEar,           // MALI   50 percent harder on TACET's hidden beats
-        HeldNote,        // CHAI   his note rings on into the next empty beat at half power
+        HeldNote,        // CHAI   his note rings on into a beat nobody plays, at 40 percent
         OneStepBetter,   // NUAN   30 percent harder when TACET plays loud
         FourBars,        // LUKA   the fourth beat of a bar he plays all of hits twice as hard
-        Forgiven,        // IRIS   a late stroke on her beats still counts as GOOD
-        Thunder          // BORIS  his BOOST knocks 2 off TACET's next note
+        Forgiven,        // IRIS   a late stroke that brings her in still counts as GOOD
+        Thunder          // BORIS  a big stroke with him in knocks 2 off TACET's next note
     }
 
     //Musician : one player in the ensemble.
@@ -75,12 +75,12 @@ namespace Tacetno433.Data
             new Musician { Name = "ANNA",  Instrument = "VIOLIN",    Culture = "EUROPEAN", Family = Family.String,     Era = 0,
                            Power = 4, Cost = 4, ThemeColor = Palette.ToneB,
                            Trait = MusicianTrait.KeepsCount, TraitName = "COUNTS ALOUD",
-                           TraitText = "On the beats she plays, the PERFECT window is wider.",
+                           TraitText = "On beats the baton points at her side, the PERFECT window is wider.",
                            Line = "Counts every bar out loud, even when nobody asked her to." },
             new Musician { Name = "KLARA", Instrument = "FLUTE",     Culture = "EUROPEAN", Family = Family.Wind,       Era = 0,
                            Power = 3, Cost = 2, ThemeColor = Palette.ToneC,
                            Trait = MusicianTrait.QuietPart, TraitName = "THE QUIET PART",
-                           TraitText = "EASE does not soften her part.",
+                           TraitText = "She plays on every stroke, even a small one, wherever she sits.",
                            Line = "Plays the quiet parts nobody else wants and never misses one." },
             new Musician { Name = "OTTO",  Instrument = "TIMPANI",   Culture = "EUROPEAN", Family = Family.Percussion, Era = 0,
                            Power = 6, Cost = 6, ThemeColor = Palette.ToneD,
@@ -97,7 +97,7 @@ namespace Tacetno433.Data
             new Musician { Name = "CHAI",  Instrument = "PI NAI",    Culture = "SIAM",     Family = Family.Wind,       Era = 1,
                            Power = 3, Cost = 3, ThemeColor = Palette.ToneC,
                            Trait = MusicianTrait.HeldNote, TraitName = "HELD NOTE",
-                           TraitText = "His note rings on into the next empty beat at half power, for free.",
+                           TraitText = "His note rings on into a beat nobody plays at 40 percent, for free.",
                            Line = "Can hold one note longer than anyone thinks is possible." },
             new Musician { Name = "NUAN",  Instrument = "RANAT EK",  Culture = "SIAM",     Family = Family.Percussion, Era = 1,
                            Power = 7, Cost = 6, ThemeColor = Palette.ToneB,
@@ -114,12 +114,12 @@ namespace Tacetno433.Data
             new Musician { Name = "IRIS",  Instrument = "HORN",      Culture = "EUROPEAN", Family = Family.Wind,       Era = 2,
                            Power = 4, Cost = 3, ThemeColor = Palette.ToneA,
                            Trait = MusicianTrait.Forgiven, TraitName = "FASHIONABLY LATE",
-                           TraitText = "On the beats she plays, a late stroke still counts as GOOD.",
+                           TraitText = "A late stroke that brings her in still counts as GOOD.",
                            Line = "Arrives late, plays louder than the rest, is forgiven." },
             new Musician { Name = "BORIS", Instrument = "BASS DRUM", Culture = "EUROPEAN", Family = Family.Percussion, Era = 2,
                            Power = 8, Cost = 7, ThemeColor = Palette.ToneD,
                            Trait = MusicianTrait.Thunder, TraitName = "THE WHOLE FLOOR",
-                           TraitText = "His BOOST knocks 2 off TACET's next note.",
+                           TraitText = "A big stroke with him in knocks 2 off TACET's next note.",
                            Line = "One hit from him and the whole floor knows about it." },
         };
 

@@ -9,8 +9,9 @@ using Tacetno433.Data;
 
 namespace Tacetno433.Screens
 {
-    //DuelScreen.Baton : judging the baton. JudgeStroke turns a finished stroke into an order and
-    //a grade, and the stroke guide shows how big the stroke is while it is being made.
+    //DuelScreen.Baton : judging the baton. JudgeStroke turns a finished stroke into who plays (its
+    //size, DYNAMICS) and a grade, and the stroke guide shows how big the stroke is while it is being
+    //made: the ruler marks p, mf and f, and the band lights up row by row as the stroke grows.
     //The stick itself and its ruler are drawn by Core/Baton.cs, the arrows by Core/NoteGlyph.cs.
     public partial class DuelScreen
     {
@@ -19,9 +20,9 @@ namespace Tacetno433.Screens
         {
             int k = b % 4;
 
-            //Stroke Size : small eases, middle plays, big boosts
+            //Stroke Size : small brings the back row, middle the middle row too, big the whole band
             Choice choice = sizeChoice[Baton.SizeOf(gesture.Length)];
-            if (battle.ChoicesLocked) choice = Choice.Boost;                   // THE METRONOME : every stroke is a BOOST
+            if (battle.ChoicesLocked) choice = Choice.Boost;                   // THE METRONOME : always the whole band
 
             //Timing Grade : judged where the baton stopped, against the beat
             float now = StrokeClock();
@@ -33,15 +34,15 @@ namespace Tacetno433.Screens
             //COUNTS ALOUD : a PERFECT that only her wider window allowed gets her name over it
             if (grade == Grade.Perfect && off > battle.PerfectWindow)
             {
-                int anna = TraitSeat(MusicianTrait.KeepsCount, b);
+                int anna = battle.CuedSeat(MusicianTrait.KeepsCount, b);
                 if (anna >= 0) PopTrait(anna);
             }
 
-            //FASHIONABLY LATE : a late stroke on her beat is forgiven as GOOD
-            if (grade == Grade.Miss && now > target && battle.LateForgivenAt(b))
+            //FASHIONABLY LATE : a late stroke that brings her in is forgiven as GOOD
+            if (grade == Grade.Miss && now > target && battle.LateForgivenAt(choice))
             {
                 grade = Grade.Good;
-                int iris = TraitSeat(MusicianTrait.Forgiven, b);
+                int iris = battle.JoinedSeat(MusicianTrait.Forgiven, choice);
                 if (iris >= 0) PopTrait(iris);
             }
 
@@ -49,7 +50,7 @@ namespace Tacetno433.Screens
             bool rightWay = gesture.Direction == pattern[k];
             if (!rightWay) grade = Grade.Miss;
 
-            //Signature : this stroke is a PERFECT BOOST whatever its shape, with the bonus on top
+            //Signature : this stroke is a PERFECT big stroke whatever its shape, with the bonus on top
             bool signature = battle.SignatureArmed;
             if (signature)
             {
@@ -64,7 +65,7 @@ namespace Tacetno433.Screens
             baton.Whip(gesture.Direction);
 
             //Slash : a big stroke the right way leaves a blade of light along its path, brighter
-            //for a PERFECT. The band's own blow, the answer to TACET's.
+            //for a PERFECT. The whole band's blow, the answer to TACET's.
             if (choice == Choice.Boost && (rightWay || signature))
                 effects.SpawnSlash(gesture.From, gesture.To, grade == Grade.Perfect ? 1f : 0.55f);
 
@@ -111,9 +112,9 @@ namespace Tacetno433.Screens
         }
 
         //Stroke Guide : a ruler coming off the baton the way this beat goes, with marks where a
-        //stroke turns from EASE to PLAY and from PLAY to BOOST. Once a stroke starts the ruler
-        //stays where it began and fills up as the baton travels, so the size can be judged on
-        //the way instead of guessed.
+        //stroke turns from p to mf and from mf to f. Once a stroke starts the ruler stays where it
+        //began and fills up as the baton travels, so the size can be judged on the way instead of
+        //guessed. The band lights up with it, row by row (see DrawMusicianGlow).
         private void DrawStrokeGuide(SpriteBatch sb)
         {
             if (AnswerProgress() < 0f || cutIn > 0f || rolling) return;

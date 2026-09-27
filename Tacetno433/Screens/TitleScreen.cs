@@ -47,19 +47,19 @@ namespace Tacetno433.Screens
         private static string[] tips =
         {
             "A beat TACET wins knocks breath out of the band. At zero, it collapses.",
-            "Big strokes cost nothing extra. Swing big and win the beat.",
+            "A small stroke brings the back row, a big one the whole band. Everyone who plays pays stamina.",
             "PERFECT strokes in a row build a combo. A miss breaks it.",
-            "The front row hits harder. The back row costs less.",
-            "TACET's call shows how loud each note is: f loud, mf, p soft. Answer to match.",
+            "The baton points at one side of the stage on every beat. Whoever sits there hits harder.",
+            "TACET's notes say f, mf or p. Answer to match: the ruler on the baton says the same.",
             "A ??? beat hides its strength until the clash.",
             "Motifs last the whole run. Pick the ones that suit your conductor.",
-            "A PERFECT BOOST against a real f note is a COUNTER. It throws part of the note back.",
+            "A PERFECT f against a real f note is a COUNTER. It throws part of the note back.",
             "From floor two, a note tied to a spark: answer it, then flick once more, any way, on the half beat.",
             "Rounds end with a roll on floor one, and always for elites and bosses. Shake as fast as you can.",
             "From floor two, a note under an arch is a fermata. Stroke it, then hold still to the end.",
             "Eight PERFECTs in a row set the band on fire. FORTISSIMO hits harder for four beats.",
             "Far enough ahead at the end of a round, conduct the FINALE and end the duel at once.",
-            "Round two plays your plan twice, round three three times. Read the f and p again each time.",
+            "Where TACET is silent, let the beat pass to rest, or swing for a free hit.",
             "Strokes judged early or late? Settings has a STROKE TIMING test.",
         };
         private const float TipTime = 6f;

@@ -135,19 +135,14 @@ namespace Tacetno433.Data
             for (int i = 0; i < MusicianList.All.Length; i++) rehearsed.Add(MusicianList.All[i].Rehearsed.ToString());
             lines.Add("rehearsed=" + string.Join(",", rehearsed));
 
+            //Seated : one entry per seat. Round 12 dropped the beat plan, an old save's plan= line is ignored.
             List<string> seated = new List<string>();
-            List<string> plan = new List<string>();
             for (int s = 0; s < StageLayout.SeatCount; s++)
             {
                 Musician m = run.Formation.Seated[s];
                 seated.Add(m == null ? "-1" : Array.IndexOf(MusicianList.All, m).ToString());
-
-                string row = "";
-                for (int b = 0; b < BattleRules.BeatsPerRound; b++) row += run.Formation.Plan[s, b] ? "1" : "0";
-                plan.Add(row);
             }
             lines.Add("seated=" + string.Join(",", seated));
-            lines.Add("plan=" + string.Join(",", plan));
 
             List<string> motifs = new List<string>();
             for (int i = 0; i < run.Motifs.Count; i++) motifs.Add(Array.IndexOf(MotifList.All, run.Motifs[i]).ToString());
@@ -211,14 +206,9 @@ namespace Tacetno433.Data
                 MusicianList.All[i].Rehearsed = rehearsed[i];
 
             int[] seated = GetList(v, "seated");
-            string[] plan = GetText(v, "plan").Split(',');
             for (int s = 0; s < StageLayout.SeatCount && s < seated.Length; s++)
-            {
                 if (seated[s] >= 0 && seated[s] < MusicianList.All.Length) run.Formation.Seated[s] = MusicianList.All[seated[s]];
-                if (s < plan.Length)
-                    for (int b = 0; b < BattleRules.BeatsPerRound && b < plan[s].Length; b++)
-                        run.Formation.Plan[s, b] = plan[s][b] == '1';
-            }
+            run.Formation.Tidy(run.Seats);       // a save from before round 12 sat its first players down the centre
 
             int[] motifs = GetList(v, "motifs");
             for (int i = 0; i < motifs.Length; i++)
