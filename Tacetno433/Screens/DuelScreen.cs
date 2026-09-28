@@ -59,9 +59,9 @@ namespace Tacetno433.Screens
     //              beat end the fight at once.
     //
     //Good beats give notes to the instrument families that played them. When the conductor's
-    //recipe is complete, SPACE lets the signature loose: a cut-in, then the next stroke is a
-    //PERFECT big stroke, harder still. ESC opens the pause menu (see PauseMenu); coming back, the
-    //band counts three beats in.
+    //recipe is complete, SPACE lets the signature loose: a cut-in, then the conductor's own move
+    //for the next few strokes (round 13, see BattleState.StartSignature). ESC opens the pause
+    //menu (see PauseMenu); coming back, the band counts three beats in.
     //
     //THIS CLASS IS SPLIT OVER SEVEN FILES, all called DuelScreen (the "partial" keyword lets one
     //class be written in several files; the compiler joins them back into one):
@@ -217,6 +217,9 @@ namespace Tacetno433.Screens
         private string beatsLabel = "";
         private string tempoLabel = "";
         private string signatureName = "";
+        private float signatureScale;                    // the name's size in the signature panel, see Load
+        private const float SignatureNameRoom = 100f;    // how wide the name may be there
+        private string[] louderWords = new string[0];   // THE CLOSER THE LOUDER, see Load
 
         //Round State : the whole round is one run of beats. TACET's note n sounds at n beats,
         //and is answered at n + 4 beats, so the answers start one bar after the call.
@@ -241,7 +244,6 @@ namespace Tacetno433.Screens
         private float heldTime;
         private Choice holdChoice;
         private Grade holdGrade;
-        private bool holdSignature;
 
         //Trait Pops : each musician's trait name rises at most once in this many seconds, so a
         //trait that works every beat does not bury the stage in words
@@ -315,7 +317,19 @@ namespace Tacetno433.Screens
             displayLine = battle.Line;
             roundEndLabel = "END OF ROUND " + battle.Round;
             beatsLabel = "/ " + BattleRules.BeatsPerRound;
-            signatureName = Game.CurrentRun.Conductor.MechanicName;
+            signatureName = Game.CurrentRun.Conductor.SignatureName;
+
+            //Signature Name Fit : a long name shrinks to fit the bottom left panel
+            signatureScale = TextSize.Label;
+            float nameWidth = Game.Font.MeasureString(signatureName).X * signatureScale;
+            if (nameWidth > SignatureNameRoom) signatureScale *= SignatureNameRoom / nameWidth;
+
+            //Louder Words : THE CLOSER THE LOUDER's bonus, "LOUDER +40%", made once for every percent
+            if (Game.CurrentRun.Conductor.Perk == ConductorPerk.CloserLouder)
+            {
+                louderWords = new string[(int)(BattleRules.CloserLouderMax * 100f) + 1];
+                for (int i = 0; i < louderWords.Length; i++) louderWords[i] = "LOUDER +" + i + "%";
+            }
 
             //Tempo : this round's speed, which an enemy's trait may have changed
             beatLen = 60f / battle.Tempo;
@@ -386,7 +400,7 @@ namespace Tacetno433.Screens
             for (int i = 0; i < sayText.Length; i++)
             {
                 string text = sayText[i];
-                if (i == SaySignature) text = "* " + c.Name + " : " + c.MechanicName + "!";
+                if (i == SaySignature) text = c.SignatureCall;
                 if (i == SayTrait) text = battle.Enemy.TraitStory;
 
                 string wrapped = Gfx.WrapText(Game.StoryFont, text, SayWrap, TextSize.Story);
@@ -524,8 +538,8 @@ namespace Tacetno433.Screens
             if (clashShown) clashTimer += dt;
 
             //Fire Light : fades in while the band is on fire, out when it is not.
-            //On fire, the staff behind the band never stops singing.
-            float fireWanted = battle.FortissimoLeft > 0 ? 1f : 0f;
+            //On fire, the staff behind the band never stops singing. SET ALIGHT lights it too.
+            float fireWanted = battle.FortissimoLeft > 0 || battle.SignatureIs(SignatureMove.SetAlight) ? 1f : 0f;
             fireGlow += (fireWanted - fireGlow) * Math.Min(1f, dt * 5f);
             if (fireGlow > 0.5f) staffEnergy = Math.Max(staffEnergy, 1f);
 
@@ -769,12 +783,12 @@ namespace Tacetno433.Screens
             {
                 if (battle.IsSilent(b))
                 {
-                    ResolveAnswer(b, Choice.Normal, Grade.None, false);
+                    ResolveAnswer(b, Choice.Normal, Grade.None);
                     AdvanceBeat();
                     return;
                 }
                 SoundBank.Play(Sfx.QteHesitate);
-                ResolveAnswer(b, Choice.Normal, Grade.Hesitate, false);
+                ResolveAnswer(b, Choice.Normal, Grade.Hesitate);
                 AfterStroke(b);
             }
         }
@@ -801,7 +815,7 @@ namespace Tacetno433.Screens
 
         //Answer Resolve : ask the rules what happened on this beat, then show it at once.
         //TACET's note reaches the hit point on the beat, so the clash happens right here.
-        private void ResolveAnswer(int b, Choice choice, Grade grade, bool signature)
+        private void ResolveAnswer(int b, Choice choice, Grade grade)
         {
             int comboBefore = battle.Combo;
             bool wasReady = battle.SignatureReady;
@@ -861,9 +875,9 @@ namespace Tacetno433.Screens
             StartClash(r, grade);
             if (r.Counter) ShowCounter();
 
-            //Notes : a good beat feeds the signature, but the signature itself does not
-            if (!signature && (grade == Grade.Perfect || grade == Grade.Good)) battle.AddNotes(r);
-            if (!wasReady && battle.SignatureReady && !battle.SignatureArmed)
+            //Notes : a PERFECT beat feeds the signature, but not while the signature runs (see AddNotes)
+            battle.AddNotes(r);
+            if (!wasReady && battle.SignatureReady && !battle.SignatureOn)
             {
                 Say(SayReady);
                 effects.SpawnPop(bandPanel.Center.X, bandPanel.Y - 24, "SIGNATURE READY  -  SPACE", Palette.Accent, 0.5f);
@@ -892,6 +906,7 @@ namespace Tacetno433.Screens
 
         //Breath Show : what the beat did to the band's breath.
         //   TACET'S BLOW  its note flies on into the band, the stamina plate jolts, the loss pops up
+        //   DEAF EARS     THE UNHEARING's signature kept the blow off, its name pops up instead
         //   SECOND WIND   the motif caught the band this once
         //   COLLAPSE      out of breath, the fight is over
         //   low breath    the first time it drops under a quarter, the story box warns
@@ -907,6 +922,10 @@ namespace Tacetno433.Screens
                 shake = Math.Max(shake, Math.Min(1f, 0.35f + r.Blow / 24f));
                 effects.SpawnPop(310f, 100f, NumberText.Signed(-r.Blow), Palette.Highlight, 0.5f);
             }
+
+            //DEAF EARS : TACET won the beat, but its blow never reached the band
+            if (r.BlowIgnored > 0)
+                effects.SpawnPop(310f, 100f, "DEAF EARS", Palette.Accent, 0.4f);
 
             if (r.SecondWind)
                 effects.SpawnPop(stageBox.Center.X, stageBox.Y + 60, "SECOND WIND", Palette.Accent, 0.6f);
@@ -1034,10 +1053,10 @@ namespace Tacetno433.Screens
         }
 
         //Signature Arm : SPACE with the recipe complete. The conductor's picture sweeps across
-        //the screen, and the next stroke becomes a PERFECT big stroke with the signature bonus on top.
+        //the screen, and the conductor's own move runs for the next few strokes (BattleState.StartSignature).
         private void ArmSignature()
         {
-            if (battle.SignatureArmed) return;
+            if (battle.SignatureOn) return;
             if (!battle.SignatureReady)
             {
                 SoundBank.Play(Sfx.UiDenied, 0.4f, 0f);
@@ -1045,12 +1064,12 @@ namespace Tacetno433.Screens
             }
             if (phase != Phase.Play || pending >= total || rolling || holding) return;
 
-            battle.SpendNotes();
-            battle.SignatureArmed = true;
+            battle.StartSignature();
             cutIn = BattleRules.CutInTime;
             cutInFinale = false;
             Say(SaySignature);
             SoundBank.Play(Sfx.ComboUp, 1f, 0.6f);
+            if (battle.SignatureIs(SignatureMove.SetAlight)) fireFlash = 1f;   // SET ALIGHT : the stage goes up in flames
         }
 
         private void LeaveRound()
@@ -1110,9 +1129,9 @@ namespace Tacetno433.Screens
         {
             if (phase != Phase.Play || !gesture.InStroke || rolling || holding || onGrace) return -1;
             if (AnswerProgress() < 0f) return -1;
-            //LOCKED TEMPO : the rows the mark calls light up, whatever the size
+            //LOCKED TEMPO, VILLAGE BAND : the rows the mark or the signature calls light up, whatever the size
             int b = BeatOf(pending);
-            if (battle.ChoicesLocked && !battle.IsSilent(b)) return SizeIndexOf(battle.MarkedChoice(b));
+            if (battle.SizeDecided(b)) return SizeIndexOf(battle.DecidedChoice(b));
 
             float along = Vector2.Dot(gesture.LiveVector, NoteGlyph.Way(WantedWay()));
             return Baton.SizeOf(along);

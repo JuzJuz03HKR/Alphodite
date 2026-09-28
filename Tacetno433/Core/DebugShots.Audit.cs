@@ -13,7 +13,8 @@ namespace Tacetno433.Core
     //   BASELINE    THE APPRENTICE, how often each enemy on each floor ends a run, and the first era
     //   CONDUCTORS  every conductor with the same habits
     //   MOTIFS      one motif owned from the start and no others, against no motif at all
-    //The sim hands in grades directly, never uses SIGNATURE, never buys in shops or plays events,
+    //The sim hands in grades directly, lets the SIGNATURE loose as soon as it can (round 13, it
+    //never did before), never buys in shops or plays events,
     //so motifs that change timing windows or shards (STEADY PULSE, PATRON'S PURSE, ENCORE) show
     //little here. Results swing by about 2 to 3 percent between runs.
     public static partial class DebugShots
@@ -57,7 +58,8 @@ namespace Tacetno433.Core
                 {
                     RunRecord rec = new RunRecord();
                     for (int n = 0; n < 800; n++) PlayRun(game, ConductorList.All[c], h, null, true, random, rec);
-                    r += auditHabit[h] + " " + Percent(rec.Won, rec.Runs).PadLeft(6) + "   ";
+                    r += auditHabit[h] + " " + Percent(rec.Won, rec.Runs).PadLeft(6)
+                       + " (SIG " + (rec.Signatures / (float)Math.Max(1, rec.Fights)).ToString("0.0") + ")   ";
                 }
                 r += "\r\n";
             }

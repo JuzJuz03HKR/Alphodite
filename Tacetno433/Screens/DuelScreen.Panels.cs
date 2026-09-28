@@ -17,13 +17,13 @@ namespace Tacetno433.Screens
         //Signature Panel : the conductor's face and the recipe. Each column is one instrument
         //family, with a box for every note the recipe asks for. A family nobody on stage plays
         //shows a dash and is skipped. When every column is full the panel lights up and SPACE
-        //lets the signature loose.
+        //lets the signature loose. While it runs, the panel names it and counts its strokes down.
         private void DrawSignaturePanel(SpriteBatch sb)
         {
             Rectangle p = signPanel;
             bool ready = battle.SignatureReady;
-            bool armed = battle.SignatureArmed;
-            bool glowing = ready || armed;
+            bool running = battle.SignatureOn;
+            bool glowing = ready || running;
             float pulse = glowing ? (float)Math.Sin(time * 6f) * 0.5f + 0.5f : 0f;
             Color ink = glowing ? Palette.Highlight : Palette.PaperDim;
 
@@ -35,6 +35,20 @@ namespace Tacetno433.Screens
             Rectangle face = new Rectangle(p.X + 12, p.Y + 8, 48, 48);
             PortraitBox.DrawFaceIcon(sb, face, Game.CurrentRun.Conductor, glowing ? 1f : 0.55f);
             Ui.KeyChipRight(sb, "SPACE", face.Center.X + 22, p.Y + 88, ink);
+
+            //Running : the move's name, and a diamond for every stroke it still lasts
+            if (running)
+            {
+                Gfx.TextSpaced(sb, Game.Font, "SIGNATURE", p.X + 76, p.Y + 14, Palette.PaperDim, TextSize.Tiny, 2f);
+                Gfx.Text(sb, Game.Font, signatureName, p.X + 76, p.Y + 30, Palette.Highlight, signatureScale);
+                for (int i = 0; i < BattleRules.SignatureStrokes; i++)
+                {
+                    float dx = p.X + 84 + i * 22;
+                    if (i < battle.SignatureLeft) Gfx.Diamond(sb, dx, p.Y + 72, 7, Palette.Highlight);
+                    else Gfx.DiamondOutline(sb, dx, p.Y + 72, 6, Palette.LineGrey, 1f);
+                }
+                return;
+            }
 
             //Recipe Columns : strings, winds, percussion
             for (int f = 0; f < 3; f++)

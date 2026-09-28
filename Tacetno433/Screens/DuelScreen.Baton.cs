@@ -25,13 +25,13 @@ namespace Tacetno433.Screens
 
             //SOFT REST : a small stroke on a silent beat is a rest, whatever its timing or way.
             //The caller moves on to the next beat (AfterStroke), as for any other stroke.
-            if (battle.RestsOn(b, choice) && !battle.SignatureArmed)
+            if (battle.RestsOn(b, choice))
             {
                 baton.Whip(gesture.Direction);
-                ResolveAnswer(b, Choice.Ease, Grade.None, false);
+                ResolveAnswer(b, Choice.Ease, Grade.None);
                 return;
             }
-            if (battle.ChoicesLocked && !battle.IsSilent(b)) choice = battle.MarkedChoice(b);   // LOCKED TEMPO : the mark decides
+            if (battle.SizeDecided(b)) choice = battle.DecidedChoice(b);   // LOCKED TEMPO, VILLAGE BAND : not the size
 
             //Timing Grade : judged where the baton stopped, against the beat
             float now = StrokeClock();
@@ -59,30 +59,25 @@ namespace Tacetno433.Screens
             bool rightWay = gesture.Direction == pattern[k];
             if (!rightWay) grade = Grade.Miss;
 
-            //Signature : this stroke is a PERFECT big stroke whatever its shape, with the bonus on top
-            bool signature = battle.SignatureArmed;
-            if (signature)
-            {
-                battle.SignatureArmed = false;
-                choice = Choice.Boost;
-                grade = Grade.Perfect;
-                battle.SignatureNext = true;
-            }
+            //CLOCKWORK : under THE METRONOME's signature a stroke on time is PERFECT
+            Grade timed = grade;
+            grade = battle.SignatureGrade(grade);
 
-            //Hand And Stick : the hand picture changes pose, the stick gets a flick
-            hand.Play(signature ? HandPose.Signature : PoseFor(gesture.Direction));
+            //Hand And Stick : the hand picture changes pose, the stick gets a flick.
+            //The signature's strokes use the hand's signature pose.
+            hand.Play(battle.SignatureOn ? HandPose.Signature : PoseFor(gesture.Direction));
             baton.Whip(gesture.Direction);
 
             //Slash : a big stroke the right way leaves a blade of light along its path, brighter
             //for a PERFECT. The whole band's blow, the answer to TACET's.
-            if (choice == Choice.Boost && (rightWay || signature))
+            if (choice == Choice.Boost && rightWay)
                 effects.SpawnSlash(gesture.From, gesture.To, grade == Grade.Perfect ? 1f : 0.55f);
 
             //Judgement : ONE word at the hit point, how well it landed and what the band was told,
             //and the shape of the order opening out from the hit point
-            string word = (!rightWay && !signature) ? "WRONG WAY" : judgeText[(int)grade * 3 + (int)choice];
+            string word = !rightWay ? "WRONG WAY" : judgeText[(int)grade * 3 + (int)choice];
             ShowJudge(word, 0.55f);
-            if (rightWay && !signature) ShowTiming(grade, now, target);
+            if (rightWay && timed == grade) ShowTiming(grade, now, target);
 
             if (choice == Choice.Boost) SoundBank.Play(Sfx.QteBoost);
             if (choice == Choice.Normal) SoundBank.Play(Sfx.QteNormal);
@@ -94,11 +89,11 @@ namespace Tacetno433.Screens
             //the beat at once. A missed one settles it straight away, there is nothing to hold.
             if (battle.IsFermata(b) && grade != Grade.Miss && !battle.Finished)
             {
-                StartHold(choice, grade, signature);
+                StartHold(choice, grade);
                 return;
             }
 
-            ResolveAnswer(b, choice, grade, signature);
+            ResolveAnswer(b, choice, grade);
         }
 
         //EARLY / LATE : like the FAST and LATE marks of Project Sekai. A stroke that counted but
@@ -149,12 +144,12 @@ namespace Tacetno433.Screens
 
             //Ruler : from where the stroke began, the way this beat goes, filled as far as the
             //stroke has come. The finale only needs the right way, so it has no size zones, and
-            //neither has a note under LOCKED TEMPO, where the mark decides the size.
+            //neither has a note under LOCKED TEMPO or VILLAGE BAND, where the size decides nothing.
             Vector2 d = NoteGlyph.Way(WantedWay());
             Vector2 anchor = gesture.InStroke ? gesture.StrokeStart : Input.MousePos;
             float along = Vector2.Dot(gesture.LiveVector, d);
             int zone = gesture.InStroke ? Baton.SizeOf(along) : -1;
-            bool markDecides = battle.ChoicesLocked && !battle.IsSilent(BeatOf(pending));
+            bool markDecides = battle.SizeDecided(BeatOf(pending));
             Baton.DrawRuler(sb, anchor, d, along, zone, phase != Phase.Finale && !markDecides);
         }
 

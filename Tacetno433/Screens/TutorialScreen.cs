@@ -126,8 +126,8 @@ namespace Tacetno433.Screens
             new Lesson { Kind = Kind.Finish, Title = "READY", Need = 0,
                 Body = "That is everything the baton does. In a run you seat the band on the STAGE page before "
                      + "each round. A few more things to know : a PERFECT f against a real f is a COUNTER. Eight PERFECTs in a row set the band on fire. Far enough "
-                     + "ahead, the FINALE ends a fight at once. SPACE lets your conductor's SIGNATURE "
-                     + "loose when its recipe is full.",
+                     + "ahead, the FINALE ends a fight at once. PERFECT beats fill your conductor's recipe, "
+                     + "and SPACE then lets their own SIGNATURE loose for four strokes.",
                 Goal = "Start a run whenever you are ready." },
         };
 

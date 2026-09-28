@@ -11,9 +11,9 @@ namespace Tacetno433.Screens
     //ConductorDetailScreen : we stepped inside the painting. A character profile page.
     //
     //Layout, left to right:
-    //   LEFT   who they are: name, epithet, role, stats as diamonds, face and perk
-    //   CENTRE the conductor standing in the scene
-    //   RIGHT  the dossier: story, how they play, and their numbers
+    //   LEFT   who they are: name, epithet, role, stats as diamonds, face and story
+    //   CENTRE the conductor standing in the scene, with arrows to the next and last profile
+    //   RIGHT  how they play: the PASSIVE (always on) and the SIGNATURE (SPACE), and what each does
     //
     //The background is not a picture, it is drawn from maths every frame: parallax
     //pillars for depth, sine ribbons for the music, a backlight behind the figure,
@@ -32,10 +32,12 @@ namespace Tacetno433.Screens
         private const int RightX = 842;
         private const int RightW = 380;
         private Rectangle figureBox = new Rectangle(480, 70, 320, 530);
+        private const int StoryWrap = 250;             // the story sits beside the face, narrower than the dossier
         private Rectangle faceBox = new Rectangle(70, 392, 112, 112);
-        private Rectangle perkBox = new Rectangle(200, 392, 250, 112);
         private Rectangle chooseButton = new Rectangle(486, 614, 308, 50);
         private Rectangle backButton = new Rectangle(70, 616, 170, 46);
+        private Rectangle lastButton = new Rectangle(424, 614, 50, 50);   // the arrows either side of TAKE THE BATON
+        private Rectangle nextButton = new Rectangle(806, 614, 50, 50);
 
         //Detail Data
         private int index;
@@ -43,11 +45,13 @@ namespace Tacetno433.Screens
         private Rectangle sourceRect;      // where the painting sat on the gallery page
         private string profileLabel = "";  // built once in Load, never while drawing
         private string epithetWrapped = "";
+        private string storyWrapped = "";
         private string seatsLabel = "";
         private float nameScale;
 
         //Detail State
         private float enter;               // 0 = just walked in, 1 = fully arrived
+        private float swap = 1f;           // the words fade in again after the arrows switch profile
         private float time;
 
         public ConductorDetailScreen(int index, Rectangle sourceRect)
@@ -59,9 +63,16 @@ namespace Tacetno433.Screens
 
         public override void Load()
         {
-            //Label Build : done here so Draw never has to join strings
+            Prepare();
+        }
+
+        //Prepare : the labels for the conductor on show, built here so Draw never joins strings.
+        //Called again when the arrows switch to another conductor.
+        private void Prepare()
+        {
             profileLabel = "CONDUCTOR PROFILE   /   " + c.IndexLabel;
             epithetWrapped = Gfx.WrapText(Game.StoryFont, c.Epithet, 370, TextSize.Story);
+            storyWrapped = Gfx.WrapText(Game.StoryFont, c.Story, StoryWrap, TextSize.Story);
             int seats = c.Perk == ConductorPerk.EveryRoadHome ? 2 : 3;
             seatsLabel = seats.ToString();
 
@@ -74,6 +85,7 @@ namespace Tacetno433.Screens
         public override void Update(float dt)
         {
             time += dt;
+            swap = Math.Min(1f, swap + dt * 4f);
 
             //Enter Animation : fly into the painting, no input until we land
             enter += dt * 2.0f;
@@ -87,9 +99,40 @@ namespace Tacetno433.Screens
                 Game.Screens.Change(new ConductorSelectScreen(index));
             }
 
+            //Detail Switch : the arrows (or left and right) turn to the next profile without leaving
+            if (Input.KeyPressed(Keys.Right) || Input.KeyPressed(Keys.D) || Input.ClickedOn(nextButton))
+            {
+                Switch(1);
+                return;
+            }
+            if (Input.KeyPressed(Keys.Left) || Input.KeyPressed(Keys.A) || Input.ClickedOn(lastButton))
+            {
+                Switch(-1);
+                return;
+            }
+
             //Detail Confirm
             if (Input.KeyPressed(Keys.Enter) || Input.KeyPressed(Keys.Space) || Input.ClickedOn(chooseButton))
                 Confirm();
+        }
+
+        //Detail Switch : show the conductor one step along, stopping at the ends like the gallery.
+        //The figure stays where it stands and the words fade in again.
+        private void Switch(int direction)
+        {
+            int next = index + direction;
+            if (next < 0 || next > ConductorList.All.Length - 1)
+            {
+                SoundBank.Play(Sfx.UiDenied);
+                return;
+            }
+
+            index = next;
+            c = ConductorList.All[index];
+            sourceRect = figureBox;
+            swap = 0f;
+            Prepare();
+            SoundBank.Play(Sfx.UiMove);
         }
 
         //Detail Confirm : remember the class and move on to the run
@@ -111,6 +154,7 @@ namespace Tacetno433.Screens
             float alpha = (enter - 0.55f) / 0.45f;
             if (alpha < 0f) alpha = 0f;
             if (alpha > 1f) alpha = 1f;
+            alpha *= swap;
 
             DrawScene(sb, e);
 
@@ -124,6 +168,8 @@ namespace Tacetno433.Screens
                 DrawRightColumn(sb, alpha);
                 Ui.Button(sb, chooseButton, "TAKE THE BATON", "ENTER", true, true, alpha);
                 Ui.Button(sb, backButton, "BACK", "ESC", false, true, alpha);
+                DrawArrow(sb, lastButton, false, index > 0, alpha);
+                DrawArrow(sb, nextButton, true, index < ConductorList.All.Length - 1, alpha);
             }
 
             DrawLetterbox(sb);
@@ -217,7 +263,7 @@ namespace Tacetno433.Screens
             Ornament.Crosses(sb, TacetGame.ScreenW - 180, TacetGame.ScreenH - 20, 5, 1, 14, Palette.LineGrey);
         }
 
-        //Left Column : the character sheet
+        //Left Column : the character sheet, then the face and the story beside it
         private void DrawLeftColumn(SpriteBatch sb, float a)
         {
             int y = 62;
@@ -243,29 +289,18 @@ namespace Tacetno433.Screens
             Gfx.TextRight(sb, Game.Font, c.PushLabel, LeftX + 380, rowY - 3, Palette.Paper * a, TextSize.Body);
 
             rowY += 36;
+            DrawRow(sb, "SEATS", rowY, a);
+            Gfx.Text(sb, Game.Font, seatsLabel, LeftX + 136, rowY - 3, Palette.Paper * a, TextSize.Body);
+
+            rowY += 36;
             DrawRow(sb, "BASED ON", rowY, a);
             Gfx.Text(sb, Game.StoryFont, c.BasedOn, LeftX + 130, rowY - 5, Palette.Paper * a, TextSize.Story);
 
-            //Face : the head shot in a viewfinder
+            //Face : the head shot in a viewfinder, and who they were beside it
             PortraitBox.DrawFaceIcon(sb, faceBox, c, a);
-
-            //Perk Box : double frame, like the era box on a profile card
-            Gfx.Rect(sb, perkBox, Palette.Void * (0.7f * a));
-            Ornament.DoubleFrame(sb, perkBox, Palette.PaperDim * a);
-            //Signature : the SPACE move's name and what it needs (round 12.2 : the box used to repeat
-            //the mechanic's name under the SIGNATURE heading, and the recipe was shown nowhere)
-            Gfx.TextSpaced(sb, Game.Font, "SIGNATURE  /  SPACE", perkBox.X + 16, perkBox.Y + 14, Palette.LineGrey * a, TextSize.Tiny, 3f);
-            Gfx.Text(sb, Game.BigFont, c.SignatureMark, perkBox.X + 16, perkBox.Y + 30, Palette.Highlight * a, TextSize.Small);
-            //Recipe : NEEDS, then a number and the family mark for each family it asks for
-            Gfx.TextSpaced(sb, Game.Font, "NEEDS", perkBox.X + 16, perkBox.Y + 76, Palette.LineGrey * a, TextSize.Tiny, 2f);
-            float rx = perkBox.X + 86;
-            for (int f = 0; f < c.Recipe.Length; f++)
-            {
-                if (c.Recipe[f] <= 0) continue;
-                Gfx.Text(sb, Game.Font, NumberText.Get(c.Recipe[f]), rx, perkBox.Y + 71, Palette.Paper * a, TextSize.Body);
-                MusicianArt.FamilyGlyph(sb, (Family)f, rx + 28, perkBox.Y + 82, 0.5f, Palette.Paper * a);
-                rx += 52;
-            }
+            int sx = faceBox.Right + 18;
+            Gfx.TextSpaced(sb, Game.Font, "WHO THEY WERE", sx, faceBox.Y, Palette.LineGrey * a, TextSize.Tiny, 3f);
+            Gfx.Text(sb, Game.StoryFont, storyWrapped, sx, faceBox.Y + 20, Palette.PaperDim * a, TextSize.Story);
         }
 
         private void DrawRow(SpriteBatch sb, string label, int y, float a)
@@ -275,27 +310,48 @@ namespace Tacetno433.Screens
             Gfx.Rect(sb, LeftX, y + 24, 380, 1, Palette.LineGrey * (0.35f * a));
         }
 
-        //Right Column : the dossier. Story, then how they play, then the numbers.
+        //Right Column : how they play. The PASSIVE is always on, the SIGNATURE is what SPACE lets
+        //loose once the recipe is full (round 13 : every conductor has their own).
         private void DrawRightColumn(SpriteBatch sb, float a)
         {
+            //Section 1 : Passive
             int y = 64;
-
-            //Section 1 : Story
-            DrawRibbon(sb, "WHO THEY WERE", "I", y, a);
-            Gfx.Text(sb, Game.StoryFont, c.StoryWrapped, RightX, y + 42, Palette.Paper * a, TextSize.Story);
-
-            //Section 2 : Mechanic
-            y += 190;
-            DrawRibbon(sb, "HOW THEY PLAY", "II", y, a);
+            DrawRibbon(sb, "PASSIVE  /  ALWAYS ON", "I", y, a);
             Gfx.Text(sb, Game.BigFont, c.MechanicName, RightX, y + 38, Palette.Highlight * a, TextSize.Subtitle);
             Gfx.Text(sb, Game.StoryFont, c.MechanicWrapped, RightX, y + 76, Palette.Paper * a, TextSize.Story);
 
-            //Section 3 : Numbers, printed large like a poster
-            y += 200;
-            DrawRibbon(sb, "IN NUMBERS", "III", y, a);
-            DrawBigNumber(sb, "STAMINA", c.StaminaLabel, RightX, y + 40, a);
-            DrawBigNumber(sb, "PUSH", c.PushLabel, RightX + 130, y + 40, a);
-            DrawBigNumber(sb, "SEATS", seatsLabel, RightX + 260, y + 40, a);
+            //Section 2 : Signature, with the key that lets it loose and the recipe it needs
+            y = 272;
+            DrawRibbon(sb, "SIGNATURE", "II", y, a);
+            Ui.KeyChipRight(sb, "SPACE", RightX + RightW - 58, y + 14, Palette.Paper * a);
+            Gfx.Text(sb, Game.StoryFont, c.SignatureMark, RightX, y + 36, Palette.PaperDim * a, TextSize.Story);
+            Gfx.Text(sb, Game.BigFont, c.SignatureName, RightX, y + 58, Palette.Highlight * a, TextSize.Subtitle);
+            Gfx.Text(sb, Game.StoryFont, c.SignatureWrapped, RightX, y + 96, Palette.Paper * a, TextSize.Story);
+
+            //Recipe : NEEDS, then a number and the family mark for each family it asks for
+            int ny = y + 190;
+            Gfx.TextSpaced(sb, Game.Font, "NEEDS", RightX, ny + 5, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            float rx = RightX + 70;
+            for (int f = 0; f < c.Recipe.Length; f++)
+            {
+                if (c.Recipe[f] <= 0) continue;
+                Gfx.Text(sb, Game.Font, NumberText.Get(c.Recipe[f]), rx, ny, Palette.Paper * a, TextSize.Body);
+                MusicianArt.FamilyGlyph(sb, (Family)f, rx + 28, ny + 11, 0.5f, Palette.Paper * a);
+                rx += 52;
+            }
+            //Where the notes come from : PERFECT beats, and GOOD ones too for BY THE BOOK
+            string from = c.Perk == ConductorPerk.ByTheBook ? "NOTES FROM PERFECT OR GOOD BEATS" : "NOTES FROM PERFECT BEATS";
+            Gfx.TextSpaced(sb, Game.Font, from, RightX, ny + 32, Palette.LineGrey * a, TextSize.Tiny, 2f);
+        }
+
+        //Arrow : a diamond with an arrow inside, for the next and the last profile. Dim at the ends.
+        private void DrawArrow(SpriteBatch sb, Rectangle box, bool pointRight, bool enabled, float a)
+        {
+            Color color = Palette.LineGrey * 0.5f;
+            if (enabled) color = Input.MouseOver(box) ? Palette.Highlight : Palette.Paper;
+            Gfx.Diamond(sb, box.Center.X, box.Center.Y, 24, Palette.Void * (0.8f * a));
+            Gfx.DiamondOutline(sb, box.Center.X, box.Center.Y, 24, color * a, 1.5f);
+            Gfx.Arrow(sb, box.Center.X + (pointRight ? 2 : -2), box.Center.Y, 9, pointRight, color * a);
         }
 
         //Ribbon : a section heading. A dark band ending in an arrow tip, a roman numeral,
@@ -307,13 +363,6 @@ namespace Tacetno433.Screens
             Gfx.Rect(sb, RightX - 12, y, 3, 28, Palette.Paper * a);
             Gfx.Text(sb, Game.BigFont, numeral, RightX, y + 1, Palette.PaperDim * a, TextSize.Small);
             Gfx.TextSpaced(sb, Game.Font, title, RightX + 40, y + 7, Palette.Highlight * a, TextSize.Label, 4f);
-        }
-
-        private void DrawBigNumber(SpriteBatch sb, string label, string value, int x, int y, float a)
-        {
-            Gfx.TextSpaced(sb, Game.Font, label, x, y, Palette.LineGrey * a, TextSize.Tiny, 3f);
-            Gfx.Text(sb, Game.BigFont, value, x, y + 12, Palette.Paper * a, TextSize.Title);
-            Gfx.Rect(sb, x, y + 62, 100, 1, Palette.LineGrey * a);
         }
     }
 }

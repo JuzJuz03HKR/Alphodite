@@ -68,15 +68,21 @@ namespace Tacetno433.Screens
             scroll += (index - scroll) * dt * 9f;
             if (Math.Abs(index - scroll) < 0.002f) scroll = index;
 
-            //Gallery Navigate
-            if (Input.KeyPressed(Keys.Right) || Input.KeyPressed(Keys.D) || Input.ClickedOn(rightButton))
-                Move(1);
-            if (Input.KeyPressed(Keys.Left) || Input.KeyPressed(Keys.A) || Input.ClickedOn(leftButton))
-                Move(-1);
+            //Gallery Navigate : one step per frame, and a step ends the frame. The arrows sit over the
+            //next painting's spot, so the click that moved the gallery used to land on that painting
+            //as well and open it straight away (round 13 fix: the arrows seemed not to work).
+            bool right = Input.KeyPressed(Keys.Right) || Input.KeyPressed(Keys.D) || Input.ClickedOn(rightButton);
+            bool left = Input.KeyPressed(Keys.Left) || Input.KeyPressed(Keys.A) || Input.ClickedOn(leftButton);
+            if (right || left)
+            {
+                Move(right ? 1 : -1);
+                return;
+            }
 
             //Gallery Enter : click the painting or press confirm to step inside it
             Rectangle centerFrame = FrameRect(index);
-            bool stepInside = Input.KeyPressed(Keys.Enter) || Input.KeyPressed(Keys.Space) || Input.ClickedOn(centerFrame);
+            bool onArrow = Input.MouseOver(leftButton) || Input.MouseOver(rightButton);
+            bool stepInside = Input.KeyPressed(Keys.Enter) || Input.KeyPressed(Keys.Space) || (Input.ClickedOn(centerFrame) && !onArrow);
 
             if (stepInside)
             {
@@ -257,8 +263,10 @@ namespace Tacetno433.Screens
             float settled = 1f - Math.Min(1f, Math.Abs(index - scroll) * 3f);
             if (settled > 0f)
             {
-                Gfx.TextCentered(sb, Game.StoryFont, c.Epithet, CenterX, 612, Palette.Paper * settled, TextSize.Story);
-                Gfx.TextSpacedCentered(sb, Game.Font, c.BasedOnLabel, CenterX, 632, Palette.LineGrey * settled, TextSize.Tiny, 3f);
+                //Skills : the PASSIVE's name and the SIGNATURE's, the whole of them on the profile page
+                Gfx.TextSpacedCentered(sb, Game.Font, c.SkillsLabel, CenterX, 585, Palette.Highlight * settled, TextSize.Tiny, 3f);
+                Gfx.TextCentered(sb, Game.StoryFont, c.Epithet, CenterX, 616, Palette.Paper * settled, TextSize.Story);
+                Gfx.TextSpacedCentered(sb, Game.Font, c.BasedOnLabel, CenterX, 640, Palette.LineGrey * settled, TextSize.Tiny, 3f);
             }
 
             //Arrow Buttons : greyed out at the ends of the gallery

@@ -76,12 +76,14 @@
         //   TACET'S BLOW  a beat TACET wins hits the band for what got through
         //   a MISS costs MissExtraCost on top of the note
         //   COLLAPSE      breath at zero ends the fight, the band is silenced (SECOND WIND saves it once)
-        public static float BlowPerPower = 0.75f;   // stamina lost per point TACET wins a beat by, was 1.0, 0.7 in round 9
+        public static float BlowPerPower = 0.95f;   // stamina lost per point TACET wins a beat by, was 1.0, 0.7 in round 9
                                                     // round 10 : 0.63 kept the whole game as hard as round 9 after BREATH MARK was cut
                                                     // round 11a : 0.68 made up for the softer WHITE NOISE
                                                     // round 11b : 0.78 with the bigger rests (the player allowed it a little easier)
                                                     // round 12 : 0.75 with the marks wider apart (EnemyBoostPower 2),
                                                     // a misread f hurts, which is what sets careful players apart
+                                                    // round 13 : 0.95, every conductor's own passive and signature
+                                                    // is real power now, so the whole game stays as hard as round 12.2
 
         //Timing Grades (HARD, 25 Sep : players found the wide windows far too easy)
         //The stroke settings page can move every judgement earlier or later for one player's
@@ -95,10 +97,12 @@
         //No stroke on one of TACET's notes (HESITATE) : nobody comes in, so nobody pays, and the
         //note lands whole. Round 12 : the band used to play its planned part at 30 percent.
 
-        //Signature : PERFECT and GOOD beats collect notes for the instrument families that
-        //played them. When the conductor's recipe is complete (see Conductor.Recipe), SPACE lets
-        //the signature loose: the next stroke is a PERFECT BOOST that hits harder still.
-        public static float SignaturePower = 1.5f;      // on top of everything else on that beat
+        //Signature : PERFECT beats collect notes for the instrument families that played them
+        //(GOOD ones did too until round 13). When the conductor's recipe is complete (see Conductor.Recipe), SPACE lets
+        //the signature loose. Round 13 : every conductor has a move of their own (Conductor.Move),
+        //and it lasts for the next few strokes. Was : the next stroke was a PERFECT f, x1.5 for all.
+        //No notes are collected while a signature is running, so one cannot chain into the next.
+        public static int SignatureStrokes = 4;         // how many strokes a signature lasts
 
         //Tempo : beats per minute in round 1, 2 and 3. The duel speeds up as the fight goes on.
         //TACET's second bar is called while the first is being answered, so the player
@@ -288,11 +292,20 @@
                                                      // mark won 74 percent at 1.0, the others 50 to 64.
                                                      // Round 12.2 : the band plays the written mark instead (never a wrong size),
                                                      // 1.25 won 80 percent, 1.4 66, so 1.33 (about 71 to 73)
+        //THE APPRENTICE's BY THE BOOK has no number : his GOOD beats fill the recipe too (round 13, he had no perk).
+        //Tried first : 1 or 2 breath back for every stroke IN TUNE won 85 to 88 percent of simulated runs alone.
         public static float RunawayFireBonus = 1.3f; // THE INFERNO, the beat after a miss
-        public static float CloserLouderMax = 1.3f;  // THE UNHEARING, +130 percent at the very edge. Was 0.6 : with the PUSH CAP
-                                                     // the line rarely falls far, so he was the weakest conductor (round 10)
-        public static float CloserRestMax = 1.0f;    // THE UNHEARING, a rest gives back up to this much more (double) at the edge.
-                                                     // Round 12.2 : a band loses on breath now, not on the line
+        public static float SetAlightPower = 1.3f;   // THE INFERNO's SET ALIGHT, every stroke under it
+        public static float SetAlightCap = 10f;      //     and it may push this far, a quarter past the PUSH CAP (16 : 80 percent, 12 : 77). Tried first :
+                                                     //     the band caught fire (FORTISSIMO, free), 91 to 96 percent, a fire that costs
+                                                     //     no breath is worth far more than any power
+        public static float CloserLouderMax = 0.3f;  // THE UNHEARING, how much harder the band hits with no breath left (+30 percent).
+                                                     // Round 13 : it counts the breath the band has lost. It used to count how far
+                                                     // TACET had pushed the line (+130 percent), which a band rarely lets happen, and
+                                                     // a band loses on breath since round 12. Round 12.2 made rests deeper there too.
+                                                     // 1.0 won 84 percent of simulated runs alone, the others about 70,
+                                                     // and 0.4 from half breath 76 with the others at 70 to 72
+        public static float CloserLouderFrom = 0.5f; // THE UNHEARING, the share of breath under which the band starts hitting harder
         public static float CrossCultureHarmony = 0.07f; // THE FOLK LEADER, per extra culture on a beat. Was 0.15 : he won the most runs (round 11)
 
         //Shop

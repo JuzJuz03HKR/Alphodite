@@ -27,6 +27,7 @@ namespace Tacetno433.Battle
         public Choice EnemyChoice;
         public Grade Grade;
         public int Blow;               // TACET'S BLOW : stamina knocked out of the band on this beat (or its spark)
+        public int BlowIgnored;        // DEAF EARS : the blow the signature kept off the band, for the duel to show
         public bool Collapsed;         // COLLAPSE : the band ran out of breath on this beat, the fight is lost
 
         //Extras : the duel page shows a word for each of these
@@ -120,8 +121,7 @@ namespace Tacetno433.Battle
 
         //Signature : the notes live here so they carry over from one round to the next
         public int[] Notes = new int[3];         // gathered per family : strings, winds, percussion
-        public bool SignatureNext;               // the next beat resolved gets the signature bonus
-        public bool SignatureArmed;              // SPACE was pressed, the next stroke is the signature
+        public int SignatureLeft;                // strokes the conductor's signature still lasts, 0 when none is running
 
         //Round Data : rebuilt at the start of every round
         public int[] EnemyPower = new int[BattleRules.BeatsPerRound];
@@ -361,6 +361,54 @@ namespace Tacetno433.Battle
             return ShownChoice[beat];
         }
 
+        //Size Decided : on this beat the size of the stroke does not pick the rows, something else
+        //does. LOCKED TEMPO plays the note's mark, VILLAGE BAND brings the whole band. On a silent
+        //beat the drawn size still counts, a small stroke there is a rest.
+        public bool SizeDecided(int beat)
+        {
+            if (IsSilent(beat)) return false;
+            return ChoicesLocked || SignatureIs(SignatureMove.VillageBand);
+        }
+
+        //Decided Choice : who plays on a beat where SizeDecided is true
+        public Choice DecidedChoice(int beat)
+        {
+            if (SignatureIs(SignatureMove.VillageBand)) return Choice.Boost;               // VILLAGE BAND
+            return MarkedChoice(beat);                                                    // LOCKED TEMPO
+        }
+
+        //SIGNATURE : SPACE with the recipe full lets the conductor's own move loose, for the next
+        //few strokes (BattleRules.SignatureStrokes). Every conductor has a different one (round 13):
+        //   ABSOLUTE PITCH  THE APPRENTICE   every stroke on time is IN TUNE, whatever its size
+        //   CLOCKWORK       THE METRONOME    every stroke on time is PERFECT (SignatureGrade)
+        //   SET ALIGHT      THE INFERNO      every stroke hits harder and may push past the PUSH CAP
+        //   DEAF EARS       THE UNHEARING    TACET's blows take no breath
+        //   VILLAGE BAND    THE FOLK LEADER  every stroke is the whole band, paid as a small one
+        //A stroke on a silent beat counts as one of the strokes, a rest does not.
+        public bool SignatureOn
+        {
+            get { return SignatureLeft > 0; }
+        }
+
+        public bool SignatureIs(SignatureMove move)
+        {
+            return SignatureLeft > 0 && Run.Conductor.Move == move;
+        }
+
+        public void StartSignature()
+        {
+            SpendNotes();
+            SignatureLeft = BattleRules.SignatureStrokes;
+        }
+
+        //Signature Grade : CLOCKWORK, a stroke on time (a GOOD) counts as PERFECT. A MISS, late,
+        //early or the wrong way, stays a MISS. The duel asks here with the grade it judged.
+        public Grade SignatureGrade(Grade grade)
+        {
+            if (SignatureIs(SignatureMove.Clockwork) && grade == Grade.Good) return Grade.Perfect;   // CLOCKWORK
+            return grade;
+        }
+
         //Roll Counted : how many of these shakes count towards a roll. Past TremoloMost they add
         //nothing. ACCELERANDO counts every shake twice (round 11), so the top is reached sooner.
         public int RollCounted(int strokes)
@@ -389,6 +437,21 @@ namespace Tacetno433.Battle
                 float step = BattleRules.ComboStep;
                 if (Run.Has(MotifId.Crescendo)) step *= 2f;                 // CRESCENDO
                 return 1f + step * Math.Min(Combo, BattleRules.ComboMax);
+            }
+        }
+
+        //Louder Bonus : THE CLOSER THE LOUDER, how much harder THE UNHEARING's band hits right now.
+        //0 while the band has more than CloserLouderFrom of its breath, growing to CloserLouderMax
+        //with none left. 0 for every other conductor.
+        public float LouderBonus
+        {
+            get
+            {
+                if (Run.Conductor.Perk != ConductorPerk.CloserLouder || Run.MaxStamina <= 0) return 0f;
+                float share = Run.Stamina / (float)Run.MaxStamina;
+                float from = BattleRules.CloserLouderFrom;
+                if (share >= from) return 0f;
+                return BattleRules.CloserLouderMax * MathHelper.Clamp((from - share) / from, 0f, 1f);
             }
         }
 
@@ -773,8 +836,6 @@ namespace Tacetno433.Battle
             {
                 float recover = BattleRules.RestRecover;
                 if (Run.Has(MotifId.BreathMark)) recover *= BattleRules.BreathMarkRecover;   // BREATH MARK
-                if (Run.Conductor.Perk == ConductorPerk.CloserLouder && Line < 0f)           // THE CLOSER THE LOUDER
-                    recover *= 1f + BattleRules.CloserRestMax * (-Line / BattleRules.LineLimit);
                 if (EnemyHas(EnemyTrait.NoRest)) recover *= BattleRules.NoRestShare;       // NO REST
                 return (int)recover;
             }
@@ -821,9 +882,15 @@ namespace Tacetno433.Battle
             }
         }
 
-        //Notes Add : a good beat gives one note to each family that came in on it
+        //Notes Add : a PERFECT beat gives one note to each family that came in on it (round 13, a
+        //GOOD one did too, and the signature came round two or three times a fight). A beat
+        //played under the signature gives none, and neither does any beat while it runs.
+        //BY THE BOOK : THE APPRENTICE's GOOD beats still give notes.
         public void AddNotes(BeatResult r)
         {
+            bool counts = r.Grade == Grade.Perfect;
+            if (r.Grade == Grade.Good && Run.Conductor.Perk == ConductorPerk.ByTheBook) counts = true;   // BY THE BOOK
+            if (!counts || r.Signature || SignatureLeft > 0) return;
             Formation formation = Run.Formation;
             for (int f = 0; f < Notes.Length; f++)
             {
@@ -881,8 +948,12 @@ namespace Tacetno433.Battle
             BeatResult r = Results[beat];
             if (grade != Grade.None && grade != Grade.Hesitate && RestsOn(beat, choice))
                 grade = Grade.None;                                                     // SOFT REST
-            if (ChoicesLocked && !IsSilent(beat)) choice = MarkedChoice(beat);          // LOCKED TEMPO
+            if (SizeDecided(beat)) choice = DecidedChoice(beat);                        // LOCKED TEMPO, VILLAGE BAND
             bool stroked = grade != Grade.None && grade != Grade.Hesitate;
+
+            //SIGNATURE : this stroke is one of the few the conductor's move lasts for
+            bool underSignature = stroked && SignatureLeft > 0;
+            SignatureMove move = Run.Conductor.Move;
 
             //Bar Start : FOUR BARS counts the beats of every bar afresh
             if (beat % 4 == 0)
@@ -897,6 +968,7 @@ namespace Tacetno433.Battle
 
             int basePower = stroked ? PowerFor(beat, choice) : 0;
             float cost = stroked ? CostFor(choice) : 0f;
+            if (underSignature && move == SignatureMove.VillageBand) cost = CostFor(Choice.Normal); // VILLAGE BAND : paid as a middle stroke
             float recover = 0f;
             Choice enemyChoice = EnemyChoice[beat];
 
@@ -1032,13 +1104,8 @@ namespace Tacetno433.Battle
             if (FortissimoLeft > 0 && grade != Grade.None) FortissimoLeft--;
             UpdateFortissimo(r, grade);
 
-            //SIGNATURE : the conductor's own move lands on this beat
-            r.Signature = SignatureNext;
-            if (SignatureNext)
-            {
-                power *= BattleRules.SignaturePower;
-                SignatureNext = false;
-            }
+            //SET ALIGHT : under THE INFERNO's signature every stroke burns hotter (and pushes further, below)
+            if (underSignature && move == SignatureMove.SetAlight) power *= BattleRules.SetAlightPower;
 
             //RUNAWAY FIRE : the first beat we play after a miss burns hotter
             r.Fired = false;
@@ -1053,9 +1120,8 @@ namespace Tacetno433.Battle
             //OVERTURE : the first beat of each round, the first time through only
             if (beat == 0 && Pass == 0 && Run.Has(MotifId.Overture)) power *= BattleRules.OverturePower;
 
-            //THE CLOSER THE LOUDER : the further behind, the harder we hit
-            if (Run.Conductor.Perk == ConductorPerk.CloserLouder && Line < 0f)
-                power *= 1f + BattleRules.CloserLouderMax * (-Line / BattleRules.LineLimit);
+            //THE CLOSER THE LOUDER : the less breath the band has left, the harder it hits
+            power *= 1f + LouderBonus;
 
             //Enemy Choice : decided at the start of the round, shown in its call, applied now
             float enemyPower = EnemyStrikeAt(beat);
@@ -1072,16 +1138,18 @@ namespace Tacetno433.Battle
 
             //IN TUNE : a stroke on time the same size as the mark TACET really plays takes the edge
             //off its note. A FALSE NOTE's shown mark does not count, a hidden note has none, and a
-            //roll is the whole band whatever TACET plays.
+            //roll is the whole band whatever TACET plays. ABSOLUTE PITCH makes any size on time IN TUNE.
             //COUNTER : a PERFECT big stroke against a real f note knocks more of it back.
             //MARCATO lets a COUNTER push further.
             r.Counter = false;
             r.InTune = false;
             bool onTime = grade == Grade.Perfect || grade == Grade.Good;
-            if (onTime && choice == enemyChoice && basePower > 0 && enemyPower > 0 && !EnemyHidden[beat] && !r.Tremolo)
+            bool matched = choice == enemyChoice && !EnemyHidden[beat];
+            if (underSignature && move == SignatureMove.AbsolutePitch) matched = true;     // ABSOLUTE PITCH
+            if (onTime && matched && basePower > 0 && enemyPower > 0 && !r.Tremolo)
             {
                 r.InTune = true;
-                r.Counter = choice == Choice.Boost && grade == Grade.Perfect;
+                r.Counter = choice == Choice.Boost && enemyChoice == Choice.Boost && !EnemyHidden[beat] && grade == Grade.Perfect;
                 enemyPower *= r.Counter ? BattleRules.CounterKeep : BattleRules.InTuneKeep;
             }
 
@@ -1099,6 +1167,7 @@ namespace Tacetno433.Battle
             r.EnemyPower = (int)Math.Round(enemyPower);
             r.Played = r.OurPower > 0;
             float cap = r.Counter && Run.Has(MotifId.Marcato) ? BattleRules.MarcatoCap : BattleRules.PushCap;   // MARCATO
+            if (underSignature && move == SignatureMove.SetAlight) cap = Math.Max(cap, BattleRules.SetAlightCap);  // SET ALIGHT
             float push = PushFor(r.OurPower, r.EnemyPower, cap);                        // PUSH CAP inside
 
             Line += push;
@@ -1113,8 +1182,15 @@ namespace Tacetno433.Battle
                 MarkTrait(r, MusicianTrait.Thunder);
             }
 
-            //TACET'S BLOW : a beat TACET wins hits the band for whatever got through
+            //TACET'S BLOW : a beat TACET wins hits the band for whatever got through.
+            //DEAF EARS : under THE UNHEARING's signature it takes no breath at all.
             r.Blow = BlowFor(r.OurPower, r.EnemyPower);
+            r.BlowIgnored = 0;
+            if (underSignature && move == SignatureMove.DeafEars)
+            {
+                r.BlowIgnored = r.Blow;
+                r.Blow = 0;
+            }
 
             //Stamina
             r.StaminaChange = (int)Math.Round(recover) - costPaid - r.Blow;
@@ -1135,6 +1211,11 @@ namespace Tacetno433.Battle
             r.Double = EnemyDouble[beat];
             r.GraceGrade = Grade.None;
             r.GracePush = 0;
+
+            //SIGNATURE : one of its strokes is used up
+            r.Signature = underSignature;
+            if (underSignature) SignatureLeft--;
+
             r.Done = true;
             WriteSheet(beat, r);
 
@@ -1245,6 +1326,10 @@ namespace Tacetno433.Battle
             float theirs = r.EnemyPower * BattleRules.GraceShare;
             int comboBefore = Combo;
 
+            //CLOCKWORK : the flick back of a signature stroke, on time, is PERFECT too
+            if (r.Signature && Run.Conductor.Move == SignatureMove.Clockwork && grade == Grade.Good)
+                grade = Grade.Perfect;
+
             if (grade == Grade.Perfect)
             {
                 ours *= BattleRules.PerfectBonus;
@@ -1278,8 +1363,14 @@ namespace Tacetno433.Battle
             if (Line > BattleRules.LineLimit) Line = BattleRules.LineLimit;
             if (Line < -BattleRules.LineLimit) Line = -BattleRules.LineLimit;
 
-            //TACET'S BLOW : its second note gets through too
+            //TACET'S BLOW : its second note gets through too (DEAF EARS : not under the signature)
             r.Blow = BlowFor(ourPart, theirPart);
+            r.BlowIgnored = 0;
+            if (r.Signature && Run.Conductor.Move == SignatureMove.DeafEars)
+            {
+                r.BlowIgnored = r.Blow;
+                r.Blow = 0;
+            }
             Run.ChangeStamina(-r.Blow);
 
             r.GraceGrade = grade;

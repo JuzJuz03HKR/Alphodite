@@ -40,6 +40,18 @@ namespace Tacetno433.Screens
             if (glow > 0f) Gfx.DrawGlowBox(sb, bar, Palette.Highlight * (0.6f * glow));
             Ui.CapsuleBar(sb, bar, run.Stamina / (float)run.MaxStamina, Palette.Paper, 1f);
 
+            //THE CLOSER THE LOUDER : how much harder THE UNHEARING's band hits at this breath,
+            //on a small tag hanging under the plate
+            if (louderWords.Length > 0)
+            {
+                int louder = Math.Min(louderWords.Length - 1, (int)Math.Round(battle.LouderBonus * 100f));
+                if (louder > 0)
+                {
+                    Gfx.SlantBox(sb, new Rectangle(-20, roundPlate.Bottom, 170, 22), -Ui.Slant, Palette.Void * 0.88f);
+                    Gfx.TextSpaced(sb, Game.Font, louderWords[louder], 22, roundPlate.Bottom + 4, Palette.Highlight, TextSize.Tiny, 2f);
+                }
+            }
+
             //Enemy Plate : taller when the enemy has a trait on this floor, to name it
             bool trait = battle.TraitShown;
             int plateH = enemyPlate.Height + (trait ? 24 : 0);
@@ -232,7 +244,7 @@ namespace Tacetno433.Screens
                 Ui.Pips(sb, plate.X + 24, plate.Y + 28, toFire, battle.FortissimoCombo, 3, 9, 1f);
             }
 
-            if (fireGlow > 0.02f)
+            if (fireGlow > 0.02f && !battle.SignatureIs(SignatureMove.SetAlight))    // SET ALIGHT's flames are not FORTISSIMO
             {
                 Rectangle fire = new Rectangle(730, 70, 196, 40);
                 float a = fireGlow;

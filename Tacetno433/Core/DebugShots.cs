@@ -152,6 +152,7 @@ namespace Tacetno433.Core
                 for (int h = 0; h < habits.Length; h++)
                 {
                     int wins = 0, roundsTotal = 0, staminaTotal = 0, lowest = 999, finales = 0, beatsTotal = 0;
+                    int signaturesBefore = simSignatures;
 
                     for (int n = 0; n < 300; n++)
                     {
@@ -191,7 +192,8 @@ namespace Tacetno433.Core
                             + "   AVG BEATS " + (beatsTotal / 300f).ToString("0.0").PadLeft(4)
                             + "   AVG STAMINA LEFT " + (staminaTotal / 300)
                             + "   LOWEST " + lowest
-                            + "   FINALE " + (finales * 100 / 300) + "%\r\n";
+                            + "   FINALE " + (finales * 100 / 300) + "%"
+                            + "   SIGNATURES " + ((simSignatures - signaturesBefore) / 300f).ToString("0.0") + "\r\n";
                 }
                 report += "\r\n";
             }
@@ -241,6 +243,12 @@ namespace Tacetno433.Core
             return b.ShownChoice[beat];
         }
 
+        //Sim Signature : the simulated players press SPACE as soon as the recipe is full, on the
+        //next beat that has a note (round 13, before that the sim never used the signature).
+        //Set to false in a scratch copy to measure what the signatures are worth.
+        private static bool SimSignature = true;
+        private static int simSignatures;                     // how many were let loose, for the reports
+
         //Play Habit Beat : one beat the way this habit plays it
         private static void PlayHabitBeat(RunState run, BattleState b, int beat, Habit habit, Random random)
         {
@@ -250,9 +258,17 @@ namespace Tacetno433.Core
                 return;
             }
 
+            //SIGNATURE : let it loose on the next beat with a note
+            if (SimSignature && b.SignatureReady && !b.SignatureOn && !b.IsSilent(beat))
+            {
+                b.StartSignature();
+                simSignatures++;
+            }
+
             //Grade
             int roll = random.Next(100);
             Grade grade = roll < habit.Perfect ? Grade.Perfect : (roll < habit.Perfect + habit.Good ? Grade.Good : Grade.Miss);
+            if (!b.IsTremolo(beat)) grade = b.SignatureGrade(grade);                         // CLOCKWORK
 
             //Size : read, or fixed, sometimes a size off
             Choice choice = habit.Size == 0 ? Choice.Ease : (habit.Size == 1 ? Choice.Normal : (habit.Size == 2 ? Choice.Boost : ReadMark(b, beat)));
@@ -378,7 +394,8 @@ namespace Tacetno433.Core
                         + "   LOST TO NORMAL/ELITE/BOSS  " + rec.LostTo[0] + " / " + rec.LostTo[1] + " / " + rec.LostTo[2]
                         + "   OUT OF BREATH " + rec.OutOfBreath
                         + "   STAMINA AT BOSS " + (rec.BossCount > 0 ? rec.BossStamina / rec.BossCount : 0) + "%"
-                        + "   BEATS PER FIGHT " + (rec.Fights > 0 ? rec.Beats / (float)rec.Fights : 0f).ToString("0.0") + "\r\n";
+                        + "   BEATS PER FIGHT " + (rec.Fights > 0 ? rec.Beats / (float)rec.Fights : 0f).ToString("0.0")
+                        + "   SIGNATURES PER FIGHT " + (rec.Fights > 0 ? rec.Signatures / (float)rec.Fights : 0f).ToString("0.0") + "\r\n";
             }
             return report;
         }
@@ -386,7 +403,7 @@ namespace Tacetno433.Core
         //Run Record : what a batch of simulated runs added up to, for the reports
         private class RunRecord
         {
-            public int Runs, Won, OutOfBreath, BossStamina, BossCount, Fights, Beats;
+            public int Runs, Won, OutOfBreath, BossStamina, BossCount, Fights, Beats, Signatures;
             public int[] LostOnFloor = new int[BattleRules.FloorsPerRun + 1];
             public int[] LostTo = new int[3];                         // by EnemyKind
             public int[] EraRuns = new int[3], EraWon = new int[3];   // by the first era chosen
@@ -513,7 +530,8 @@ namespace Tacetno433.Core
             //Fermata : a steady hand holds it to the end, a shaky one lets go part way
             if (b.IsFermata(beat)) b.HoldFraction = grade == Grade.Hesitate || grade == Grade.Miss ? 0f : (flick == Grade.Miss ? 0.5f : (grade == Grade.Perfect ? 1f : 0.8f));
 
-            b.Resolve(beat, choice, grade);
+            BeatResult r = b.Resolve(beat, choice, grade);
+            b.AddNotes(r);                                                                  // SIGNATURE notes, as the duel gives them
             if (b.EnemyDouble[beat] && !b.Finished) b.ResolveGrace(beat, grade == Grade.Hesitate ? Grade.Hesitate : flick);
         }
 
@@ -522,6 +540,7 @@ namespace Tacetno433.Core
         {
             BattleState b = run.Battle;
             rec.Fights++;
+            int signaturesBefore = simSignatures;
             while (!b.Finished)
             {
                 for (int g = 0; g < BattleRules.BeatsPerRound * b.Passes && !b.Finished; g++)
@@ -541,6 +560,7 @@ namespace Tacetno433.Core
                 }
                 if (!b.Finished) b.EndRound();
             }
+            rec.Signatures += simSignatures - signaturesBefore;
             return b.PlayerWon;
         }
 
@@ -575,7 +595,7 @@ namespace Tacetno433.Core
             Open(game, names[index]);
         }
 
-        //Conductor Shot : "detail3" or "duelc3", a page name and one digit (not "duelcombo")
+        //Conductor Shot : "detail3", "duelc3" or "duels3", a page name and one digit (not "duelcombo")
         private static bool IsConductorShot(string name, string page)
         {
             return name.Length == page.Length + 1 && name.StartsWith(page) && char.IsDigit(name[page.Length]);
@@ -657,7 +677,8 @@ namespace Tacetno433.Core
         private static RunState SampleRun(TacetGame game, string name)
         {
             RunState run = new RunState();
-            run.Start(ConductorList.All[IsConductorShot(name, "duelc") ? ShotConductor(name) : 2], game.StoryFont, RouteNodeInfo.CaptionWrapWidth);
+            bool ownConductor = IsConductorShot(name, "duelc") || IsConductorShot(name, "duels");
+            run.Start(ConductorList.All[ownConductor ? ShotConductor(name) : 2], game.StoryFont, RouteNodeInfo.CaptionWrapWidth);
             run.BandName = "THE SILENT CHOIR";
 
             //Ensemble : three from Siam on stage, one from the Classical era on the bench
@@ -771,6 +792,15 @@ namespace Tacetno433.Core
             //Signature Picture : the recipe is full, so SPACE (pressed by the tool) lets it loose
             if (name == "duelcutin")
                 for (int f = 0; f < run.Battle.Notes.Length; f++) run.Battle.Notes[f] = run.Battle.NeedFor(f);
+
+            //Running Signature : duels0 .. duels4, each conductor's move one stroke in (round 13).
+            //THE UNHEARING's band is low on breath, so THE CLOSER THE LOUDER shows.
+            if (IsConductorShot(name, "duels"))
+            {
+                run.Battle.StartSignature();
+                run.Battle.SignatureLeft = BattleRules.SignatureStrokes - 1;
+                if (run.Conductor.Perk == ConductorPerk.CloserLouder) run.ChangeStamina(-45);
+            }
 
             if (name == "result" || name == "defeat")
             {

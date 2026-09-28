@@ -120,12 +120,11 @@ namespace Tacetno433.Screens
 
         //Hold Start : the stroke that opens TACET's fermata landed. The band starts its note now,
         //and the beat is settled when the hold ends.
-        private void StartHold(Choice choice, Grade grade, bool signature)
+        private void StartHold(Choice choice, Grade grade)
         {
             holding = true;
             holdChoice = choice;
             holdGrade = grade;
-            holdSignature = signature;
             heldTime = 0f;
             holdClock = clock;
             holdSteady = clock + 0.3f;
@@ -168,7 +167,7 @@ namespace Tacetno433.Screens
 
             ShowJudge(whole ? holdText[1] : holdText[0], 0.55f);
             if (whole) effects.SpawnFlare(HitX, RingY, 1.2f);
-            ResolveAnswer(b, holdChoice, holdGrade, holdSignature);
+            ResolveAnswer(b, holdChoice, holdGrade);
             AdvanceBeat();
         }
 
@@ -197,7 +196,7 @@ namespace Tacetno433.Screens
             JumpForPicture(BattleRules.BeatsPerRound - 1);
             clock = AnswerAt(pending);
             called = BattleRules.BeatsPerRound - 1;
-            StartHold(Choice.Normal, Grade.Perfect, false);
+            StartHold(Choice.Normal, Grade.Perfect);
         }
 
         //Roll Update : count every stroke until the roll closes, then settle the beat
@@ -212,7 +211,7 @@ namespace Tacetno433.Screens
                 Grade grade = BattleState.RollGrade(rollStrokes);
                 if (grade != Grade.Hesitate) ShowJudge(rollText[(int)grade], 0.55f);
                 if (grade == Grade.Perfect) SoundBank.Play(Sfx.QtePerfect);
-                ResolveAnswer(b, Choice.Boost, grade, false);         // TREMOLO : the whole band rolls
+                ResolveAnswer(b, Choice.Boost, grade);                // TREMOLO : the whole band rolls
                 AdvanceBeat();
             }
         }
