@@ -1,6 +1,6 @@
 # TACET 4'33 — เอกสารส่งต่อให้ฝ่ายโค้ด
 
-อัปเดต : 28 กันยายน 2026 (หลังรอบ 12.2) · repo `github.com/JuzJuz03HKR/Alphodite` branch **`Alpha4`** (รอบ 12–12.2 · `Alpha3` = รอบ 9–11b · รอบ 6–8 อยู่ `Alpha2`) · กติกาสำหรับ Claude อยู่ `CLAUDE.md` · อ่านคู่กับ [`PROJECT_STATUS.md`](PROJECT_STATUS.md) (รายละเอียดทุกระบบ)
+อัปเดต : 28 กันยายน 2026 (หลังรอบ 13) · repo `github.com/JuzJuz03HKR/Alphodite` branch **`Alpha4`** (รอบ 12–13 · `Alpha3` = รอบ 9–11b · รอบ 6–8 อยู่ `Alpha2`) · กติกาสำหรับ Claude อยู่ `CLAUDE.md` · อ่านคู่กับ [`PROJECT_STATUS.md`](PROJECT_STATUS.md) (รายละเอียดทุกระบบ)
 และ [`ASSET_LIST.md`](ASSET_LIST.md) (ไฟล์ภาพ/เสียงที่ต้องใส่)
 
 ---
@@ -37,9 +37,13 @@
 - **รอบ 12.2 (28 ก.ย.)** : **หน้าเลือกเส้นทาง = ถนนของชั้น + ทางแยก + กล่องรายละเอียด** (`RouteScreen.cs` ไม่ใช้ `PanelStrip` แล้ว หน้าเลือกยุคยังใช้) ·
   **METRONOME** วงเล่นตามตัวอักษรบนโน้ต (`BattleState.MarkedChoice`, จ่าย ×1.33) · **UNHEARING** พักได้ลมเพิ่มเมื่อโดนดันถอย (`CloserRestMax`) · FOLK LEADER Push 5 ·
   หน้าโปรไฟล์บอก SIGNATURE + สูตร · คอนดักเตอร์ทุกคน (เก่ง) 68–79%
+- **รอบ 13 (28 ก.ย.)** : **คอนดักเตอร์ทุกคนมี PASSIVE + SIGNATURE ของตัวเอง** (`ConductorPerk` + `SignatureMove`) · SIGNATURE อยู่ 4 ตวัด · โน้ตสูตรจาก PERFECT ·
+  APPRENTICE BY THE BOOK / ABSOLUTE PITCH · METRONOME LOCKED TEMPO / CLOCKWORK · INFERNO RUNAWAY FIRE / SET ALIGHT · UNHEARING THE CLOSER THE LOUDER / DEAF EARS · FOLK LEADER EVERY ROAD HOME / VILLAGE BAND ·
+  ตัวจำลองใช้ SIGNATURE แล้ว · `BlowPerPower` 0.95 ชดเชย · คอนดักเตอร์ทุกคน (เก่ง) 70–75% · ไม่กด Space เลย เก่ง ~64–68% ·
+  หน้าโปรไฟล์ = PASSIVE / SIGNATURE / สูตร + ลูกศรเปลี่ยนคน · แก้บั๊กลูกศรแกลเลอรี (คลิกแล้วเปิดโปรไฟล์คนถัดไป)
 - **ยังไม่มีไฟล์ภาพและเสียงเลย** ทุกช่องเป็นกรอบว่าง / เงียบ ใส่ไฟล์ตามชื่อแล้วขึ้นเองโดยไม่ต้องแก้โค้ด
 - เพื่อนต่างกลุ่มเล่นระบบรอบ 5 แล้ว (ง่ายเกิน) · **เพลย์เทส 25 ก.ย.** 5 คน เล่น build รอบ 8 : ชอบการตวัด · เข้าใจยาก · ง่ายไป (แก้แล้วรอบ 9) ·
-  **รอบ 9–12.2 ยังไม่มีคนเล่นจริง** ตัวเลขได้จากการจำลอง
+  **รอบ 9–13 ยังไม่มีคนเล่นจริง** ตัวเลขได้จากการจำลอง
 - **ข้อเสนอที่รอผู้ใช้เลือก** (ให้เล่นสนุกขึ้น · รีวิวทั้งเกม · สอนเล่น ก–ซ) อยู่ `PROJECT_STATUS.md` หัวข้อ 0 · ข้อเสนอรีวิวรอบ 12 ก–จ ทำแล้วรอบ 12.1
 
 ## 2. ความคืบหน้า (ประมาณการ)
@@ -116,7 +120,9 @@ Tacetno433/
 | โหมด TUTORIAL | `Screens/TutorialScreen.cs` (รายการบท `lessons` แก้ข้อความ/ลำดับที่นี่) · `TutorialScreen.Practice.cs` (จังหวะ โน้ต การตัดสิน) · `TutorialScreen.Seats.cs` (บท WHERE THEY SIT) |
 | เส้นแสง CUE ในดวล | `Screens/DuelScreen.Stage.cs` `DrawCueBeam` |
 | หน้าเลือกเส้นทาง (ถนน · ทางแยก · ป้าย · กล่องรายละเอียด) | `Screens/RouteScreen.cs` `DrawRoad` `DrawFork` `DrawTiles` `DrawDetail` · ตัวอักษรชนิดที่ `RouteNodeInfo.Marks` |
-| ความสามารถคอนดักเตอร์ | ตัวเลข `Data/Conductor.cs` (สตามิน่า Push สูตร) · ผล `BattleState` ค้น `LOCKED TEMPO` `RUNAWAY FIRE` `THE CLOSER THE LOUDER` `EVERY ROAD HOME` |
+| ความสามารถคอนดักเตอร์ (PASSIVE) | ตัวเลข `Data/Conductor.cs` (สตามิน่า Push สูตร ข้อความ) · ผล `BattleState` ค้น `BY THE BOOK` `LOCKED TEMPO` `RUNAWAY FIRE` `THE CLOSER THE LOUDER` (`LouderBonus`) `EVERY ROAD HOME` |
+| **SIGNATURE ต่อคอนดักเตอร์ (รอบ 13)** | ชนิดท่า `Data/Conductor.cs` `SignatureMove` + ข้อความ `SignatureName` / `SignatureText` / `SignatureCall` · กติกา `BattleState.StartSignature` `SignatureIs` `SignatureGrade` `SizeDecided` · ค้น `ABSOLUTE PITCH` `CLOCKWORK` `SET ALIGHT` `DEAF EARS` `VILLAGE BAND` · อยู่กี่ครั้ง `BattleRules.SignatureStrokes` · เก็บโน้ต `BattleState.AddNotes` (PERFECT เท่านั้น) · กด Space `DuelScreen.ArmSignature` · กล่องนับถอยหลัง `DuelScreen.Panels.DrawSignaturePanel` |
+| หน้าเลือกคอนดักเตอร์ | แกลเลอรี `Screens/ConductorSelectScreen.cs` (ลูกศร · ชื่อสกิลใต้ภาพ) · โปรไฟล์ `Screens/ConductorDetailScreen.cs` (PASSIVE / SIGNATURE · ลูกศรเปลี่ยนคน `Switch`) |
 | พักบีตเงียบ (ไม่ตวัด หรือตวัดเล็ก = SOFT REST) | `Battle/BattleState.cs` `RestsOn` · `IsSilent` |
 | Motif ของโน้ตพิเศษ / ชั้นที่เริ่มสุ่มให้ | `Data/Motif.cs` (`FromFloor`) · ผลใน `BattleState` (ค้น `ACCELERANDO` `TENUTO` `GRACE NOTE` `MARCATO` `CON BRIO` `CODA`) |
 | ช่องภาพ | `Core/ArtBank.cs` (ภาพนิ่ง) · `Core/CharacterArt.cs` (นักดนตรี pixel) · `Core/HandArt.cs` (มือ) |
@@ -141,6 +147,7 @@ Tacetno433/
 ## 4. งานที่เหลือ (เรียงตามความสำคัญ)
 
 ### ต้องทำก่อน (P1)
+0000. **เล่นทดสอบรอบ 13** : คอนดักเตอร์ครบ 5 คน กด Space ทุกครั้งที่สูตรเต็ม · แต่ละคนเล่นต่างกันจริงไหม · หน้าโปรไฟล์ / ลูกศร · TACET ซัดแรงขึ้น 0.95 (ถ้ายากไป ถามผู้ใช้ก่อนลด)
 000. **เล่นทดสอบรอบ 12.2** : หน้าเลือกเส้นทางใหม่ · คอนดักเตอร์ครบ 5 คน (METRONOME แบบใหม่)
 00. **เล่นทดสอบรอบ 12.1** : บท Tutorial ที่ 5 · เส้นแสง CUE · ตวัดกลาง/ใหญ่ที่ยาวขึ้น · ตวัดเล็กบนบีตเงียบได้พัก · NAMELESS MASTER
 0. **เล่นทดสอบรอบ 12 ด้วยเมาส์จริง** (branch `Alpha4`) : ตวัด 3 ขนาดแม่นไหม · อ่าน f/mf/p ทันไหม · ตวัดบีตเงียบโดยไม่ตั้งใจบ่อยไหม · เห็น CUE ไหม · หน้า STAGE ใหม่อ่านรู้เรื่องไหม ·
@@ -175,7 +182,8 @@ Tacetno433/
 - รอบ 12 : ตัวจำลองไม่ย้ายคนระหว่างรอบ ไม่จัดฝั่งตาม CUE ไม่หลบ SILENT MOUTHS (นั่งตามลำดับปลดล็อก) · ไม่ได้วัดว่าคนตวัด 3 ขนาดแม่นแค่ไหน ·
   (รอบ 12.1 : NAMELESS ชั้น 1 เก่งแพ้ ~17% ยังยากสุดแต่ไม่เป็นกำแพง · SECOND WIND +14–16 · ใบแรงสุดตอนนี้ CON BRIO +19–21) · เซฟเก่า (ก่อนรอบ 12) ย้ายคนออกจากที่ล็อกเอง ยังไม่ได้ลองกับไฟล์จริง ·
   ภาพ `docs/screenshots/score*.png` `bargain.png` `stage.png` เป็นหน้าก่อนรอบ 12
-- การจำลองบาลานซ์ไม่รวม SIGNATURE (รอบ 12 รวมการอ่าน f/mf/p แล้ว ผ่านนิสัย "อ่านโน้ต" · รวมโน้ตคู่ TREMOLO COUNTER FORTISSIMO FINALE แล้ว)
+- การจำลองบาลานซ์รวม SIGNATURE แล้ว (รอบ 13 : กด Space ทันทีที่สูตรเต็ม บนบีตที่มีโน้ต · คนจริงอาจกดช้ากว่าหรือเลือกจังหวะได้ดีกว่า) ·
+  รวมการอ่าน f/mf/p (นิสัย "อ่านโน้ต") · โน้ตคู่ TREMOLO COUNTER FORTISSIMO FINALE แล้ว · ไม่กด Space เลย เสีย ~5–8% ของผู้เล่นเก่ง
 - สตามิน่า (รอบ 8) กดดันภายในดวลแล้ว (แพ้เพราะหมดลมเป็นส่วนใหญ่) แต่ตอนถึงบอสยังเหลือ ~85% → การบริหารข้ามด่านยังเบา ผูกกับการปรับใหญ่ห้องซ้อม/เส้นทาง (ต้องคุยก่อน)
 - เซฟมีช่องเดียว · CONTINUE เข้าร้านเดิมจะสุ่มของในร้านใหม่
 - ฟอนต์อ้าง `C:/Windows/Fonts/pala.ttf` แบบ path เต็ม (ใช้ได้ทุกเครื่อง Windows ที่ติดตั้งที่ไดรฟ์ C)

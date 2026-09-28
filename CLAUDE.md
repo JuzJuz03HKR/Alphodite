@@ -73,6 +73,13 @@
 - **รอบ 12.2 (28 ก.ย.) ผู้ใช้เลือก** : **หน้าเลือกเส้นทาง = ถนนของชั้น + ทางแยก + ป้ายเล็ก + กล่องรายละเอียด** (`RouteScreen.cs`) · **หน้าเลือกยุคคงแผงเดิม** (`PanelStrip`) ·
   รีวิวคอนดักเตอร์ : **METRONOME = วงเล่นตามตัวอักษรบนโน้ต ผู้เล่นคุมแค่จังหวะ** (`MarkedChoice`, `LockedTempoCost` 1.33) · UNHEARING พักได้ลมเพิ่มเมื่อถอย (`CloserRestMax` 1.0) ·
   FOLK LEADER Push 5 · APPRENTICE / INFERNO ไม่ปรับ · SIGNATURE ยังเหมือนกันทุกคน (ข้อเสนอรอคุย) · ภาพอาร์ตเส้นทางเป็นแนวนอน 460×284
+- **รอบ 13 (28 ก.ย.) ผู้ใช้สั่ง** : **คอนดักเตอร์ทุกคนมี PASSIVE + SIGNATURE ของตัวเอง** (สไตล์การเล่นต่างกัน ไม่ใช่แค่ตัวเลข · Claude ออกแบบเอง ผู้ใช้ยังไม่ได้เห็น) :
+  APPRENTICE BY THE BOOK (GOOD ก็ได้โน้ตสูตร) / ABSOLUTE PITCH (ขนาดไหนก็ IN TUNE) · METRONOME LOCKED TEMPO / CLOCKWORK (GOOD = PERFECT) ·
+  INFERNO RUNAWAY FIRE / SET ALIGHT (×1.3 ดันเกินเพดานถึง 10) · UNHEARING THE CLOSER THE LOUDER (ลม < ครึ่ง ถึง +30%) / DEAF EARS (TACET ซัดไม่เสียลม) ·
+  FOLK LEADER EVERY ROAD HOME / VILLAGE BAND (ทั้งวง ราคาตวัดกลาง) · SIGNATURE อยู่ 4 ตวัด (`BattleRules.SignatureStrokes`) · โน้ตสูตรจาก PERFECT เท่านั้น ·
+  **ตัวจำลองใช้ SIGNATURE แล้ว** · **`BlowPerPower` 0.75 → 0.95** ให้ความยากรวมเท่าเดิม (ไม่กด Space เลยยากขึ้น) · INFERNO Push 8 · UNHEARING Push 3 ·
+  **ท่าที่ประหยัดลมแรงเกินเสมอ** (ลมคือเงื่อนไขแพ้) ออกแบบ SIGNATURE / Motif ใหม่ให้ระวัง · หน้าโปรไฟล์อธิบาย PASSIVE / SIGNATURE + ลูกศรเปลี่ยนคน ·
+  **แก้บั๊กลูกศรแกลเลอรี** (คลิกแล้วเปิดโปรไฟล์ถัดไปเลย) · รายละเอียด + ตัวเลขใน `PROJECT_STATUS.md` หัวข้อ 6 "รอบ 13"
 - โค้ดที่ใช้ร่วมกันระหว่างดวลกับ Tutorial : ไม้บาตอง `Core/Baton.cs` · สัญลักษณ์โน้ต/จุดตี/วงแหวน `Core/NoteGlyph.cs` — แก้หน้าตาที่นี่ทีเดียว ห้ามเขียนซ้ำในหน้าจอ
 
 ## 5. build และทดสอบ
@@ -90,8 +97,10 @@
   `--shots simulate --out <โฟลเดอร์>` จำลองบาลานซ์ลง `simulate.txt` · `--shots audit --out <โฟลเดอร์>` ตรวจสมดุลแยกคอนดักเตอร์/Motif/ศัตรู/ยุค ลง `audit.txt` ·
   `--shots savecheck --out <โฟลเดอร์>` ทดสอบเซฟ/โหลด
   ชื่อหน้าที่แคปได้อยู่ใน `PROJECT_STATUS.md` หัวข้อ 11
-- ผลจำลองล่าสุด (28 ก.ย. รอบ 12.2, audit 2 รัน + simulate บน repo จริง, นับ Motif) : ผู้เล่นทั่วไปจบรัน ~9–10% · เก่ง ~70–72% · ไร้ที่ติ ~99–100% ·
-  คอนดักเตอร์ (เก่ง/ทั่วไป) APPRENTICE 70–74/8–9 · METRONOME 71–72/12–13 · INFERNO 71–73/15–17 · UNHEARING 68–70/6–9 · FOLK LEADER 75–79/11 ·
+- ผลจำลองล่าสุด (28 ก.ย. รอบ 13, audit 4 รัน + simulate, นับ Motif **และ SIGNATURE**) : ผู้เล่นทั่วไปจบรัน ~9% · เก่ง ~70–72% · ไร้ที่ติ ~100% ·
+  คอนดักเตอร์ (เก่ง/ทั่วไป) APPRENTICE 70–74/8–10 · METRONOME 70–72/12–13 · INFERNO 70–75/16–18 · UNHEARING 72–74/6–8 · FOLK LEADER 71–74/9–13 ·
+  SIGNATURE ~1.2–1.9 ครั้งต่อดวล · **ไม่กด Space เลย เก่ง ~64–68% ทั่วไป ~4–9%** · ดวลไร้ที่ติชั้น 1 ~19 / 21 / 23 บีต ·
+  (รอบ 12.2 ไม่นับ SIGNATURE : ทั่วไป ~9–10% · เก่ง ~70–72% · คอนดักเตอร์ 68–79%) ·
   NAMELESS ชั้น 1 เก่งแพ้ ~17% · SECOND WIND +14–16 · ตวัดเล็กทุกบีตจบรัน ~1% (SOFT REST ไม่เป็นทางลัด) ·
   (รอบ 12, 27 ก.ย. : ทั่วไป ~7–8% · เก่ง ~68–70%) ·
   ตวัดใหญ่ทุกโน้ต 46–56% (อ่านโน้ตดีกว่าฟาด) · ดวลไร้ที่ติชั้น 1 ธรรมดา ~20 บีต Elite ~22 บอส ~24 ·
@@ -99,7 +108,9 @@
   (รอบ 11b : ทั่วไป ~9% เก่ง ~67% ดวล 16 / 23 / 31.5 บีต · รอบ 11a : ~8% / ~63% · รอบ 10 : ~7% / ~55%) ·
   บีตต่อดวล 18 / 13.5 / 10.5 · แพ้เพราะหมดลมเป็นส่วนใหญ่ · กติการอบ 8 ในตัวจำลองรอบ 11b = 35% / 77% / 99.8% / 85% ·
   **ผลแกว่ง ±5–8% ระหว่างรัน** เทียบก่อน/หลังต้องรันหลายครั้ง · ตัวเลขเก่าก่อนรอบ 9 ไม่นับ Motif
-- ชื่อหน้าที่แคปได้เพิ่ม (รอบ 8) : `tutorial` `tutorialsize` `tutorialtiming` `tutorialloud` `tutorialbreath` `tutorialroll` `tutorialready` · (รอบ 11b) `duelrepeat` · (รอบ 12) `stage` `stagetrait` `stagemute` `stagemirror` `stagerepeat` `duelmute` (`bargain` อยู่หน้า STAGE แล้ว) · เลิกใช้ `score` `scoretrait` `scorepairs` `scorerepeat` · (รอบ 12.1) `tutorialseats` · หน้า tutorial ที่ตามมาเลื่อนเลขบทไป 1 · (รอบ 12.2) `detail0`–`detail4` `duelc0`–`duelc4` (คอนดักเตอร์ทีละคน)
+- ชื่อหน้าที่แคปได้เพิ่ม (รอบ 8) : `tutorial` `tutorialsize` `tutorialtiming` `tutorialloud` `tutorialbreath` `tutorialroll` `tutorialready` · (รอบ 11b) `duelrepeat` · (รอบ 12) `stage` `stagetrait` `stagemute` `stagemirror` `stagerepeat` `duelmute` (`bargain` อยู่หน้า STAGE แล้ว) · เลิกใช้ `score` `scoretrait` `scorepairs` `scorerepeat` · (รอบ 12.1) `tutorialseats` · หน้า tutorial ที่ตามมาเลื่อนเลขบทไป 1 · (รอบ 12.2) `detail0`–`detail4` `duelc0`–`duelc4` (คอนดักเตอร์ทีละคน) · (รอบ 13) `duels0`–`duels4` (ดวลขณะ SIGNATURE ของคนนั้นทำงาน)
 - **จูนบาลานซ์ในแชท cloud** (วิธีที่ใช้รอบ 9–10) : คัดลอกโปรเจกต์ไปโฟลเดอร์ชั่วคราวตามข้างบน · แก้ตัวเลขในสำเนา (ไม่แตะ repo) · รัน `--shots simulate` หลายรอบ
   (หรือ `--shots audit`) แล้วเฉลี่ย · ได้ค่าที่ใช่ค่อยแก้ใน repo แล้วรันซ้ำยืนยัน · รอบ 11a ใช้สคริปต์ลองหลายค่าพร้อมกัน (สำเนาแยกโฟลเดอร์ละชุด รัน 4 ชุดขนานกัน audit ~40 วิ) ·
-  เป้าที่ผู้ใช้เลือกไว้ (รอบ 11b) : ง่ายลงได้นิดหน่อยจากรอบ 11a · ความยาวดวลดูที่บรรทัด "READS THE MARKS, PERFECT" ใน simulate.txt (รอบ 12 ไม่มี AUTO PLAN แล้ว) · รอบ 12 จูนให้เท่าเป้ารอบ 11b
+  เป้าที่ผู้ใช้เลือกไว้ (รอบ 11b) : ง่ายลงได้นิดหน่อยจากรอบ 11a · ความยาวดวลดูที่บรรทัด "READS THE MARKS, PERFECT" ใน simulate.txt (รอบ 12 ไม่มี AUTO PLAN แล้ว) · รอบ 12 จูนให้เท่าเป้ารอบ 11b ·
+  (รอบ 13) **ลบ `audit.txt` เก่าในโฟลเดอร์ผลก่อนรันเสมอ** ไม่งั้นอ่านได้ไฟล์เก่าตอนที่ชุดใหม่ยังไม่เสร็จ · อย่าใช้ `pkill -f` ด้วยคำที่อยู่ในคำสั่งตัวเอง (ฆ่า shell ตัวเอง) ·
+  simulate แบบดวลเดี่ยวใช้ INFERNO (SampleRun ใช้คอนดักเตอร์ลำดับ 2) ส่วนรันทั้งเกมใช้ APPRENTICE · SIGNATURE ปิดได้ในสำเนา (`DebugShots.SimSignature = false`) เพื่อวัดค่าของมัน
