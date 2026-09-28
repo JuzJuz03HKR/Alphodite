@@ -112,7 +112,7 @@ namespace Tacetno433.Core
             if (Glow > 0f) Gfx.DrawGlow(sb, tip.X, tip.Y, 40f * Glow, Palette.Highlight * (0.6f * Glow));
         }
 
-        //Size Of : 0 small (p, the back row), 1 middle (mf, the middle row too), 2 big (f, the whole band)
+        //Size Of : 0 small (p, the p players), 1 middle (mf, the mf players too), 2 big (f, the whole band)
         public static int SizeOf(float length)
         {
             if (length < GestureReader.MiddleLength) return 0;

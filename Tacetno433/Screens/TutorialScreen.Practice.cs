@@ -33,7 +33,7 @@ namespace Tacetno433.Screens
         {
             "mf : A MIDDLE STROKE, PAST THE FIRST MARK",
             "f IS LOUD : BIG, THE WHOLE BAND",
-            "p IS SOFT : SMALL, THE BACK ROW"
+            "p IS SOFT : SMALL, THE p PLAYERS"
         };
         private static string[] gradeWords = { "", "PERFECT", "GOOD", "MISS", "HESITATE" };
         private static string[] timingWords = { "EARLY", "", "LATE" };

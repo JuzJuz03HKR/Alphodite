@@ -17,7 +17,8 @@ namespace Tacetno433.Screens
     //Wares, top to bottom:
     //   EXTRA SEAT    one more seat on stage, at most two per floor, dearer each time
     //   TUNING        stamina back
-    //   HIRE          a musician from the current era joins
+    //   HIRE          a musician from the current era joins. Round 14 : the shop shows who, with
+    //                 their part, before paying, so the band can be built on purpose
     //   three motifs, rolled when the shop opens
     //Leaving asks first, because the shelves are gone once the band walks out.
     public class ShopScreen : GameScreen
@@ -65,6 +66,7 @@ namespace Tacetno433.Screens
 
         //Shop State
         private Motif[] motifs = new Motif[0];
+        private Musician hire;                 // the musician on offer, rolled when the shop opens, or null
         private string[] names = new string[RowCount];
         private string[] notes = new string[RowCount];
         private string[] priceLabels = new string[RowCount];
@@ -86,8 +88,14 @@ namespace Tacetno433.Screens
             notes[SeatRow] = "One more musician on stage. Two per floor at most.";
             names[TuningRow] = "TUNING";
             notes[TuningRow] = "The band gets back " + (int)(BattleRules.TuningRecover * 100) + " percent of its stamina.";
-            names[HireRow] = "HIRE A PLAYER";
-            notes[HireRow] = "A musician of the " + run.CurrentEra.Name + " era joins the ensemble.";
+            //Hire : one player from this era, known before buying, with their part
+            hire = MusicianList.RollFromEra(run.Era, run.Roster, run.Rng);
+            names[HireRow] = hire != null ? "HIRE " + hire.Name : "HIRE A PLAYER";
+            notes[HireRow] = hire != null
+                ? hire.Name + ", " + hire.Instrument + ". Plays " + StageLayout.Rows[StageLayout.PartOf(hire.Family)].Mark
+                  + ", answers " + StageLayout.SideNames[hire.Cue] + ". " + hire.TraitName + " : " + hire.TraitText
+                : NobodyLine;
+            if (hire == null) sold[HireRow] = true;
 
             for (int i = 0; i < 3; i++)
             {
@@ -181,7 +189,7 @@ namespace Tacetno433.Screens
             if (row == SeatRow && !run.SeatForSale) { Deny(SoldLine); return; }
             if (row == TuningRow && run.Stamina >= run.MaxStamina) { Deny(RestedLine); return; }
             if (row == HireRow && run.RosterFull) { Deny(FullLine); return; }
-            if (row == HireRow && MusicianList.AvailableInEra(run.Era, run.Roster) == 0) { Deny(NobodyLine); return; }
+            if (row == HireRow && hire == null) { Deny(NobodyLine); return; }
 
             if (!run.SpendShards(PriceOf(row))) { Deny(PoorLine); return; }
 
@@ -200,7 +208,7 @@ namespace Tacetno433.Screens
             else if (row == HireRow)
             {
                 run.JustJoined.Clear();
-                Musician m = run.RecruitOne();
+                Musician m = run.Recruit(hire);
                 if (m == null)
                 {
                     run.AddShards(PriceOf(row));      // nobody came, give the money back
@@ -318,8 +326,12 @@ namespace Tacetno433.Screens
             }
             else if (row == HireRow)
             {
-                Gfx.Circle(sb, x, y - 12, 8, c);
-                Gfx.Rect(sb, x - 12, y, 24, 20, c);
+                if (hire != null) MusicianArt.PartBadge(sb, hire, x, y, 14f, Palette.Ink, Palette.Paper, a);
+                else
+                {
+                    Gfx.Circle(sb, x, y - 12, 8, c);
+                    Gfx.Rect(sb, x - 12, y, 24, 20, c);
+                }
             }
             else if (row - FirstMotifRow < motifs.Length)
             {

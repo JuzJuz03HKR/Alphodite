@@ -235,10 +235,10 @@ namespace Tacetno433.Screens
                 return "MOTIF  /  " + gotMotif.Name;
             }
 
-            if (reward == Reward.Recruit)
+            if (reward == Reward.Recruit || reward == Reward.RecruitPart)
             {
                 run.JustJoined.Clear();
-                Musician m = run.RecruitOne();
+                Musician m = reward == Reward.RecruitPart ? run.Recruit(run.MissingPartPlayer()) : run.RecruitOne();
                 if (m == null)
                 {
                     run.AddShards(ev.Choices[chosen].ShardCost);       // money back, nobody could come
@@ -280,7 +280,7 @@ namespace Tacetno433.Screens
                 run.Chosen.Type = NodeType.Elite;
                 run.Chosen.Title = RouteNodeInfo.TitleOf(NodeType.Elite);
                 run.BeginBattle();
-                Game.Screens.Change(new FormationScreen(true));
+                Game.Screens.Change(new DuelScreen());
                 return;
             }
 

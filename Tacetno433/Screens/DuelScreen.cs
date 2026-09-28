@@ -9,7 +9,9 @@ using Tacetno433.Data;
 
 namespace Tacetno433.Screens
 {
-    //DuelScreen : one round of the fight, conducted beat after beat without a break.
+    //DuelScreen : the whole fight, conducted beat after beat without a break. Round 14 : the
+    //rounds follow each other on this page (they used to go back to the STAGE page in between),
+    //a banner between them says what changes in the next one.
     //
     //A ROUND is eight beats, written as two bars of four.
     //   CALL    TACET plays its eight notes, one on each beat. Every note leaves the right edge
@@ -31,14 +33,14 @@ namespace Tacetno433.Screens
     //lands where the baton stops or turns. There is no long song: every answered beat plays the
     //next note of the band's melody, so the music only happens when the player conducts.
     //
-    //WHO PLAYS is decided by the stroke itself (round 12, there is no score page any more):
-    //   DYNAMICS  how BIG the stroke is picks the rows that come in: small (p) the back row,
-    //             middle (mf) the middle row too, big (f) the whole band. The ruler on the baton
+    //WHO PLAYS is decided by the stroke itself (round 12, there is no score page any more), and
+    //every player wears their PART over their head, a letter and an arrow (round 14):
+    //   DYNAMICS  how BIG the stroke is picks the parts that come in: small (p) the p players,
+    //             middle (mf) the mf players too, big (f) the whole band. The ruler on the baton
     //             says p, mf and f, the same marks TACET's notes carry: answer f with f.
     //             Everyone who comes in pays stamina, so a big stroke tires the band.
-    //   CUE       the way the baton goes points at one side of the stage (down and up the centre,
-    //             left and right their own side). Whoever sits there hits harder. The players the
-    //             baton points at wear a small mark over their heads.
+    //   CUE       the way the baton goes matches some players' arrows (down and up share one).
+    //             They hit harder, their badges light up and a thread runs to them.
     //   REST      where TACET is silent, letting the beat pass or a small stroke is a rest and
     //             gives breath back (SOFT REST). A middle or big stroke there is a free hit
     //             instead. Either is fine, neither is a miss.
@@ -74,7 +76,7 @@ namespace Tacetno433.Screens
     //   DuelScreen.Panels.cs   the three panels along the bottom
     public partial class DuelScreen : GameScreen
     {
-        private enum Phase { Intro, Play, Finale, RoundEnd }
+        private enum Phase { Intro, Play, Finale, RoundEnd, Bargain }
 
         //Duel Layout
         private Rectangle stageBox = new Rectangle(40, 196, 600, 420);   // the band area, for pop ups
@@ -120,11 +122,11 @@ namespace Tacetno433.Screens
         private string[] rollText = new string[5];
         private static string[] holdText = { "LET GO", "FERMATA" };
 
-        //Band Panel Order : the same way round as the stage above it, back row (p) on the left to
-        //front row (f) on the right, left side to right side inside each row
+        //Band Panel Order : the same way round as the stage above it, the p players on the left to
+        //the f players on the right, left arrow to right arrow inside each part
         private static int[] panelOrder = { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
 
-        //Front First : front row first, to find who stands nearest TACET
+        //Front First : the f players first, they stand nearest TACET and take its blow
         private static int[] frontFirst = { 6, 7, 8, 3, 4, 5, 0, 1, 2 };
 
         //Story Lines : what the box at the bottom right says. The signature line and the enemy's
@@ -221,6 +223,22 @@ namespace Tacetno433.Screens
         private const float SignatureNameRoom = 100f;    // how wide the name may be there
         private string[] louderWords = new string[0];   // THE CLOSER THE LOUDER, see Load
 
+        //Round Note : what is different about the coming round, told under its banner (SILENT
+        //MOUTHS, REQUIEM, the devil's deal), and the enemy's trait the first time it is met.
+        //Made in SetUpRound, never in Draw.
+        private string introNote = "";
+        private float introTime;          // how long this round's banner stays up
+        private bool traitCard;           // this banner explains the enemy's trait in full
+        private static bool[] traitSeen = new bool[16];   // traits met at least once since the game started
+        private static bool partsTold;                     // the first duel since the game started explains the badges
+        private const string PartsNote = "OVER EACH PLAYER : THE LETTER IS THE SMALLEST STROKE THAT BRINGS THEM IN, THE ARROW THE WAY THEY HIT HARDER";
+        private const string BargainNote = "THE BARGAIN : YOUR BAND HITS 50 PERCENT HARDER THIS ROUND";
+
+        //Bargain : THE DEVIL'S STRING's offer before round two, answered on this page (round 14)
+        private Rectangle bargainBox = new Rectangle(330, 200, 620, 250);
+        private Rectangle acceptButton = new Rectangle(380, 374, 250, 50);
+        private Rectangle refuseButton = new Rectangle(650, 374, 250, 50);
+
         //Round State : the whole round is one run of beats. TACET's note n sounds at n beats,
         //and is answered at n + 4 beats, so the answers start one bar after the call.
         //With REPEATS the notes are counted across the whole round: note g is beat g % 8 of
@@ -315,7 +333,6 @@ namespace Tacetno433.Screens
         {
             battle = Game.CurrentRun.Battle;
             displayLine = battle.Line;
-            roundEndLabel = "END OF ROUND " + battle.Round;
             beatsLabel = "/ " + BattleRules.BeatsPerRound;
             signatureName = Game.CurrentRun.Conductor.SignatureName;
 
@@ -331,9 +348,7 @@ namespace Tacetno433.Screens
                 for (int i = 0; i < louderWords.Length; i++) louderWords[i] = "LOUDER +" + i + "%";
             }
 
-            //Tempo : this round's speed, which an enemy's trait may have changed
-            beatLen = 60f / battle.Tempo;
-            tempoLabel = battle.TempoLabel;
+            SetUpRound();
 
             //Judgement Words : made once here, so a beat never builds a string
             for (int g = 0; g < gradeWord.Length; g++)
@@ -358,8 +373,52 @@ namespace Tacetno433.Screens
             phaseTimer = 0f;
             beat = 0;
 
+            //The Bargain : a fight picked up before round two waits for the devil's answer first
+            if (battle.BargainOffered)
+            {
+                phase = Phase.Bargain;
+                Game.IsMouseVisible = true;
+            }
+
             SoundBank.PlayMusic(RunFlow.FightMusic(Game.CurrentRun));
             SoundBank.Play(Sfx.RoundStart);
+        }
+
+        //Round Set Up : this round's tempo and words. Called when the duel opens and again for
+        //every round after it, the rounds follow each other without leaving the page.
+        private void SetUpRound()
+        {
+            roundEndLabel = "END OF ROUND " + battle.Round;
+
+            //Tempo : this round's speed, which an enemy's trait may have changed
+            beatLen = 60f / battle.Tempo;
+            tempoLabel = battle.TempoLabel;
+
+            //First Meeting : a trait nobody has seen yet explains itself under the first banner
+            traitCard = false;
+            if (battle.Round == 1 && battle.TraitShown && !traitSeen[(int)battle.Enemy.Trait])
+            {
+                traitSeen[(int)battle.Enemy.Trait] = true;
+                traitCard = true;
+            }
+
+            //Round Note : what is different about this round
+            introNote = "";
+            if (battle.SilencedPart >= 0)
+                introNote = "SILENT MOUTHS : YOUR " + StageLayout.Rows[battle.SilencedPart].Mark + " PLAYERS CANNOT PLAY THIS ROUND";
+            else if (battle.Mirrored)
+                introNote = "UNFINISHED : THE LEFT AND RIGHT ARROWS SWAP THIS ROUND";
+            else if (battle.Round >= 3 && battle.EnemyHas(EnemyTrait.Lullaby))
+                introNote = "LULLABY : THE LAST ROUND SLOWS DOWN";
+            else if (battle.Round == 1 && !partsTold && !traitCard)
+            {
+                introNote = PartsNote;                                   // the badges, once, before the first fight starts
+                partsTold = true;
+            }
+
+            introTime = BattleRules.IntroTime;
+            if (introNote.Length > 0) introTime = BattleRules.IntroNoteTime;
+            if (traitCard) introTime = BattleRules.TraitIntroTime;
         }
 
         //Screen Leave : give the ordinary mouse pointer back to the rest of the game
@@ -379,7 +438,7 @@ namespace Tacetno433.Screens
         public override void Resumed()
         {
             paused = false;
-            Game.IsMouseVisible = false;
+            Game.IsMouseVisible = phase == Phase.Bargain;     // the deal is answered with the ordinary pointer
             gesture.Clear();
 
             //Fermata : a hold cannot survive a pause, it ends with what was held so far
@@ -596,7 +655,7 @@ namespace Tacetno433.Screens
             if (phase == Phase.Intro)
             {
                 phaseTimer += dt;
-                if (phaseTimer >= BattleRules.IntroTime) StartRound();
+                if (phaseTimer >= introTime) StartRound();
             }
             else if (phase == Phase.Play)
             {
@@ -611,6 +670,33 @@ namespace Tacetno433.Screens
                 phaseTimer += dt;
                 if (phaseTimer >= BattleRules.RoundEndTime) LeaveRound();
             }
+            else if (phase == Phase.Bargain)
+            {
+                UpdateBargain();
+            }
+        }
+
+        //Bargain Update : THE BARGAIN, the devil's deal waits for an answer, a click or Y / N.
+        //The fight stands still until then, the pointer is the ordinary one.
+        private void UpdateBargain()
+        {
+            bool accept = Input.ClickedOn(acceptButton) || Input.KeyPressed(Keys.Y);
+            bool refuse = Input.ClickedOn(refuseButton) || Input.KeyPressed(Keys.N);
+            if (!accept && !refuse) return;
+
+            battle.AnswerBargain(accept);
+            SoundBank.Play(accept ? Sfx.MotifGet : Sfx.UiBack);
+            if (accept)
+            {
+                introNote = BargainNote;
+                introTime = Math.Max(introTime, BattleRules.IntroNoteTime);
+            }
+
+            Game.IsMouseVisible = false;
+            gesture.Clear();
+            phase = Phase.Intro;
+            phaseTimer = 0f;
+            SoundBank.Play(Sfx.RoundStart);
         }
 
         //Round Start : TACET is about to play. The story box warns what kind of bar comes first.
@@ -1075,12 +1161,25 @@ namespace Tacetno433.Screens
         private void LeaveRound()
         {
             battle.EndRound();
-
-            //Next Round : back to the stage page, to see TACET's next part and move the band
             if (battle.Finished)
+            {
                 Game.Screens.Change(new ResultScreen());
-            else
-                Game.Screens.Change(new FormationScreen(true));
+                return;
+            }
+
+            //Next Round : straight on, on this page (round 14). The devil asks first.
+            SetUpRound();
+            phaseTimer = 0f;
+            beat = 0;
+            clashShown = false;
+            if (battle.BargainOffered)
+            {
+                phase = Phase.Bargain;
+                Game.IsMouseVisible = true;
+                return;
+            }
+            phase = Phase.Intro;
+            SoundBank.Play(Sfx.RoundStart);
         }
 
         //Tug Split : where the marker sits on the tug bar
@@ -1223,7 +1322,12 @@ namespace Tacetno433.Screens
 
             effects.DrawPops(sb, Game.BigFont);
 
-            if (phase == Phase.Intro) DrawBanner(sb, battle.RoundLabel, phaseTimer / BattleRules.IntroTime);
+            if (phase == Phase.Intro)
+            {
+                DrawBanner(sb, battle.RoundLabel, phaseTimer / introTime);
+                DrawRoundNote(sb, phaseTimer / introTime);
+            }
+            if (phase == Phase.Bargain) DrawBargain(sb);
             if (phase == Phase.RoundEnd) DrawBanner(sb, bannerText, phaseTimer / BattleRules.RoundEndTime);
             if (phase == Phase.Finale && finaleClock < 0f) DrawFinaleCard(sb);
             if (cutIn > 0f) DrawCutIn(sb);
@@ -1232,7 +1336,7 @@ namespace Tacetno433.Screens
 
             //Baton : the size guide and the stick itself, over everything else. See DuelScreen.Baton.cs
             //While the pause menu is open the ordinary pointer is back, so the stick is hidden.
-            if (!paused)
+            if (!paused && phase != Phase.Bargain)
             {
                 DrawStrokeGuide(sb);
                 baton.Draw(sb, gesture);

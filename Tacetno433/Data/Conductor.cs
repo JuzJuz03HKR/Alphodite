@@ -177,7 +177,7 @@ namespace Tacetno433.Data
                       + "He is the only conductor who is not afraid of TACET getting closer.",
                 MechanicName = "THE CLOSER THE LOUDER",
                 MechanicText = "You start weak. Once the band is down to half its breath it hits harder the lower it goes, "
-                             + "up to 30 percent harder on its very last breath.",
+                             + "up to 25 percent harder on its very last breath.",
                 SignatureMark = "Senza paura",
                 SignatureName = "DEAF EARS",
                 SignatureText = "For the next 4 strokes TACET's blows take no breath at all. "
@@ -204,16 +204,19 @@ namespace Tacetno433.Data
                       + "and found out they all fit together.",
                 MechanicName = "EVERY ROAD HOME",
                 MechanicText = "Players from different cultures on the same beat hit harder together, "
-                             + "7 percent for every culture after the first, but you begin the run with one seat fewer.",
+                             + "5 percent for every culture after the first, but you begin the run with one seat fewer.",
                 SignatureMark = "Alla rustica",
                 SignatureName = "VILLAGE BAND",
                 SignatureText = "For the next 4 strokes, any stroke brings the whole band in, every culture at once, "
                               + "and the band pays only what a middle stroke costs.",
                 SignatureCall = "* VILLAGE BAND! Four strokes, the whole band for the price of a middle one.",
-                Recipe = new int[] { 2, 3, 2 },     // the pipes of every road
+                Recipe = new int[] { 3, 3, 3 },     // the pipes of every road. Round 14 : 2 3 2 -> 3 3 3, VILLAGE BAND brings the
+                                                    // heavy percussion in at a middle stroke's price and came too often
                 Move = SignatureMove.VillageBand,
-                Stamina = 6, PushPower = 5, Perk = ConductorPerk.EveryRoadHome,      // round 12.2 : push 6 -> 5, he won the most
+                Stamina = 5, PushPower = 5, Perk = ConductorPerk.EveryRoadHome,      // round 12.2 : push 6 -> 5, he won the most
                                                                                      // runs (77 to 82 percent, the others 67 to 75)
+                                                                                     // round 14 : stamina 6 -> 5, VILLAGE BAND brings the
+                                                                                     // percussion (f) in for a middle stroke's price
                 ThemeColor = Palette.ToneE,
                 Unlocked = true
             },

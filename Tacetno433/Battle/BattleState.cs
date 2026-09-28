@@ -6,8 +6,8 @@ using Tacetno433.Data;
 namespace Tacetno433.Battle
 {
     //Choice : what the band (or TACET) does on one beat, written as music marks.
-    //   p   Ease    TACET plays soft.  For us : a small stroke, the back row comes in.
-    //   mf  Normal  TACET plays.       For us : a middle stroke, the middle row comes in too.
+    //   p   Ease    TACET plays soft.  For us : a small stroke, the p players come in.
+    //   mf  Normal  TACET plays.       For us : a middle stroke, the mf players come in too.
     //   f   Boost   TACET plays loud.  For us : a big stroke, the whole band comes in.
     public enum Choice { Normal, Boost, Ease }
 
@@ -54,7 +54,8 @@ namespace Tacetno433.Battle
         public Grade GraceGrade;
         public int GracePush;
 
-        //Per Seat : who came in on this beat, and whose trait changed it
+        //Per Seat : who came in on this beat, and whose trait changed it. A seat is a musician's
+        //home seat, so it always means the same player (StageLayout.HomeSeat).
         public bool[] Joined = new bool[StageLayout.SeatCount];
         public bool[] TraitFired = new bool[StageLayout.SeatCount];
     }
@@ -62,12 +63,13 @@ namespace Tacetno433.Battle
     //BattleState : ALL THE COMBAT RULES, with no drawing in it.
     //
     //How a fight works:
-    //   a round is 8 beats of TACET's part. Before each round the player only seats the band
-    //   (the stage page). There is no beat plan (round 12): every stroke decides who plays.
-    //   DYNAMICS  how big the stroke is picks the rows that come in: small the back row,
-    //             middle the middle row too, big the whole band (see Joins).
-    //   CUE       the baton points at one side of the stage on every beat, and whoever sits
-    //             there hits harder (see CueSideAt).
+    //   a round is 8 beats of TACET's part, and the rounds follow each other without leaving
+    //   the duel (round 14). There is no plan and no seating: every stroke decides who plays,
+    //   and every musician's PART is written on them (StageLayout) : a letter and an arrow.
+    //   DYNAMICS  how big the stroke is picks the parts that come in: small the p players,
+    //             middle the mf players too, big the whole band (see Joins).
+    //   CUE       the baton goes one way on every beat, and the players whose arrow points
+    //             that way hit harder (see CueSideAt).
     //   the round is played through once, twice or three times in a row (REPEATS, round 11):
     //   the same beats each time, but TACET decides its f / mf / p again for every pass.
     //   on every beat both sides add up their power and the difference pushes a line. Push it
@@ -163,6 +165,7 @@ namespace Tacetno433.Battle
         private int[] lastRound = new int[BattleRules.BeatsPerRound];  // ANSWER BETTER : what the band played last round
         private bool bargainAnswered;
         private bool bargainTaken;
+        private int lastSilenced = -1;           // SILENT MOUTHS : the part silenced last round
 
         //Seat Memory : what each seat did on the beats before this one, for the traits that
         //count a run of beats. Every round starts them afresh.
@@ -170,8 +173,8 @@ namespace Tacetno433.Battle
         private int[] streak = new int[StageLayout.SeatCount];         // MOMENTUM : beats in a row
         private int[] barCount = new int[StageLayout.SeatCount];       // FOUR BARS : beats of this bar
 
-        //SILENT MOUTHS : the side of the stage THE MUTE CHOIR silences this round, -1 for none
-        public int SilencedSide = -1;
+        //SILENT MOUTHS : the part (0 p, 1 mf, 2 f) THE MUTE CHOIR silences this round, -1 for none
+        public int SilencedPart = -1;
 
         public BattleState(RunState run, Enemy enemy, Random random)
         {
@@ -228,7 +231,7 @@ namespace Tacetno433.Battle
             get { return BattleRules.GoodWindow + (Run.Has(MotifId.SteadyPulse) ? BattleRules.SteadyWindowBonus : 0f); }
         }
 
-        //Perfect Window At : COUNTS ALOUD widens it on the beats the baton points at her side
+        //Perfect Window At : COUNTS ALOUD widens it on her beats, the ones the baton goes her way
         public float PerfectWindowAt(int beat)
         {
             float window = PerfectWindow;
@@ -236,13 +239,15 @@ namespace Tacetno433.Battle
             return window;
         }
 
-        //Late Forgiven : FASHIONABLY LATE, a late stroke that brings her in still counts as GOOD
-        public bool LateForgivenAt(Choice choice)
+        //Late Forgiven : FASHIONABLY LATE, on her beats a late stroke that brings her in still
+        //counts as GOOD (round 14 : only on her beats, she is a p player and comes in on every stroke)
+        public bool LateForgivenAt(int beat, Choice choice)
         {
-            return JoinedSeat(MusicianTrait.Forgiven, choice) >= 0;
+            int seat = JoinedSeat(MusicianTrait.Forgiven, choice);
+            return seat >= 0 && IsCued(seat, beat);
         }
 
-        //Cued Seat : a seat with this trait on the side the baton points at on this beat, or -1
+        //Cued Seat : a player with this trait whose arrow the baton follows on this beat, or -1
         public int CuedSeat(MusicianTrait trait, int beat)
         {
             for (int s = 0; s < StageLayout.SeatCount; s++)
@@ -258,8 +263,8 @@ namespace Tacetno433.Battle
             return -1;
         }
 
-        //CUE : the side of the stage the baton points at on this beat. Down and up point at the
-        //centre, left and right at their own side. REQUIEM mirrors the stage in round three.
+        //CUE : which arrow the baton follows on this beat, 0 left, 1 down and up, 2 right.
+        //REQUIEM mirrors the band in round three: the left players answer right and back.
         public int CueSideAt(int beat)
         {
             int side = BattleRules.CueSide[beat % 4];
@@ -267,31 +272,32 @@ namespace Tacetno433.Battle
             return side;
         }
 
+        //Is Cued : this seat's player answers the way the baton goes on this beat (their arrow)
         public bool IsCued(int seat, int beat)
         {
             return StageLayout.SeatSide(seat) == CueSideAt(beat);
         }
 
-        //Mirrored : UNFINISHED, in round three left and right swap
+        //Mirrored : UNFINISHED, in round three the left and right arrows swap
         public bool Mirrored
         {
             get { return Round >= 3 && EnemyHas(EnemyTrait.Unfinished); }
         }
 
-        //Can Play : somebody sits here, and not on the side SILENT MOUTHS has silenced. If the
-        //whole band sits on that side the silence does not hold, a band always has a sound.
+        //Can Play : somebody sits here, and not in the part SILENT MOUTHS has silenced. If the
+        //whole band plays that part the silence does not hold, a band always has a sound.
         public bool CanPlay(int seat)
         {
             Formation f = Run.Formation;
             if (f.Seated[seat] == null) return false;
-            if (SilencedSide < 0 || StageLayout.SeatSide(seat) != SilencedSide) return true;
+            if (SilencedPart < 0 || StageLayout.SeatRow[seat] != SilencedPart) return true;
 
             for (int s = 0; s < StageLayout.SeatCount; s++)
-                if (f.Seated[s] != null && StageLayout.SeatSide(s) != SilencedSide) return false;
+                if (f.Seated[s] != null && StageLayout.SeatRow[s] != SilencedPart) return false;
             return true;
         }
 
-        //DYNAMICS : how many rows a stroke brings in, counted from the back
+        //DYNAMICS : how many parts a stroke brings in, counted from p
         public static int RowsFor(Choice choice)
         {
             if (choice == Choice.Ease) return 1;
@@ -299,39 +305,36 @@ namespace Tacetno433.Battle
             return 3;
         }
 
-        //Row Tier : a row's place counted from the back among the rows that have somebody who
-        //can play, 0 for the first. A row with nobody in it is skipped, so every stroke brings
-        //somebody in. -1 for an empty row.
-        public int RowTier(int row)
-        {
-            if (!RowHasPlayers(row)) return -1;
-            int tier = 0;
-            for (int r = 0; r < row; r++)
-                if (RowHasPlayers(r)) tier++;
-            return tier;
-        }
-
-        private bool RowHasPlayers(int row)
-        {
-            for (int s = 0; s < StageLayout.SeatCount; s++)
-                if (StageLayout.SeatRow[s] == row && CanPlay(s)) return true;
-            return false;
-        }
-
-        //Joins : does this seat play on a stroke of this size? THE QUIET PART plays on every stroke.
+        //Joins : does this seat play on a stroke of this size? A stroke brings in every part up
+        //to its size, the letters written on the players mean exactly that (round 14).
+        //A stroke never brings nobody: when no p player can play, a small stroke brings the
+        //quietest part there is (and a middle one too, when there is no p or mf player).
         //(LOCKED TEMPO picks the size from TACET's mark before it gets here, see MarkedChoice.)
         public bool Joins(int seat, Choice choice)
         {
             if (!CanPlay(seat)) return false;
-            if (Run.Formation.Seated[seat].Trait == MusicianTrait.QuietPart) return true;    // THE QUIET PART
-            return RowTier(StageLayout.SeatRow[seat]) < RowsFor(choice);
+            int part = StageLayout.SeatRow[seat];
+            int reach = RowsFor(choice);
+            if (part < reach) return true;
+            int quietest = QuietestPart();
+            return quietest >= reach && part == quietest;
         }
 
-        //Joins By Trait : THE QUIET PART brought her in on a stroke her row would sit out
-        private bool JoinsByTrait(int seat, Choice choice)
+        //Quietest Part : the lowest part (0 p, 1 mf, 2 f) that somebody able to play is in, 3 for none
+        public int QuietestPart()
         {
-            return Run.Formation.Seated[seat].Trait == MusicianTrait.QuietPart
-                && RowTier(StageLayout.SeatRow[seat]) >= RowsFor(choice);
+            int lowest = 3;
+            for (int s = 0; s < StageLayout.SeatCount; s++)
+                if (StageLayout.SeatRow[s] < lowest && CanPlay(s)) lowest = StageLayout.SeatRow[s];
+            return lowest;
+        }
+
+        //Smallest Stroke : the smallest stroke that brings this seat in, 0 small, 1 middle, 2 big
+        public int SmallestStroke(int seat)
+        {
+            if (Joins(seat, Choice.Ease)) return 0;
+            if (Joins(seat, Choice.Normal)) return 1;
+            return 2;
         }
 
         //Tempo : beats per minute this round. LULLABY and UNFINISHED change the last round.
@@ -490,15 +493,14 @@ namespace Tacetno433.Battle
                 barCount[s] = 0;
             }
 
-            //SILENT MOUTHS : from round two one side of the stage is silenced for the whole round,
-            //picked now so the stage page can show it and the band can be moved out of its way
-            SilencedSide = -1;
-            if (EnemyHas(EnemyTrait.SilentMouths) && Round >= 2) SilencedSide = PickSilencedSide();
+            //SILENT MOUTHS : from round two one part of the band is silenced for the whole round,
+            //picked now so the duel can say so on the round's banner
+            SilencedPart = -1;
+            if (EnemyHas(EnemyTrait.SilentMouths) && Round >= 2) SilencedPart = PickSilencedPart();
 
             //Last Note : every round ends on a special note two beats long. Ordinary enemies HOLD
             //it (fermata) from FermataFromFloor on, everyone else ROLLS it (tremolo), so on floor
-            //one every enemy rolls. It always has a note, and it is never hidden, so the stage page
-            //can show it before the round.
+            //one every enemy rolls. It always has a note, and it is never hidden.
             int last = BattleRules.BeatsPerRound - 1;
             bool hold = Enemy.Kind == EnemyKind.Normal && Run.Floor >= BattleRules.FermataFromFloor;
             bool roll = !hold && Run.Floor >= BattleRules.TremoloFromFloor;     // round 9 : whoever does not hold, rolls
@@ -623,23 +625,30 @@ namespace Tacetno433.Battle
             }
         }
 
-        //Silenced Side Pick : SILENT MOUTHS takes one side that has somebody on it, fairly at
-        //random. A band sitting on one side only is left alone, it would have no sound at all.
-        private int PickSilencedSide()
+        //Silenced Part Pick : SILENT MOUTHS takes one part that has somebody in it, fairly at
+        //random, and never the same one two rounds running. A band that plays one part only is
+        //left alone, it would have no sound at all.
+        private int PickSilencedPart()
         {
             Formation f = Run.Formation;
+            int used = 0;
             int picks = 0;
             int chosen = -1;
-            for (int side = 0; side < 3; side++)
+            for (int part = 0; part < 3; part++)
             {
-                bool used = false;
+                bool has = false;
                 for (int s = 0; s < StageLayout.SeatCount; s++)
-                    if (f.Seated[s] != null && StageLayout.SeatSide(s) == side) used = true;
-                if (!used) continue;
+                    if (f.Seated[s] != null && StageLayout.SeatRow[s] == part) has = true;
+                if (!has) continue;
+                used++;
+                if (part == lastSilenced) continue;
                 picks++;
-                if (random.Next(picks) == 0) chosen = side;
+                if (random.Next(picks) == 0) chosen = part;
             }
-            return picks >= 2 ? chosen : -1;
+            if (used < 2) return -1;
+            if (chosen < 0) chosen = lastSilenced;
+            lastSilenced = chosen;
+            return chosen;
         }
 
         //Strongest : the biggest note TACET plays this round
@@ -698,9 +707,11 @@ namespace Tacetno433.Battle
             return Choice.Normal;
         }
 
-        //Seat Power : one seated player's part on a beat, with their row, the CUE and their own
-        //trait. The traits that count a run of beats read the seat memory, which Resolve moves on
-        //after every beat. Traits that react to the stroke itself live in Resolve.
+        //Seat Power : one player's sound on a beat, with the CUE and their own trait. The traits
+        //that count a run of beats read the seat memory, which Resolve moves on after every
+        //beat. Traits that react to the stroke itself live in Resolve.
+        //Round 14 : the power is the musician's own number, the one on their card (the rows used
+        //to scale it, x0.8 at the back and x1.3 at the front).
         public float SeatPowerAt(int seat, int beat)
         {
             Musician m = Run.Formation.Seated[seat];
@@ -710,18 +721,25 @@ namespace Tacetno433.Battle
             if (m.Trait == MusicianTrait.Momentum)
                 power += Math.Min(streak[seat], BattleRules.MomentumMax) * BattleRules.MomentumStep;
 
-            power *= StageLayout.RowOf(seat).PowerScale;
-
             //BY EAR : a hidden note is no problem for someone who never read one
             if (m.Trait == MusicianTrait.ByEar && EnemyHidden[beat]) power *= BattleRules.ByEarPower;
 
             //FOUR BARS STRAIGHT : the last beat of a bar he played from its first beat
             if (m.Trait == MusicianTrait.FourBars && FullBarUpTo(seat, beat)) power *= BattleRules.FourBarsPower;
 
-            //CUE : the baton points at this side of the stage
+            //THE QUIET PART : against TACET's real p note, she plays it back twice as hard
+            if (m.Trait == MusicianTrait.QuietPart && QuietNote(beat)) power *= BattleRules.QuietPartPower;
+
+            //CUE : the baton goes this player's way
             if (IsCued(seat, beat)) power *= BattleRules.CuePower;
 
             return power;
+        }
+
+        //Quiet Note : TACET really plays this beat soft (p), a note that is there and not hidden
+        private bool QuietNote(int beat)
+        {
+            return EnemyChoice[beat] == Choice.Ease && EnemyPower[beat] > 0 && !EnemyHidden[beat];
         }
 
         //Full Bar : true on the fourth beat of a bar when this seat played the three before it
@@ -737,6 +755,7 @@ namespace Tacetno433.Battle
             if (m.Trait == MusicianTrait.Momentum) return streak[seat] > 0;
             if (m.Trait == MusicianTrait.ByEar) return EnemyHidden[beat];
             if (m.Trait == MusicianTrait.FourBars) return FullBarUpTo(seat, beat);
+            if (m.Trait == MusicianTrait.QuietPart) return QuietNote(beat);
             return false;
         }
 
@@ -749,8 +768,8 @@ namespace Tacetno433.Battle
             return -1;
         }
 
-        //Power For : everyone a stroke of this size brings in on this beat, with their rows, the
-        //CUE, their traits, harmony and the conductor. Before the timing grade and the combo.
+        //Power For : everyone a stroke of this size brings in on this beat, with the CUE, their
+        //traits, harmony and the conductor. Before the timing grade and the combo.
         public int PowerFor(int beat, Choice choice)
         {
             Formation f = Run.Formation;
@@ -795,7 +814,7 @@ namespace Tacetno433.Battle
 
             for (int s = 0; s < StageLayout.SeatCount; s++)
                 if (Joins(s, choice))
-                    total += Run.CostOf(f.Seated[s]) * StageLayout.RowOf(s).CostScale;
+                    total += Run.CostOf(f.Seated[s]);
 
             total *= BattleRules.StaminaCostScale;
             if (choice == Choice.Ease) total *= BattleRules.EaseCost;
@@ -959,11 +978,11 @@ namespace Tacetno433.Battle
             if (beat % 4 == 0)
                 for (int s = 0; s < StageLayout.SeatCount; s++) barCount[s] = 0;
 
-            //DYNAMICS : who comes in. The size of the stroke picks the rows, see Joins.
+            //DYNAMICS : who comes in. The size of the stroke picks the parts, see Joins.
             for (int s = 0; s < StageLayout.SeatCount; s++)
             {
                 r.Joined[s] = stroked && Joins(s, choice);
-                r.TraitFired[s] = r.Joined[s] && (TraitFires(s, beat) || JoinsByTrait(s, choice));
+                r.TraitFired[s] = r.Joined[s] && TraitFires(s, beat);
             }
 
             int basePower = stroked ? PowerFor(beat, choice) : 0;
@@ -1024,8 +1043,8 @@ namespace Tacetno433.Battle
             }
             else if (choice == Choice.Ease)
             {
-                //Small Stroke : only the back row plays. It gives no breath back (EaseRecover is 0),
-                //unless PIANISSIMO lets the rows that sit out breathe
+                //Small Stroke : only the p players play. It gives no breath back (EaseRecover is 0),
+                //unless PIANISSIMO lets the parts that sit out breathe
                 power *= BattleRules.EasePower;
                 easeBack = easeRecover;                                                // added after the grade, so PIANISSIMO's card number is exact
             }

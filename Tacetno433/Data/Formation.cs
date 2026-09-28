@@ -1,22 +1,15 @@
 namespace Tacetno433.Data
 {
-    //Formation : who sits in which seat.
+    //Formation : who is on stage and who waits on the bench.
     //
-    //There is no beat plan any more (round 12). Where a musician sits is how they play:
-    //   the ROW  decides which strokes bring them in, small the back row, middle the middle row
-    //            too, big everybody (see BattleState.Joins)
-    //   the SIDE decides on which beats the baton points at them (CUE, BattleRules.CueSide)
+    //Round 14 : nobody chooses a seat any more. Each musician plays a PART written on their card
+    //(a letter for the strokes that bring them in, an arrow for the way they answer, see
+    //StageLayout), and each part belongs to one musician, so everyone on stage always sits in
+    //their own HOME SEAT. The only choice left is who plays: the stage has room for RunState.Seats
+    //players, the rest wait on the bench. The band page (BandScreen) swaps them.
     public class Formation
     {
         public Musician[] Seated = new Musician[StageLayout.SeatCount];
-
-        //Seat Unlocked : a seat is open if it is among the first seatsOwned in the unlock order
-        public bool IsUnlocked(int seat, int seatsOwned)
-        {
-            for (int i = 0; i < seatsOwned && i < StageLayout.UnlockOrder.Length; i++)
-                if (StageLayout.UnlockOrder[i] == seat) return true;
-            return false;
-        }
 
         //Seat Of : which seat a musician is in, or -1 when they are on the bench
         public int SeatOf(Musician m)
@@ -24,6 +17,11 @@ namespace Tacetno433.Data
             for (int s = 0; s < Seated.Length; s++)
                 if (Seated[s] == m) return s;
             return -1;
+        }
+
+        public bool OnStage(Musician m)
+        {
+            return SeatOf(m) >= 0;
         }
 
         public int SeatedCount
@@ -37,51 +35,39 @@ namespace Tacetno433.Data
             }
         }
 
-        //Place : put a musician into a seat. If they were already sitting somewhere,
-        //whoever was in the target seat moves over to their old seat.
-        public void Place(Musician m, int seat)
-        {
-            int from = SeatOf(m);
-            if (from == seat) return;
-
-            Musician previous = Seated[seat];
-            Seated[seat] = m;
-            if (from >= 0) Seated[from] = previous;       // Seat Swap
-        }
-
-        //Remove : back to the bench
-        public void Remove(int seat)
-        {
-            Seated[seat] = null;
-        }
-
-        //Auto Seat : first open empty seat, in unlock order. Returns false if the stage is full.
+        //Auto Seat : a musician steps onto the stage, into their home seat, while there is room.
+        //Returns false when the stage is full (they wait on the bench).
         public bool AutoSeat(Musician m, int seatsOwned)
         {
-            for (int i = 0; i < seatsOwned && i < StageLayout.UnlockOrder.Length; i++)
-            {
-                int seat = StageLayout.UnlockOrder[i];
-                if (Seated[seat] == null)
-                {
-                    Seated[seat] = m;
-                    return true;
-                }
-            }
-            return false;
+            if (OnStage(m)) return true;
+            if (SeatedCount >= seatsOwned) return false;
+            Seated[StageLayout.HomeSeat(m)] = m;
+            return true;
         }
 
-        //Tidy : anyone sitting in a seat that is not open moves to the first open empty seat, or
-        //to the bench when the stage is full. A run saved before round 12 sat its first players
-        //down the centre, and those seats open later now (StageLayout.UnlockOrder).
+        //Bench : off the stage
+        public void Bench(Musician m)
+        {
+            int seat = SeatOf(m);
+            if (seat >= 0) Seated[seat] = null;
+        }
+
+        //Swap : one on the bench takes the place of one on stage
+        public void Swap(Musician fromBench, Musician fromStage)
+        {
+            Bench(fromStage);
+            Seated[StageLayout.HomeSeat(fromBench)] = fromBench;
+        }
+
+        //Tidy : everyone moves to their home seat, and when there are more players on stage than
+        //room for them (a smaller stage, or a save from before round 14 where anyone could sit
+        //anywhere) the last ones go to the bench.
         public void Tidy(int seatsOwned)
         {
-            for (int s = 0; s < Seated.Length; s++)
-            {
-                if (Seated[s] == null || IsUnlocked(s, seatsOwned)) continue;
-                Musician m = Seated[s];
-                Seated[s] = null;
-                AutoSeat(m, seatsOwned);
-            }
+            Musician[] before = (Musician[])Seated.Clone();
+            for (int s = 0; s < Seated.Length; s++) Seated[s] = null;
+            for (int s = 0; s < before.Length; s++)
+                if (before[s] != null) AutoSeat(before[s], seatsOwned);
         }
     }
 }

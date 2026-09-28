@@ -39,7 +39,7 @@ namespace Tacetno433.Screens
             return r;
         }
 
-        //Up Next : CUE, the baton points at this seat's side on the beat being answered.
+        //Up Next : CUE, the baton goes this player's way on the beat being answered (their arrow).
         //In the finale, everyone is.
         private bool UpNext(int seat)
         {
@@ -50,7 +50,7 @@ namespace Tacetno433.Screens
 
         //Musician Glow : the light behind whoever is playing or about to. Drawn before the band
         //switches to pixel sampling, because a soft glow must stay smooth.
-        //While a stroke is being drawn the rows it would bring in light up, one more row each
+        //While a stroke is being drawn the parts it would bring in light up, one more part each
         //time the stroke passes a mark on the ruler (DYNAMICS), so its size can be seen on stage.
         private void DrawMusicianGlow(SpriteBatch sb)
         {
@@ -93,8 +93,10 @@ namespace Tacetno433.Screens
             }
         }
 
-        //Musician Marks : CUE, a small diamond over whoever the baton points at on the beat being
-        //answered, and a cross over anyone SILENT MOUTHS has silenced this round
+        //Musician Marks : every player's PART over their head, the letter and the arrow (round 14).
+        //The ones the baton goes toward on the beat being answered (CUE) light up and grow, the
+        //rest wait a shade dimmer. A cross over anyone SILENT MOUTHS has silenced this round.
+        //REQUIEM's mirrored round turns the arrows round with the rule.
         private void DrawMusicianMarks(SpriteBatch sb)
         {
             Formation f = Game.CurrentRun.Formation;
@@ -102,25 +104,32 @@ namespace Tacetno433.Screens
             {
                 if (f.Seated[s] == null) continue;
                 Rectangle r = StandRect(s);
+                int side = StageLayout.SeatSide(s);
+                if (battle.Mirrored) side = 2 - side;                                      // UNFINISHED
+                float bx = r.Center.X;
+                float by = r.Y - 22;
+
+                //Dark Disc : the stage behind is bright, so the badge is inked in, the letter light
                 if (!battle.CanPlay(s))
                 {
-                    Gfx.Line(sb, r.Center.X - 7, r.Y - 21, r.Center.X + 7, r.Y - 7, Palette.Ink, 2f);
-                    Gfx.Line(sb, r.Center.X - 7, r.Y - 7, r.Center.X + 7, r.Y - 21, Palette.Ink, 2f);
+                    MusicianArt.PartBadge(sb, StageLayout.SeatRow[s], side, bx, by, 12f, Palette.PaperDim, Palette.Ink, 0.45f);
+                    Gfx.Line(sb, bx - 12, by - 12, bx + 12, by + 12, Palette.Ink, 3f);
+                    Gfx.Line(sb, bx - 12, by + 12, bx + 12, by - 12, Palette.Ink, 3f);
                     continue;
                 }
-                if (!UpNext(s)) continue;
-                Gfx.Diamond(sb, r.Center.X, r.Y - 14, 7, Palette.Paper);
-                Gfx.Diamond(sb, r.Center.X, r.Y - 14, 5, Palette.Ink);
+
+                bool next = UpNext(s);
+                if (next) Gfx.DrawGlow(sb, bx, by, 34f, Palette.Highlight * 0.6f);
+                MusicianArt.PartBadge(sb, StageLayout.SeatRow[s], side, bx, by, next ? 15f : 12f,
+                                      next ? Palette.Highlight : Palette.Paper, Palette.Ink, next ? 1f : 0.75f);
             }
         }
 
-        //CUE Beam : a thread from the answer ring to whoever the baton points at on the beat being
+        //CUE Beam : a thread from the answer ring to whoever the baton goes toward on the beat being
         //answered (round 12.1, the small mark over their heads alone was easy to miss). It grows
         //darker as the ring closes, and a spark runs along it to land on the players right on
-        //the beat. The side's name, the same word the STAGE page uses, sits where the thread
-        //leaves the ring, where the eyes already are, because this page shows the stage from the
-        //side and left, centre and right become far, middle and near. On a silent beat the thread
-        //is faint, nobody has to play it.
+        //the beat. The arrow's name sits where the thread leaves the ring, where the eyes already
+        //are. On a silent beat the thread is faint, nobody has to play it.
         private void DrawCueBeam(SpriteBatch sb)
         {
             if (phase != Phase.Play || cutIn > 0f) return;

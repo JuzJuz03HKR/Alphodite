@@ -61,11 +61,11 @@ namespace Tacetno433.Data
         {
             //Rarity 1
             new Motif { Id = MotifId.Resin,        Name = "ROSIN",         Mark = "arco", Rarity = 1,
-                        Text = "String players hit 1 harder." },
+                        Text = "String players (mf) hit 1 harder." },
             new Motif { Id = MotifId.ReedCase,     Name = "REED CASE",     Mark = "o",    Rarity = 1,
-                        Text = "Wind players cost 1 less stamina." },
+                        Text = "Wind players (p) cost 1 less stamina." },
             new Motif { Id = MotifId.SpareSticks,  Name = "SPARE STICKS",  Mark = "x",    Rarity = 1,
-                        Text = "Percussion players hit 1 harder." },
+                        Text = "Percussion players (f) cost 1 less stamina." },
             new Motif { Id = MotifId.Pianissimo,   Name = "PIANISSIMO",    Mark = "pp",   Rarity = 1,
                         Text = "A small stroke gives back 3 stamina." },
             new Motif { Id = MotifId.PatronsPurse, Name = "PATRON'S PURSE", Mark = "$",   Rarity = 1,

@@ -69,7 +69,7 @@ namespace Tacetno433.Core
             mouseClock += dt;
             Input.PretendHeld = true;
 
-            //Still Hand : the fermata picture needs the baton held still, and the WHERE THEY SIT
+            //Still Hand : the fermata picture needs the baton held still, and the WHO PLAYS
             //picture keeps the beam of the stroke it was set up with
             if (index < names.Length && (names[index] == "duelfermata" || names[index] == "tutorialseats"))
             {
@@ -575,6 +575,7 @@ namespace Tacetno433.Core
             if ((names[index] == "duelpause" || names[index] == "pause") && frames == waits[index] - 30) Input.PretendPress = Keys.Escape;
             if (names[index] == "titlequit" && frames == waits[index] - 10) Input.PretendPress = Keys.Escape;
             if (names[index] == "shopleave" && frames == waits[index] - 10) Input.PretendPress = Keys.Enter;
+            if (names[index] == "guide2" && frames == 10) Input.PretendPress = Keys.Right;
             if (names[index] == "guide3" && (frames == 10 || frames == 20)) Input.PretendPress = Keys.Right;
             if (names[index] == "guide4" && (frames == 10 || frames == 20 || frames == 30)) Input.PretendPress = Keys.Right;
             if (names[index] == "guide5" && (frames == 10 || frames == 20 || frames == 30 || frames == 40)) Input.PretendPress = Keys.Right;
@@ -610,9 +611,9 @@ namespace Tacetno433.Core
 
         //Page Open : build a sample run that suits the page, then show it.
         //Names: title titlecontinue titlequit guide guide3 guide4 guide5 settings calibrate gallery detail chapter era
-        //       crossing recruit bandname route pause view stage score scoretrait scorepairs scorerepeat bargain
+        //       crossing recruit bandname route pause band (or view) duelbargain dueltrait duelmute duelmirror
         //       duel duelcombo duelboss duelcutin duelpause dueldouble dueltremolo duelfermata duelfire duelrepeat finale
-        //       result defeat reward shop shopleave event rest curtain curtainwin
+        //       result defeat reward shop shopleave event eventchair rest curtain curtainwin
         private static void Open(TacetGame game, string name)
         {
             RunState run = SampleRun(game, name);
@@ -634,13 +635,12 @@ namespace Tacetno433.Core
             if (name == "recruit") screen = new RecruitScreen();
             if (name == "bandname") screen = new BandNameScreen();
             if (name == "route" || name == "pause") screen = new RouteScreen();
-            if (name == "view") screen = new FormationScreen(false);
-            if (name.StartsWith("stage") || name == "bargain") screen = new FormationScreen(true);
+            if (name == "view" || name == "band") screen = new BandScreen();
             if (name.StartsWith("duel") || name == "finale") screen = new DuelScreen();
             if (name == "result" || name == "defeat") screen = new ResultScreen();
             if (name == "reward") screen = new MotifRewardScreen(false);
             if (name == "shop" || name == "shopleave") screen = new ShopScreen();
-            if (name == "event") screen = new EventScreen();
+            if (name.StartsWith("event")) screen = new EventScreen();
             if (name == "rest") screen = new RestScreen();
             if (name == "curtain" || name == "curtainwin") screen = new CurtainCallScreen(name == "curtainwin");
 
@@ -688,7 +688,7 @@ namespace Tacetno433.Core
             run.RecruitOne();
             run.ChooseEra(0);
             run.RecruitOne();
-            run.ChooseEra(1);
+            run.ChooseEra(name == "shop" ? 0 : 1);                                  // the shop picture : a Classical player still for hire
 
             if (name == "recruit")
             {
@@ -706,7 +706,7 @@ namespace Tacetno433.Core
                 run.AddMotif(MotifList.Get(MotifId.Resin));
                 run.AddShards(120);
                 run.Rehearse(run.Roster[0]);
-                run.CurrentEvent = EventList.All[1];
+                run.CurrentEvent = EventList.All[name == "eventchair" ? EventList.All.Length - 1 : 1];   // eventchair : THE EMPTY CHAIR
                 run.BattlesWon = 6;
                 run.PerfectsTotal = 23;
                 run.BestCombo = 5;
@@ -764,25 +764,26 @@ namespace Tacetno433.Core
             }
 
 
-            //Trait Pictures : an ordinary enemy on floor two shows its trait, the devil makes its offer,
-            //THE MUTE CHOIR silences a side, REQUIEM mirrors the stage in round three (round 12)
+            //Trait Pictures : an ordinary enemy on floor two explains its trait on the first banner,
+            //the devil makes its offer, THE MUTE CHOIR silences a part, REQUIEM mirrors the arrows
+            //in round three (round 14 : all inside the duel, the STAGE page is gone)
             Random pick = new Random(5);
-            if (name == "stagetrait" || name == "duelboss")
+            if (name == "dueltrait" || name == "duelboss")
             {
                 run.Floor = 2;
                 run.Battle = new BattleState(run, name == "duelboss" ? EnemyList.All[7] : EnemyList.All[0], pick);
             }
-            if (name == "bargain")
+            if (name == "duelbargain")
             {
                 run.Battle = new BattleState(run, EnemyList.All[8], pick);
                 run.Battle.EndRound();
             }
-            if (name == "stagemute" || name == "duelmute")
+            if (name == "duelmute")
             {
                 run.Battle = new BattleState(run, EnemyList.All[4], pick);
                 run.Battle.EndRound();                                                // it silences from round two
             }
-            if (name == "stagemirror")
+            if (name == "duelmirror")
             {
                 run.Battle = new BattleState(run, EnemyList.All[6], pick);
                 run.Battle.EndRound();

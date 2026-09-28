@@ -21,12 +21,12 @@ namespace Tacetno433.Screens
         }
 
         //Guide Text : THE PLACE TO EDIT THE TUTORIAL
-        private static string[] steps = { "ROUTE", "STAGE", "STROKE", "DUEL", "LINE" };
+        private static string[] steps = { "ROUTE", "BAND", "STROKE", "DUEL", "LINE" };
         private static string[] numbers = { "01", "02", "03", "04", "05" };
         private static string[] titles =
         {
             "Choose a path",
-            "Seat the ensemble",
+            "Know your band",
             "Big stroke, whole band",
             "Play the duel",
             "Hold the line"
@@ -37,13 +37,13 @@ namespace Tacetno433.Screens
             + "Duels pay shards and motifs, ??? can be anything, shops and rest stops keep the band alive. "
             + "The last stage of each floor is a boss. Clear three floors to win the run.",
 
-            "Drag musicians onto the seats. Where they sit is how they play. The ROW says which strokes bring "
-            + "them in: the back row plays on every stroke, the middle row on middle and big ones, the front row "
-            + "only on big ones. The SIDE says on which beats the baton points at them, and then they hit harder. "
-            + "The strip on top is TACET's next phrase, with the side each beat points at. Right click to bench.",
+            "Every musician wears a PART, drawn like a note: a letter and an arrow. The LETTER is the smallest "
+            + "stroke that brings them in: winds p (every stroke), strings mf (middle and big), percussion f "
+            + "(big only). The ARROW is the way they answer: when the baton goes their way they hit harder. "
+            + "There is nothing to arrange before a fight. On the route, TAB opens THE BAND to choose who plays.",
 
-            "How big you swing decides who plays: small (p) the back row, "
-            + "middle (mf) the middle row too, big (f) the whole band. Everyone who plays pays stamina, "
+            "How big you swing decides who plays: small (p) the p players, "
+            + "middle (mf) the mf players too, big (f) the whole band. Everyone who plays pays stamina, "
             + "so read TACET's marks and answer p small and f big. Where TACET is silent, let the beat pass or "
             + "stroke small to rest; a bigger swing is a free hit. Round two plays its phrase twice, round three three times.",
 
@@ -68,11 +68,11 @@ namespace Tacetno433.Screens
         private const float NavSpacing = 110f;
 
         //Drawing Data : the made-up examples in the pictures, kept out of Draw so drawing never allocates
-        private static string[] demoRows = { "BACK", "MIDDLE", "FRONT" };
+        private static string[] demoRows = { "WINDS", "STRINGS", "PERCUSSION" };
         private static string[] demoRowNotes = { "EVERY STROKE", "MIDDLE AND BIG", "BIG ONLY" };
-        private static string[] demoSides = { "LEFT", "CENTRE", "RIGHT" };
         private static string[] demoSizes = { "p", "mf", "f" };
-        private static string[] demoRowIn = { "SMALL  :  BACK ROW", "MIDDLE  :  AND THE MIDDLE ROW", "BIG  :  THE WHOLE BAND" };
+        private static string[] demoRowIn = { "SMALL  :  THE p PLAYERS", "MIDDLE  :  AND THE mf PLAYERS", "BIG  :  THE WHOLE BAND" };
+        private static int[] demoBand = { 1, 3, 5, 6 };      // the chairs filled in the band picture (part * 3 + arrow)
         private static string[] demoBeats = { "1", "2", "3", "4" };
 
         //Demo Pattern : the four points of the 4/4 shape, in beat order, around the centre
@@ -190,41 +190,42 @@ namespace Tacetno433.Screens
             Gfx.TextSpacedCentered(sb, Game.Font, "BOSS", 570, y + 18, Palette.PaperDim * a, TextSize.Tiny, 2f);
         }
 
-        //Page 2 : three rows of seats
+        //Page 2 : the band as the BAND page shows it. A row for each letter, p nearest the
+        //conductor, a column for each arrow, and a few players wearing their badges (round 14)
         private void DrawStage(SpriteBatch sb, float a)
         {
-            for (int r = 0; r < 3; r++)
+            for (int part = 0; part < 3; part++)
             {
-                float y = 160 + r * 120;
-                float size = 0.7f + r * 0.12f;
-                Gfx.Rect(sb, 250 - r * 30, y + 96 * size, 360 + r * 60, 2, Palette.LineGrey * a);
-                Gfx.TextSpaced(sb, Game.Font, demoRows[r], 100, y + 30, Palette.Paper * a, TextSize.Label, 3f);
-                Gfx.Text(sb, Game.StoryFont, demoRowNotes[r], 100, y + 50, Palette.PaperDim * a, TextSize.StorySmall);
+                float y = 462 - part * 116;
+                Gfx.Text(sb, Game.BigFont, demoSizes[part], 96, y - 26, Palette.Highlight * a, TextSize.Subtitle);
+                Gfx.TextSpaced(sb, Game.Font, demoRows[part], 150, y - 18, Palette.Paper * a, TextSize.Label, 2f);
+                Gfx.Text(sb, Game.StoryFont, demoRowNotes[part], 150, y + 2, Palette.PaperDim * a, TextSize.StorySmall);
+                Gfx.Rect(sb, 330, y + 50, 300, 1, Palette.LineGrey * (0.4f * a));
 
-                for (int s = 0; s < 3; s++)
+                for (int side = 0; side < 3; side++)
                 {
-                    int w = (int)(40 * size);
-                    int h = (int)(110 * size);
-                    Rectangle cap = new Rectangle(340 + (s - 1) * (130 + r * 20) - w / 2 + 90, (int)y, w, h);
-                    bool filled = (r + s) % 2 == 0 || s == 1;
+                    Rectangle cap = new Rectangle(400 + side * 90 - 20, (int)y - 44, 40, 88);
+                    bool filled = Array.IndexOf(demoBand, part * 3 + side) >= 0;
                     if (filled) ArtSlot.Draw(sb, cap, Palette.Paper, a);
-                    else Gfx.RectOutline(sb, cap, Palette.LineGrey * a, 1);
+                    else Gfx.CapsuleOutline(sb, cap, Palette.LineGrey * (0.5f * a), 1f);
+                    MusicianArt.PartBadge(sb, part, side, cap.Center.X, cap.Y - 2, filled ? 12f : 9f,
+                                          Palette.Ink, filled ? Palette.Paper : Palette.PaperDim, filled ? a : 0.4f * a);
                 }
             }
 
-            //Sides : the columns the baton points at
-            for (int s = 0; s < 3; s++)
-                Gfx.TextSpacedCentered(sb, Game.Font, demoSides[s], 430 + (s - 1) * 150, 132, Palette.PaperDim * a, TextSize.Tiny, 3f);
+            //Arrows : the way each column answers
+            NoteGlyph.Arrow(sb, Flick.Left, 400, 136, 30f, 11f, Palette.PaperDim * a, 2f);
+            NoteGlyph.Arrow(sb, Flick.Down, 482, 136, 24f, 10f, Palette.PaperDim * a, 2f);
+            NoteGlyph.Arrow(sb, Flick.Up, 498, 136, 24f, 10f, Palette.PaperDim * a, 2f);
+            NoteGlyph.Arrow(sb, Flick.Right, 580, 136, 30f, 11f, Palette.PaperDim * a, 2f);
 
-            //Drag Hint : a capsule on its way to a seat
-            float t = (time * 0.5f) % 1f;
-            Rectangle ghost = new Rectangle((int)(600 - t * 90), (int)(470 - t * 60), 30, 80);
-            ArtSlot.Draw(sb, ghost, Palette.Highlight, 0.8f * a);
-            Gfx.Arrow(sb, ghost.X - 14, ghost.Center.Y, 7, false, Palette.PaperDim * a);
+            //Conductor : the podium, the bigger the stroke the further back it reaches
+            Gfx.Diamond(sb, 490, 528, 6, Palette.Paper * a);
+            Gfx.TextSpacedCentered(sb, Game.Font, "CONDUCTOR", 490, 536, Palette.LineGrey * a, TextSize.Tiny, 3f);
         }
 
-        //Page 3 : a stroke growing along the ruler, and the rows of the band lighting up with it,
-        //the back row first (DYNAMICS)
+        //Page 3 : a stroke growing along the ruler, and the parts of the band lighting up with it,
+        //the p players first (DYNAMICS)
         private void DrawStroke(SpriteBatch sb, float a)
         {
             //Ruler : three zones, p mf f, a stroke growing along it and falling back
@@ -244,13 +245,13 @@ namespace Tacetno433.Screens
             }
             Gfx.TextSpacedCentered(sb, Game.Font, demoRowIn[zone], rx + rw / 2f, ry - 34, Palette.Paper * a, TextSize.Tiny, 3f);
 
-            //Band : three rows seen from the conductor, back at the top. A row lights up once the
-            //stroke is big enough to bring it in.
+            //Band : three parts seen from the conductor, f at the back (the top), p nearest. A part
+            //lights up once the stroke is big enough to bring it in.
             for (int r = 0; r < 3; r++)
             {
-                int row = 2 - r;                                   // drawn back row first, at the top
+                int row = r;
                 bool lit = zone >= r;
-                float y = 150 + r * 88;
+                float y = 326 - r * 88;
                 float size = 0.75f + row * 0.1f;
                 Gfx.TextSpaced(sb, Game.Font, demoRows[r], 110, y + 26, (lit ? Palette.Highlight : Palette.PaperDim) * a, TextSize.Label, 3f);
                 for (int s = 0; s < 3; s++)

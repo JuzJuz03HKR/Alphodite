@@ -20,7 +20,7 @@ namespace Tacetno433.Screens
         {
             int k = b % 4;
 
-            //Stroke Size : small brings the back row, middle the middle row too, big the whole band
+            //Stroke Size : small brings the p players, middle the mf players too, big the whole band
             Choice choice = sizeChoice[Baton.SizeOf(gesture.Length)];
 
             //SOFT REST : a small stroke on a silent beat is a rest, whatever its timing or way.
@@ -47,8 +47,8 @@ namespace Tacetno433.Screens
                 if (anna >= 0) PopTrait(anna);
             }
 
-            //FASHIONABLY LATE : a late stroke that brings her in is forgiven as GOOD
-            if (grade == Grade.Miss && now > target && battle.LateForgivenAt(choice))
+            //FASHIONABLY LATE : on her beats a late stroke that brings her in is forgiven as GOOD
+            if (grade == Grade.Miss && now > target && battle.LateForgivenAt(b, choice))
             {
                 grade = Grade.Good;
                 int iris = battle.JoinedSeat(MusicianTrait.Forgiven, choice);

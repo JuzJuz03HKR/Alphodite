@@ -9,9 +9,12 @@ namespace Tacetno433.Data
     public enum EnemyKind { Normal, Elite, Boss }
 
     //EnemyTrait : the one rule a shape of TACET bends. BattleState and the duel check these by
-    //name. A trait is always told to the player BEFORE it matters: its name sits on the stage
-    //page (point at the enemy to read it) and the duel's story box says it when the fight opens.
-    //Round 12 : SILENT MOUTHS and UNFINISHED also play with the sides of the stage (the CUE).
+    //name. A trait is always told to the player BEFORE it matters: the first banner of the duel
+    //explains it the first time it is met (round 14), its name sits on the enemy's plate, and the
+    //story box says it when the fight opens.
+    //Round 12 : SILENT MOUTHS and UNFINISHED also play with the band. Round 14 : with the parts
+    //written on the players, SILENT MOUTHS silences a letter (p, mf or f) and UNFINISHED swaps
+    //the left and right arrows.
     public enum EnemyTrait
     {
         None,
@@ -19,9 +22,9 @@ namespace Tacetno433.Data
         FillsGaps,       // DEAD AIR     a small stroke or none lets its note in 50 percent harder
         Lullaby,         // THE LULL     round three slows down instead of speeding up
         FalseNotes,      // STATIC       one note in every bar shows the wrong loudness
-        SilentMouths,    // MUTE CHOIR   from round two it silences one side of your stage, and hides some notes
+        SilentMouths,    // MUTE CHOIR   from round two it silences one part of your band (p, mf or f), and hides some notes
         NoRest,          // WHITE NOISE  silent beats give back only half the stamina
-        Unfinished,      // REQUIEM      round three plays its part backwards, faster, and mirrors your stage
+        Unfinished,      // REQUIEM      round three plays its part backwards, faster, and swaps your left and right arrows
         Mirror,          // NAMELESS     from round two it plays YOUR last round back at you
         Bargain          // DEVIL'S STRING  before round two it offers a deal
     }
@@ -91,21 +94,24 @@ namespace Tacetno433.Data
             //Elite : any era
             new Enemy { Name = "THE MUTE CHOIR", Title = "A hundred mouths, open, making nothing.",
                         Trait = EnemyTrait.SilentMouths, TraitName = "SILENT MOUTHS", TraitFloor = 1,
-                        TraitText = "From round two it silences one side of your stage each round: nobody there can play. Some notes stay hidden as ???",
-                        Kind = EnemyKind.Elite, Pattern = new int[] { 5, 0, 5, 0, 7, 0, 5, 8 }, Hidden = new int[] { 3, 7 }, Tone = Palette.ToneB },
+                        TraitText = "From round two it silences one part of your band each round, p, mf or f: those players cannot play. Some notes stay hidden as ???",
+                        Kind = EnemyKind.Elite, Pattern = new int[] { 5, 0, 5, 0, 6, 0, 5, 7 }, Hidden = new int[] { 3, 7 }, Tone = Palette.ToneB },
+                        // round 14, was 5 0 5 0 7 0 5 8 : silencing a whole part hit harder than silencing a side of the stage
             //WHITE NOISE : round 11, quieter notes (3 -> 2) and NO REST gives back half instead of
             //nothing. It used to end more runs on floor one than any boss.
             //Round 12 : a hiss, mostly p (Temper 15 -> -60) and nothing hidden. A note on every beat
             //means a stroke paid on every beat, so its notes are soft enough to answer small.
+            //Round 14 : notes 2 -> 3, Temper -60 -> -45. The winds (p) answer soft notes cheaply now,
+            //and it had stopped being a threat (a strong player lost to it 3 percent of the time, was 16).
             new Enemy { Name = "WHITE NOISE",    Title = "Every beat, all the time, forever.",
                         Trait = EnemyTrait.NoRest, TraitName = "NO REST", TraitFloor = 1,
                         TraitText = "It never stops, so silent beats give back only half the stamina.",
-                        Kind = EnemyKind.Elite, Pattern = new int[] { 2, 2, 2, 2, 2, 2, 2, 2 }, Tone = Palette.ToneA, Temper = -60 },
+                        Kind = EnemyKind.Elite, Pattern = new int[] { 3, 3, 3, 3, 3, 3, 3, 3 }, Tone = Palette.ToneA, Temper = -45 },
 
             //Boss : one per era
             new Enemy { Name = "REQUIEM",            Title = "The piece that was never finished.",
                         Trait = EnemyTrait.Unfinished, TraitName = "UNFINISHED", TraitFloor = 1,
-                        TraitText = "In round three it plays backwards and faster, and your stage is mirrored: left and right swap.",
+                        TraitText = "In round three it plays backwards and faster, and your band is mirrored: the left and right arrows swap.",
                         Kind = EnemyKind.Boss, Era = 0, Pattern = new int[] { 6, 0, 4, 0, 8, 0, 4, 9 }, Hidden = new int[] { 2, 6 }, Tone = Palette.ToneA },
             new Enemy { Name = "THE NAMELESS MASTER", Title = "He plays a phrase. You must answer better.",
                         Trait = EnemyTrait.Mirror, TraitName = "ANSWER BETTER", TraitFloor = 1,

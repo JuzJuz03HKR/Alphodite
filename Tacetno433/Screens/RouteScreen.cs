@@ -16,7 +16,7 @@ namespace Tacetno433.Screens
     //the FORK drops to one to four small TILES, the places on offer now. The one under the
     //pointer shows its picture and its whole line in the DETAIL box below. Forward only.
     //
-    //TAB (or the button) opens the stage so the ensemble can be rearranged between fights.
+    //TAB (or the button) opens the band page, to choose who plays and who waits on the bench.
     //ESC opens the pause menu, like every page of a run. Arriving here saves the run.
     //(The era page keeps the tall panels of PanelStrip.)
     public class RouteScreen : GameScreen
@@ -47,12 +47,18 @@ namespace Tacetno433.Screens
         private float time;
         private float[] lift = new float[4];          // how far each tile has risen, 0 to 1
         private Vector2 lastMouse;
+        private string benchLabel = "";               // "2 ON THE BENCH" over the band button, made in Load
 
         public override void Load()
         {
             if (Game.CurrentRun == null) return;
 
             selected = 0;
+
+            //Bench Note : players waiting off stage are easy to forget, so the band button says so
+            RunState run = Game.CurrentRun;
+            int benched = run.Roster.Count - run.Formation.SeatedCount;
+            benchLabel = benched > 0 ? benched + " ON THE BENCH" : "";
             lift = new float[Game.CurrentRun.Options.Length];
             lastMouse = Input.MousePos;
 
@@ -90,11 +96,11 @@ namespace Tacetno433.Screens
             for (int i = 0; i < lift.Length; i++)
                 lift[i] += ((i == selected ? 1f : 0f) - lift[i]) * Math.Min(1f, dt * 12f);
 
-            //Stage View : look at the ensemble between fights
+            //Band : look at the ensemble between fights, and choose who plays
             if (Input.KeyPressed(Keys.Tab) || Input.ClickedOn(stageButton))
             {
                 SoundBank.Play(Sfx.UiConfirm);
-                Game.Screens.Change(new FormationScreen(false));
+                Game.Screens.Change(new BandScreen());
                 return;
             }
 
@@ -292,7 +298,9 @@ namespace Tacetno433.Screens
             float cx = TacetGame.ScreenW / 2f;
             Gfx.TextSpacedCentered(sb, Game.BigFont, run.StageLabel, cx, 640, Palette.Paper, TextSize.Subtitle, 6f);
 
-            Ui.Button(sb, stageButton, "VIEW STAGE", "TAB", false);
+            Ui.Button(sb, stageButton, "THE BAND", "TAB", false);
+            if (benchLabel.Length > 0)
+                Gfx.TextSpaced(sb, Game.Font, benchLabel, stageButton.X + 4, stageButton.Y - 18, Palette.Highlight, TextSize.Tiny, 2f);
 
             Gfx.TextSpacedRight(sb, Game.Font, run.FloorShort, 1244, 640, Palette.PaperDim, TextSize.Label, 3f);
             Gfx.TextSpacedRight(sb, Game.Font, "ARROWS  CHOOSE   /   ENTER  GO", 1244, 670, Palette.LineGrey, TextSize.Tiny, 2f);

@@ -34,9 +34,10 @@ namespace Tacetno433.Screens
 
             if (node.Type == NodeType.Battle || node.Type == NodeType.Elite || node.Type == NodeType.Boss)
             {
-                //Fight : set up the battle, then open the stage to prepare
+                //Fight : set up the battle and step straight into the duel. There is nothing to
+                //arrange first (round 14), every player's part is written on them.
                 run.BeginBattle(enemy);
-                game.Screens.Change(new FormationScreen(true));
+                game.Screens.Change(new DuelScreen());
             }
             else if (node.Type == NodeType.EraShift)
             {
@@ -75,8 +76,7 @@ namespace Tacetno433.Screens
             return true;
         }
 
-        //Fight Music : ONE track for the whole fight, from the stage page through every round,
-        //so it never restarts when the pages swap between rounds. Keep it quiet and without a
+        //Fight Music : ONE track for the whole fight, through every round, so it never restarts. Keep it quiet and without a
         //strong beat : the melody of a duel comes from the baton (see SoundBank phrase notes).
         public static Music FightMusic(RunState run)
         {

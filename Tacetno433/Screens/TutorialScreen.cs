@@ -17,14 +17,15 @@ namespace Tacetno433.Screens
     //comes in. TAB skips a lesson, ESC goes back to the title. Nothing here can be lost.
     //
     //Lessons 1 to 5 have no beat : hold the button, stroke down, draw the 4/4 shape, swing
-    //small, middle and big, and see where the players sit (WHERE THEY SIT, round 12.1).
+    //small, middle and big, and meet the players' parts (WHO PLAYS, round 14, it was WHERE THEY
+    //SIT in round 12.1).
     //From lesson 6 a slow beat runs, started by holding the button, with the same ring, lane
     //and notes as the duel (drawn by the same Core helpers).
     //
     //THIS CLASS IS SPLIT OVER THREE FILES (partial, like DuelScreen) :
     //   TutorialScreen.cs           the lessons, their order, and the page around the stage
     //   TutorialScreen.Practice.cs  the beat, the notes, judging a stroke, and drawing the stage
-    //   TutorialScreen.Seats.cs     the WHERE THEY SIT lesson : rows, sides and a small stage
+    //   TutorialScreen.Seats.cs     the WHO PLAYS lesson : three players, their letters and arrows
     public partial class TutorialScreen : GameScreen
     {
         //Can Pause : a menu page outside the run, ESC here means going back
@@ -71,16 +72,16 @@ namespace Tacetno433.Screens
                 Goal = "Draw the shape twice." },
 
             new Lesson { Kind = Kind.Size, Title = "SMALL, MIDDLE, BIG", Need = 3,
-                Body = "How far you swing decides who plays. A short stroke (p) brings only the back row, "
-                     + "cheap on breath. A middle one (mf) brings the middle row too. A long one (f) "
+                Body = "How far you swing decides who plays. A short stroke (p) brings only the p players, "
+                     + "cheap on breath. A middle one (mf) brings the mf players too. A long one (f) "
                      + "brings the whole band, the hardest hit and the most tiring. The ruler shows how far you have come.",
                 Goal = "Swing down : short, then middle, then long." },
 
-            new Lesson { Kind = Kind.Seats, Title = "WHERE THEY SIT", Need = 7,
-                Body = "Where a player sits is how they play. Their ROW says which strokes bring them in : "
-                     + "p the back row, mf the middle row too, f everyone. Their SIDE says when the baton "
-                     + "points at them : down and up at the centre, left and right at their own side. "
-                     + "Whoever it points at hits 50 percent harder.",
+            new Lesson { Kind = Kind.Seats, Title = "WHO PLAYS", Need = 7,
+                Body = "Every player wears their PART, drawn like a note : a letter and an arrow. "
+                     + "The LETTER is the smallest stroke that brings them in : p the winds, mf the strings, "
+                     + "f the percussion. The ARROW is the way they answer : when the baton goes their way "
+                     + "(down and up share one) they hit 50 percent harder.",
                 Goal = "Swing p, mf and f, then draw the 4/4 shape." },
 
             new Lesson { Kind = Kind.Timing, Title = "ON THE BEAT", Need = 6, Bpm = 70,
@@ -97,7 +98,7 @@ namespace Tacetno433.Screens
 
             new Lesson { Kind = Kind.Loudness, Title = "LOUD AND SOFT", Need = 6, Bpm = 76,
                 Body = "Each note says how loud TACET plays it, and the ruler on the baton says the same. "
-                     + "f is loud : answer it f, BIG, the whole band. p is soft : a SMALL stroke, the back row "
+                     + "f is loud : answer it f, BIG, the whole band. p is soft : a SMALL stroke, the p players "
                      + "alone. mf : a MIDDLE one. The right size is IN TUNE and weakens TACET's note.",
                 Goal = "Six notes on time, with the right size." },
 
@@ -124,8 +125,8 @@ namespace Tacetno433.Screens
                 Goal = "Land two sparks." },
 
             new Lesson { Kind = Kind.Finish, Title = "READY", Need = 0,
-                Body = "That is everything the baton does. In a run you seat the band on the STAGE page before "
-                     + "each round. A few more things to know : a PERFECT f against a real f is a COUNTER. Eight PERFECTs in a row set the band on fire. Far enough "
+                Body = "That is everything the baton does. In a run there is nothing to arrange : every part is "
+                     + "written on its player, and the BAND page (TAB on the route) picks who plays. A few more things to know : a PERFECT f against a real f is a COUNTER. Eight PERFECTs in a row set the band on fire. Far enough "
                      + "ahead, the FINALE ends a fight at once. PERFECT beats fill your conductor's recipe, "
                      + "and SPACE then lets their own SIGNATURE loose for four strokes.",
                 Goal = "Start a run whenever you are ready." },
@@ -154,7 +155,7 @@ namespace Tacetno433.Screens
             "IN BETWEEN : PAST THE FIRST MARK, NOT THE SECOND",
             "A LONGER ONE : ALL THE WAY PAST THE SECOND MARK"
         };
-        private static string[] sizeDone = { "p, THE BACK ROW. NOW A MIDDLE ONE.", "mf, THE MIDDLE ROW TOO. NOW A LONG ONE.", "f, THE WHOLE BAND." };
+        private static string[] sizeDone = { "p, THE p PLAYERS. NOW A MIDDLE ONE.", "mf, THE mf PLAYERS TOO. NOW A LONG ONE.", "f, THE WHOLE BAND." };
         private const string HoldHint = "KEEP HOLDING...";
         private const string NiceHint = "GOOD. AGAIN.";
 
@@ -322,7 +323,7 @@ namespace Tacetno433.Screens
                 return;
             }
 
-            //Size : the three sizes in order, small first (also the first half of WHERE THEY SIT)
+            //Size : the three sizes in order, small first (also the first half of WHO PLAYS)
             bool sizing = l.Kind == Kind.Size || (l.Kind == Kind.Seats && done < 3);
             if (sizing && size != done)
             {

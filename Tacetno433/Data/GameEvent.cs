@@ -13,7 +13,8 @@ namespace Tacetno433.Data
         Motif,        // a random motif, Amount is the lowest rarity
         Recruit,      // a musician from the current era joins
         Rehearse,     // the musician who took the check gains 1 power
-        Fight         // an elite fight starts
+        Fight,        // an elite fight starts
+        RecruitPart   // a musician for a part (p, mf or f) the band has nobody for joins (round 14)
     }
 
     //EventChoice : one button on an event page.
@@ -158,6 +159,26 @@ namespace Tacetno433.Data
                     new EventChoice { Text = "Play for the room", Check = true, CheckBase = 20,
                                       Win = Reward.Recruit, WinText = "A regular puts down their cup and asks to join you.",
                                       Lose = Reward.Shards, LoseAmount = -10, LoseText = "Nobody listens. You pay for the tea after all." },
+                }
+            },
+
+            //THE EMPTY CHAIR (round 14) : every player's part is written on them now, so a band can
+            //be missing a whole letter. This place offers one, for a price.
+            new GameEvent
+            {
+                Title = "THE EMPTY CHAIR",
+                Place = "AN ORCHESTRA PIT, ONE STAND LIT",
+                Text = "In the dark pit one chair still has its stand, and on the stand one part, a single line of music "
+                     + "with a letter and an arrow. The ink is wet. Someone was meant to play it tonight.",
+                Choices = new EventChoice[]
+                {
+                    new EventChoice { Text = "Find the one who plays it", ShardCost = 35,
+                                      Win = Reward.RecruitPart, WinText = "A player steps out of the dark, reads the part once, and sits down." },
+                    new EventChoice { Text = "Play it yourselves", Check = true, CheckBase = 35,
+                                      Win = Reward.Rehearse, WinText = "The line is strange and beautiful. Your player keeps it.",
+                                      Lose = Reward.Stamina, LoseAmount = -8, LoseText = "The part is written for someone else. It fights every note." },
+                    new EventChoice { Text = "Leave the chair empty",
+                                      Win = Reward.Stamina, WinAmount = 8, WinText = "You leave the part where it lies. The quiet of the pit is almost restful." },
                 }
             },
         };

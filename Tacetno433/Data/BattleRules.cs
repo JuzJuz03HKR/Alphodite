@@ -10,8 +10,7 @@
         public const int MaxRounds = 3;           // after this, whoever is ahead wins
         public const float LineLimit = 100f;      // push the line this far to win outright
 
-        //REPEATS (round 11) : TACET's phrase is played more than once before the band goes back to
-        //the stage page, without a stop. TACET plays the same beats each time, but decides its
+        //REPEATS (round 11) : TACET's phrase is played more than once in a round, without a stop. TACET plays the same beats each time, but decides its
         //f / mf / p and its pairs afresh for every time through, so they must be read again.
         //Players found a round over in seconds. Round 12 : kept as the length of a round.
         public static int[] PassesPerRound = { 1, 2, 3 };   // round 1 once, round 2 twice, round 3 three times
@@ -41,25 +40,28 @@
         public static float HarmonyPerExtra = 0.15f;
 
         //DYNAMICS (round 12) : there is no score page. How big a stroke is decides who plays:
-        //   small  (p)   the back row
-        //   middle (mf)  the back and middle rows
-        //   big    (f)   the whole band
-        //A row with nobody in it is skipped, so every stroke brings somebody in (BattleState.Joins).
+        //   small  (p)   the p players, the winds
+        //   middle (mf)  the p and mf players, winds and strings
+        //   big    (f)   the whole band, percussion too
+        //Round 14 : the letter is written on each musician (their PART, see StageLayout), it used
+        //to be the row they sat in. A part with nobody in it is skipped, so every stroke brings
+        //somebody in (BattleState.Joins).
         //Whoever plays pays stamina for their note, so a big stroke is strong and tiring and a small
         //one is cheap. Only a rest gives breath back. The players who come in ARE the power: the
         //size itself multiplies nothing any more (round 8 to 11 : small x0.6, big x1.5).
         //The numbers below stay here as tuning knobs.
         public static float BoostPower = 1.0f;     // a big stroke, on top of the whole band coming in
-        public static float EasePower = 1.0f;      // a small stroke, the back row at full strength
+        public static float EasePower = 1.0f;      // a small stroke, the p players at full strength
         public static float EaseCost = 1.0f;       // a small stroke pays this share of its notes
         public static int EaseRecover = 0;         // breath a small stroke gives back (was 8). At 6, small strokes
                                                    // on every beat won 90 percent of simulated fights (round 12)
 
-        //CUE (round 12) : the baton points at one side of the stage on every beat. Down and up point
-        //at the centre, left and right at their own side. Whoever sits on that side and plays hits
-        //harder. The sides are the stage's columns (StageLayout.SeatSide).
+        //CUE (round 12) : every beat the baton goes one way. Round 14 : every musician has an arrow
+        //of their own (Musician.Cue), left, down and up, or right, and the players whose arrow
+        //matches the way hit harder. Down and up share one arrow. (Round 12 to 13 : the arrow was
+        //the column of the stage they sat in.)
         public static float CuePower = 1.5f;
-        public static int[] CueSide = { 1, 0, 2, 1 };      // beat of the bar -> side : 0 left, 1 centre, 2 right
+        public static int[] CueSide = { 1, 0, 2, 1 };      // beat of the bar -> arrow : 0 left, 1 down and up, 2 right
 
         //Rest : a beat where TACET is silent and the baton lets it pass gives stamina back.
         //Round 11 : 6 -> 10, the player found rests gave back far too little to be worth planning.
@@ -186,7 +188,7 @@
         public static int BargainStamina = 15;      //     for this much max stamina, for the whole run
 
         //Musician Traits : the numbers behind each MusicianTrait (see Data/Musician.cs)
-        public static float KeepsCountWindow = 0.05f;  // ANNA, added to the PERFECT window on beats cued to her side
+        public static float KeepsCountWindow = 0.05f;  // ANNA, added to the PERFECT window on her beats (her arrow)
         public static int MomentumStep = 1;            // OTTO, per beat in a row
         public static int MomentumMax = 3;
         public static float ByEarPower = 1.5f;         // MALI, on hidden beats
@@ -194,9 +196,12 @@
         public static float OneStepBetterPower = 1.3f; // NUAN, against a loud note
         public static float FourBarsPower = 2f;        // LUKA, the fourth beat of a full bar
         public static int ThunderKnock = 2;            // BORIS, taken off TACET's next note
+        public static float QuietPartPower = 2f;       // KLARA, against TACET's p notes (round 14, she used to play on every stroke)
 
         //Timing Lengths (seconds). The beats themselves follow TempoBpm above.
         public static float IntroTime = 1.1f;      // round banner
+        public static float IntroNoteTime = 2.2f;  // a banner that says what changes this round (round 14)
+        public static float TraitIntroTime = 3.6f; // the first banner against a trait never met before (round 14)
         public static float LateTime = 0.35f;      // the latest a stroke can land after its beat
         public static float RoundEndTime = 1.4f;
 
@@ -259,8 +264,10 @@
         public static int[] MotifPrice = { 0, 45, 70, 100 };   // shop price by rarity 1, 2, 3
 
         //Motif Effects : the numbers each motif changes
-        public static int FamilyMotifPower = 1;      // ROSIN, SPARE STICKS
+        public static int FamilyMotifPower = 1;      // ROSIN
         public static int ReedCaseDiscount = 1;      // REED CASE, 2 in round 11, back to 1 (round 12 : +10 to +13 percent alone)
+        public static int SpareSticksDiscount = 1;   // SPARE STICKS (round 14) : was +1 power, worth nothing once the percussion
+                                                     // hit 8 to 10 and the PUSH CAP holds every beat. Breath is what counts.
         public static int PianissimoRecover = 3;     // PIANISSIMO, a small stroke gives this back (was 6 on top of EASE's 8)
         public static float PurseBonus = 1.3f;       // PATRON'S PURSE
         public static float BreathMarkRecover = 1.25f; // BREATH MARK : 12 x 1.25 = 15 (round 12, 10 -> 12.5 in round 11). Was 2 (x2), round 10 :
@@ -299,14 +306,16 @@
         public static float SetAlightCap = 10f;      //     and it may push this far, a quarter past the PUSH CAP (16 : 80 percent, 12 : 77). Tried first :
                                                      //     the band caught fire (FORTISSIMO, free), 91 to 96 percent, a fire that costs
                                                      //     no breath is worth far more than any power
-        public static float CloserLouderMax = 0.3f;  // THE UNHEARING, how much harder the band hits with no breath left (+30 percent).
+        public static float CloserLouderMax = 0.25f; // THE UNHEARING, how much harder the band hits with no breath left (+25 percent).
+                                                     // Round 14 : 0.3 -> 0.25, the percussion hit harder now and he led the rest.
                                                      // Round 13 : it counts the breath the band has lost. It used to count how far
                                                      // TACET had pushed the line (+130 percent), which a band rarely lets happen, and
                                                      // a band loses on breath since round 12. Round 12.2 made rests deeper there too.
                                                      // 1.0 won 84 percent of simulated runs alone, the others about 70,
                                                      // and 0.4 from half breath 76 with the others at 70 to 72
         public static float CloserLouderFrom = 0.5f; // THE UNHEARING, the share of breath under which the band starts hitting harder
-        public static float CrossCultureHarmony = 0.07f; // THE FOLK LEADER, per extra culture on a beat. Was 0.15 : he won the most runs (round 11)
+        public static float CrossCultureHarmony = 0.05f; // THE FOLK LEADER, per extra culture on a beat. Was 0.15 : he won the most runs (round 11).
+                                                         // Round 14 : 0.07 -> 0.05, with stamina 6 -> 5 (he was 5 to 9 points above the rest)
 
         //Shop
         public static int SeatPriceBase = 55;        // the first extra seat

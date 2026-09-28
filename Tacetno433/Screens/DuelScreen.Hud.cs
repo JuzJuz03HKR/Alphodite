@@ -275,6 +275,49 @@ namespace Tacetno433.Screens
             Ornament.Divider(sb, 640, 402, 120, Palette.PaperDim * a);
         }
 
+        //Round Note : under the round's banner, what is different about this round. The first time
+        //a trait is met, its name and its whole rule instead, so the cause is read before it bites
+        //(round 14 : the STAGE page used to explain it before the fight).
+        private void DrawRoundNote(SpriteBatch sb, float t)
+        {
+            float a = t < 0.1f ? t / 0.1f : (t > 0.9f ? (1f - t) / 0.1f : 1f);
+            if (a <= 0f) return;
+
+            if (traitCard)
+            {
+                Enemy e = battle.Enemy;
+                Rectangle box = new Rectangle(440, 430, 400, 96);
+                Gfx.Rect(sb, box, Palette.Void * (0.92f * a));
+                Ornament.DoubleFrame(sb, box, Palette.Paper * a);
+                Ui.Tag(sb, e.TraitName, box.X + 18, box.Y + 14, true, a);
+                Gfx.Text(sb, Game.StoryFont, e.TraitWrapped, box.X + 18, box.Y + 42, Palette.Paper * a, TextSize.StorySmall);
+                return;
+            }
+
+            if (introNote.Length > 0)
+            {
+                Gfx.Rect(sb, 0, 420, TacetGame.ScreenW, 34, Color.Black * (0.82f * a));
+                Gfx.TextSpacedCentered(sb, Game.Font, introNote, 640, 430, Palette.Accent * a, TextSize.Label, 2f);
+            }
+        }
+
+        //Bargain : THE DEVIL'S STRING's offer before round two, over the stopped duel
+        private void DrawBargain(SpriteBatch sb)
+        {
+            Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Color.Black * 0.75f);
+            Hollow.Eclipse(sb, bargainBox.Center.X, bargainBox.Y - 10, 60f, time * 0.4f, 1f);
+            Gfx.Rect(sb, bargainBox, Palette.Void);
+            Ornament.DoubleFrame(sb, bargainBox, Palette.Paper);
+
+            Gfx.TextSpacedCentered(sb, Game.Font, "THE DEVIL'S STRING  /  THE BARGAIN", bargainBox.Center.X, bargainBox.Y + 30, Palette.PaperDim, TextSize.Tiny, 4f);
+            Gfx.TextCentered(sb, Game.BigFont, "One string, one bow, one bargain.", bargainBox.Center.X, bargainBox.Y + 74, Palette.Highlight, TextSize.Subtitle);
+            Gfx.TextCentered(sb, Game.StoryFont, "Your band hits 50 percent harder for this round.", bargainBox.Center.X, bargainBox.Y + 120, Palette.Paper, TextSize.Story);
+            Gfx.TextCentered(sb, Game.StoryFont, "Your stamina limit drops by 15 for the rest of the run.", bargainBox.Center.X, bargainBox.Y + 148, Palette.Paper, TextSize.Story);
+
+            Ui.Button(sb, acceptButton, "ACCEPT", "Y", true);
+            Ui.Button(sb, refuseButton, "REFUSE", "N", false);
+        }
+
         //Cut In : the signature, staged like an E.G.O in Limbus Company. A white flash, a black
         //band sweeping across with the conductor's picture breaking out of it, a streak of light
         //through the eyes, shards bursting outward, and the move's name stacked on the right:

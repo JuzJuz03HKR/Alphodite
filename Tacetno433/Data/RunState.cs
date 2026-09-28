@@ -45,12 +45,12 @@ namespace Tacetno433.Data
         //Run Party
         public List<Musician> Roster = new List<Musician>();       // everyone you own
         public List<Musician> JustJoined = new List<Musician>();   // shown on the recruit page
-        public Formation Formation = new Formation();              // who sits where
+        public Formation Formation = new Formation();              // who is on stage, who is on the bench
         public List<Motif> Motifs = new List<Motif>();             // everything the band carries
 
         //Run Resources
         public int Shards = 0;
-        public int Seats = 3;                // open seats on stage
+        public int Seats = 3;                // how many players fit on stage
         public int SeatsBoughtThisFloor = 0; // the shop will only sell two per floor
         public int Stamina = 100;
         public int MaxStamina = 100;
@@ -191,15 +191,43 @@ namespace Tacetno433.Data
         public Musician RecruitOne()
         {
             if (RosterFull) return null;
+            return Recruit(MusicianList.RollFromEra(Era, Roster, random));
+        }
 
-            Musician found = MusicianList.RollFromEra(Era, Roster, random);
-            if (found == null) return null;
+        //Recruit : this musician joins (the shop shows who it will be before paying). Null when
+        //there is no room or nobody was given.
+        public Musician Recruit(Musician m)
+        {
+            if (m == null || RosterFull || Roster.Contains(m)) return null;
 
-            Roster.Add(found);
-            JustJoined.Add(found);
-            Formation.AutoSeat(found, Seats);
+            Roster.Add(m);
+            JustJoined.Add(m);
+            Formation.AutoSeat(m, Seats);
             RefreshLabels();
-            return found;
+            return m;
+        }
+
+        //Missing Part Player : someone who plays a part (p, mf or f) nobody in the ensemble plays
+        //yet, from this era if there is one, from any era if not. When every part is covered, just
+        //someone new from this era. Null when nobody is left (round 14, THE EMPTY CHAIR).
+        public Musician MissingPartPlayer()
+        {
+            bool[] covered = new bool[3];
+            for (int i = 0; i < Roster.Count; i++) covered[StageLayout.PartOf(Roster[i].Family)] = true;
+
+            Musician best = null;
+            int picks = 0;
+            for (int pass = 0; pass < 2 && best == null; pass++)
+                for (int i = 0; i < MusicianList.All.Length; i++)
+                {
+                    Musician m = MusicianList.All[i];
+                    if (Roster.Contains(m) || covered[StageLayout.PartOf(m.Family)]) continue;
+                    if (pass == 0 && m.Era != Era) continue;
+                    picks++;
+                    if (random.Next(picks) == 0) best = m;         // every candidate gets a fair chance
+                }
+            if (best == null) best = MusicianList.RollFromEra(Era, Roster, random);
+            return best;
         }
 
         //Motif Check : does the band carry this motif
@@ -223,15 +251,15 @@ namespace Tacetno433.Data
         {
             int power = m.Power + m.Rehearsed;
             if (m.Family == Family.String && Has(MotifId.Resin)) power += BattleRules.FamilyMotifPower;
-            if (m.Family == Family.Percussion && Has(MotifId.SpareSticks)) power += BattleRules.FamilyMotifPower;
             return power;
         }
 
-        //Cost Of : what one note from this musician costs, before seat rows and choices
+        //Cost Of : what one note from this musician costs, before the stroke and the combo
         public int CostOf(Musician m)
         {
             int cost = m.Cost;
             if (m.Family == Family.Wind && Has(MotifId.ReedCase)) cost -= BattleRules.ReedCaseDiscount;
+            if (m.Family == Family.Percussion && Has(MotifId.SpareSticks)) cost -= BattleRules.SpareSticksDiscount;   // round 14, was +1 power
             if (cost < 1) cost = 1;
             return cost;
         }

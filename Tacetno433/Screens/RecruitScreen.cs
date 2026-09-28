@@ -147,6 +147,12 @@ namespace Tacetno433.Screens
 
             //New Tag and Instrument : printed up the side of the figure
             Ui.Tag(sb, "NEW", column.X + 40, column.Y + 40, true, a);
+
+            //Part : the letter and the arrow they will play with, under the tag (round 14)
+            MusicianArt.PartBadge(sb, m, column.X + 62, column.Y + 108, 18f, Palette.Ink, Palette.Paper, a);
+            Gfx.TextSpacedCentered(sb, Game.Font, "PART", column.X + 62, column.Y + 146, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            Gfx.TextSpacedCentered(sb, Game.Font, StageLayout.Rows[StageLayout.PartOf(m.Family)].Strokes, column.X + 62, column.Y + 164, Palette.PaperDim * a, TextSize.Tiny, 1f);
+            Gfx.TextSpacedCentered(sb, Game.Font, StageLayout.SideNames[m.Cue], column.X + 62, column.Y + 180, Palette.PaperDim * a, TextSize.Tiny, 1f);
             Gfx.TextVertical(sb, Game.Font, m.Instrument, column.Right - 40, column.Y + 50, Palette.PaperDim * a, TextSize.Label);
             Gfx.Rect(sb, column.Right - 60, column.Y + 40, 1, 200, Palette.LineGrey * a);
 

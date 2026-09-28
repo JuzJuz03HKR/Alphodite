@@ -47,9 +47,9 @@ namespace Tacetno433.Screens
         private static string[] tips =
         {
             "A beat TACET wins knocks breath out of the band. At zero, it collapses.",
-            "A small stroke brings the back row, a big one the whole band. Everyone who plays pays stamina.",
+            "A small stroke brings the p players, a big one the whole band. Everyone who plays pays stamina.",
             "PERFECT strokes in a row build a combo. A miss breaks it.",
-            "The baton points at one side of the stage on every beat. Whoever sits there hits harder.",
+            "Every player wears a letter and an arrow. When the baton goes their way, they hit harder.",
             "TACET's notes say f, mf or p. Answer to match: the ruler on the baton says the same.",
             "A ??? beat hides its strength until the clash.",
             "Motifs last the whole run. Pick the ones that suit your conductor.",
