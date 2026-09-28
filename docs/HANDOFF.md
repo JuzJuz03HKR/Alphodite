@@ -1,6 +1,6 @@
 # TACET 4'33 — เอกสารส่งต่อให้ฝ่ายโค้ด
 
-อัปเดต : 28 กันยายน 2026 (หลังรอบ 12.1) · repo `github.com/JuzJuz03HKR/Alphodite` branch **`Alpha4`** (รอบ 12–12.1 · `Alpha3` = รอบ 9–11b · รอบ 6–8 อยู่ `Alpha2`) · กติกาสำหรับ Claude อยู่ `CLAUDE.md` · อ่านคู่กับ [`PROJECT_STATUS.md`](PROJECT_STATUS.md) (รายละเอียดทุกระบบ)
+อัปเดต : 28 กันยายน 2026 (หลังรอบ 12.2) · repo `github.com/JuzJuz03HKR/Alphodite` branch **`Alpha4`** (รอบ 12–12.2 · `Alpha3` = รอบ 9–11b · รอบ 6–8 อยู่ `Alpha2`) · กติกาสำหรับ Claude อยู่ `CLAUDE.md` · อ่านคู่กับ [`PROJECT_STATUS.md`](PROJECT_STATUS.md) (รายละเอียดทุกระบบ)
 และ [`ASSET_LIST.md`](ASSET_LIST.md) (ไฟล์ภาพ/เสียงที่ต้องใส่)
 
 ---
@@ -34,9 +34,12 @@
 - **รอบ 12.1 (28 ก.ย.)** : **ตวัดเล็กบนบีตเงียบ = พัก** (`BattleState.RestsOn`) · **เส้นแสง CUE** จากวงตอบไปหาคนที่ถูกชี้ + ชื่อฝั่งเหนือหัว (`DuelScreen.Stage.DrawCueBeam`) ·
   **Tutorial บท 5 WHERE THEY SIT** (`TutorialScreen.Seats.cs`, รวม 13 บท) · ตวัดกลาง 100–240 px (`GestureReader.BigLength` 240) · NAMELESS ท่อนใหม่ · SECOND WIND 0.15 ·
   ทั่วไป ~9–10% เก่ง ~71–74% (ง่ายลงเล็กน้อยจาก NAMELESS)
+- **รอบ 12.2 (28 ก.ย.)** : **หน้าเลือกเส้นทาง = ถนนของชั้น + ทางแยก + กล่องรายละเอียด** (`RouteScreen.cs` ไม่ใช้ `PanelStrip` แล้ว หน้าเลือกยุคยังใช้) ·
+  **METRONOME** วงเล่นตามตัวอักษรบนโน้ต (`BattleState.MarkedChoice`, จ่าย ×1.33) · **UNHEARING** พักได้ลมเพิ่มเมื่อโดนดันถอย (`CloserRestMax`) · FOLK LEADER Push 5 ·
+  หน้าโปรไฟล์บอก SIGNATURE + สูตร · คอนดักเตอร์ทุกคน (เก่ง) 68–79%
 - **ยังไม่มีไฟล์ภาพและเสียงเลย** ทุกช่องเป็นกรอบว่าง / เงียบ ใส่ไฟล์ตามชื่อแล้วขึ้นเองโดยไม่ต้องแก้โค้ด
 - เพื่อนต่างกลุ่มเล่นระบบรอบ 5 แล้ว (ง่ายเกิน) · **เพลย์เทส 25 ก.ย.** 5 คน เล่น build รอบ 8 : ชอบการตวัด · เข้าใจยาก · ง่ายไป (แก้แล้วรอบ 9) ·
-  **รอบ 9–12.1 ยังไม่มีคนเล่นจริง** ตัวเลขได้จากการจำลอง
+  **รอบ 9–12.2 ยังไม่มีคนเล่นจริง** ตัวเลขได้จากการจำลอง
 - **ข้อเสนอที่รอผู้ใช้เลือก** (ให้เล่นสนุกขึ้น · รีวิวทั้งเกม · สอนเล่น ก–ซ) อยู่ `PROJECT_STATUS.md` หัวข้อ 0 · ข้อเสนอรีวิวรอบ 12 ก–จ ทำแล้วรอบ 12.1
 
 ## 2. ความคืบหน้า (ประมาณการ)
@@ -112,6 +115,8 @@ Tacetno433/
 | สตามิน่า : TACET ซัด / หมดลมแพ้ | `BattleState` (ค้น `TACET'S BLOW`, `COLLAPSE`, `CheckBreath`) · ตัวเลข `BattleRules.BlowPerPower` · ภาพ `DuelScreen.ShowBreath` · ขอบจอ `DuelScreen.Hud.cs` `DrawLowBreath` |
 | โหมด TUTORIAL | `Screens/TutorialScreen.cs` (รายการบท `lessons` แก้ข้อความ/ลำดับที่นี่) · `TutorialScreen.Practice.cs` (จังหวะ โน้ต การตัดสิน) · `TutorialScreen.Seats.cs` (บท WHERE THEY SIT) |
 | เส้นแสง CUE ในดวล | `Screens/DuelScreen.Stage.cs` `DrawCueBeam` |
+| หน้าเลือกเส้นทาง (ถนน · ทางแยก · ป้าย · กล่องรายละเอียด) | `Screens/RouteScreen.cs` `DrawRoad` `DrawFork` `DrawTiles` `DrawDetail` · ตัวอักษรชนิดที่ `RouteNodeInfo.Marks` |
+| ความสามารถคอนดักเตอร์ | ตัวเลข `Data/Conductor.cs` (สตามิน่า Push สูตร) · ผล `BattleState` ค้น `LOCKED TEMPO` `RUNAWAY FIRE` `THE CLOSER THE LOUDER` `EVERY ROAD HOME` |
 | พักบีตเงียบ (ไม่ตวัด หรือตวัดเล็ก = SOFT REST) | `Battle/BattleState.cs` `RestsOn` · `IsSilent` |
 | Motif ของโน้ตพิเศษ / ชั้นที่เริ่มสุ่มให้ | `Data/Motif.cs` (`FromFloor`) · ผลใน `BattleState` (ค้น `ACCELERANDO` `TENUTO` `GRACE NOTE` `MARCATO` `CON BRIO` `CODA`) |
 | ช่องภาพ | `Core/ArtBank.cs` (ภาพนิ่ง) · `Core/CharacterArt.cs` (นักดนตรี pixel) · `Core/HandArt.cs` (มือ) |
@@ -136,6 +141,7 @@ Tacetno433/
 ## 4. งานที่เหลือ (เรียงตามความสำคัญ)
 
 ### ต้องทำก่อน (P1)
+000. **เล่นทดสอบรอบ 12.2** : หน้าเลือกเส้นทางใหม่ · คอนดักเตอร์ครบ 5 คน (METRONOME แบบใหม่)
 00. **เล่นทดสอบรอบ 12.1** : บท Tutorial ที่ 5 · เส้นแสง CUE · ตวัดกลาง/ใหญ่ที่ยาวขึ้น · ตวัดเล็กบนบีตเงียบได้พัก · NAMELESS MASTER
 0. **เล่นทดสอบรอบ 12 ด้วยเมาส์จริง** (branch `Alpha4`) : ตวัด 3 ขนาดแม่นไหม · อ่าน f/mf/p ทันไหม · ตวัดบีตเงียบโดยไม่ตั้งใจบ่อยไหม · เห็น CUE ไหม · หน้า STAGE ใหม่อ่านรู้เรื่องไหม ·
    ข้อเสนอรีวิวรอบ 12 ข้อ 4 ทำแล้วรอบ 12.1 · ที่ยังรออยู่ : ข้อ 5 และ 6 ใน `PROJECT_STATUS.md` หัวข้อ 0
@@ -197,5 +203,6 @@ Tacetno433/
   รอบ 11b แผนเล่นวน 1→2→3 ครั้ง (ต่อเนื่อง ไม่มีช่วงนั่งรอ) · TACET เล่นบีตเดิมสุ่ม f/mf/p ใหม่ · ดวลเก่ง ธรรมดา ~2 แผน Elite 2–3 บอส 3 · ความยากง่ายลงได้นิดหน่อย
 - รอบ 12 : โล๊ะการจัดจังหวะก่อนสู้ · แบบ 1 DYNAMICS (ขนาดตวัด = ใครเล่น) + เสริมจากแบบ 2 CUE (ทิศตวัด) · คนที่เล่นกินสตามิน่า · เก็บ REPEATS ·
   CUE + ศัตรูเล่นกับฝั่ง (ใช้ศัตรูเดิม) · "เล่นได้ไม่ยากมาก แต่ยังมีความลึก" (จูนให้อัตราชนะเท่ารอบ 11b)
+- รอบ 12.2 : หน้าเลือกเส้นทางแบบ ข (ถนน + ทางแยก) · หน้าเลือกยุคคงเดิม · รีวิว/ปรับคอนดักเตอร์ทุกคน
 - รอบ 12.1 : ผู้ใช้สั่งข้อเสนอรีวิวรอบ 12 ก–จ ทั้งหมด (ตวัดเล็กบนบีตเงียบ = พัก · CUE เห็นชัด · บท Tutorial จัดที่นั่ง · ตวัดกลางกว้างขึ้น · ปรับ NAMELESS / SECOND WIND)
 - Esc = เมนูหยุดทุกหน้าในรัน · สิ่งที่ย้อนไม่ได้ต้องถามก่อน ค่าเริ่มเลือก "ไม่" · แพ้ดวล = ลบเซฟ (roguelike)
