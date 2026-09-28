@@ -125,7 +125,7 @@
 **ชุดแรก 12 เสียงที่หน้าดวลใช้ (ทำก่อน)** : `beat_tick` · `note_on` · `qte_normal` · `qte_boost` · `qte_ease` · `qte_perfect` ·
 `qte_miss` · `qte_hesitate` · `clash_win` · `clash_lose` · `clash_even` · `combo_up`
 
-ที่เหลือ : `ui_move` `ui_confirm` `ui_back` `ui_denied` `path_chosen` `seat_pickup` `seat_drop` `seat_remove` `note_off`
+ที่เหลือ : `ui_move` `ui_confirm` `ui_back` `ui_denied` `path_chosen` `seat_pickup` `seat_drop` `seat_remove` (รอบ 14 : ใช้ในหน้า THE BAND ตอนเลือกคนขึ้นเวที/นั่งพัก) `note_off`
 `round_start` `enemy_boost` `enemy_ease` `stamina_empty` `rest_recover` `victory` `defeat` `recruit` `combo_break`
 `motif_get` `buy` `page_turn` `check_pass` `check_fail` `rehearse` `run_complete`
 (ความหมายแต่ละเสียงอยู่ใน `Content/Audio/README.txt`)

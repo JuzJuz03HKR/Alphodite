@@ -1,6 +1,6 @@
 # TACET 4'33 — เอกสารส่งต่อให้ฝ่ายโค้ด
 
-อัปเดต : 28 กันยายน 2026 (หลังรอบ 13) · repo `github.com/JuzJuz03HKR/Alphodite` branch **`Alpha4`** (รอบ 12–13 · `Alpha3` = รอบ 9–11b · รอบ 6–8 อยู่ `Alpha2`) · กติกาสำหรับ Claude อยู่ `CLAUDE.md` · อ่านคู่กับ [`PROJECT_STATUS.md`](PROJECT_STATUS.md) (รายละเอียดทุกระบบ)
+อัปเดต : 28 กันยายน 2026 (หลังรอบ 14) · repo `github.com/JuzJuz03HKR/Alphodite` branch **`Alpha5`** (รอบ 14 · `Alpha4` = รอบ 12–13 · `Alpha3` = รอบ 9–11b · รอบ 6–8 อยู่ `Alpha2`) · กติกาสำหรับ Claude อยู่ `CLAUDE.md` · อ่านคู่กับ [`PROJECT_STATUS.md`](PROJECT_STATUS.md) (รายละเอียดทุกระบบ)
 และ [`ASSET_LIST.md`](ASSET_LIST.md) (ไฟล์ภาพ/เสียงที่ต้องใส่)
 
 ---
@@ -8,8 +8,9 @@
 ## 1. สรุปใน 1 นาที
 
 - MonoGame DesktopGL 3.8 · .NET 9 · เปิด `Tacetno433.sln` แล้วกด F5 · build ต้องได้ **0 error 0 warning**
-- เล่นได้ครบลูป : เมนู → เลือกคอนดักเตอร์ → รัน 3 ชั้น (เส้นทาง / เวที / ดวล / ผลลัพธ์ / ร้าน / เหตุการณ์ / พัก) → Curtain Call (รอบ 12 ไม่มีหน้าโน้ตแล้ว)
-- ดวล = ใช้เมาส์เป็นไม้บาตอง กดค้างแล้วตวัดตามท่า 4/4 **ทุกบีตต่อเนื่อง** ขนาดการตวัด = ใครเล่น (p แถวหลัง · mf + แถวกลาง · f ทั้งวง, รอบ 12) ·
+- เล่นได้ครบลูป : เมนู → เลือกคอนดักเตอร์ → รัน 3 ชั้น (เส้นทาง / ดวล / ผลลัพธ์ / ร้าน / เหตุการณ์ / พัก) → Curtain Call (รอบ 12 ไม่มีหน้าโน้ต · **รอบ 14 ไม่มีหน้าเวทีก่อนดวล**)
+- ดวล = ใช้เมาส์เป็นไม้บาตอง กดค้างแล้วตวัดตามท่า 4/4 **ทุกบีตต่อเนื่อง** ขนาดการตวัด = ใครเล่น (p คน p · mf + คน mf · f ทั้งวง) ·
+  **รอบ 14 : นักดนตรีมี PART ติดตัว (ตัวอักษรตามตระกูล เป่า p สาย mf ตี f + ลูกศร CUE ต่อคน) · 3 รอบเล่นต่อกันในหน้าดวล** ·
   โน้ตเขียน f / mf / p มีหัวลูกศรที่ขอบบอกทิศ โน้ตถัดไปสว่าง · โน้ตพิเศษมาทีละชั้น : TREMOLO (ชั้น 1 ทุกศัตรู · Elite/บอสทุกชั้น) · FERMATA (ชั้น 2) · โน้ตคู่ (ชั้น 2 ตั้งแต่รอบ 9) ·
   COUNTER · FORTISSIMO · FINALE (รอบ 6–6.3, 25 ก.ย.)
 - Esc = เมนูหยุดทุกหน้าในรัน · มีเซฟตั้งค่า + เซฟรัน + CONTINUE · STROKE TIMING (calibration) ในหน้าตั้งค่า
@@ -41,18 +42,23 @@
   APPRENTICE BY THE BOOK / ABSOLUTE PITCH · METRONOME LOCKED TEMPO / CLOCKWORK · INFERNO RUNAWAY FIRE / SET ALIGHT · UNHEARING THE CLOSER THE LOUDER / DEAF EARS · FOLK LEADER EVERY ROAD HOME / VILLAGE BAND ·
   ตัวจำลองใช้ SIGNATURE แล้ว · `BlowPerPower` 0.95 ชดเชย · คอนดักเตอร์ทุกคน (เก่ง) 70–75% · ไม่กด Space เลย เก่ง ~64–68% ·
   หน้าโปรไฟล์ = PASSIVE / SIGNATURE / สูตร + ลูกศรเปลี่ยนคน · แก้บั๊กลูกศรแกลเลอรี (คลิกแล้วเปิดโปรไฟล์คนถัดไป)
+- **รอบ 14 (28 ก.ย., `Alpha5`)** : **ลบหน้า STAGE (`FormationScreen`)** ผู้ใช้บอกว่าไม่จำเป็น ไม่ดึงดูด อธิบายยาก · นักดนตรีทุกคนมี **PART** = ตัวอักษร + ลูกศร วาดแบบโน้ต
+  (`MusicianArt.PartBadge`) · ตัวอักษรตามตระกูล (`StageLayout.PartOf`) · ลูกศร `Musician.Cue` · ที่นั่งประจำ `StageLayout.HomeSeat` (9 คน = 9 PART) · กฎสำรอง : ไม่มีคน p → ตวัดเล็กเรียกส่วนที่เบาสุด ·
+  ดวลเล่น 3 รอบในหน้าเดียว (`DuelScreen.SetUpRound` · ป้ายบอกสิ่งที่เปลี่ยน · การ์ดกลไกศัตรูครั้งแรก · ดีล DEVIL ในดวล) · หน้า THE BAND (`BandScreen`) เลือกใครขึ้นเวที ·
+  ค่าตัวคูณแถวย้ายเข้าการ์ด · MUTE CHOIR ปิดตัวอักษร · REQUIEM สลับลูกศร · KLARA ×2 ใส่โน้ต p · ANNA / IRIS บนบีตลูกศรตัวเอง · ร้านบอกคนจ้าง · event THE EMPTY CHAIR ·
+  SPARE STICKS ค่า −1 · จูน FOLK LEADER / UNHEARING / WHITE NOISE · เก่ง ~71–74% ทั่วไป ~8–9% (เท่ารอบ 13)
 - **ยังไม่มีไฟล์ภาพและเสียงเลย** ทุกช่องเป็นกรอบว่าง / เงียบ ใส่ไฟล์ตามชื่อแล้วขึ้นเองโดยไม่ต้องแก้โค้ด
 - เพื่อนต่างกลุ่มเล่นระบบรอบ 5 แล้ว (ง่ายเกิน) · **เพลย์เทส 25 ก.ย.** 5 คน เล่น build รอบ 8 : ชอบการตวัด · เข้าใจยาก · ง่ายไป (แก้แล้วรอบ 9) ·
-  **รอบ 9–13 ยังไม่มีคนเล่นจริง** ตัวเลขได้จากการจำลอง
-- **ข้อเสนอที่รอผู้ใช้เลือก** (ให้เล่นสนุกขึ้น · รีวิวทั้งเกม · สอนเล่น ก–ซ) อยู่ `PROJECT_STATUS.md` หัวข้อ 0 · ข้อเสนอรีวิวรอบ 12 ก–จ ทำแล้วรอบ 12.1
+  **รอบ 9–14 ยังไม่มีคนเล่นจริง** ตัวเลขได้จากการจำลอง
+- **ข้อเสนอที่รอผู้ใช้เลือก** (ให้เล่นสนุกขึ้น · รีวิวทั้งเกม · สอนเล่น ก–ซ · ต่อยอดรอบ 14) อยู่ `PROJECT_STATUS.md` หัวข้อ 0 · ข้อเสนอหน้า STAGE ทำแบบ 2 แล้วรอบ 14
 
 ## 2. ความคืบหน้า (ประมาณการ)
 
 | ส่วน | % | หมายเหตุ |
 |---|---|---|
-| ระบบหลักของรัน (เส้นทาง จัดวง ดวล ผลลัพธ์ Motif ร้าน เหตุการณ์ พัก จบรัน) | 90% | ครบวง ขาดการจูนหลังเล่นจริง · รอบ 12 เปลี่ยนแกนดวล ต้องเล่นจริงก่อน |
+| ระบบหลักของรัน (เส้นทาง วง ดวล ผลลัพธ์ Motif ร้าน เหตุการณ์ พัก จบรัน) | 90% | ครบวง ขาดการจูนหลังเล่นจริง · รอบ 12–14 เปลี่ยนแกนดวลและวง ต้องเล่นจริงก่อน |
 | ระบบดวล (ตวัดต่อเนื่อง ขนาดตวัด = ใครเล่น CUE IN TUNE โน้ตคู่ TREMOLO COUNTER FORTISSIMO FINALE ความสามารถ กลไก SIGNATURE) | 85% | สมดุลด้วยตัวจำลองแล้ว (รอบ 12) · แกนใหม่ยังไม่มีคนเล่นจริง |
-| หน้าจอ UI 19 หน้า (รวม TUTORIAL) + เมนูหยุด + กล่องถามยืนยัน | 90% | Tutorial 13 บท สอนการตวัด + ขนาด = ใครเล่น + จัดที่นั่ง (รอบ 12.1) · ยังไม่สอนการพัก/ดันเส้น |
+| หน้าจอ UI 19 หน้า (รวม TUTORIAL) + เมนูหยุด + กล่องถามยืนยัน | 90% | Tutorial 13 บท สอนการตวัด + ขนาด = ใครเล่น + PART (รอบ 14 บท WHO PLAYS) · ยังไม่สอนการพัก/ดันเส้น · รอบ 14 : STAGE → THE BAND |
 | ระบบรอบนอก (ตั้งค่า เซฟ CONTINUE calibration ปลดล็อก) | 75% | ครบยกเว้นปลดล็อกถาวร · เซฟยังไม่จำจังหวะหน้าผลลัพธ์/Motif |
 | ช่องใส่ภาพ/เสียง (hooks) | 100% | ครบทุกหน้า รายการใน `ASSET_LIST.md` |
 | เนื้อหา (ตัวละคร ศัตรู เหตุการณ์ Motif) | 40% | พอเล่นได้ ยังน้อยสำหรับเกมเต็ม |
@@ -86,13 +92,16 @@ Tacetno433/
 | อยากแก้อะไร | ไปที่ |
 |---|---|
 | ตัวเลขบาลานซ์ทุกตัว | `Data/BattleRules.cs` |
-| **ใครเล่นเมื่อตวัดขนาดไหน (DYNAMICS)** | `BattleState.Joins` / `RowTier` / `RowsFor` · พลัง `PowerFor` · สตามิน่า `CostFor` · ค้น `DYNAMICS` |
-| **ฝั่งที่ไม้ชี้ (CUE)** | `BattleRules.CuePower` `CueSide` · `BattleState.CueSideAt` / `IsCued` · ฝั่งของที่นั่ง `StageLayout.SeatSide` · ค้น `CUE` |
+| **ใครเล่นเมื่อตวัดขนาดไหน (DYNAMICS)** | `BattleState.Joins` / `QuietestPart` / `SmallestStroke` / `RowsFor` · พลัง `PowerFor` · สตามิน่า `CostFor` · ค้น `DYNAMICS` |
+| **PART ของนักดนตรี (รอบ 14)** | ตัวอักษรตามตระกูล `StageLayout.Rows` / `PartOf` · ลูกศร `Musician.Cue` · ที่นั่งประจำ `StageLayout.HomeSeat` · ป้าย `MusicianArt.PartBadge` (การ์ด · หน้ารับคน · เหนือหัว · กล่องวง) |
+| **ลูกศรที่ไม้ตวัดไป (CUE)** | `BattleRules.CuePower` `CueSide` · `BattleState.CueSideAt` / `IsCued` · ลูกศรของที่นั่ง `StageLayout.SeatSide` · ค้น `CUE` |
 | **IN TUNE / COUNTER** | `BattleState.Resolve` (ค้น `IN TUNE`) · `BattleRules.InTuneKeep` `CounterKeep` · ป้ายในดวล `DuelScreen.Hud.cs` `DrawJudge` |
 | **พัก (บีตเงียบไม่ตวัด)** | `DuelScreen.UpdateAnswer` (No Stroke) · `BattleState.IsSilent` / `SilentRecover` |
-| **หน้าเวที (ก่อนสู้ + ระหว่างรอบ)** : แถบท่อน TACET · ฝั่ง · p/mf/f ของแถว · ดีล DEVIL · คำอธิบายกลไกครั้งแรก | `Screens/FormationScreen.cs` (`DrawCall` `DrawStage`) · ที่นั่ง/ลำดับปลดล็อก `Data/StageLayout.cs` · `Data/Formation.cs` |
-| แถวสว่างตามขนาดตอนตวัด · เพชร CUE · กากบาท SILENCED | `DuelScreen.Stage.cs` (`DrawMusicianGlow` `DrawMusicianMarks`) · `DuelScreen.LiveSize` |
-| ฝั่งที่ถูกปิดเสียง (MUTE CHOIR) · เวทีกลับด้าน (REQUIEM) | `BattleState.SilencedSide` / `CanPlay` / `PickSilencedSide` · `Mirrored` (ค้น `SILENT MOUTHS` `UNFINISHED`) |
+| **หน้า THE BAND (รอบ 14, แทนหน้าเวที)** : ใครขึ้นเวที/นั่งพัก · แผนผัง PART 3×3 | `Screens/BandScreen.cs` · ใครอยู่บนเวที `Data/Formation.cs` (`AutoSeat` `Bench` `Swap` `Tidy`) · เปิดจาก `RouteScreen` (TAB) |
+| **ระหว่างรอบในดวล (รอบ 14)** : ป้ายบอกสิ่งที่เปลี่ยน · การ์ดกลไกศัตรูครั้งแรก · ดีล DEVIL | `DuelScreen.SetUpRound` / `LeaveRound` / `UpdateBargain` · วาด `DuelScreen.Hud.cs` `DrawRoundNote` `DrawBargain` |
+| คนสว่างตามขนาดตอนตวัด · ป้าย PART เหนือหัว (คนที่ถูกชี้ใหญ่ขึ้น) · กากบาท SILENCED | `DuelScreen.Stage.cs` (`DrawMusicianGlow` `DrawMusicianMarks`) · `DuelScreen.LiveSize` |
+| ตัวอักษรที่ถูกปิดเสียง (MUTE CHOIR) · ลูกศรสลับ (REQUIEM) | `BattleState.SilencedPart` / `CanPlay` / `PickSilencedPart` · `Mirrored` (ค้น `SILENT MOUTHS` `UNFINISHED`) |
+| ร้านบอกคนที่จะจ้าง · event THE EMPTY CHAIR | `ShopScreen` (`hire`) · `RunState.Recruit` / `MissingPartPlayer` · `Reward.RecruitPart` |
 | นักดนตรี / ความสามารถ | `Data/Musician.cs` (+ ผลของความสามารถใน `Battle/BattleState.cs` ค้นชื่อความสามารถ เช่น `MOMENTUM`) |
 | ศัตรู / กลไก / ชั้นที่เริ่มใช้กลไก | `Data/Enemy.cs` (+ ค้นชื่อกลไกใน `BattleState.cs`, `DuelScreen*.cs`) |
 | คอนดักเตอร์ / สูตร SIGNATURE | `Data/Conductor.cs` |
@@ -117,7 +126,7 @@ Tacetno433/
 | ไม้บาตอง / ไม้บรรทัดวัดขนาด (เขียน p / mf / f) | `Core/Baton.cs` (ใช้ทั้งดวลและ Tutorial) |
 | สัญลักษณ์โน้ต ลูกศร จุดตี วงแหวนจับเวลา | `Core/NoteGlyph.cs` (ใช้ทั้งดวลและ Tutorial) |
 | สตามิน่า : TACET ซัด / หมดลมแพ้ | `BattleState` (ค้น `TACET'S BLOW`, `COLLAPSE`, `CheckBreath`) · ตัวเลข `BattleRules.BlowPerPower` · ภาพ `DuelScreen.ShowBreath` · ขอบจอ `DuelScreen.Hud.cs` `DrawLowBreath` |
-| โหมด TUTORIAL | `Screens/TutorialScreen.cs` (รายการบท `lessons` แก้ข้อความ/ลำดับที่นี่) · `TutorialScreen.Practice.cs` (จังหวะ โน้ต การตัดสิน) · `TutorialScreen.Seats.cs` (บท WHERE THEY SIT) |
+| โหมด TUTORIAL | `Screens/TutorialScreen.cs` (รายการบท `lessons` แก้ข้อความ/ลำดับที่นี่) · `TutorialScreen.Practice.cs` (จังหวะ โน้ต การตัดสิน) · `TutorialScreen.Seats.cs` (บท WHO PLAYS, รอบ 14) |
 | เส้นแสง CUE ในดวล | `Screens/DuelScreen.Stage.cs` `DrawCueBeam` |
 | หน้าเลือกเส้นทาง (ถนน · ทางแยก · ป้าย · กล่องรายละเอียด) | `Screens/RouteScreen.cs` `DrawRoad` `DrawFork` `DrawTiles` `DrawDetail` · ตัวอักษรชนิดที่ `RouteNodeInfo.Marks` |
 | ความสามารถคอนดักเตอร์ (PASSIVE) | ตัวเลข `Data/Conductor.cs` (สตามิน่า Push สูตร ข้อความ) · ผล `BattleState` ค้น `BY THE BOOK` `LOCKED TEMPO` `RUNAWAY FIRE` `THE CLOSER THE LOUDER` (`LouderBonus`) `EVERY ROAD HOME` |
@@ -147,6 +156,7 @@ Tacetno433/
 ## 4. งานที่เหลือ (เรียงตามความสำคัญ)
 
 ### ต้องทำก่อน (P1)
+00000. **เล่นทดสอบรอบ 14** : เข้าดวลตรง · ป้าย PART เหนือหัวอ่านทันไหม · ป้ายคั่นรอบ / การ์ดกลไก / ดีล DEVIL ขัดจังหวะไหม · หน้า THE BAND · ร้าน HIRE · THE EMPTY CHAIR · แคปภาพ `docs/screenshots/` ใหม่บน Windows
 0000. **เล่นทดสอบรอบ 13** : คอนดักเตอร์ครบ 5 คน กด Space ทุกครั้งที่สูตรเต็ม · แต่ละคนเล่นต่างกันจริงไหม · หน้าโปรไฟล์ / ลูกศร · TACET ซัดแรงขึ้น 0.95 (ถ้ายากไป ถามผู้ใช้ก่อนลด)
 000. **เล่นทดสอบรอบ 12.2** : หน้าเลือกเส้นทางใหม่ · คอนดักเตอร์ครบ 5 คน (METRONOME แบบใหม่)
 00. **เล่นทดสอบรอบ 12.1** : บท Tutorial ที่ 5 · เส้นแสง CUE · ตวัดกลาง/ใหญ่ที่ยาวขึ้น · ตวัดเล็กบนบีตเงียบได้พัก · NAMELESS MASTER
@@ -179,6 +189,9 @@ Tacetno433/
 ## 5. ปัญหาที่รู้อยู่
 
 - เพลย์เทส 25 ก.ย. เล่น build รอบ 8 · รอบ 9–12 ยังไม่มีคนเล่นจริง ภาพทดสอบใช้เมาส์ปลอม
+- รอบ 14 : ตัวจำลองไม่เลือกคนขึ้นเวทีเอง (นั่งตามลำดับที่เข้าวง) · ไม่ได้วัดว่าคนอ่านป้าย PART เหนือหัวทันไหม (รัศมี 12–15 px) · ดวลยาวขึ้น ~10% สำหรับผู้เล่นเก่ง (24.4 บีต เดิม 22.3) ·
+  FOLK LEADER ผู้เล่นทั่วไปชนะน้อยสุด 5–6% (สูตร 3/3/3) · UNHEARING เก่งสูงสุด ~76% · WHITE NOISE ง่ายกว่ารอบ 13 (เก่งแพ้ชั้น 1 7–8% เดิม 16%) DEVIL ยากขึ้นสำหรับผู้เล่นทั่วไป (20% เดิม 11–13%) ·
+  เซฟเก่าย้ายคนเข้าที่นั่งประจำเอง (`Formation.Tidy`, savecheck ผ่าน) ยังไม่ได้ลองกับไฟล์จริง
 - รอบ 12 : ตัวจำลองไม่ย้ายคนระหว่างรอบ ไม่จัดฝั่งตาม CUE ไม่หลบ SILENT MOUTHS (นั่งตามลำดับปลดล็อก) · ไม่ได้วัดว่าคนตวัด 3 ขนาดแม่นแค่ไหน ·
   (รอบ 12.1 : NAMELESS ชั้น 1 เก่งแพ้ ~17% ยังยากสุดแต่ไม่เป็นกำแพง · SECOND WIND +14–16 · ใบแรงสุดตอนนี้ CON BRIO +19–21) · เซฟเก่า (ก่อนรอบ 12) ย้ายคนออกจากที่ล็อกเอง ยังไม่ได้ลองกับไฟล์จริง ·
   ภาพ `docs/screenshots/score*.png` `bargain.png` `stage.png` เป็นหน้าก่อนรอบ 12
@@ -212,5 +225,7 @@ Tacetno433/
 - รอบ 12 : โล๊ะการจัดจังหวะก่อนสู้ · แบบ 1 DYNAMICS (ขนาดตวัด = ใครเล่น) + เสริมจากแบบ 2 CUE (ทิศตวัด) · คนที่เล่นกินสตามิน่า · เก็บ REPEATS ·
   CUE + ศัตรูเล่นกับฝั่ง (ใช้ศัตรูเดิม) · "เล่นได้ไม่ยากมาก แต่ยังมีความลึก" (จูนให้อัตราชนะเท่ารอบ 11b)
 - รอบ 12.2 : หน้าเลือกเส้นทางแบบ ข (ถนน + ทางแยก) · หน้าเลือกยุคคงเดิม · รีวิว/ปรับคอนดักเตอร์ทุกคน
+- รอบ 13 : คอนดักเตอร์ทุกคนมี PASSIVE + SIGNATURE ของตัวเอง
+- รอบ 14 : ลบหน้า STAGE · PART ติดตัวนักดนตรี (แบบที่ 2 ที่ Claude เสนอ) · ปรับบอส สกิล event ให้เข้ากับรูปแบบใหม่ · ความยากรวมเท่ารอบ 13
 - รอบ 12.1 : ผู้ใช้สั่งข้อเสนอรีวิวรอบ 12 ก–จ ทั้งหมด (ตวัดเล็กบนบีตเงียบ = พัก · CUE เห็นชัด · บท Tutorial จัดที่นั่ง · ตวัดกลางกว้างขึ้น · ปรับ NAMELESS / SECOND WIND)
 - Esc = เมนูหยุดทุกหน้าในรัน · สิ่งที่ย้อนไม่ได้ต้องถามก่อน ค่าเริ่มเลือก "ไม่" · แพ้ดวล = ลบเซฟ (roguelike)
