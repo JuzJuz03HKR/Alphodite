@@ -123,11 +123,11 @@ namespace Tacetno433.Screens
         }
 
         //Stroke Tier : 0 when a small stroke brings this seat in, 1 a middle one, 2 only a big one.
-        //THE QUIET PART and LOCKED TEMPO come in on every stroke.
+        //THE QUIET PART comes in on every stroke. (For LOCKED TEMPO it is the mark instead.)
         private int StrokeTierOf(int seat)
         {
             Musician m = Game.CurrentRun.Formation.Seated[seat];
-            if (battle.ChoicesLocked || m.Trait == MusicianTrait.QuietPart) return 0;
+            if (m.Trait == MusicianTrait.QuietPart) return 0;
             return Math.Max(0, battle.RowTier(StageLayout.SeatRow[seat]));
         }
 

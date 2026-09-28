@@ -8,9 +8,9 @@ namespace Tacetno433.Data
     public enum ConductorPerk
     {
         None,            // THE APPRENTICE
-        LockedTempo,     // THE METRONOME   every stroke a boost, whatever its size, never ease
+        LockedTempo,     // THE METRONOME   the band plays the note's written mark, whatever the stroke size
         RunawayFire,     // THE INFERNO     a miss is not weaker and powers up the next beat
-        CloserLouder,    // THE UNHEARING   stronger the further TACET has pushed
+        CloserLouder,    // THE UNHEARING   stronger, and breathing deeper, the further TACET has pushed
         EveryRoadHome    // THE FOLK LEADER mixed cultures on a beat hit harder, one seat fewer
     }
 
@@ -99,12 +99,13 @@ namespace Tacetno433.Data
                 MechanicName = "LOCKED TEMPO",
                 SignatureMark = "Tempo giusto",
                 Recipe = new int[] { 2, 0, 2 },     // the rhythm section
-                MechanicText = "Every stroke brings the whole band in, whatever its size, so a small flick "
-                             + "hits as hard as a big swing. The back row never plays alone.",
+                MechanicText = "The band plays the mark written on TACET's note, p, mf or f, whatever size "
+                             + "you swing. You only keep time. Every stroke costs a little more, and a false mark fools him too.",
                 Stamina = 10, PushPower = 6, Perk = ConductorPerk.LockedTempo,       // round 10 : 9 -> 7, no cheaper notes. Round 11a : 9,
                                                                                      // round 11b : 10 and push 6. Bigger rests and EASE help
                                                                                      // everyone but him (he cannot EASE). Round 12 : he pays
-                                                                                     // for the whole band on every stroke
+                                                                                     // for the whole band on every stroke. Round 12.2 : the
+                                                                                     // band plays the written mark, see BattleRules.LockedTempoCost
                 ThemeColor = Palette.ToneC,
                 Unlocked = true
             },
@@ -140,9 +141,10 @@ namespace Tacetno433.Data
                 MechanicName = "THE CLOSER THE LOUDER",
                 SignatureMark = "Sempre crescendo",
                 Recipe = new int[] { 3, 1, 0 },     // the strings carry it
-                MechanicText = "You start weak. The nearer TACET creeps to your edge, "
-                             + "the harder your ensemble hits, up to 130 percent.",
-                Stamina = 5, PushPower = 4, Perk = ConductorPerk.CloserLouder,       // round 10 : push 3 -> 4, perk up to 130 percent
+                MechanicText = "You start weak. The nearer TACET creeps to your edge, the harder your ensemble "
+                             + "hits, up to 130 percent, and the more a rest gives back, up to double.",
+                Stamina = 5, PushPower = 4, Perk = ConductorPerk.CloserLouder,       // round 10 : push 3 -> 4, perk up to 130 percent.
+                                                                                     // Round 12.2 : rests breathe deeper when behind too
                 ThemeColor = Palette.ToneD,
                 Unlocked = true
             },
@@ -161,7 +163,8 @@ namespace Tacetno433.Data
                 Recipe = new int[] { 1, 2, 1 },     // the pipes of every road
                 MechanicText = "Players from different cultures on the same beat hit harder together, "
                              + "but you begin the run with one seat fewer.",
-                Stamina = 6, PushPower = 6, Perk = ConductorPerk.EveryRoadHome,
+                Stamina = 6, PushPower = 5, Perk = ConductorPerk.EveryRoadHome,      // round 12.2 : push 6 -> 5, he won the most
+                                                                                     // runs (77 to 82 percent, the others 67 to 75)
                 ThemeColor = Palette.ToneE,
                 Unlocked = true
             },

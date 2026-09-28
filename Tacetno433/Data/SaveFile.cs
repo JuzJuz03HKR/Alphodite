@@ -180,7 +180,7 @@ namespace Tacetno433.Data
 
             //Start : the same start as a new run, then everything is written over from the file
             RunState run = new RunState();
-            run.Start(ConductorList.All[conductor], game.StoryFont, PanelStrip.CaptionWrapWidth);
+            run.Start(ConductorList.All[conductor], game.StoryFont, RouteNodeInfo.CaptionWrapWidth);
 
             run.BandName = GetText(v, "band");
             run.Floor = GetInt(v, "floor", 1);

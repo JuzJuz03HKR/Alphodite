@@ -466,7 +466,7 @@ namespace Tacetno433.Data
             node.Caption = RouteNodeInfo.CaptionOf(type);
 
             if (font != null)
-                node.CaptionWrapped = Gfx.WrapText(font, node.Caption, wrapWidth, TextSize.StorySmall, PanelStrip.CaptionLines);
+                node.CaptionWrapped = Gfx.WrapText(font, node.Caption, wrapWidth, TextSize.Story, RouteNodeInfo.CaptionLines);
             else
                 node.CaptionWrapped = node.Caption;
 

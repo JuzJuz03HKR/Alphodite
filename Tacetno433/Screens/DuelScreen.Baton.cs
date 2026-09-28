@@ -31,7 +31,7 @@ namespace Tacetno433.Screens
                 ResolveAnswer(b, Choice.Ease, Grade.None, false);
                 return;
             }
-            if (battle.ChoicesLocked) choice = Choice.Boost;                   // THE METRONOME : always the whole band
+            if (battle.ChoicesLocked && !battle.IsSilent(b)) choice = battle.MarkedChoice(b);   // LOCKED TEMPO : the mark decides
 
             //Timing Grade : judged where the baton stopped, against the beat
             float now = StrokeClock();
@@ -148,12 +148,14 @@ namespace Tacetno433.Screens
             }
 
             //Ruler : from where the stroke began, the way this beat goes, filled as far as the
-            //stroke has come. The finale only needs the right way, so it has no size zones.
+            //stroke has come. The finale only needs the right way, so it has no size zones, and
+            //neither has a note under LOCKED TEMPO, where the mark decides the size.
             Vector2 d = NoteGlyph.Way(WantedWay());
             Vector2 anchor = gesture.InStroke ? gesture.StrokeStart : Input.MousePos;
             float along = Vector2.Dot(gesture.LiveVector, d);
             int zone = gesture.InStroke ? Baton.SizeOf(along) : -1;
-            Baton.DrawRuler(sb, anchor, d, along, zone, phase != Phase.Finale);
+            bool markDecides = battle.ChoicesLocked && !battle.IsSilent(BeatOf(pending));
+            Baton.DrawRuler(sb, anchor, d, along, zone, phase != Phase.Finale && !markDecides);
         }
 
     }

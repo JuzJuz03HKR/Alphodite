@@ -117,9 +117,10 @@ namespace Tacetno433.Screens
         //CUE Beam : a thread from the answer ring to whoever the baton points at on the beat being
         //answered (round 12.1, the small mark over their heads alone was easy to miss). It grows
         //darker as the ring closes, and a spark runs along it to land on the players right on
-        //the beat. The side's name, the same word the STAGE page uses, sits over them, because
-        //this page shows the stage from the side and left, centre and right become far, middle
-        //and near. On a silent beat the thread is faint, nobody has to play it.
+        //the beat. The side's name, the same word the STAGE page uses, sits where the thread
+        //leaves the ring, where the eyes already are, because this page shows the stage from the
+        //side and left, centre and right become far, middle and near. On a silent beat the thread
+        //is faint, nobody has to play it.
         private void DrawCueBeam(SpriteBatch sb)
         {
             if (phase != Phase.Play || cutIn > 0f) return;
@@ -133,8 +134,7 @@ namespace Tacetno433.Screens
 
             Formation f = Game.CurrentRun.Formation;
             Vector2 from = new Vector2(HitX - CueBeamStart, RingY);
-            float labelX = 0f;
-            float labelY = float.MaxValue;
+            bool any = false;
             for (int s = 0; s < StageLayout.SeatCount; s++)
             {
                 if (f.Seated[s] == null || !UpNext(s)) continue;
@@ -147,16 +147,11 @@ namespace Tacetno433.Screens
                 Vector2 spark = Vector2.Lerp(from, to, t);
                 Gfx.DrawGlow(sb, spark.X, spark.Y, 16f, Palette.Highlight * a);
                 Gfx.Diamond(sb, spark.X, spark.Y, 4, Palette.Ink * a);
-
-                if (r.Y < labelY)
-                {
-                    labelY = r.Y;
-                    labelX = r.Center.X;
-                }
+                any = true;
             }
 
-            if (labelY < float.MaxValue)
-                Gfx.TextSpacedCentered(sb, Game.Font, StageLayout.SideNames[battle.CueSideAt(b)], labelX, labelY - 44f,
+            if (any)
+                Gfx.TextSpacedCentered(sb, Game.Font, StageLayout.SideNames[battle.CueSideAt(b)], from.X - CueLabelGap, from.Y - 30f,
                                        Palette.Ink * (0.4f + 0.6f * t), TextSize.Tiny, 3f);
         }
 

@@ -18,8 +18,7 @@ namespace Tacetno433.Screens
         private const int LedgerX = 760;
         private const int LedgerW = 460;
 
-        //Journey Marks : one letter per kind of place, in NodeType order
-        private static string[] journeyMark = { "E", "?", "$", "!", "R", "B", "X" };
+        //Journey Marks : one letter per kind of place, the same as the route's road (RouteNodeInfo.Marks)
         private static string[] journeyKey = { "E ENCOUNTER", "! ELITE", "B BOSS", "? UNKNOWN", "$ SHOP", "R REST", "X CROSSING" };
 
         private bool won;
@@ -149,7 +148,7 @@ namespace Tacetno433.Screens
                 bool fight = stop.Type == NodeType.Battle || stop.Type == NodeType.Elite || stop.Type == NodeType.Boss;
                 if (fight) Gfx.Rect(sb, box, Palette.Paper * (0.85f * e));
                 Gfx.RectOutline(sb, box, Palette.Paper * (0.7f * e), 1);
-                Gfx.TextCentered(sb, Game.Font, journeyMark[(int)stop.Type], box.Center.X, box.Center.Y,
+                Gfx.TextCentered(sb, Game.Font, RouteNodeInfo.Marks[(int)stop.Type], box.Center.X, box.Center.Y,
                                  (fight ? Palette.Ink : Palette.Paper) * e, TextSize.Tiny);
                 if (stop.Lost) Gfx.Line(sb, box.X - 3, box.Bottom + 3, box.Right + 3, box.Y - 3, Palette.Highlight * e, 2f);
                 x += 22;

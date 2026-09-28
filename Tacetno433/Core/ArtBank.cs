@@ -22,7 +22,7 @@ namespace Tacetno433.Core
     //   CutIn              the signature picture                 Art/Conductors/cutin_the_inferno
     //   Enemy              TACET's shape in a duel               Art/Enemies/enemy_hush
     //   EraPanel           the tall panel on the era page        Art/Eras/era_siam
-    //   RoutePanel         the tall panel of a kind of place     Art/Route/route_shop
+    //   RoutePanel         a kind of place, small and wide       Art/Route/route_shop    (230 x 142 on the route page)
     //   EventPicture       one per event                         Art/Events/event_a_street_musician
     //   Shop, Rest         the shop and the rest room            Art/Places/shop, Art/Places/rest
     //   Baton              the stick the player holds            Art/Baton/baton

@@ -282,13 +282,17 @@
         public static float CodaLine = 60f;          // CODA, the FINALE is offered from here instead of FinaleLine
 
         //Conductor Perks
-        public static float LockedTempoCost = 1.25f; // THE METRONOME pays this share. Was 0.6 : since BOOST is free (round 8)
+        public static float LockedTempoCost = 1.33f; // THE METRONOME pays this share. Was 0.6 : since BOOST is free (round 8)
                                                      // his lock cost him nothing, and he won 98 percent of simulated runs (round 10).
                                                      // Round 12 : 1.25, the whole band on every stroke without reading any
-                                                     // mark won 74 percent at 1.0, the others 50 to 64
+                                                     // mark won 74 percent at 1.0, the others 50 to 64.
+                                                     // Round 12.2 : the band plays the written mark instead (never a wrong size),
+                                                     // 1.25 won 80 percent, 1.4 66, so 1.33 (about 71 to 73)
         public static float RunawayFireBonus = 1.3f; // THE INFERNO, the beat after a miss
         public static float CloserLouderMax = 1.3f;  // THE UNHEARING, +130 percent at the very edge. Was 0.6 : with the PUSH CAP
                                                      // the line rarely falls far, so he was the weakest conductor (round 10)
+        public static float CloserRestMax = 1.0f;    // THE UNHEARING, a rest gives back up to this much more (double) at the edge.
+                                                     // Round 12.2 : a band loses on breath now, not on the line
         public static float CrossCultureHarmony = 0.07f; // THE FOLK LEADER, per extra culture on a beat. Was 0.15 : he won the most runs (round 11)
 
         //Shop

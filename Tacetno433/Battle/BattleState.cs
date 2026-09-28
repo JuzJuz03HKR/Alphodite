@@ -318,20 +318,19 @@ namespace Tacetno433.Battle
             return false;
         }
 
-        //Joins : does this seat play on a stroke of this size?
-        //THE QUIET PART plays on every stroke, and LOCKED TEMPO always brings the whole band.
+        //Joins : does this seat play on a stroke of this size? THE QUIET PART plays on every stroke.
+        //(LOCKED TEMPO picks the size from TACET's mark before it gets here, see MarkedChoice.)
         public bool Joins(int seat, Choice choice)
         {
             if (!CanPlay(seat)) return false;
             if (Run.Formation.Seated[seat].Trait == MusicianTrait.QuietPart) return true;    // THE QUIET PART
-            if (ChoicesLocked) return true;                                                  // LOCKED TEMPO
             return RowTier(StageLayout.SeatRow[seat]) < RowsFor(choice);
         }
 
         //Joins By Trait : THE QUIET PART brought her in on a stroke her row would sit out
         private bool JoinsByTrait(int seat, Choice choice)
         {
-            return Run.Formation.Seated[seat].Trait == MusicianTrait.QuietPart && !ChoicesLocked
+            return Run.Formation.Seated[seat].Trait == MusicianTrait.QuietPart
                 && RowTier(StageLayout.SeatRow[seat]) >= RowsFor(choice);
         }
 
@@ -347,10 +346,19 @@ namespace Tacetno433.Battle
             }
         }
 
-        //Choices Locked : THE METRONOME's every stroke brings the whole band, whatever its size
+        //Choices Locked : THE METRONOME, the band plays the mark written on TACET's note, whatever
+        //size the hand drew (round 12.2, was : every stroke the whole band). He only keeps time.
         public bool ChoicesLocked
         {
             get { return Run.Conductor.Perk == ConductorPerk.LockedTempo; }
+        }
+
+        //Marked Choice : LOCKED TEMPO, the size a note's mark asks for. What the note SAYS, so a
+        //FALSE NOTE fools him too. A hidden ??? note, a roll and a held note bring the whole band.
+        public Choice MarkedChoice(int beat)
+        {
+            if (EnemyHidden[beat] || beat == TremoloBeat || beat == FermataBeat) return Choice.Boost;
+            return ShownChoice[beat];
         }
 
         //Roll Counted : how many of these shakes count towards a roll. Past TremoloMost they add
@@ -765,6 +773,8 @@ namespace Tacetno433.Battle
             {
                 float recover = BattleRules.RestRecover;
                 if (Run.Has(MotifId.BreathMark)) recover *= BattleRules.BreathMarkRecover;   // BREATH MARK
+                if (Run.Conductor.Perk == ConductorPerk.CloserLouder && Line < 0f)           // THE CLOSER THE LOUDER
+                    recover *= 1f + BattleRules.CloserRestMax * (-Line / BattleRules.LineLimit);
                 if (EnemyHas(EnemyTrait.NoRest)) recover *= BattleRules.NoRestShare;       // NO REST
                 return (int)recover;
             }
@@ -871,7 +881,7 @@ namespace Tacetno433.Battle
             BeatResult r = Results[beat];
             if (grade != Grade.None && grade != Grade.Hesitate && RestsOn(beat, choice))
                 grade = Grade.None;                                                     // SOFT REST
-            if (ChoicesLocked) choice = Choice.Boost;                                   // LOCKED TEMPO
+            if (ChoicesLocked && !IsSilent(beat)) choice = MarkedChoice(beat);          // LOCKED TEMPO
             bool stroked = grade != Grade.None && grade != Grade.Hesitate;
 
             //Bar Start : FOUR BARS counts the beats of every bar afresh

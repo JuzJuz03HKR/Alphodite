@@ -65,7 +65,7 @@ namespace Tacetno433.Screens
         private static string[] tierWords = { "EVERY STROKE", "MIDDLE AND BIG", "BIG ONLY" };
         private static string[] tierMarks = { "p", "mf", "f" };
         private const string EmptyRow = "EMPTY, SKIPPED";
-        private const string AllStrokes = "EVERY STROKE";
+        private static string[] noteWords = { "EVERY NOTE", "mf AND f NOTES", "f NOTES ONLY" };   // LOCKED TEMPO : the mark calls the rows
 
         //Call Words
         private static string[] kindWords = { "", "TREMOLO", "FERMATA", "HIDDEN" };
@@ -503,8 +503,8 @@ namespace Tacetno433.Screens
                 if (tier < 0) Gfx.TextSpaced(sb, Game.Font, EmptyRow, 48, labelY + 24, Palette.LineGrey, TextSize.Tiny, 1.5f);
                 else
                 {
-                    Gfx.Text(sb, Game.BigFont, tierMarks[battle.ChoicesLocked ? 0 : tier], 48, labelY + 14, Palette.Highlight, TextSize.Small);
-                    Gfx.TextSpaced(sb, Game.Font, battle.ChoicesLocked ? AllStrokes : tierWords[tier], 84, labelY + 24, Palette.PaperDim, TextSize.Tiny, 1.5f);
+                    Gfx.Text(sb, Game.BigFont, tierMarks[tier], 48, labelY + 14, Palette.Highlight, TextSize.Small);
+                    Gfx.TextSpaced(sb, Game.Font, battle.ChoicesLocked ? noteWords[tier] : tierWords[tier], 84, labelY + 24, Palette.PaperDim, TextSize.Tiny, 1.5f);
                 }
             }
 

@@ -399,7 +399,7 @@ namespace Tacetno433.Core
         private static bool PlayRun(TacetGame game, Conductor conductor, int habit, Motif startMotif, bool takeMotifs, Random random, RunRecord rec)
         {
             RunState run = new RunState();
-            run.Start(conductor, game.StoryFont, PanelStrip.CaptionWrapWidth);
+            run.Start(conductor, game.StoryFont, RouteNodeInfo.CaptionWrapWidth);
             run.BandName = "SIM";
             if (startMotif != null) run.AddMotif(startMotif);
             bool alive = true;
@@ -575,6 +575,19 @@ namespace Tacetno433.Core
             Open(game, names[index]);
         }
 
+        //Conductor Shot : "detail3" or "duelc3", a page name and one digit (not "duelcombo")
+        private static bool IsConductorShot(string name, string page)
+        {
+            return name.Length == page.Length + 1 && name.StartsWith(page) && char.IsDigit(name[page.Length]);
+        }
+
+        //Shot Conductor : the digit at the end picks the conductor
+        private static int ShotConductor(string name)
+        {
+            int index = name[name.Length - 1] - '0';
+            return Math.Max(0, Math.Min(ConductorList.All.Length - 1, index));
+        }
+
         //Page Open : build a sample run that suits the page, then show it.
         //Names: title titlecontinue titlequit guide guide3 guide4 guide5 settings calibrate gallery detail chapter era
         //       crossing recruit bandname route pause view stage score scoretrait scorepairs scorerepeat bargain
@@ -593,6 +606,8 @@ namespace Tacetno433.Core
             if (name == "settings" || name == "calibrate") screen = new SettingsScreen();
             if (name == "gallery") screen = new ConductorSelectScreen(2);
             if (name == "detail") screen = new ConductorDetailScreen(2, new Rectangle(475, 126, 330, 450));
+            if (IsConductorShot(name, "detail"))                                        // detail0 .. detail4 : one per conductor
+                screen = new ConductorDetailScreen(ShotConductor(name), new Rectangle(475, 126, 330, 450));
             if (name == "chapter") screen = new ChapterScreen();
             if (name == "era") screen = new EraChoiceScreen(true);
             if (name == "crossing") screen = new EraChoiceScreen(false);
@@ -642,7 +657,7 @@ namespace Tacetno433.Core
         private static RunState SampleRun(TacetGame game, string name)
         {
             RunState run = new RunState();
-            run.Start(ConductorList.All[2], game.Font, PanelStrip.CaptionWrapWidth);
+            run.Start(ConductorList.All[IsConductorShot(name, "duelc") ? ShotConductor(name) : 2], game.StoryFont, RouteNodeInfo.CaptionWrapWidth);
             run.BandName = "THE SILENT CHOIR";
 
             //Ensemble : three from Siam on stage, one from the Classical era on the bench
@@ -674,6 +689,12 @@ namespace Tacetno433.Core
                 run.BattlesWon = 6;
                 run.PerfectsTotal = 23;
                 run.BestCombo = 5;
+
+                //Journey : four places already behind the band, so the route's road shows its marks
+                run.RecordStop(NodeType.Battle);
+                run.RecordStop(NodeType.Event);
+                run.RecordStop(NodeType.Battle);
+                run.RecordStop(NodeType.Shop);
             }
 
             //Route : keep rolling until four paths come up, so the picture shows a full row

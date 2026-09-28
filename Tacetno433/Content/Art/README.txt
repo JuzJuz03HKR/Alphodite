@@ -84,11 +84,15 @@ Code: Core/ArtBank.cs (DrawStage)
 6. PANELS : ERAS AND PLACES
 ---------------------------
 Folder:  Content/Art/Eras      era_classical.png   era_siam.png   era_romantic.png
-Folder:  Content/Art/Route     route_battle.png  route_elite.png  route_boss.png  route_event.png
-                               route_shop.png  route_rest.png  route_crossing.png
 Tall panels that stretch to fit the column they are in (around 480 x 720 is a good size).
 The bottom 150 pixels sit under the caption, so keep the subject in the upper part.
-Code: Core/PanelStrip.cs, Screens/EraChoiceScreen.cs, Screens/RouteScreen.cs
+Code: Core/PanelStrip.cs, Screens/EraChoiceScreen.cs
+
+Folder:  Content/Art/Route     route_battle.png  route_elite.png  route_boss.png  route_event.png
+                               route_shop.png  route_rest.png  route_crossing.png
+A small WIDE picture in the route page's detail box, shown at 230 x 142 (paint 460 x 284).
+(Before 28 Sep 2026 these were tall 480 x 720 panels; the route page no longer uses panels.)
+Code: Screens/RouteScreen.cs (DrawDetail)
 
 
 7. PLACES AND EVENTS

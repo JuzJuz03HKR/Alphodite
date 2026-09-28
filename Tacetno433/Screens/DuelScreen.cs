@@ -82,6 +82,7 @@ namespace Tacetno433.Screens
         private const float HitX = 640f;                     // the hit point never moves
         private const float RingY = 372f;
         private const float CueBeamStart = 72f;              // the CUE beam leaves the ring this far left of the hit point
+        private const float CueLabelGap = 56f;               // and the side's name sits this far left of that
         private const float LaneHalf = 34f;                  // half the height of the lane
         private const float RingStart = 120f;
         private const float RingTarget = 44f;
@@ -1109,8 +1110,20 @@ namespace Tacetno433.Screens
         {
             if (phase != Phase.Play || !gesture.InStroke || rolling || holding || onGrace) return -1;
             if (AnswerProgress() < 0f) return -1;
+            //LOCKED TEMPO : the rows the mark calls light up, whatever the size
+            int b = BeatOf(pending);
+            if (battle.ChoicesLocked && !battle.IsSilent(b)) return SizeIndexOf(battle.MarkedChoice(b));
+
             float along = Vector2.Dot(gesture.LiveVector, NoteGlyph.Way(WantedWay()));
             return Baton.SizeOf(along);
+        }
+
+        //Size Index Of : the other way round from sizeChoice, 0 small, 1 middle, 2 big
+        private static int SizeIndexOf(Choice choice)
+        {
+            if (choice == Choice.Ease) return 0;
+            if (choice == Choice.Normal) return 1;
+            return 2;
         }
 
         public override void Draw(SpriteBatch sb)

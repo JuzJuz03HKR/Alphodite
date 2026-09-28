@@ -97,7 +97,7 @@ namespace Tacetno433.Screens
         {
             //Run Begin : build a fresh run and hand the player their first choice of era
             Game.CurrentRun = new RunState();
-            Game.CurrentRun.Start(c, Game.StoryFont, PanelStrip.CaptionWrapWidth);
+            Game.CurrentRun.Start(c, Game.StoryFont, RouteNodeInfo.CaptionWrapWidth);
             SoundBank.Play(Sfx.UiConfirm);
             Game.Screens.Change(new ChapterScreen());
         }
@@ -252,12 +252,20 @@ namespace Tacetno433.Screens
             //Perk Box : double frame, like the era box on a profile card
             Gfx.Rect(sb, perkBox, Palette.Void * (0.7f * a));
             Ornament.DoubleFrame(sb, perkBox, Palette.PaperDim * a);
-            Gfx.TextSpaced(sb, Game.Font, "SIGNATURE", perkBox.X + 16, perkBox.Y + 14, Palette.LineGrey * a, TextSize.Tiny, 3f);
-            Gfx.Text(sb, Game.BigFont, c.MechanicName, perkBox.X + 16, perkBox.Y + 30, Palette.Highlight * a, TextSize.Small);
-            Gfx.TextSpaced(sb, Game.Font, "SEATS", perkBox.X + 16, perkBox.Y + 76, Palette.LineGrey * a, TextSize.Tiny, 3f);
-            Gfx.Text(sb, Game.Font, seatsLabel, perkBox.X + 70, perkBox.Y + 71, Palette.Paper * a, TextSize.Body);
-            Gfx.TextSpaced(sb, Game.Font, "BENCH", perkBox.X + 110, perkBox.Y + 76, Palette.LineGrey * a, TextSize.Tiny, 3f);
-            Gfx.Text(sb, Game.Font, NumberText.Get(BattleRules.BenchSize), perkBox.X + 166, perkBox.Y + 71, Palette.Paper * a, TextSize.Body);
+            //Signature : the SPACE move's name and what it needs (round 12.2 : the box used to repeat
+            //the mechanic's name under the SIGNATURE heading, and the recipe was shown nowhere)
+            Gfx.TextSpaced(sb, Game.Font, "SIGNATURE  /  SPACE", perkBox.X + 16, perkBox.Y + 14, Palette.LineGrey * a, TextSize.Tiny, 3f);
+            Gfx.Text(sb, Game.BigFont, c.SignatureMark, perkBox.X + 16, perkBox.Y + 30, Palette.Highlight * a, TextSize.Small);
+            //Recipe : NEEDS, then a number and the family mark for each family it asks for
+            Gfx.TextSpaced(sb, Game.Font, "NEEDS", perkBox.X + 16, perkBox.Y + 76, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            float rx = perkBox.X + 86;
+            for (int f = 0; f < c.Recipe.Length; f++)
+            {
+                if (c.Recipe[f] <= 0) continue;
+                Gfx.Text(sb, Game.Font, NumberText.Get(c.Recipe[f]), rx, perkBox.Y + 71, Palette.Paper * a, TextSize.Body);
+                MusicianArt.FamilyGlyph(sb, (Family)f, rx + 28, perkBox.Y + 82, 0.5f, Palette.Paper * a);
+                rx += 52;
+            }
         }
 
         private void DrawRow(SpriteBatch sb, string label, int y, float a)
