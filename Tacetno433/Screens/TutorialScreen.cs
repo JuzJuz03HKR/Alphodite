@@ -16,13 +16,15 @@ namespace Tacetno433.Screens
     //card fill up with every success. A finished lesson shows LESSON CLEAR and the next one
     //comes in. TAB skips a lesson, ESC goes back to the title. Nothing here can be lost.
     //
-    //Lessons 1 to 4 have no beat : hold the button, stroke down, draw the 4/4 shape, swing
-    //small, middle and big. From lesson 5 a slow beat runs, started by holding the button,
-    //with the same ring, lane and notes as the duel (drawn by the same Core helpers).
+    //Lessons 1 to 5 have no beat : hold the button, stroke down, draw the 4/4 shape, swing
+    //small, middle and big, and see where the players sit (WHERE THEY SIT, round 12.1).
+    //From lesson 6 a slow beat runs, started by holding the button, with the same ring, lane
+    //and notes as the duel (drawn by the same Core helpers).
     //
-    //THIS CLASS IS SPLIT OVER TWO FILES (partial, like DuelScreen) :
+    //THIS CLASS IS SPLIT OVER THREE FILES (partial, like DuelScreen) :
     //   TutorialScreen.cs           the lessons, their order, and the page around the stage
     //   TutorialScreen.Practice.cs  the beat, the notes, judging a stroke, and drawing the stage
+    //   TutorialScreen.Seats.cs     the WHERE THEY SIT lesson : rows, sides and a small stage
     public partial class TutorialScreen : GameScreen
     {
         //Can Pause : a menu page outside the run, ESC here means going back
@@ -32,7 +34,7 @@ namespace Tacetno433.Screens
         }
 
         //Lesson Kind : what the player has to do in a lesson
-        private enum Kind { Hold, Stroke, Pattern, Size, Timing, Lane, Loudness, Breath, Roll, Fermata, Spark, Finish }
+        private enum Kind { Hold, Stroke, Pattern, Size, Seats, Timing, Lane, Loudness, Breath, Roll, Fermata, Spark, Finish }
 
         //Lesson : one step of the tutorial
         private class Lesson
@@ -73,6 +75,13 @@ namespace Tacetno433.Screens
                      + "cheap on breath. A middle one (mf) brings the middle row too. A long one (f) "
                      + "brings the whole band, the hardest hit and the most tiring. The ruler shows how far you have come.",
                 Goal = "Swing down : short, then middle, then long." },
+
+            new Lesson { Kind = Kind.Seats, Title = "WHERE THEY SIT", Need = 7,
+                Body = "Where a player sits is how they play. Their ROW says which strokes bring them in : "
+                     + "p the back row, mf the middle row too, f everyone. Their SIDE says when the baton "
+                     + "points at them : down and up at the centre, left and right at their own side. "
+                     + "Whoever it points at hits 50 percent harder.",
+                Goal = "Swing p, mf and f, then draw the 4/4 shape." },
 
             new Lesson { Kind = Kind.Timing, Title = "ON THE BEAT", Need = 6, Bpm = 70,
                 Body = "Now the band keeps time. The ring closes on its mark on every beat. "
@@ -115,9 +124,8 @@ namespace Tacetno433.Screens
                 Goal = "Land two sparks." },
 
             new Lesson { Kind = Kind.Finish, Title = "READY", Need = 0,
-                Body = "That is everything the baton does. In a run you also seat the band : the row decides "
-                     + "which strokes bring each player in, and the side the beats the baton points at them. "
-                     + "Three more things to know : a PERFECT f against a real f is a COUNTER. Eight PERFECTs in a row set the band on fire. Far enough "
+                Body = "That is everything the baton does. In a run you seat the band on the STAGE page before "
+                     + "each round. A few more things to know : a PERFECT f against a real f is a COUNTER. Eight PERFECTs in a row set the band on fire. Far enough "
                      + "ahead, the FINALE ends a fight at once. SPACE lets your conductor's SIGNATURE "
                      + "loose when its recipe is full.",
                 Goal = "Start a run whenever you are ready." },
@@ -207,6 +215,7 @@ namespace Tacetno433.Screens
             gesture.Clear();
             effects.Clear();
             ResetPractice();
+            ResetSeats();
         }
 
         public override void Update(float dt)
@@ -218,6 +227,7 @@ namespace Tacetno433.Screens
             gesture.Update(dt, Input.MouseDown());
             baton.Update(dt, gesture.Held);
             effects.Update(dt);
+            UpdateSeats(dt);
 
             //Leave : ESC or the button, from any lesson
             if (Input.KeyPressed(Keys.Escape) || Input.ClickedOn(backButton))
@@ -282,7 +292,7 @@ namespace Tacetno433.Screens
             hintTimer = 2.2f;
         }
 
-        //Free Lessons : 1 to 4, no beat, just strokes
+        //Free Lessons : 1 to 5, no beat, just strokes
         private void UpdateFree(float dt, Lesson l)
         {
             //Hold : the ring round the baton fills while the button stays down
@@ -312,8 +322,9 @@ namespace Tacetno433.Screens
                 return;
             }
 
-            //Size : the three sizes in order, small first
-            if (l.Kind == Kind.Size && size != done)
+            //Size : the three sizes in order, small first (also the first half of WHERE THEY SIT)
+            bool sizing = l.Kind == Kind.Size || (l.Kind == Kind.Seats && done < 3);
+            if (sizing && size != done)
             {
                 Hint(sizeHints[done]);
                 effects.SpawnHit(HitX, RingY, Grade.Miss);
@@ -321,7 +332,8 @@ namespace Tacetno433.Screens
                 return;
             }
 
-            if (l.Kind == Kind.Size) Hint(sizeDone[done]);
+            if (l.Kind == Kind.Seats) SeatsStroke(size);
+            else if (l.Kind == Kind.Size) Hint(sizeDone[done]);
             else Hint(NiceHint);
             done++;
             effects.SpawnHit(HitX, RingY, Grade.Perfect);
@@ -333,6 +345,7 @@ namespace Tacetno433.Screens
         private Flick FreeWay(Lesson l)
         {
             if (l.Kind == Kind.Pattern) return pattern[done % 4];
+            if (l.Kind == Kind.Seats) return SeatsWay();
             return Flick.Down;
         }
 

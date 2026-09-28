@@ -114,6 +114,52 @@ namespace Tacetno433.Screens
             }
         }
 
+        //CUE Beam : a thread from the answer ring to whoever the baton points at on the beat being
+        //answered (round 12.1, the small mark over their heads alone was easy to miss). It grows
+        //darker as the ring closes, and a spark runs along it to land on the players right on
+        //the beat. The side's name, the same word the STAGE page uses, sits over them, because
+        //this page shows the stage from the side and left, centre and right become far, middle
+        //and near. On a silent beat the thread is faint, nobody has to play it.
+        private void DrawCueBeam(SpriteBatch sb)
+        {
+            if (phase != Phase.Play || cutIn > 0f) return;
+            float t = AnswerProgress();
+            if (t < 0f) return;
+            t = MathHelper.Clamp(t, 0f, 1f);
+
+            int b = BeatOf(pending);
+            float a = 0.25f + 0.6f * t;
+            if (battle.IsSilent(b)) a *= 0.35f;
+
+            Formation f = Game.CurrentRun.Formation;
+            Vector2 from = new Vector2(HitX - CueBeamStart, RingY);
+            float labelX = 0f;
+            float labelY = float.MaxValue;
+            for (int s = 0; s < StageLayout.SeatCount; s++)
+            {
+                if (f.Seated[s] == null || !UpNext(s)) continue;
+                Rectangle r = StandRect(s);
+                Vector2 to = new Vector2(r.Center.X, r.Y + r.Height * 0.3f);
+
+                Gfx.Line(sb, from, to, Palette.Highlight * (a * 0.5f), 7f);     // the halo, seen on TACET's dark
+                Gfx.Line(sb, from, to, Palette.Ink * a, 2f);                    // the core, seen on the bright stage
+
+                Vector2 spark = Vector2.Lerp(from, to, t);
+                Gfx.DrawGlow(sb, spark.X, spark.Y, 16f, Palette.Highlight * a);
+                Gfx.Diamond(sb, spark.X, spark.Y, 4, Palette.Ink * a);
+
+                if (r.Y < labelY)
+                {
+                    labelY = r.Y;
+                    labelX = r.Center.X;
+                }
+            }
+
+            if (labelY < float.MaxValue)
+                Gfx.TextSpacedCentered(sb, Game.Font, StageLayout.SideNames[battle.CueSideAt(b)], labelX, labelY - 44f,
+                                       Palette.Ink * (0.4f + 0.6f * t), TextSize.Tiny, 3f);
+        }
+
         //Tacet Side : everything in the dark. TACET's black sun with its white rim, the holes
         //of silence drifting up, the ripples of its notes on the floor, and its shape in front.
         //ARTWORK : Content/Art/Enemies/enemy_<name>.png, see ArtBank. The eclipse is an effect
@@ -210,7 +256,8 @@ namespace Tacetno433.Screens
         //The note to answer next is bright, the next one a little dimmer, the rest faint.
         //A pair (from floor two) is a note tied to a spark: one more flick, any way, on the spark.
         //A note under an arch (from floor two) is held still after its stroke.
-        //A dash is a beat where TACET is silent: let it pass to rest, or swing for a free hit.
+        //A dash is a beat where TACET is silent: let it pass or stroke small to rest, or swing
+        //bigger for a free hit.
         private void DrawIncoming(SpriteBatch sb)
         {
             if (phase != Phase.Play) return;
@@ -265,7 +312,7 @@ namespace Tacetno433.Screens
                 if (power <= 0 && !battle.EnemyHidden[n])
                 {
                     //Silent Beat : a dash, the band may rest here. A faint pointer says a stroke
-                    //is still allowed, a free hit for whoever it brings in.
+                    //is still allowed: a small one still rests, a bigger one is a free hit.
                     Gfx.Rect(sb, x - 10, RingY - 2, 20, 4, Palette.PaperDim * (0.7f * focus));
                     NoteGlyph.Pointer(sb, pattern[n % 4], x, RingY, 14f, focus * 0.4f);
                     continue;

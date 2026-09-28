@@ -266,7 +266,8 @@
         public static float EncoreRecover = 0.15f;   // ENCORE
         public static float RubatoMissPower = 0.85f; // RUBATO
         public static float SforzandoPower = 1.3f;   // SFORZANDO, a big stroke (round 12 : 1.8 against BOOST's old x1.5, now against x1)
-        public static float SecondWindRefill = 0.25f;// SECOND WIND, was 0.33 (round 12 : +34 percent alone, the most of any motif)
+        public static float SecondWindRefill = 0.15f;// SECOND WIND, was 0.25 (round 12.1 : still +26 alone, the most of any motif;
+                                                    // 0.15 is about one rest, +14 to +18 like the other rarity 3 motifs). Round 12 : 0.33 -> 0.25
         public static float OverturePower = 1.5f;    // OVERTURE
         public static float CounterpointPower = 1.3f;// COUNTERPOINT
 

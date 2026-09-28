@@ -59,7 +59,7 @@ namespace Tacetno433.Screens
             "From floor two, a note under an arch is a fermata. Stroke it, then hold still to the end.",
             "Eight PERFECTs in a row set the band on fire. FORTISSIMO hits harder for four beats.",
             "Far enough ahead at the end of a round, conduct the FINALE and end the duel at once.",
-            "Where TACET is silent, let the beat pass to rest, or swing for a free hit.",
+            "Where TACET is silent, let the beat pass or stroke small to rest. A bigger swing is a free hit.",
             "Strokes judged early or late? Settings has a STROKE TIMING test.",
         };
         private const float TipTime = 6f;

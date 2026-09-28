@@ -39,8 +39,9 @@ namespace Tacetno433.Screens
     //   CUE       the way the baton goes points at one side of the stage (down and up the centre,
     //             left and right their own side). Whoever sits there hits harder. The players the
     //             baton points at wear a small mark over their heads.
-    //   REST      where TACET is silent, letting the beat pass is a rest and gives breath back.
-    //             A stroke there is a free hit instead. Either is fine, neither is a miss.
+    //   REST      where TACET is silent, letting the beat pass or a small stroke is a rest and
+    //             gives breath back (SOFT REST). A middle or big stroke there is a free hit
+    //             instead. Either is fine, neither is a miss.
     //
     //Extra notes and moments:
     //   PAIR       a note tied to a spark (from floor two). The spark is answered half a beat
@@ -80,6 +81,7 @@ namespace Tacetno433.Screens
         private Rectangle tugBar = new Rectangle(440, 34, 400, 12);
         private const float HitX = 640f;                     // the hit point never moves
         private const float RingY = 372f;
+        private const float CueBeamStart = 72f;              // the CUE beam leaves the ring this far left of the hit point
         private const float LaneHalf = 34f;                  // half the height of the lane
         private const float RingStart = 120f;
         private const float RingTarget = 44f;
@@ -177,7 +179,7 @@ namespace Tacetno433.Screens
             "* It draws out a long note. Stroke it, then hold still!",
             "* The band runs out of breath. The music stops.",
             "* It plays the phrase again. Read the marks, they change!",
-            "* Silence. Let it pass to breathe, or swing for a free hit."
+            "* Silence. Let it pass or stroke small to breathe. A bigger swing is a free hit."
         };
         private const float SayWrap = 350f;
         private const float SaySpeed = 520f;     // pixels of text uncovered per second
@@ -1159,7 +1161,8 @@ namespace Tacetno433.Screens
             //Low Breath : the edges close in with the beat, see DuelScreen.Hud.cs
             DrawLowBreath(sb);
 
-            //Play Area : the lane, the notes and the ring never shake
+            //Play Area : the lane, the notes and the ring never shake. The CUE beam runs under them.
+            DrawCueBeam(sb);
             DrawLane(sb);
             DrawIncoming(sb);
             DrawFinaleNotes(sb);

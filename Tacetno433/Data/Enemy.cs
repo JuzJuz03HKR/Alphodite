@@ -110,7 +110,9 @@ namespace Tacetno433.Data
             new Enemy { Name = "THE NAMELESS MASTER", Title = "He plays a phrase. You must answer better.",
                         Trait = EnemyTrait.Mirror, TraitName = "ANSWER BETTER", TraitFloor = 1,
                         TraitText = "From round two it plays your last round back at you.",
-                        Kind = EnemyKind.Boss, Era = 1, Pattern = new int[] { 3, 3, 0, 5, 0, 3, 0, 8 }, Hidden = new int[] { 3, 7 }, Tone = Palette.ToneB },   // round 12, was 4 4 0 6 4 4 0 9 : a note on six beats left no room to breathe
+                        Kind = EnemyKind.Boss, Era = 1, Pattern = new int[] { 3, 0, 3, 5, 0, 3, 2, 7 }, Hidden = new int[] { 3, 7 }, Tone = Palette.ToneB },
+                        // round 12.1, was 3 3 0 5 0 3 0 8 : a strong player lost to it on floor one 27 percent of the time,
+                        // twice the hardest elite. Now about 15 percent, still the hardest boss. Round 12 : was 4 4 0 6 4 4 0 9
             new Enemy { Name = "THE DEVIL'S STRING",  Title = "One string, one bow, one bargain.",
                         Trait = EnemyTrait.Bargain, TraitName = "THE BARGAIN", TraitFloor = 1,
                         TraitText = "Before round two it offers a deal: more power now, less stamina for ever.",

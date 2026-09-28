@@ -749,6 +749,15 @@ namespace Tacetno433.Battle
             return EnemyPower[beat] <= 0 && !EnemyHidden[beat];
         }
 
+        //SOFT REST : on a silent beat a small stroke is still a rest, the same as letting the beat
+        //pass. Players who keep conducting through the silence breathe too (round 12.1, the habit
+        //of stroking every beat used to spend the rest). Only a middle or big stroke there is a
+        //free hit. The size is the one the hand drew, before THE METRONOME makes it big.
+        public bool RestsOn(int beat, Choice drawn)
+        {
+            return IsSilent(beat) && drawn == Choice.Ease;
+        }
+
         //Silent Recover : what a rest gives back
         public int SilentRecover
         {
@@ -860,6 +869,8 @@ namespace Tacetno433.Battle
         public BeatResult Resolve(int beat, Choice choice, Grade grade)
         {
             BeatResult r = Results[beat];
+            if (grade != Grade.None && grade != Grade.Hesitate && RestsOn(beat, choice))
+                grade = Grade.None;                                                     // SOFT REST
             if (ChoicesLocked) choice = Choice.Boost;                                   // LOCKED TEMPO
             bool stroked = grade != Grade.None && grade != Grade.Hesitate;
 
@@ -1156,7 +1167,7 @@ namespace Tacetno433.Battle
             r.Collapsed = false;
             if (Run.Stamina > 0 || Finished) return;
 
-            //SECOND WIND : the first time the band would collapse, a third of its breath comes back
+            //SECOND WIND : the first time the band would collapse, some breath comes back (SecondWindRefill)
             if (!secondWindUsed && Run.Has(MotifId.SecondWind))
             {
                 Run.ChangeStamina((int)(Run.MaxStamina * BattleRules.SecondWindRefill));

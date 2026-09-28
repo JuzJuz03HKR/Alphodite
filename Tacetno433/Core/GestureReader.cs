@@ -34,9 +34,11 @@ namespace Tacetno433.Core
         public const float MinLength = 34f;       // shorter than this is only a shaking hand
         public const float MaxTime = 0.6f;        // a stroke that goes on longer is cut off here
 
-        //Stroke Size : a stroke shorter than MiddleLength is small, longer than BigLength is big
+        //Stroke Size : a stroke shorter than MiddleLength is small, longer than BigLength is big.
+        //Round 12.1 : the middle zone is 140 pixels wide instead of 100 (BigLength was 200), so an
+        //mf is easier to land at speed. The small zone is unchanged, a big stroke reaches further.
         public const float MiddleLength = 100f;
-        public const float BigLength = 200f;
+        public const float BigLength = 240f;
 
         //Trail : the last few positions, kept for drawing the tail of the baton
         private const int Samples = 20;

@@ -69,8 +69,9 @@ namespace Tacetno433.Core
             mouseClock += dt;
             Input.PretendHeld = true;
 
-            //Still Hand : the fermata picture needs the baton held still
-            if (index < names.Length && names[index] == "duelfermata")
+            //Still Hand : the fermata picture needs the baton held still, and the WHERE THEY SIT
+            //picture keeps the beam of the stroke it was set up with
+            if (index < names.Length && (names[index] == "duelfermata" || names[index] == "tutorialseats"))
             {
                 Input.MousePos = new Vector2(760f, 470f);
                 return;
@@ -258,9 +259,11 @@ namespace Tacetno433.Core
             if (habit.Saver && run.Stamina < run.MaxStamina * 0.3f && choice == Choice.Normal) choice = Choice.Ease;
             if (random.Next(100) < habit.WrongSize) choice = choice == Choice.Normal ? (random.Next(2) == 0 ? Choice.Ease : Choice.Boost) : Choice.Normal;
 
-            //Silent Beat : a reader lets it pass, a fixed habit swings its usual size anyway
+            //Silent Beat : a reader lets it pass, a fixed habit swings its usual size anyway (a small
+            //one is still a rest there, SOFT REST). A reader who never rests takes the free hit
+            //with a middle stroke, the smallest that is not a rest.
             bool rest = habit.Rest && b.IsSilent(beat);
-            if (habit.Size == -1 && b.IsSilent(beat) && !habit.Rest) choice = Choice.Ease;
+            if (habit.Size == -1 && b.IsSilent(beat) && !habit.Rest) choice = Choice.Normal;
 
             int strokes = habit.Perfect >= 100 ? 8 : (habit.Perfect == 0 ? 5 : 5 + random.Next(4));
             int slip = habit.Perfect >= 100 ? 0 : (habit.Perfect >= 70 ? 10 : 30);
@@ -615,11 +618,16 @@ namespace Tacetno433.Core
             if (name == "dueldouble") ((DuelScreen)screen).JumpForPicture(FirstPair(run.Battle));
             if (name == "duelfermata") ((DuelScreen)screen).HoldForPicture();
             if (name == "tutorialsize") ((TutorialScreen)screen).JumpForPicture(3, 0f);
-            if (name == "tutorialtiming") ((TutorialScreen)screen).JumpForPicture(4, 5.6f);
-            if (name == "tutorialloud") ((TutorialScreen)screen).JumpForPicture(6, 6.6f);
-            if (name == "tutorialbreath") ((TutorialScreen)screen).JumpForPicture(7, 7.6f);
-            if (name == "tutorialroll") ((TutorialScreen)screen).JumpForPicture(8, 5.8f);
-            if (name == "tutorialready") ((TutorialScreen)screen).JumpForPicture(11, 0f);
+            if (name == "tutorialseats")
+            {
+                ((TutorialScreen)screen).JumpForPicture(4, 0f);
+                ((TutorialScreen)screen).SeatsForPicture();
+            }
+            if (name == "tutorialtiming") ((TutorialScreen)screen).JumpForPicture(5, 5.6f);
+            if (name == "tutorialloud") ((TutorialScreen)screen).JumpForPicture(7, 6.6f);
+            if (name == "tutorialbreath") ((TutorialScreen)screen).JumpForPicture(8, 7.6f);
+            if (name == "tutorialroll") ((TutorialScreen)screen).JumpForPicture(9, 5.8f);
+            if (name == "tutorialready") ((TutorialScreen)screen).JumpForPicture(12, 0f);
         }
 
         //First Pair : the first beat of the round that TACET plays as a pair, for the picture

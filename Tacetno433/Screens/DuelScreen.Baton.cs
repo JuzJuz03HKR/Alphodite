@@ -22,6 +22,15 @@ namespace Tacetno433.Screens
 
             //Stroke Size : small brings the back row, middle the middle row too, big the whole band
             Choice choice = sizeChoice[Baton.SizeOf(gesture.Length)];
+
+            //SOFT REST : a small stroke on a silent beat is a rest, whatever its timing or way.
+            //The caller moves on to the next beat (AfterStroke), as for any other stroke.
+            if (battle.RestsOn(b, choice) && !battle.SignatureArmed)
+            {
+                baton.Whip(gesture.Direction);
+                ResolveAnswer(b, Choice.Ease, Grade.None, false);
+                return;
+            }
             if (battle.ChoicesLocked) choice = Choice.Boost;                   // THE METRONOME : always the whole band
 
             //Timing Grade : judged where the baton stopped, against the beat
