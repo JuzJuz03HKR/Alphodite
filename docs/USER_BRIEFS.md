@@ -25,6 +25,7 @@
 | ก | SECTION (โบนัสกลุ่มเครื่อง แบบ trait ของ TFT) | ✅ | `184fe2e` |
 | UI | transition แถบเฉียง (คลื่นเหลือแค่เข้าดวล/Curtain Call) · ไอคอนเป็นตัวอักษร · ผังยืนในดวลมองจากข้างเวที | ✅ | `6ee038f` |
 | UI 2 | transition ช้าลง (`FadeSpeed` 3 → 2.2) · ไฟล์นี้ + `RESUME_PROMPT.md` | ✅ | (commit นี้) |
+| R | ศึกษาเกมที่เหลือ (`DESIGN_RESEARCH` 6.13) + รีวิวเกมหลังรอบ 15 (`GAME_REVIEW` หัวข้อแรก) → **ข้อเสนอ F1–F5 / I1 รอผู้ใช้เลือก** | ✅ 15:40 | (commit นี้) |
 | 4 | ต่อไฟล์เสียงเมื่อมาถึง · แก้ตามที่ผู้ใช้เล่นทดสอบ · **ล็อกโค้ด ~19:30** · เอกสาร · ข้อมูลสไลด์ Canva (รอเกณฑ์อาจารย์จากผู้ใช้) | ⏳ ยังไม่เริ่ม | – |
 | – | ผู้ใช้ build .exe จากเวอร์ชันที่ล็อก | ⏳ ≤ 21:15 | – |
 
@@ -88,26 +89,26 @@
 
 | หมวด | เกม | ผู้ใช้พูดถึงเมื่อ | สถานะการศึกษา |
 |---|---|---|---|
-| Rhythm | Project Sekai | 25, 27, 29 ก.ย. (+ UI/transition 29 ก.ย. บ่าย) | ✅ ค้นเว็บ 25 ก.ย. (โน้ต/เอฟเฟกต์/FEVER) + 27 ก.ย. (ลำดับสกิล) · `DESIGN_RESEARCH` 6.5–6.6 · ❌ ยังไม่ได้ค้นเรื่อง UI/transition (เว็บดูภาพไม่ได้) |
+| Rhythm | Project Sekai | 25, 27, 29 ก.ย. (+ UI/transition 29 ก.ย. บ่าย) | ✅ ค้นเว็บ 25 ก.ย. (โน้ต/เอฟเฟกต์/FEVER) + 27 ก.ย. (ลำดับสกิล) · `DESIGN_RESEARCH` 6.5–6.6 · 🟡 UI/แอนิเมชัน 29 ก.ย. บ่าย ได้หลัก "เคลื่อนช้า ค่อยๆ หยุด" (6.13) ยังไม่ได้เห็นภาพ transition จริง |
 | Rhythm | D4DJ Groovy Mix | 25, 27, 29 ก.ย. | ✅ ค้นเว็บ 25 ก.ย. + 27 ก.ย. · `DESIGN_RESEARCH` 6.5–6.6 |
-| Rhythm | Hatsune Miku Project DIVA Mega Mix+ | 27, 29 ก.ย. | 🟡 ค้น 27 ก.ย. (Chance Time / Technical Zone) · มีบางส่วนใน 6.5 |
-| Rhythm | Taiko no Tatsujin | 29 ก.ย. (เคยอ้างก่อนหน้า) | 🟡 มีในเอกสาร (แถบรัว เส้นจังหวะ เป้ากลอง) แต่ไม่พบการค้นเว็บใน transcript นี้ |
-| Rhythm | Muse Dash | 29 ก.ย. | 🟡 มีใน `DESIGN_RESEARCH` 2.1 พร้อมแหล่งอ้างอิง (จากแชทก่อน 24 ก.ย.) |
-| Rhythm | DJMAX RESPECT V | 29 ก.ย. | ❌ ยังไม่ได้ศึกษา |
+| Rhythm | Hatsune Miku Project DIVA Mega Mix+ | 27, 29 ก.ย. | ✅ ค้น 27 ก.ย. + 29 ก.ย. บ่าย (Mix Mode ตัวช่วย เกจ Clear) · 6.5 · 6.13 |
+| Rhythm | Taiko no Tatsujin | 29 ก.ย. (เคยอ้างก่อนหน้า) | ✅ ค้น 29 ก.ย. บ่าย (4 ระดับ เกจ Soul เล่นจนจบเพลงได้แม้ไม่ผ่าน) · 6.13 |
+| Rhythm | Muse Dash | 29 ก.ย. | ✅ `DESIGN_RESEARCH` 2.1 + ค้น 29 ก.ย. บ่าย (★1–2 เป็น tutorial หัวใจฟื้น HP) · 6.13 |
+| Rhythm | DJMAX RESPECT V | 29 ก.ย. | ✅ ค้น 29 ก.ย. บ่าย (% ต่อโน้ต FEVER โหมด 4B) · 6.13 |
 | Roguelike | Hades | 29 ก.ย. | ✅ `DESIGN_RESEARCH` 2.3 + ค้น 27 ก.ย. (Death Defiance) |
-| Roguelike | Slay the Spire | 29 ก.ย. (+ ผังยืน 29 ก.ย. บ่าย) | 🟡 ค้น 28 ก.ย. (intent icon) เท่านั้น |
+| Roguelike | Slay the Spire | 29 ก.ย. (+ ผังยืน 29 ก.ย. บ่าย) | ✅ ค้น 28 ก.ย. (intent) + 29 ก.ย. บ่าย (Neow's Lament, Ascension) · 6.13 |
 | Roguelike | Darkest Dungeon | 29 ก.ย. | ✅ ค้น 28 ก.ย. (ตำแหน่ง rank) · `DESIGN_RESEARCH` 6.12 |
-| Roguelike | BlazBlue Entropy Effect | 29 ก.ย. | ❌ ยังไม่ได้ศึกษา |
-| Roguelike | Alina of the Arena | 29 ก.ย. | ❌ ยังไม่ได้ศึกษา |
+| Roguelike | BlazBlue Entropy Effect | 29 ก.ย. | ✅ ค้น 29 ก.ย. บ่าย · 6.13 |
+| Roguelike | Alina of the Arena | 29 ก.ย. | ✅ ค้น 29 ก.ย. บ่าย · 6.13 |
 | Roguelike | Balatro | 29 ก.ย. | ✅ `DESIGN_RESEARCH` 2.3 + ค้น 28 ก.ย. (ลำดับโจ๊กเกอร์) |
-| Roguelike | Witch's Apocalyptic Journey | 27, 29 ก.ย. | 🟡 ค้น 27 ก.ย. · อ้างใน 6.9 (PHRASE CARDS) |
+| Roguelike | Witch's Apocalyptic Journey | 27, 29 ก.ย. | ✅ ค้น 27 ก.ย. + 29 ก.ย. บ่าย (คำติเรื่องข้อมูลอัดแน่น) · 6.9 · 6.13 |
 | อื่นๆ | Limbus Company | 27, 29 ก.ย. (+ ผังยืน) | ✅ `DESIGN_RESEARCH` 2.2 + ค้น 27–28 ก.ย. (clash, Mirror Dungeon) |
 | อื่นๆ | Arknights | 29 ก.ย. | ✅ `DESIGN_RESEARCH` 2.2 (UI) พร้อมแหล่งอ้างอิง |
-| อื่นๆ | Stellar Sora (ชื่อจริงที่พบในการค้นคือ **Stella Sora** ของ Yostar) | 29 ก.ย. (+ UI/transition) | 🟡 มีใน `DESIGN_RESEARCH` 2.2 (roguelite ปีนหอ perk แบบ Hades) · ❌ ยังไม่ได้ดู UI/transition |
-| อื่นๆ | **takt op. Symphony** (สำคัญเรื่องธีม) | 27, 29 ก.ย. | ✅ ค้น 27 ก.ย. · ใช้แล้ว : เกจ 3 สี → สูตร SIGNATURE 3 ตระกูล (`DESIGN_RESEARCH` 2.2) |
-| อื่นๆ | เกมกาชา / เกมตลาดดัง จีน ญี่ปุ่น เกาหลี | 27, 29 ก.ย. | 🟡 บางเกม : Honkai: Star Rail · Fate/Grand Order · Zenless Zone Zero · Reverse:1999 · Persona 5 (`DESIGN_RESEARCH` 2.2) |
+| อื่นๆ | Stellar Sora (ชื่อจริงที่พบในการค้นคือ **Stella Sora** ของ Yostar) | 29 ก.ย. (+ UI/transition) | ✅ 2.2 + ค้น 29 ก.ย. บ่าย (Potentials, Melody Notes, Disc) · 6.13 · ❌ ยังไม่ได้เห็นภาพ UI/transition จริง |
+| อื่นๆ | **takt op. Symphony** (สำคัญเรื่องธีม) | 27, 29 ก.ย. | ✅ ค้น 27 ก.ย. + 29 ก.ย. บ่าย (โลก D2 ห้ามดนตรี Musicart เก็บบทเพลงในร่าง) · 2.2 · 6.13 |
+| อื่นๆ | เกมกาชา / เกมตลาดดัง จีน ญี่ปุ่น เกาหลี | 27, 29 ก.ย. | 🟡 Honkai: Star Rail (Simulated Universe) · Arknights (Integrated Strategies) · Blue Archive (UI) ค้น 29 ก.ย. บ่าย (6.13) · FGO · ZZZ · Reverse:1999 · Persona 5 (2.2) |
 
-สัญลักษณ์ : ✅ ศึกษาแล้วมีบันทึก · 🟡 ศึกษาบางส่วน · ❌ ยังไม่ได้เริ่ม · **งาน research รอบใหญ่ตามลิสต์ 29 ก.ย. ยังไม่ได้ทำ** (วางไว้หลัง deadline หรือช่วงที่ผู้ใช้เล่นทดสอบ)
+สัญลักษณ์ : ✅ ศึกษาแล้วมีบันทึก · 🟡 ศึกษาบางส่วน · ❌ ยังไม่ได้เริ่ม · **29 ก.ย. บ่าย ศึกษาเกมที่เหลือแล้ว** (`DESIGN_RESEARCH` 6.13) · ข้อจำกัด : ได้แต่ข้อความจากผลค้นหา ไม่ได้ดูภาพ/วิดีโอ
 
 ### 4.2 เกมที่ Claude ค้นเพิ่มเอง (จาก transcript : WebSearch 39 ครั้ง WebFetch 11 ครั้ง)
 

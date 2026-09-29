@@ -42,7 +42,7 @@
 ## 2. เกมที่ศึกษา
 
 > **ลิสต์เกมที่ผู้ใช้สั่งให้ศึกษา (29 ก.ย.) และสถานะแต่ละเกม** (ศึกษาแล้ว / บางส่วน / ยังไม่เริ่ม) อยู่ [`USER_BRIEFS.md`](USER_BRIEFS.md) หัวข้อ 4 ·
-> ยังไม่ได้ศึกษา : DJMAX RESPECT V · BlazBlue Entropy Effect · Alina of the Arena · UI/transition ของ Stella Sora และ Project Sekai · **takt op. Symphony สำคัญเรื่องธีม** (ผู้ใช้ย้ำ 29 ก.ย.)
+> เกมที่เหลือศึกษาแล้ว 29 ก.ย. บ่าย → หัวข้อ **6.13** (ยังไม่ได้ดูภาพ UI/transition จริงของ Stella Sora กับ Project Sekai เพราะค้นได้แต่ข้อความ) · **takt op. Symphony สำคัญเรื่องธีม** (ผู้ใช้ย้ำ 29 ก.ย.)
 
 ### 2.1 เกมจังหวะ
 
@@ -457,6 +457,34 @@ takt op. เกจ 3 สี → สูตรตระกูลเครื่อ
 - ท่าที่ "ได้คนแรงในราคาถูก" (VILLAGE BAND ดึงเครื่องตีเข้ามาในราคาตวัดกลาง) มีค่าตามค่าของคนแรงที่สุด เปลี่ยนค่าการ์ดแล้วต้องตรวจสกิลที่อ้างถึงราคา
 - Motif เพิ่มพลังล้วนไร้ค่าเมื่อคนแรงอยู่แล้ว (PUSH CAP) → เปลี่ยนเป็นลดค่าสตามิน่า (ลมคือสิ่งที่ชี้ขาด, บทเรียนเดียวกับรอบ 13)
 
+## 6.13 รอบ 15 (29 ก.ย. บ่าย) — ศึกษาเกมที่เหลือตามลิสต์ของผู้ใช้
+
+ที่มา : ผู้ใช้ "ลองศึกษาเกมทั้งหมดที่เหลือแล้วทำการบันทึกข้อมูลไว้ แล้วตอนนี้ช่วยรีวิวเกมตัวเอง … ผ่านข้อมูลต่างๆของเกมที่ศึกษามา" (ลิสต์เกมอยู่ `USER_BRIEFS.md` หัวข้อ 4)
+วิธี : ค้นเว็บ 16 ครั้ง ได้ **ข้อความสรุปจากผลค้นหา** ไม่ได้เปิดดูภาพ/วิดีโอ · ตัวเลขและรายละเอียดเท่าที่ผลค้นบอก ไม่ใช่ข้อมูลครบของเกม · รีวิวเกมเราหลังรอบ 15 อยู่ `GAME_REVIEW.md` หัวข้อแรก
+
+| เกม | สิ่งที่พบ | บทเรียนสำหรับ TACET |
+|---|---|---|
+| **DJMAX RESPECT V** (เกมจังหวะ เกาหลี) | โน้ตตกลงมาที่เส้น · ความแม่นแสดงเป็น % ต่อโน้ต (100% ในช่วงราว ±41.6 ms ที่ความเข้มงวดปกติ) · ความเข้มงวดตัดสิน 3 ระดับ · เกจ FEVER เติมเร็วขึ้นเมื่อแม่น · พลาด (BREAK) ตัดทั้งคอมโบและ FEVER · FEVER ตั้งเป็นอัตโนมัติได้ · **โหมดง่าย = ลดจำนวนปุ่ม (4B)** ไม่ใช่ลดความเร็ว · "เรียนง่าย เก่งยาก" | ดวล GENTLE (มีแค่ f/p) คือแนวเดียวกับ 4B ✓ · % ต่อโน้ตเป็น feedback ที่เข้าใจทันที → ใส่ในหน้าผลดวลได้ (เฟส 1 เดือน) |
+| **BlazBlue Entropy Effect** (action roguelite) | ตัวละครแต่ละตัวมี "กติกาของตัวเอง" ท่าต่างกันจริง · ต่อรันเก็บ Potentials (ติดตัว) + Tactics (ท่ากด) · **ยืม Tactics ของตัวละครอื่นมาใช้ได้** · คำวิจารณ์ : พื้นฐานทักษะชันกว่า Hades คนที่อยากเล่นลื่นๆ อาจเลิก | คอนดักเตอร์ต่างสไตล์ (รอบ 13) ถูกทางแล้ว · ช่วงต้นต้องง่ายจริง (รอบ 15 ทำแล้ว) · ไอเดีย : ยืม SIGNATURE ของคอนดักเตอร์อื่นเป็นรางวัลหายาก (เฟส 1 เดือน) |
+| **Alina of the Arena** (deckbuilder + ช่อง hex) | Slay the Spire + Into the Breach · อาวุธเปลี่ยนการทำงานของการ์ด · **บางคลาสแรงขึ้นตามจำนวนการ์ดสีเดียวกันในเด็ค** · มีเกจคอมโบ · รีวิวชอบระบบต่อสู้ แต่ติดเรื่อง UI แปลกๆ และความยาก | ยืนยันแนว SECTION (ครบกลุ่มแรงขึ้น) ✓ · UI ต้องอ่านง่ายตรงไปตรงมา (ตรงกับที่ผู้ใช้ให้เปลี่ยนไอคอนเป็นตัวอักษรแล้ว) |
+| **Stella Sora** (Yostar, 19 ต.ค. 2025) | action มุมบน + roguelite ปีน Monolith (แนว Hades) · **Potentials** : เลเวลขึ้นเลือก 1 ใน 3 ใบซ้ำกันซ้อนได้ถึงเลเวล 6 · ศัตรูดรอป **Melody Notes** ตามธาตุ → เติมเกจ Harmony · **Disc** : Melody Skill ทำงานตลอด / Harmony Skill ต้องครบโน้ตที่กำหนด · Disc ช่อง Support ให้ **โน้ตเริ่มต้น 1 ตัวตอนเริ่มรัน** · รีวิวชม UI สะอาด ระบบดูแลผู้เล่นใหม่ดี เล่นเร็วเข้าถึงง่าย | **แทบเหมือนสูตร SIGNATURE ของเรา** (โน้ตตามตระกูลเครื่อง → ท่าพิเศษ) ✓ · ไอเดีย : Motif ใบซ้ำอัปเลเวล · ของบางชิ้นให้โน้ตสูตรเริ่มต้น 1 ตัว (เฟส 1 เดือน) · ❌ ยังไม่ได้เห็น UI/transition จริง (ค้นได้แต่ข้อความ) |
+| **Project Sekai** (UI / แอนิเมชัน) | ทีมพัฒนาตั้งค่าการเปลี่ยนท่า Live2D ให้ **ช้าและนุ่ม** และให้ปลายนิ้วขยับค้างนิดหนึ่งตอนจบท่า ให้ความรู้สึก "ยังค้างอยู่" | หลักเดียวกับที่ผู้ใช้บ่นว่า transition เร็วแล้วลายตา : เคลื่อนแล้ว **ค่อยๆ หยุด (ease-out)** · ใช้กับ transition และแอนิเมชันตัวละครของทีมอาร์ต · ❌ ไม่พบข้อความอธิบาย transition เมนู |
+| **Project DIVA MegaMix+** | Mix Mode (จอยจับการเคลื่อนไหว) มี Easy–Hard · มีตัวช่วย "ได้คะแนนแม้กดค้าง" เปิด/ปิดได้ · Tutorial สอนทั้ง 2 โหมด · เป้าคือเกจ Clear ด้านล่างถึงเส้น STAGE CLEAR | เกจถึงเส้น = เส้นดันของเรา ✓ · ตัวช่วยแบบเปิด/ปิด = โหมดความยาก → **ผู้ใช้ตัดสินแล้วว่าไม่ทำ** (METRONOME ทำหน้าที่คลาสเล่นง่ายแทน) |
+| **Taiko no Tatsujin** | 4 ระดับ (Kantan = เรียนพื้นฐาน) · เกจ Soul ต้องเกินเส้นถึงจะผ่าน · **เล่นจนจบเพลงได้เสมอแม้จะไม่ผ่าน** → ใจดีกับมือใหม่ | ไอเดีย : ดวลแรกๆ ลมหมดไม่จบทันที เล่นจนจบรอบค่อยตัดสิน (กระทบความยาก ต้องถาม) |
+| **Muse Dash** | 2 ปุ่ม · เพลงระดับ ★1–2 ทำหน้าที่เป็น tutorial ความเร็วคงที่ ไม่มีลูกเล่นหลอกตา · มีหลอด HP · หัวใจเก็บแล้วฟื้น 80 HP · FEVER จากการตีโดน | ดวลแรก 80 BPM มีแค่ f/p = แนว ★1–2 ✓ · โน้ตหัวใจฟื้นลม = โน้ตชนิดใหม่ → ห้ามเพิ่มโดยไม่คุย (เฟส 1 เดือน) |
+| **Slay the Spire** | เริ่มรันเจอ Neow ให้โบนัส · **ถ้ารันก่อนไปไม่ถึงบอสองก์ 1 จะได้ Neow's Lament : ศัตรู 3 ตัวแรกเหลือ 1 HP** = ช่วยคนที่กำลังติดโดยไม่มีเมนูความยาก · Ascension เพิ่มความยากทีละขั้นหลังชนะ (ภาค 2 โดนติว่าอัดขั้นจนชันเกิน) | **ตรงกับเป้า "ไม่มีโหมดความยาก แต่คน casual เล่นได้"** : ใจดีอัตโนมัติหลังแพ้เร็ว + ความท้าทายเสริมหลังชนะ (แบบ Heat ของ Hades / Ascension) · ข้อควรระวัง : ขั้นความยากต้องไล่ช้าๆ |
+| **Witch's Apocalyptic Journey** | deckbuilder ผลัดตา มีทีมแม่มด แพ็กขยาย เพื่อน relic blessing · รีวิวบวก 84% · คำติ : ข้อความการ์ดไม่ชัด เมนูล้น ข้อมูลอัดแน่น → เรียนยาก | คำติเดียวกับเพลย์เทสของเรา → ข้อความสั้น ทีละเรื่อง (รอบ 15 ทำแล้ว) |
+| **takt op. Symphony** (สำคัญเรื่องธีม) | อุกกาบาตดำทำให้เกิดอสูร **D2 ที่ห้ามดนตรีทั้งโลก** แต่ดนตรีคือสิ่งเดียวที่สู้มันได้ · **Musicart** = สาวที่ **เก็บโน้ตเพลงของบทประพันธ์ดังไว้ในร่าง** (Beethoven No. 5, Mozart) · **Conductor** สั่งและนำ Musicart | ธีมคู่ขนานกับเรามาก (TACET = ความเงียบกลืนดนตรี) · lore ของผู้ใช้ (Hollow ของวาทยากร) ไปทางเดียวกัน : **ศัตรูแต่ละตัว = บทเพลงของวาทยากรคนนั้น** · จุดต่าง : เราคุมทั้งวงออร์เคสตรา ไม่ใช่นักสู้คนเดียว → ใช้จุดนี้ขาย |
+| **Honkai: Star Rail — Simulated Universe** (โหมด roguelike ในเกมกาชา) | เลือก **Path** ตอนเริ่ม → Blessing ที่ออกเอียงไปทาง Path นั้น · Path Resonance = ท่าใหญ่ทั้งทีม · Curio บางชิ้นมีผลเสียด้วย | ไอเดีย : Motif แบ่งตามกลุ่มเครื่อง ถ้าวงเน้นกลุ่มไหน ของกลุ่มนั้นออกบ่อยขึ้น (ต่อ SECTION) · Motif ที่มีข้อเสียคู่ (แบบ DEVIL) (เฟส 1 เดือน) |
+| **Arknights — Integrated Strategies** | สร้างทีมใหม่ทุกรันด้วยตั๋วรับสมัครตามคลาส · สกุลเงิน **Hope** ใช้รับคนหายาก (6★ = 6 Hope) · ทีมเริ่มต้น (squad) ให้โบนัสต่างกัน | ร้าน/รับนักดนตรีของเรา : ไอเดียให้นักดนตรีเก่งมีราคา Hope แบบนี้ (เฟส 1 เดือน) · ทีมเริ่มต้นต่างกัน = ยุค (Era) ที่มีอยู่แล้ว ✓ |
+| **Blue Archive** (UI) | ปุ่มสกิล 3 ช่องมุมขวาล่าง · เกจ cost เติมเองถึง 10 · มือ 6 ใบหมุนเข้า 3 ช่อง | แถบทรัพยากรเดียวที่เห็นชัดตรงมุมเดียว = แผง SIGNATURE ของเรา ✓ |
+
+**สรุปบทเรียนที่ใช้ได้ทันที**
+1. เคลื่อนไหวแบบค่อยๆ หยุด (Project Sekai) → transition ของเรา
+2. ใจดีอัตโนมัติหลังแพ้เร็ว (Slay the Spire Neow's Lament) → ตอบโจทย์ casual โดยไม่มีโหมดความยาก (ต้องถาม เพราะเกี่ยวกับความยาก)
+3. ข้อความสั้น คำเดียวต่อความหมายเดียว (Witch's Apocalyptic Journey, Alina) → เกมเรายังใช้ทั้ง STAMINA และ BREATH กับสิ่งเดียวกัน
+4. สูตรท่าพิเศษจากโน้ตตามตระกูล (Stella Sora) ยืนยันว่า SIGNATURE มาถูกทาง
+
 ## 7. คำถามที่ยังต้องตัดสินใจ
 
 0. ~~ระบบสตามิน่า~~ ✅ รอบ 8 เลือกแล้ว (หัวข้อ 6.7) — เหลือจูน `BlowPerPower` หลังเล่นจริง
@@ -483,6 +511,22 @@ takt op. เกจ 3 สี → สูตรตระกูลเครื่อ
 ---
 
 ## แหล่งอ้างอิง
+
+**รอบ 15 (29 ก.ย. บ่าย, ข้อความจากผลค้นหา)**
+- [DJMax Respect V beginner tips (TheGamer)](https://www.thegamer.com/djmax-respect-v-beginner-tips-tricks/) · [DJMAX RESPECT/System (NamuWiki)](https://en.namu.wiki/w/DJMAX%20RESPECT/%EC%8B%9C%EC%8A%A4%ED%85%9C)
+- [BlazBlue Entropy Effect X review (Noisy Pixel)](https://noisypixel.net/blazblue-entropy-effect-x-review/) · [review (Final Weapon)](https://finalweapon.net/2026/02/09/blazblue-entropy-effect-x-review/)
+- [Alina of the Arena (Wikipedia)](https://en.wikipedia.org/wiki/Alina_of_the_Arena) · [review (Screen Rant)](https://screenrant.com/alina-arena-game-review/) · [review (Hey Poor Player)](https://www.heypoorplayer.com/2023/11/23/alina-of-the-arena-review-switch/)
+- [Stella Sora review (Game8)](https://game8.co/articles/reviews/stella-sora-review) · [Stella Sora combat system guide (GamingonPhone)](https://gamingonphone.com/guides/stella-sora-the-complete-combat-system-guide-and-tips/) · [Ascension (Stella Sora Wiki)](https://stellasora.miraheze.org/wiki/Ascension)
+- [Project SEKAI Live2D animations interview (AUTOMATON)](https://automaton-media.com/en/interviews/the-secret-behind-project-sekai-colorful-stage-feat-hatsune-mikus-super-expressive-animations-we-asked-the-devs-how-live2d-makes-it-happen/)
+- [Project DIVA MegaMix practice/controls (Gematsu)](https://www.gematsu.com/2020/01/hatsune-miku-project-diva-mega-mix-details-practice-gallery-and-game-control-configuration) · [How to Play (GameFAQs)](https://gamefaqs.gamespot.com/switch/268631-hatsune-miku-project-diva-megamix/faqs/78476/how-to-play)
+- [Taiko no Tatsujin (Wikipedia)](https://en.wikipedia.org/wiki/Taiko_no_Tatsujin) · [Taiko series (Fandom)](https://taiko.fandom.com/wiki/Taiko_no_Tatsujin_(series))
+- [Muse Dash tips (Fandom)](https://musedash.fandom.com/wiki/Tips_and_Tricks) · [Muse Dash/System (NamuWiki)](https://en.namu.wiki/w/Muse%20Dash/%EC%8B%9C%EC%8A%A4%ED%85%9C)
+- [Neow (Slay the Spire Wiki)](https://slay-the-spire.fandom.com/wiki/Neow) · [Ascension (Slay the Spire Wiki)](https://slay-the-spire.fandom.com/wiki/Ascension)
+- [Witch's Apocalyptic Journey review (Game8)](https://game8.co/reviews/witchs-apocalyptic-journey/witchs-apocalyptic-journey-review) · [review (NoobFeed)](https://www.noobfeed.com/reviews/witchs-apocalyptic-journey-review)
+- [Takt Op (Wikipedia)](https://en.wikipedia.org/wiki/Takt_Op) · [takt op.Destiny episode 1 (CBR)](https://www.cbr.com/takt-op-destiny-episode-1-spoilers-series-premiere/)
+- [Simulated Universe (Prydwen)](https://www.prydwen.gg/star-rail/guides/simulated-universe) · [Simulated Universe/Paths (Fandom)](https://honkai-star-rail.fandom.com/wiki/Simulated_Universe/Paths)
+- [Integrated Strategies explained (GamePress)](https://ak.gamepress.gg/core-gameplay/arknights-cn-integrated-strategies-explained) · [Integrated Strategies (Arknights Terra Wiki)](https://arknights.wiki.gg/wiki/Integrated_Strategies)
+- [Blue Archive/Organization (NamuWiki)](https://en.namu.wiki/w/%EB%B8%94%EB%A3%A8%20%EC%95%84%EC%B9%B4%EC%9D%B4%EB%B8%8C/%ED%8E%B8%EC%84%B1)
 
 **รอบ 14 (หน้าวางแผน / PART)**
 - [Crypt of the NecroDancer – Shops](https://necrodancer.miraheze.org/wiki/Shops) · [Crypt of the NecroDancer (Wikipedia)](https://en.wikipedia.org/wiki/Crypt_of_the_NecroDancer)
