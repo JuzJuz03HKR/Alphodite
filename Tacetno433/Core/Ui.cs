@@ -8,6 +8,7 @@ namespace Tacetno433.Core
     //   Button      a slanted blade, solid for the main action, outlined for the rest
     //   Tag         a small label in a box
     //   KeyChip     the keyboard key that also does the job
+    //   KeyCap      a keyboard key drawn as a key, and MouseIcon, for the pages that teach the controls
     //   StepNav     diamonds on a line, which step of a process you are on
     //   Header      "01" plus a serif heading plus a rule
     //   Panel       the dark box with corner marks that holds content
@@ -89,6 +90,31 @@ namespace Tacetno433.Core
             Rectangle chip = new Rectangle((int)(rightX - w), (int)(cy - 9), (int)w, 18);
             Gfx.RectOutline(sb, chip, color, 1);
             Gfx.TextCentered(sb, Font, key, chip.Center.X, chip.Center.Y, color, TextSize.Tiny);
+        }
+
+        //Key Cap : a keyboard key with its name on it, lit like a key cap (round 15, the players
+        //asked which button does what). Returns how wide it was, so a line can follow it.
+        //This is an interface icon, not artwork, so it stays.
+        public static float KeyCap(SpriteBatch sb, string key, float x, float cy, float alpha)
+        {
+            float w = System.Math.Max(34f, Gfx.TextWidth(Font, key, TextSize.Tiny) + 18f);
+            Rectangle cap = new Rectangle((int)x, (int)(cy - 15), (int)w, 28);
+            Gfx.Rect(sb, cap.X, cap.Y + 4, cap.Width, cap.Height, Palette.Void * alpha);          // the side of the key
+            Gfx.Rect(sb, cap, Palette.Paper * alpha);
+            Gfx.RectOutline(sb, cap, Palette.LineGrey * alpha, 1);
+            Gfx.TextCentered(sb, Font, key, cap.Center.X, cap.Center.Y, Palette.Ink * alpha, TextSize.Tiny);
+            return w;
+        }
+
+        //Mouse Icon : a mouse seen from above, the LEFT button filled, the one the baton needs
+        public static void MouseIcon(SpriteBatch sb, float cx, float cy, float size, float alpha)
+        {
+            Rectangle body = new Rectangle((int)(cx - 14 * size), (int)(cy - 22 * size), (int)(28 * size), (int)(44 * size));
+            Gfx.Capsule(sb, body, Palette.Void * alpha);
+            Gfx.CapsuleOutline(sb, body, Palette.Paper * alpha, 2f);
+            Gfx.Rect(sb, cx - 10 * size, cy - 14 * size, 9 * size, 12 * size, Palette.Highlight * alpha);   // the left button
+            Gfx.Rect(sb, cx - 1, cy - 20 * size, 2, 18 * size, Palette.Paper * alpha);                        // between the buttons
+            Gfx.Rect(sb, cx - 13 * size, cy - 2 * size, 26 * size, 2, Palette.Paper * alpha);
         }
 
         //Tag : a word in a small box. filled tags are for things that matter right now.

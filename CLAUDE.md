@@ -94,7 +94,10 @@
   **คลื่น/เส้นดันคงเดิม** · **ผังเวทีแบบวงจริง** เครื่องสายหน้า เป่ากลาง ตีหลัง · ลูกศร = ฝั่งที่นั่งจริง (ไวโอลินซ้าย เชลโลขวา) · ป้ายบนตัว = ไอคอนกลุ่มเครื่อง + ลูกศร (`MusicianArt.SeatBadge`) · ไม่มีค่า COST แล้ว ·
   **ไล่ระดับความยาก** : BPM ตามชั้น 80/88/96 → 88/100/112 → 96/112/128 (`TempoByFloor`) · 2 ดวลแรกของรัน TACET เล่นแค่ f กับ p (`GentleFights`) · ศัตรูธรรมดาชั้น 1 ไม่รัวท้ายรอบ · แรงศัตรูตามชั้น 0.85/1.45/2.45 (`FloorPower`) ·
   ตัวจำลองมีผู้เล่นแบบ NEWCOMER + ความแม่นขึ้นกับ BPM (`TempoSkill`) · METRONOME = ขนาดไหนก็ถูก (คลาสสำหรับคนเล่นง่าย) · VILLAGE BAND = ตวัดตรงเวลาคืนลม 3 · FOLK LEADER ไม่เสียที่นั่งแล้ว ·
-  REED CASE = พักได้ลม +4 เมื่อมีเครื่องเป่า · SPARE STICKS = เครื่องตี ×1.3 บนโน้ต f · MUTE CHOIR ปิดเสียงกลุ่มเครื่อง · ไม่ทำโหมดเลือกความยาก ใช้ curve แทน (ผู้ใช้ยืนยัน) · รายละเอียด `PROJECT_STATUS.md` หัวข้อ 6 "รอบ 15"
+  REED CASE = พักได้ลม +4 เมื่อมีเครื่องเป่า · SPARE STICKS = เครื่องตี ×1.3 บนโน้ต f · MUTE CHOIR ปิดเสียงกลุ่มเครื่อง · ไม่ทำโหมดเลือกความยาก ใช้ curve แทน (ผู้ใช้ยืนยัน) ·
+  **ก้อน 2 : Tutorial เหลือ 6 บทพื้นฐาน + READY** (บทละเรื่องเดียว สั้น) โน้ตพิเศษย้ายไป EXTRAS หลัง READY (TAB) · ลบบท WHO PLAYS (`TutorialScreen.Seats.cs`) ·
+  **HOW TO PLAY เหลือ 3 หน้า** CONTROLS / THE NOTE / THE LINE ใช้ภาพมากกว่าตัวหนังสือ · ไอคอนปุ่ม `Ui.KeyCap` / `Ui.MouseIcon` (วาดด้วยโค้ด ผู้ใช้อนุญาต) ·
+  **สอนตอนเจอครั้งแรกในรันจริง** (`DuelScreen.TeachNote` : mf · รัว · ค้าง · spark · ลูกศร CUE ครั้งละเรื่องต่อรอบ) · รายละเอียด `PROJECT_STATUS.md` หัวข้อ 6 "รอบ 15"
 - โค้ดที่ใช้ร่วมกันระหว่างดวลกับ Tutorial : ไม้บาตอง `Core/Baton.cs` · สัญลักษณ์โน้ต/จุดตี/วงแหวน `Core/NoteGlyph.cs` — แก้หน้าตาที่นี่ทีเดียว ห้ามเขียนซ้ำในหน้าจอ
 
 ## 5. build และทดสอบ
@@ -132,7 +135,8 @@
   บีตต่อดวล 18 / 13.5 / 10.5 · แพ้เพราะหมดลมเป็นส่วนใหญ่ · กติการอบ 8 ในตัวจำลองรอบ 11b = 35% / 77% / 99.8% / 85% ·
   **ผลแกว่ง ±5–8% ระหว่างรัน** เทียบก่อน/หลังต้องรันหลายครั้ง · ตัวเลขเก่าก่อนรอบ 9 ไม่นับ Motif
 - ชื่อหน้าที่แคปได้เพิ่ม (รอบ 8) : `tutorial` `tutorialsize` `tutorialtiming` `tutorialloud` `tutorialbreath` `tutorialroll` `tutorialready` · (รอบ 11b) `duelrepeat` · (รอบ 12) `stage` `stagetrait` `stagemute` `stagemirror` `stagerepeat` `duelmute` (`bargain` อยู่หน้า STAGE แล้ว) · เลิกใช้ `score` `scoretrait` `scorepairs` `scorerepeat` · (รอบ 12.1) `tutorialseats` · หน้า tutorial ที่ตามมาเลื่อนเลขบทไป 1 · (รอบ 12.2) `detail0`–`detail4` `duelc0`–`duelc4` (คอนดักเตอร์ทีละคน) · (รอบ 13) `duels0`–`duels4` (ดวลขณะ SIGNATURE ของคนนั้นทำงาน) ·
-  **(รอบ 14) ใหม่ `band` (= `view`) `dueltrait` `duelbargain` `duelmirror` `duelintro` (ชื่อไหนขึ้นต้น duel ก็ได้ ดวลตัวอย่าง) `eventchair` `guide2` · เลิกใช้ `stage` `stagetrait` `stagemute` `stagemirror` `stagerepeat` `bargain`** (หน้า STAGE ถูกลบ)
+  **(รอบ 14) ใหม่ `band` (= `view`) `dueltrait` `duelbargain` `duelmirror` `duelintro` (ชื่อไหนขึ้นต้น duel ก็ได้ ดวลตัวอย่าง) `eventchair` `guide2` · เลิกใช้ `stage` `stagetrait` `stagemute` `stagemirror` `stagerepeat` `bargain`** (หน้า STAGE ถูกลบ) ·
+  **(รอบ 15) HOW TO PLAY มี 3 หน้า `guide` `guide2` `guide3` (เลิกใช้ `guide4` `guide5`) · Tutorial : `tutorialsize` บท 3 · `tutorialtiming` 4 · `tutorialloud` 5 · `tutorialbreath` 6 · `tutorialready` 7 · `tutorialroll` EXTRA · เลิกใช้ `tutorialseats`**
 - **จูนบาลานซ์ในแชท cloud** (วิธีที่ใช้รอบ 9–10) : คัดลอกโปรเจกต์ไปโฟลเดอร์ชั่วคราวตามข้างบน · แก้ตัวเลขในสำเนา (ไม่แตะ repo) · รัน `--shots simulate` หลายรอบ
   (หรือ `--shots audit`) แล้วเฉลี่ย · ได้ค่าที่ใช่ค่อยแก้ใน repo แล้วรันซ้ำยืนยัน · รอบ 11a ใช้สคริปต์ลองหลายค่าพร้อมกัน (สำเนาแยกโฟลเดอร์ละชุด รัน 4 ชุดขนานกัน audit ~40 วิ) ·
   เป้าที่ผู้ใช้เลือกไว้ (รอบ 11b) : ง่ายลงได้นิดหน่อยจากรอบ 11a · ความยาวดวลดูที่บรรทัด "READS THE MARKS, PERFECT" ใน simulate.txt (รอบ 12 ไม่มี AUTO PLAN แล้ว) · รอบ 12 จูนให้เท่าเป้ารอบ 11b ·

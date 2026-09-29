@@ -32,8 +32,8 @@ namespace Tacetno433.Screens
         private static string[] markHints =                                 // in Choice order
         {
             "mf : A MIDDLE STROKE, PAST THE FIRST MARK",
-            "f IS LOUD : BIG, THE WHOLE BAND",
-            "p IS SOFT : SMALL, THE p PLAYERS"
+            "f IS LOUD : A BIG STROKE, PAST THE SECOND MARK",
+            "p IS SOFT : A SMALL STROKE, BEFORE THE FIRST MARK"
         };
         private static string[] gradeWords = { "", "PERFECT", "GOOD", "MISS", "HESITATE" };
         private static string[] timingWords = { "EARLY", "", "LATE" };
@@ -283,7 +283,7 @@ namespace Tacetno433.Screens
         {
             if (mark == Choice.Boost) return size == 2;
             if (mark == Choice.Ease) return size == 0;
-            return size == 1;                                // round 12 : mf is a middle stroke, the size is who plays
+            return size == 1;                                // mf is a middle stroke
         }
 
         //Note Won : the note breaks, the lane lights. The lessons with a beat count it here.
@@ -291,7 +291,7 @@ namespace Tacetno433.Screens
         {
             if (HasLane(l)) effects.SpawnShatter(HitX, RingY, 30f);
             laneFlash = 1f;
-            if (l.Kind == Kind.Timing || l.Kind == Kind.Lane || l.Kind == Kind.Loudness || l.Kind == Kind.Breath) done++;
+            if (l.Kind == Kind.Timing || l.Kind == Kind.Loudness || l.Kind == Kind.Breath) done++;
         }
 
         //Note Lost : in the KEEP BREATHING lesson TACET's note flies on into the band
@@ -424,7 +424,6 @@ namespace Tacetno433.Screens
             if (lane) DrawLane(sb, pulse);
             NoteGlyph.HitPoint(sb, HitX, RingY, LaneHalf, pulse);
             if (lane && running) DrawNotes(sb);
-            if (l.Kind == Kind.Seats) DrawSeats(sb);                     // see TutorialScreen.Seats.cs
 
             effects.DrawShards(sb);
             effects.DrawHits(sb);
@@ -577,7 +576,7 @@ namespace Tacetno433.Screens
             NoteGlyph.FermataSign(sb, HitX, RingY - RingTarget - 34f, 20f, Palette.Highlight);
         }
 
-        //Free Guide : lessons 1 to 5. A big arrow for the way to swing, the hold ring, the ruler.
+        //Free Guide : the lessons without a beat. A big arrow for the way to swing, the hold ring, the ruler.
         private void DrawFreeGuide(SpriteBatch sb, Lesson l)
         {
             if (l.Kind == Kind.Hold)
@@ -598,19 +597,17 @@ namespace Tacetno433.Screens
             NoteGlyph.Arrow(sb, want, HitX + d.X * bob, RingY + d.Y * bob, 70f, 22f, Palette.Highlight, 10f);
 
             //Pattern : the four ways under the well, the one to do now lit
-            bool shape = l.Kind == Kind.Pattern || (l.Kind == Kind.Seats && done >= 3);
-            int step = l.Kind == Kind.Seats ? done - 3 : done;
-            if (shape)
+            if (l.Kind == Kind.Pattern)
                 for (int i = 0; i < 4; i++)
                 {
-                    bool now = i == step % 4;
+                    bool now = i == done % 4;
                     float cx = HitX - 90f + i * 60f;
                     if (now) Gfx.Circle(sb, cx, RingY + 118f, 22f, Palette.Void);
                     NoteGlyph.Arrow(sb, pattern[i], cx, RingY + 118f, 26f, 10f, now ? Palette.Highlight : Palette.InkSoft, 4f);
                 }
 
             //Size : the order to give next
-            if ((l.Kind == Kind.Size || l.Kind == Kind.Seats) && done < 3)
+            if (l.Kind == Kind.Size && done < 3)
                 Gfx.TextCentered(sb, Game.BigFont, sizeWordsBig[done], HitX, RingY + 104f, Palette.Ink, TextSize.Title);
         }
 
@@ -625,7 +622,7 @@ namespace Tacetno433.Screens
             Vector2 d = NoteGlyph.Way(l.Bpm > 0 ? WayOf(pending) : FreeWay(l));
             Vector2 anchor = gesture.InStroke ? gesture.StrokeStart : Input.MousePos;
             float along = Vector2.Dot(gesture.LiveVector, d);
-            bool zones = l.Kind == Kind.Size || l.Kind == Kind.Seats || l.Kind == Kind.Loudness;
+            bool zones = l.Kind == Kind.Size || l.Kind == Kind.Loudness;
             Baton.DrawRuler(sb, anchor, d, along, gesture.InStroke ? Baton.SizeOf(along) : -1, zones);
         }
 

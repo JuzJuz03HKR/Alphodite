@@ -230,8 +230,16 @@ namespace Tacetno433.Screens
         private float introTime;          // how long this round's banner stays up
         private bool traitCard;           // this banner explains the enemy's trait in full
         private static bool[] traitSeen = new bool[16];   // traits met at least once since the game started
-        private static bool partsTold;                     // the first duel since the game started explains the badges
+        private static bool partsTold;                     // the first duel since the game started explains the one rule
+        private static bool mfTold, rollTold, holdTold, sparkTold, cueTold;   // TEACH NOTES already given since the game started
         private const string PartsNote = "SWING THE SIZE THE NOTE SAYS : p SMALL, mf MIDDLE, f BIG. THE WHOLE BAND PLAYS EVERY NOTE YOU HIT";
+
+        //Teach Notes : the first time something new turns up, the round banner says what to do (round 15)
+        private const string MfNote = "NEW : mf NOTES. ANSWER THEM WITH A MIDDLE STROKE";
+        private const string RollNote = "THIS ROUND ENDS ON A ZIGZAG ROLL : SHAKE THE BATON AS FAST AS YOU CAN";
+        private const string HoldNote = "THIS ROUND ENDS ON A NOTE UNDER AN ARCH : STROKE IT, THEN KEEP THE BATON STILL";
+        private const string SparkNote = "A NOTE TIED TO A SPARK : FLICK ONCE MORE, ANY WAY, HALF A BEAT LATER";
+        private const string CueNote = "THE ARROWS OVER YOUR PLAYERS : WHEN THE BATON SWINGS THEIR WAY, THEY HIT HARDER";
         private const string BargainNote = "THE BARGAIN : YOUR BAND HITS 50 PERCENT HARDER THIS ROUND";
 
         //Bargain : THE DEVIL'S STRING's offer before round two, answered on this page (round 14)
@@ -417,10 +425,38 @@ namespace Tacetno433.Screens
                 introNote = PartsNote;                                   // the one rule, once, before the first fight starts
                 partsTold = true;
             }
+            else if (!traitCard) introNote = TeachNote();
 
             introTime = BattleRules.IntroTime;
             if (introNote.Length > 0) introTime = BattleRules.IntroNoteTime;
+            if (introNote == PartsNote || IsTeachNote(introNote)) introTime = BattleRules.TeachNoteTime;
             if (traitCard) introTime = BattleRules.TraitIntroTime;
+        }
+
+        //Teach Note : the first time something new turns up in a round, its banner says what to do,
+        //one new thing a round, once each since the game started. The tutorial is short (round 15),
+        //this teaches the rest in the run, where it happens.
+        private string TeachNote()
+        {
+            if (!battle.Gentle && !mfTold) { mfTold = true; return MfNote; }
+            if (battle.TremoloBeat >= 0 && !rollTold) { rollTold = true; return RollNote; }
+            if (battle.FermataBeat >= 0 && !holdTold) { holdTold = true; return HoldNote; }
+            if (HasPair() && !sparkTold) { sparkTold = true; return SparkNote; }
+            if (!cueTold) { cueTold = true; return CueNote; }
+            return "";
+        }
+
+        private static bool IsTeachNote(string note)
+        {
+            return note == MfNote || note == RollNote || note == HoldNote || note == SparkNote || note == CueNote;
+        }
+
+        //Has Pair : TACET plays a note with a spark in the first pass of this round
+        private bool HasPair()
+        {
+            for (int b = 0; b < BattleRules.BeatsPerRound; b++)
+                if (battle.EnemyDouble[b]) return true;
+            return false;
         }
 
         //Screen Leave : give the ordinary mouse pointer back to the rest of the game

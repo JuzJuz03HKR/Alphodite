@@ -16,16 +16,18 @@ namespace Tacetno433.Screens
     //card fill up with every success. A finished lesson shows LESSON CLEAR and the next one
     //comes in. TAB skips a lesson, ESC goes back to the title. Nothing here can be lost.
     //
-    //Lessons 1 to 5 have no beat : hold the button, stroke down, draw the 4/4 shape, swing
-    //small, middle and big, and meet the players' parts (WHO PLAYS, round 14, it was WHERE THEY
-    //SIT in round 12.1).
-    //From lesson 6 a slow beat runs, started by holding the button, with the same ring, lane
+    //Round 15 (29 Sep) : playtesters found 13 lessons far too much at once, some gave up before
+    //playing. Now there are six short BASICS, one idea each, and READY. Everything else (rolls,
+    //held notes, sparks, the arrows over the players, the signature) is explained in the run
+    //the first time it comes (DuelScreen.SetUpRound). Rolls, held notes and sparks can still be
+    //practised here : READY offers them as EXTRA PRACTICE (TAB).
+    //Lessons 1 to 3 have no beat : hold the button, draw the 4/4 shape, swing small, middle and big.
+    //From lesson 4 a slow beat runs, started by holding the button, with the same ring, lane
     //and notes as the duel (drawn by the same Core helpers).
     //
-    //THIS CLASS IS SPLIT OVER THREE FILES (partial, like DuelScreen) :
+    //THIS CLASS IS SPLIT OVER TWO FILES (partial, like DuelScreen) :
     //   TutorialScreen.cs           the lessons, their order, and the page around the stage
     //   TutorialScreen.Practice.cs  the beat, the notes, judging a stroke, and drawing the stage
-    //   TutorialScreen.Seats.cs     the WHO PLAYS lesson : three players, their letters and arrows
     public partial class TutorialScreen : GameScreen
     {
         //Can Pause : a menu page outside the run, ESC here means going back
@@ -35,7 +37,7 @@ namespace Tacetno433.Screens
         }
 
         //Lesson Kind : what the player has to do in a lesson
-        private enum Kind { Hold, Stroke, Pattern, Size, Seats, Timing, Lane, Loudness, Breath, Roll, Fermata, Spark, Finish }
+        private enum Kind { Hold, Pattern, Size, Timing, Loudness, Breath, Roll, Fermata, Spark, Finish }
 
         //Lesson : one step of the tutorial
         private class Lesson
@@ -53,82 +55,57 @@ namespace Tacetno433.Screens
             public float BodyHeight;        // how tall the wrapped body is, so the card fits it
         }
 
-        //Lessons : THE PLACE TO EDIT THE TUTORIAL. Keep each lesson to one idea.
+        //Lessons : THE PLACE TO EDIT THE TUTORIAL. Keep each lesson to one idea and two short
+        //sentences. The BASICS end at the first Finish lesson, the EXTRA PRACTICE comes after it.
         private static Lesson[] lessons =
         {
             new Lesson { Kind = Kind.Hold, Title = "RAISE THE BATON", Need = 1,
-                Body = "The mouse is your baton. It only counts while the LEFT BUTTON is held down. "
-                     + "Let go, and the baton hangs down and nothing you do counts.",
+                Body = "The mouse is your baton. Hold the LEFT BUTTON down to raise it.",
                 Goal = "Hold the left button down." },
 
-            new Lesson { Kind = Kind.Stroke, Title = "YOUR FIRST STROKE", Need = 3,
-                Body = "Keep the button held and swing DOWN in one quick move, then stop. "
-                     + "The beat lands where the baton stops.",
-                Goal = "Swing down three times." },
-
-            new Lesson { Kind = Kind.Pattern, Title = "THE 4/4 SHAPE", Need = 8,
-                Body = "A bar has four beats and each beat has its own way : DOWN, LEFT, RIGHT, UP. "
-                     + "It is the shape a real conductor draws. Follow the arrow.",
-                Goal = "Draw the shape twice." },
+            new Lesson { Kind = Kind.Pattern, Title = "THE 4/4 SHAPE", Need = 4,
+                Body = "Keep holding, swing, then stop. Every bar goes DOWN, LEFT, RIGHT, UP, like a real conductor.",
+                Goal = "Follow the arrow once round." },
 
             new Lesson { Kind = Kind.Size, Title = "SMALL, MIDDLE, BIG", Need = 3,
-                Body = "How far you swing decides who plays. A short stroke (p) brings only the p players, "
-                     + "cheap on breath. A middle one (mf) brings the mf players too. A long one (f) "
-                     + "brings the whole band, the hardest hit and the most tiring. The ruler shows how far you have come.",
+                Body = "How far you swing is how loud the band plays : short p, middle mf, long f. "
+                     + "The ruler shows how far you have come.",
                 Goal = "Swing down : short, then middle, then long." },
 
-            new Lesson { Kind = Kind.Seats, Title = "WHO PLAYS", Need = 7,
-                Body = "Every player wears their PART, drawn like a note : a letter and an arrow. "
-                     + "The LETTER is the smallest stroke that brings them in : p the winds, mf the strings, "
-                     + "f the percussion. The ARROW is the way they answer : when the baton goes their way "
-                     + "(down and up share one) they hit 50 percent harder.",
-                Goal = "Swing p, mf and f, then draw the 4/4 shape." },
+            new Lesson { Kind = Kind.Timing, Title = "ON THE BEAT", Need = 4, Bpm = 70,
+                Body = "Now the band keeps time. Stop each stroke just as the ring closes.",
+                Goal = "Four strokes GOOD or better." },
 
-            new Lesson { Kind = Kind.Timing, Title = "ON THE BEAT", Need = 6, Bpm = 70,
-                Body = "Now the band keeps time. The ring closes on its mark on every beat. "
-                     + "Finish each stroke, the baton stopping, right as the ring closes. "
-                     + "The four ways keep going round : down, left, right, up.",
-                Goal = "Six strokes GOOD or better." },
+            new Lesson { Kind = Kind.Loudness, Title = "READ THE NOTE", Need = 6, Bpm = 76,
+                Body = "TACET's notes slide in. Swing where the arrow points, as far as the letter says : "
+                     + "f BIG, mf MIDDLE, p SMALL. Your whole band plays every note you hit.",
+                Goal = "Six notes on time, the right size." },
 
-            new Lesson { Kind = Kind.Lane, Title = "TACET'S NOTES", Need = 6, Bpm = 76,
-                Body = "TACET plays a note, and it slides down the lane to the hit point one bar later. "
-                     + "Answer each note as it arrives, the way the arrow head on its edge points. "
-                     + "The note to answer next is the bright one.",
-                Goal = "Answer six notes GOOD or better." },
+            new Lesson { Kind = Kind.Breath, Title = "BREATH", Need = 8, Bpm = BattleRules.TempoByFloor[0][0],
+                Body = "The bar at the top is the band's breath, its life. A note TACET wins takes some away. "
+                     + "At zero the fight is lost. Where TACET is silent, let the beat pass to breathe.",
+                Goal = "Play eight notes. Watch the bar." },
 
-            new Lesson { Kind = Kind.Loudness, Title = "LOUD AND SOFT", Need = 6, Bpm = 76,
-                Body = "Each note says how loud TACET plays it, and the ruler on the baton says the same. "
-                     + "f is loud : answer it f, BIG, the whole band. p is soft : a SMALL stroke, the p players "
-                     + "alone. mf : a MIDDLE one. The right size is IN TUNE and weakens TACET's note.",
-                Goal = "Six notes on time, with the right size." },
+            new Lesson { Kind = Kind.Finish, Title = "READY", Need = 0,
+                Body = "That is the whole baton. Everything else is explained in the run, the first time "
+                     + "you meet it. TAB for extra practice : rolls, held notes and sparks.",
+                Goal = "Start a run whenever you are ready." },
 
-            new Lesson { Kind = Kind.Breath, Title = "KEEP BREATHING", Need = 10, Bpm = BattleRules.TempoByFloor[0][0],
-                Body = "The bar at the top is the band's breath. A beat TACET wins knocks breath out "
-                     + "of the band, and a missed stroke lets it through. When the breath is gone the "
-                     + "band collapses and the fight is lost. This is the real speed of a first round.",
-                Goal = "Play ten notes. Watch the bar." },
-
+            //Extra Practice : after READY, only for players who ask for it (TAB)
             new Lesson { Kind = Kind.Roll, Title = "TREMOLO", Need = 1, Bpm = 76,
-                Body = "A zigzag bar is a roll. On the first floor every round ends with one, and so does every elite and boss round. "
-                     + "Shake the baton back and forth as fast as you can until the bar runs out. "
-                     + "Every shake counts, and shaking is free.",
+                Body = "A zigzag bar is a roll : elites and bosses end their rounds with one. Shake the baton as fast as you can.",
                 Goal = "Six shakes in one roll." },
 
             new Lesson { Kind = Kind.Fermata, Title = "FERMATA", Need = 1, Bpm = 76,
-                Body = "A note under an arch is held, from the second floor on. Stroke it on the beat, "
-                     + "then keep the button down and the baton STILL until the ribbon runs out.",
+                Body = "A note under an arch is held, from the second floor. Stroke it, then keep the baton STILL.",
                 Goal = "Hold one fermata to the end." },
 
             new Lesson { Kind = Kind.Spark, Title = "THE SPARK", Need = 2, Bpm = 70,
-                Body = "From the second floor some notes come tied to a spark. Stroke the note as usual, "
-                     + "then flick once more, any way at all, half a beat later.",
+                Body = "From the second floor a note can come tied to a spark. Flick once more, any way, half a beat later.",
                 Goal = "Land two sparks." },
 
-            new Lesson { Kind = Kind.Finish, Title = "READY", Need = 0,
-                Body = "That is everything the baton does. In a run there is nothing to arrange : every part is "
-                     + "written on its player, and the BAND page (TAB on the route) picks who plays. A few more things to know : a PERFECT f against a real f is a COUNTER. Eight PERFECTs in a row set the band on fire. Far enough "
-                     + "ahead, the FINALE ends a fight at once. PERFECT beats fill your conductor's recipe, "
-                     + "and SPACE then lets their own SIGNATURE loose for four strokes.",
+            new Lesson { Kind = Kind.Finish, Title = "ALL DONE", Need = 0,
+                Body = "That was every note there is. The silence is waiting.",
                 Goal = "Start a run whenever you are ready." },
         };
 
@@ -145,8 +122,8 @@ namespace Tacetno433.Screens
         private const float ClearTime = 1.4f;          // how long LESSON CLEAR stays up
 
         //Prepared Text : made once, so Draw never builds a string
-        private static string[] lessonLabels;          // "LESSON 03 / 12"
-        private static string[] lessonTags;            // "LESSON 03"
+        private static string[] lessonLabels;          // "LESSON 03 / 07", or "EXTRA 1 / 3"
+        private static string[] lessonTags;            // "LESSON 03", or "EXTRA 1"
         private static Flick[] pattern = { Flick.Down, Flick.Left, Flick.Right, Flick.Up };
         private static string[] wayHints = { "", "SWING UP", "SWING DOWN", "SWING LEFT", "SWING RIGHT" };   // in Flick order
         private static string[] sizeHints =
@@ -155,7 +132,7 @@ namespace Tacetno433.Screens
             "IN BETWEEN : PAST THE FIRST MARK, NOT THE SECOND",
             "A LONGER ONE : ALL THE WAY PAST THE SECOND MARK"
         };
-        private static string[] sizeDone = { "p, THE p PLAYERS. NOW A MIDDLE ONE.", "mf, THE mf PLAYERS TOO. NOW A LONG ONE.", "f, THE WHOLE BAND." };
+        private static string[] sizeDone = { "p, SOFT. NOW A MIDDLE ONE.", "mf. NOW A LONG ONE.", "f, LOUD." };
         private const string HoldHint = "KEEP HOLDING...";
         private const string NiceHint = "GOOD. AGAIN.";
 
@@ -180,11 +157,19 @@ namespace Tacetno433.Screens
             {
                 lessonLabels = new string[lessons.Length];
                 lessonTags = new string[lessons.Length];
+                int basics = BasicsEnd() + 1;
+                int extras = lessons.Length - basics - 1;
                 for (int i = 0; i < lessons.Length; i++)
                 {
                     string number = (i + 1).ToString("00");
-                    lessonLabels[i] = "LESSON " + number + " / " + lessons.Length.ToString("00");
+                    lessonLabels[i] = "LESSON " + number + " / " + basics.ToString("00");
                     lessonTags[i] = "LESSON " + number;
+                    if (i >= basics)
+                    {
+                        int extra = Math.Min(i - basics + 1, extras);
+                        lessonLabels[i] = "EXTRA " + extra + " / " + extras;
+                        lessonTags[i] = "EXTRA " + extra;
+                    }
                     lessons[i].BodyWrapped = Gfx.WrapText(Game.StoryFont, lessons[i].Body, CardWrap, TextSize.Story);
                     lessons[i].GoalWrapped = Gfx.WrapText(Game.StoryFont, lessons[i].Goal, CardWrap - 70f, TextSize.StorySmall);
                     lessons[i].BodyHeight = Game.StoryFont.MeasureString(lessons[i].BodyWrapped).Y * TextSize.Story;
@@ -216,7 +201,14 @@ namespace Tacetno433.Screens
             gesture.Clear();
             effects.Clear();
             ResetPractice();
-            ResetSeats();
+        }
+
+        //Basics End : the READY lesson, the first Finish. Lessons after it are extra practice.
+        private static int BasicsEnd()
+        {
+            for (int i = 0; i < lessons.Length; i++)
+                if (lessons[i].Kind == Kind.Finish) return i;
+            return lessons.Length - 1;
         }
 
         public override void Update(float dt)
@@ -228,7 +220,6 @@ namespace Tacetno433.Screens
             gesture.Update(dt, Input.MouseDown());
             baton.Update(dt, gesture.Held);
             effects.Update(dt);
-            UpdateSeats(dt);
 
             //Leave : ESC or the button, from any lesson
             if (Input.KeyPressed(Keys.Escape) || Input.ClickedOn(backButton))
@@ -243,6 +234,11 @@ namespace Tacetno433.Screens
             {
                 gesture.Read();
                 if (Input.KeyPressed(Keys.Enter) || Input.ClickedOn(startButton)) StartRun();
+                else if (index + 1 < lessons.Length && (Input.KeyPressed(Keys.Tab) || Input.ClickedOn(skipButton)))
+                {
+                    SoundBank.Play(Sfx.PageTurn);
+                    StartLesson(index + 1);                    // EXTRA PRACTICE
+                }
                 return;
             }
 
@@ -293,7 +289,7 @@ namespace Tacetno433.Screens
             hintTimer = 2.2f;
         }
 
-        //Free Lessons : 1 to 5, no beat, just strokes
+        //Free Lessons : the lessons without a beat, just strokes
         private void UpdateFree(float dt, Lesson l)
         {
             //Hold : the ring round the baton fills while the button stays down
@@ -323,9 +319,8 @@ namespace Tacetno433.Screens
                 return;
             }
 
-            //Size : the three sizes in order, small first (also the first half of WHO PLAYS)
-            bool sizing = l.Kind == Kind.Size || (l.Kind == Kind.Seats && done < 3);
-            if (sizing && size != done)
+            //Size : the three sizes in order, small first
+            if (l.Kind == Kind.Size && size != done)
             {
                 Hint(sizeHints[done]);
                 effects.SpawnHit(HitX, RingY, Grade.Miss);
@@ -333,8 +328,7 @@ namespace Tacetno433.Screens
                 return;
             }
 
-            if (l.Kind == Kind.Seats) SeatsStroke(size);
-            else if (l.Kind == Kind.Size) Hint(sizeDone[done]);
+            if (l.Kind == Kind.Size) Hint(sizeDone[done]);
             else Hint(NiceHint);
             done++;
             effects.SpawnHit(HitX, RingY, Grade.Perfect);
@@ -346,7 +340,6 @@ namespace Tacetno433.Screens
         private Flick FreeWay(Lesson l)
         {
             if (l.Kind == Kind.Pattern) return pattern[done % 4];
-            if (l.Kind == Kind.Seats) return SeatsWay();
             return Flick.Down;
         }
 
@@ -440,6 +433,7 @@ namespace Tacetno433.Screens
             if (l.Kind == Kind.Finish)
             {
                 Ui.Button(sb, startButton, SaveFile.HasRun ? "TO THE TITLE" : "NEW RUN", "ENTER", true);
+                if (index + 1 < lessons.Length) Ui.Button(sb, skipButton, "EXTRAS", "TAB", false);
                 return;
             }
 

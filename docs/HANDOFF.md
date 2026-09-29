@@ -130,7 +130,9 @@ Tacetno433/
 | ไม้บาตอง / ไม้บรรทัดวัดขนาด (เขียน p / mf / f) | `Core/Baton.cs` (ใช้ทั้งดวลและ Tutorial) |
 | สัญลักษณ์โน้ต ลูกศร จุดตี วงแหวนจับเวลา | `Core/NoteGlyph.cs` (ใช้ทั้งดวลและ Tutorial) |
 | สตามิน่า : TACET ซัด / หมดลมแพ้ | `BattleState` (ค้น `TACET'S BLOW`, `COLLAPSE`, `CheckBreath`) · ตัวเลข `BattleRules.BlowPerPower` · ภาพ `DuelScreen.ShowBreath` · ขอบจอ `DuelScreen.Hud.cs` `DrawLowBreath` |
-| โหมด TUTORIAL | `Screens/TutorialScreen.cs` (รายการบท `lessons` แก้ข้อความ/ลำดับที่นี่) · `TutorialScreen.Practice.cs` (จังหวะ โน้ต การตัดสิน) · `TutorialScreen.Seats.cs` (บท WHO PLAYS, รอบ 14) |
+| โหมด TUTORIAL | `Screens/TutorialScreen.cs` (รายการบท `lessons` แก้ข้อความ/ลำดับที่นี่ · บทพื้นฐานจบที่ READY บทหลังจากนั้นคือ EXTRAS, รอบ 15) · `TutorialScreen.Practice.cs` (จังหวะ โน้ต การตัดสิน) |
+| HOW TO PLAY · ไอคอนปุ่ม | `Screens/GuideScreen.cs` (3 หน้า ข้อความอยู่ `bodies`) · `Ui.KeyCap` / `Ui.MouseIcon` |
+| สอนตอนเจอครั้งแรกในดวล (TEACH NOTES) | `DuelScreen.TeachNote` / `SetUpRound` · เวลา `BattleRules.TeachNoteTime` |
 | เส้นแสง CUE ในดวล | `Screens/DuelScreen.Stage.cs` `DrawCueBeam` |
 | หน้าเลือกเส้นทาง (ถนน · ทางแยก · ป้าย · กล่องรายละเอียด) | `Screens/RouteScreen.cs` `DrawRoad` `DrawFork` `DrawTiles` `DrawDetail` · ตัวอักษรชนิดที่ `RouteNodeInfo.Marks` |
 | ความสามารถคอนดักเตอร์ (PASSIVE) | ตัวเลข `Data/Conductor.cs` (สตามิน่า Push สูตร ข้อความ) · ผล `BattleState` ค้น `BY THE BOOK` `LOCKED TEMPO` `RUNAWAY FIRE` `THE CLOSER THE LOUDER` (`LouderBonus`) `EVERY ROAD HOME` |

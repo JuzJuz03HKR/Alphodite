@@ -69,9 +69,8 @@ namespace Tacetno433.Core
             mouseClock += dt;
             Input.PretendHeld = true;
 
-            //Still Hand : the fermata picture needs the baton held still, and the WHO PLAYS
-            //picture keeps the beam of the stroke it was set up with
-            if (index < names.Length && (names[index] == "duelfermata" || names[index] == "tutorialseats"))
+            //Still Hand : the fermata picture needs the baton held still
+            if (index < names.Length && names[index] == "duelfermata")
             {
                 Input.MousePos = new Vector2(760f, 470f);
                 return;
@@ -664,17 +663,12 @@ namespace Tacetno433.Core
             if (name == "dueltremolo" || name == "duelrepeat") ((DuelScreen)screen).JumpForPicture(BattleRules.BeatsPerRound - 1);
             if (name == "dueldouble") ((DuelScreen)screen).JumpForPicture(FirstPair(run.Battle));
             if (name == "duelfermata") ((DuelScreen)screen).HoldForPicture();
-            if (name == "tutorialsize") ((TutorialScreen)screen).JumpForPicture(3, 0f);
-            if (name == "tutorialseats")
-            {
-                ((TutorialScreen)screen).JumpForPicture(4, 0f);
-                ((TutorialScreen)screen).SeatsForPicture();
-            }
-            if (name == "tutorialtiming") ((TutorialScreen)screen).JumpForPicture(5, 5.6f);
-            if (name == "tutorialloud") ((TutorialScreen)screen).JumpForPicture(7, 6.6f);
-            if (name == "tutorialbreath") ((TutorialScreen)screen).JumpForPicture(8, 7.6f);
-            if (name == "tutorialroll") ((TutorialScreen)screen).JumpForPicture(9, 5.8f);
-            if (name == "tutorialready") ((TutorialScreen)screen).JumpForPicture(12, 0f);
+            if (name == "tutorialsize") ((TutorialScreen)screen).JumpForPicture(2, 0f);
+            if (name == "tutorialtiming") ((TutorialScreen)screen).JumpForPicture(3, 5.6f);
+            if (name == "tutorialloud") ((TutorialScreen)screen).JumpForPicture(4, 6.6f);
+            if (name == "tutorialbreath") ((TutorialScreen)screen).JumpForPicture(5, 7.6f);
+            if (name == "tutorialready") ((TutorialScreen)screen).JumpForPicture(6, 0f);
+            if (name == "tutorialroll") ((TutorialScreen)screen).JumpForPicture(7, 5.8f);
         }
 
         //First Pair : the first beat of the round that TACET plays as a pair, for the picture

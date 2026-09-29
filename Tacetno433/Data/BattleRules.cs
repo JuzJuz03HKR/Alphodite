@@ -196,6 +196,7 @@
         public static float IntroTime = 1.1f;      // round banner
         public static float IntroNoteTime = 2.2f;  // a banner that says what changes this round (round 14)
         public static float TraitIntroTime = 3.6f; // the first banner against a trait never met before (round 14)
+        public static float TeachNoteTime = 3.0f;  // a banner that teaches something new, the first time it turns up (round 15)
         public static float LateTime = 0.35f;      // the latest a stroke can land after its beat
         public static float RoundEndTime = 1.4f;
 

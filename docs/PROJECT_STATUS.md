@@ -17,7 +17,7 @@
   แผนวันนี้ทำเป็นก้อน push ทุกจบก้อน (ผู้ใช้อนุญาต) : **ก้อน 1 ระบบต่อสู้ใหม่ + ไล่ระดับความยาก (ทำแล้ว)** · ก้อน 2 Tutorial สั้น + HOW TO PLAY + ไอคอนปุ่ม (+ SECTION ถ้าทัน) · ก้อน 3 โครงระบบเพลง (เพลงจริงแยกเครื่องทีละโน้ต ผู้ใช้จะทำเสียงให้ ต้องเลือกศัตรู+เพลงก่อน) · ก้อน 4 แก้ตามเล่น ล็อกโค้ด เอกสาร ข้อมูลสไลด์ ·
   หลัง deadline : อธิบายโค้ด (VFX การตวัด คลื่นกระแทก) · สรุปภาพรวมเกมให้อาจารย์ · research เกม (rhythm / roguelike / Limbus Arknights Stellar Sora **takt op. Symphony (สำคัญเรื่องธีม)** และเกมกาชาจีน ญี่ปุ่น เกาหลี) · VFX ทำท้ายสุด
 - **รอบ 15 (29 ก.ย., `Alpha6`) — โน้ตบอกขนาด · ทั้งวงเล่นทุกโน้ต · ตวัดไม่เสียลม · ผังเวทีแบบวงจริง · ไล่ระดับง่ายไปยาก** (หัวข้อ 6 "รอบ 15") ·
-  Tutorial / HOW TO PLAY ยังเป็นกติกาเก่า (รอบ 14) จนกว่าก้อน 2 เสร็จ
+  **ก้อน 2 (ทำแล้ว)** : Tutorial 6 บทพื้นฐานสั้นๆ + READY (โน้ตพิเศษเป็น EXTRAS) · HOW TO PLAY 3 หน้าแบบภาพ + ไอคอนปุ่ม · สอนตอนเจอครั้งแรกในดวล (TEACH NOTES)
 - งานก่อนหน้า : branch **`Alpha5`** (รอบ 14, แตกจาก `Alpha4` ที่ `d80bafa`) · `Alpha4` = รอบ 12–13 · `Alpha3` = รอบ 9–11b ([PR #1](https://github.com/JuzJuz03HKR/Alphodite/pull/1) `Alpha3` → `Alpha2` เปิดไว้ ยังไม่ merge) ·
   รอบ 6–8 อยู่ `Alpha2` · commit/push เมื่อผู้ใช้สั่งเท่านั้น
 - **รอบ 14 (28 ก.ย., `Alpha5`) — ลบหน้า STAGE ออกจากลูปดวล** : นักดนตรีทุกคนมี **PART ติดตัว = ตัวอักษร + หัวลูกศร วาดแบบเดียวกับโน้ต** ·
@@ -1051,6 +1051,14 @@ THE METRONOME : ทุกการตวัดเป็น BOOST ไม่ว่
 - Motif (เก่ง ใบเดียว) : SFORZANDO COUNTERPOINT +14 · SECOND WIND +12 · CRESCENDO TUTTI SPARE STICKS +9 · ใบอ่อน (~0) STEADY PULSE ENCORE PIANISSIMO OVERTURE TENUTO CON BRIO CODA
 - **ความแม่นตาม BPM ในตัวจำลองเป็นสมมติฐาน** (`Habit.TempoSkill` : ทุก BPM ต่ำกว่า 112 ย้าย % จาก MISS/GOOD ไป PERFECT) · มือใหม่ในตัวจำลองไม่เก่งขึ้นระหว่างรัน (คนจริงเรียนรู้)
 - ตรวจแล้ว : C# 0 error 0 warning · savecheck 19/19 · **ยังไม่ได้เล่นด้วยเมาส์จริง** · Tutorial / HOW TO PLAY ยังเป็นกติกาเก่า (ก้อน 2)
+
+**ก้อน 2 : สอนเล่นให้สั้น (ผู้ใช้ : "Tutorial 13 หน้ารับสารเยอะไป คนเล่นง่ายๆ ต้องออกก่อน")**
+- **Tutorial** (`TutorialScreen.cs` + `.Practice.cs`) : 6 บทพื้นฐาน บทละเรื่อง 1–2 ประโยค : RAISE THE BATON · THE 4/4 SHAPE · SMALL, MIDDLE, BIG · ON THE BEAT · READ THE NOTE (ลูกศร + ตัวอักษร) · BREATH → READY ·
+  หลัง READY กด TAB = **EXTRAS** (TREMOLO · FERMATA · THE SPARK → ALL DONE) · ลบบท WHO PLAYS (`TutorialScreen.Seats.cs`) และบท FIRST STROKE / TACET'S NOTES (รวมเข้าบทอื่น) · เดิม 13 บท
+- **HOW TO PLAY** (`GuideScreen.cs`) : 3 หน้า (เดิม 5) : 01 CONTROLS (รูปเมาส์ปุ่มซ้าย + ปุ่ม SPACE / TAB / ESC พร้อมหน้าที่) · 02 THE NOTE (โน้ต f + ลูกศร · ไม้บรรทัด p mf f · วงแหวน · ท่า 4/4) · 03 THE LINE (เส้นดัน + ลม)
+- **ไอคอนปุ่ม** `Ui.KeyCap` (ปุ่มคีย์บอร์ด) · `Ui.MouseIcon` (เมาส์ ปุ่มซ้ายสว่าง) วาดด้วยโค้ด = ไอคอน UI ไม่ใช่อาร์ต
+- **TEACH NOTES** (`DuelScreen.TeachNote`) : ครั้งแรกที่เจอของใหม่ ป้ายรอบบอกวิธีเล่น 3 วิ (`TeachNoteTime`) ครั้งละ 1 เรื่องต่อรอบ ครั้งเดียวต่อการเปิดเกม : mf ครั้งแรก · รัว · ค้าง · spark · ลูกศร CUE ·
+  ดวลแรกของเกม = "SWING THE SIZE THE NOTE SAYS : p SMALL, mf MIDDLE, f BIG. THE WHOLE BAND PLAYS EVERY NOTE YOU HIT"
 
 **ทดลองแล้วไม่ใช้ (ตัวจำลอง)**
 - ไม่ปรับอะไรเลยหลังเอาค่าสตามิน่าออก : ทั่วไปจบรัน 97% (ง่ายเกินมาก)
