@@ -50,7 +50,8 @@ commit/push เมื่อฉันสั่งเท่านั้น · ย�
 
 ## สถานะล่าสุด (29 ก.ย. ~21:00)
 
-**ก้อน 9** : ✅ ปิดเสียง (`SoundBank.InstrumentsOn`) · ✅ ตัวละครในดวลเล็กลง · ✅ เอา Art Work 2 ออก · ✅ ลบแพ็กเกจที่ไม่ได้ใช้ · ✅ คลังเสียง → `SoundLibrary/` · ✅ `Build/TACET4'33.zip`
+**ก้อน 9** : ✅ ปิดเสียง (`SoundBank.InstrumentsOn`) · ✅ ตัวละครในดวลเล็กลง · ✅ เอา Art Work 2 ออก · ✅ ลบแพ็กเกจที่ไม่ได้ใช้ · ✅ คลังเสียง → `SoundLibrary/` · ✅ `Build/TACET4'33.zip` ·
+✅ **branch `Release`** (ผู้ใช้สั่ง 21:1x) = มีแค่ `TACET4'33.zip` ไฟล์เดียว (commit `24b5b5a`, สร้างจาก Alpha6 `412c21a`) · zip ไม่มีไฟล์เซฟ (เซฟอยู่ `%AppData%\TACET433` ของเครื่องที่เล่น) เครื่องใหม่เปิดมาเริ่มต้นเสมอ
 
 **ก้อน 8** : ✅ อาร์ตคอนดักเตอร์ = THE UNHEARING (Beethoven) · ✅ อาร์ตนักดนตรี 9 คน (รูปเดียวกัน) · ✅ เพลง 7 เพลง (ขาด DEVIL'S STRING) · ✅ `Build/TACET433_win-x64.zip` (build จาก Linux net8.0 ฟอนต์แทน ยังไม่ได้ลองบน Windows)
 
