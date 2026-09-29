@@ -76,7 +76,7 @@ namespace Tacetno433.Screens
     //   DuelScreen.Panels.cs   the three panels along the bottom
     public partial class DuelScreen : GameScreen
     {
-        private enum Phase { Intro, Play, Finale, RoundEnd, Bargain }
+        private enum Phase { Intro, Play, Outro, Finale, RoundEnd, Bargain }
 
         //Enters With Wave : TACET's silence swallows the stage as the fight begins (ScreenManager)
         public override bool EntersWithWave
@@ -162,6 +162,7 @@ namespace Tacetno433.Screens
         private const int SayCollapse = 22;
         private const int SayAgain = 23;
         private const int SayRest = 24;
+        private const int SayOutro = 25;
         private static string[] sayText =
         {
             "* It hums a phrase. Listen...",
@@ -188,7 +189,8 @@ namespace Tacetno433.Screens
             "* It draws out a long note. Stroke it, then hold still!",
             "* The band runs out of breath. The music stops.",
             "* It plays the phrase again. Read the marks, they change!",
-            "* Silence. Let it pass or stroke small to breathe. A bigger swing is a free hit."
+            "* Silence. Let it pass or stroke small to breathe. A bigger swing is a free hit.",
+            "* The silence breaks. Your band plays the phrase to its end."
         };
         private const float SayWrap = 350f;
         private const float SaySpeed = 520f;     // pixels of text uncovered per second
@@ -289,6 +291,10 @@ namespace Tacetno433.Screens
         //Low Breath : under this share of stamina the screen closes in with the beat, a warning
         private const float LowBreath = 0.25f;
         private int pending;            // the note waiting for its stroke, 0 to total - 1, total when all are in
+        private int outroBeat;          // OUTRO : the next beat of the phrase the band plays on its own
+        private int outroLast;          // OUTRO : the last beat of the phrase that has a note
+        private int outroStep;          // OUTRO : notes (and rests) played so far
+        private float outroClock;       // OUTRO : seconds since the line reached TACET
         private bool onGrace;           // that beat's first note is answered, its pair is still due
         private bool rolling;           // TACET's roll is being answered
         private int rollStrokes;
@@ -705,6 +711,10 @@ namespace Tacetno433.Screens
             {
                 UpdatePlay(dt);
             }
+            else if (phase == Phase.Outro)
+            {
+                UpdateOutro(dt);
+            }
             else if (phase == Phase.Finale)
             {
                 UpdateFinale(dt);
@@ -832,8 +842,65 @@ namespace Tacetno433.Screens
             //Round Over : every answer is in and the last clash has had its moment,
             //or the line reached an edge and the fight is decided
             if (pending >= total && doneAt < 0f) doneAt = clock;
-            if (battle.Finished || (doneAt >= 0f && clock >= doneAt + BattleRules.PhraseTail))
+            if (battle.Finished && battle.PlayerWon) StartOutro();
+            else if (battle.Finished || (doneAt >= 0f && clock >= doneAt + BattleRules.PhraseTail))
                 EndPlay();
+        }
+
+        //Outro Start : OUTRO (round 15). The line reached TACET in the middle of a phrase. The
+        //music does not stop dead : the band plays the rest of the phrase on its own, in time,
+        //and the silence breaks on its last note. A loss still cuts the music off, because that
+        //is the silence winning. Only this phrase is finished, never the whole song.
+        private void StartOutro()
+        {
+            rolling = false;
+            onGrace = false;
+            outroBeat = BeatOf(Math.Max(0, pending - 1)) + 1;          // the beat after the winning one
+            outroLast = -1;
+            for (int n = outroBeat; n < BattleRules.BeatsPerRound; n++)
+                if (battle.PowerAt(battle.Pass, n) > 0) outroLast = n;   // trailing rests are left out
+            if (outroLast < 0)
+            {
+                EndPlay();
+                return;
+            }
+
+            phase = Phase.Outro;
+            outroClock = 0f;
+            outroStep = 0;
+            Say(SayOutro);
+        }
+
+        //Outro Update : one note of the phrase on every beat, as loud as its mark, then one beat
+        //for the last note to ring before the round is summed up as a win
+        private void UpdateOutro(float dt)
+        {
+            outroClock += dt;
+            while (outroBeat <= outroLast && outroClock >= (outroStep + 1) * beatLen)
+            {
+                if (battle.PowerAt(battle.Pass, outroBeat) > 0) OutroNote(outroBeat);
+                beat = outroBeat;
+                outroBeat++;
+                outroStep++;
+            }
+            if (outroBeat > outroLast && outroClock >= (outroStep + 1) * beatLen) EndPlay();
+        }
+
+        //Outro Note : everybody who plays lights up and plays this beat's note of the song
+        private void OutroNote(int n)
+        {
+            Choice mark = battle.ShownAt(battle.Pass, n);
+            float volume = mark == Choice.Boost ? 1f : (mark == Choice.Ease ? 0.5f : 0.8f);
+            PlayBandNote(n, volume, 0f);
+
+            for (int s = 0; s < StageLayout.SeatCount; s++)
+            {
+                if (!battle.Plays(s)) continue;
+                lit[s] = 1f;
+                actors[s].Play(CharacterAnim.Attack);
+                Rectangle stand = StandRect(s);
+                effects.SpawnRipple(stand.Center.X, stand.Bottom, 80f, false);
+            }
         }
 
         //Call Note : TACET plays one note, as loud as its mark says. Its note leaves now and

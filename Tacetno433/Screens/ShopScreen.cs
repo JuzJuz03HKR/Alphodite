@@ -87,7 +87,7 @@ namespace Tacetno433.Screens
             names[SeatRow] = "EXTRA SEAT";
             notes[SeatRow] = "One more musician on stage. Two per floor at most.";
             names[TuningRow] = "TUNING";
-            notes[TuningRow] = "The band gets back " + (int)(BattleRules.TuningRecover * 100) + " percent of its stamina.";
+            notes[TuningRow] = "The band gets back " + (int)(BattleRules.TuningRecover * 100) + " percent of its breath.";
             //Hire : one player from this era, known before buying, with their seat
             hire = MusicianList.RollFromEra(run.Era, run.Roster, run.Rng);
             names[HireRow] = hire != null ? "HIRE " + hire.Name : "HIRE A PLAYER";

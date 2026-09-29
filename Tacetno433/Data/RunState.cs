@@ -284,7 +284,7 @@ namespace Tacetno433.Data
             Stamina += amount;
             if (Stamina < 0) Stamina = 0;
             if (Stamina > MaxStamina) Stamina = MaxStamina;
-            StaminaLabel = "STAMINA  " + Stamina + " / " + MaxStamina;
+            StaminaLabel = "BREATH  " + Stamina + " / " + MaxStamina;
             StaminaValue = Stamina + " / " + MaxStamina;
         }
 
@@ -376,7 +376,7 @@ namespace Tacetno433.Data
             ShardsLabel = "SHARDS  " + Shards;
             SeatsLabel = "SEATS  " + Formation.SeatedCount + " / " + Seats;
             SeatsValue = Formation.SeatedCount + " / " + Seats;
-            StaminaLabel = "STAMINA  " + Stamina + " / " + MaxStamina;
+            StaminaLabel = "BREATH  " + Stamina + " / " + MaxStamina;
             StaminaValue = Stamina + " / " + MaxStamina;
             RosterLabel = "ENSEMBLE  " + Roster.Count + " / " + RosterCapacity;
             MotifsLabel = "MOTIFS  " + Motifs.Count;

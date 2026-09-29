@@ -240,7 +240,7 @@ namespace Tacetno433.Screens
             Ui.CapsuleBar(sb, new Rectangle(120, 430, 500, 14), (split - 100f) / 540f, Palette.Paper, a);
             Gfx.TextSpaced(sb, Game.Font, "THE LINE", 120, 412, Palette.LineGrey * a, TextSize.Tiny, 2f);
 
-            Gfx.TextSpaced(sb, Game.Font, "STAMINA  :  THE BAND'S BREATH  /  AT ZERO THE FIGHT IS LOST", 120, 476, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            Gfx.TextSpaced(sb, Game.Font, "BREATH  :  THE BAND'S LIFE  /  AT ZERO THE FIGHT IS LOST", 120, 476, Palette.LineGrey * a, TextSize.Tiny, 2f);
             Ui.CapsuleBar(sb, new Rectangle(120, 494, 500, 10), 0.45f, Palette.PaperDim, a);
         }
     }

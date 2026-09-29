@@ -58,10 +58,10 @@ namespace Tacetno433.Screens
             pickHint = "EACH MUSICIAN CAN TRAIN " + BattleRules.RehearseMax + " TIMES";
 
             optionTexts[Breathe] = Gfx.WrapText(Game.StoryFont, "Sit down, close your eyes. The band gets back "
-                                   + (int)(BattleRules.BreatheRecover * 100) + " percent of its stamina.", CardW - 40, TextSize.StorySmall);
+                                   + (int)(BattleRules.BreatheRecover * 100) + " percent of its breath.", CardW - 40, TextSize.StorySmall);
             optionTexts[Rehearse] = Gfx.WrapText(Game.StoryFont, "Practise one part until it is perfect. "
                                    + "That musician gains 1 power for the rest of the run.", CardW - 40, TextSize.StorySmall);
-            optionTexts[DeepRest] = Gfx.WrapText(Game.StoryFont, "Pay for a real bed. The band gets back all of its stamina.",
+            optionTexts[DeepRest] = Gfx.WrapText(Game.StoryFont, "Pay for a real bed. The band gets back all of its breath.",
                                    CardW - 40, TextSize.StorySmall);
             optionPrices[Breathe] = "FREE";
             optionPrices[Rehearse] = "FREE";
@@ -169,14 +169,14 @@ namespace Tacetno433.Screens
                 int before = run.Stamina;
                 run.ChangeStamina((int)(run.MaxStamina * BattleRules.BreatheRecover));
                 SoundBank.Play(Sfx.RestRecover);
-                Done("RESTED", "The band breathes slowly together. Stamina " + NumberText.Signed(run.Stamina - before) + ".");
+                Done("RESTED", "The band breathes slowly together. Breath " + NumberText.Signed(run.Stamina - before) + ".");
             }
             else if (option == DeepRest)
             {
                 run.SpendShards(BattleRules.DeepRestPrice);
                 run.RestoreAllStamina();
                 SoundBank.Play(Sfx.RestRecover);
-                Done("FULLY RESTED", "A real bed, a long night. The band wakes up with all of its stamina.");
+                Done("FULLY RESTED", "A real bed, a long night. The band wakes up with all of its breath.");
             }
             else
             {

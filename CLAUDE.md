@@ -108,6 +108,7 @@
   **ตัวละครหลักจากผู้ใช้ (29 ก.ย.) : วาทยากร 6 คน = Fanny Mendelssohn · Lully · J. S. Bach · Mozart · Paganini · Beethoven แต่ละคนมีร่าง Hollow** (รายละเอียด `PROJECT_STATUS.md` หัวข้อ 0) · ในเกมตอนนี้ยังเป็น 5 คนเดิม (APPRENTICE BACH BERLIOZ BEETHOVEN BARTOK) ต้องคุยก่อนเปลี่ยน ·
   **ก้อน UI (ผู้ใช้สั่ง)** : เปลี่ยนหน้าปกติ = แถบดำเฉียง (`Core/SlantWipe.cs`, ความเร็ว `ScreenManager.FadeSpeed` 2.2 ผู้ใช้บอกว่าเร็วแล้วลายตา) · คลื่นความเงียบเฉพาะหน้าที่ `EntersWithWave` (ดวล · Curtain Call) · ม่านเฉพาะหน้าเลือกคอนดักเตอร์ ·
   **ไอคอนที่วาดแล้วดูแปลก → ตัวอักษร/คำ** (Motif = `Motif.Initials` · กลุ่มเครื่อง = คำ · ห้ามกลับไปวาดสัญลักษณ์ดนตรีโดยไม่ถาม) · ดวลวางวง 3×3 มองจากข้างเวทีเยื้องบน (`StageLayout.Duel*` · `DuelScreen.DrawFloorSpots`) ·
+  **ก้อน 5 (แก้ตามรีวิว, ผู้ใช้สั่ง "ทำ ก")** : คำบนจอ STAMINA → **BREATH** คำเดียวทั้งเกม (ชื่อในโค้ด/เซฟยังเป็น Stamina) · ข้อความหน้าแรก "You lead the band that does." · แถบ Tutorial นับแค่ 7 บท (EXTRAS แยก) · ป้าย Motif บนแถบรันใหญ่ขึ้น (`RunHud.BadgeSize` 16) · แถบเฉียงแบบค่อยๆ หยุด (ease-out) · **OUTRO** ชนะกลางท่อน วงเล่นท่อนนั้นต่อเองจนจบแล้วค่อยจบดวล แพ้ = เพลงถูกตัด (`DuelScreen.StartOutro`) · ไม่ปรับความยาก (ผู้ใช้ : ข ไม่ต้องปรับ) ·
   รายละเอียด `PROJECT_STATUS.md` หัวข้อ 6 "รอบ 15"
 - โค้ดที่ใช้ร่วมกันระหว่างดวลกับ Tutorial : ไม้บาตอง `Core/Baton.cs` · สัญลักษณ์โน้ต/จุดตี/วงแหวน `Core/NoteGlyph.cs` — แก้หน้าตาที่นี่ทีเดียว ห้ามเขียนซ้ำในหน้าจอ
 

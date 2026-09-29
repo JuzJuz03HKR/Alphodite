@@ -123,6 +123,7 @@ namespace Tacetno433.Screens
 
         //Prepared Text : made once, so Draw never builds a string
         private static string[] lessonLabels;          // "LESSON 03 / 07", or "EXTRA 1 / 3"
+        private static int basicsEnd;                  // the READY lesson, see BasicsEnd
         private static string[] lessonTags;            // "LESSON 03", or "EXTRA 1"
         private static Flick[] pattern = { Flick.Down, Flick.Left, Flick.Right, Flick.Up };
         private static string[] wayHints = { "", "SWING UP", "SWING DOWN", "SWING LEFT", "SWING RIGHT" };   // in Flick order
@@ -157,7 +158,8 @@ namespace Tacetno433.Screens
             {
                 lessonLabels = new string[lessons.Length];
                 lessonTags = new string[lessons.Length];
-                int basics = BasicsEnd() + 1;
+                basicsEnd = BasicsEnd();
+                int basics = basicsEnd + 1;
                 int extras = lessons.Length - basics - 1;
                 for (int i = 0; i < lessons.Length; i++)
                 {
@@ -374,11 +376,16 @@ namespace Tacetno433.Screens
 
             Gfx.SlantBox(sb, new Rectangle(860, 10, 440, 80), Ui.Slant, Palette.Void * 0.9f);
             Gfx.TextSpaced(sb, Game.Font, "PROGRESS", 900, 22, Palette.LineGrey, TextSize.Tiny, 4f);
-            float gap = 330f / (lessons.Length - 1);
+            //Pips : the basics up to READY, or only the extras once past it, so a newcomer sees
+            //the seven steps the label counts, not the extras too (round 15). ALL DONE, the very
+            //last lesson, is not counted, the same as in the label.
+            int first = index <= basicsEnd ? 0 : basicsEnd + 1;
+            int last = index <= basicsEnd ? basicsEnd : Math.Max(first, lessons.Length - 2);
+            float gap = 330f / Math.Max(1, last - first);
             Gfx.Rect(sb, 904, 58, 330, 1, Palette.LineGrey);
-            for (int i = 0; i < lessons.Length; i++)
+            for (int i = first; i <= last; i++)
             {
-                float x = 904 + i * gap;
+                float x = 904 + (i - first) * gap;
                 if (i < index) Gfx.Diamond(sb, x, 58, 5, Palette.Paper);
                 else if (i == index) { Gfx.Diamond(sb, x, 58, 8, Palette.Highlight); Gfx.DiamondOutline(sb, x, 58, 12, Palette.Paper, 1f); }
                 else Gfx.DiamondOutline(sb, x, 58, 5, Palette.LineGrey, 1f);

@@ -33,7 +33,7 @@ namespace Tacetno433.Screens
             //throbs with the beat once the band is low on breath
             int jolt = (int)((float)Math.Sin(time * 70f) * 6f * staminaJolt);
             bool low = run.Stamina <= run.MaxStamina * LowBreath;
-            Gfx.TextSpaced(sb, Game.Font, "STAMINA", 22 + jolt, roundPlate.Y + 64, low ? Palette.Highlight : Palette.LineGrey, TextSize.Tiny, 2f);
+            Gfx.TextSpaced(sb, Game.Font, "BREATH", 22 + jolt, roundPlate.Y + 64, low ? Palette.Highlight : Palette.LineGrey, TextSize.Tiny, 2f);
             Gfx.TextRight(sb, Game.Font, run.StaminaValue, 250 + jolt, roundPlate.Y + 58, Palette.Paper, TextSize.Body);
             Rectangle bar = new Rectangle(22 + jolt, roundPlate.Y + 80, 228, 10);
             float glow = Math.Max(staminaFlash, low ? BeatPulse() : 0f);
@@ -319,7 +319,7 @@ namespace Tacetno433.Screens
             Gfx.TextSpacedCentered(sb, Game.Font, "THE DEVIL'S STRING  /  THE BARGAIN", bargainBox.Center.X, bargainBox.Y + 30, Palette.PaperDim, TextSize.Tiny, 4f);
             Gfx.TextCentered(sb, Game.BigFont, "One string, one bow, one bargain.", bargainBox.Center.X, bargainBox.Y + 74, Palette.Highlight, TextSize.Subtitle);
             Gfx.TextCentered(sb, Game.StoryFont, "Your band hits 50 percent harder for this round.", bargainBox.Center.X, bargainBox.Y + 120, Palette.Paper, TextSize.Story);
-            Gfx.TextCentered(sb, Game.StoryFont, "Your stamina limit drops by 15 for the rest of the run.", bargainBox.Center.X, bargainBox.Y + 148, Palette.Paper, TextSize.Story);
+            Gfx.TextCentered(sb, Game.StoryFont, "Your breath limit drops by 15 for the rest of the run.", bargainBox.Center.X, bargainBox.Y + 148, Palette.Paper, TextSize.Story);
 
             Ui.Button(sb, acceptButton, "ACCEPT", "Y", true);
             Ui.Button(sb, refuseButton, "REFUSE", "N", false);

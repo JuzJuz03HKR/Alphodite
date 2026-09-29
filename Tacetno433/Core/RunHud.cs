@@ -8,15 +8,15 @@ namespace Tacetno433.Core
     //
     //Left   band name and conductor
     //Centre the page title
-    //Right  stamina, seats, shards and motif count
+    //Right  breath, seats, shards and motif count
     //Under the bar on the right, one badge per motif. Point at a badge to read it.
     //
     //Pages call DrawTop early and DrawTips last, so the tooltip sits above everything.
     public static class RunHud
     {
         public const int TopH = 64;
-        private const float BadgeSize = 11f;
-        private const int BadgeGap = 28;
+        private const float BadgeSize = 16f;     // round 15 : 11 was too small to read the initials
+        private const int BadgeGap = 40;
 
         private static int hoverMotif = -1;
 
@@ -37,7 +37,7 @@ namespace Tacetno433.Core
 
             //Stamina Chip : label, number and a bar
             int sx = 850;
-            Gfx.TextSpaced(sb, Ui.Font, "STAMINA", sx, 12, Palette.LineGrey, TextSize.Tiny, 2f);
+            Gfx.TextSpaced(sb, Ui.Font, "BREATH", sx, 12, Palette.LineGrey, TextSize.Tiny, 2f);
             Gfx.TextRight(sb, Ui.Font, run.StaminaValue, sx + 150, 8, Palette.Paper, TextSize.Body);
             Ui.CapsuleBar(sb, new Rectangle(sx, 34, 150, 10), run.Stamina / (float)run.MaxStamina, Palette.Paper, 1f);
 
@@ -64,7 +64,7 @@ namespace Tacetno433.Core
         //Badge Centre : motif i, counted from the right edge
         private static Vector2 BadgeCentre(int i)
         {
-            return new Vector2(TacetGame.ScreenW - 30 - i * BadgeGap, TopH + 20);
+            return new Vector2(TacetGame.ScreenW - 34 - i * BadgeGap, TopH + 24);
         }
 
         //Badges : one diamond per motif, the newest on the left
@@ -78,7 +78,7 @@ namespace Tacetno433.Core
                 bool over = Input.MouseOver(hit);
                 if (over) hoverMotif = i;
 
-                if (over) Gfx.DrawGlow(sb, c.X, c.Y, 22f, Palette.Paper * 0.3f);
+                if (over) Gfx.DrawGlow(sb, c.X, c.Y, 30f, Palette.Paper * 0.3f);
                 MotifArt.Badge(sb, run.Motifs[i], c.X, c.Y, BadgeSize, over ? 1f : 0.8f);
             }
         }

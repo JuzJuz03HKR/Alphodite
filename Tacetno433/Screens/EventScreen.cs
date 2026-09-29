@@ -218,7 +218,7 @@ namespace Tacetno433.Screens
             if (reward == Reward.Stamina)
             {
                 run.ChangeStamina(amount);
-                return NumberText.Signed(amount) + " STAMINA";
+                return NumberText.Signed(amount) + " BREATH";
             }
 
             if (reward == Reward.Motif)

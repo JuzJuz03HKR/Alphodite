@@ -48,7 +48,7 @@ namespace Tacetno433.Data
                 Name = "ROMANTIC",
                 Subtitle = "EVERYTHING FELT",
                 Years = "1820 - 1900",
-                Description = "Bigger and louder. The stamina bill comes later."
+                Description = "Bigger and louder. The breath bill comes later."
             },
         };
 

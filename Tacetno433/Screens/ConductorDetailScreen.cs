@@ -279,7 +279,7 @@ namespace Tacetno433.Screens
             Gfx.TextSpaced(sb, Game.Font, c.Role, LeftX + 130, rowY - 3, Palette.Paper * a, TextSize.Body, 2f);
 
             rowY += 36;
-            DrawRow(sb, "STAMINA", rowY, a);
+            DrawRow(sb, "BREATH", rowY, a);
             Ui.Pips(sb, LeftX + 136, rowY + 6, c.Stamina, 10, 5, 15, a);
             Gfx.TextRight(sb, Game.Font, c.StaminaLabel, LeftX + 380, rowY - 3, Palette.Paper * a, TextSize.Body);
 

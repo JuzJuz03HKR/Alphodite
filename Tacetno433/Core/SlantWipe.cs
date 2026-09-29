@@ -21,9 +21,12 @@ namespace Tacetno433.Core
             if (covered <= 0f) return;
             if (covered > 1f) covered = 1f;
 
-            //Smoothstep : starts slowly, rushes, then settles
+            //Ease Out : sets off at once and slows down all the way to a soft stop (round 15 : the
+            //smoothstep rush in the middle flickered. Project Sekai's animators let every motion
+            //settle slowly for the same reason, see DESIGN_RESEARCH 6.13)
             float t = going ? covered : 1f - covered;
-            float ease = t * t * (3f - 2f * t);
+            float rest = 1f - t;
+            float ease = 1f - rest * rest * rest;
             int w = TacetGame.ScreenW;
             int h = TacetGame.ScreenH;
             float edge = -Lean - 40f + ease * (w + Lean + 80f);     // the bottom of the edge, from off the left to off the right

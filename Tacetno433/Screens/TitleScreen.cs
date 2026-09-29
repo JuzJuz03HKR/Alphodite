@@ -317,7 +317,7 @@ namespace Tacetno433.Screens
             Gfx.Diamond(sb, 446, y + 16, 3, Palette.PaperDim);
 
             Gfx.Text(sb, Game.StoryFont, "You do not play the notes.", 86, 296, Palette.Highlight, TextSize.Story);
-            Gfx.Text(sb, Game.StoryFont, "You decide who does.", 86, 318, Palette.PaperDim, TextSize.Story);
+            Gfx.Text(sb, Game.StoryFont, "You lead the band that does.", 86, 318, Palette.PaperDim, TextSize.Story);
         }
 
         //Menu : slanted blades, the chosen one turns solid white

@@ -123,7 +123,7 @@ namespace Tacetno433.Data
             //now it is a reading test : a note on every beat, any mark, and no rest at all.
             new Enemy { Name = "WHITE NOISE",    Title = "Every beat, all the time, forever.",
                         Trait = EnemyTrait.NoRest, TraitName = "NO REST", TraitFloor = 1,
-                        TraitText = "It never stops, so silent beats give back only half the stamina.",
+                        TraitText = "It never stops, so silent beats give back only half the breath.",
                         Kind = EnemyKind.Elite, Pattern = new int[] { 5, 5, 5, 5, 5, 5, 5, 5 }, Tone = Palette.ToneA, Temper = 0 },
 
             //Boss : one per era
@@ -139,7 +139,7 @@ namespace Tacetno433.Data
                         // twice the hardest elite. Now about 15 percent, still the hardest boss. Round 12 : was 4 4 0 6 4 4 0 9
             new Enemy { Name = "THE DEVIL'S STRING",  Title = "One string, one bow, one bargain.",
                         Trait = EnemyTrait.Bargain, TraitName = "THE BARGAIN", TraitFloor = 1,
-                        TraitText = "Before round two it offers a deal: more power now, less stamina for ever.",
+                        TraitText = "Before round two it offers a deal: more power now, less breath for ever.",
                         Kind = EnemyKind.Boss, Era = 2, Pattern = new int[] { 7, 0, 7, 0, 0, 9, 0, 9 }, Hidden = new int[] { 4 }, Tone = Palette.ToneA, Temper = 20 },
         };
 

@@ -651,7 +651,7 @@ namespace Tacetno433.Screens
             int jolt = (int)((float)Math.Sin(time * 70f) * 6f * breathJolt);
             Rectangle plate = new Rectangle(BreathPlate.X + jolt, BreathPlate.Y, BreathPlate.Width, BreathPlate.Height);
             Gfx.SlantBox(sb, plate, Ui.Slant, Palette.Void * 0.9f);
-            Gfx.TextSpaced(sb, Game.Font, "STAMINA", plate.X + 26, plate.Y + 10, breath <= 0.25f ? Palette.Highlight : Palette.LineGrey, TextSize.Tiny, 2f);
+            Gfx.TextSpaced(sb, Game.Font, "BREATH", plate.X + 26, plate.Y + 10, breath <= 0.25f ? Palette.Highlight : Palette.LineGrey, TextSize.Tiny, 2f);
             Rectangle bar = new Rectangle(plate.X + 26, plate.Y + 32, 220, 10);
             if (breathJolt > 0f) Gfx.DrawGlowBox(sb, bar, Palette.Highlight * (0.6f * breathJolt));
             Ui.CapsuleBar(sb, bar, breath, Palette.Paper, 1f);

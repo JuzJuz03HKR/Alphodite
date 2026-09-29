@@ -104,7 +104,7 @@ namespace Tacetno433.Screens
             statNames[0] = "PERFECT BEATS";    statValues[0] = NumberText.Get(battle.PerfectCount);
             statNames[1] = "BEST COMBO";       statValues[1] = NumberText.Get(battle.BestCombo);
             statNames[2] = "FINAL LINE";       statValues[2] = NumberText.Signed((int)battle.Line);
-            statNames[3] = "STAMINA BACK";     statValues[3] = NumberText.Signed(recovered);
+            statNames[3] = "BREATH BACK";     statValues[3] = NumberText.Signed(recovered);
             statNames[4] = "SHARDS";           statValues[4] = NumberText.Signed(shards);
             statCount = 5;
 

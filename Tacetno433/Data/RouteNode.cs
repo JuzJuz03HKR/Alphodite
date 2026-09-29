@@ -41,7 +41,7 @@ namespace Tacetno433.Data
         {
             "A duel with TACET. Win and take whatever it leaves behind.",
             "Something is waiting here. A person, a gift, or a fight.",
-            "Trade shards for motifs, stamina and seats.",
+            "Trade shards for motifs, breath and seats.",
             "Harder than it looks. Better spoils, and sometimes a musician.",
             "Breathe, or rehearse. The ensemble chooses one.",
             "The last room of this floor. It has been waiting for you.",
