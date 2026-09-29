@@ -188,7 +188,10 @@ namespace Tacetno433.Screens
                 float x = left + i * gap;
                 Rectangle cap = new Rectangle((int)x - 22, (int)(floor - 120 + dip), 44, 110);
                 MusicianArt.Token(sb, cap, run.Roster[i], e, 0f);
-                Gfx.TextSpacedCentered(sb, Game.Font, run.Roster[i].NameTag, x, floor + 10, Palette.PaperDim * e, TextSize.Tiny, 1.5f);
+
+                //Names : a big band stands close, so every other name drops a line and they never touch
+                float nameY = count >= 6 && i % 2 == 0 ? floor + 24 : floor + 10;
+                Gfx.TextSpacedCentered(sb, Game.Font, run.Roster[i].NameTag, x, nameY, Palette.PaperDim * e, TextSize.Tiny, 1.5f);
             }
 
             //Conductor : at the head of the line, bowing with the band

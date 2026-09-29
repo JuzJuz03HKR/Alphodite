@@ -119,7 +119,8 @@ namespace Tacetno433.Screens
                     textX = box.X + 52;
                 }
                 Gfx.Text(sb, Game.Font, m.Name, textX, box.Y + 6, ink, TextSize.Body);
-                Gfx.TextSpaced(sb, Game.Font, StageLayout.RowOf(s).Name, textX, box.Y + 28, soft, TextSize.Tiny, 1f);
+                string family = roomForFace ? StageLayout.RowOf(s).Name : StageLayout.RowOf(s).Short;   // a narrow box (a big band) gets STR / WND / PRC
+                Gfx.TextSpaced(sb, Game.Font, family, textX, box.Y + 28, soft, TextSize.Tiny, 1f);
 
                 //Seat : the badge, or SILENCED while SILENT MOUTHS holds their section
                 if (silenced)

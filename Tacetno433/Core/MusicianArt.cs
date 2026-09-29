@@ -55,11 +55,25 @@ namespace Tacetno433.Core
             ArtBank.DrawOrSlot(sb, ArtBank.PortraitOf(m), art, Palette.Paper, bright);
             Ornament.FadeUp(sb, new Rectangle(art.X, art.Bottom - 34, art.Width, 34), 0.9f);
 
-            //Side : the arrow in the top corner, so every card says which way of the baton they answer
-            SideBadge(sb, m.Cue, r.X + 22, r.Y + 24, 13f, Palette.Ink, Palette.Paper, bright);
+            //Side : the arrow in the top corner, so every card says which way of the baton they answer.
+            //A short card (a big ensemble, three rows of cards) has no room above the name, so the
+            //arrow moves to the end of the name line and the name shrinks to fit beside it.
+            bool shortCard = art.Height < 90;
+            float nameSize = TextSize.Small;
+            if (shortCard)
+            {
+                SideBadge(sb, m.Cue, r.Right - 16, art.Bottom - 16, 10f, Palette.Ink, Palette.Paper, bright);
+                float room = r.Width - 16 - 26;
+                float width = Gfx.TextWidth(Ui.BigFont, m.NameTag, nameSize);
+                if (width > room) nameSize *= room / width;
+            }
+            else
+            {
+                SideBadge(sb, m.Cue, r.X + 22, r.Y + 24, 13f, Palette.Ink, Palette.Paper, bright);
+            }
 
             //Name : serif with the slash, sitting on the bottom of the portrait
-            Gfx.Text(sb, Ui.BigFont, m.NameTag, r.X + 8, art.Bottom - 30, Palette.Highlight * bright, TextSize.Small);
+            Gfx.Text(sb, Ui.BigFont, m.NameTag, r.X + 8, art.Bottom - 30, Palette.Highlight * bright, nameSize);
             Gfx.Rect(sb, r.X + 8, art.Bottom + 1, r.Width - 16, 1, Palette.Paper * (0.5f * bright));
 
             //Details
