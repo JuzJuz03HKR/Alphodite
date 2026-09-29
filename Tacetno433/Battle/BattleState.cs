@@ -147,7 +147,12 @@ namespace Tacetno433.Battle
         private Choice[,] passChoice = new Choice[BattleRules.PassesMost, BattleRules.BeatsPerRound];
         private Choice[,] passShown = new Choice[BattleRules.PassesMost, BattleRules.BeatsPerRound];
         private bool[,] passDouble = new bool[BattleRules.PassesMost, BattleRules.BeatsPerRound];
-        private int[] writtenPower = new int[BattleRules.BeatsPerRound];       // the round's notes before THE WHOLE FLOOR knocks them
+        private int[,] passPower = new int[BattleRules.PassesMost, BattleRules.BeatsPerRound];   // each pass's notes before THE WHOLE FLOOR knocks them
+        private int[,] passNote = new int[BattleRules.PassesMost, BattleRules.BeatsPerRound];    // SONG : the pitch of each note (MIDI), 0 for none
+
+        //SONG : the phrase of the enemy's song this round starts on. Round 1 plays phrase 0, each
+        //round then carries on from where the last one stopped (see EndRound).
+        private int songStart;
 
         //Sheet : every beat of every round, kept for the result page. Sheet[round - 1][beat].
         //When a round is played more than once, it keeps the last time through.
@@ -158,6 +163,7 @@ namespace Tacetno433.Battle
         public string TempoLabel = "";
         public string PassesLabel = "";          // "PLAYED x2", empty when the round is played once
         public string EnemyTitle = "";
+        public string SongLabel = "";            // "ODE TO JOY  /  BEETHOVEN", empty for an enemy without a song
         private static string[] passesWords = { "", "", "PLAYED x2", "PLAYED x3" };
 
         private Random random;
@@ -197,6 +203,7 @@ namespace Tacetno433.Battle
             if (enemy.Kind == EnemyKind.Boss) lineWeight = BattleRules.BossLine;
 
             EnemyTitle = enemy.KindLabel + "  /  " + enemy.Name;
+            if (enemy.Song != null) SongLabel = enemy.Song.Label;
 
             for (int b = 0; b < Results.Length; b++)
                 Results[b] = new BeatResult();
@@ -487,19 +494,25 @@ namespace Tacetno433.Battle
                 if (EnemyPower[last] <= 0) EnemyPower[last] = Math.Max(1, Strongest() * 6 / 10);
             }
 
+            int[] roundPower = new int[BattleRules.BeatsPerRound];
             for (int b = 0; b < BattleRules.BeatsPerRound; b++)
-                writtenPower[b] = EnemyPower[b];
+                roundPower[b] = EnemyPower[b];
 
             //REPEATS : the same beats every time through, but the marks and the pairs are
-            //decided afresh for each pass, all of them now
+            //decided afresh for each pass, all of them now.
+            //SONG : an enemy with a song plays the next phrase of it on every pass instead, its
+            //notes, rests and marks exactly as written (SongPhrase).
             Passes = BattleRules.PassesPerRound[Math.Min(Round, BattleRules.PassesPerRound.Length) - 1];
             for (int p = 0; p < Passes; p++)
             {
                 for (int b = 0; b < BattleRules.BeatsPerRound; b++)
                 {
+                    EnemyPower[b] = roundPower[b];
+                    passNote[p, b] = SongList.PlainMelody[b];
                     EnemyChoice[b] = b == TremoloBeat ? Choice.Normal : RollEnemyChoice(b);
                     ShownChoice[b] = EnemyChoice[b];
                 }
+                if (Enemy.Song != null) SongPhrase(p);
 
                 //FALSE NOTES : one note in each bar shows the wrong loudness
                 if (EnemyHas(EnemyTrait.FalseNotes))
@@ -513,6 +526,7 @@ namespace Tacetno433.Battle
                     passChoice[p, b] = EnemyChoice[b];
                     passShown[p, b] = ShownChoice[b];
                     passDouble[p, b] = EnemyDouble[b];
+                    passPower[p, b] = EnemyPower[b];
                 }
             }
             BeginPass(0);
@@ -520,6 +534,47 @@ namespace Tacetno433.Battle
             RoundLabel = "ROUND " + Round + " / " + BattleRules.MaxRounds;
             TempoLabel = Tempo + " BPM";
             PassesLabel = passesWords[Passes];
+        }
+
+        //Song Phrase : SONG, pass p of this round plays the next phrase of the enemy's song. Each
+        //note hits as hard as the enemy's pattern does on average (Enemy.SongNotePower), and keeps
+        //the mark the song writes. The round's last note is still a roll or a hold when the enemy
+        //has one (a silent last beat then holds on to the note before it).
+        //GENTLE fights, the first of a run, play only the notes on beats 1 and 3 of every bar,
+        //and an mf there is played p, so the song is learnt with two sizes at half the speed.
+        private void SongPhrase(int p)
+        {
+            SongChart song = Enemy.Song;
+            int phrase = (songStart + p) % song.PhraseCount;
+            int power = Math.Max(1, (int)Math.Round(Enemy.SongNotePower() * scale));
+            int last = BattleRules.BeatsPerRound - 1;
+            int held = 0;
+
+            for (int b = 0; b < BattleRules.BeatsPerRound; b++)
+            {
+                int note = song.Notes[phrase, b];
+                Choice mark = song.Marks[phrase, b];
+                if (Gentle && b % 2 == 1) note = 0;                                         // GENTLE : beats 1 and 3 only
+                if (Gentle && mark == Choice.Normal) mark = Choice.Ease;                    // GENTLE : f and p only
+                if (note > 0) held = note;
+
+                //Last Note : a roll or a hold always has a note, the one before it rings on
+                bool special = b == last && (TremoloBeat == last || FermataBeat == last);
+                if (special && note == 0) { note = held > 0 ? held : SongList.PlainMelody[b]; mark = Choice.Normal; }
+
+                EnemyPower[b] = note > 0 ? power : 0;
+                EnemyHidden[b] = EnemyHidden[b] && note > 0;
+                passNote[p, b] = note;
+                EnemyChoice[b] = b == TremoloBeat ? Choice.Normal : mark;
+                ShownChoice[b] = EnemyChoice[b];
+            }
+        }
+
+        //Note At : SONG, the pitch (MIDI number) the band plays for this beat of this pass. An
+        //enemy without a song gives a plain line, so the band always plays in tune.
+        public int NoteAt(int pass, int beat)
+        {
+            return passNote[Math.Min(pass, BattleRules.PassesMost - 1), beat];
         }
 
         //Pass Begin : the next time through the phrase. Its marks and pairs become the round's,
@@ -532,7 +587,7 @@ namespace Tacetno433.Battle
                 EnemyChoice[b] = passChoice[pass, b];
                 ShownChoice[b] = passShown[pass, b];
                 EnemyDouble[b] = passDouble[pass, b];
-                EnemyPower[b] = writtenPower[b];
+                EnemyPower[b] = passPower[pass, b];
                 Results[b].Done = false;
             }
         }
@@ -551,7 +606,7 @@ namespace Tacetno433.Battle
 
         public int PowerAt(int pass, int beat)
         {
-            return pass == Pass ? EnemyPower[beat] : writtenPower[beat];
+            return pass == Pass ? EnemyPower[beat] : passPower[pass, beat];
         }
 
         //False Note : pick one plain, visible note in this bar and give it the wrong mark
@@ -1411,6 +1466,7 @@ namespace Tacetno433.Battle
             for (int b = 0; b < BattleRules.BeatsPerRound; b++)
                 lastRound[b] = Results[b].BasePower;
 
+            songStart += Passes;                                                        // SONG : the next round goes on with the next phrase
             Round++;
             FinaleTried = false;
             if (Round > BattleRules.MaxRounds)

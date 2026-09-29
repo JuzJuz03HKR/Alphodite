@@ -12,19 +12,18 @@ namespace Tacetno433.Data
     //name. A trait is always told to the player BEFORE it matters: the first banner of the duel
     //explains it the first time it is met (round 14), its name sits on the enemy's plate, and the
     //story box says it when the fight opens.
-    //Round 12 : SILENT MOUTHS and UNFINISHED also play with the band. Round 14 : with the parts
-    //written on the players, SILENT MOUTHS silences a letter (p, mf or f) and UNFINISHED swaps
-    //the left and right arrows.
+    //Round 12 : SILENT MOUTHS and UNFINISHED also play with the band. Round 15 : SILENT MOUTHS
+    //silences a section of the orchestra and UNFINISHED swaps the left and right sides.
     public enum EnemyTrait
     {
         None,
         EchoFades,       // HUSH         the f / mf / p marks on its notes fade before they arrive
-        FillsGaps,       // DEAD AIR     a small stroke or none lets its note in 50 percent harder
+        FillsGaps,       // DEAD AIR     a note missed or let pass lands 50 percent harder
         Lullaby,         // THE LULL     round three slows down instead of speeding up
         FalseNotes,      // STATIC       one note in every bar shows the wrong loudness
-        SilentMouths,    // MUTE CHOIR   from round two it silences one part of your band (p, mf or f), and hides some notes
+        SilentMouths,    // MUTE CHOIR   from round two it silences one section of your band, and hides some notes
         NoRest,          // WHITE NOISE  silent beats give back only half the stamina
-        Unfinished,      // REQUIEM      round three plays its part backwards, faster, and swaps your left and right arrows
+        Unfinished,      // REQUIEM      round three plays its part backwards, faster, and swaps your left and right sides
         Mirror,          // NAMELESS     from round two it plays YOUR last round back at you
         Bargain          // DEVIL'S STRING  before round two it offers a deal
     }
@@ -47,6 +46,20 @@ namespace Tacetno433.Data
 
         //Hidden : beat numbers (0 to 7) shown as ??? until the clash
         public int[] Hidden = new int[0];
+
+        //SONG (round 15) : a real piece this enemy plays instead of its pattern, or null. Its notes,
+        //rests and marks come from the song (see Data/SongChart.cs). The pattern still sets how hard
+        //each note hits : the average of its notes (SongNotePower).
+        public SongChart Song;
+
+        public int SongNotePower()
+        {
+            int total = 0;
+            int notes = 0;
+            for (int b = 0; b < Pattern.Length; b++)
+                if (Pattern[b] > 0) { total += Pattern[b]; notes++; }
+            return notes > 0 ? (int)System.Math.Round(total / (float)notes) : 1;
+        }
 
         //Temper : above 0 it boosts more often, below 0 it eases more often (percent)
         public int Temper = 0;
@@ -74,22 +87,24 @@ namespace Tacetno433.Data
         {
             //Normal : any era. Round 11 : HUSH and THE LULL were given heavier parts, they were
             //far weaker than the other two and never threatened anyone.
+            //Round 15 : the roadside enemies play ODE TO JOY for now (the first song). In the month
+            //after the 29 Sep hand in, each should get a piece of its own.
             new Enemy { Name = "HUSH",      Title = "The first thing to go is the echo.",
                         Trait = EnemyTrait.EchoFades, TraitName = "ECHO FADES", TraitFloor = 2,
                         TraitText = "The f, mf and p marks on its notes fade before they reach you. Remember them.",
-                        Kind = EnemyKind.Normal, Pattern = new int[] { 4, 0, 3, 4, 0, 0, 5, 0 }, Tone = Palette.ToneD, Temper = 5 },
+                        Kind = EnemyKind.Normal, Song = SongList.OdeToJoy, Pattern = new int[] { 4, 0, 3, 4, 0, 0, 5, 0 }, Tone = Palette.ToneD, Temper = 5 },
             new Enemy { Name = "DEAD AIR",  Title = "It waits between your notes.",
                         Trait = EnemyTrait.FillsGaps, TraitName = "FILLS THE GAPS", TraitFloor = 2,
                         TraitText = "A note you miss or let pass hits 50 percent harder.",
-                        Kind = EnemyKind.Normal, Pattern = new int[] { 0, 4, 0, 4, 0, 4, 0, 5 }, Tone = Palette.ToneE },
+                        Kind = EnemyKind.Normal, Song = SongList.OdeToJoy, Pattern = new int[] { 0, 4, 0, 4, 0, 4, 0, 5 }, Tone = Palette.ToneE },
             new Enemy { Name = "THE LULL",  Title = "Soft, patient, and never finished.",
                         Trait = EnemyTrait.Lullaby, TraitName = "LULLABY", TraitFloor = 2,
                         TraitText = "Round three slows down instead of speeding up.",
-                        Kind = EnemyKind.Normal, Pattern = new int[] { 3, 3, 0, 0, 7, 0, 3, 3 }, Tone = Palette.ToneC, Temper = -10 },
+                        Kind = EnemyKind.Normal, Song = SongList.OdeToJoy, Pattern = new int[] { 3, 3, 0, 0, 7, 0, 3, 3 }, Tone = Palette.ToneC, Temper = -10 },
             new Enemy { Name = "STATIC",    Title = "It sounds like something. It is not.",
                         Trait = EnemyTrait.FalseNotes, TraitName = "FALSE NOTES", TraitFloor = 2,
                         TraitText = "One note in every bar shows the wrong loudness.",
-                        Kind = EnemyKind.Normal, Pattern = new int[] { 4, 0, 3, 0, 4, 0, 3, 6 }, Tone = Palette.ToneB, Temper = 10 },
+                        Kind = EnemyKind.Normal, Song = SongList.OdeToJoy, Pattern = new int[] { 4, 0, 3, 0, 4, 0, 3, 6 }, Tone = Palette.ToneB, Temper = 10 },
 
             //Elite : any era
             new Enemy { Name = "THE MUTE CHOIR", Title = "A hundred mouths, open, making nothing.",

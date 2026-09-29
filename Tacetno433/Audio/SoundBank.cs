@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Media;
@@ -83,6 +84,15 @@ namespace Tacetno433.Audio
     //   Audio/Phrase/answer_1 ... answer_8   the band's answer, note 1 on beat 1 and so on
     //   Audio/Phrase/call_1   ... call_8     TACET's call
     //Fewer files are fine: with 4 notes the melody simply repeats every bar.
+    //
+    //INSTRUMENTS (round 15) : the band plays the real song TACET's notes come from (Data/SongChart.cs),
+    //each musician on their own instrument. One recorded note per instrument is enough, the game
+    //plays it at every pitch of the song :
+    //   Audio/Instruments/violin  flute  timpani  soduang  pinai  ranatek  cello  horn  bassdrum
+    //   (the names are Musician.Sample). Record each on C : middle C (C4) for most, C3 for the
+    //   cello and the timpani (Musician.SampleNote). The bass drum is one hit, it has no pitch.
+    //   Audio/Instruments/tacet  (optional) TACET's own voice for its call, also on C4.
+    //When an instrument file is there, it plays instead of the phrase files above.
     public static class SoundBank
     {
         //Sound Files : paths inside the Content folder, no extension
@@ -163,6 +173,11 @@ namespace Tacetno433.Audio
         private static int callCount;
         public static int LoadedPhrase;
 
+        //Instrument Notes : see the note at the top, one per musician in MusicianList order
+        private static SoundEffect[] instrumentNotes = new SoundEffect[0];
+        private static SoundEffect tacetNote;
+        public static int LoadedInstruments;
+
         //Sound Load : called once from LoadContent
         public static void Load(ContentManager content)
         {
@@ -199,6 +214,7 @@ namespace Tacetno433.Audio
             answerCount = LoadPhrase(content, "Audio/Phrase/answer_", answerNotes);
             callCount = LoadPhrase(content, "Audio/Phrase/call_", callNotes);
             LoadedPhrase = answerCount + callCount;
+            LoadInstruments(content);
 
             MediaPlayer.IsRepeating = true;
             MediaPlayer.Volume = MusicLevel;
@@ -220,6 +236,60 @@ namespace Tacetno433.Audio
                 catch (Exception) { break; }
             }
             return count;
+        }
+
+        //Instruments Load : one file per musician, and TACET's own, each skipped quietly if missing
+        private static void LoadInstruments(ContentManager content)
+        {
+            Tacetno433.Data.Musician[] all = Tacetno433.Data.MusicianList.All;
+            instrumentNotes = new SoundEffect[all.Length];
+            LoadedInstruments = 0;
+            for (int i = 0; i < all.Length; i++)
+            {
+                instrumentNotes[i] = TryLoad(content, "Audio/Instruments/" + all[i].Sample);
+                if (instrumentNotes[i] != null) LoadedInstruments++;
+            }
+            tacetNote = TryLoad(content, "Audio/Instruments/tacet");
+        }
+
+        //Try Load : a sound effect if its file exists and reads, otherwise null
+        private static SoundEffect TryLoad(ContentManager content, string name)
+        {
+            if (!Exists(content, name)) return null;
+            try { return content.Load<SoundEffect>(name); }
+            catch (Exception) { return null; }
+        }
+
+        //Play Instrument : one musician's instrument playing this note of the song (a MIDI number,
+        //60 is middle C). detune bends it a little, the duel uses it to make a MISS sound wrong.
+        //Returns false when the file is missing, so the caller can fall back.
+        public static bool PlayInstrument(int musician, int sampleNote, int midi, float volume, float detune)
+        {
+            if (musician < 0 || musician >= instrumentNotes.Length || instrumentNotes[musician] == null) return false;
+            instrumentNotes[musician].Play(volume * Settings.Sfx * Settings.Master, PitchFor(sampleNote, midi, detune), 0f);
+            return true;
+        }
+
+        //Play Tacet : TACET's call on its own voice, when the file exists
+        public static bool PlayTacet(int midi, float volume)
+        {
+            if (tacetNote == null) return false;
+            tacetNote.Play(volume * Settings.Sfx * Settings.Master, PitchFor(60, midi, 0f), 0f);
+            return true;
+        }
+
+        //ADVANCED PART : one recorded note played at another pitch. SoundEffect.Play takes a pitch
+        //from -1 (one octave down) to +1 (one octave up), so a note n semitones above the recording
+        //is pitch n / 12. A note further away than an octave is moved by whole octaves (12 semitones)
+        //until it fits, so the cello plays the tune an octave lower instead of not at all.
+        //A drum (sampleNote 0) always plays as recorded.
+        private static float PitchFor(int sampleNote, int midi, float detune)
+        {
+            if (sampleNote <= 0 || midi <= 0) return MathHelper.Clamp(detune, -1f, 1f);
+            int shift = midi - sampleNote;
+            while (shift > 12) shift -= 12;
+            while (shift < -12) shift += 12;
+            return MathHelper.Clamp(shift / 12f + detune, -1f, 1f);
         }
 
         //Play Answer : the band's note for this beat of the round. Returns false when there are

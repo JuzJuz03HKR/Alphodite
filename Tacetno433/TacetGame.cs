@@ -144,6 +144,7 @@ namespace Tacetno433
             EnemyList.PrepareText(StoryFont, TraitWrapWidth);
             MotifList.PrepareText(StoryFont, MotifCardWidth, MotifTipWidth);
             EventList.PrepareText(StoryFont, EventTextWidth, EventTextWidth);
+            SongList.Prepare();
 
             //First Screen : the title page, or the capture tool when it was asked for
             if (DebugShots.Active)
@@ -276,7 +277,7 @@ namespace Tacetno433
                 //so the string work never happens during normal play.
                 string line = "FPS " + shownFps + "   MEM " + shownMemory.ToString("0.0") + " MB"
                             + "   SFX " + SoundBank.LoadedSfx + "   MUSIC " + SoundBank.LoadedMusic
-                            + "   PHRASE " + SoundBank.LoadedPhrase
+                            + "   PHRASE " + SoundBank.LoadedPhrase + "   INSTR " + SoundBank.LoadedInstruments
                             + "   HAND " + HandArt.LoadedPoses + "   ART " + ArtBank.Loaded + "   PIXEL " + CharacterArt.Loaded;
                 Gfx.Rect(spriteBatch, 0, 0, 860, 24, Color.Black * 0.8f);
                 Gfx.Text(spriteBatch, Font, line, 8, 3, Palette.Highlight, TextSize.Body);

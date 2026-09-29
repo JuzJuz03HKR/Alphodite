@@ -841,7 +841,7 @@ namespace Tacetno433.Screens
             {
                 Choice shown = battle.EnemyHidden[n] ? Choice.Normal : battle.ShownAt(pass, n);
                 float volume = shown == Choice.Boost ? 1f : (shown == Choice.Ease ? 0.45f : 0.75f);
-                if (!SoundBank.PlayCall(n, volume, 0f))
+                if (!SoundBank.PlayTacet(battle.NoteAt(pass, n), volume * 0.6f) && !SoundBank.PlayCall(n, volume, 0f))
                     SoundBank.Play(Sfx.NoteOn, volume, shown == Choice.Boost ? -0.4f : 0.2f);
 
                 effects.SpawnRipple(EnemyX(), EnemyFeetY, shown == Choice.Boost ? 170f : 110f, true);
@@ -986,9 +986,9 @@ namespace Tacetno433.Screens
             if (r.Played && grade != Grade.Hesitate && !r.Fermata)          // a fermata sang when it was struck
             {
                 float volume = choice == Choice.Boost ? 1f : (choice == Choice.Ease ? 0.5f : 0.8f);
-                float pitch = grade == Grade.Miss ? -0.12f : (r.Fortissimo ? 0.08f : 0f);
+                float pitch = grade == Grade.Miss ? -0.12f : 0f;
                 if (r.Fortissimo) volume = 1f;
-                SoundBank.PlayAnswer(b, volume, pitch);
+                PlayBandNote(b, volume, pitch);
             }
 
             if (grade == Grade.Hesitate) ShowJudge(gradeWord[(int)Grade.Hesitate], 0.55f);
@@ -1015,6 +1015,29 @@ namespace Tacetno433.Screens
             ShowBreath(r);
             if (r.Fired)
                 effects.SpawnPop(stageBox.Center.X, stageBox.Y + 60, "RUNAWAY FIRE", Palette.Accent, 0.5f);
+        }
+
+        //Band Note : SONG, the note of the song on this beat, played by everybody who plays, each on
+        //their own instrument, quieter each the more there are (round 15). Without instrument files
+        //it falls back to the old phrase files, and without those it stays silent (no stand-in sounds).
+        private bool PlayBandNote(int b, float volume, float detune)
+        {
+            Formation f = Game.CurrentRun.Formation;
+            int midi = battle.NoteAt(battle.Pass, b);
+            int players = 0;
+            for (int s = 0; s < StageLayout.SeatCount; s++)
+                if (battle.Plays(s)) players++;
+
+            float each = volume / (float)Math.Sqrt(Math.Max(1, players));
+            bool any = false;
+            for (int s = 0; s < StageLayout.SeatCount; s++)
+            {
+                if (!battle.Plays(s)) continue;
+                Musician m = f.Seated[s];
+                if (SoundBank.PlayInstrument(m.Index, m.SampleNote, midi, each, detune)) any = true;
+            }
+            if (any) return true;
+            return SoundBank.PlayAnswer(b, volume, detune);
         }
 
         //Combo Show : grows on a PERFECT, breaks on a miss or no stroke

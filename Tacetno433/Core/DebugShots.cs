@@ -739,6 +739,7 @@ namespace Tacetno433.Core
             if (name == "reward" || name == "dueltremolo" || name.EndsWith("repeat")) run.Chosen.Type = NodeType.Elite;
             if (name == "dueldouble") run.Floor = 3;                                  // pairs from floor two, more on the last
             if (name == "duelfermata") run.Floor = 2;                                 // held notes from floor two
+            if (name == "duelgentle") run.BattlesWon = 0;                             // round 15 : a first fight, f and p on beats 1 and 3
             run.Chosen.Title = RouteNodeInfo.TitleOf(run.Chosen.Type);
             run.Chosen.Caption = RouteNodeInfo.CaptionOf(run.Chosen.Type);
             run.BeginBattle();

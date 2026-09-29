@@ -1,0 +1,6 @@
+One short recorded note per instrument (round 15). The game plays it at every pitch of the song.
+Record each on C : middle C (C4) for most, C3 for the cello and the timpani. The bass drum is one hit.
+File names (lower case, .wav) : violin flute timpani soduang pinai ranatek cello horn bassdrum
+Optional : tacet (TACET's own voice for its call, on C4)
+Then add each file in the MGCB Editor (Add > Existing Item, processor "Sound Effect") and build.
+See Content/Audio/README.txt for the details.

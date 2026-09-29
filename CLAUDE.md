@@ -97,7 +97,12 @@
   REED CASE = พักได้ลม +4 เมื่อมีเครื่องเป่า · SPARE STICKS = เครื่องตี ×1.3 บนโน้ต f · MUTE CHOIR ปิดเสียงกลุ่มเครื่อง · ไม่ทำโหมดเลือกความยาก ใช้ curve แทน (ผู้ใช้ยืนยัน) ·
   **ก้อน 2 : Tutorial เหลือ 6 บทพื้นฐาน + READY** (บทละเรื่องเดียว สั้น) โน้ตพิเศษย้ายไป EXTRAS หลัง READY (TAB) · ลบบท WHO PLAYS (`TutorialScreen.Seats.cs`) ·
   **HOW TO PLAY เหลือ 3 หน้า** CONTROLS / THE NOTE / THE LINE ใช้ภาพมากกว่าตัวหนังสือ · ไอคอนปุ่ม `Ui.KeyCap` / `Ui.MouseIcon` (วาดด้วยโค้ด ผู้ใช้อนุญาต) ·
-  **สอนตอนเจอครั้งแรกในรันจริง** (`DuelScreen.TeachNote` : mf · รัว · ค้าง · spark · ลูกศร CUE ครั้งละเรื่องต่อรอบ) · รายละเอียด `PROJECT_STATUS.md` หัวข้อ 6 "รอบ 15"
+  **สอนตอนเจอครั้งแรกในรันจริง** (`DuelScreen.TeachNote` : mf · รัว · ค้าง · spark · ลูกศร CUE ครั้งละเรื่องต่อรอบ) ·
+  **ก้อน 3 : ระบบเพลง** เพลงจริงเขียนเป็นตัวโน้ตใน `Data/SongChart.cs` (ท่อนละ 8 บีต "E4p G4f -") ศัตรูที่มีเพลงเล่นตามเพลงเป๊ะ (โน้ต พัก ความดัง) · รอบ 1/2/3 เล่นท่อนถัดไปเรื่อยๆ ·
+  ดวล GENTLE เล่นเฉพาะบีต 1 กับ 3 และ mf เป็น p · วงเล่นระดับเสียงของโน้ตด้วยไฟล์เครื่องดนตรีคนละ 1 ไฟล์ ปรับ pitch ในโค้ด (`SoundBank.PlayInstrument`, `Content/Audio/Instruments/`) ·
+  ตอนนี้มีเพลงเดียว **ODE TO JOY (Beethoven) ที่ศัตรูข้างทางทั้ง 4** · `NormalScale` 3.4 · **ห้ามแต่งโน้ตเพลงจากความจำที่ไม่แน่ใจ** (เว็บโน้ตเพลงถูกบล็อกในแชท cloud) ให้ทีมส่ง score/MIDI ·
+  **ตัวละครหลักจากผู้ใช้ (29 ก.ย.) : วาทยากร 6 คน = Fanny Mendelssohn · Lully · J. S. Bach · Mozart · Paganini · Beethoven แต่ละคนมีร่าง Hollow** (รายละเอียด `PROJECT_STATUS.md` หัวข้อ 0) · ในเกมตอนนี้ยังเป็น 5 คนเดิม (APPRENTICE BACH BERLIOZ BEETHOVEN BARTOK) ต้องคุยก่อนเปลี่ยน ·
+  รายละเอียด `PROJECT_STATUS.md` หัวข้อ 6 "รอบ 15"
 - โค้ดที่ใช้ร่วมกันระหว่างดวลกับ Tutorial : ไม้บาตอง `Core/Baton.cs` · สัญลักษณ์โน้ต/จุดตี/วงแหวน `Core/NoteGlyph.cs` — แก้หน้าตาที่นี่ทีเดียว ห้ามเขียนซ้ำในหน้าจอ
 
 ## 5. build และทดสอบ

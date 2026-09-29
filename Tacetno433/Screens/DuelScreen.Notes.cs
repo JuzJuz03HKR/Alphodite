@@ -88,7 +88,7 @@ namespace Tacetno433.Screens
 
             if (grade == Grade.Perfect || grade == Grade.Good)
             {
-                if (r.OurPower > 0 && !SoundBank.PlayAnswer(b, 0.6f, 0.25f))
+                if (r.OurPower > 0 && !PlayBandNote(b, 0.6f, 0f))
                     SoundBank.Play(Sfx.QteEase, 0.7f, 0.3f);
                 effects.SpawnFlare(HitX, RingY, grade == Grade.Perfect ? 0.6f : 0.35f);
             }
@@ -132,7 +132,7 @@ namespace Tacetno433.Screens
 
             int b = BeatOf(pending);
             float volume = choice == Choice.Boost ? 1f : (choice == Choice.Ease ? 0.5f : 0.8f);
-            if (!SoundBank.PlayAnswer(b, volume, 0f)) SoundBank.Play(Sfx.NoteOn, volume, 0.3f);
+            if (!PlayBandNote(b, volume, 0f)) SoundBank.Play(Sfx.NoteOn, volume, 0.3f);
             for (int s = 0; s < StageLayout.SeatCount; s++)
                 if (battle.Plays(s)) lit[s] = 1f;
         }

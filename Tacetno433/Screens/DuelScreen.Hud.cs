@@ -60,6 +60,13 @@ namespace Tacetno433.Screens
             Gfx.TextSpacedRight(sb, Game.Font, battle.Enemy.KindLabel, enemyPlate.Right - 18, enemyPlate.Y + 40, Palette.LineGrey, TextSize.Tiny, 3f);
             if (trait)
                 Gfx.TextSpacedRight(sb, Game.Font, battle.Enemy.TraitName, enemyPlate.Right - 18, enemyPlate.Y + 62, Palette.Paper, TextSize.Tiny, 3f);
+
+            //Song : the piece TACET is playing, under the plate (round 15)
+            if (battle.SongLabel.Length > 0)
+            {
+                Gfx.SlantBox(sb, new Rectangle(enemyPlate.Right - 250, enemyPlate.Y + plateH + 2, 270, 22), Ui.Slant, Palette.Void * 0.7f);
+                Gfx.TextSpacedRight(sb, Game.Font, battle.SongLabel, enemyPlate.Right - 18, enemyPlate.Y + plateH + 6, Palette.PaperDim, TextSize.Tiny, 2f);
+            }
         }
 
         //Low Breath : under a quarter of stamina the edges of the screen close in on every beat,

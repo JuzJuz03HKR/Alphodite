@@ -224,7 +224,8 @@
         //breath. They hit harder now, so a band that arrives tired can lose to them.
         //Round 12 : lower again, TACET's f doubles its note now and the band pays for every player.
         //Round 15 : higher again, the whole band plays every note and playing costs nothing.
-        public static float NormalScale = 2.6f;   // ordinary encounters, 2.2 in round 12 to 14, 3.1 in round 11 (2.0 in round 8, 1.35 before)
+        public static float NormalScale = 3.4f;   // ordinary encounters. Round 15 : 2.6, then 3.4 once they play ODE TO JOY (a note
+                                                  // on almost every beat, many of them p, made them far weaker). 2.2 in round 12 to 14
         public static float EliteScale = 1.8f;    // 1.4 in round 12 to 14, was 2.0 (1.35 before round 8)
         public static float BossScale = 2.3f;     // 1.8 in round 12 to 14, was 2.8 (1.85 before round 8)
 

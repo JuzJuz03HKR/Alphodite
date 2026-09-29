@@ -15,6 +15,27 @@ HOW TO ADD ONE
 The list of names lives in  Audio/SoundBank.cs  (SfxFiles and MusicFiles).
 Change a name there if you would rather name your file differently.
 
+INSTRUMENTS (round 15, 29 Sep)  :  the band plays the real song TACET's notes come from
+  Every musician has an instrument, and ONE recorded note of it is enough : the game plays that
+  note higher or lower for every note of the song (up to an octave either way, further notes move
+  by whole octaves). Everybody on stage plays each note you hit, together.
+       Content/Audio/Instruments/violin.wav     ANNA      recorded on C4 (middle C)
+       Content/Audio/Instruments/flute.wav      KLARA     C4
+       Content/Audio/Instruments/timpani.wav    OTTO      C3
+       Content/Audio/Instruments/soduang.wav    MALI      C4
+       Content/Audio/Instruments/pinai.wav      CHAI      C4
+       Content/Audio/Instruments/ranatek.wav    NUAN      C4
+       Content/Audio/Instruments/cello.wav      LUKA      C3
+       Content/Audio/Instruments/horn.wav       IRIS      C4
+       Content/Audio/Instruments/bassdrum.wav   BORIS     one hit, no pitch
+       Content/Audio/Instruments/tacet.wav      (optional) TACET's own voice for its call, C4
+  Keep each note 1 to 2 seconds, dry (no reverb), the start of the note right at the start of the
+  file, mono is fine. Recorded on another note? Change that musician's SampleNote in
+  Data/Musician.cs (a MIDI number : C4 = 60, C3 = 48, A4 = 69).
+  Add each file in the MGCB Editor with the "Sound Effect" processor. F3 shows INSTR = how many loaded.
+  When instrument files exist they are used instead of the phrase notes below.
+  The songs themselves are written in Data/SongChart.cs (notes from the score, never from a recording).
+
 THE DUEL HAS NO LONG SONG
   The melody of a fight is played ONE NOTE PER BEAT, and only when the player conducts.
   Record one short phrase, cut it into notes, and name the notes in order:

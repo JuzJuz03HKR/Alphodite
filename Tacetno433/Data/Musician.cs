@@ -45,6 +45,13 @@ namespace Tacetno433.Data
         public int Cue = 1;
         public string Line = "";              // one short personality line
 
+        //Instrument Sound (round 15) : one recorded note of their instrument, Content/Audio/Instruments/<Sample>,
+        //played at the pitch of every note of the song (SoundBank.PlayInstrument). SampleNote is the
+        //note the file was recorded on as a MIDI number (60 is middle C), 0 for a drum with no pitch.
+        public string Sample = "";
+        public int SampleNote = 60;
+        public int Index;                     // where they are in MusicianList.All, set by PrepareText
+
         //Musician Battle Stats
         public int Power = 4;                 // how hard one note pushes (round 15 : playing costs no stamina, there is no cost)
 
@@ -85,51 +92,51 @@ namespace Tacetno433.Data
         {
             //Era 0 : CLASSICAL
             new Musician { Name = "ANNA",  Instrument = "VIOLIN",    Culture = "EUROPEAN", Family = Family.String,     Era = 0, Cue = 0,
-                           Power = 5, ThemeColor = Palette.ToneB,
+                           Power = 5, Sample = "violin", SampleNote = 60, ThemeColor = Palette.ToneB,
                            Trait = MusicianTrait.KeepsCount, TraitName = "COUNTS ALOUD",
                            TraitText = "On her beats, when the baton points her way, the PERFECT window is wider.",
                            Line = "Counts every bar out loud, even when nobody asked her to." },
             new Musician { Name = "KLARA", Instrument = "FLUTE",     Culture = "EUROPEAN", Family = Family.Wind,       Era = 0, Cue = 1,
-                           Power = 4, ThemeColor = Palette.ToneC,
+                           Power = 4, Sample = "flute", SampleNote = 60, ThemeColor = Palette.ToneC,
                            Trait = MusicianTrait.QuietPart, TraitName = "THE QUIET PART",
                            TraitText = "Against TACET's soft p notes she plays twice as hard.",
                            Line = "Plays the quiet parts nobody else wants and never misses one." },
             new Musician { Name = "OTTO",  Instrument = "TIMPANI",   Culture = "EUROPEAN", Family = Family.Percussion, Era = 0, Cue = 2,
-                           Power = 6, ThemeColor = Palette.ToneD,
+                           Power = 6, Sample = "timpani", SampleNote = 48, ThemeColor = Palette.ToneD,
                            Trait = MusicianTrait.Momentum, TraitName = "MOMENTUM",
                            TraitText = "Each beat in a row he plays hits 1 harder, up to 3.",
                            Line = "Slow to start, impossible to stop once he has." },
 
             //Era 1 : SIAM
             new Musician { Name = "MALI",  Instrument = "SO DUANG",  Culture = "SIAM",     Family = Family.String,     Era = 1, Cue = 1,
-                           Power = 5, ThemeColor = Palette.ToneA,
+                           Power = 5, Sample = "soduang", SampleNote = 60, ThemeColor = Palette.ToneA,
                            Trait = MusicianTrait.ByEar, TraitName = "BY EAR",
                            TraitText = "Hits 50 percent harder on TACET's hidden ??? beats.",
                            Line = "Learned by ear in a courtyard and has never read a page." },
             new Musician { Name = "CHAI",  Instrument = "PI NAI",    Culture = "SIAM",     Family = Family.Wind,       Era = 1, Cue = 2,
-                           Power = 4, ThemeColor = Palette.ToneC,
+                           Power = 4, Sample = "pinai", SampleNote = 60, ThemeColor = Palette.ToneC,
                            Trait = MusicianTrait.HeldNote, TraitName = "HELD NOTE",
                            TraitText = "When nobody plays a beat, his last note rings on at 40 percent.",
                            Line = "Can hold one note longer than anyone thinks is possible." },
             new Musician { Name = "NUAN",  Instrument = "RANAT EK",  Culture = "SIAM",     Family = Family.Percussion, Era = 1, Cue = 0,
-                           Power = 6, ThemeColor = Palette.ToneB,
+                           Power = 6, Sample = "ranatek", SampleNote = 60, ThemeColor = Palette.ToneB,
                            Trait = MusicianTrait.OneStepBetter, TraitName = "ONE STEP BETTER",
                            TraitText = "Hits 30 percent harder when TACET plays loud (f).",
                            Line = "Answers whatever she hears, faster and one step better." },
 
             //Era 2 : ROMANTIC
             new Musician { Name = "LUKA",  Instrument = "CELLO",     Culture = "EUROPEAN", Family = Family.String,     Era = 2, Cue = 2,
-                           Power = 6, ThemeColor = Palette.ToneC,
+                           Power = 6, Sample = "cello", SampleNote = 48, ThemeColor = Palette.ToneC,
                            Trait = MusicianTrait.FourBars, TraitName = "FOUR BARS STRAIGHT",
                            TraitText = "Playing all four beats of a bar, the fourth hits twice as hard.",
                            Line = "Says almost nothing and then plays for four bars straight." },
             new Musician { Name = "IRIS",  Instrument = "HORN",      Culture = "EUROPEAN", Family = Family.Wind,       Era = 2, Cue = 0,
-                           Power = 5, ThemeColor = Palette.ToneA,
+                           Power = 5, Sample = "horn", SampleNote = 60, ThemeColor = Palette.ToneA,
                            Trait = MusicianTrait.Forgiven, TraitName = "FASHIONABLY LATE",
                            TraitText = "On her beats, when the baton points her way, a late stroke still counts as GOOD.",
                            Line = "Arrives late, plays louder than the rest, is forgiven." },
             new Musician { Name = "BORIS", Instrument = "BASS DRUM", Culture = "EUROPEAN", Family = Family.Percussion, Era = 2, Cue = 1,
-                           Power = 7, ThemeColor = Palette.ToneD,
+                           Power = 7, Sample = "bassdrum", SampleNote = 0, ThemeColor = Palette.ToneD,
                            Trait = MusicianTrait.Thunder, TraitName = "THE WHOLE FLOOR",
                            TraitText = "His big stroke on an f note knocks 2 off TACET's next note.",
                            Line = "One hit from him and the whole floor knows about it." },
@@ -148,6 +155,7 @@ namespace Tacetno433.Data
                 m.FamilyLabel = familyNames[(int)m.Family] + "  /  " + m.Culture;
                 m.PartLabel = StageLayout.Rows[StageLayout.SectionOf(m.Family)].Name + "   " + StageLayout.SideNames[m.Cue];
                 m.NameTag = m.Name + "/";
+                m.Index = i;
             }
         }
 
