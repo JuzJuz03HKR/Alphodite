@@ -1,90 +1,112 @@
 <!DOCTYPE html>
 <html lang="th"><head><meta charset="utf-8"><title>Gameplay Loop</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
-<!-- Gameplay Loop, the simple one for slides (round 15, 29 Sep 2026). The detailed one is gameplay_loop_detail.html.
+<!-- Gameplay Loop, the whole run but easy to read, for slides (round 15, 29 Sep 2026). The dense one is gameplay_loop_detail.html.
      Render : NODE_PATH=$(npm root -g) node docs/diagrams/render.js -->
 <style>
   html, body { margin: 0; padding: 0; background: #F3F0E8; }
   body { font-family: 'IBM Plex Sans Thai', sans-serif; color: #17171A; }
   .sheet { position: relative; width: 1600px; height: 900px; overflow: hidden; background: #F3F0E8; }
   .sheet svg { position: absolute; left: 0; top: 0; }
-  .hd { position: absolute; left: 56px; top: 34px; }
-  .hd h1 { margin: 0; font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 46px; letter-spacing: 6px; line-height: 1; }
-  .hd p { margin: 10px 0 0; font-size: 22px; color: #5C5C64; font-weight: 500; }
-  .node { position: absolute; box-sizing: border-box; width: 400px; height: 124px; transform: translate(-50%, -50%);
-          background: #fff; border: 3px solid #17171A; border-radius: 22px; box-shadow: 0 6px 0 rgba(23,23,26,0.10);
-          padding: 16px 18px 0 86px; }
+  .hd { position: absolute; left: 56px; top: 30px; }
+  .hd h1 { margin: 0; font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 44px; letter-spacing: 6px; line-height: 1; }
+  .hd p { margin: 8px 0 0; font-size: 21px; color: #5C5C64; font-weight: 500; }
+  .legend { position: absolute; right: 56px; top: 34px; font-size: 17px; color: #5C5C64; text-align: right; line-height: 1.8; }
+  .legend i { display: inline-block; width: 38px; height: 0; border-top: 5px solid; vertical-align: middle; margin-left: 10px; }
+  .node { position: absolute; box-sizing: border-box; width: 320px; height: 108px;
+          background: #fff; border: 3px solid #17171A; border-radius: 20px; box-shadow: 0 6px 0 rgba(23,23,26,0.10);
+          padding: 14px 16px 0 78px; }
+  .node.ring { width: 300px; transform: translate(-50%, -50%); }
   .node.accent { border-color: #C8432B; border-width: 4px; }
-  .num { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); width: 50px; height: 50px; border-radius: 50%;
-         background: #17171A; color: #F3F0E8; font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 26px; text-align: center; line-height: 50px; }
+  .node.good { border-color: #2F6B3F; }
+  .num { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 46px; height: 46px; border-radius: 50%;
+         background: #17171A; color: #F3F0E8; font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 24px; text-align: center; line-height: 46px; }
   .node.accent .num { background: #C8432B; }
-  .t { font-size: 32px; font-weight: 700; line-height: 1.25; white-space: nowrap; }
-  .s { font-size: 19px; color: #3A3A40; line-height: 1.35; white-space: nowrap; }
+  .node.good .num { background: #2F6B3F; }
+  .t { font-size: 28px; font-weight: 700; line-height: 1.25; white-space: nowrap; }
+  .s { font-size: 18px; color: #3A3A40; line-height: 1.35; white-space: nowrap; }
+  .tag { position: absolute; right: 14px; bottom: -14px; background: #C8432B; color: #fff; font-size: 14px; font-weight: 700; padding: 3px 10px; border-radius: 10px; }
+  .pill { position: absolute; transform: translate(-50%, -50%); background: #F3F0E8; border: 2.5px solid; border-radius: 999px;
+          padding: 3px 14px; font-size: 17px; font-weight: 700; white-space: nowrap; }
+  .k { color: #17171A; border-color: #17171A; } .g { color: #2F6B3F; border-color: #2F6B3F; } .r { color: #C8432B; border-color: #C8432B; }
   .mid { position: absolute; transform: translate(-50%, -50%); text-align: center; }
-  .mid .big { font-size: 46px; font-weight: 700; line-height: 1.1; }
-  .mid .small { font-size: 20px; color: #5C5C64; margin-top: 6px; }
-  .out { position: absolute; box-sizing: border-box; border: 3px dashed #17171A; border-radius: 22px; padding: 18px 24px; background: rgba(255,255,255,0.6); }
-  .out .k { font-family: 'IBM Plex Mono', monospace; font-size: 14px; letter-spacing: 2px; color: #5C5C64; }
-  .out .row { font-size: 24px; font-weight: 700; margin-top: 12px; white-space: nowrap; }
-  .out .row span { font-weight: 500; font-size: 18px; color: #3A3A40; display: block; }
-  .win { color: #2F6B3F; } .lose { color: #C8432B; }
-  .entry { position: absolute; box-sizing: border-box; border: 3px dashed #17171A; border-radius: 22px; padding: 16px 22px; background: rgba(255,255,255,0.6); }
-  .entry .t { font-size: 28px; }
-  .foot { position: absolute; left: 56px; bottom: 20px; font-size: 13px; color: #8A867C; }
+  .mid .big { font-size: 40px; font-weight: 700; line-height: 1.1; }
+  .mid .small { font-size: 19px; color: #5C5C64; margin-top: 4px; }
+  .foot { position: absolute; right: 56px; bottom: 16px; font-size: 13px; color: #8A867C; }
 </style></head>
 <body><div class="sheet">
 <svg id="arrows" width="1600" height="900" viewBox="0 0 1600 900">
-  <defs><marker id="head" markerWidth="14" markerHeight="14" refX="9" refY="7" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L14,7 L0,14 z" fill="#17171A"/></marker></defs>
+  <defs>
+    <marker id="hK" markerWidth="14" markerHeight="14" refX="9" refY="7" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L14,7 L0,14 z" fill="#17171A"/></marker>
+    <marker id="hG" markerWidth="14" markerHeight="14" refX="9" refY="7" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L14,7 L0,14 z" fill="#2F6B3F"/></marker>
+    <marker id="hR" markerWidth="14" markerHeight="14" refX="9" refY="7" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L14,7 L0,14 z" fill="#C8432B"/></marker>
+  </defs>
 </svg>
 
-<div class="hd"><h1>GAMEPLAY LOOP</h1><p>1 รัน ของ TACET 4'33 (Roguelike)</p></div>
+<div class="hd"><h1>GAMEPLAY LOOP</h1><p>1 รันของ TACET 4'33 ตั้งแต่เริ่มจนจบ</p></div>
+<div class="legend">ทางหลัก<i style="border-color:#17171A"></i><br>ชนะ<i style="border-color:#2F6B3F"></i><br>แพ้<i style="border-color:#C8432B"></i></div>
 
-<div class="entry" style="left:60px;top:190px;width:360px">
-  <div class="t">เริ่มรัน</div><div class="s">เลือกคอนดักเตอร์ + ยุค</div><div class="s">รับนักดนตรีเข้าวง</div>
-</div>
+<!-- Start : the left column, top to bottom -->
+<div class="node" style="left:60px;top:170px"><div class="num">1</div><div class="t">เมนูหลัก</div><div class="s">เริ่มเกม · เรียนวิธีเล่น</div></div>
+<div class="node" style="left:60px;top:330px"><div class="num">2</div><div class="t">เลือกคอนดักเตอร์</div><div class="s">5 คน สไตล์ต่างกัน</div></div>
+<div class="node" style="left:60px;top:490px"><div class="num">3</div><div class="t">เปิดชั้นใหม่</div><div class="s">เลือกยุค + รับนักดนตรี</div></div>
 
-<div class="node" id="n1"><div class="num">1</div><div class="t">เลือกทาง</div><div class="s">ดวล · ร้าน · พัก · เหตุการณ์</div></div>
-<div class="node accent" id="n2"><div class="num">2</div><div class="t">ดวล</div><div class="s">ตวัดไม้สู้ความเงียบ (Core Loop)</div></div>
-<div class="node" id="n3"><div class="num">3</div><div class="t">รับรางวัล</div><div class="s">Motif · นักดนตรี → วงแข็งขึ้น</div></div>
+<!-- One floor : the ring in the middle -->
+<div class="node ring" id="n4"><div class="num">4</div><div class="t">เลือกทาง</div><div class="s">ดวล · ร้าน · พัก · เหตุการณ์</div></div>
+<div class="node ring accent" id="n5"><div class="num">5</div><div class="t">ดวล</div><div class="s">ตวัดไม้สู้ความเงียบ</div><div class="tag">CORE GAME LOOP</div></div>
+<div class="node ring" id="n6"><div class="num">6</div><div class="t">รับรางวัล</div><div class="s">Motif · นักดนตรี · Shards</div></div>
+<div class="mid" id="mid"><div class="big">1 ชั้น</div><div class="small">วนจนเจอบอส</div></div>
 
-<div class="mid" id="mid"><div class="big" style="font-size:40px">วนจนเจอบอส</div><div class="small">ชั้นละ 7–10 ด่าน</div></div>
+<!-- End : the right column -->
+<div class="node good" style="left:1220px;top:250px"><div class="num">7</div><div class="t">ชนะบอส</div><div class="s">ไปชั้นถัดไป (มี 3 ชั้น)</div></div>
+<div class="node" style="left:1220px;top:620px"><div class="num">8</div><div class="t">จบรัน</div><div class="s">สรุปผล (Curtain Call)</div></div>
 
-<div class="out" style="left:1190px;top:300px;width:370px">
-  <div class="k">หลังดวล</div>
-  <div class="row win">ชนะบอส → ชั้นถัดไป<span>1 รัน มี 3 ชั้น ยิ่งลึกยิ่งยาก</span></div>
-  <div class="row win">ชนะบอสชั้น 3 → จบเกม</div>
-  <div class="row lose">แพ้ดวล → เริ่มรันใหม่<span>Roguelike : ของที่เก็บมาหายหมด</span></div>
-</div>
+<div class="pill k" style="left:672px;top:470px">ด่านถัดไป</div>
+<div class="pill g" style="left:1190px;top:505px">ชนะบอส</div>
+<div class="pill r" style="left:1172px;top:716px">แพ้ดวล</div>
+<div class="pill g" style="left:860px;top:128px">ชั้น 1 → 2 → 3 : เปิดชั้นใหม่</div>
+<div class="pill g" style="left:1480px;top:486px">ชนะชั้น 3</div>
+<div class="pill k" style="left:700px;top:850px">กลับเมนู · เริ่มรันใหม่</div>
 
-<div class="foot">TACET 4'33 · รอบ 15 (29 ก.ย. 2026) · รายละเอียดเต็ม gameplay_loop_detail.png</div>
+<div class="foot">TACET 4'33 · รอบ 15 (29 ก.ย. 2026) · แบบละเอียด gameplay_loop_detail.png</div>
 </div>
 <script>
-  //Ring : three stops on a circle, the arrows run along it between them
-  const C = { x: 740, y: 520 }, R = 265;
-  const angles = [-90, 30, 150];                          // top, bottom right, bottom left : clockwise
+  const svg = document.getElementById('arrows');
+  function path(d, colour) {
+    const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const stroke = { K: '#17171A', G: '#2F6B3F', R: '#C8432B' }[colour];
+    p.setAttribute('d', d); p.setAttribute('fill', 'none'); p.setAttribute('stroke', stroke);
+    p.setAttribute('stroke-width', '5'); p.setAttribute('stroke-linecap', 'round'); p.setAttribute('stroke-linejoin', 'round');
+    p.setAttribute('marker-end', 'url(#h' + colour + ')'); svg.appendChild(p);
+  }
+
+  //Ring : one floor, choose a path -> the stage -> the reward -> back to choosing
+  const C = { x: 800, y: 540 }, R = 200;
+  const angles = [-90, 30, 150];
   angles.forEach((a, i) => {
-    const r = a * Math.PI / 180, el = document.getElementById('n' + (i + 1));
+    const r = a * Math.PI / 180, el = document.getElementById('n' + (i + 4));
     el.style.left = (C.x + R * Math.cos(r)) + 'px';
     el.style.top = (C.y + R * Math.sin(r)) + 'px';
   });
-  const mid = document.getElementById('mid'); mid.style.left = C.x + 'px'; mid.style.top = (C.y + 20) + 'px';
-
-  const svg = document.getElementById('arrows');
-  function path(d, dashed) {
-    const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    p.setAttribute('d', d); p.setAttribute('fill', 'none'); p.setAttribute('stroke', '#17171A');
-    p.setAttribute('stroke-width', dashed ? '4' : '6'); p.setAttribute('stroke-linecap', 'round');
-    if (dashed) p.setAttribute('stroke-dasharray', '10 10');
-    p.setAttribute('marker-end', 'url(#head)'); svg.appendChild(p);
-  }
-  //Arcs : from just past one stop to just before the next
-  const gaps = [[48, 28], [28, 28], [28, 48]];
+  const mid = document.getElementById('mid'); mid.style.left = C.x + 'px'; mid.style.top = (C.y - 4) + 'px';
+  const gaps = [[52, 36], [36, 36], [36, 52]];
   angles.forEach((a, i) => {
-    const b = a + 120, s = (a + gaps[i][0]) * Math.PI / 180, e = (b - gaps[i][1]) * Math.PI / 180;
-    path(`M ${C.x + R * Math.cos(s)} ${C.y + R * Math.sin(s)} A ${R} ${R} 0 0 1 ${C.x + R * Math.cos(e)} ${C.y + R * Math.sin(e)}`, false);
+    const s = (a + gaps[i][0]) * Math.PI / 180, e = (a + 120 - gaps[i][1]) * Math.PI / 180;
+    path(`M ${C.x + R * Math.cos(s)} ${C.y + R * Math.sin(s)} A ${R} ${R} 0 0 1 ${C.x + R * Math.cos(e)} ${C.y + R * Math.sin(e)}`, 'K');
   });
-  //Entry and exit
-  path('M 420 262 Q 490 262 528 258', false);             // start of the run -> choose a path
-  path('M 1166 640 Q 1180 560 1184 470', true);            // the duel -> what happens after it
+
+  //Start column, and into the floor
+  path('M 220 282 L 220 322', 'K');                                    // 1 -> 2
+  path('M 220 442 L 220 482', 'K');                                    // 2 -> 3
+  path('M 384 566 Q 560 566 644 362', 'K');                            // 3 -> 4, under the green return so they never cross
+
+  //Out of the duel
+  path('M 1127 612 Q 1190 470 1296 368', 'G');                         // 5 -> 7 : the boss is beaten
+  path('M 1127 668 Q 1170 690 1212 684', 'R');                         // 5 -> 8 : the duel is lost
+  path('M 1380 246 Q 860 0 392 484', 'G');                             // 7 -> 3 : the next floor
+  path('M 1480 366 L 1480 612', 'G');                                  // 7 -> 8 : the third floor is done
+
+  //Back to the menu, round the bottom and up the left side
+  path('M 1380 732 L 1380 830 Q 1380 850 1360 850 L 40 850 Q 20 850 20 830 L 20 246 Q 20 226 40 226 L 52 226', 'K');
 </script>
 </body></html>
