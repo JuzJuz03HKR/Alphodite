@@ -1,7 +1,7 @@
 # TACET 4'33 — เอกสารส่งต่อให้ฝ่ายโค้ด
 
 อัปเดต : 29 กันยายน 2026 (รอบ 15) · repo `github.com/JuzJuz03HKR/Alphodite` branch **`Alpha6`** (รอบ 15 · `Alpha5` = รอบ 14 · `Alpha4` = รอบ 12–13 · `Alpha3` = รอบ 9–11b · รอบ 6–8 อยู่ `Alpha2`) · กติกาสำหรับ Claude อยู่ `CLAUDE.md` · อ่านคู่กับ [`PROJECT_STATUS.md`](PROJECT_STATUS.md) (รายละเอียดทุกระบบ)
-และ [`ASSET_LIST.md`](ASSET_LIST.md) (ไฟล์ภาพ/เสียงที่ต้องใส่) · สิ่งที่ผู้ใช้สั่งคำต่อคำ [`USER_BRIEFS.md`](USER_BRIEFS.md) · prompt หลัง compact [`RESUME_PROMPT.md`](RESUME_PROMPT.md)
+และ [`ASSET_LIST.md`](ASSET_LIST.md) (ไฟล์ภาพ/เสียงที่ต้องใส่) · สิ่งที่ผู้ใช้สั่งคำต่อคำ [`USER_BRIEFS.md`](USER_BRIEFS.md) · prompt หลัง compact [`RESUME_PROMPT.md`](RESUME_PROMPT.md) · เนื้อหาสไลด์ [`TACET_Slides_29Sep.md`](TACET_Slides_29Sep.md) · แผนภาพลูป `diagrams/core_game_loop.png` · `gameplay_loop.png` (+ `*_detail.png`)
 
 ---
 
