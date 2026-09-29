@@ -341,7 +341,7 @@ Stella Sora ชื่อนั้นแหละ ลองศึกษาเก�
 ```
 → ทำ `docs/TACET_Slides_29Sep.md` (เรียงตามหัวข้อให้คะแนน + เส้นทางการพัฒนา) และแผนภาพ `docs/diagrams/core_game_loop.png` · `gameplay_loop.png`
 
-**29 ก.ย. 17:0x**
+**29 ก.ย. 16:5x**
 
 ```text
 Core Game Loop / Gameplay Loop คือเอาแบบเข้าใจง่าย อ่านทีเดียวรู้เรื่องได้ไหม
