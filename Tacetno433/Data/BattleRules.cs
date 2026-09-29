@@ -252,7 +252,7 @@
         public static float MaestroGoodWindow = 0.18f;
         public static int MaestroTremoloPerfect = 6;
         public static int MaestroTremoloGood = 4;
-        public static float[] MaestroFloorPower = { 1.1f, 1.8f, 2.7f };    // a strong player wins about 59 percent, an average one 4
+        public static float[] MaestroFloorPower = { 1.0f, 1.65f, 2.4f };   // a strong player wins about 64 percent, an average one 14 (with the songs, 29 Sep)
         //Round 8 : BOOST costs nothing extra, so a big stroke on every beat is the normal way to
         //play. TACET hits about 1.5 times harder to match, which kept the simulated win rates
         //of ordinary players where they were (see PROJECT_STATUS section 8).
@@ -262,8 +262,8 @@
         //Round 15 : higher again, the whole band plays every note and playing costs nothing.
         public static float NormalScale = 3.4f;   // ordinary encounters. Round 15 : 2.6, then 3.4 once they play ODE TO JOY (a note
                                                   // on almost every beat, many of them p, made them far weaker). 2.2 in round 12 to 14
-        public static float EliteScale = 1.8f;    // 1.4 in round 12 to 14, was 2.0 (1.35 before round 8)
-        public static float BossScale = 2.3f;     // 1.8 in round 12 to 14, was 2.8 (1.85 before round 8)
+        public static float EliteScale = 2.1f;    // 29 Sep 1.8 -> 2.1 : elites play songs now (SYMPHONY NO. 5, PRELUDE IN C), a song has rests and softer notes. 1.4 in round 12 to 14, was 2.0 (1.35 before round 8)
+        public static float BossScale = 2.7f;     // 29 Sep 2.3 -> 2.7 : bosses play songs now (RONDO ALLA TURCA, NACHTMUSIK). 1.8 in round 12 to 14, was 2.8 (1.85 before round 8)
 
         //Conductor Stats : the 0 to 10 numbers on the select page become real values here
         public static int StaminaBase = 60;

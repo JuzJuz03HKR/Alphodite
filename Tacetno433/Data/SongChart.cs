@@ -97,11 +97,72 @@ namespace Tacetno433.Data
             }
         };
 
+        //Fifth Symphony : L. v. Beethoven, Symphony No. 5 (1808), the four-note opening (fate knocking)
+        //and its answer a step lower, loud then soft. Eb is written D# (the same key on a piano).
+        public static SongChart FifthSymphony = new SongChart
+        {
+            Name = "SYMPHONY NO. 5",
+            Composer = "BEETHOVEN",
+            Phrases = new string[]
+            {
+                "-    G4f  G4f  G4f   D#4f -    -    -",
+                "-    F4f  F4f  F4f   D4f  -    -    -",
+                "-    G4mf G4mf G4mf  D#4mf -   -    -",
+                "-    F4p  F4p  F4p   D4p  -    -    -",
+            }
+        };
+
+        //Prelude In C : J. S. Bach, The Well-Tempered Clavier I, Prelude in C major BWV 846 (1722),
+        //the first five bars, half a bar of broken chord per phrase. A note on every beat, no rest.
+        public static SongChart PreludeInC = new SongChart
+        {
+            Name = "PRELUDE IN C",
+            Composer = "BACH",
+            Phrases = new string[]
+            {
+                "C4p  E4p  G4mf C5mf  E5f  G4mf C5mf E5f",
+                "C4p  D4p  A4mf D5mf  F5f  A4mf D5mf F5f",
+                "B3p  D4p  G4mf D5mf  F5f  G4mf D5mf F5f",
+                "C4p  E4p  G4mf C5mf  E5f  G4mf C5mf E5f",
+                "A3p  C4p  E4mf A4mf  C5f  E4mf A4mf C5f",
+            }
+        };
+
+        //Rondo Alla Turca : W. A. Mozart, Piano Sonata No. 11 K. 331 (1783), the last movement's
+        //opening, every sixteenth note on its own beat (slowed down so it can be conducted).
+        public static SongChart RondoAllaTurca = new SongChart
+        {
+            Name = "RONDO ALLA TURCA",
+            Composer = "MOZART",
+            Phrases = new string[]
+            {
+                "B4p  A4p  G#4p A4p   C5f  -    -    -",
+                "D5p  C5p  B4p  C5p   E5f  -    -    -",
+                "F5mf E5mf D#5mf E5mf B5f  A5mf G#5mf A5mf",
+                "B5mf A5mf G#5mf A5mf C6f  -    -    -",
+            }
+        };
+
+        //Nacht Musik : W. A. Mozart, Eine kleine Nachtmusik K. 525 (1787), the opening four bars,
+        //one note per beat (the quick eighth notes are shortened to the note on the beat).
+        public static SongChart NachtMusik = new SongChart
+        {
+            Name = "EINE KLEINE NACHTMUSIK",
+            Composer = "MOZART",
+            Phrases = new string[]
+            {
+                "G4f  D4mf G4f  D4mf  G4mf B4mf D5f  -",
+                "C5f  A4mf C5f  A4mf  C5mf A4mf F#4mf D4p",
+                "G4f  D4mf G4f  D4mf  G4mf B4mf D5f  -",
+                "C5f  A4mf C5f  A4mf  C5mf A4mf F#4mf D4p",
+            }
+        };
+
         //Plain Melody : for an enemy without a song yet, one gentle line so the band still plays
         //in tune when the instrument files exist (a C major pentatonic arch, not a real piece)
         public static int[] PlainMelody = { 60, 62, 64, 67, 69, 67, 64, 62 };
 
-        public static SongChart[] All = { OdeToJoy, Twinkle, Moonlight };
+        public static SongChart[] All = { OdeToJoy, Twinkle, Moonlight, FifthSymphony, PreludeInC, RondoAllaTurca, NachtMusik };
 
         //Prepare : read every phrase once, when the game starts
         public static void Prepare()

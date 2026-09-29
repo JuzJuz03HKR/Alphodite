@@ -1144,8 +1144,19 @@ THE METRONOME : ทุกการตวัดเป็น BOOST ไม่ว่
   เครื่องไทย 3 ตัวใช้วิโอลา / โอโบ / ไซโลโฟนแทนไปก่อนตามที่ผู้ใช้สั่ง · `Musician.SampleNote` ตั้งตามไฟล์ · ยังไม่มี `tacet.wav`
   **เพลง** (3 เพลงแล้ว, `Data/SongChart.cs`) : ODE TO JOY (DEAD AIR · STATIC) · **AH, VOUS DIRAI-JE, MAMAN** (Mozart K.265 ธีม = ทำนอง Twinkle, HUSH) · **AU CLAIR DE LA LUNE** (เพลงฝรั่งเศสดั้งเดิม เชื่อกันว่าของ Lully แต่ไม่แน่นอน ป้ายเขียน TRAD. / LULLY, THE LULL) ·
   เลือกเฉพาะทำนองที่ Claude รู้โน้ตแน่นอนทุกตัว (เพลงเด็ก 2/4 และ 4/4) · เพลงยากของร่าง alter ego ยังรอ score/MIDI (`USER_BRIEFS.md` หัวข้อ 3.1)
-  **อาร์ต** : รูปจากผู้ใช้ 3 รูปใส่ให้ THE APPRENTICE (หน้าโปรไฟล์ที่ผู้ใช้วงไว้เป็นของ APPRENTICE · ถ้าเป็นคนอื่นแค่เปลี่ยนชื่อไฟล์) : `gallery_the_apprentice.png` (ครึ่งตัว 302×402 ภาพในแกลเลอรี, ช่องใหม่ `ArtBank.GalleryOf` ไม่มีก็ใช้ portrait) ·
+  **อาร์ต** (ก้อน 8 ย้ายไป THE UNHEARING แล้ว ผู้ใช้บอกว่าเป็นของ Beethoven) : รูปจากผู้ใช้ 3 รูปเคยใส่ให้ THE APPRENTICE (หน้าโปรไฟล์ที่ผู้ใช้วงไว้เป็นของ APPRENTICE · ถ้าเป็นคนอื่นแค่เปลี่ยนชื่อไฟล์) : `gallery_the_apprentice.png` (ครึ่งตัว 302×402 ภาพในแกลเลอรี, ช่องใหม่ `ArtBank.GalleryOf` ไม่มีก็ใช้ portrait) ·
   `portrait_the_apprentice.png` (ภาพร่างเต็มตัว 640×1060 หน้าโปรไฟล์ + โค้ง) · `face_the_apprentice.png` (หน้า 224×224 กล่องเล็ก WHO THEY WERE) · คอนดักเตอร์อื่นยังเป็นกรอบว่าง
+
+**ก้อน 8 (29 ก.ย. 20:4x, ผู้ใช้ : "art เป็นของ beethoven ใส่แค่ beethoven · อาร์ตใหม่ให้นักดนตรีทุกคน · ทำเพลงต่อให้ครบหรือเกือบครบ · เช็คข้อมูลทุกอย่างอัพเดท · ทำเป็น .exe อัพขึ้น repo")** :
+- อาร์ตคอนดักเตอร์ย้ายจาก APPRENTICE ไป **THE UNHEARING (Beethoven)** : `gallery_` / `portrait_` / `face_the_unhearing.png`
+- **อาร์ตนักดนตรี** : รูปตัวละคร 112×112 ของผู้ใช้ใส่เป็น `Art/Musicians/<ชื่อ>_idle_0.png` ให้ทั้ง 9 คน (รูปเดียวกันทุกคน เป็นตัวแทนจนกว่าจะมีรูปแยก) · ขึ้นในดวล หน้าวง การโค้ง
+- **เพลง 7 เพลง ครบ 7 จาก 8 ศัตรู** : เพิ่ม SYMPHONY NO. 5 (Beethoven, THE MUTE CHOIR) · PRELUDE IN C BWV 846 (Bach, WHITE NOISE, โน้ตทุกบีต) · RONDO ALLA TURCA K.331 (Mozart, บอส REQUIEM) · EINE KLEINE NACHTMUSIK K.525 (Mozart, บอส NAMELESS MASTER) ·
+  **THE DEVIL'S STRING ยังไม่มีเพลง** (Caprice 24 ของ Paganini ผมจำโน้ตไม่แน่ใจ รอ MIDI) · โน้ตเร็วย่อเป็นบีตละโน้ต (Rondo = 1 โน้ตต่อบีตแบบช้าลง · Nachtmusik = โน้ตบนจังหวะ) · Eb เขียนเป็น D#
+- **บาลานซ์หลังใส่เพลง** : Elite/บอสที่เล่นเพลงอ่อนลงมาก (NORMAL ทั่วไป 64 → 77% · ตวัดกลางทุกบีต 4 → 30%) → `EliteScale` 1.8 → 2.1 · `BossScale` 2.3 → 2.7 · `MaestroFloorPower` 1.0 / 1.65 / 2.4 ·
+  ผล : **NORMAL** ไร้ที่ติ 100% · เก่ง 92% · ทั่วไป 62% · มือใหม่ 4% · ตวัดกลางทุกบีต 16% · ตวัดใหญ่ทุกโน้ต 77% · **MAESTRO** ไร้ที่ติ 99% · เก่ง 64% · ทั่วไป 14% · มือใหม่ 0% · ตวัดใหญ่ทุกโน้ต 25% ·
+  ลองแล้วไม่ใช้ : Elite 2.3 บอส 3.0 (NORMAL ทั่วไป 49% · MAESTRO เก่ง 26%) · MAESTRO 1.1/1.8/2.7 กับ Elite 2.1 (เก่ง 44%) · 0.95/1.55/2.25 (เก่ง 71%)
+- **.exe** : build ในแชท cloud (Linux) = `dotnet publish -c Release -r win-x64 --self-contained` แบบ **net8.0** (ในเครื่อง cloud มีแค่ .NET 8) และ **ฟอนต์แทน** (Liberation Serif แทน Palatino · DejaVu Sans แทน Bahnschrift) · zip อยู่ `Build/TACET433_win-x64.zip` ·
+  **ยังไม่ได้ลองรันบน Windows** (มี `SDL2.dll` `openal.dll` ครบ) · ถ้าจะใช้ฟอนต์จริงให้ build บน Windows ด้วยคำสั่งเดิม
 
 **ทดลองแล้วไม่ใช้ (ตัวจำลอง)**
 - ไม่ปรับอะไรเลยหลังเอาค่าสตามิน่าออก : ทั่วไปจบรัน 97% (ง่ายเกินมาก)
