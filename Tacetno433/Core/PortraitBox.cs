@@ -30,7 +30,7 @@ namespace Tacetno433.Core
             Rectangle canvas = new Rectangle(frame.X + FrameThickness, frame.Y + FrameThickness,
                                              frame.Width - FrameThickness * 2, frame.Height - FrameThickness * 2);
             Gfx.Rect(sb, canvas, Palette.CanvasDark * brightness);
-            ArtBank.DrawOrSlot(sb, ArtBank.PortraitOf(c), canvas, Palette.Paper, brightness);
+            ArtBank.DrawOrSlot(sb, ArtBank.GalleryOf(c), canvas, Palette.Paper, brightness);
 
             //Corner Studs and Crest
             Gfx.Diamond(sb, frame.X, frame.Y, 5, line);

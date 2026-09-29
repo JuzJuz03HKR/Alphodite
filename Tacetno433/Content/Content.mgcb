@@ -40,3 +40,90 @@
 /processorParam:PremultiplyAlpha=True
 /processorParam:TextureFormat=Color
 /build:LogoFont.spritefont
+
+#begin Art/Conductors/gallery_the_apprentice.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyEnabled=False
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Art/Conductors/gallery_the_apprentice.png
+
+#begin Art/Conductors/portrait_the_apprentice.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyEnabled=False
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Art/Conductors/portrait_the_apprentice.png
+
+#begin Art/Conductors/face_the_apprentice.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyEnabled=False
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Art/Conductors/face_the_apprentice.png
+
+#begin Audio/Instruments/violin.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/Instruments/violin.wav
+
+#begin Audio/Instruments/flute.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/Instruments/flute.wav
+
+#begin Audio/Instruments/timpani.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/Instruments/timpani.wav
+
+#begin Audio/Instruments/soduang.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/Instruments/soduang.wav
+
+#begin Audio/Instruments/pinai.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/Instruments/pinai.wav
+
+#begin Audio/Instruments/ranatek.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/Instruments/ranatek.wav
+
+#begin Audio/Instruments/cello.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/Instruments/cello.wav
+
+#begin Audio/Instruments/horn.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/Instruments/horn.wav
+
+#begin Audio/Instruments/bassdrum.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/Instruments/bassdrum.wav

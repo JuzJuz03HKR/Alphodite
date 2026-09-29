@@ -19,6 +19,7 @@ namespace Tacetno433.Core
     //   MusicianFace       small square face, lists and panels   Art/Musicians/face_mali
     //   ConductorPortrait  the gallery painting, profile, bow    Art/Conductors/portrait_the_inferno
     //   ConductorFace      small square face                     Art/Conductors/face_the_inferno
+    //   ConductorGallery   the gallery painting only (29 Sep)    Art/Conductors/gallery_the_inferno, else the portrait
     //   CutIn              the signature picture                 Art/Conductors/cutin_the_inferno
     //   Enemy              TACET's shape in a duel               Art/Enemies/enemy_hush
     //   EraPanel           the tall panel on the era page        Art/Eras/era_siam
@@ -37,6 +38,7 @@ namespace Tacetno433.Core
         public static Texture2D[] MusicianFace = new Texture2D[0];
         public static Texture2D[] ConductorPortrait = new Texture2D[0];   // lined up with ConductorList.All
         public static Texture2D[] ConductorFace = new Texture2D[0];
+        public static Texture2D[] ConductorGallery = new Texture2D[0];
         public static Texture2D[] CutIn = new Texture2D[0];
         public static Texture2D[] Enemy = new Texture2D[0];               // lined up with EnemyList.All
         public static Texture2D[] EraPanel = new Texture2D[0];
@@ -81,12 +83,14 @@ namespace Tacetno433.Core
             CutIn = new Texture2D[conductors];
             ConductorPortrait = new Texture2D[conductors];
             ConductorFace = new Texture2D[conductors];
+            ConductorGallery = new Texture2D[conductors];
             for (int i = 0; i < conductors; i++)
             {
                 string key = Key(ConductorList.All[i].Name);
                 CutIn[i] = Picture(content, "Art/Conductors/cutin_" + key);
                 ConductorPortrait[i] = Picture(content, "Art/Conductors/portrait_" + key);
                 ConductorFace[i] = Picture(content, "Art/Conductors/face_" + key);
+                ConductorGallery[i] = Picture(content, "Art/Conductors/gallery_" + key);
             }
 
             Enemy = new Texture2D[EnemyList.All.Length];
@@ -146,6 +150,13 @@ namespace Tacetno433.Core
         public static Texture2D FaceOf(Musician m) { return Find(MusicianFace, Array.IndexOf(MusicianList.All, m)); }
         public static Texture2D PortraitOf(Conductor c) { return Find(ConductorPortrait, Array.IndexOf(ConductorList.All, c)); }
         public static Texture2D FaceOf(Conductor c) { return Find(ConductorFace, Array.IndexOf(ConductorList.All, c)); }
+
+        //Gallery Of : the painting on the gallery page, the portrait when there is no painting of its own
+        public static Texture2D GalleryOf(Conductor c)
+        {
+            Texture2D painting = Find(ConductorGallery, Array.IndexOf(ConductorList.All, c));
+            return painting ?? PortraitOf(c);
+        }
         public static Texture2D CutInOf(Conductor c) { return Find(CutIn, Array.IndexOf(ConductorList.All, c)); }
         public static Texture2D EnemyOf(Enemy e) { return Find(Enemy, Array.IndexOf(EnemyList.All, e)); }
         public static Texture2D EventOf(GameEvent e) { return Find(EventPicture, Array.IndexOf(EventList.All, e)); }

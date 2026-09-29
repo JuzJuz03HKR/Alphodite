@@ -59,11 +59,49 @@ namespace Tacetno433.Data
             }
         };
 
+        //Twinkle : W. A. Mozart, the theme of his twelve variations on "Ah, vous dirai-je, maman",
+        //K. 265 (1781), a French song everyone knows as Twinkle, Twinkle, Little Star. C major, 2/4,
+        //one note per beat, a held note followed by a rest (29 Sep, the second song).
+        public static SongChart Twinkle = new SongChart
+        {
+            Name = "AH, VOUS DIRAI-JE, MAMAN",
+            Composer = "MOZART",
+            Phrases = new string[]
+            {
+                "C4p  C4p  G4mf G4mf  A4f  A4f  G4mf -",
+                "F4mf F4mf E4p  E4p   D4mf D4mf C4p  -",
+                "G4mf G4mf F4p  F4p   E4mf E4mf D4p  -",
+                "G4f  G4f  F4mf F4mf  E4mf E4mf D4p  -",
+                "C4p  C4p  G4mf G4mf  A4f  A4f  G4mf -",
+                "F4mf F4mf E4p  E4p   D4mf D4mf C4p  -",
+            }
+        };
+
+        //Moonlight : "Au clair de la lune", a French song of the 18th century, long said to be
+        //by J.-B. Lully (nobody is sure, so the label says TRAD.). C major, 4/4, a half note is a
+        //note and a rest, the whole note at the end of a line is a note and three rests.
+        public static SongChart Moonlight = new SongChart
+        {
+            Name = "AU CLAIR DE LA LUNE",
+            Composer = "TRAD. / LULLY",
+            Phrases = new string[]
+            {
+                "C4p  C4p  C4p  D4mf  E4mf -    D4mf -",
+                "C4p  E4mf D4p  D4p   C4p  -    -    -",
+                "C4p  C4p  C4p  D4mf  E4mf -    D4mf -",
+                "C4p  E4mf D4p  D4p   C4p  -    -    -",
+                "D4f  D4f  D4f  D4f   A3mf -    A3mf -",
+                "D4f  C4mf B3mf A3p   G3p  -    -    -",
+                "C4p  C4p  C4p  D4mf  E4mf -    D4mf -",
+                "C4p  E4mf D4p  D4p   C4p  -    -    -",
+            }
+        };
+
         //Plain Melody : for an enemy without a song yet, one gentle line so the band still plays
         //in tune when the instrument files exist (a C major pentatonic arch, not a real piece)
         public static int[] PlainMelody = { 60, 62, 64, 67, 69, 67, 64, 62 };
 
-        public static SongChart[] All = { OdeToJoy };
+        public static SongChart[] All = { OdeToJoy, Twinkle, Moonlight };
 
         //Prepare : read every phrase once, when the game starts
         public static void Prepare()

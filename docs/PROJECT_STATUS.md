@@ -1137,6 +1137,16 @@ THE METRONOME : ทุกการตวัดเป็น BOOST ไม่ว่
   เคล็ดลับหน้าแรกสั้นลง ("The wrong size plays weaker" จริงทั้ง 2 โหมด) · กล่องล่างหน้า THE BAND 3 บรรทัดสั้น · PASSIVE / SIGNATURE ของคอนดักเตอร์ทั้ง 5 คนเหลือประโยคเดียว ตัวเลขเท่าเดิม (`Data/Conductor.cs`) · ไม่แตะกติกา
 - ทดลองแล้วไม่ใช้ : NORMAL แรงศัตรูเดิม 0.85/1.45/2.45 (ทั่วไป 45% มือใหม่ผ่านชั้น 1 81%) · MAESTRO 1.45/1.9/2.45 (เก่งแพ้ในชั้น 1 43% เป็นกำแพง) · 1.2/1.9/2.6 (เก่ง 53%)
 
+**ก้อน 7 (29 ก.ย. 20:3x, ผู้ใช้ : "เติมอาร์ตให้ครบ · แอดเสียงเครื่องดนตรีให้ทั้งหมดแล้ว ทำเพลงด่วน 2-3 เพลง · เครื่องดนตรีไทยใช้เครื่องที่เพิ่มนอกจากอันหลักๆ ไปก่อน")** :
+  **เสียง** : คลังเสียงของผู้ใช้อยู่ราก repo (1,164 ไฟล์ `Violin Section/` `Viola Section/` `Cello Section/` `Solo Violin/` `Flute/` `Oboe/` `F Horn/` `Timpani/` `Xylo/` `drums/` · ไม่ได้อยู่ใน build) ·
+  เลือกโน้ตสั้น (spiccato/staccato) คนละ 1 ไฟล์ แปลงด้วย ffmpeg เป็น mono 16-bit 44.1 kHz ยาว ≤ 1.1 วิ + fade + ปรับความดังให้เท่ากัน (peak −8 dB) → `Content/Audio/Instruments/` + `Content.mgcb` :
+  violin = Violin Section Spic C4 (60) · flute = Flute stac C5 (72) · timpani = Timpani1 Hit (ไม่มีระดับเสียง 0) · **soduang = Viola spic C4 (60)** · **pinai = Oboe Stacc D4 (62)** · **ranatek = Xylo C5 (72)** · cello = Cello spic C3 (48) · horn = F Horn stac C3 (48) · bassdrum = drums/bass bdrum_f_1 (0) ·
+  เครื่องไทย 3 ตัวใช้วิโอลา / โอโบ / ไซโลโฟนแทนไปก่อนตามที่ผู้ใช้สั่ง · `Musician.SampleNote` ตั้งตามไฟล์ · ยังไม่มี `tacet.wav`
+  **เพลง** (3 เพลงแล้ว, `Data/SongChart.cs`) : ODE TO JOY (DEAD AIR · STATIC) · **AH, VOUS DIRAI-JE, MAMAN** (Mozart K.265 ธีม = ทำนอง Twinkle, HUSH) · **AU CLAIR DE LA LUNE** (เพลงฝรั่งเศสดั้งเดิม เชื่อกันว่าของ Lully แต่ไม่แน่นอน ป้ายเขียน TRAD. / LULLY, THE LULL) ·
+  เลือกเฉพาะทำนองที่ Claude รู้โน้ตแน่นอนทุกตัว (เพลงเด็ก 2/4 และ 4/4) · เพลงยากของร่าง alter ego ยังรอ score/MIDI (`USER_BRIEFS.md` หัวข้อ 3.1)
+  **อาร์ต** : รูปจากผู้ใช้ 3 รูปใส่ให้ THE APPRENTICE (หน้าโปรไฟล์ที่ผู้ใช้วงไว้เป็นของ APPRENTICE · ถ้าเป็นคนอื่นแค่เปลี่ยนชื่อไฟล์) : `gallery_the_apprentice.png` (ครึ่งตัว 302×402 ภาพในแกลเลอรี, ช่องใหม่ `ArtBank.GalleryOf` ไม่มีก็ใช้ portrait) ·
+  `portrait_the_apprentice.png` (ภาพร่างเต็มตัว 640×1060 หน้าโปรไฟล์ + โค้ง) · `face_the_apprentice.png` (หน้า 224×224 กล่องเล็ก WHO THEY WERE) · คอนดักเตอร์อื่นยังเป็นกรอบว่าง
+
 **ทดลองแล้วไม่ใช้ (ตัวจำลอง)**
 - ไม่ปรับอะไรเลยหลังเอาค่าสตามิน่าออก : ทั่วไปจบรัน 97% (ง่ายเกินมาก)
 - แรงศัตรูเพิ่มเป็นเส้นตรงต่อชั้น (1 / 1.8 / 2.6) : ชั้น 2 เป็นกำแพงของมือใหม่ · FloorScale 1.0 : เก่งเหลือ 33%
