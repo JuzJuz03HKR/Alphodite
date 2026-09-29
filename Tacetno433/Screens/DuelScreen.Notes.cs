@@ -208,7 +208,7 @@ namespace Tacetno433.Screens
             {
                 rolling = false;
                 battle.RollStrokes = rollStrokes;
-                Grade grade = BattleState.RollGrade(rollStrokes);
+                Grade grade = BattleState.RollGrade(rollStrokes, battle.Run.Maestro);
                 if (grade != Grade.Hesitate) ShowJudge(rollText[(int)grade], 0.55f);
                 if (grade == Grade.Perfect) SoundBank.Play(Sfx.QtePerfect);
                 ResolveAnswer(b, Choice.Boost, grade);                // TREMOLO : the whole band rolls

@@ -38,6 +38,7 @@ namespace Tacetno433.Screens
         private Rectangle backButton = new Rectangle(70, 616, 170, 46);
         private Rectangle lastButton = new Rectangle(424, 614, 50, 50);   // the arrows either side of TAKE THE BATON
         private Rectangle nextButton = new Rectangle(806, 614, 50, 50);
+        private Rectangle modeBox = new Rectangle(976, 612, 234, 38);      // NORMAL or MAESTRO, MAESTRO MODE
 
         //Detail Data
         private int index;
@@ -111,6 +112,9 @@ namespace Tacetno433.Screens
                 return;
             }
 
+            //Detail Mode : NORMAL or MAESTRO, the same switch as the gallery
+            if (Input.ClickedOn(modeBox) || Input.KeyPressed(Keys.M)) ConductorSelectScreen.FlipMode();
+
             //Detail Confirm
             if (Input.KeyPressed(Keys.Enter) || Input.KeyPressed(Keys.Space) || Input.ClickedOn(chooseButton))
                 Confirm();
@@ -141,6 +145,7 @@ namespace Tacetno433.Screens
             //Run Begin : build a fresh run and hand the player their first choice of era
             Game.CurrentRun = new RunState();
             Game.CurrentRun.Start(c, Game.StoryFont, RouteNodeInfo.CaptionWrapWidth);
+            Game.CurrentRun.Maestro = Settings.Maestro;                                  // MAESTRO MODE
             SoundBank.Play(Sfx.UiConfirm);
             Game.Screens.Change(new ChapterScreen());
         }
@@ -168,6 +173,7 @@ namespace Tacetno433.Screens
                 DrawRightColumn(sb, alpha);
                 Ui.Button(sb, chooseButton, "TAKE THE BATON", "ENTER", true, true, alpha);
                 Ui.Button(sb, backButton, "BACK", "ESC", false, true, alpha);
+                Ui.ModeSwitch(sb, modeBox, Settings.Maestro, Input.MouseOver(modeBox), alpha);
                 DrawArrow(sb, lastButton, false, index > 0, alpha);
                 DrawArrow(sb, nextButton, true, index < ConductorList.All.Length - 1, alpha);
             }

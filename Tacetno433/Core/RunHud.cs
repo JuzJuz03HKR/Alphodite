@@ -31,6 +31,10 @@ namespace Tacetno433.Core
             Gfx.Text(sb, Ui.BigFont, run.BandName.Length > 0 ? run.BandName : "UNNAMED ENSEMBLE", 32, 8, Palette.Paper, TextSize.Small);
             Gfx.TextSpaced(sb, Ui.Font, run.Conductor.Name, 34, 40, Palette.LineGrey, TextSize.Tiny, 2.5f);
 
+            //Mode : NORMAL or MAESTRO after the conductor's name (MAESTRO MODE)
+            float modeX = 34 + Gfx.SpacedWidth(Ui.Font, run.Conductor.Name, TextSize.Tiny, 2.5f) + 16;
+            Gfx.TextSpaced(sb, Ui.Font, run.Maestro ? "MAESTRO" : "NORMAL", modeX, 40, run.Maestro ? Palette.Highlight : Palette.PaperDim, TextSize.Tiny, 2.5f);
+
             //Title
             if (title.Length > 0)
                 Gfx.TextSpacedCentered(sb, Ui.Font, title, TacetGame.ScreenW / 2f, 24, Palette.PaperDim, TextSize.Label, 5f);

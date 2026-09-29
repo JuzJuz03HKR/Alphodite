@@ -344,7 +344,7 @@ namespace Tacetno433.Screens
             if (now < rollEnd) return;
 
             rolling = false;
-            Grade grade = BattleState.RollGrade(rollStrokes);
+            Grade grade = BattleState.RollGrade(rollStrokes, false);
             ShowJudge(rollWords[(int)grade], 0);
             if (rollStrokes >= BattleRules.TremoloPerfect)
             {

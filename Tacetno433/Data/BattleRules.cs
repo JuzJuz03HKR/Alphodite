@@ -46,7 +46,8 @@
         //mf middle, f big, and the whole band plays every note the baton lands. Playing is free.
         //The wrong size still plays, at this share. (Round 12 to 14 : DYNAMICS, the size picked
         //who came in, a small stroke only the p players, and everybody who played paid stamina.)
-        public static float WrongSizePower = 0.3f;
+        //NORMAL keeps half (29 Sep, was 0.3 for everyone), MAESTRO keeps 0.3 (see MAESTRO MODE below).
+        public static float WrongSizePower = 0.5f;
 
         //CUE (round 12) : every beat the baton goes one way. Round 14 : every musician has an arrow
         //of their own (Musician.Cue), left, down and up, or right, and the players whose arrow
@@ -82,8 +83,10 @@
         //Timing Grades (HARD, 25 Sep : players found the wide windows far too easy)
         //The stroke settings page can move every judgement earlier or later for one player's
         //hand and screen (Settings.TimingOffset), so the windows can stay narrow.
-        public static float PerfectWindow = 0.08f; // seconds either side of the beat, was 0.12
-        public static float GoodWindow = 0.18f;    // was 0.30
+        //NORMAL (29 Sep) : a little wider again, friends could not keep up on the first floor.
+        //MAESTRO keeps the narrow 0.08 / 0.18.
+        public static float PerfectWindow = 0.10f; // seconds either side of the beat, was 0.12, 0.08 until 29 Sep
+        public static float GoodWindow = 0.22f;    // was 0.30, 0.18 until 29 Sep
         public static float EarlyTime = 0.24f;     // a stroke ending earlier than this before its beat is the hand getting ready
         public static float PerfectBonus = 1.3f;   // a PERFECT stroke multiplies the band's power (round 12, was 1.2)
         public static float MissPower = 0.45f;     // PENALTY : a bad stroke still counts, but weaker, was 0.7, 0.55 until round 12
@@ -102,17 +105,20 @@
         //is being answered, so the player conducts on every beat without waiting.
         //Round 15 : the player found the very first fight far too quick (every floor was 96 / 112 / 128,
         //round 9). The last floor keeps that, the first is gentle, so the game climbs.
+        //NORMAL (29 Sep) : slower again, friends still could not keep up on the first floor
+        //(was 80 / 88 / 96, 88 / 100 / 112, 96 / 112 / 128). MAESTRO plays 96 / 112 / 128 on every floor.
         public static int[][] TempoByFloor =
         {
-            new int[] { 80, 88, 96 },       // floor 1
-            new int[] { 88, 100, 112 },     // floor 2
-            new int[] { 96, 112, 128 },     // floor 3, as every floor was in round 9 to 14
+            new int[] { 70, 76, 84 },       // floor 1
+            new int[] { 80, 90, 100 },      // floor 2
+            new int[] { 88, 100, 112 },     // floor 3
         };
         public static float PhraseTail = 0.5f;      // after the last answer, before the round is summed up
 
         //Gentle Fights : the first fights of a run, where TACET only plays f and p (never mf), so
-        //the first thing to learn is two sizes (round 15, see BattleState.Gentle)
-        public static int GentleFights = 2;
+        //the first thing to learn is two sizes (round 15, see BattleState.Gentle). NORMAL 3
+        //(29 Sep, was 2), MAESTRO none.
+        public static int GentleFights = 3;
 
         //Teaching Order : the special notes arrive one floor at a time, so floor one teaches the
         //plain game with the roll (the enemy traits also start on floor two). Keep it simple to learn.
@@ -136,8 +142,8 @@
         public static float TremoloBase = 0.4f;     // our part with no strokes at all
         public static float TremoloStep = 0.15f;    // each stroke adds this much of our part
         public static int TremoloMost = 10;         // strokes past this add nothing
-        public static int TremoloPerfect = 6;       // strokes for a PERFECT roll, was 7 : the roll is shorter at 128 BPM
-        public static int TremoloGood = 4;          // strokes for a GOOD roll, fewer than 1 is a HESITATE
+        public static int TremoloPerfect = 5;       // strokes for a PERFECT roll, was 7, 6 until 29 Sep (NORMAL is slower, MAESTRO keeps 6)
+        public static int TremoloGood = 3;          // strokes for a GOOD roll, 4 until 29 Sep, fewer than 1 is a HESITATE
 
         //Fermata : ordinary enemies end every round with a held note two beats long (elites and
         //bosses end theirs with the tremolo instead). Stroke it on the beat, then keep the button
@@ -221,7 +227,32 @@
         //band plays every note, so a band grows much stronger over a run than before. The floors
         //climb steeply to match, and the first floor is softer, so it can be learned (the player
         //asked for a curve, easy first, hard later). Round 9 to 14 : 1.0, 1.25, 1.5.
-        public static float[] FloorPower = { 0.85f, 1.45f, 2.45f };
+        //NORMAL (29 Sep) : softer, most of all on floors two and three where a newcomer used to
+        //stop (was 0.85, 1.45, 2.45). With the slower tempo an average player wins about 65 percent
+        //of runs in the simulation (24 before), a newcomer clears floor one about 88 percent of the time.
+        public static float[] FloorPower = { 0.8f, 1.25f, 2.1f };
+
+        //MAESTRO MODE (29 Sep) : the player picks NORMAL or MAESTRO on the conductor pages
+        //(RunState.Maestro, Settings.Maestro). A friend found even the first floor too quick, so
+        //NORMAL is every number above, made gentler. MAESTRO is hard from the first fight:
+        //full speed on every floor, no gentle fights, every special note from floor one (the
+        //roll, the held note and the pairs), a wrong size keeps only 30 percent, narrow windows,
+        //more shakes for a PERFECT roll, and TACET at full strength. Search MAESTRO to find
+        //every place the mode changes something (BattleState).
+        public static int[][] MaestroTempo =
+        {
+            new int[] { 96, 112, 128 },     // every floor, as round 9 to 14
+            new int[] { 96, 112, 128 },
+            new int[] { 96, 112, 128 },
+        };
+        public static int MaestroGentleFights = 0;
+        public static int MaestroSpecialFromFloor = 1;      // rolls, held notes and pairs all from floor one
+        public static float MaestroWrongSizePower = 0.3f;
+        public static float MaestroPerfectWindow = 0.08f;
+        public static float MaestroGoodWindow = 0.18f;
+        public static int MaestroTremoloPerfect = 6;
+        public static int MaestroTremoloGood = 4;
+        public static float[] MaestroFloorPower = { 1.1f, 1.8f, 2.7f };    // a strong player wins about 59 percent, an average one 4
         //Round 8 : BOOST costs nothing extra, so a big stroke on every beat is the normal way to
         //play. TACET hits about 1.5 times harder to match, which kept the simulated win rates
         //of ordinary players where they were (see PROJECT_STATUS section 8).

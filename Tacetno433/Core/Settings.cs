@@ -24,6 +24,10 @@ namespace Tacetno433.Core
         //Full Screen : applied by TacetGame.ApplyFullscreen
         public static bool Fullscreen;
 
+        //MAESTRO MODE : the mode the next run starts in, picked on the conductor pages and
+        //remembered for next time (29 Sep). false is NORMAL.
+        public static bool Maestro;
+
         //Stroke Timing : seconds taken off every stroke before it is judged in a duel.
         //Every hand, mouse and screen is a little late in its own way. A player whose strokes
         //are always judged late moves this up, and the duel meets them where they are.

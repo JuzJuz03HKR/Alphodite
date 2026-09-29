@@ -313,6 +313,7 @@ namespace Tacetno433.Core
             run.RecordStop(NodeType.Shop);
             run.Chosen = run.Options[1];
             run.CurrentEvent = EventList.All[2];
+            run.Maestro = true;                                                         // MAESTRO MODE is kept too
             SaveFile.SaveRun(run);
 
             RunState back = SaveFile.LoadRun(game);
@@ -326,6 +327,7 @@ namespace Tacetno433.Core
                 report += Same("band", run.BandName, back.BandName);
                 report += Same("floor / stage", run.Floor + "/" + run.Stage + "/" + run.StagesThisFloor, back.Floor + "/" + back.Stage + "/" + back.StagesThisFloor);
                 report += Same("era", run.Era.ToString(), back.Era.ToString());
+                report += Same("maestro", run.Maestro.ToString(), back.Maestro.ToString());
                 report += Same("shards / seats", run.Shards + "/" + run.Seats + "/" + run.SeatsBoughtThisFloor, back.Shards + "/" + back.Seats + "/" + back.SeatsBoughtThisFloor);
                 report += Same("stamina", run.StaminaValue, back.StaminaValue);
                 report += Same("record", run.BattlesWon + "/" + run.PerfectsTotal + "/" + run.BestCombo, back.BattlesWon + "/" + back.PerfectsTotal + "/" + back.BestCombo);
@@ -342,13 +344,13 @@ namespace Tacetno433.Core
             }
 
             //Settings : change them, save, scramble, load, compare, then put the defaults back
-            Settings.Master = 0.35f; Settings.Sfx = 0.6f; Settings.Music = 0.1f; Settings.Language = 1; Settings.SetTiming(0.045f);
+            Settings.Master = 0.35f; Settings.Sfx = 0.6f; Settings.Music = 0.1f; Settings.Language = 1; Settings.SetTiming(0.045f); Settings.Maestro = true;
             SaveFile.SaveSettings();
-            Settings.Master = 1f; Settings.Sfx = 1f; Settings.Music = 1f; Settings.Language = 0; Settings.SetTiming(0f);
+            Settings.Master = 1f; Settings.Sfx = 1f; Settings.Music = 1f; Settings.Language = 0; Settings.SetTiming(0f); Settings.Maestro = false;
             SaveFile.LoadSettings();
-            report += Same("settings", "0.35/0.6/0.1/1/" + Settings.TimingLabel(0.045f),
-                           Settings.Master + "/" + Settings.Sfx + "/" + Settings.Music + "/" + Settings.Language + "/" + Settings.TimingLabel(Settings.TimingOffset));
-            Settings.Master = 0.8f; Settings.Sfx = 0.8f; Settings.Music = 0.55f; Settings.Language = 0; Settings.SetTiming(0f);
+            report += Same("settings", "0.35/0.6/0.1/1/" + Settings.TimingLabel(0.045f) + "/True",
+                           Settings.Master + "/" + Settings.Sfx + "/" + Settings.Music + "/" + Settings.Language + "/" + Settings.TimingLabel(Settings.TimingOffset) + "/" + Settings.Maestro);
+            Settings.Master = 0.8f; Settings.Sfx = 0.8f; Settings.Music = 0.55f; Settings.Language = 0; Settings.SetTiming(0f); Settings.Maestro = false;
 
             SaveFile.DeleteRun();
             report += Same("delete", "False", SaveFile.HasRun.ToString());
@@ -390,10 +392,26 @@ namespace Tacetno433.Core
         //the band is low and a seat when someone waits on the bench, events are skipped.
         //After a win the sim takes a motif at random from the same offer the reward page makes
         //(round 9 : before that motifs were skipped, so late runs looked harder than they play).
+        //Sim Maestro : whole runs are played in MAESTRO MODE while this is true (29 Sep)
+        private static bool simMaestro;
+
         private static string SimulateRuns(TacetGame game, Random random)
         {
-            string report = "WHOLE RUNS  (" + BattleRules.FloorsPerRun + " floors, 200 runs per line, conductor THE APPRENTICE, motifs taken)\r\n";
+            string report = "";
+            for (int mode = 0; mode < 2; mode++)
+            {
+                simMaestro = mode == 1;
+                report += "WHOLE RUNS  " + (simMaestro ? "MAESTRO" : "NORMAL") + "  (" + BattleRules.FloorsPerRun
+                        + " floors, 200 runs per line, conductor THE APPRENTICE, motifs taken)\r\n";
+                report += SimulateRunsInMode(game, random) + "\r\n";
+            }
+            simMaestro = false;
+            return report;
+        }
 
+        private static string SimulateRunsInMode(TacetGame game, Random random)
+        {
+            string report = "";
             for (int h = 0; h < runHabits.Length; h++)
             {
                 RunRecord rec = new RunRecord();
@@ -428,6 +446,7 @@ namespace Tacetno433.Core
         {
             RunState run = new RunState();
             run.Start(conductor, game.StoryFont, RouteNodeInfo.CaptionWrapWidth);
+            run.Maestro = simMaestro;                                                   // MAESTRO MODE
             run.BandName = "SIM";
             if (startMotif != null) run.AddMotif(startMotif);
             bool alive = true;
@@ -534,7 +553,7 @@ namespace Tacetno433.Core
             if (b.IsTremolo(beat) && grade != Grade.Hesitate)
             {
                 b.RollStrokes = strokes;
-                grade = BattleState.RollGrade(strokes);
+                grade = BattleState.RollGrade(strokes, b.Run.Maestro);
                 choice = Choice.Boost;                                                  // the whole band rolls
             }
 

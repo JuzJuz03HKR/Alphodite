@@ -37,6 +37,7 @@ namespace Tacetno433.Screens
         private Rectangle leftButton = new Rectangle(250, 318, 70, 70);
         private Rectangle rightButton = new Rectangle(960, 318, 70, 70);
         private Rectangle backButton = new Rectangle(36, 648, 150, 42);
+        private static Rectangle modeBox = new Rectangle(1010, 634, 234, 38);   // NORMAL or MAESTRO, MAESTRO MODE
 
         //Gallery State
         private int index;                            // which painting we are standing at
@@ -89,6 +90,9 @@ namespace Tacetno433.Screens
                 SoundBank.Play(Sfx.UiConfirm);
                 Game.Screens.Change(new ConductorDetailScreen(index, centerFrame));
             }
+
+            //Gallery Mode : NORMAL or MAESTRO for the run about to start
+            if (Input.ClickedOn(modeBox) || Input.KeyPressed(Keys.M)) FlipMode();
 
             //Gallery Back
             if (Input.KeyPressed(Keys.Escape) || Input.ClickedOn(backButton))
@@ -283,9 +287,19 @@ namespace Tacetno433.Screens
             }
 
             Ui.Button(sb, backButton, "BACK", "ESC", false);
+            Ui.ModeSwitch(sb, modeBox, Settings.Maestro, Input.MouseOver(modeBox), 1f);
 
             //Hint
             Gfx.TextSpacedCentered(sb, Game.Font, "CLICK THE PAINTING TO STEP INSIDE", CenterX, 694, Palette.LineGrey, TextSize.Tiny, 3f);
+        }
+
+        //Flip Mode : MAESTRO MODE on or off, remembered in the settings file for the next run.
+        //The profile page uses it too, the switch sits on both conductor pages.
+        public static void FlipMode()
+        {
+            Settings.Maestro = !Settings.Maestro;
+            SaveFile.SaveSettings();
+            SoundBank.Play(Sfx.UiMove);
         }
 
         //Arrow Button : a diamond frame with an arrow inside, dimmed when you cannot go that way

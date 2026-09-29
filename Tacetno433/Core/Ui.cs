@@ -16,6 +16,7 @@ namespace Tacetno433.Core
     //   Tooltip     a box that explains whatever the mouse is over
     //   Slider      a track with a diamond knob, used by the settings page
     //   CheckBox    a small box with a tick in it when the option is on
+    //   ModeSwitch  NORMAL or MAESTRO, the chosen half filled (29 Sep, the conductor pages)
     //
     //The fonts are handed over once by TacetGame, so every call stays short.
     public static class Ui
@@ -104,6 +105,30 @@ namespace Tacetno433.Core
             Gfx.RectOutline(sb, cap, Palette.LineGrey * alpha, 1);
             Gfx.TextCentered(sb, Font, key, cap.Center.X, cap.Center.Y, Palette.Ink * alpha, TextSize.Tiny);
             return w;
+        }
+
+        //Mode Switch : NORMAL or MAESTRO side by side, the chosen half filled, a one line reminder
+        //under it (MAESTRO MODE, 29 Sep). The conductor pages flip Settings.Maestro on a click or M.
+        public const string ModeKey = "M";
+        private const string NormalLine = "Slower. Easier to keep up.";
+        private const string MaestroLine = "Full speed from the first fight.";
+
+        public static void ModeSwitch(SpriteBatch sb, Rectangle box, bool maestro, bool hover, float alpha)
+        {
+            int half = box.Width / 2;
+            ModeHalf(sb, new Rectangle(box.X, box.Y, half, box.Height), "NORMAL", !maestro, alpha);
+            ModeHalf(sb, new Rectangle(box.X + half, box.Y, box.Width - half, box.Height), "MAESTRO", maestro, alpha);
+            Gfx.RectOutline(sb, box, (hover ? Palette.Highlight : Palette.LineGrey) * alpha, 1);
+
+            Gfx.TextSpaced(sb, Font, "MODE", box.X, box.Y - 20, Palette.LineGrey * alpha, TextSize.Tiny, 2f);
+            KeyChipRight(sb, ModeKey, box.Right, box.Y - 13, Palette.PaperDim * alpha);
+            Gfx.TextRight(sb, StoryFont, maestro ? MaestroLine : NormalLine, box.Right, box.Bottom + 5, Palette.PaperDim * alpha, TextSize.StorySmall);
+        }
+
+        private static void ModeHalf(SpriteBatch sb, Rectangle r, string word, bool on, float alpha)
+        {
+            if (on) Gfx.Rect(sb, r, Palette.Paper * alpha);
+            Gfx.TextSpacedCentered(sb, Font, word, r.Center.X, r.Center.Y - 8, (on ? Palette.Ink : Palette.PaperDim) * alpha, TextSize.Label, 2f);
         }
 
         //Mouse Icon : a mouse seen from above, the LEFT button filled, the one the baton needs

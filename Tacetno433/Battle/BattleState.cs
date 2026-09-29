@@ -193,7 +193,8 @@ namespace Tacetno433.Battle
             this.random = random;
 
             //Enemy Scale : deeper floors hit harder, elites and bosses harder still
-            scale = BattleRules.FloorPower[Math.Min(run.Floor, BattleRules.FloorPower.Length) - 1];
+            float[] floorPower = run.Maestro ? BattleRules.MaestroFloorPower : BattleRules.FloorPower;    // MAESTRO
+            scale = floorPower[Math.Min(run.Floor, floorPower.Length) - 1];
             if (enemy.Kind == EnemyKind.Normal) scale *= BattleRules.NormalScale;
             if (enemy.Kind == EnemyKind.Elite) scale *= BattleRules.EliteScale;
             if (enemy.Kind == EnemyKind.Boss) scale *= BattleRules.BossScale;
@@ -231,15 +232,23 @@ namespace Tacetno433.Battle
             get { return Enemy.Trait != EnemyTrait.None && Run.Floor >= Enemy.TraitFloor; }
         }
 
-        //Timing Windows : STEADY PULSE widens both
+        //Timing Windows : STEADY PULSE widens both, MAESTRO keeps them narrow
         public float PerfectWindow
         {
-            get { return BattleRules.PerfectWindow + (Run.Has(MotifId.SteadyPulse) ? BattleRules.SteadyWindowBonus : 0f); }
+            get
+            {
+                float window = Run.Maestro ? BattleRules.MaestroPerfectWindow : BattleRules.PerfectWindow;   // MAESTRO
+                return window + (Run.Has(MotifId.SteadyPulse) ? BattleRules.SteadyWindowBonus : 0f);
+            }
         }
 
         public float GoodWindow
         {
-            get { return BattleRules.GoodWindow + (Run.Has(MotifId.SteadyPulse) ? BattleRules.SteadyWindowBonus : 0f); }
+            get
+            {
+                float window = Run.Maestro ? BattleRules.MaestroGoodWindow : BattleRules.GoodWindow;         // MAESTRO
+                return window + (Run.Has(MotifId.SteadyPulse) ? BattleRules.SteadyWindowBonus : 0f);
+            }
         }
 
         //Perfect Window At : COUNTS ALOUD widens it on her beats, the ones the baton goes her way
@@ -322,7 +331,8 @@ namespace Tacetno433.Battle
         {
             get
             {
-                int[] floorTempo = BattleRules.TempoByFloor[Math.Min(Run.Floor, BattleRules.TempoByFloor.Length) - 1];
+                int[][] table = Run.Maestro ? BattleRules.MaestroTempo : BattleRules.TempoByFloor;           // MAESTRO
+                int[] floorTempo = table[Math.Min(Run.Floor, table.Length) - 1];
                 int bpm = floorTempo[Math.Min(Round, floorTempo.Length) - 1];
                 if (Round >= 3 && EnemyHas(EnemyTrait.Lullaby)) bpm = floorTempo[0] - BattleRules.LullabySlower;    // LULLABY
                 if (Round >= 3 && EnemyHas(EnemyTrait.Unfinished)) bpm += BattleRules.UnfinishedFaster;            // UNFINISHED
@@ -334,7 +344,7 @@ namespace Tacetno433.Battle
         //first thing to learn is two sizes (round 15, GentleFights)
         public bool Gentle
         {
-            get { return Run.Floor == 1 && Run.BattlesWon < BattleRules.GentleFights; }
+            get { return Run.Floor == 1 && Run.BattlesWon < (Run.Maestro ? BattleRules.MaestroGentleFights : BattleRules.GentleFights); }   // MAESTRO
         }
 
         //Asks Size : this note asks for a size, the one its mark SAYS (a FALSE NOTE lies). A
@@ -484,8 +494,11 @@ namespace Tacetno433.Battle
             //game (round 9 to 14 : every enemy rolled on floor one). A special note always has a
             //note, and it is never hidden.
             int last = BattleRules.BeatsPerRound - 1;
-            bool hold = Enemy.Kind == EnemyKind.Normal && Run.Floor >= BattleRules.FermataFromFloor;
-            bool roll = Enemy.Kind != EnemyKind.Normal && Run.Floor >= BattleRules.TremoloFromFloor;
+            //MAESTRO : every enemy ends on its special note from floor one
+            int holdFrom = Run.Maestro ? BattleRules.MaestroSpecialFromFloor : BattleRules.FermataFromFloor;
+            int rollFrom = Run.Maestro ? BattleRules.MaestroSpecialFromFloor : BattleRules.TremoloFromFloor;
+            bool hold = Enemy.Kind == EnemyKind.Normal && Run.Floor >= holdFrom;
+            bool roll = Enemy.Kind != EnemyKind.Normal && Run.Floor >= rollFrom;
             TremoloBeat = roll ? last : -1;
             FermataBeat = hold ? last : -1;
             if (roll || hold)
@@ -634,7 +647,7 @@ namespace Tacetno433.Battle
         private void PlantDoubles()
         {
             for (int b = 0; b < BattleRules.BeatsPerRound; b++) EnemyDouble[b] = false;
-            if (Run.Floor < BattleRules.PairsFromFloor) return;
+            if (Run.Floor < (Run.Maestro ? BattleRules.MaestroSpecialFromFloor : BattleRules.PairsFromFloor)) return;   // MAESTRO
 
             int want = BattleRules.DoubleNotes[Math.Min(Round, BattleRules.DoubleNotes.Length) - 1];
             if (want > BattleRules.DoubleMost) want = BattleRules.DoubleMost;
@@ -708,11 +721,11 @@ namespace Tacetno433.Battle
             return beat == FermataBeat;
         }
 
-        //Roll Grade : how a roll of this many strokes is graded
-        public static Grade RollGrade(int strokes)
+        //Roll Grade : how a roll of this many strokes is graded. MAESTRO asks for more shakes.
+        public static Grade RollGrade(int strokes, bool maestro)
         {
-            if (strokes >= BattleRules.TremoloPerfect) return Grade.Perfect;
-            if (strokes >= BattleRules.TremoloGood) return Grade.Good;
+            if (strokes >= (maestro ? BattleRules.MaestroTremoloPerfect : BattleRules.TremoloPerfect)) return Grade.Perfect;
+            if (strokes >= (maestro ? BattleRules.MaestroTremoloGood : BattleRules.TremoloGood)) return Grade.Good;
             if (strokes >= 1) return Grade.Miss;
             return Grade.Hesitate;
         }
@@ -1099,7 +1112,7 @@ namespace Tacetno433.Battle
             else if (!sizeRight)
             {
                 //Wrong Size : the band plays, but not the way the note is written
-                power *= BattleRules.WrongSizePower;
+                power *= Run.Maestro ? BattleRules.MaestroWrongSizePower : BattleRules.WrongSizePower;    // MAESTRO
             }
             else if (choice == Choice.Boost && Run.Has(MotifId.Sforzando))
             {

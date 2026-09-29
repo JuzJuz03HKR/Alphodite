@@ -41,6 +41,7 @@ namespace Tacetno433.Data
         public int StagesThisFloor = 8;      // the boss sits on this stage number
         public int Era = 0;                  // index into EraList.All
         public bool RunComplete;             // true once the last boss is beaten
+        public bool Maestro;                 // MAESTRO MODE : hard from the first fight, NORMAL when false (29 Sep, BattleRules)
 
         //Run Party
         public List<Musician> Roster = new List<Musician>();       // everyone you own

@@ -85,6 +85,7 @@ namespace Tacetno433.Data
             lines.Add("language=" + Settings.Language);
             lines.Add("fullscreen=" + (Settings.Fullscreen ? 1 : 0));
             lines.Add("timing=" + Number(Settings.TimingOffset));
+            lines.Add("maestro=" + (Settings.Maestro ? 1 : 0));
             Write(SettingsPath, lines);
         }
 
@@ -100,6 +101,7 @@ namespace Tacetno433.Data
             Settings.Language = GetInt(v, "language", 0) == 1 ? 1 : 0;
             Settings.Fullscreen = GetInt(v, "fullscreen", 0) == 1;
             Settings.SetTiming(GetFloat(v, "timing", 0f));
+            Settings.Maestro = GetInt(v, "maestro", 0) == 1;
         }
 
         //Run Save : everything RunState needs to carry on. A fight in progress is not written,
@@ -116,6 +118,7 @@ namespace Tacetno433.Data
             lines.Add("stage=" + run.Stage);
             lines.Add("stages=" + run.StagesThisFloor);
             lines.Add("era=" + run.Era);
+            lines.Add("maestro=" + (run.Maestro ? 1 : 0));          // MAESTRO MODE, a save from before 29 Sep has none : NORMAL
             lines.Add("shards=" + run.Shards);
             lines.Add("seats=" + run.Seats);
             lines.Add("seatsbought=" + run.SeatsBoughtThisFloor);
@@ -187,6 +190,7 @@ namespace Tacetno433.Data
             run.Stage = GetInt(v, "stage", 1);
             run.StagesThisFloor = GetInt(v, "stages", 8);
             run.Era = Math.Max(0, Math.Min(EraList.All.Length - 1, GetInt(v, "era", 0)));
+            run.Maestro = GetInt(v, "maestro", 0) == 1;
             run.Shards = GetInt(v, "shards", 0);
             run.Seats = GetInt(v, "seats", 3);
             run.SeatsBoughtThisFloor = GetInt(v, "seatsbought", 0);
