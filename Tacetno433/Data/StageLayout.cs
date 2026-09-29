@@ -6,6 +6,7 @@ namespace Tacetno433.Data
     public class StageRow
     {
         public string Name = "";          // "STRINGS"
+        public string Short = "";         // "STR", where there is no room for the whole word
         public Family Family;             // the instruments that sit here
     }
 
@@ -32,9 +33,9 @@ namespace Tacetno433.Data
         //Sections : index 0 is the front, nearest the conductor
         public static StageRow[] Rows = new StageRow[]
         {
-            new StageRow { Name = "STRINGS",    Family = Family.String },
-            new StageRow { Name = "WINDS",      Family = Family.Wind },
-            new StageRow { Name = "PERCUSSION", Family = Family.Percussion },
+            new StageRow { Name = "STRINGS",    Short = "STR", Family = Family.String },
+            new StageRow { Name = "WINDS",      Short = "WND", Family = Family.Wind },
+            new StageRow { Name = "PERCUSSION", Short = "PRC", Family = Family.Percussion },
         };
 
         //Seat Row : which section each seat belongs to
@@ -69,17 +70,21 @@ namespace Tacetno433.Data
             return Rows[SeatRow[seat]];
         }
 
-        //Duel Stand : THE DUEL PAGE, seen from the side. The band stands in a line facing
-        //TACET on the right. Each section is one column: strings furthest left, percussion
-        //nearest the enemy. The three players of a part stand at three depths:
-        //further away is higher up the screen and a little smaller.
+        //Duel Stand : THE DUEL PAGE, seen from the side of the stage and a little above it (round 15,
+        //the player asked to see where everybody stands, like the parties of Slay the Spire or
+        //Limbus Company). The band faces TACET on the right the way an orchestra faces its
+        //conductor : the strings nearest, then the winds, the percussion at the back on the left.
+        //Each section is a column and its three sides are three depths : further away is higher up
+        //the screen, smaller, and set back to the left, so the nine places make a leaning grid on
+        //the floor with a little room between everybody (see DuelScreen.DrawFloorSpots), with the
+        //section's name on the floor in front of it.
         //All numbers are screen pixels, because the duel page never moves its stage.
         //The boxes are sized for detailed pixel characters with room to swing an instrument,
         //and the f column stays clear of the timing ring in the middle of the screen.
-        public static float[] DuelColumnX = { 196f, 316f, 436f };     // strings, winds, percussion
-        public static float[] DuelDepthY = { 506f, 530f, 554f };       // far, centre, near : the feet
-        public static float[] DuelDepthX = { -20f, 0f, 20f };
-        public static float[] DuelDepthScale = { 0.86f, 0.93f, 1f };   // placeholder boxes only, see CharacterArt
+        public static float[] DuelColumnX = { 410f, 270f, 130f };     // strings, winds, percussion (round 15, was the other way round)
+        public static float[] DuelDepthY = { 476f, 526f, 576f };       // far, centre, near : the feet (left, centre, right side)
+        public static float[] DuelDepthX = { -45f, 0f, 45f };
+        public static float[] DuelDepthScale = { 0.78f, 0.89f, 1f };   // placeholder boxes only, see CharacterArt
         public const int StandW = 100;
         public const int StandH = 170;
         public const float DuelFloorY = 452f;                          // where the stage floor starts

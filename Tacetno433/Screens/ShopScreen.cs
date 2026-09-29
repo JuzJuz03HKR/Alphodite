@@ -307,31 +307,17 @@ namespace Tacetno433.Screens
             }
         }
 
-        //Ware Icons : a capsule for seats, a tuning fork, a figure, or the motif's badge
+        //Ware Icons : a word for a seat and for tuning, the new player's side arrow, or the motif's
+        //badge (round 15 : plain words, the drawn chair and tuning fork were hard to read)
         private void DrawWareIcon(SpriteBatch sb, int row, float x, float y, float a)
         {
             Color c = Palette.Paper * a;
-            if (row == SeatRow)
-            {
-                Gfx.CapsuleOutline(sb, new Rectangle((int)x - 9, (int)y - 22, 18, 44), c, 2f);
-                Gfx.Rect(sb, x - 5, y - 1, 10, 2, c);
-                Gfx.Rect(sb, x - 1, y - 5, 2, 10, c);
-            }
-            else if (row == TuningRow)
-            {
-                Gfx.Rect(sb, x - 8, y - 20, 2, 24, c);
-                Gfx.Rect(sb, x + 6, y - 20, 2, 24, c);
-                Gfx.Arc(sb, x, y + 4, 7, 0f, MathHelper.Pi, c, 2f);
-                Gfx.Rect(sb, x - 1, y + 10, 2, 14, c);
-            }
+            if (row == SeatRow) Gfx.TextSpacedCentered(sb, Game.Font, "SEAT", x, y - 7, c, TextSize.Tiny, 2f);
+            else if (row == TuningRow) Gfx.TextSpacedCentered(sb, Game.Font, "TUNE", x, y - 7, c, TextSize.Tiny, 2f);
             else if (row == HireRow)
             {
-                if (hire != null) MusicianArt.SeatBadge(sb, hire, x, y, 14f, Palette.Ink, Palette.Paper, a);
-                else
-                {
-                    Gfx.Circle(sb, x, y - 12, 8, c);
-                    Gfx.Rect(sb, x - 12, y, 24, 20, c);
-                }
+                if (hire != null) MusicianArt.SideBadge(sb, hire.Cue, x, y, 14f, Palette.Ink, Palette.Paper, a);
+                else Gfx.TextSpacedCentered(sb, Game.Font, "HIRE", x, y - 7, c, TextSize.Tiny, 2f);
             }
             else if (row - FirstMotifRow < motifs.Length)
             {

@@ -42,7 +42,8 @@ namespace Tacetno433.Data
     {
         public MotifId Id;
         public string Name = "";
-        public string Mark = "";          // the notation mark drawn on its badge, like "sfz"
+        public string Mark = "";          // the notation mark it is named after, like "sfz" (round 15 : no longer drawn)
+        public string Initials = "";      // two letters on its badge, "SF" (round 15, the player found the notation marks hard to read)
         public int Rarity = 1;            // 1 common, 2 rare, 3 treasured
         public int FromFloor = 1;         // never offered before this floor (its note is not in play yet)
         public string Text = "";
@@ -92,7 +93,7 @@ namespace Tacetno433.Data
                         Text = "Once per fight, when the band would collapse, 15 percent of its stamina comes back." },
             new Motif { Id = MotifId.Overture,     Name = "OVERTURE",      Mark = "I",    Rarity = 3,
                         Text = "The first beat of every round hits 50 percent harder." },
-            new Motif { Id = MotifId.Counterpoint, Name = "COUNTERPOINT",  Mark = "+",    Rarity = 3,
+            new Motif { Id = MotifId.Counterpoint, Name = "COUNTERPOINT",  Mark = "+",    Rarity = 3, Initials = "CP",
                         Text = "Against TACET's f notes, your answer hits 20 percent harder." },
 
             //Special Notes : each bends one of the four notes or one big moment of the duel.
@@ -122,6 +123,12 @@ namespace Tacetno433.Data
                 m.TextWrapped = Gfx.WrapText(storyFont, m.Text, cardWidth, TextSize.StorySmall, 4);
                 m.TipWrapped = Gfx.WrapText(storyFont, m.Text, tipWidth, TextSize.StorySmall);
                 m.RarityLabel = rarityNames[m.Rarity];
+
+                //Initials : the first letters of the first two words, or the first two letters of one word.
+                //A motif can set its own when two would come out the same (COUNTERPOINT "CP", not CODA's "CO").
+                if (m.Initials != "") continue;
+                string[] words = m.Name.Split(' ');
+                m.Initials = words.Length >= 2 ? "" + words[0][0] + words[1][0] : m.Name.Substring(0, System.Math.Min(2, m.Name.Length));
             }
         }
 

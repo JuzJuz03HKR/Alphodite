@@ -328,7 +328,7 @@ namespace Tacetno433.Screens
             Gfx.Text(sb, Game.BigFont, c.SignatureName, RightX, y + 58, Palette.Highlight * a, TextSize.Subtitle);
             Gfx.Text(sb, Game.StoryFont, c.SignatureWrapped, RightX, y + 96, Palette.Paper * a, TextSize.Story);
 
-            //Recipe : NEEDS, then a number and the family mark for each family it asks for
+            //Recipe : NEEDS, then a number and the section's name for each family it asks for
             int ny = y + 190;
             Gfx.TextSpaced(sb, Game.Font, "NEEDS", RightX, ny + 5, Palette.LineGrey * a, TextSize.Tiny, 2f);
             float rx = RightX + 70;
@@ -336,8 +336,9 @@ namespace Tacetno433.Screens
             {
                 if (c.Recipe[f] <= 0) continue;
                 Gfx.Text(sb, Game.Font, NumberText.Get(c.Recipe[f]), rx, ny, Palette.Paper * a, TextSize.Body);
-                MusicianArt.FamilyGlyph(sb, (Family)f, rx + 28, ny + 11, 0.5f, Palette.Paper * a);
-                rx += 52;
+                string section = StageLayout.Rows[StageLayout.SectionOf((Family)f)].Name;
+                Gfx.TextSpaced(sb, Game.Font, section, rx + 22, ny + 5, Palette.Paper * a, TextSize.Tiny, 2f);
+                rx += 22 + Gfx.TextWidth(Game.Font, section, TextSize.Tiny) + section.Length * 2f + 26;
             }
             //Where the notes come from : PERFECT beats, and GOOD ones too for BY THE BOOK
             string from = c.Perk == ConductorPerk.ByTheBook ? "NOTES FROM PERFECT OR GOOD BEATS" : "NOTES FROM PERFECT BEATS";

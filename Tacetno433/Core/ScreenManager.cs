@@ -44,8 +44,15 @@ namespace Tacetno433.Core
         public virtual void Resumed() { }
 
         //Screen Uses Curtain : true on the page where the stage curtain opens (conductor select).
-        //Every other page changes with the plain silence wave.
         public virtual bool UsesCurtain
+        {
+            get { return false; }
+        }
+
+        //Screen Enters With Wave : true on the pages TACET's silence swallows the stage into, the
+        //duel and the end of a run. Every other page changes with the quick slant wipe (round 15,
+        //29 Sep : the player found the wave on every page too much).
+        public virtual bool EntersWithWave
         {
             get { return false; }
         }
@@ -55,8 +62,11 @@ namespace Tacetno433.Core
     }
 
     //ScreenManager : holds the screen we are on, and covers the screen while swapping to another.
-    //The cover is TACET's silence washing over the page and pulling back (Core/SilenceWave.cs),
-    //or, going to or from the conductor select page, the stage curtain (Core/Curtain.cs).
+    //Three covers (round 15) :
+    //   CURTAIN  going to or from the conductor select page, the stage curtain (Core/Curtain.cs)
+    //   WAVE     going into a duel or the curtain call, TACET's silence washing over the page
+    //            and pulling back (Core/SilenceWave.cs), so it still means "the fight begins"
+    //   WIPE     every other page, a quick slanted black band (Core/SlantWipe.cs)
     public class ScreenManager
     {
         private TacetGame game;
@@ -65,7 +75,8 @@ namespace Tacetno433.Core
 
         private float fade;              // 0 = nothing covers the page, 1 = fully covered
         private bool fadingOut;
-        private bool curtain;            // this change uses the stage curtain instead of the wave
+        private bool curtain;            // this change uses the stage curtain
+        private bool wave;               // this change uses TACET's wave, otherwise the slant wipe
         private float time;              // keeps the wave's torn edge moving
         private const float FadeSpeed = 3f;
 
@@ -85,6 +96,7 @@ namespace Tacetno433.Core
             waiting = screen;
             fadingOut = true;
             curtain = screen.UsesCurtain || (current != null && current.UsesCurtain);
+            wave = !curtain && screen.EntersWithWave;
         }
 
         //Screen Change Now : swap with no fade (used for the very first screen)
@@ -133,7 +145,8 @@ namespace Tacetno433.Core
             if (fade <= 0f) return;
 
             if (curtain) Curtain.Draw(sb, fade);
-            else SilenceWave.Draw(sb, fade, time);
+            else if (wave) SilenceWave.Draw(sb, fade, time);
+            else SlantWipe.Draw(sb, fade, fadingOut);
         }
     }
 }

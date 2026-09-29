@@ -29,6 +29,43 @@ namespace Tacetno433.Screens
             StageStaff.Draw(sb, 232f, edge, 150f, energy, time, ink);
         }
 
+        //Floor Spots : the nine places on the stage floor, an oval under each one (round 15). An empty
+        //place is a faint ring, a filled one a darker pool under the player, so the grid of the
+        //orchestra reads even before the art is in. Faint lines join the places of each section,
+        //and the section's name is written on the floor in front of it.
+        private void DrawFloorSpots(SpriteBatch sb)
+        {
+            Formation f = Game.CurrentRun.Formation;
+            for (int section = 0; section < 3; section++)
+            {
+                Vector2 far = FeetOf(section * 3);
+                Vector2 near = FeetOf(section * 3 + 2);
+                Gfx.Line(sb, far, near, Palette.Ink * 0.12f, 1f);
+                Gfx.TextSpacedCentered(sb, Game.Font, StageLayout.Rows[section].Name, near.X, near.Y + 16f,
+                                       Palette.Ink * 0.4f, TextSize.Tiny, 2f);
+            }
+            for (int s = 0; s < StageLayout.SeatCount; s++)
+            {
+                Vector2 feet = FeetOf(s);
+                float scale = StageLayout.DuelDepthScale[s % 3];
+                float rx = 44f * scale;
+                float ry = 12f * scale;
+                if (f.Seated[s] != null)
+                {
+                    Gfx.DrawGlow(sb, feet.X, feet.Y, rx * 1.2f, Palette.Ink * 0.18f);
+                    Gfx.EllipseOutline(sb, feet.X, feet.Y, rx, ry, Palette.Ink * 0.45f, 2f);
+                }
+                else Gfx.EllipseOutline(sb, feet.X, feet.Y, rx * 0.8f, ry * 0.8f, Palette.Ink * 0.18f, 1f);
+            }
+        }
+
+        //Feet Of : where a place's feet stand on the floor, the bottom middle of its box
+        private static Vector2 FeetOf(int seat)
+        {
+            Rectangle r = StageLayout.DuelStandRect(seat);
+            return new Vector2(r.Center.X, r.Bottom);
+        }
+
         //Stand Rect : where a seat's musician stands. Whoever the baton points at on the beat
         //being answered is lifted a little, and whoever just played leans toward TACET.
         private Rectangle StandRect(int seat)
@@ -93,7 +130,7 @@ namespace Tacetno433.Screens
             }
         }
 
-        //Musician Marks : every player's seat over their head, the section mark and the arrow (round 15).
+        //Musician Marks : every player's side over their head, an arrow in a disc (round 15).
         //The ones the baton goes toward on the beat being answered (CUE) light up and grow, the
         //rest wait a shade dimmer. A cross over anyone SILENT MOUTHS has silenced this round.
         //REQUIEM's mirrored round turns the arrows round with the rule.
@@ -112,7 +149,7 @@ namespace Tacetno433.Screens
                 //Dark Disc : the stage behind is bright, so the badge is inked in, the mark light
                 if (!battle.CanPlay(s))
                 {
-                    MusicianArt.SeatBadge(sb, StageLayout.SeatRow[s], side, bx, by, 12f, Palette.PaperDim, Palette.Ink, 0.45f);
+                    MusicianArt.SideBadge(sb, side, bx, by, 12f, Palette.PaperDim, Palette.Ink, 0.45f);
                     Gfx.Line(sb, bx - 12, by - 12, bx + 12, by + 12, Palette.Ink, 3f);
                     Gfx.Line(sb, bx - 12, by + 12, bx + 12, by - 12, Palette.Ink, 3f);
                     continue;
@@ -120,7 +157,7 @@ namespace Tacetno433.Screens
 
                 bool next = UpNext(s);
                 if (next) Gfx.DrawGlow(sb, bx, by, 34f, Palette.Highlight * 0.6f);
-                MusicianArt.SeatBadge(sb, StageLayout.SeatRow[s], side, bx, by, next ? 15f : 12f,
+                MusicianArt.SideBadge(sb, side, bx, by, next ? 15f : 12f,
                                       next ? Palette.Highlight : Palette.Paper, Palette.Ink, next ? 1f : 0.75f);
             }
         }

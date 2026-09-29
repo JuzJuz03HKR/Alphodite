@@ -6,13 +6,13 @@ namespace Tacetno433.Core
 {
     //MotifArt : how a motif is drawn, in one file.
     //
-    //PLACEHOLDER. Each motif is its notation mark inside a diamond. When motif icons are
-    //painted, Badge becomes one sb.Draw of the icon into the same square.
+    //PLACEHOLDER. Each motif is its two initials inside a diamond (round 15, it was a notation
+    //mark). When motif icons are painted, Badge becomes one sb.Draw of the icon into the same square.
     //   Badge -> the small icon (top bar, shop shelf)
     //   Card  -> the tall card on the reward page
     public static class MotifArt
     {
-        //Badge : a diamond frame with the mark inside. Rarer motifs get more frame lines.
+        //Badge : a diamond frame with the initials inside. Rarer motifs get more frame lines.
         public static void Badge(SpriteBatch sb, Motif m, float cx, float cy, float size, float alpha)
         {
             Gfx.Diamond(sb, cx, cy, size, Palette.Void * alpha);
@@ -23,44 +23,11 @@ namespace Tacetno433.Core
             Mark(sb, m, cx, cy, size / 30f, Palette.Highlight * alpha);
         }
 
-        //Mark : the notation symbol. A few are drawn as shapes, the rest are letters.
+        //Mark : the motif's two initials, plain letters (round 15 : the notation marks drawn here,
+        //hairpins, breath commas, "arco", were hard to read for anyone who does not read music)
         public static void Mark(SpriteBatch sb, Motif m, float cx, float cy, float s, Color color)
         {
-            if (m.Id == MotifId.Crescendo)
-            {
-                //Hairpin : two lines opening to the right
-                Gfx.Line(sb, cx - 13 * s, cy, cx + 13 * s, cy - 8 * s, color, 2f);
-                Gfx.Line(sb, cx - 13 * s, cy, cx + 13 * s, cy + 8 * s, color, 2f);
-                return;
-            }
-
-            if (m.Id == MotifId.BreathMark)
-            {
-                //Breath Mark : the small comma a score writes where the player may breathe
-                Gfx.Circle(sb, cx, cy - 4 * s, 5f * s, color);
-                Gfx.Line(sb, cx + 4 * s, cy - 3 * s, cx - 3 * s, cy + 10 * s, color, 3f * s);
-                return;
-            }
-
-            if (m.Id == MotifId.Tenuto)
-            {
-                //Tenuto : a short flat bar, "hold this note for all it is worth"
-                Gfx.Rect(sb, cx - 12 * s, cy - 2 * s, 24 * s, 4 * s, color);
-                return;
-            }
-
-            if (m.Id == MotifId.Coda)
-            {
-                //Coda : a ring crossed by a longer upright and a longer flat line
-                Gfx.CircleOutline(sb, cx, cy, 9 * s, color, 2f);
-                Gfx.Line(sb, cx, cy - 15 * s, cx, cy + 15 * s, color, 2f);
-                Gfx.Line(sb, cx - 15 * s, cy, cx + 15 * s, cy, color, 2f);
-                return;
-            }
-
-            float scale = TextSize.Small * s * 1.1f;
-            if (m.Mark.Length > 3) scale *= 0.7f;
-            Gfx.TextCentered(sb, Ui.BigFont, m.Mark, cx, cy - 2 * s, color, scale);
+            Gfx.TextCentered(sb, Ui.BigFont, m.Initials, cx, cy - 2 * s, color, TextSize.Small * s * 1.05f);
         }
 
         //Card : the tall reward card. hover lifts it and lights the frame.

@@ -78,6 +78,12 @@ namespace Tacetno433.Screens
     {
         private enum Phase { Intro, Play, Finale, RoundEnd, Bargain }
 
+        //Enters With Wave : TACET's silence swallows the stage as the fight begins (ScreenManager)
+        public override bool EntersWithWave
+        {
+            get { return true; }
+        }
+
         //Duel Layout
         private Rectangle stageBox = new Rectangle(40, 196, 600, 420);   // the band area, for pop ups
         private Rectangle tugBar = new Rectangle(440, 34, 400, 12);
@@ -1327,6 +1333,7 @@ namespace Tacetno433.Screens
             DrawFireLight(sb, edge);
             DrawStaff(sb, edge);
             effects.DrawRipples(sb, false);
+            DrawFloorSpots(sb);
             DrawMusicianGlow(sb);
 
             //Band : pixel characters need "point" sampling to stay sharp, see CharacterArt

@@ -85,7 +85,7 @@
 Tacetno433/
 ├─ TacetGame.cs        เริ่มเกม โหลดฟอนต์ เสียง ภาพ เตรียมข้อความ · วาดทั้งเกมลงภาพ 1280x720 แล้วยืดใส่จอ
 ├─ Core/               เครื่องมือวาด ชุด UI อ่านเมาส์/คีย์ ช่องภาพ (ArtBank ArtSlot CharacterArt HandArt) เอฟเฟกต์ (Hollow TacetField StageStaff)
-│                      กล่องถาม (ConfirmBox) · ไม้บาตอง (Baton) · สัญลักษณ์โน้ต (NoteGlyph) · เปลี่ยนหน้า (Curtain SilenceWave) · เครื่องมือทดสอบ (DebugShots .Audit)
+│                      กล่องถาม (ConfirmBox) · ไม้บาตอง (Baton) · สัญลักษณ์โน้ต (NoteGlyph) · เปลี่ยนหน้า (Curtain SilenceWave SlantWipe) · เครื่องมือทดสอบ (DebugShots .Audit)
 ├─ Data/               ข้อมูลทั้งหมด — แก้ตัวเลข/เนื้อหาที่นี่ (BattleRules = ตัวเลขบาลานซ์ทุกตัว) · SaveFile (เซฟ 2 ไฟล์)
 ├─ Battle/             กติกาการต่อสู้ BattleState (ไม่มีโค้ดวาด) + DuelEffects (เอฟเฟกต์แบบ object pool)
 ├─ Screens/            หน้าจอ 19 หน้า + PauseMenu (DuelScreen แยก 7 ไฟล์ · TutorialScreen แยก 3 ไฟล์ แบบ partial) · รอบ 12 ลบ ScoreScreen
@@ -96,7 +96,9 @@ Tacetno433/
 |---|---|
 | ตัวเลขบาลานซ์ทุกตัว | `Data/BattleRules.cs` |
 | **โน้ตบอกขนาด / ทั้งวงเล่น (รอบ 15)** | ใครเล่น `BattleState.Plays` (ทุกคนบนเวที) · ขนาดที่โน้ตขอ `AsksSize` / `SizeFree` / `SizeRight` · ผิดขนาด `BattleRules.WrongSizePower` · พลัง `PowerFor` · ค้น `THE NOTE SAYS` · ป้าย TOO BIG / TOO SMALL `DuelScreen.Baton.JudgeStroke` |
-| **ที่นั่งแบบวงจริง (รอบ 15)** | กลุ่มเครื่อง = แถว `StageLayout.Rows` / `SectionOf` (สายหน้า เป่ากลาง ตีหลัง) · ฝั่ง `Musician.Cue` · ที่นั่งประจำ `StageLayout.HomeSeat` · ป้าย `MusicianArt.SeatBadge` (การ์ด · หน้ารับคน · เหนือหัว · กล่องวง) |
+| **ที่นั่งแบบวงจริง (รอบ 15)** | กลุ่มเครื่อง = แถว `StageLayout.Rows` / `SectionOf` (สายหน้า เป่ากลาง ตีหลัง) · ฝั่ง `Musician.Cue` · ที่นั่งประจำ `StageLayout.HomeSeat` · ป้ายลูกศรในวงกลม `MusicianArt.SideBadge` (การ์ด · หน้ารับคน · ร้าน · หน้า THE BAND · เหนือหัว · กล่องวง) · ชื่อกลุ่มเป็นคำ `StageRow.Name` / `Short` |
+| **ผังยืนในดวล (มองจากข้างเวทีเยื้องบน)** | ตำแหน่ง/ขนาด `StageLayout.DuelColumnX` `DuelDepthY` `DuelDepthX` `DuelDepthScale` → `DuelStandRect` · วงรีบนพื้น + ชื่อกลุ่ม `DuelScreen.Stage.cs` `DrawFloorSpots` |
+| ป้าย Motif (ตัวอักษรย่อ) | `Motif.Initials` (สร้างใน `MotifList.PrepareText` ตั้งเองได้ถ้าซ้ำ เช่น COUNTERPOINT = CP) · วาด `Core/MotifArt.cs` `Mark` |
 | **ไล่ระดับความยาก (รอบ 15)** | BPM `BattleRules.TempoByFloor` · ดวลแรกๆ แค่ f/p `GentleFights` / `BattleState.Gentle` · แรงศัตรูตามชั้น `FloorPower` · โน้ตสุดท้ายของรอบ `BattleState.PrepareRound` (Last Note) |
 | **ลูกศรที่ไม้ตวัดไป (CUE)** | `BattleRules.CuePower` `CueSide` · `BattleState.CueSideAt` / `IsCued` · ลูกศรของที่นั่ง `StageLayout.SeatSide` · ค้น `CUE` |
 | **IN TUNE / COUNTER** | `BattleState.Resolve` (ค้น `IN TUNE`) · `BattleRules.InTuneKeep` `CounterKeep` · ป้ายในดวล `DuelScreen.Hud.cs` `DrawJudge` |
@@ -126,7 +128,7 @@ Tacetno433/
 | หลุมจุดตี · เลนสว่าง · ขอบเลนเต้น | `DuelScreen.Stage.cs` `DrawLane` (ค้น `Hit Well`, `LANE FLASH`) |
 | EARLY / LATE | `DuelScreen.Baton.cs` `ShowTiming` · วาดใน `DuelScreen.Hud.cs` `DrawJudge` |
 | บรรทัดห้าเส้นหลังวง | `Core/StageStaff.cs` · ความแรงคือ `staffEnergy` ใน `DuelScreen.cs` |
-| ตัวเปลี่ยนหน้า | `Core/ScreenManager.cs` เลือก : ม่าน `Core/Curtain.cs` เมื่อหน้านั้น `UsesCurtain` (หน้าเลือกคอนดักเตอร์) · อื่นๆ คลื่น `Core/SilenceWave.cs` · ความเร็ว `FadeSpeed` |
+| ตัวเปลี่ยนหน้า | `Core/ScreenManager.cs` เลือก : ม่าน `Core/Curtain.cs` เมื่อหน้านั้น `UsesCurtain` (หน้าเลือกคอนดักเตอร์) · คลื่น `Core/SilenceWave.cs` เมื่อ `EntersWithWave` (ดวล · Curtain Call) · อื่นๆ แถบดำเฉียง `Core/SlantWipe.cs` (รอบ 15) · ความเร็ว `FadeSpeed` |
 | ไม้บาตอง / ไม้บรรทัดวัดขนาด (เขียน p / mf / f) | `Core/Baton.cs` (ใช้ทั้งดวลและ Tutorial) |
 | สัญลักษณ์โน้ต ลูกศร จุดตี วงแหวนจับเวลา | `Core/NoteGlyph.cs` (ใช้ทั้งดวลและ Tutorial) |
 | สตามิน่า : TACET ซัด / หมดลมแพ้ | `BattleState` (ค้น `TACET'S BLOW`, `COLLAPSE`, `CheckBreath`) · ตัวเลข `BattleRules.BlowPerPower` · ภาพ `DuelScreen.ShowBreath` · ขอบจอ `DuelScreen.Hud.cs` `DrawLowBreath` |

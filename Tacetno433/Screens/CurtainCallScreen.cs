@@ -14,6 +14,12 @@ namespace Tacetno433.Screens
     //After this the run is thrown away and the game returns to the title.
     public class CurtainCallScreen : GameScreen
     {
+        //Enters With Wave : the end of a run is one of the moments TACET's wave is kept for
+        public override bool EntersWithWave
+        {
+            get { return true; }
+        }
+
         private Rectangle titleButton = new Rectangle(930, 636, 310, 54);
         private const int LedgerX = 760;
         private const int LedgerW = 460;

@@ -149,7 +149,7 @@ namespace Tacetno433.Screens
             Ui.Tag(sb, "NEW", column.X + 40, column.Y + 40, true, a);
 
             //Seat : their section and the side of the stage they sit on, under the tag (round 15)
-            MusicianArt.SeatBadge(sb, m, column.X + 62, column.Y + 108, 18f, Palette.Ink, Palette.Paper, a);
+            MusicianArt.SideBadge(sb, m.Cue, column.X + 62, column.Y + 108, 18f, Palette.Ink, Palette.Paper, a);
             Gfx.TextSpacedCentered(sb, Game.Font, "SEAT", column.X + 62, column.Y + 146, Palette.LineGrey * a, TextSize.Tiny, 2f);
             Gfx.TextSpacedCentered(sb, Game.Font, StageLayout.Rows[StageLayout.SectionOf(m.Family)].Name, column.X + 62, column.Y + 164, Palette.PaperDim * a, TextSize.Tiny, 1f);
             Gfx.TextSpacedCentered(sb, Game.Font, StageLayout.SideNames[m.Cue], column.X + 62, column.Y + 180, Palette.PaperDim * a, TextSize.Tiny, 1f);

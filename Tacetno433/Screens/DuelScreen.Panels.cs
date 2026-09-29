@@ -55,7 +55,8 @@ namespace Tacetno433.Screens
             {
                 int need = battle.NeedFor(f);
                 float cx = p.X + 98 + f * 28;
-                MusicianArt.FamilyGlyph(sb, (Family)f, cx, p.Y + 86, 0.4f, need > 0 ? Palette.Paper : Palette.LineGrey * 0.5f);
+                Gfx.TextSpacedCentered(sb, Game.Font, StageLayout.Rows[StageLayout.SectionOf((Family)f)].Short, cx, p.Y + 80,
+                                       need > 0 ? Palette.Paper : Palette.LineGrey * 0.5f, TextSize.Tiny * 0.85f, 0f);
 
                 if (need == 0)
                 {
@@ -119,7 +120,6 @@ namespace Tacetno433.Screens
                 }
                 Gfx.Text(sb, Game.Font, m.Name, textX, box.Y + 6, ink, TextSize.Body);
                 Gfx.TextSpaced(sb, Game.Font, StageLayout.RowOf(s).Name, textX, box.Y + 28, soft, TextSize.Tiny, 1f);
-                MusicianArt.FamilyGlyph(sb, m.Family, box.Right - 14, box.Y + 16, 0.35f, soft);
 
                 //Seat : the badge, or SILENCED while SILENT MOUTHS holds their section
                 if (silenced)
@@ -130,7 +130,7 @@ namespace Tacetno433.Screens
                 {
                     int side = StageLayout.SeatSide(s);
                     if (battle.Mirrored) side = 2 - side;                                   // UNFINISHED
-                    MusicianArt.SeatBadge(sb, StageLayout.SeatRow[s], side, box.X + 28, box.Bottom - 20, 11f, Palette.Paper, Palette.Ink, 1f);
+                    MusicianArt.SideBadge(sb, side, box.X + 28, box.Bottom - 20, 11f, Palette.Paper, Palette.Ink, 1f);
                 }
 
                 x += w + gap;

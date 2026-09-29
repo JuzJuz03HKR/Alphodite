@@ -11,7 +11,7 @@ namespace Tacetno433.Screens
     //BandScreen : THE BAND, opened from the route page (round 14, it replaces the STAGE page).
     //
     //There is nothing to arrange before a fight. Everybody on stage plays every note, and each
-    //musician sits where their instrument sits in a real orchestra (StageLayout, MusicianArt.SeatBadge):
+    //musician sits where their instrument sits in a real orchestra (StageLayout, MusicianArt.SideBadge):
     //   the SECTION  strings at the front, winds in the middle, percussion at the back
     //   the SIDE     left, centre or right, drawn as an arrow: when the baton points that way
     //                on a beat of the 4/4 shape, they hit harder (CUE)
@@ -273,8 +273,7 @@ namespace Tacetno433.Screens
                 StageRow row = StageLayout.Rows[section];
                 float y = partY[section];
                 Gfx.Rect(sb, 250, y + ChairH / 2f + 8, 470, 1, Palette.LineGrey * 0.3f);
-                MusicianArt.FamilyGlyph(sb, row.Family, LabelX + 22, y - 12, 1.1f, Palette.Highlight);
-                Gfx.TextSpaced(sb, Game.Font, row.Name, LabelX + 66, y - 22, Palette.Paper, TextSize.Label, 2f);
+                Gfx.TextSpaced(sb, Game.Font, row.Name, LabelX + 66, y - 22, Palette.Highlight, TextSize.Label, 2f);
                 if (sectionEmpty[section])
                     Gfx.TextSpaced(sb, Game.Font, MissingShort, LabelX + 66, y, Palette.Accent, TextSize.Tiny, 1.5f);
                 else if (sectionWords[section].Length > 0)
@@ -315,7 +314,7 @@ namespace Tacetno433.Screens
             {
                 //Empty Chair : the chair's own badge, faint, a player still to find
                 Gfx.CapsuleOutline(sb, r, Palette.LineGrey * 0.3f, 1f);
-                MusicianArt.SeatBadge(sb, StageLayout.SeatRow[s], StageLayout.SeatSide(s), r.Center.X, r.Center.Y, 12f,
+                MusicianArt.SideBadge(sb, StageLayout.SeatSide(s), r.Center.X, r.Center.Y, 12f,
                                       Palette.Ink, Palette.PaperDim, 0.35f);
                 return;
             }
@@ -387,7 +386,7 @@ namespace Tacetno433.Screens
 
                 //Seat : the badge, the section and side it stands for, and the beats the baton points there
                 int section = StageLayout.SectionOf(m.Family);
-                MusicianArt.SeatBadge(sb, m, x + 300, y + 30, 18f, Palette.Ink, Palette.Paper, 1f);
+                MusicianArt.SideBadge(sb, m.Cue, x + 300, y + 30, 18f, Palette.Ink, Palette.Paper, 1f);
                 Gfx.TextSpaced(sb, Game.Font, StageLayout.Rows[section].Name, x + 336, y + 10, Palette.Paper, TextSize.Tiny, 1.5f);
                 Gfx.TextSpaced(sb, Game.Font, StageLayout.SideNames[m.Cue], x + 336, y + 28, Palette.Paper, TextSize.Tiny, 1.5f);
                 Gfx.TextSpaced(sb, Game.Font, sideBeats[m.Cue], x + 336, y + 46, Palette.LineGrey, TextSize.Tiny, 1.5f);
