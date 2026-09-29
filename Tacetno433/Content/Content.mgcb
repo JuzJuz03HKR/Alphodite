@@ -52,16 +52,6 @@
 /processorParam:TextureFormat=Color
 /build:Art/Conductors/gallery_the_unhearing.png
 
-#begin Art/Conductors/portrait_the_unhearing.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyEnabled=False
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Art/Conductors/portrait_the_unhearing.png
 
 #begin Art/Conductors/face_the_unhearing.png
 /importer:TextureImporter

@@ -238,12 +238,17 @@ namespace Tacetno433.Audio
             return count;
         }
 
+        //SOUND OFF (29 Sep) : the player turned the band's instruments off for the presentation,
+        //the songs did not sound right yet. true loads them again, nothing else needs to change.
+        public static bool InstrumentsOn = false;
+
         //Instruments Load : one file per musician, and TACET's own, each skipped quietly if missing
         private static void LoadInstruments(ContentManager content)
         {
             Tacetno433.Data.Musician[] all = Tacetno433.Data.MusicianList.All;
             instrumentNotes = new SoundEffect[all.Length];
             LoadedInstruments = 0;
+            if (!InstrumentsOn) return;                                           // SOUND OFF
             for (int i = 0; i < all.Length; i++)
             {
                 instrumentNotes[i] = TryLoad(content, "Audio/Instruments/" + all[i].Sample);

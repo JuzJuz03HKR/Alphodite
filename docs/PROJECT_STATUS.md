@@ -1155,8 +1155,15 @@ THE METRONOME : ทุกการตวัดเป็น BOOST ไม่ว่
 - **บาลานซ์หลังใส่เพลง** : Elite/บอสที่เล่นเพลงอ่อนลงมาก (NORMAL ทั่วไป 64 → 77% · ตวัดกลางทุกบีต 4 → 30%) → `EliteScale` 1.8 → 2.1 · `BossScale` 2.3 → 2.7 · `MaestroFloorPower` 1.0 / 1.65 / 2.4 ·
   ผล : **NORMAL** ไร้ที่ติ 100% · เก่ง 92% · ทั่วไป 62% · มือใหม่ 4% · ตวัดกลางทุกบีต 16% · ตวัดใหญ่ทุกโน้ต 77% · **MAESTRO** ไร้ที่ติ 99% · เก่ง 64% · ทั่วไป 14% · มือใหม่ 0% · ตวัดใหญ่ทุกโน้ต 25% ·
   ลองแล้วไม่ใช้ : Elite 2.3 บอส 3.0 (NORMAL ทั่วไป 49% · MAESTRO เก่ง 26%) · MAESTRO 1.1/1.8/2.7 กับ Elite 2.1 (เก่ง 44%) · 0.95/1.55/2.25 (เก่ง 71%)
-- **.exe** : build ในแชท cloud (Linux) = `dotnet publish -c Release -r win-x64 --self-contained` แบบ **net8.0** (ในเครื่อง cloud มีแค่ .NET 8) และ **ฟอนต์แทน** (Liberation Serif แทน Palatino · DejaVu Sans แทน Bahnschrift) · zip อยู่ `Build/TACET433_win-x64.zip` ·
+- **.exe** : build ในแชท cloud (Linux) = `dotnet publish -c Release -r win-x64 --self-contained` แบบ **net8.0** (ในเครื่อง cloud มีแค่ .NET 8) และ **ฟอนต์แทน** (Liberation Serif แทน Palatino · DejaVu Sans แทน Bahnschrift) · zip อยู่ `Build/TACET4'33.zip` (ก้อน 9) ·
   **ยังไม่ได้ลองรันบน Windows** (มี `SDL2.dll` `openal.dll` ครบ) · ถ้าจะใช้ฟอนต์จริงให้ build บน Windows ด้วยคำสั่งเดิม
+
+**ก้อน 9 (29 ก.ย. ~21:00, ผู้ใช้ : "ปิดระบบเสียงไปก่อน ฟังเพลงแล้วไม่ได้จริงๆ · art character หน้าต่อสู้ให้เล็กลง ไอคอนทิศทางอยู่บนหัว · เอา Art_work2 ออก · optimize · push · build อีกรอบ · จัดไฟล์ใน github · โฟลเดอร์ .exe ชื่อ TACET4'33")** :
+- **ปิดเสียง** : `SoundBank.InstrumentsOn = false` (ค้น `SOUND OFF`) ไม่โหลดไฟล์เครื่องดนตรี เกมเงียบ · เปิดคืนได้ที่บรรทัดเดียว · ไฟล์เสียงและเพลงยังอยู่ครบ
+- **ตัวละครในดวล** : `CharacterArt.Draw` ย่อรูปให้ไม่สูงเกินช่องยืน (เดิม ×3 = 336 px) เท้าอยู่ที่พื้น ป้ายลูกศรอยู่เหนือหัว
+- **เอา Art Work 2 ออก** : ลบ `portrait_the_unhearing.png` (ภาพร่างเต็มตัวกลางหน้าโปรไฟล์) · เหลือภาพแกลเลอรี + หน้าเล็กของ THE UNHEARING
+- **optimize** : ลบแพ็กเกจ `MonoGame.Extended` / `.Content.Pipeline` ที่ไม่ได้ใช้ (build เล็กลง) · ไม่แตะกติกา
+- **จัด repo** : คลังเสียงของผู้ใช้ย้ายไป `SoundLibrary/` (+ README บอกว่าไฟล์ไหนใช้ในเกม) · `.exe` อยู่ `Build/TACET4'33.zip` (+ README)
 
 **ทดลองแล้วไม่ใช้ (ตัวจำลอง)**
 - ไม่ปรับอะไรเลยหลังเอาค่าสตามิน่าออก : ทั่วไปจบรัน 97% (ง่ายเกินมาก)

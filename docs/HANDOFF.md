@@ -140,6 +140,7 @@ Tacetno433/
 | เส้นแสง CUE ในดวล | `Screens/DuelScreen.Stage.cs` `DrawCueBeam` |
 | **โหมด NORMAL / MAESTRO (29 ก.ย. เย็น)** | ตัวเลข NORMAL = ค่าเดิมใน `BattleRules` · MAESTRO = `BattleRules.Maestro*` · ใช้ที่ `BattleState` (ค้น `MAESTRO`) · โหมดของรัน `RunState.Maestro` · จำไว้ `Settings.Maestro` · เซฟ `maestro=` ทั้งสองไฟล์ · สวิตช์ `Ui.ModeSwitch` + `ConductorSelectScreen.FlipMode` (หน้าแกลเลอรี + โปรไฟล์ กด M) · แถบรัน `RunHud.DrawTop` |
 | การ์ดนักดนตรีตอนวงใหญ่ (ตัวอักษรไม่ซ้อน) | `MusicianArt.Card` (การ์ดเตี้ย = ลูกศรท้ายชื่อ) · กล่องวงในดวล `DuelScreen.Panels` (แคบ = STR/WND/PRC) · ชื่อตอนโค้ง `CurtainCallScreen.DrawBow` |
+| เปิด/ปิดเสียงเครื่องดนตรี (29 ก.ย. ปิดอยู่) | `Audio/SoundBank.cs` `InstrumentsOn` (ค้น `SOUND OFF`) · คลังเสียงต้นฉบับ `SoundLibrary/` (README บอกไฟล์ที่ใช้) |
 | **OUTRO (รอบ 15)** : ชนะกลางท่อน วงเล่นท่อนนั้นต่อจนจบ | `Screens/DuelScreen.cs` `StartOutro` / `UpdateOutro` / `OutroNote` (ค้น `OUTRO`) · เรียกจาก `UpdatePlay` เมื่อ `battle.Finished && battle.PlayerWon` |
 | คำ BREATH บนจอ (รอบ 15) | ข้อความเท่านั้น · ในโค้ดยังชื่อ `Stamina` · คีย์เซฟ `stamina=` |
 | หน้าเลือกเส้นทาง (ถนน · ทางแยก · ป้าย · กล่องรายละเอียด) | `Screens/RouteScreen.cs` `DrawRoad` `DrawFork` `DrawTiles` `DrawDetail` · ตัวอักษรชนิดที่ `RouteNodeInfo.Marks` |

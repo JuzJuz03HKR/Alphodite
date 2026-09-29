@@ -118,9 +118,12 @@ namespace Tacetno433.Core
                 return;
             }
 
+            //Fit : never taller than the slot, so the side badge over the slot stays over the head
+            //(29 Sep : a 112 pixel picture at x3 stood far above its spot and hid the badge)
+            float size = Math.Min(scale, slot.Height / (float)art.Height);
             Vector2 feet = new Vector2(slot.Center.X, slot.Bottom);
             Vector2 origin = new Vector2(art.Width / 2f, art.Height);
-            sb.Draw(art, feet, null, tint, 0f, origin, scale, SpriteEffects.None, 0f);
+            sb.Draw(art, feet, null, tint, 0f, origin, size, SpriteEffects.None, 0f);
         }
 
         //Draw Still : the first idle frame fitted into a box (formation seats, the bow, the rest
