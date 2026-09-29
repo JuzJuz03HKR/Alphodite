@@ -121,7 +121,7 @@ namespace Tacetno433.Screens
                 Gfx.TextSpaced(sb, Game.Font, StageLayout.RowOf(s).Name, textX, box.Y + 28, soft, TextSize.Tiny, 1f);
                 MusicianArt.FamilyGlyph(sb, m.Family, box.Right - 14, box.Y + 16, 0.35f, soft);
 
-                //Part : the badge, or SILENCED while SILENT MOUTHS holds their part
+                //Seat : the badge, or SILENCED while SILENT MOUTHS holds their section
                 if (silenced)
                 {
                     Gfx.TextSpaced(sb, Game.Font, silencedWord, box.X + 8, box.Bottom - 20, soft, TextSize.Tiny, 1.5f);
@@ -130,12 +130,7 @@ namespace Tacetno433.Screens
                 {
                     int side = StageLayout.SeatSide(s);
                     if (battle.Mirrored) side = 2 - side;                                   // UNFINISHED
-                    MusicianArt.PartBadge(sb, StageLayout.SeatRow[s], side, box.X + 28, box.Bottom - 20, 11f, Palette.Paper, Palette.Ink, 1f);
-
-                    //Stepping In : no quieter player can play, so a smaller stroke brings them in
-                    int tier = battle.SmallestStroke(s);
-                    if (tier < StageLayout.SeatRow[s])
-                        Gfx.Text(sb, Game.BigFont, choiceWord[tierChoice[tier]], box.X + 54, box.Bottom - 30, ink, TextSize.Small * 0.6f);
+                    MusicianArt.SeatBadge(sb, StageLayout.SeatRow[s], side, box.X + 28, box.Bottom - 20, 11f, Palette.Paper, Palette.Ink, 1f);
                 }
 
                 x += w + gap;

@@ -14,7 +14,7 @@ namespace Tacetno433.Data
         Recruit,      // a musician from the current era joins
         Rehearse,     // the musician who took the check gains 1 power
         Fight,        // an elite fight starts
-        RecruitPart   // a musician for a part (p, mf or f) the band has nobody for joins (round 14)
+        RecruitPart   // a musician of a section (strings, winds or percussion) the band has nobody in joins
     }
 
     //EventChoice : one button on an event page.
@@ -162,14 +162,14 @@ namespace Tacetno433.Data
                 }
             },
 
-            //THE EMPTY CHAIR (round 14) : every player's part is written on them now, so a band can
-            //be missing a whole letter. This place offers one, for a price.
+            //THE EMPTY CHAIR (round 14) : a band can be missing a whole section of the orchestra
+            //(round 15, it was a letter). This place offers a player for one, for a price.
             new GameEvent
             {
                 Title = "THE EMPTY CHAIR",
                 Place = "AN ORCHESTRA PIT, ONE STAND LIT",
                 Text = "In the dark pit one chair still has its stand, and on the stand one part, a single line of music "
-                     + "with a letter and an arrow. The ink is wet. Someone was meant to play it tonight.",
+                     + "for an instrument your band does not have. The ink is wet. Someone was meant to play it tonight.",
                 Choices = new EventChoice[]
                 {
                     new EventChoice { Text = "Find the one who plays it", ShardCost = 35,

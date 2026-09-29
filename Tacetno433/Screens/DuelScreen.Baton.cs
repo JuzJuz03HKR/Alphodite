@@ -9,9 +9,9 @@ using Tacetno433.Data;
 
 namespace Tacetno433.Screens
 {
-    //DuelScreen.Baton : judging the baton. JudgeStroke turns a finished stroke into who plays (its
-    //size, DYNAMICS) and a grade, and the stroke guide shows how big the stroke is while it is being
-    //made: the ruler marks p, mf and f, and the band lights up row by row as the stroke grows.
+    //DuelScreen.Baton : judging the baton. JudgeStroke turns a finished stroke into a size (to match
+    //the note's p, mf or f) and a grade, and the stroke guide shows how big the stroke is while it
+    //is being made: the ruler marks p, mf and f, and the band swells as the stroke grows.
     //The stick itself and its ruler are drawn by Core/Baton.cs, the arrows by Core/NoteGlyph.cs.
     public partial class DuelScreen
     {
@@ -20,7 +20,7 @@ namespace Tacetno433.Screens
         {
             int k = b % 4;
 
-            //Stroke Size : small brings the p players, middle the mf players too, big the whole band
+            //Stroke Size : small p, middle mf, big f, to match the note's mark
             Choice choice = sizeChoice[Baton.SizeOf(gesture.Length)];
 
             //SOFT REST : a small stroke on a silent beat is a rest, whatever its timing or way.
@@ -31,7 +31,6 @@ namespace Tacetno433.Screens
                 ResolveAnswer(b, Choice.Ease, Grade.None);
                 return;
             }
-            if (battle.SizeDecided(b)) choice = battle.DecidedChoice(b);   // LOCKED TEMPO, VILLAGE BAND : not the size
 
             //Timing Grade : judged where the baton stopped, against the beat
             float now = StrokeClock();
@@ -47,11 +46,11 @@ namespace Tacetno433.Screens
                 if (anna >= 0) PopTrait(anna);
             }
 
-            //FASHIONABLY LATE : on her beats a late stroke that brings her in is forgiven as GOOD
-            if (grade == Grade.Miss && now > target && battle.LateForgivenAt(b, choice))
+            //FASHIONABLY LATE : on her beats a late stroke is forgiven as GOOD
+            if (grade == Grade.Miss && now > target && battle.LateForgivenAt(b))
             {
                 grade = Grade.Good;
-                int iris = battle.JoinedSeat(MusicianTrait.Forgiven, choice);
+                int iris = battle.CuedSeat(MusicianTrait.Forgiven, b);
                 if (iris >= 0) PopTrait(iris);
             }
 
@@ -70,12 +69,16 @@ namespace Tacetno433.Screens
 
             //Slash : a big stroke the right way leaves a blade of light along its path, brighter
             //for a PERFECT. The whole band's blow, the answer to TACET's.
-            if (choice == Choice.Boost && rightWay)
+            bool sizeRight = battle.SizeRight(b, choice);
+            if (choice == Choice.Boost && rightWay && sizeRight)
                 effects.SpawnSlash(gesture.From, gesture.To, grade == Grade.Perfect ? 1f : 0.55f);
 
-            //Judgement : ONE word at the hit point, how well it landed and what the band was told,
-            //and the shape of the order opening out from the hit point
-            string word = !rightWay ? "WRONG WAY" : judgeText[(int)grade * 3 + (int)choice];
+            //Judgement : ONE word at the hit point, how well it landed and the size it was, or
+            //that the size was not the one the note asked for
+            string word = judgeText[(int)grade * 3 + (int)choice];
+            if (!sizeRight)
+                word = wrongSizeText[(int)grade * 2 + (SizeIndexOf(choice) > SizeIndexOf(battle.ShownChoice[b]) ? 1 : 0)];
+            if (!rightWay) word = "WRONG WAY";
             ShowJudge(word, 0.55f);
             if (rightWay && timed == grade) ShowTiming(grade, now, target);
 
@@ -144,13 +147,15 @@ namespace Tacetno433.Screens
 
             //Ruler : from where the stroke began, the way this beat goes, filled as far as the
             //stroke has come. The finale only needs the right way, so it has no size zones, and
-            //neither has a note under LOCKED TEMPO or VILLAGE BAND, where the size decides nothing.
+            //neither has a note any size will do (LOCKED TEMPO, ABSOLUTE PITCH, a roll or a ???).
+            //A silent beat keeps them, a small stroke there is a rest.
             Vector2 d = NoteGlyph.Way(WantedWay());
             Vector2 anchor = gesture.InStroke ? gesture.StrokeStart : Input.MousePos;
             float along = Vector2.Dot(gesture.LiveVector, d);
             int zone = gesture.InStroke ? Baton.SizeOf(along) : -1;
-            bool markDecides = battle.SizeDecided(BeatOf(pending));
-            Baton.DrawRuler(sb, anchor, d, along, zone, phase != Phase.Finale && !markDecides);
+            int beat = BeatOf(pending);
+            bool anySize = !battle.IsSilent(beat) && battle.SizeFree(beat);
+            Baton.DrawRuler(sb, anchor, d, along, zone, phase != Phase.Finale && !anySize);
         }
 
     }

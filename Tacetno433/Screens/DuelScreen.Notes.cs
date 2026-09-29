@@ -134,7 +134,7 @@ namespace Tacetno433.Screens
             float volume = choice == Choice.Boost ? 1f : (choice == Choice.Ease ? 0.5f : 0.8f);
             if (!SoundBank.PlayAnswer(b, volume, 0f)) SoundBank.Play(Sfx.NoteOn, volume, 0.3f);
             for (int s = 0; s < StageLayout.SeatCount; s++)
-                if (battle.Joins(s, choice)) lit[s] = 1f;
+                if (battle.Plays(s)) lit[s] = 1f;
         }
 
         //Hold Update : the hold lasts while the button stays down and the baton stays still.
@@ -151,7 +151,7 @@ namespace Tacetno433.Screens
 
             //Glow : the players holding the note stay lit
             for (int s = 0; s < StageLayout.SeatCount; s++)
-                if (battle.Joins(s, holdChoice)) lit[s] = Math.Max(lit[s], 0.7f);
+                if (battle.Plays(s)) lit[s] = Math.Max(lit[s], 0.7f);
 
             if (!down || !still || now >= holdEnd) FinishHold(b);
         }

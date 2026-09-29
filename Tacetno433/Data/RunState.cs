@@ -116,8 +116,6 @@ namespace Tacetno433.Data
             Battle = null;
             MusicianList.ResetRehearsals();
 
-            //Folk Leader : starts with one seat fewer
-            if (conductor.Perk == ConductorPerk.EveryRoadHome) Seats = 2;
 
             //Conductor Stats : turn the 0 to 10 numbers into real values
             MaxStamina = BattleRules.StaminaBase + conductor.Stamina * BattleRules.StaminaPerPoint;
@@ -207,13 +205,13 @@ namespace Tacetno433.Data
             return m;
         }
 
-        //Missing Part Player : someone who plays a part (p, mf or f) nobody in the ensemble plays
-        //yet, from this era if there is one, from any era if not. When every part is covered, just
-        //someone new from this era. Null when nobody is left (round 14, THE EMPTY CHAIR).
-        public Musician MissingPartPlayer()
+        //Missing Section Player : someone of a section (strings, winds or percussion) nobody in the
+        //ensemble plays yet, from this era if there is one, from any era if not. When every section
+        //is covered, just someone new from this era. Null when nobody is left (THE EMPTY CHAIR).
+        public Musician MissingSectionPlayer()
         {
-            bool[] covered = new bool[3];
-            for (int i = 0; i < Roster.Count; i++) covered[StageLayout.PartOf(Roster[i].Family)] = true;
+            bool[] covered = new bool[StageLayout.Rows.Length];
+            for (int i = 0; i < Roster.Count; i++) covered[StageLayout.SectionOf(Roster[i].Family)] = true;
 
             Musician best = null;
             int picks = 0;
@@ -221,7 +219,7 @@ namespace Tacetno433.Data
                 for (int i = 0; i < MusicianList.All.Length; i++)
                 {
                     Musician m = MusicianList.All[i];
-                    if (Roster.Contains(m) || covered[StageLayout.PartOf(m.Family)]) continue;
+                    if (Roster.Contains(m) || covered[StageLayout.SectionOf(m.Family)]) continue;
                     if (pass == 0 && m.Era != Era) continue;
                     picks++;
                     if (random.Next(picks) == 0) best = m;         // every candidate gets a fair chance
@@ -245,23 +243,13 @@ namespace Tacetno433.Data
             RefreshLabels();
         }
 
-        //Power Of : what one musician hits for right now, before seat rows and choices.
+        //Power Of : what one musician hits for right now, before the CUE and the beat.
         //Rehearsals and family motifs are added here, so every page shows the same number.
         public int PowerOf(Musician m)
         {
             int power = m.Power + m.Rehearsed;
             if (m.Family == Family.String && Has(MotifId.Resin)) power += BattleRules.FamilyMotifPower;
             return power;
-        }
-
-        //Cost Of : what one note from this musician costs, before the stroke and the combo
-        public int CostOf(Musician m)
-        {
-            int cost = m.Cost;
-            if (m.Family == Family.Wind && Has(MotifId.ReedCase)) cost -= BattleRules.ReedCaseDiscount;
-            if (m.Family == Family.Percussion && Has(MotifId.SpareSticks)) cost -= BattleRules.SpareSticksDiscount;   // round 14, was +1 power
-            if (cost < 1) cost = 1;
-            return cost;
         }
 
         //Rehearse : one musician gets permanently stronger for this run
@@ -331,8 +319,7 @@ namespace Tacetno433.Data
         {
             get
             {
-                int start = Conductor.Perk == ConductorPerk.EveryRoadHome ? 2 : 3;
-                return Seats - start;
+                return Seats - 3;      // every run starts with 3 (round 15 : THE FOLK LEADER no longer starts with 2)
             }
         }
 

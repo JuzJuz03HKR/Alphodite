@@ -5,10 +5,11 @@ using Tacetno433.Data;
 
 namespace Tacetno433.Battle
 {
-    //Choice : what the band (or TACET) does on one beat, written as music marks.
-    //   p   Ease    TACET plays soft.  For us : a small stroke, the p players come in.
-    //   mf  Normal  TACET plays.       For us : a middle stroke, the mf players come in too.
-    //   f   Boost   TACET plays loud.  For us : a big stroke, the whole band comes in.
+    //Choice : how loud a note is, written as music marks. TACET's notes carry one, and the
+    //size of our stroke is one (round 15 : the note says which size to swing, the whole band plays).
+    //   p   Ease    soft.   For us : a small stroke.
+    //   mf  Normal  plain.  For us : a middle stroke.
+    //   f   Boost   loud.   For us : a big stroke.
     public enum Choice { Normal, Boost, Ease }
 
     //Grade : how well the stroke landed on the ring. None is a beat let pass on purpose (a rest).
@@ -29,6 +30,7 @@ namespace Tacetno433.Battle
         public int Blow;               // TACET'S BLOW : stamina knocked out of the band on this beat (or its spark)
         public int BlowIgnored;        // DEAF EARS : the blow the signature kept off the band, for the duel to show
         public bool Collapsed;         // COLLAPSE : the band ran out of breath on this beat, the fight is lost
+        public bool WrongSize;         // the stroke was not the size the note asked for (half power)
 
         //Extras : the duel page shows a word for each of these
         public int Combo;              // the combo after this beat
@@ -54,7 +56,7 @@ namespace Tacetno433.Battle
         public Grade GraceGrade;
         public int GracePush;
 
-        //Per Seat : who came in on this beat, and whose trait changed it. A seat is a musician's
+        //Per Seat : who played on this beat, and whose trait changed it. A seat is a musician's
         //home seat, so it always means the same player (StageLayout.HomeSeat).
         public bool[] Joined = new bool[StageLayout.SeatCount];
         public bool[] TraitFired = new bool[StageLayout.SeatCount];
@@ -64,12 +66,14 @@ namespace Tacetno433.Battle
     //
     //How a fight works:
     //   a round is 8 beats of TACET's part, and the rounds follow each other without leaving
-    //   the duel (round 14). There is no plan and no seating: every stroke decides who plays,
-    //   and every musician's PART is written on them (StageLayout) : a letter and an arrow.
-    //   DYNAMICS  how big the stroke is picks the parts that come in: small the p players,
-    //             middle the mf players too, big the whole band (see Joins).
+    //   the duel (round 14). There is no plan and no seating to arrange.
+    //   THE NOTE SAYS  every note of TACET's carries f, mf or p, and the stroke should be that
+    //             size (big, middle, small). The right size plays at full strength, the wrong
+    //             one at half (WrongSizePower). Round 15 : the size no longer picks who plays.
+    //   THE BAND  everybody on stage plays every note the baton lands, like a real orchestra
+    //             plays what is written (see Plays). Stroking costs nothing.
     //   CUE       the baton goes one way on every beat, and the players whose arrow points
-    //             that way hit harder (see CueSideAt).
+    //             that way hit harder (see CueSideAt). The arrow is where they sit.
     //   the round is played through once, twice or three times in a row (REPEATS, round 11):
     //   the same beats each time, but TACET decides its f / mf / p again for every pass.
     //   on every beat both sides add up their power and the difference pushes a line. Push it
@@ -77,11 +81,10 @@ namespace Tacetno433.Battle
     //   whoever is ahead wins.
     //   no single note pushes further than PUSH CAP, and elites and bosses are a HEAVY LINE
     //   (their pushes count less), so a duel is a run of beats, never one big hit (round 9).
-    //   STAMINA is the band's breath, carried across the whole run. Everyone who comes in pays
-    //   for their note, a small stroke lets the others breathe, and a silent beat let pass is
-    //   a rest. A beat TACET wins knocks breath out of the band (TACET'S BLOW), and so does a
-    //   MISS. At zero the band COLLAPSES and the fight is lost.
-    //   Rolls and holds cost nothing extra on top of the players who play them.
+    //   BREATH (the STAMINA number) is the band's life, carried across the whole run, like the
+    //   life gauge of a rhythm game. Playing never spends it (round 15). A beat TACET wins
+    //   knocks breath out of the band (TACET'S BLOW), a MISS costs a little more, and a silent
+    //   beat let pass is a rest that gives some back. At zero the band COLLAPSES and the fight is lost.
     //   PERFECT strokes in a row build a COMBO that makes every beat stronger, and a long
     //   combo sets the band on fire (FORTISSIMO) for a few beats.
     //   some of TACET's notes come in pairs (the second one is a grace, see ResolveGrace).
@@ -165,7 +168,7 @@ namespace Tacetno433.Battle
         private int[] lastRound = new int[BattleRules.BeatsPerRound];  // ANSWER BETTER : what the band played last round
         private bool bargainAnswered;
         private bool bargainTaken;
-        private int lastSilenced = -1;           // SILENT MOUTHS : the part silenced last round
+        private int lastSilenced = -1;           // SILENT MOUTHS : the section silenced last round
 
         //Seat Memory : what each seat did on the beats before this one, for the traits that
         //count a run of beats. Every round starts them afresh.
@@ -173,8 +176,9 @@ namespace Tacetno433.Battle
         private int[] streak = new int[StageLayout.SeatCount];         // MOMENTUM : beats in a row
         private int[] barCount = new int[StageLayout.SeatCount];       // FOUR BARS : beats of this bar
 
-        //SILENT MOUTHS : the part (0 p, 1 mf, 2 f) THE MUTE CHOIR silences this round, -1 for none
-        public int SilencedPart = -1;
+        //SILENT MOUTHS : the section (0 strings, 1 winds, 2 percussion) THE MUTE CHOIR silences
+        //this round, -1 for none (round 15, it was a letter p / mf / f)
+        public int SilencedSection = -1;
 
         public BattleState(RunState run, Enemy enemy, Random random)
         {
@@ -183,7 +187,7 @@ namespace Tacetno433.Battle
             this.random = random;
 
             //Enemy Scale : deeper floors hit harder, elites and bosses harder still
-            scale = 1f + BattleRules.FloorScale * (run.Floor - 1);
+            scale = BattleRules.FloorPower[Math.Min(run.Floor, BattleRules.FloorPower.Length) - 1];
             if (enemy.Kind == EnemyKind.Normal) scale *= BattleRules.NormalScale;
             if (enemy.Kind == EnemyKind.Elite) scale *= BattleRules.EliteScale;
             if (enemy.Kind == EnemyKind.Boss) scale *= BattleRules.BossScale;
@@ -239,12 +243,11 @@ namespace Tacetno433.Battle
             return window;
         }
 
-        //Late Forgiven : FASHIONABLY LATE, on her beats a late stroke that brings her in still
-        //counts as GOOD (round 14 : only on her beats, she is a p player and comes in on every stroke)
-        public bool LateForgivenAt(int beat, Choice choice)
+        //Late Forgiven : FASHIONABLY LATE, on her beats (the baton goes her way) a late stroke
+        //still counts as GOOD
+        public bool LateForgivenAt(int beat)
         {
-            int seat = JoinedSeat(MusicianTrait.Forgiven, choice);
-            return seat >= 0 && IsCued(seat, beat);
+            return CuedSeat(MusicianTrait.Forgiven, beat) >= 0;
         }
 
         //Cued Seat : a player with this trait whose arrow the baton follows on this beat, or -1
@@ -255,11 +258,11 @@ namespace Tacetno433.Battle
             return -1;
         }
 
-        //Joined Seat : a seat with this trait that a stroke of this size brings in, or -1
-        public int JoinedSeat(MusicianTrait trait, Choice choice)
+        //Playing Seat : a seat with this trait that plays, or -1
+        public int PlayingSeat(MusicianTrait trait)
         {
             for (int s = 0; s < StageLayout.SeatCount; s++)
-                if (Joins(s, choice) && Run.Formation.Seated[s].Trait == trait) return s;
+                if (Plays(s) && Run.Formation.Seated[s].Trait == trait) return s;
             return -1;
         }
 
@@ -284,109 +287,79 @@ namespace Tacetno433.Battle
             get { return Round >= 3 && EnemyHas(EnemyTrait.Unfinished); }
         }
 
-        //Can Play : somebody sits here, and not in the part SILENT MOUTHS has silenced. If the
-        //whole band plays that part the silence does not hold, a band always has a sound.
+        //Can Play : somebody sits here, and not in the section SILENT MOUTHS has silenced. If the
+        //whole band is that section the silence does not hold, a band always has a sound.
         public bool CanPlay(int seat)
         {
             Formation f = Run.Formation;
             if (f.Seated[seat] == null) return false;
-            if (SilencedPart < 0 || StageLayout.SeatRow[seat] != SilencedPart) return true;
+            if (SilencedSection < 0 || StageLayout.SeatRow[seat] != SilencedSection) return true;
 
             for (int s = 0; s < StageLayout.SeatCount; s++)
-                if (f.Seated[s] != null && StageLayout.SeatRow[s] != SilencedPart) return false;
+                if (f.Seated[s] != null && StageLayout.SeatRow[s] != SilencedSection) return false;
             return true;
         }
 
-        //DYNAMICS : how many parts a stroke brings in, counted from p
-        public static int RowsFor(Choice choice)
+        //Plays : does this seat play when the baton lands a note? Everybody on stage does, the
+        //way a real orchestra plays what is written (round 15). Round 12 to 14 : the size of the
+        //stroke picked who came in (DYNAMICS), a small stroke only the p players.
+        public bool Plays(int seat)
         {
-            if (choice == Choice.Ease) return 1;
-            if (choice == Choice.Normal) return 2;
-            return 3;
+            return CanPlay(seat);
         }
 
-        //Joins : does this seat play on a stroke of this size? A stroke brings in every part up
-        //to its size, the letters written on the players mean exactly that (round 14).
-        //A stroke never brings nobody: when no p player can play, a small stroke brings the
-        //quietest part there is (and a middle one too, when there is no p or mf player).
-        //(LOCKED TEMPO picks the size from TACET's mark before it gets here, see MarkedChoice.)
-        public bool Joins(int seat, Choice choice)
-        {
-            if (!CanPlay(seat)) return false;
-            int part = StageLayout.SeatRow[seat];
-            int reach = RowsFor(choice);
-            if (part < reach) return true;
-            int quietest = QuietestPart();
-            return quietest >= reach && part == quietest;
-        }
-
-        //Quietest Part : the lowest part (0 p, 1 mf, 2 f) that somebody able to play is in, 3 for none
-        public int QuietestPart()
-        {
-            int lowest = 3;
-            for (int s = 0; s < StageLayout.SeatCount; s++)
-                if (StageLayout.SeatRow[s] < lowest && CanPlay(s)) lowest = StageLayout.SeatRow[s];
-            return lowest;
-        }
-
-        //Smallest Stroke : the smallest stroke that brings this seat in, 0 small, 1 middle, 2 big
-        public int SmallestStroke(int seat)
-        {
-            if (Joins(seat, Choice.Ease)) return 0;
-            if (Joins(seat, Choice.Normal)) return 1;
-            return 2;
-        }
-
-        //Tempo : beats per minute this round. LULLABY and UNFINISHED change the last round.
+        //Tempo : beats per minute this round. It grows with the floor as well as the round, so the
+        //first floor is gentle and the last one as quick as ever (round 15, TempoByFloor).
+        //LULLABY and UNFINISHED change the last round.
         public int Tempo
         {
             get
             {
-                int bpm = BattleRules.TempoBpm[Math.Min(Round, BattleRules.TempoBpm.Length) - 1];
-                if (Round >= 3 && EnemyHas(EnemyTrait.Lullaby)) bpm = BattleRules.LullabyBpm;       // LULLABY
-                if (Round >= 3 && EnemyHas(EnemyTrait.Unfinished)) bpm = BattleRules.UnfinishedBpm; // UNFINISHED
+                int[] floorTempo = BattleRules.TempoByFloor[Math.Min(Run.Floor, BattleRules.TempoByFloor.Length) - 1];
+                int bpm = floorTempo[Math.Min(Round, floorTempo.Length) - 1];
+                if (Round >= 3 && EnemyHas(EnemyTrait.Lullaby)) bpm = floorTempo[0] - BattleRules.LullabySlower;    // LULLABY
+                if (Round >= 3 && EnemyHas(EnemyTrait.Unfinished)) bpm += BattleRules.UnfinishedFaster;            // UNFINISHED
                 return bpm;
             }
         }
 
-        //Choices Locked : THE METRONOME, the band plays the mark written on TACET's note, whatever
-        //size the hand drew (round 12.2, was : every stroke the whole band). He only keeps time.
-        public bool ChoicesLocked
+        //Gentle : the first fights of a run, where TACET only plays f and p, never mf, so the
+        //first thing to learn is two sizes (round 15, GentleFights)
+        public bool Gentle
         {
-            get { return Run.Conductor.Perk == ConductorPerk.LockedTempo; }
+            get { return Run.Floor == 1 && Run.BattlesWon < BattleRules.GentleFights; }
         }
 
-        //Marked Choice : LOCKED TEMPO, the size a note's mark asks for. What the note SAYS, so a
-        //FALSE NOTE fools him too. A hidden ??? note, a roll and a held note bring the whole band.
-        public Choice MarkedChoice(int beat)
+        //Asks Size : this note asks for a size, the one its mark SAYS (a FALSE NOTE lies). A
+        //silent beat, a hidden ??? note, a roll and a held note take any size.
+        public bool AsksSize(int beat)
         {
-            if (EnemyHidden[beat] || beat == TremoloBeat || beat == FermataBeat) return Choice.Boost;
-            return ShownChoice[beat];
+            return !IsSilent(beat) && !EnemyHidden[beat] && beat != TremoloBeat && beat != FermataBeat;
         }
 
-        //Size Decided : on this beat the size of the stroke does not pick the rows, something else
-        //does. LOCKED TEMPO plays the note's mark, VILLAGE BAND brings the whole band. On a silent
-        //beat the drawn size still counts, a small stroke there is a rest.
-        public bool SizeDecided(int beat)
+        //Size Free : on this beat any size is right. LOCKED TEMPO, THE METRONOME's band reads the
+        //marks for him, so he only keeps time (round 15, round 12.2 : the band played the mark).
+        //ABSOLUTE PITCH, THE APPRENTICE's signature, is right at any size too.
+        public bool SizeFree(int beat)
         {
-            if (IsSilent(beat)) return false;
-            return ChoicesLocked || SignatureIs(SignatureMove.VillageBand);
+            if (!AsksSize(beat)) return true;
+            return Run.Conductor.Perk == ConductorPerk.LockedTempo || SignatureIs(SignatureMove.AbsolutePitch);
         }
 
-        //Decided Choice : who plays on a beat where SizeDecided is true
-        public Choice DecidedChoice(int beat)
+        //Size Right : the stroke is the size the note asks for
+        public bool SizeRight(int beat, Choice drawn)
         {
-            if (SignatureIs(SignatureMove.VillageBand)) return Choice.Boost;               // VILLAGE BAND
-            return MarkedChoice(beat);                                                    // LOCKED TEMPO
+            return SizeFree(beat) || drawn == ShownChoice[beat];
         }
 
         //SIGNATURE : SPACE with the recipe full lets the conductor's own move loose, for the next
         //few strokes (BattleRules.SignatureStrokes). Every conductor has a different one (round 13):
-        //   ABSOLUTE PITCH  THE APPRENTICE   every stroke on time is IN TUNE, whatever its size
+        //   ABSOLUTE PITCH  THE APPRENTICE   every stroke on time is the right size and IN TUNE
         //   CLOCKWORK       THE METRONOME    every stroke on time is PERFECT (SignatureGrade)
         //   SET ALIGHT      THE INFERNO      every stroke hits harder and may push past the PUSH CAP
         //   DEAF EARS       THE UNHEARING    TACET's blows take no breath
-        //   VILLAGE BAND    THE FOLK LEADER  every stroke is the whole band, paid as a small one
+        //   VILLAGE BAND    THE FOLK LEADER  every stroke on time gives breath back (round 15, it was
+        //                                    the whole band paid as a small stroke, and playing is free now)
         //A stroke on a silent beat counts as one of the strokes, a rest does not.
         public bool SignatureOn
         {
@@ -493,17 +466,19 @@ namespace Tacetno433.Battle
                 barCount[s] = 0;
             }
 
-            //SILENT MOUTHS : from round two one part of the band is silenced for the whole round,
+            //SILENT MOUTHS : from round two one section of the band is silenced for the whole round,
             //picked now so the duel can say so on the round's banner
-            SilencedPart = -1;
-            if (EnemyHas(EnemyTrait.SilentMouths) && Round >= 2) SilencedPart = PickSilencedPart();
+            SilencedSection = -1;
+            if (EnemyHas(EnemyTrait.SilentMouths) && Round >= 2) SilencedSection = PickSilencedSection();
 
             //Last Note : every round ends on a special note two beats long. Ordinary enemies HOLD
-            //it (fermata) from FermataFromFloor on, everyone else ROLLS it (tremolo), so on floor
-            //one every enemy rolls. It always has a note, and it is never hidden.
+            //it (fermata) from FermataFromFloor on, elites and bosses ROLL it (tremolo). Round 15 :
+            //ordinary enemies on floor one end on a plain note, the first fights teach the plain
+            //game (round 9 to 14 : every enemy rolled on floor one). A special note always has a
+            //note, and it is never hidden.
             int last = BattleRules.BeatsPerRound - 1;
             bool hold = Enemy.Kind == EnemyKind.Normal && Run.Floor >= BattleRules.FermataFromFloor;
-            bool roll = !hold && Run.Floor >= BattleRules.TremoloFromFloor;     // round 9 : whoever does not hold, rolls
+            bool roll = Enemy.Kind != EnemyKind.Normal && Run.Floor >= BattleRules.TremoloFromFloor;
             TremoloBeat = roll ? last : -1;
             FermataBeat = hold ? last : -1;
             if (roll || hold)
@@ -625,25 +600,25 @@ namespace Tacetno433.Battle
             }
         }
 
-        //Silenced Part Pick : SILENT MOUTHS takes one part that has somebody in it, fairly at
-        //random, and never the same one two rounds running. A band that plays one part only is
+        //Silenced Section Pick : SILENT MOUTHS takes one section that has somebody in it, fairly
+        //at random, and never the same one two rounds running. A band of one section only is
         //left alone, it would have no sound at all.
-        private int PickSilencedPart()
+        private int PickSilencedSection()
         {
             Formation f = Run.Formation;
             int used = 0;
             int picks = 0;
             int chosen = -1;
-            for (int part = 0; part < 3; part++)
+            for (int section = 0; section < StageLayout.Rows.Length; section++)
             {
                 bool has = false;
                 for (int s = 0; s < StageLayout.SeatCount; s++)
-                    if (f.Seated[s] != null && StageLayout.SeatRow[s] == part) has = true;
+                    if (f.Seated[s] != null && StageLayout.SeatRow[s] == section) has = true;
                 if (!has) continue;
                 used++;
-                if (part == lastSilenced) continue;
+                if (section == lastSilenced) continue;
                 picks++;
-                if (random.Next(picks) == 0) chosen = part;
+                if (random.Next(picks) == 0) chosen = section;
             }
             if (used < 2) return -1;
             if (chosen < 0) chosen = lastSilenced;
@@ -687,10 +662,12 @@ namespace Tacetno433.Battle
             return Grade.Hesitate;
         }
 
-        //Enemy Choice Roll : heavy beats tend to boost, light beats tend to ease
+        //Enemy Choice Roll : heavy beats tend to boost, light beats tend to ease.
+        //Gentle fights (the first of a run) play only f on heavy beats and p on light ones.
         private Choice RollEnemyChoice(int beat)
         {
             if (EnemyPower[beat] == 0) return Choice.Normal;
+            if (Gentle) return IsHeavy(beat) ? Choice.Boost : Choice.Ease;
 
             int boost = IsHeavy(beat) ? BattleRules.HeavyBoostChance : BattleRules.LightBoostChance;
             int ease = IsHeavy(beat) ? BattleRules.HeavyEaseChance : BattleRules.LightEaseChance;
@@ -730,6 +707,10 @@ namespace Tacetno433.Battle
             //THE QUIET PART : against TACET's real p note, she plays it back twice as hard
             if (m.Trait == MusicianTrait.QuietPart && QuietNote(beat)) power *= BattleRules.QuietPartPower;
 
+            //SPARE STICKS : the percussion hit harder on TACET's real f notes (round 15)
+            if (m.Family == Family.Percussion && Run.Has(MotifId.SpareSticks) && LoudNote(beat))
+                power *= BattleRules.SpareSticksPower;
+
             //CUE : the baton goes this player's way
             if (IsCued(seat, beat)) power *= BattleRules.CuePower;
 
@@ -740,6 +721,12 @@ namespace Tacetno433.Battle
         private bool QuietNote(int beat)
         {
             return EnemyChoice[beat] == Choice.Ease && EnemyPower[beat] > 0 && !EnemyHidden[beat];
+        }
+
+        //Loud Note : TACET really plays this beat loud (f), a note that is there and not hidden
+        private bool LoudNote(int beat)
+        {
+            return EnemyChoice[beat] == Choice.Boost && EnemyPower[beat] > 0 && !EnemyHidden[beat];
         }
 
         //Full Bar : true on the fourth beat of a bar when this seat played the three before it
@@ -768,9 +755,9 @@ namespace Tacetno433.Battle
             return -1;
         }
 
-        //Power For : everyone a stroke of this size brings in on this beat, with the CUE, their
-        //traits, harmony and the conductor. Before the timing grade and the combo.
-        public int PowerFor(int beat, Choice choice)
+        //Power For : the whole band on this beat, with the CUE, their traits, harmony and the
+        //conductor. Before the size, the timing grade and the combo.
+        public int PowerFor(int beat)
         {
             Formation f = Run.Formation;
             float total = 0f;
@@ -779,22 +766,22 @@ namespace Tacetno433.Battle
 
             for (int s = 0; s < StageLayout.SeatCount; s++)
             {
-                if (!Joins(s, choice)) continue;
+                if (!Plays(s)) continue;
                 total += SeatPowerAt(s, beat);
                 players++;
 
                 //Culture Count : a culture counts once, the first time it turns up on this beat
                 bool seenBefore = false;
                 for (int t = 0; t < s; t++)
-                    if (Joins(t, choice) && f.Seated[t].Culture == f.Seated[s].Culture) seenBefore = true;
+                    if (Plays(t) && f.Seated[t].Culture == f.Seated[s].Culture) seenBefore = true;
                 if (!seenBefore) cultures++;
             }
             if (players == 0) return 0;
 
-            //Harmony : every extra player on the same beat adds a bonus
+            //Harmony : every extra player on the same beat adds a bonus, up to HarmonyMost players
             float perExtra = BattleRules.HarmonyPerExtra;
             if (Run.Has(MotifId.Tutti)) perExtra += BattleRules.TuttiPerExtra;         // TUTTI
-            float harmony = 1f + perExtra * (players - 1);
+            float harmony = 1f + perExtra * (Math.Min(players, BattleRules.HarmonyMost) - 1);
 
             //EVERY ROAD HOME : mixed cultures on one beat
             if (Run.Conductor.Perk == ConductorPerk.EveryRoadHome)
@@ -804,22 +791,6 @@ namespace Tacetno433.Battle
             if (BargainActive) total *= BattleRules.BargainPower;
 
             return (int)Math.Round(total * harmony * Run.PowerMultiplier);
-        }
-
-        //Cost For : the stamina everyone a stroke of this size brings in pays, before the grade
-        public float CostFor(Choice choice)
-        {
-            Formation f = Run.Formation;
-            float total = 0f;
-
-            for (int s = 0; s < StageLayout.SeatCount; s++)
-                if (Joins(s, choice))
-                    total += Run.CostOf(f.Seated[s]);
-
-            total *= BattleRules.StaminaCostScale;
-            if (choice == Choice.Ease) total *= BattleRules.EaseCost;
-            if (ChoicesLocked) total *= BattleRules.LockedTempoCost;                    // LOCKED TEMPO
-            return total;
         }
 
         //Enemy Strike : TACET's written power on a beat, before its f / mf / p.
@@ -842,7 +813,7 @@ namespace Tacetno433.Battle
         //SOFT REST : on a silent beat a small stroke is still a rest, the same as letting the beat
         //pass. Players who keep conducting through the silence breathe too (round 12.1, the habit
         //of stroking every beat used to spend the rest). Only a middle or big stroke there is a
-        //free hit. The size is the one the hand drew, before THE METRONOME makes it big.
+        //free hit.
         public bool RestsOn(int beat, Choice drawn)
         {
             return IsSilent(beat) && drawn == Choice.Ease;
@@ -854,6 +825,7 @@ namespace Tacetno433.Battle
             get
             {
                 float recover = BattleRules.RestRecover;
+                if (Run.Has(MotifId.ReedCase) && SectionPlays(Family.Wind)) recover += BattleRules.ReedCaseRest;   // REED CASE
                 if (Run.Has(MotifId.BreathMark)) recover *= BattleRules.BreathMarkRecover;   // BREATH MARK
                 if (EnemyHas(EnemyTrait.NoRest)) recover *= BattleRules.NoRestShare;       // NO REST
                 return (int)recover;
@@ -874,6 +846,14 @@ namespace Tacetno433.Battle
 
             if (total == 0) return 2;
             return recipe[family];
+        }
+
+        //Section Plays : somebody of this family is on stage and able to play
+        public bool SectionPlays(Family family)
+        {
+            for (int s = 0; s < StageLayout.SeatCount; s++)
+                if (CanPlay(s) && Run.Formation.Seated[s].Family == family) return true;
+            return false;
         }
 
         //Band Has : somebody seated plays this family
@@ -958,16 +938,16 @@ namespace Tacetno433.Battle
                 if (r.Joined[s] && Run.Formation.Seated[s].Trait == trait) r.TraitFired[s] = true;
         }
 
-        //Beat Resolve : the heart of the fight. Applies both choices, the timing grade,
-        //the combo, the traits, stamina, and moves the line. Returns what happened so the page can show it.
+        //Beat Resolve : the heart of the fight. Applies the stroke's size against the note's mark,
+        //the timing grade, the combo, the traits, breath, and moves the line. Returns what happened
+        //so the page can show it. choice is the size the hand drew.
         //Grade None means the baton let the beat pass on purpose (only offered when TACET is silent),
-        //Hesitate that one of TACET's notes went by without a stroke. Either way nobody comes in.
+        //Hesitate that one of TACET's notes went by without a stroke. Either way nobody plays.
         public BeatResult Resolve(int beat, Choice choice, Grade grade)
         {
             BeatResult r = Results[beat];
             if (grade != Grade.None && grade != Grade.Hesitate && RestsOn(beat, choice))
                 grade = Grade.None;                                                     // SOFT REST
-            if (SizeDecided(beat)) choice = DecidedChoice(beat);                        // LOCKED TEMPO, VILLAGE BAND
             bool stroked = grade != Grade.None && grade != Grade.Hesitate;
 
             //SIGNATURE : this stroke is one of the few the conductor's move lasts for
@@ -978,18 +958,22 @@ namespace Tacetno433.Battle
             if (beat % 4 == 0)
                 for (int s = 0; s < StageLayout.SeatCount; s++) barCount[s] = 0;
 
-            //DYNAMICS : who comes in. The size of the stroke picks the parts, see Joins.
+            //The Band : everybody on stage plays a note the baton lands (see Plays)
             for (int s = 0; s < StageLayout.SeatCount; s++)
             {
-                r.Joined[s] = stroked && Joins(s, choice);
+                r.Joined[s] = stroked && Plays(s);
                 r.TraitFired[s] = r.Joined[s] && TraitFires(s, beat);
             }
 
-            int basePower = stroked ? PowerFor(beat, choice) : 0;
-            float cost = stroked ? CostFor(choice) : 0f;
-            if (underSignature && move == SignatureMove.VillageBand) cost = CostFor(Choice.Normal); // VILLAGE BAND : paid as a middle stroke
+            int basePower = stroked ? PowerFor(beat) : 0;
             float recover = 0f;
+            float breathLost = 0f;
             Choice enemyChoice = EnemyChoice[beat];
+
+            //THE NOTE SAYS : the stroke should be the size the note's mark asks for. The wrong
+            //size still plays, at WrongSizePower (LOCKED TEMPO and ABSOLUTE PITCH are never wrong).
+            bool sizeRight = !stroked || SizeRight(beat, choice);
+            r.WrongSize = !sizeRight;
 
             //HELD NOTE : nobody came in, but the note from the beat before is still ringing
             r.HeldSeat = -1;
@@ -1016,37 +1000,36 @@ namespace Tacetno433.Battle
                 }
             }
 
-            float easeRecover = BattleRules.EaseRecover;
-            if (Run.Has(MotifId.Pianissimo)) easeRecover += BattleRules.PianissimoRecover;   // PIANISSIMO
-            if (EnemyHas(EnemyTrait.NoRest)) easeRecover *= BattleRules.NoRestShare;       // NO REST
-
-            //Player Choice
+            //Stroke Size
             r.Rested = false;
             float easeBack = 0f;
             if (!stroked)
             {
                 //No Stroke : TACET is silent and the baton let the beat pass, the band rests.
                 //On one of TACET's notes nobody answers, and nobody breathes either.
-                //A HELD NOTE rings on through a rest for free, the rest still breathes (round 12 :
-                //it used to take the rest away, and rests are the only breath in a fight now)
+                //A HELD NOTE rings on through a rest for free, the rest still breathes.
                 if (IsSilent(beat))
                 {
-                    recover += SilentRecover;                                          // BREATH MARK, NO REST inside
+                    recover += SilentRecover;                                          // BREATH MARK, REED CASE, NO REST inside
                     r.Rested = true;
                 }
             }
-            else if (choice == Choice.Boost)
+            else if (!sizeRight)
             {
-                //Big Stroke : the whole band comes in
-                bool sforzando = Run.Has(MotifId.Sforzando);                          // SFORZANDO
-                power *= sforzando ? BattleRules.SforzandoPower : BattleRules.BoostPower;
+                //Wrong Size : the band plays, but not the way the note is written
+                power *= BattleRules.WrongSizePower;
             }
-            else if (choice == Choice.Ease)
+            else if (choice == Choice.Boost && Run.Has(MotifId.Sforzando))
             {
-                //Small Stroke : only the p players play. It gives no breath back (EaseRecover is 0),
-                //unless PIANISSIMO lets the parts that sit out breathe
-                power *= BattleRules.EasePower;
-                easeBack = easeRecover;                                                // added after the grade, so PIANISSIMO's card number is exact
+                //SFORZANDO : a big stroke on a note that asks for it hits harder
+                power *= BattleRules.SforzandoPower;
+            }
+            else if (choice == Choice.Ease && Run.Has(MotifId.Pianissimo))
+            {
+                //PIANISSIMO : a small stroke on a note that asks for it gives breath back (NO REST halves it).
+                //Added after the grade, so the card's number is exact.
+                easeBack = BattleRules.PianissimoRecover;
+                if (EnemyHas(EnemyTrait.NoRest)) easeBack *= BattleRules.NoRestShare;   // NO REST
             }
 
             //TREMOLO : TACET's roll is answered by many strokes instead of one, by the whole band.
@@ -1095,14 +1078,18 @@ namespace Tacetno433.Battle
 
                 if (!runaway)                                                          // RUNAWAY FIRE ignores the loss
                     power *= Run.Has(MotifId.Rubato) ? BattleRules.RubatoMissPower : BattleRules.MissPower;
-                if (basePower > 0 && !Run.Has(MotifId.Rubato))                         // RUBATO skips the extra cost
-                    cost += BattleRules.MissExtraCost;
+                if (basePower > 0 && !Run.Has(MotifId.Rubato))                         // RUBATO skips the extra breath
+                    breathLost += BattleRules.MissBreath;
             }
             else if (grade == Grade.Hesitate)
             {
-                Combo = 0;                                                             // nobody came in, see above
+                Combo = 0;                                                             // nobody played, see above
             }
             recover += tenutoBack + easeBack;                                          // TENUTO, PIANISSIMO
+
+            //VILLAGE BAND : under THE FOLK LEADER's signature every stroke on time gives breath back
+            if (underSignature && move == SignatureMove.VillageBand && (grade == Grade.Perfect || grade == Grade.Good))
+                recover += BattleRules.VillageBandRecover;
 
             if (Combo > BestCombo) BestCombo = Combo;
             r.Combo = Combo;
@@ -1111,13 +1098,11 @@ namespace Tacetno433.Battle
             //Combo Bonus
             power *= ComboBonus;
 
-            //FORTISSIMO : the band is on fire for a few beats after a long combo. It hits harder,
-            //and it does not tire (BattleRules.FortissimoCost), so the peak is never cut short.
+            //FORTISSIMO : the band is on fire for a few beats after a long combo, and hits harder
             r.Fortissimo = false;
             if (FortissimoLeft > 0 && basePower > 0)
             {
                 power *= BattleRules.FortissimoPower;
-                cost *= BattleRules.FortissimoCost;
                 r.Fortissimo = true;
             }
             if (FortissimoLeft > 0 && grade != Grade.None) FortissimoLeft--;
@@ -1147,8 +1132,9 @@ namespace Tacetno433.Battle
             if (enemyChoice == Choice.Boost) enemyPower *= BattleRules.EnemyBoostPower;
             if (enemyChoice == Choice.Ease) enemyPower *= BattleRules.EnemyEasePower;
 
-            //FILLS THE GAPS : a quiet answer, a small stroke or none at all, lets it in harder
-            if (EnemyHas(EnemyTrait.FillsGaps) && (!stroked || choice == Choice.Ease))
+            //FILLS THE GAPS : a note let pass or MISSED lets it in harder (round 15, it was a small
+            //stroke or none, and a small stroke is what a p note asks for now)
+            if (EnemyHas(EnemyTrait.FillsGaps) && (!stroked || grade == Grade.Miss))
                 enemyPower *= BattleRules.FillsGapsPower;
 
             //COUNTERPOINT : answering a boost
@@ -1158,6 +1144,7 @@ namespace Tacetno433.Battle
             //IN TUNE : a stroke on time the same size as the mark TACET really plays takes the edge
             //off its note. A FALSE NOTE's shown mark does not count, a hidden note has none, and a
             //roll is the whole band whatever TACET plays. ABSOLUTE PITCH makes any size on time IN TUNE.
+            //LOCKED TEMPO is never the wrong size, but only a stroke that really matches is IN TUNE.
             //COUNTER : a PERFECT big stroke against a real f note knocks more of it back.
             //MARCATO lets a COUNTER push further.
             r.Counter = false;
@@ -1172,15 +1159,6 @@ namespace Tacetno433.Battle
                 enemyPower *= r.Counter ? BattleRules.CounterKeep : BattleRules.InTuneKeep;
             }
 
-            //Short Of Breath : the band can only play as much as it can still pay for, and paying
-            //the very last of it means the band COLLAPSES (see CheckBreath)
-            int costPaid = (int)Math.Round(cost);
-            if (costPaid > Run.Stamina)
-            {
-                if (costPaid > 0) power *= Run.Stamina / (float)costPaid;
-                costPaid = Run.Stamina;
-            }
-
             //Clash : the difference pushes the line
             r.OurPower = (int)Math.Round(power);
             r.EnemyPower = (int)Math.Round(enemyPower);
@@ -1193,8 +1171,8 @@ namespace Tacetno433.Battle
             if (Line > BattleRules.LineLimit) Line = BattleRules.LineLimit;
             if (Line < -BattleRules.LineLimit) Line = -BattleRules.LineLimit;
 
-            //THE WHOLE FLOOR : his big stroke knocks TACET's next note down
-            if (choice == Choice.Boost && beat + 1 < BattleRules.BeatsPerRound && EnemyPower[beat + 1] > 0
+            //THE WHOLE FLOOR : his big stroke, on a note that asks for one, knocks TACET's next note down
+            if (choice == Choice.Boost && sizeRight && beat + 1 < BattleRules.BeatsPerRound && EnemyPower[beat + 1] > 0
                 && JoinedHas(r, MusicianTrait.Thunder))
             {
                 EnemyPower[beat + 1] = Math.Max(0, EnemyPower[beat + 1] - BattleRules.ThunderKnock);
@@ -1211,8 +1189,8 @@ namespace Tacetno433.Battle
                 r.Blow = 0;
             }
 
-            //Stamina
-            r.StaminaChange = (int)Math.Round(recover) - costPaid - r.Blow;
+            //Breath : rests and motifs give some back, a blow and a MISS take some away. Playing is free.
+            r.StaminaChange = (int)Math.Round(recover - breathLost) - r.Blow;
             Run.ChangeStamina(r.StaminaChange);
 
             //Seat Memory : who played this beat, for the traits that count runs of beats

@@ -107,7 +107,6 @@ namespace Tacetno433.Screens
         private static Choice[] sizeChoice = { Choice.Ease, Choice.Normal, Choice.Boost };
 
         private static string[] choiceWord = { "mf", "f", "p" };            // in Choice order, the stroke's mark
-        private static int[] tierChoice = { 2, 0, 1 };                      // row tier 0, 1, 2 -> Choice p, mf, f
         private const string silencedWord = "SILENCED";
         private static string[] dynamicMark = { "mf", "f", "p" };           // in Choice order, as music writes loudness
         private static string[] gradeWord = { "", "PERFECT", "GOOD", "MISS", "HESITATE" };
@@ -118,6 +117,7 @@ namespace Tacetno433.Screens
         //Judgement Words : "PERFECT  /  f" and so on, one per grade and choice, made in Load.
         //The grace and the roll get their own short words, also made once.
         private string[] judgeText = new string[15];
+        private string[] wrongSizeText = new string[10];   // grade * 2, + 1 when the stroke was too big
         private string[] graceText = new string[5];
         private string[] rollText = new string[5];
         private static string[] holdText = { "LET GO", "FERMATA" };
@@ -170,7 +170,7 @@ namespace Tacetno433.Screens
             "* Neither side gives way.",
             "* The silence presses closer...",
             "* The band is gasping for air. One more blow could finish it!",
-            "* It plays softly. A small answer saves your breath.",
+            "* It plays softly. Answer p with a small stroke.",
             "",
             "* A note tied to a spark. Flick once more, any way, on the half beat!",
             "* It winds up a long trill. Shake the baton!",
@@ -231,7 +231,7 @@ namespace Tacetno433.Screens
         private bool traitCard;           // this banner explains the enemy's trait in full
         private static bool[] traitSeen = new bool[16];   // traits met at least once since the game started
         private static bool partsTold;                     // the first duel since the game started explains the badges
-        private const string PartsNote = "OVER EACH PLAYER : THE LETTER IS THE SMALLEST STROKE THAT BRINGS THEM IN, THE ARROW THE WAY THEY HIT HARDER";
+        private const string PartsNote = "SWING THE SIZE THE NOTE SAYS : p SMALL, mf MIDDLE, f BIG. THE WHOLE BAND PLAYS EVERY NOTE YOU HIT";
         private const string BargainNote = "THE BARGAIN : YOUR BAND HITS 50 PERCENT HARDER THIS ROUND";
 
         //Bargain : THE DEVIL'S STRING's offer before round two, answered on this page (round 14)
@@ -355,6 +355,8 @@ namespace Tacetno433.Screens
             {
                 for (int c = 0; c < choiceWord.Length; c++)
                     judgeText[g * 3 + c] = gradeWord[g].Length == 0 ? "" : gradeWord[g] + "  /  " + choiceWord[c];
+                wrongSizeText[g * 2] = gradeWord[g].Length == 0 ? "" : gradeWord[g] + "  /  TOO SMALL";
+                wrongSizeText[g * 2 + 1] = gradeWord[g].Length == 0 ? "" : gradeWord[g] + "  /  TOO BIG";
                 graceText[g] = gradeWord[g].Length == 0 ? "" : gradeWord[g] + "  /  FLICK";
                 rollText[g] = gradeWord[g].Length == 0 ? "" : gradeWord[g] + "  /  ROLL";
             }
@@ -404,15 +406,15 @@ namespace Tacetno433.Screens
 
             //Round Note : what is different about this round
             introNote = "";
-            if (battle.SilencedPart >= 0)
-                introNote = "SILENT MOUTHS : YOUR " + StageLayout.Rows[battle.SilencedPart].Mark + " PLAYERS CANNOT PLAY THIS ROUND";
+            if (battle.SilencedSection >= 0)
+                introNote = "SILENT MOUTHS : YOUR " + StageLayout.Rows[battle.SilencedSection].Name + " CANNOT PLAY THIS ROUND";
             else if (battle.Mirrored)
                 introNote = "UNFINISHED : THE LEFT AND RIGHT ARROWS SWAP THIS ROUND";
             else if (battle.Round >= 3 && battle.EnemyHas(EnemyTrait.Lullaby))
                 introNote = "LULLABY : THE LAST ROUND SLOWS DOWN";
             else if (battle.Round == 1 && !partsTold && !traitCard)
             {
-                introNote = PartsNote;                                   // the badges, once, before the first fight starts
+                introNote = PartsNote;                                   // the one rule, once, before the first fight starts
                 partsTold = true;
             }
 
@@ -1223,14 +1225,11 @@ namespace Tacetno433.Screens
         }
 
         //Live Size : how big the stroke being drawn is so far, 0 small, 1 middle, 2 big, so the
-        //band can light up row by row while the baton travels. -1 when no stroke is under way.
+        //band can swell with it while the baton travels. -1 when no stroke is under way.
         private int LiveSize()
         {
             if (phase != Phase.Play || !gesture.InStroke || rolling || holding || onGrace) return -1;
             if (AnswerProgress() < 0f) return -1;
-            //LOCKED TEMPO, VILLAGE BAND : the rows the mark or the signature calls light up, whatever the size
-            int b = BeatOf(pending);
-            if (battle.SizeDecided(b)) return SizeIndexOf(battle.DecidedChoice(b));
 
             float along = Vector2.Dot(gesture.LiveVector, NoteGlyph.Way(WantedWay()));
             return Baton.SizeOf(along);

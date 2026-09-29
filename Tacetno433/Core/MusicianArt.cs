@@ -10,7 +10,7 @@ namespace Tacetno433.Core
     //   Token   the pixel musician still (stage seats, bow, rest room)   see CharacterArt
     //   Tile    small square face        (score rows, panels)   Art/Musicians/face_<name>
     //   Card    a tall card with the portrait on top and the numbers below
-    //   PartBadge  the musician's PART, a letter and an arrow drawn like a note (round 14)
+    //   SeatBadge  where the musician sits : their section's mark and their arrow (round 15)
     //Each one draws the picture when it exists and an empty ArtSlot box when it does not.
     //Every page only passes a rectangle and a brightness, so nothing else has to change.
     public static class MusicianArt
@@ -40,8 +40,8 @@ namespace Tacetno433.Core
         //Card : the tall lineup card. Portrait on top, the name with its slash over the bottom
         //of the portrait, instrument and numbers below.
         //seatWord is the band along the bottom (FRONT, BENCH, a chance like 65%), empty for none.
-        //The numbers are the musician's own power and cost with rehearsals and motifs added,
-        //the same numbers every other page shows (RunState.PowerOf and CostOf).
+        //The number is the musician's own power with rehearsals and motifs added, the same number
+        //every other page shows (RunState.PowerOf). Beside it, the mark of the section they sit in.
         public static void Card(SpriteBatch sb, Rectangle r, Musician m, RunState run, bool hover, bool dim, string seatWord)
         {
             float bright = dim ? 0.35f : 1f;
@@ -55,8 +55,8 @@ namespace Tacetno433.Core
             ArtBank.DrawOrSlot(sb, ArtBank.PortraitOf(m), art, Palette.Paper, bright);
             Ornament.FadeUp(sb, new Rectangle(art.X, art.Bottom - 34, art.Width, 34), 0.9f);
 
-            //Part : the letter and the arrow in the top corner, so every card says how they play
-            PartBadge(sb, m, r.X + 22, r.Y + 24, 13f, Palette.Ink, Palette.Paper, bright);
+            //Seat : the section mark and the arrow in the top corner, so every card says where they sit
+            SeatBadge(sb, m, r.X + 22, r.Y + 24, 13f, Palette.Ink, Palette.Paper, bright);
 
             //Name : serif with the slash, sitting on the bottom of the portrait
             Gfx.Text(sb, Ui.BigFont, m.NameTag, r.X + 8, art.Bottom - 30, Palette.Highlight * bright, TextSize.Small);
@@ -64,11 +64,9 @@ namespace Tacetno433.Core
 
             //Details
             Gfx.TextSpaced(sb, Ui.Font, m.Instrument, r.X + 8, art.Bottom + 6, Palette.PaperDim * bright, TextSize.Tiny, 1f);
-            float half = r.Width / 2f;
             Gfx.Text(sb, Ui.Font, "PWR", r.X + 8, art.Bottom + 22, Palette.LineGrey * bright, TextSize.Tiny);
             Gfx.Text(sb, Ui.Font, NumberText.Get(run.PowerOf(m)), r.X + 8 + Gfx.TextWidth(Ui.Font, "PWR", TextSize.Tiny) + 5, art.Bottom + 19, Palette.Paper * bright, TextSize.Body);
-            Gfx.Text(sb, Ui.Font, "COST", r.X + half + 2, art.Bottom + 22, Palette.LineGrey * bright, TextSize.Tiny);
-            Gfx.Text(sb, Ui.Font, NumberText.Get(run.CostOf(m)), r.X + half + 2 + Gfx.TextWidth(Ui.Font, "COST", TextSize.Tiny) + 5, art.Bottom + 19, Palette.Paper * bright, TextSize.Body);
+            FamilyGlyph(sb, m.Family, r.Right - 16, art.Bottom + 31, 0.42f, Palette.LineGrey * bright);
 
             //Seat Word : FRONT / MIDDLE / BACK / BENCH, or a chance like "65%"
             if (seatWord.Length > 0)
@@ -84,25 +82,22 @@ namespace Tacetno433.Core
             if (m.Rehearsed > 0) Ui.Pips(sb, r.Right - 12 - (m.Rehearsed - 1) * 10, r.Y + 12, m.Rehearsed, m.Rehearsed, 3, 10, bright);
         }
 
-        //Part Badge : a musician's PART, drawn the way TACET's notes are drawn in the lane (round 14):
-        //a disc with the letter of the smallest stroke that brings them in, p, mf or f, and the
-        //arrow of the way they answer on its edge: left, right, or up and down together.
-        //It looks like a note on purpose, a note that looks like a player is one they answer well.
+        //Seat Badge : where a musician sits (round 15) : a disc with their section's mark (the
+        //same little icons as the family, strings, winds, percussion) and an arrow on its edge,
+        //the side the baton points at them : left, right, or up and down together for the centre.
+        //Round 14 it held a letter, p, mf or f, the smallest stroke that brought them in.
         //This is an interface icon, not artwork, so it stays.
-        private static string[] partMarks = { "p", "mf", "f" };
-
-        public static void PartBadge(SpriteBatch sb, Musician m, float cx, float cy, float radius, Color ink, Color paper, float alpha)
+        public static void SeatBadge(SpriteBatch sb, Musician m, float cx, float cy, float radius, Color ink, Color paper, float alpha)
         {
-            PartBadge(sb, StageLayout.PartOf(m.Family), m.Cue, cx, cy, radius, ink, paper, alpha);
+            SeatBadge(sb, StageLayout.SectionOf(m.Family), m.Cue, cx, cy, radius, ink, paper, alpha);
         }
 
-        //Part Badge : any part and arrow, for REQUIEM's mirrored round and for empty chairs
-        public static void PartBadge(SpriteBatch sb, int part, int side, float cx, float cy, float radius, Color ink, Color paper, float alpha)
+        //Seat Badge : any section and side, for REQUIEM's mirrored round and for empty chairs
+        public static void SeatBadge(SpriteBatch sb, int section, int side, float cx, float cy, float radius, Color ink, Color paper, float alpha)
         {
             Gfx.Circle(sb, cx, cy, radius, paper * alpha);
             Gfx.CircleOutline(sb, cx, cy, radius, ink * alpha, radius >= 14f ? 2f : 1f);
-            float letter = TextSize.Small * (radius / 22f) * (part == 1 ? 0.8f : 1f);
-            Gfx.TextCentered(sb, Ui.BigFont, partMarks[part], cx, cy - radius * 0.12f, ink * alpha, letter);
+            FamilyGlyph(sb, StageLayout.Rows[section].Family, cx, cy + radius * 0.05f, radius / 24f, ink * alpha);
 
             //Arrow : a head on the edge, pointing the way they answer. A dark head under a light
             //one, like the pointers on the notes, so it reads on a bright stage and on the dark.

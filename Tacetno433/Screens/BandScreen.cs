@@ -10,18 +10,18 @@ namespace Tacetno433.Screens
 {
     //BandScreen : THE BAND, opened from the route page (round 14, it replaces the STAGE page).
     //
-    //There is nothing to arrange before a fight any more. Every musician plays a PART that is
-    //written on their card like a note in the lane (StageLayout, MusicianArt.PartBadge):
-    //   the LETTER  p, mf or f, set by the instrument: which strokes bring them in
-    //   the ARROW   left, down and up, or right: which way of the baton makes them hit harder
+    //There is nothing to arrange before a fight. Everybody on stage plays every note, and each
+    //musician sits where their instrument sits in a real orchestra (StageLayout, MusicianArt.SeatBadge):
+    //   the SECTION  strings at the front, winds in the middle, percussion at the back
+    //   the SIDE     left, centre or right, drawn as an arrow: when the baton points that way
+    //                on a beat of the 4/4 shape, they hit harder (CUE)
     //The only choice here is WHO PLAYS. The stage has room for RunState.Seats players, the rest
     //wait on the bench. Click a musician to move them on or off the stage. With the stage full,
     //clicking someone on the bench picks them, and the next click on a player swaps the two.
     //
-    //Left  : THE ORCHESTRA, a chart of the nine parts. Everyone sits in their own chair, so the
-    //        chart fills itself: the rows are the letters, from p near the conductor to f at the
-    //        back (the bigger the stroke, the further it reaches), the columns are the arrows.
-    //        A chair nobody plays yet shows its part faintly, a part to look for.
+    //Left  : THE ORCHESTRA, seen from the podium. Everyone sits in their own chair, so the chart
+    //        fills itself: the rows are the sections, strings nearest the conductor, the columns
+    //        are the sides. A chair nobody plays yet shows its badge faintly, a player to look for.
     //Right : everyone in the ensemble as portrait cards, on stage or on the bench.
     public class BandScreen : GameScreen
     {
@@ -32,9 +32,9 @@ namespace Tacetno433.Screens
         private const int CardGap = 10;
         private const int CardColumns = 4;
 
-        //Orchestra Chart : one column per arrow, one row per letter
-        private static float[] columnX = { 380f, 510f, 640f };        // left, down and up, right
-        private static float[] partY = { 492f, 374f, 256f };          // p, mf, f : p nearest the conductor
+        //Orchestra Chart : one column per side, one row per section
+        private static float[] columnX = { 380f, 510f, 640f };        // left, centre, right
+        private static float[] partY = { 492f, 374f, 256f };          // strings, winds, percussion : strings nearest the conductor
         private const float ChartTop = 130f;
         private const float LabelX = 48f;
         private const int ChairW = 54;
@@ -42,16 +42,12 @@ namespace Tacetno433.Screens
         private const float PodiumY = 584f;
 
         //Chart Words
-        private static string[] rowMarks = { "p", "mf", "f" };
-        private static string[] missingWords = { "NO p PLAYER : A SMALL STROKE BRINGS YOUR QUIETEST PART",
-                                                 "NO mf PLAYER : A MIDDLE STROKE BRINGS ONLY THE p PLAYERS",
-                                                 "NO f PLAYER : A BIG STROKE ADDS NOBODY" };
-        private static string[] missingShort = { "NOBODY PLAYS p YET", "NOBODY PLAYS mf YET", "NOBODY PLAYS f YET" };
+        private const string MissingShort = "NOBODY SITS HERE YET";
 
         //Notes : what the detail box says when the mouse is over nothing
-        private const string NoteTitle = "EVERY PLAYER'S PART IS WRITTEN ON THEM, LIKE A NOTE";
-        private const string NoteLetter = "LETTER : a small stroke brings the p players, a middle one the mf players too, a big one everybody.";
-        private const string NoteArrow = "ARROW : when the baton goes their way, they hit 50 percent harder (CUE).";
+        private const string NoteTitle = "A REAL ORCHESTRA, SEEN FROM THE PODIUM";
+        private const string NoteBand = "Everybody on stage plays every note you hit. More players, more power.";
+        private const string NoteArrow = "ARROW : when the baton points their way, they hit 50 percent harder (CUE).";
         private const string NoteClick = "Click a musician to move them on or off the stage.";
 
         //Band State
@@ -63,9 +59,8 @@ namespace Tacetno433.Screens
         private string message = "";
 
         //Prepared Text : made in Load and whenever the band changes, never in Draw
-        private string[] sideBeats = { "", "", "" };   // "BEATS 2  6" for each arrow, CUE
-        private bool[] partMissing = new bool[3];
-        private string gapLine = "";                  // the first missing part, said in full
+        private string[] sideBeats = { "", "", "" };   // "BEATS 2  6" for each side, CUE
+        private bool[] sectionEmpty = new bool[3];
 
         public override void Load()
         {
@@ -74,7 +69,7 @@ namespace Tacetno433.Screens
             run.Formation.Tidy(run.Seats);
             run.RefreshLabels();
 
-            //Side Beats : which beats of a round the baton goes each way (CUE)
+            //Side Beats : which beats of a round the baton points each way (CUE)
             for (int side = 0; side < 3; side++)
             {
                 string beats = "BEATS";
@@ -90,13 +85,11 @@ namespace Tacetno433.Screens
         private void Rebuild(RunState run)
         {
             run.RefreshLabels();
-            gapLine = "";
-            for (int part = 0; part < 3; part++)
+            for (int section = 0; section < 3; section++)
             {
-                partMissing[part] = true;
+                sectionEmpty[section] = true;
                 for (int side = 0; side < 3; side++)
-                    if (run.Formation.Seated[part * 3 + side] != null) partMissing[part] = false;
-                if (partMissing[part] && gapLine.Length == 0 && run.Formation.SeatedCount > 0) gapLine = missingWords[part];
+                    if (run.Formation.Seated[section * 3 + side] != null) sectionEmpty[section] = false;
             }
         }
 
@@ -116,7 +109,7 @@ namespace Tacetno433.Screens
             return new Rectangle(rosterBox.X + col * (w + CardGap), top + row * (h + CardGap), w, h);
         }
 
-        //Chair Rect : where a part's chair stands on the chart
+        //Chair Rect : where a chair stands on the chart
         private static Rectangle ChairRect(int seat)
         {
             float cx = columnX[StageLayout.SeatSide(seat)];
@@ -252,10 +245,10 @@ namespace Tacetno433.Screens
             RunHud.DrawTips(sb, run);
         }
 
-        //Chart : the orchestra, its letters down the side and its arrows across the top
+        //Chart : the orchestra, its sections down the side and its sides across the top
         private void DrawChart(SpriteBatch sb, RunState run)
         {
-            //Arrows : one column each, with the beats of a round the baton goes that way
+            //Sides : one column each, with the beats of a round the baton points that way
             for (int side = 0; side < 3; side++)
             {
                 float x = columnX[side];
@@ -265,18 +258,16 @@ namespace Tacetno433.Screens
                 Gfx.Rect(sb, x, ChartTop + 72, 1, PodiumY - ChartTop - 96, Palette.LineGrey * 0.18f);
             }
 
-            //Letters : one row each, p nearest the conductor, f at the back
-            for (int part = 0; part < 3; part++)
+            //Sections : one row each, strings nearest the conductor, percussion at the back
+            for (int section = 0; section < 3; section++)
             {
-                StageRow row = StageLayout.Rows[part];
-                float y = partY[part];
+                StageRow row = StageLayout.Rows[section];
+                float y = partY[section];
                 Gfx.Rect(sb, 250, y + ChairH / 2f + 8, 470, 1, Palette.LineGrey * 0.3f);
-                Gfx.Text(sb, Game.BigFont, rowMarks[part], LabelX, y - 30, Palette.Highlight, TextSize.Subtitle);
+                MusicianArt.FamilyGlyph(sb, row.Family, LabelX + 22, y - 12, 1.1f, Palette.Highlight);
                 Gfx.TextSpaced(sb, Game.Font, row.Name, LabelX + 66, y - 22, Palette.Paper, TextSize.Label, 2f);
-                Gfx.TextSpaced(sb, Game.Font, row.Strokes, LabelX + 66, y - 2, Palette.PaperDim, TextSize.Tiny, 1.5f);
-                MusicianArt.FamilyGlyph(sb, row.Family, LabelX + 20, y + 30, 0.55f, Palette.LineGrey);
-                if (partMissing[part])
-                    Gfx.TextSpaced(sb, Game.Font, missingShort[part], LabelX + 66, y + 18, Palette.Accent, TextSize.Tiny, 1.5f);
+                if (sectionEmpty[section])
+                    Gfx.TextSpaced(sb, Game.Font, MissingShort, LabelX + 66, y, Palette.Accent, TextSize.Tiny, 1.5f);
             }
 
             //Chairs
@@ -290,7 +281,7 @@ namespace Tacetno433.Screens
             Gfx.TextSpacedCentered(sb, Game.Font, "CONDUCTOR", px, PodiumY + 8, Palette.LineGrey, TextSize.Tiny, 3f);
         }
 
-        //Arrow : the way a column answers, a head for left and right, two for down and up
+        //Arrow : the side a column sits on, a head for left and right, two (down and up) for the centre
         private static void DrawArrow(SpriteBatch sb, int side, float x, float y)
         {
             if (side == 0) NoteGlyph.Arrow(sb, Flick.Left, x, y, 34f, 12f, Palette.Paper, 2f);
@@ -302,7 +293,7 @@ namespace Tacetno433.Screens
             }
         }
 
-        //Chair : a player on stage, a player on the bench (dim), or a part nobody plays yet
+        //Chair : a player on stage, a player on the bench (dim), or a chair nobody plays yet
         private void DrawChair(SpriteBatch sb, RunState run, int s)
         {
             Rectangle r = ChairRect(s);
@@ -311,9 +302,9 @@ namespace Tacetno433.Screens
 
             if (owner == null)
             {
-                //Empty Part : the chair's own badge, faint, a part still to find
+                //Empty Chair : the chair's own badge, faint, a player still to find
                 Gfx.CapsuleOutline(sb, r, Palette.LineGrey * 0.3f, 1f);
-                MusicianArt.PartBadge(sb, StageLayout.SeatRow[s], StageLayout.SeatSide(s), r.Center.X, r.Center.Y, 12f,
+                MusicianArt.SeatBadge(sb, StageLayout.SeatRow[s], StageLayout.SeatSide(s), r.Center.X, r.Center.Y, 12f,
                                       Palette.Ink, Palette.PaperDim, 0.35f);
                 return;
             }
@@ -383,18 +374,16 @@ namespace Tacetno433.Screens
                 Gfx.TextSpaced(sb, Game.Font, m.Instrument, x + 98, y + 34, Palette.Paper, TextSize.Label, 2f);
                 Gfx.TextSpaced(sb, Game.Font, m.FamilyLabel, x + 98, y + 56, Palette.LineGrey, TextSize.Tiny, 1.5f);
 
-                //Part : the badge, and what its letter and arrow mean
-                int part = StageLayout.PartOf(m.Family);
-                MusicianArt.PartBadge(sb, m, x + 300, y + 30, 18f, Palette.Ink, Palette.Paper, 1f);
-                Gfx.TextSpaced(sb, Game.Font, StageLayout.Rows[part].Strokes, x + 336, y + 10, Palette.Paper, TextSize.Tiny, 1.5f);
+                //Seat : the badge, the section and side it stands for, and the beats the baton points there
+                int section = StageLayout.SectionOf(m.Family);
+                MusicianArt.SeatBadge(sb, m, x + 300, y + 30, 18f, Palette.Ink, Palette.Paper, 1f);
+                Gfx.TextSpaced(sb, Game.Font, StageLayout.Rows[section].Name, x + 336, y + 10, Palette.Paper, TextSize.Tiny, 1.5f);
                 Gfx.TextSpaced(sb, Game.Font, StageLayout.SideNames[m.Cue], x + 336, y + 28, Palette.Paper, TextSize.Tiny, 1.5f);
                 Gfx.TextSpaced(sb, Game.Font, sideBeats[m.Cue], x + 336, y + 46, Palette.LineGrey, TextSize.Tiny, 1.5f);
 
-                //Numbers : the same power and cost as the cards, rehearsals and motifs included
+                //Numbers : the same power as the cards, rehearsals and motifs included
                 Gfx.TextSpaced(sb, Game.Font, "POWER", x + 300, y + 66, Palette.LineGrey, TextSize.Tiny, 2f);
                 Gfx.Text(sb, Game.Font, NumberText.Get(run.PowerOf(m)), x + 360, y + 62, Palette.Paper, TextSize.Body);
-                Gfx.TextSpaced(sb, Game.Font, "COST", x + 392, y + 66, Palette.LineGrey, TextSize.Tiny, 2f);
-                Gfx.Text(sb, Game.Font, NumberText.Get(run.CostOf(m)), x + 440, y + 62, Palette.Paper, TextSize.Body);
 
                 //Trait : what this musician does that nobody else does
                 Gfx.Rect(sb, x + 520, y, 1, 80, Palette.LineGrey * 0.5f);
@@ -404,10 +393,9 @@ namespace Tacetno433.Screens
             else
             {
                 Gfx.TextSpaced(sb, Game.Font, NoteTitle, x, y + 2, Palette.LineGrey, TextSize.Tiny, 2f);
-                Gfx.Text(sb, Game.StoryFont, NoteLetter, x, y + 20, Palette.Paper, TextSize.StorySmall);
+                Gfx.Text(sb, Game.StoryFont, NoteBand, x, y + 20, Palette.Paper, TextSize.StorySmall);
                 Gfx.Text(sb, Game.StoryFont, NoteArrow, x, y + 42, Palette.Paper, TextSize.StorySmall);
-                if (gapLine.Length > 0) Gfx.TextSpaced(sb, Game.Font, gapLine, x, y + 68, Palette.Accent, TextSize.Tiny, 1.5f);
-                else Gfx.Text(sb, Game.StoryFont, NoteClick, x, y + 64, Palette.PaperDim, TextSize.StorySmall);
+                Gfx.Text(sb, Game.StoryFont, NoteClick, x, y + 64, Palette.PaperDim, TextSize.StorySmall);
             }
 
             //Message : short warnings, fading out

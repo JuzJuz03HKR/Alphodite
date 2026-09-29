@@ -238,7 +238,7 @@ namespace Tacetno433.Screens
             if (reward == Reward.Recruit || reward == Reward.RecruitPart)
             {
                 run.JustJoined.Clear();
-                Musician m = reward == Reward.RecruitPart ? run.Recruit(run.MissingPartPlayer()) : run.RecruitOne();
+                Musician m = reward == Reward.RecruitPart ? run.Recruit(run.MissingSectionPlayer()) : run.RecruitOne();
                 if (m == null)
                 {
                     run.AddShards(ev.Choices[chosen].ShardCost);       // money back, nobody could come

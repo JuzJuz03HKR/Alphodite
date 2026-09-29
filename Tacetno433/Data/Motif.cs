@@ -61,13 +61,13 @@ namespace Tacetno433.Data
         {
             //Rarity 1
             new Motif { Id = MotifId.Resin,        Name = "ROSIN",         Mark = "arco", Rarity = 1,
-                        Text = "String players (mf) hit 1 harder." },
+                        Text = "String players hit 1 harder." },
             new Motif { Id = MotifId.ReedCase,     Name = "REED CASE",     Mark = "o",    Rarity = 1,
-                        Text = "Wind players (p) cost 1 less stamina." },
+                        Text = "With a wind player on stage, every rest gives back 4 more stamina." },
             new Motif { Id = MotifId.SpareSticks,  Name = "SPARE STICKS",  Mark = "x",    Rarity = 1,
-                        Text = "Percussion players (f) cost 1 less stamina." },
+                        Text = "Percussion players hit 30 percent harder on TACET's f notes." },
             new Motif { Id = MotifId.Pianissimo,   Name = "PIANISSIMO",    Mark = "pp",   Rarity = 1,
-                        Text = "A small stroke gives back 3 stamina." },
+                        Text = "A small stroke on a p note gives back 3 stamina." },
             new Motif { Id = MotifId.PatronsPurse, Name = "PATRON'S PURSE", Mark = "$",   Rarity = 1,
                         Text = "Won fights pay 30 percent more shards." },
 
@@ -75,7 +75,7 @@ namespace Tacetno433.Data
             new Motif { Id = MotifId.BreathMark,   Name = "BREATH MARK",   Mark = ",",    Rarity = 2,
                         Text = "A rest gives back 15 stamina instead of 12." },
             new Motif { Id = MotifId.Tutti,        Name = "TUTTI",         Mark = "tutti", Rarity = 2,
-                        Text = "Playing together is stronger. Each extra player adds 10 percent more." },
+                        Text = "Playing together is stronger. Each extra player adds 6 percent more." },
             new Motif { Id = MotifId.SteadyPulse,  Name = "STEADY PULSE",  Mark = "=",    Rarity = 2,
                         Text = "The PERFECT and GOOD timing windows are wider." },
             new Motif { Id = MotifId.Encore,       Name = "ENCORE",        Mark = "bis",  Rarity = 2,
@@ -87,13 +87,13 @@ namespace Tacetno433.Data
             new Motif { Id = MotifId.Crescendo,    Name = "CRESCENDO",     Mark = "<",    Rarity = 3,
                         Text = "The COMBO bonus grows twice as fast." },
             new Motif { Id = MotifId.Sforzando,    Name = "SFORZANDO",     Mark = "sfz",  Rarity = 3,
-                        Text = "A big stroke hits 30 percent harder." },
+                        Text = "A big stroke on an f note hits 20 percent harder." },
             new Motif { Id = MotifId.SecondWind,   Name = "SECOND WIND",   Mark = "V",    Rarity = 3,
                         Text = "Once per fight, when the band would collapse, 15 percent of its stamina comes back." },
             new Motif { Id = MotifId.Overture,     Name = "OVERTURE",      Mark = "I",    Rarity = 3,
                         Text = "The first beat of every round hits 50 percent harder." },
             new Motif { Id = MotifId.Counterpoint, Name = "COUNTERPOINT",  Mark = "+",    Rarity = 3,
-                        Text = "Against TACET's f notes, your answer hits 30 percent harder." },
+                        Text = "Against TACET's f notes, your answer hits 20 percent harder." },
 
             //Special Notes : each bends one of the four notes or one big moment of the duel.
             //FromFloor keeps a motif away until its note has arrived (BattleRules teaching order).

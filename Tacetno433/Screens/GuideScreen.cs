@@ -208,7 +208,7 @@ namespace Tacetno433.Screens
                     bool filled = Array.IndexOf(demoBand, part * 3 + side) >= 0;
                     if (filled) ArtSlot.Draw(sb, cap, Palette.Paper, a);
                     else Gfx.CapsuleOutline(sb, cap, Palette.LineGrey * (0.5f * a), 1f);
-                    MusicianArt.PartBadge(sb, part, side, cap.Center.X, cap.Y - 2, filled ? 12f : 9f,
+                    MusicianArt.SeatBadge(sb, part, side, cap.Center.X, cap.Y - 2, filled ? 12f : 9f,
                                           Palette.Ink, filled ? Palette.Paper : Palette.PaperDim, filled ? a : 0.4f * a);
                 }
             }

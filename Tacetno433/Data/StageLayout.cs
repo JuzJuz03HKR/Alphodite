@@ -2,69 +2,66 @@
 
 namespace Tacetno433.Data
 {
-    //StageRow : one PART of the orchestra, the players who come in on the same strokes
+    //StageRow : one SECTION of the orchestra, the players of one instrument family
     public class StageRow
     {
-        public string Name = "";          // "WINDS"
-        public string Mark = "";          // the smallest stroke that brings the part in, "p"
-        public string Strokes = "";       // "EVERY STROKE"
-        public Family Family;             // the instruments that play this part
+        public string Name = "";          // "STRINGS"
+        public Family Family;             // the instruments that sit here
     }
 
     //StageLayout : THE PLACE TO EDIT THE STAGE.
     //
-    //Round 14 : every musician plays a PART, printed on their card the way a note is printed
-    //in the lane, a letter and an arrow:
-    //   LETTER  p, mf or f, set by their instrument (BattleRules DYNAMICS). A small stroke brings
-    //           the p players in, a middle one the mf players too, a big one everybody.
-    //              WINDS p   every stroke        (cheap, quiet, always there)
-    //              STRINGS mf   middle and big strokes
-    //              PERCUSSION f   big strokes only (the heaviest hitters)
-    //   ARROW   the way of the baton they answer, left, down and up, or right. When the baton
-    //           goes their way they hit harder (BattleRules CUE).
-    //
-    //So there is nothing to arrange before a fight any more (the STAGE page and its seats are
-    //gone): who plays is written on the players themselves. Every letter and arrow pair belongs
-    //to exactly one musician of the nine, so each musician has one chair of their own, their
-    //HOME SEAT, like a real orchestra where the second horn always sits in the same place.
-    //The nine chairs are kept as seat numbers because the fight remembers players by seat.
-    //   seat = part * 3 + arrow        part 0 p, 1 mf, 2 f        arrow 0 left, 1 down and up, 2 right
+    //Round 15 : the stage is laid out like a real orchestra, seen from the conductor's podium.
+    //   SECTIONS  strings at the front, winds in the middle, percussion at the back
+    //   SIDES     left, centre and right. The baton points at a side on every beat of the 4/4
+    //             shape (down and up to the centre, the second beat left, the third right), and
+    //             the players sitting there hit harder (BattleRules CUE). A musician's side is
+    //             where their instrument sits in a real orchestra, the violins on the left and
+    //             the cellos on the right (Musician.Cue, drawn as their arrow).
+    //Everybody on stage plays every note (round 15), so the stage decides who gets the CUE,
+    //not who plays. Every section and side pair belongs to exactly one musician of the nine,
+    //so each musician has one chair of their own, their HOME SEAT, like a real orchestra where
+    //the second horn always sits in the same place. Nothing to arrange before a fight.
+    //   seat = section * 3 + side        section 0 strings, 1 winds, 2 percussion        side 0 left, 1 centre, 2 right
+    //(Round 14 : the rows were letters, winds p, strings mf, percussion f, and a small stroke only
+    //brought the p players in. Round 12 to 13 : the player moved everybody around by hand.)
     public static class StageLayout
     {
         public const int SeatCount = 9;
 
-        //Parts : index 0 is p, the quietest. The order is the order strokes bring them in.
+        //Sections : index 0 is the front, nearest the conductor
         public static StageRow[] Rows = new StageRow[]
         {
-            new StageRow { Name = "WINDS",      Mark = "p",  Strokes = "EVERY STROKE",   Family = Family.Wind },
-            new StageRow { Name = "STRINGS",    Mark = "mf", Strokes = "MIDDLE AND BIG", Family = Family.String },
-            new StageRow { Name = "PERCUSSION", Mark = "f",  Strokes = "BIG ONLY",       Family = Family.Percussion },
+            new StageRow { Name = "STRINGS",    Family = Family.String },
+            new StageRow { Name = "WINDS",      Family = Family.Wind },
+            new StageRow { Name = "PERCUSSION", Family = Family.Percussion },
         };
 
-        //Seat Row : which part each seat belongs to
+        //Seat Row : which section each seat belongs to
         public static int[] SeatRow = { 0, 0, 0, 1, 1, 1, 2, 2, 2 };
 
-        //Arrows : the three ways a player can answer. Down and up share one arrow, they are the
+        //Sides : the three ways a player can answer. Down and up share the centre, they are the
         //two beats the baton comes back to the middle on (BattleRules.CueSide).
-        public static string[] SideNames = { "LEFT", "DOWN / UP", "RIGHT" };
+        public static string[] SideNames = { "LEFT", "CENTRE", "RIGHT" };
+        public static string[] SideBeats = { "BEATS 2 6", "BEATS 1 4 5 8", "BEATS 3 7" };
 
         public static int SeatSide(int seat)
         {
             return seat % 3;
         }
 
-        //Part Of : the part an instrument family plays
-        public static int PartOf(Family family)
+        //Section Of : the section an instrument family sits in
+        public static int SectionOf(Family family)
         {
             for (int r = 0; r < Rows.Length; r++)
                 if (Rows[r].Family == family) return r;
-            return 1;
+            return 0;
         }
 
         //Home Seat : the one chair this musician always sits in
         public static int HomeSeat(Musician m)
         {
-            return PartOf(m.Family) * 3 + m.Cue;
+            return SectionOf(m.Family) * 3 + m.Cue;
         }
 
         public static StageRow RowOf(int seat)
@@ -73,13 +70,13 @@ namespace Tacetno433.Data
         }
 
         //Duel Stand : THE DUEL PAGE, seen from the side. The band stands in a line facing
-        //TACET on the right. Each part is one column: p furthest left, f nearest the enemy
-        //(the heavy hitters go first). The three players of a part stand at three depths:
+        //TACET on the right. Each section is one column: strings furthest left, percussion
+        //nearest the enemy. The three players of a part stand at three depths:
         //further away is higher up the screen and a little smaller.
         //All numbers are screen pixels, because the duel page never moves its stage.
         //The boxes are sized for detailed pixel characters with room to swing an instrument,
         //and the f column stays clear of the timing ring in the middle of the screen.
-        public static float[] DuelColumnX = { 196f, 316f, 436f };     // p, mf, f
+        public static float[] DuelColumnX = { 196f, 316f, 436f };     // strings, winds, percussion
         public static float[] DuelDepthY = { 506f, 530f, 554f };       // far, centre, near : the feet
         public static float[] DuelDepthX = { -20f, 0f, 20f };
         public static float[] DuelDepthScale = { 0.86f, 0.93f, 1f };   // placeholder boxes only, see CharacterArt

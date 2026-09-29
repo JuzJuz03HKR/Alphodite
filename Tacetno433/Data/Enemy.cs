@@ -80,7 +80,7 @@ namespace Tacetno433.Data
                         Kind = EnemyKind.Normal, Pattern = new int[] { 4, 0, 3, 4, 0, 0, 5, 0 }, Tone = Palette.ToneD, Temper = 5 },
             new Enemy { Name = "DEAD AIR",  Title = "It waits between your notes.",
                         Trait = EnemyTrait.FillsGaps, TraitName = "FILLS THE GAPS", TraitFloor = 2,
-                        TraitText = "Answer it with a small stroke, or none, and its note hits 50 percent harder.",
+                        TraitText = "A note you miss or let pass hits 50 percent harder.",
                         Kind = EnemyKind.Normal, Pattern = new int[] { 0, 4, 0, 4, 0, 4, 0, 5 }, Tone = Palette.ToneE },
             new Enemy { Name = "THE LULL",  Title = "Soft, patient, and never finished.",
                         Trait = EnemyTrait.Lullaby, TraitName = "LULLABY", TraitFloor = 2,
@@ -94,24 +94,27 @@ namespace Tacetno433.Data
             //Elite : any era
             new Enemy { Name = "THE MUTE CHOIR", Title = "A hundred mouths, open, making nothing.",
                         Trait = EnemyTrait.SilentMouths, TraitName = "SILENT MOUTHS", TraitFloor = 1,
-                        TraitText = "From round two it silences one part of your band each round, p, mf or f: those players cannot play. Some notes stay hidden as ???",
-                        Kind = EnemyKind.Elite, Pattern = new int[] { 5, 0, 5, 0, 6, 0, 5, 7 }, Hidden = new int[] { 3, 7 }, Tone = Palette.ToneB },
-                        // round 14, was 5 0 5 0 7 0 5 8 : silencing a whole part hit harder than silencing a side of the stage
+                        TraitText = "From round two it silences one section of your band each round, strings, winds or percussion: those players cannot play. Some notes stay hidden as ???",
+                        Kind = EnemyKind.Elite, Pattern = new int[] { 4, 0, 5, 0, 6, 0, 4, 6 }, Hidden = new int[] { 3, 7 }, Tone = Palette.ToneB },
+                        // round 15, was 5 0 5 0 6 0 5 7 : with the whole band on every note, losing a section hurt average players most
+                        // (79 percent of them lost to it on floor 3). Round 14, was 5 0 5 0 7 0 5 8
             //WHITE NOISE : round 11, quieter notes (3 -> 2) and NO REST gives back half instead of
             //nothing. It used to end more runs on floor one than any boss.
             //Round 12 : a hiss, mostly p (Temper 15 -> -60) and nothing hidden. A note on every beat
             //means a stroke paid on every beat, so its notes are soft enough to answer small.
             //Round 14 : notes 2 -> 3, Temper -60 -> -45. The winds (p) answer soft notes cheaply now,
             //and it had stopped being a threat (a strong player lost to it 3 percent of the time, was 16).
+            //Round 15 : notes 5, Temper 0. Playing is free, so soft notes on every beat were nothing,
+            //now it is a reading test : a note on every beat, any mark, and no rest at all.
             new Enemy { Name = "WHITE NOISE",    Title = "Every beat, all the time, forever.",
                         Trait = EnemyTrait.NoRest, TraitName = "NO REST", TraitFloor = 1,
                         TraitText = "It never stops, so silent beats give back only half the stamina.",
-                        Kind = EnemyKind.Elite, Pattern = new int[] { 3, 3, 3, 3, 3, 3, 3, 3 }, Tone = Palette.ToneA, Temper = -45 },
+                        Kind = EnemyKind.Elite, Pattern = new int[] { 5, 5, 5, 5, 5, 5, 5, 5 }, Tone = Palette.ToneA, Temper = 0 },
 
             //Boss : one per era
             new Enemy { Name = "REQUIEM",            Title = "The piece that was never finished.",
                         Trait = EnemyTrait.Unfinished, TraitName = "UNFINISHED", TraitFloor = 1,
-                        TraitText = "In round three it plays backwards and faster, and your band is mirrored: the left and right arrows swap.",
+                        TraitText = "In round three it plays backwards and faster, and your band is mirrored: the players on the left and right swap sides.",
                         Kind = EnemyKind.Boss, Era = 0, Pattern = new int[] { 6, 0, 4, 0, 8, 0, 4, 9 }, Hidden = new int[] { 2, 6 }, Tone = Palette.ToneA },
             new Enemy { Name = "THE NAMELESS MASTER", Title = "He plays a phrase. You must answer better.",
                         Trait = EnemyTrait.Mirror, TraitName = "ANSWER BETTER", TraitFloor = 1,

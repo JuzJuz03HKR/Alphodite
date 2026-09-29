@@ -148,10 +148,10 @@ namespace Tacetno433.Screens
             //New Tag and Instrument : printed up the side of the figure
             Ui.Tag(sb, "NEW", column.X + 40, column.Y + 40, true, a);
 
-            //Part : the letter and the arrow they will play with, under the tag (round 14)
-            MusicianArt.PartBadge(sb, m, column.X + 62, column.Y + 108, 18f, Palette.Ink, Palette.Paper, a);
-            Gfx.TextSpacedCentered(sb, Game.Font, "PART", column.X + 62, column.Y + 146, Palette.LineGrey * a, TextSize.Tiny, 2f);
-            Gfx.TextSpacedCentered(sb, Game.Font, StageLayout.Rows[StageLayout.PartOf(m.Family)].Strokes, column.X + 62, column.Y + 164, Palette.PaperDim * a, TextSize.Tiny, 1f);
+            //Seat : their section and the side of the stage they sit on, under the tag (round 15)
+            MusicianArt.SeatBadge(sb, m, column.X + 62, column.Y + 108, 18f, Palette.Ink, Palette.Paper, a);
+            Gfx.TextSpacedCentered(sb, Game.Font, "SEAT", column.X + 62, column.Y + 146, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            Gfx.TextSpacedCentered(sb, Game.Font, StageLayout.Rows[StageLayout.SectionOf(m.Family)].Name, column.X + 62, column.Y + 164, Palette.PaperDim * a, TextSize.Tiny, 1f);
             Gfx.TextSpacedCentered(sb, Game.Font, StageLayout.SideNames[m.Cue], column.X + 62, column.Y + 180, Palette.PaperDim * a, TextSize.Tiny, 1f);
             Gfx.TextVertical(sb, Game.Font, m.Instrument, column.Right - 40, column.Y + 50, Palette.PaperDim * a, TextSize.Label);
             Gfx.Rect(sb, column.Right - 60, column.Y + 40, 1, 200, Palette.LineGrey * a);
@@ -161,12 +161,10 @@ namespace Tacetno433.Screens
             Gfx.TextCentered(sb, Game.BigFont, m.NameTag, cx, y + 20, Palette.Highlight * a, TextSize.Hero);
             Gfx.TextSpacedCentered(sb, Game.Font, m.FamilyLabel, cx, y + 54, Palette.PaperDim * a, TextSize.Tiny, 3f);
 
-            //Stats : two numbers side by side, the same numbers every page shows
+            //Stats : their power, the same number every page shows (round 15 : there is no cost)
             RunState run = Game.CurrentRun;
-            Gfx.TextSpacedRight(sb, Game.Font, "POWER", cx - 34, y + 84, Palette.LineGrey * a, TextSize.Tiny, 2f);
-            Gfx.Text(sb, Game.BigFont, NumberText.Get(run.PowerOf(m)), cx - 26, y + 70, Palette.Paper * a, TextSize.Subtitle);
-            Gfx.TextSpaced(sb, Game.Font, "COST", cx + 30, y + 84, Palette.LineGrey * a, TextSize.Tiny, 2f);
-            Gfx.Text(sb, Game.BigFont, NumberText.Get(run.CostOf(m)), cx + 76, y + 70, Palette.Paper * a, TextSize.Subtitle);
+            Gfx.TextSpacedRight(sb, Game.Font, "POWER", cx - 6, y + 84, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            Gfx.Text(sb, Game.BigFont, NumberText.Get(run.PowerOf(m)), cx + 2, y + 70, Palette.Paper * a, TextSize.Subtitle);
 
             Ornament.Divider(sb, cx, y + 116, 150, Palette.LineGrey * a);
             Gfx.Text(sb, Game.StoryFont, m.LineWrapped, cx - TacetGame.MusicianWrapWidth / 2f, y + 128, Palette.Paper * a, TextSize.Story);

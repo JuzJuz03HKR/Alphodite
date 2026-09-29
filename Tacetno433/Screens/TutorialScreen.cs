@@ -102,7 +102,7 @@ namespace Tacetno433.Screens
                      + "alone. mf : a MIDDLE one. The right size is IN TUNE and weakens TACET's note.",
                 Goal = "Six notes on time, with the right size." },
 
-            new Lesson { Kind = Kind.Breath, Title = "KEEP BREATHING", Need = 10, Bpm = BattleRules.TempoBpm[0],
+            new Lesson { Kind = Kind.Breath, Title = "KEEP BREATHING", Need = 10, Bpm = BattleRules.TempoByFloor[0][0],
                 Body = "The bar at the top is the band's breath. A beat TACET wins knocks breath out "
                      + "of the band, and a missed stroke lets it through. When the breath is gone the "
                      + "band collapses and the fight is lost. This is the real speed of a first round.",

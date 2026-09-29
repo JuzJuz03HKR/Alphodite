@@ -50,8 +50,8 @@ namespace Tacetno433.Screens
 
         //Musician Glow : the light behind whoever is playing or about to. Drawn before the band
         //switches to pixel sampling, because a soft glow must stay smooth.
-        //While a stroke is being drawn the parts it would bring in light up, one more part each
-        //time the stroke passes a mark on the ruler (DYNAMICS), so its size can be seen on stage.
+        //While a stroke is being drawn the whole band swells with it, brighter each time the
+        //stroke passes a mark on the ruler, so its size can be seen on stage.
         private void DrawMusicianGlow(SpriteBatch sb)
         {
             Formation f = Game.CurrentRun.Formation;
@@ -61,7 +61,7 @@ namespace Tacetno433.Screens
                 if (f.Seated[s] == null) continue;
                 float glow = lit[s];
                 if (UpNext(s)) glow = Math.Max(glow, 0.35f + (float)Math.Sin(time * 8f) * 0.15f);
-                if (live >= 0 && battle.Joins(s, sizeChoice[live])) glow = Math.Max(glow, 0.75f);
+                if (live >= 0 && battle.Plays(s)) glow = Math.Max(glow, 0.35f + 0.25f * live);
                 if (glow <= 0f) continue;
 
                 Rectangle r = StandRect(s);
@@ -93,7 +93,7 @@ namespace Tacetno433.Screens
             }
         }
 
-        //Musician Marks : every player's PART over their head, the letter and the arrow (round 14).
+        //Musician Marks : every player's seat over their head, the section mark and the arrow (round 15).
         //The ones the baton goes toward on the beat being answered (CUE) light up and grow, the
         //rest wait a shade dimmer. A cross over anyone SILENT MOUTHS has silenced this round.
         //REQUIEM's mirrored round turns the arrows round with the rule.
@@ -109,10 +109,10 @@ namespace Tacetno433.Screens
                 float bx = r.Center.X;
                 float by = r.Y - 22;
 
-                //Dark Disc : the stage behind is bright, so the badge is inked in, the letter light
+                //Dark Disc : the stage behind is bright, so the badge is inked in, the mark light
                 if (!battle.CanPlay(s))
                 {
-                    MusicianArt.PartBadge(sb, StageLayout.SeatRow[s], side, bx, by, 12f, Palette.PaperDim, Palette.Ink, 0.45f);
+                    MusicianArt.SeatBadge(sb, StageLayout.SeatRow[s], side, bx, by, 12f, Palette.PaperDim, Palette.Ink, 0.45f);
                     Gfx.Line(sb, bx - 12, by - 12, bx + 12, by + 12, Palette.Ink, 3f);
                     Gfx.Line(sb, bx - 12, by + 12, bx + 12, by - 12, Palette.Ink, 3f);
                     continue;
@@ -120,7 +120,7 @@ namespace Tacetno433.Screens
 
                 bool next = UpNext(s);
                 if (next) Gfx.DrawGlow(sb, bx, by, 34f, Palette.Highlight * 0.6f);
-                MusicianArt.PartBadge(sb, StageLayout.SeatRow[s], side, bx, by, next ? 15f : 12f,
+                MusicianArt.SeatBadge(sb, StageLayout.SeatRow[s], side, bx, by, next ? 15f : 12f,
                                       next ? Palette.Highlight : Palette.Paper, Palette.Ink, next ? 1f : 0.75f);
             }
         }

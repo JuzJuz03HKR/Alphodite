@@ -88,12 +88,12 @@ namespace Tacetno433.Screens
             notes[SeatRow] = "One more musician on stage. Two per floor at most.";
             names[TuningRow] = "TUNING";
             notes[TuningRow] = "The band gets back " + (int)(BattleRules.TuningRecover * 100) + " percent of its stamina.";
-            //Hire : one player from this era, known before buying, with their part
+            //Hire : one player from this era, known before buying, with their seat
             hire = MusicianList.RollFromEra(run.Era, run.Roster, run.Rng);
             names[HireRow] = hire != null ? "HIRE " + hire.Name : "HIRE A PLAYER";
             notes[HireRow] = hire != null
-                ? hire.Name + ", " + hire.Instrument + ". Plays " + StageLayout.Rows[StageLayout.PartOf(hire.Family)].Mark
-                  + ", answers " + StageLayout.SideNames[hire.Cue] + ". " + hire.TraitName + " : " + hire.TraitText
+                ? hire.Name + ", " + hire.Instrument + ". Sits " + StageLayout.Rows[StageLayout.SectionOf(hire.Family)].Name
+                  + ", " + StageLayout.SideNames[hire.Cue] + ". " + hire.TraitName + " : " + hire.TraitText
                 : NobodyLine;
             if (hire == null) sold[HireRow] = true;
 
@@ -326,7 +326,7 @@ namespace Tacetno433.Screens
             }
             else if (row == HireRow)
             {
-                if (hire != null) MusicianArt.PartBadge(sb, hire, x, y, 14f, Palette.Ink, Palette.Paper, a);
+                if (hire != null) MusicianArt.SeatBadge(sb, hire, x, y, 14f, Palette.Ink, Palette.Paper, a);
                 else
                 {
                     Gfx.Circle(sb, x, y - 12, 8, c);

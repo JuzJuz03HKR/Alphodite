@@ -172,7 +172,7 @@ namespace Tacetno433.Screens
                 if (glow > 0f) Gfx.DrawGlow(sb, cap.Center.X, cap.Center.Y, 40f, Palette.Highlight * (0.55f * glow));
                 Gfx.Capsule(sb, cap, glow > 0.3f ? Palette.Paper : Palette.Stage);
                 Gfx.CapsuleOutline(sb, cap, Palette.Paper, 1f);
-                MusicianArt.PartBadge(sb, row, side, cap.Center.X, cap.Center.Y - 4, 8f, Palette.Paper, Palette.Ink, 1f);
+                MusicianArt.SeatBadge(sb, row, side, cap.Center.X, cap.Center.Y - 4, 8f, Palette.Paper, Palette.Ink, 1f);
                 Gfx.TextSpacedCentered(sb, Game.Font, seatsNames[i], cap.Center.X, cap.Bottom + 3, Palette.PaperDim, TextSize.Tiny * 0.85f, 1f);
                 if (cued)
                     Gfx.TextSpacedCentered(sb, Game.Font, CueBonusWord, cap.Right + 16, cap.Y - 6, Palette.Highlight * seatsCueFlash, TextSize.Tiny, 1f);

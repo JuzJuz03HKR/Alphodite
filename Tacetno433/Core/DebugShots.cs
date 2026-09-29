@@ -129,6 +129,8 @@ namespace Tacetno433.Core
         //The report shows how often each habit wins, so BattleRules can be tuned on evidence.
         //Round 12 : there is no plan. A habit is how the player sizes strokes (see Habit), and
         //"READS THE MARKS" answers p small, mf middle and f big, which is what the game teaches.
+        //Round 15 : the size must match the note (the wrong size plays at half), and the whole band
+        //plays every note, so the fixed-size habits show what not reading costs.
         private static void Simulate(TacetGame game)
         {
             string report = "TACET BALANCE CHECK  (floor 1, 300 fights per line)\r\n"
@@ -143,7 +145,7 @@ namespace Tacetno433.Core
                 new Habit("BIG STROKE EVERY NOTE, PERFECT",    2, true, 100, 0, 0),
                 new Habit("READS THE MARKS, PERFECT",         -1, true, 100, 0, 0),
                 new Habit("READS, PERFECT, NEVER RESTS",      -1, false, 100, 0, 0),
-                new Habit("READS AND SAVES, PERFECT",         -1, true, 100, 0, 0) { Saver = true },
+                new Habit("NEWCOMER (20% PERFECT, 25% MISS)", -1, true, 20, 55, 20) { TempoSkill = 0.8f, NoSignature = true },
             };
             Random random = new Random(7);
 
@@ -205,14 +207,20 @@ namespace Tacetno433.Core
         //Habit : how a simulated player conducts (round 12).
         //   Size     -1 reads the marks (p small, mf middle, f big), 0 1 2 always that size, -2 never strokes
         //   Rest     lets TACET's silent beats pass to breathe, instead of stroking them too
-        //   Perfect, Good   percent of strokes of each grade, the rest are MISSes
-        //   WrongSize       percent of strokes that come out a size off (a shaky hand)
-        //   Saver    answers mf small once breath runs low (under 30 percent)
+        //   Perfect, Good   percent of strokes of each grade at 112 BPM, the rest are MISSes
+        //   WrongSize       percent of strokes that come out a size off (a shaky hand), half as many
+        //                   in the gentle fights where TACET only plays f and p
+        //   TempoSkill      (round 15) how much the tempo matters to this player : for every BPM
+        //                   under 112 this many percent of their strokes move from MISS and GOOD
+        //                   towards PERFECT, and the other way above it. An assumption, not a
+        //                   measurement : nobody has played the tempo curve with a real mouse yet.
+        //   NoSignature     never presses SPACE (a player who has not found it yet)
         private class Habit
         {
             public string Name;
             public int Size, Perfect, Good, WrongSize;
-            public bool Rest, Saver;
+            public bool Rest, NoSignature;
+            public float TempoSkill;
 
             public Habit(string name, int size, bool rest, int perfect, int good, int wrongSize)
             {
@@ -230,9 +238,10 @@ namespace Tacetno433.Core
         {
             new Habit("GOOD PLAY, MIDDLE STROKE EVERY BEAT",           1, false, 0, 100, 0),
             new Habit("SKILLED  (READS THE MARKS, PERFECT)",           -1, true, 100, 0, 0),
-            new Habit("AVERAGE  (READS, 40% PERFECT, 10% MISS)",      -1, true, 40, 50, 15),
-            new Habit("STRONG   (READS, 70% PERFECT, 5% MISS)",        -1, true, 70, 25, 5),
+            new Habit("AVERAGE  (READS, 40% PERFECT, 10% MISS)",      -1, true, 40, 50, 15) { TempoSkill = 0.5f },
+            new Habit("STRONG   (READS, 70% PERFECT, 5% MISS)",        -1, true, 70, 25, 5) { TempoSkill = 0.3f },
             new Habit("BIG EVERY NOTE (70% PERFECT, 5% MISS)",         2, true, 70, 25, 0),
+            new Habit("NEWCOMER (READS, 20% PERFECT, 25% MISS)",       -1, true, 20, 55, 20) { TempoSkill = 0.8f, NoSignature = true },
         };
 
         //Read Mark : the stroke the game teaches for a note. p small, mf middle, f big. A hidden
@@ -259,21 +268,24 @@ namespace Tacetno433.Core
             }
 
             //SIGNATURE : let it loose on the next beat with a note
-            if (SimSignature && b.SignatureReady && !b.SignatureOn && !b.IsSilent(beat))
+            if (SimSignature && !habit.NoSignature && b.SignatureReady && !b.SignatureOn && !b.IsSilent(beat))
             {
                 b.StartSignature();
                 simSignatures++;
             }
 
-            //Grade
+            //Grade : the habit's own shares at 112 BPM, moved by the tempo (TempoSkill)
+            float shift = (112 - b.Tempo) * habit.TempoSkill;
+            float perfect = Math.Min(100f, Math.Max(0f, habit.Perfect + shift));
+            float miss = Math.Min(100f, Math.Max(0f, 100 - habit.Perfect - habit.Good - shift * 0.5f));
             int roll = random.Next(100);
-            Grade grade = roll < habit.Perfect ? Grade.Perfect : (roll < habit.Perfect + habit.Good ? Grade.Good : Grade.Miss);
+            Grade grade = roll < perfect ? Grade.Perfect : (roll < 100 - miss ? Grade.Good : Grade.Miss);
             if (!b.IsTremolo(beat)) grade = b.SignatureGrade(grade);                         // CLOCKWORK
 
             //Size : read, or fixed, sometimes a size off
             Choice choice = habit.Size == 0 ? Choice.Ease : (habit.Size == 1 ? Choice.Normal : (habit.Size == 2 ? Choice.Boost : ReadMark(b, beat)));
-            if (habit.Saver && run.Stamina < run.MaxStamina * 0.3f && choice == Choice.Normal) choice = Choice.Ease;
-            if (random.Next(100) < habit.WrongSize) choice = choice == Choice.Normal ? (random.Next(2) == 0 ? Choice.Ease : Choice.Boost) : Choice.Normal;
+            int wrong = b.Gentle ? habit.WrongSize / 2 : habit.WrongSize;
+            if (random.Next(100) < wrong) choice = choice == Choice.Normal ? (random.Next(2) == 0 ? Choice.Ease : Choice.Boost) : Choice.Normal;
 
             //Silent Beat : a reader lets it pass, a fixed habit swings its usual size anyway (a small
             //one is still a rest there, SOFT REST). A reader who never rests takes the free hit
@@ -552,10 +564,10 @@ namespace Tacetno433.Core
                     PlayHabitBeat(run, b, beat, runHabits[habit], random);
                 }
 
-                //Finale : steady players land it, average ones about half the time
+                //Finale : steady players land it, average ones and newcomers about half the time
                 if (b.FinaleOffered)
                 {
-                    if (habit != 2 || random.Next(2) == 0) b.WinFinale();
+                    if ((habit != 2 && habit != 5) || random.Next(2) == 0) b.WinFinale();
                     else b.FailFinale();
                 }
                 if (!b.Finished) b.EndRound();

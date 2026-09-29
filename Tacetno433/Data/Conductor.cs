@@ -12,7 +12,7 @@ namespace Tacetno433.Data
         LockedTempo,     // THE METRONOME   the band plays the note's written mark, whatever the stroke size
         RunawayFire,     // THE INFERNO     a miss is not weaker and powers up the next beat
         CloserLouder,    // THE UNHEARING   the less breath the band has left, the harder it hits
-        EveryRoadHome,   // THE FOLK LEADER mixed cultures on a beat hit harder, one seat fewer
+        EveryRoadHome,   // THE FOLK LEADER mixed cultures on a beat hit harder
         ByTheBook        // THE APPRENTICE  GOOD beats fill the signature's recipe too, not only PERFECT ones
     }
 
@@ -102,8 +102,8 @@ namespace Tacetno433.Data
                              + "not only PERFECT ones, so the signature comes round sooner. The class to learn the game on.",
                 SignatureMark = "Semplice",
                 SignatureName = "ABSOLUTE PITCH",
-                SignatureText = "For the next 4 strokes, every stroke on time is IN TUNE, whatever its size "
-                              + "and whatever the note says. Swing big to hit hard, or small to save breath.",
+                SignatureText = "For the next 4 strokes, every stroke on time is the right size and IN TUNE, "
+                              + "whatever the note says. Just keep the beat.",
                 SignatureCall = "* ABSOLUTE PITCH! Four strokes, any size on time is IN TUNE.",
                 Recipe = new int[] { 2, 2, 2 },     // a little of everything. Round 13 : every recipe about twice as long, the
                                                     // signature lasts 4 strokes now (BattleRules.SignatureStrokes)
@@ -123,8 +123,8 @@ namespace Tacetno433.Data
                 Story = "He wrote music like clockwork, and the clock never asked permission. "
                       + "Under his baton the ensemble never tires, because it never hurries.",
                 MechanicName = "LOCKED TEMPO",
-                MechanicText = "The band plays the mark written on TACET's note, p, mf or f, whatever size "
-                             + "you swing. You only keep time. Every stroke costs a little more, and a false mark fools him too.",
+                MechanicText = "His band reads the marks for him : any size you swing is the right size. "
+                             + "You only keep time. Only a stroke that really matches TACET's mark is IN TUNE.",
                 SignatureMark = "Tempo giusto",
                 SignatureName = "CLOCKWORK",
                 SignatureText = "For the next 4 strokes, every stroke that lands on time is PERFECT, even a GOOD one. "
@@ -132,11 +132,14 @@ namespace Tacetno433.Data
                 SignatureCall = "* CLOCKWORK! Four strokes, every stroke on time is PERFECT.",
                 Recipe = new int[] { 3, 0, 3 },     // the rhythm section
                 Move = SignatureMove.Clockwork,
-                Stamina = 10, PushPower = 6, Perk = ConductorPerk.LockedTempo,       // round 10 : 9 -> 7, no cheaper notes. Round 11a : 9,
+                Stamina = 5, PushPower = 6, Perk = ConductorPerk.LockedTempo,        // round 15 : 10 -> 5, his size is never wrong and playing
+                                                                                     // is free, at 10 he won 91 to 94 percent (the others 80 to 89).
+                                                                                     // Round 10 : 9 -> 7, no cheaper notes. Round 11a : 9,
                                                                                      // round 11b : 10 and push 6. Bigger rests and EASE help
                                                                                      // everyone but him (he cannot EASE). Round 12 : he pays
                                                                                      // for the whole band on every stroke. Round 12.2 : the
-                                                                                     // band plays the written mark, see BattleRules.LockedTempoCost
+                                                                                     // band plays the written mark, and paid 1.33 for it.
+                                                                                     // Round 15 : playing is free, his size is never wrong
                 ThemeColor = Palette.ToneC,
                 Unlocked = true
             },
@@ -159,7 +162,8 @@ namespace Tacetno433.Data
                               + "and may push the line a quarter further than a note usually can.",
                 SignatureCall = "* SET ALIGHT! Four strokes, harder and further than ever.",
                 Recipe = new int[] { 2, 0, 3 },     // drums above all
-                Stamina = 3, PushPower = 8, Perk = ConductorPerk.RunawayFire, Move = SignatureMove.SetAlight,   // round 13 : push 9 -> 8,
+                Stamina = 3, PushPower = 7, Perk = ConductorPerk.RunawayFire, Move = SignatureMove.SetAlight,   // round 15 : push 8 -> 7 (88 to 90 percent).
+                                                                                     // Round 13 : push 9 -> 8,
                                                                                      // SET ALIGHT pushes past the cap, and he won the most runs
                                                                                      // (77 percent, the others 70 to 74). Stamina 2 : 65 to 68
                 ThemeColor = Palette.ToneA,
@@ -204,12 +208,12 @@ namespace Tacetno433.Data
                       + "and found out they all fit together.",
                 MechanicName = "EVERY ROAD HOME",
                 MechanicText = "Players from different cultures on the same beat hit harder together, "
-                             + "5 percent for every culture after the first, but you begin the run with one seat fewer.",
+                             + "5 percent for every culture after the first.",
                 SignatureMark = "Alla rustica",
                 SignatureName = "VILLAGE BAND",
-                SignatureText = "For the next 4 strokes, any stroke brings the whole band in, every culture at once, "
-                              + "and the band pays only what a middle stroke costs.",
-                SignatureCall = "* VILLAGE BAND! Four strokes, the whole band for the price of a middle one.",
+                SignatureText = "For the next 4 strokes the whole village sings along : every stroke on time "
+                              + "gives the band 3 breath back.",
+                SignatureCall = "* VILLAGE BAND! Four strokes, every stroke on time gives breath back.",
                 Recipe = new int[] { 3, 3, 3 },     // the pipes of every road. Round 14 : 2 3 2 -> 3 3 3, VILLAGE BAND brings the
                                                     // heavy percussion in at a middle stroke's price and came too often
                 Move = SignatureMove.VillageBand,

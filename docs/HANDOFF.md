@@ -1,6 +1,6 @@
 # TACET 4'33 — เอกสารส่งต่อให้ฝ่ายโค้ด
 
-อัปเดต : 28 กันยายน 2026 (หลังรอบ 14) · repo `github.com/JuzJuz03HKR/Alphodite` branch **`Alpha5`** (รอบ 14 · `Alpha4` = รอบ 12–13 · `Alpha3` = รอบ 9–11b · รอบ 6–8 อยู่ `Alpha2`) · กติกาสำหรับ Claude อยู่ `CLAUDE.md` · อ่านคู่กับ [`PROJECT_STATUS.md`](PROJECT_STATUS.md) (รายละเอียดทุกระบบ)
+อัปเดต : 29 กันยายน 2026 (รอบ 15) · repo `github.com/JuzJuz03HKR/Alphodite` branch **`Alpha6`** (รอบ 15 · `Alpha5` = รอบ 14 · `Alpha4` = รอบ 12–13 · `Alpha3` = รอบ 9–11b · รอบ 6–8 อยู่ `Alpha2`) · กติกาสำหรับ Claude อยู่ `CLAUDE.md` · อ่านคู่กับ [`PROJECT_STATUS.md`](PROJECT_STATUS.md) (รายละเอียดทุกระบบ)
 และ [`ASSET_LIST.md`](ASSET_LIST.md) (ไฟล์ภาพ/เสียงที่ต้องใส่)
 
 ---
@@ -47,6 +47,9 @@
   ดวลเล่น 3 รอบในหน้าเดียว (`DuelScreen.SetUpRound` · ป้ายบอกสิ่งที่เปลี่ยน · การ์ดกลไกศัตรูครั้งแรก · ดีล DEVIL ในดวล) · หน้า THE BAND (`BandScreen`) เลือกใครขึ้นเวที ·
   ค่าตัวคูณแถวย้ายเข้าการ์ด · MUTE CHOIR ปิดตัวอักษร · REQUIEM สลับลูกศร · KLARA ×2 ใส่โน้ต p · ANNA / IRIS บนบีตลูกศรตัวเอง · ร้านบอกคนจ้าง · event THE EMPTY CHAIR ·
   SPARE STICKS ค่า −1 · จูน FOLK LEADER / UNHEARING / WHITE NOISE · เก่ง ~71–74% ทั่วไป ~8–9% (เท่ารอบ 13)
+- **รอบ 15 (29 ก.ย., `Alpha6`)** : **โน้ตบอกขนาดตวัด** (ผิดขนาดเหลือ 30%) · **ทั้งวงเล่นทุกโน้ต** (`BattleState.Plays`) · **ตวัดไม่เสียสตามิน่า** ลม = เลือด (เสียเมื่อ TACET ชนะบีต/MISS) ·
+  เส้นดันคงเดิม · ผังเวทีแบบวงจริง (สายหน้า เป่ากลาง ตีหลัง, ลูกศร = ฝั่งจริง) · ไม่มี COST · ไล่ระดับ BPM ตามชั้น + 2 ดวลแรกมีแค่ f/p + แรงศัตรูตามชั้น 0.85/1.45/2.45 ·
+  ทั่วไป ~21–24% เก่ง ~76–79% · Tutorial/HOW TO PLAY เขียนใหม่ในก้อน 2
 - **ยังไม่มีไฟล์ภาพและเสียงเลย** ทุกช่องเป็นกรอบว่าง / เงียบ ใส่ไฟล์ตามชื่อแล้วขึ้นเองโดยไม่ต้องแก้โค้ด
 - เพื่อนต่างกลุ่มเล่นระบบรอบ 5 แล้ว (ง่ายเกิน) · **เพลย์เทส 25 ก.ย.** 5 คน เล่น build รอบ 8 : ชอบการตวัด · เข้าใจยาก · ง่ายไป (แก้แล้วรอบ 9) ·
   **รอบ 9–14 ยังไม่มีคนเล่นจริง** ตัวเลขได้จากการจำลอง
@@ -92,16 +95,17 @@ Tacetno433/
 | อยากแก้อะไร | ไปที่ |
 |---|---|
 | ตัวเลขบาลานซ์ทุกตัว | `Data/BattleRules.cs` |
-| **ใครเล่นเมื่อตวัดขนาดไหน (DYNAMICS)** | `BattleState.Joins` / `QuietestPart` / `SmallestStroke` / `RowsFor` · พลัง `PowerFor` · สตามิน่า `CostFor` · ค้น `DYNAMICS` |
-| **PART ของนักดนตรี (รอบ 14)** | ตัวอักษรตามตระกูล `StageLayout.Rows` / `PartOf` · ลูกศร `Musician.Cue` · ที่นั่งประจำ `StageLayout.HomeSeat` · ป้าย `MusicianArt.PartBadge` (การ์ด · หน้ารับคน · เหนือหัว · กล่องวง) |
+| **โน้ตบอกขนาด / ทั้งวงเล่น (รอบ 15)** | ใครเล่น `BattleState.Plays` (ทุกคนบนเวที) · ขนาดที่โน้ตขอ `AsksSize` / `SizeFree` / `SizeRight` · ผิดขนาด `BattleRules.WrongSizePower` · พลัง `PowerFor` · ค้น `THE NOTE SAYS` · ป้าย TOO BIG / TOO SMALL `DuelScreen.Baton.JudgeStroke` |
+| **ที่นั่งแบบวงจริง (รอบ 15)** | กลุ่มเครื่อง = แถว `StageLayout.Rows` / `SectionOf` (สายหน้า เป่ากลาง ตีหลัง) · ฝั่ง `Musician.Cue` · ที่นั่งประจำ `StageLayout.HomeSeat` · ป้าย `MusicianArt.SeatBadge` (การ์ด · หน้ารับคน · เหนือหัว · กล่องวง) |
+| **ไล่ระดับความยาก (รอบ 15)** | BPM `BattleRules.TempoByFloor` · ดวลแรกๆ แค่ f/p `GentleFights` / `BattleState.Gentle` · แรงศัตรูตามชั้น `FloorPower` · โน้ตสุดท้ายของรอบ `BattleState.PrepareRound` (Last Note) |
 | **ลูกศรที่ไม้ตวัดไป (CUE)** | `BattleRules.CuePower` `CueSide` · `BattleState.CueSideAt` / `IsCued` · ลูกศรของที่นั่ง `StageLayout.SeatSide` · ค้น `CUE` |
 | **IN TUNE / COUNTER** | `BattleState.Resolve` (ค้น `IN TUNE`) · `BattleRules.InTuneKeep` `CounterKeep` · ป้ายในดวล `DuelScreen.Hud.cs` `DrawJudge` |
 | **พัก (บีตเงียบไม่ตวัด)** | `DuelScreen.UpdateAnswer` (No Stroke) · `BattleState.IsSilent` / `SilentRecover` |
 | **หน้า THE BAND (รอบ 14, แทนหน้าเวที)** : ใครขึ้นเวที/นั่งพัก · แผนผัง PART 3×3 | `Screens/BandScreen.cs` · ใครอยู่บนเวที `Data/Formation.cs` (`AutoSeat` `Bench` `Swap` `Tidy`) · เปิดจาก `RouteScreen` (TAB) |
 | **ระหว่างรอบในดวล (รอบ 14)** : ป้ายบอกสิ่งที่เปลี่ยน · การ์ดกลไกศัตรูครั้งแรก · ดีล DEVIL | `DuelScreen.SetUpRound` / `LeaveRound` / `UpdateBargain` · วาด `DuelScreen.Hud.cs` `DrawRoundNote` `DrawBargain` |
 | คนสว่างตามขนาดตอนตวัด · ป้าย PART เหนือหัว (คนที่ถูกชี้ใหญ่ขึ้น) · กากบาท SILENCED | `DuelScreen.Stage.cs` (`DrawMusicianGlow` `DrawMusicianMarks`) · `DuelScreen.LiveSize` |
-| ตัวอักษรที่ถูกปิดเสียง (MUTE CHOIR) · ลูกศรสลับ (REQUIEM) | `BattleState.SilencedPart` / `CanPlay` / `PickSilencedPart` · `Mirrored` (ค้น `SILENT MOUTHS` `UNFINISHED`) |
-| ร้านบอกคนที่จะจ้าง · event THE EMPTY CHAIR | `ShopScreen` (`hire`) · `RunState.Recruit` / `MissingPartPlayer` · `Reward.RecruitPart` |
+| กลุ่มเครื่องที่ถูกปิดเสียง (MUTE CHOIR) · ฝั่งสลับ (REQUIEM) | `BattleState.SilencedSection` / `CanPlay` / `PickSilencedSection` · `Mirrored` (ค้น `SILENT MOUTHS` `UNFINISHED`) |
+| ร้านบอกคนที่จะจ้าง · event THE EMPTY CHAIR | `ShopScreen` (`hire`) · `RunState.Recruit` / `MissingSectionPlayer` · `Reward.RecruitPart` |
 | นักดนตรี / ความสามารถ | `Data/Musician.cs` (+ ผลของความสามารถใน `Battle/BattleState.cs` ค้นชื่อความสามารถ เช่น `MOMENTUM`) |
 | ศัตรู / กลไก / ชั้นที่เริ่มใช้กลไก | `Data/Enemy.cs` (+ ค้นชื่อกลไกใน `BattleState.cs`, `DuelScreen*.cs`) |
 | คอนดักเตอร์ / สูตร SIGNATURE | `Data/Conductor.cs` |
@@ -156,6 +160,7 @@ Tacetno433/
 ## 4. งานที่เหลือ (เรียงตามความสำคัญ)
 
 ### ต้องทำก่อน (P1)
+000000. **เล่นทดสอบรอบ 15** (`Alpha6`) : ดวลแรกช้า/อ่านง่ายพอไหม · ตวัดตามขนาดโน้ต · ตวัดไม่เสียลม · ความยากชั้น 2–3 · หน้า THE BAND แบบวงจริง · แล้วก้อน 2–4 ของวันนี้ (ดู `PROJECT_STATUS.md` หัวข้อ 0)
 00000. **เล่นทดสอบรอบ 14** : เข้าดวลตรง · ป้าย PART เหนือหัวอ่านทันไหม · ป้ายคั่นรอบ / การ์ดกลไก / ดีล DEVIL ขัดจังหวะไหม · หน้า THE BAND · ร้าน HIRE · THE EMPTY CHAIR · แคปภาพ `docs/screenshots/` ใหม่บน Windows
 0000. **เล่นทดสอบรอบ 13** : คอนดักเตอร์ครบ 5 คน กด Space ทุกครั้งที่สูตรเต็ม · แต่ละคนเล่นต่างกันจริงไหม · หน้าโปรไฟล์ / ลูกศร · TACET ซัดแรงขึ้น 0.95 (ถ้ายากไป ถามผู้ใช้ก่อนลด)
 000. **เล่นทดสอบรอบ 12.2** : หน้าเลือกเส้นทางใหม่ · คอนดักเตอร์ครบ 5 คน (METRONOME แบบใหม่)
