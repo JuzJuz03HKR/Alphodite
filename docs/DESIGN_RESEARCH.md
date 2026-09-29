@@ -41,6 +41,9 @@
 
 ## 2. เกมที่ศึกษา
 
+> **ลิสต์เกมที่ผู้ใช้สั่งให้ศึกษา (29 ก.ย.) และสถานะแต่ละเกม** (ศึกษาแล้ว / บางส่วน / ยังไม่เริ่ม) อยู่ [`USER_BRIEFS.md`](USER_BRIEFS.md) หัวข้อ 4 ·
+> ยังไม่ได้ศึกษา : DJMAX RESPECT V · BlazBlue Entropy Effect · Alina of the Arena · UI/transition ของ Stella Sora และ Project Sekai · **takt op. Symphony สำคัญเรื่องธีม** (ผู้ใช้ย้ำ 29 ก.ย.)
+
 ### 2.1 เกมจังหวะ
 
 **Muse Dash** (PeroPeroGames) — เกมจังหวะ 2 เลน ศัตรูวิ่งมาจากขวา ตีตามเพลง

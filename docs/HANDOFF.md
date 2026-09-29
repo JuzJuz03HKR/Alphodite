@@ -1,7 +1,7 @@
 # TACET 4'33 — เอกสารส่งต่อให้ฝ่ายโค้ด
 
 อัปเดต : 29 กันยายน 2026 (รอบ 15) · repo `github.com/JuzJuz03HKR/Alphodite` branch **`Alpha6`** (รอบ 15 · `Alpha5` = รอบ 14 · `Alpha4` = รอบ 12–13 · `Alpha3` = รอบ 9–11b · รอบ 6–8 อยู่ `Alpha2`) · กติกาสำหรับ Claude อยู่ `CLAUDE.md` · อ่านคู่กับ [`PROJECT_STATUS.md`](PROJECT_STATUS.md) (รายละเอียดทุกระบบ)
-และ [`ASSET_LIST.md`](ASSET_LIST.md) (ไฟล์ภาพ/เสียงที่ต้องใส่)
+และ [`ASSET_LIST.md`](ASSET_LIST.md) (ไฟล์ภาพ/เสียงที่ต้องใส่) · สิ่งที่ผู้ใช้สั่งคำต่อคำ [`USER_BRIEFS.md`](USER_BRIEFS.md) · prompt หลัง compact [`RESUME_PROMPT.md`](RESUME_PROMPT.md)
 
 ---
 
@@ -128,7 +128,7 @@ Tacetno433/
 | หลุมจุดตี · เลนสว่าง · ขอบเลนเต้น | `DuelScreen.Stage.cs` `DrawLane` (ค้น `Hit Well`, `LANE FLASH`) |
 | EARLY / LATE | `DuelScreen.Baton.cs` `ShowTiming` · วาดใน `DuelScreen.Hud.cs` `DrawJudge` |
 | บรรทัดห้าเส้นหลังวง | `Core/StageStaff.cs` · ความแรงคือ `staffEnergy` ใน `DuelScreen.cs` |
-| ตัวเปลี่ยนหน้า | `Core/ScreenManager.cs` เลือก : ม่าน `Core/Curtain.cs` เมื่อหน้านั้น `UsesCurtain` (หน้าเลือกคอนดักเตอร์) · คลื่น `Core/SilenceWave.cs` เมื่อ `EntersWithWave` (ดวล · Curtain Call) · อื่นๆ แถบดำเฉียง `Core/SlantWipe.cs` (รอบ 15) · ความเร็ว `FadeSpeed` |
+| ตัวเปลี่ยนหน้า | `Core/ScreenManager.cs` เลือก : ม่าน `Core/Curtain.cs` เมื่อหน้านั้น `UsesCurtain` (หน้าเลือกคอนดักเตอร์) · คลื่น `Core/SilenceWave.cs` เมื่อ `EntersWithWave` (ดวล · Curtain Call) · อื่นๆ แถบดำเฉียง `Core/SlantWipe.cs` (รอบ 15) · ความเร็ว `FadeSpeed` (2.2 = ครึ่งละ ~0.45 วิ) |
 | ไม้บาตอง / ไม้บรรทัดวัดขนาด (เขียน p / mf / f) | `Core/Baton.cs` (ใช้ทั้งดวลและ Tutorial) |
 | สัญลักษณ์โน้ต ลูกศร จุดตี วงแหวนจับเวลา | `Core/NoteGlyph.cs` (ใช้ทั้งดวลและ Tutorial) |
 | สตามิน่า : TACET ซัด / หมดลมแพ้ | `BattleState` (ค้น `TACET'S BLOW`, `COLLAPSE`, `CheckBreath`) · ตัวเลข `BattleRules.BlowPerPower` · ภาพ `DuelScreen.ShowBreath` · ขอบจอ `DuelScreen.Hud.cs` `DrawLowBreath` |
