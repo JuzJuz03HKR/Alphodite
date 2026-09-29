@@ -98,12 +98,10 @@ namespace Tacetno433.Data
                 Story = "The one Endchestra called by mistake. No gift, no legend, "
                       + "no story anybody wrote down. Only a stick, and a refusal to let the music stop.",
                 MechanicName = "BY THE BOOK",
-                MechanicText = "Learns from every beat that lands. GOOD beats fill the signature's recipe too, "
-                             + "not only PERFECT ones, so the signature comes round sooner. The class to learn the game on.",
+                MechanicText = "GOOD beats fill the signature too, so it comes sooner. The class to learn on.",
                 SignatureMark = "Semplice",
                 SignatureName = "ABSOLUTE PITCH",
-                SignatureText = "For the next 4 strokes, every stroke on time is the right size and IN TUNE, "
-                              + "whatever the note says. Just keep the beat.",
+                SignatureText = "4 strokes : any size on time is right and IN TUNE. Just keep the beat.",
                 SignatureCall = "* ABSOLUTE PITCH! Four strokes, any size on time is IN TUNE.",
                 Recipe = new int[] { 2, 2, 2 },     // a little of everything. Round 13 : every recipe about twice as long, the
                                                     // signature lasts 4 strokes now (BattleRules.SignatureStrokes)
@@ -123,12 +121,10 @@ namespace Tacetno433.Data
                 Story = "He wrote music like clockwork, and the clock never asked permission. "
                       + "Under his baton the ensemble never tires, because it never hurries.",
                 MechanicName = "LOCKED TEMPO",
-                MechanicText = "His band reads the marks for him : any size you swing is the right size. "
-                             + "You only keep time. Only a stroke that really matches TACET's mark is IN TUNE.",
+                MechanicText = "Any size you swing is the right size. You only keep time.",
                 SignatureMark = "Tempo giusto",
                 SignatureName = "CLOCKWORK",
-                SignatureText = "For the next 4 strokes, every stroke that lands on time is PERFECT, even a GOOD one. "
-                              + "The combo climbs, and the fire of FORTISSIMO comes sooner. A miss is still a miss.",
+                SignatureText = "4 strokes : every stroke on time is PERFECT, even a GOOD one.",
                 SignatureCall = "* CLOCKWORK! Four strokes, every stroke on time is PERFECT.",
                 Recipe = new int[] { 3, 0, 3 },     // the rhythm section
                 Move = SignatureMove.Clockwork,
@@ -154,12 +150,10 @@ namespace Tacetno433.Data
                 Story = "He asked for a thousand players and meant it. "
                       + "Where others hear a mistake, he hears the next bar getting bigger.",
                 MechanicName = "RUNAWAY FIRE",
-                MechanicText = "The hardest push in the game, and the least breath. A missed stroke loses no power, "
-                             + "and the beat after it hits 30 percent harder.",
+                MechanicText = "Hardest push, least breath. A miss loses no power, and the next beat hits 30 percent harder.",
                 SignatureMark = "Con fuoco",
                 SignatureName = "SET ALIGHT",
-                SignatureText = "For the next 4 strokes the band burns: every stroke hits 30 percent harder "
-                              + "and may push the line a quarter further than a note usually can.",
+                SignatureText = "4 strokes : 30 percent harder, and a quarter past the usual push limit.",
                 SignatureCall = "* SET ALIGHT! Four strokes, harder and further than ever.",
                 Recipe = new int[] { 2, 0, 3 },     // drums above all
                 Stamina = 3, PushPower = 7, Perk = ConductorPerk.RunawayFire, Move = SignatureMove.SetAlight,   // round 15 : push 8 -> 7 (88 to 90 percent).
@@ -180,12 +174,10 @@ namespace Tacetno433.Data
                 Story = "Silence took his ears first and he kept writing anyway. "
                       + "He is the only conductor who is not afraid of TACET getting closer.",
                 MechanicName = "THE CLOSER THE LOUDER",
-                MechanicText = "You start weak. Once the band is down to half its breath it hits harder the lower it goes, "
-                             + "up to 25 percent harder on its very last breath.",
+                MechanicText = "Below half breath, the lower it goes the harder the band hits, up to 25 percent.",
                 SignatureMark = "Senza paura",
                 SignatureName = "DEAF EARS",
-                SignatureText = "For the next 4 strokes TACET's blows take no breath at all. "
-                              + "Let the band run low to hit hard, then stop listening.",
+                SignatureText = "4 strokes : TACET's blows take no breath.",
                 SignatureCall = "* DEAF EARS! Four strokes, TACET's blows take no breath.",
                 Recipe = new int[] { 3, 3, 0 },     // the strings carry it
                 Stamina = 5, PushPower = 3, Perk = ConductorPerk.CloserLouder, Move = SignatureMove.DeafEars,
@@ -207,12 +199,10 @@ namespace Tacetno433.Data
                 Story = "He collected songs nobody had bothered to write down, "
                       + "and found out they all fit together.",
                 MechanicName = "EVERY ROAD HOME",
-                MechanicText = "Players from different cultures on the same beat hit harder together, "
-                             + "5 percent for every culture after the first.",
+                MechanicText = "Players from different cultures hit harder together, 5 percent per extra culture.",
                 SignatureMark = "Alla rustica",
                 SignatureName = "VILLAGE BAND",
-                SignatureText = "For the next 4 strokes the whole village sings along : every stroke on time "
-                              + "gives the band 3 breath back.",
+                SignatureText = "4 strokes : every stroke on time gives 3 breath back.",
                 SignatureCall = "* VILLAGE BAND! Four strokes, every stroke on time gives breath back.",
                 Recipe = new int[] { 3, 3, 3 },     // the pipes of every road. Round 14 : 2 3 2 -> 3 3 3, VILLAGE BAND brings the
                                                     // heavy percussion in at a middle stroke's price and came too often

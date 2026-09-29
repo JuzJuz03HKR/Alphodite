@@ -60,48 +60,44 @@ namespace Tacetno433.Screens
         private static Lesson[] lessons =
         {
             new Lesson { Kind = Kind.Hold, Title = "RAISE THE BATON", Need = 1,
-                Body = "The mouse is your baton. Hold the LEFT BUTTON down to raise it.",
+                Body = "The mouse is your baton. Hold the LEFT BUTTON.",
                 Goal = "Hold the left button down." },
 
             new Lesson { Kind = Kind.Pattern, Title = "THE 4/4 SHAPE", Need = 4,
-                Body = "Keep holding, swing, then stop. Every bar goes DOWN, LEFT, RIGHT, UP, like a real conductor.",
+                Body = "Hold, swing, stop. Every bar : DOWN, LEFT, RIGHT, UP.",
                 Goal = "Follow the arrow once round." },
 
             new Lesson { Kind = Kind.Size, Title = "SMALL, MIDDLE, BIG", Need = 3,
-                Body = "How far you swing is how loud the band plays : short p, middle mf, long f. "
-                     + "The ruler shows how far you have come.",
+                Body = "Short swing p, middle mf, long f.",
                 Goal = "Swing down : short, then middle, then long." },
 
             new Lesson { Kind = Kind.Timing, Title = "ON THE BEAT", Need = 4, Bpm = 70,
-                Body = "Now the band keeps time. Stop each stroke just as the ring closes.",
+                Body = "Stop each stroke as the ring closes.",
                 Goal = "Four strokes GOOD or better." },
 
             new Lesson { Kind = Kind.Loudness, Title = "READ THE NOTE", Need = 6, Bpm = 76,
-                Body = "TACET's notes slide in. Swing where the arrow points, as far as the letter says : "
-                     + "f BIG, mf MIDDLE, p SMALL. Your whole band plays every note you hit.",
+                Body = "Swing where the arrow points, as far as the letter says : f BIG, mf MIDDLE, p SMALL.",
                 Goal = "Six notes on time, the right size." },
 
             new Lesson { Kind = Kind.Breath, Title = "BREATH", Need = 8, Bpm = BattleRules.TempoByFloor[0][0],
-                Body = "The bar at the top is the band's breath, its life. A note TACET wins takes some away. "
-                     + "At zero the fight is lost. Where TACET is silent, let the beat pass to breathe.",
+                Body = "The top bar is your band's life. Lose a note, lose breath. Let silent beats pass to breathe.",
                 Goal = "Play eight notes. Watch the bar." },
 
             new Lesson { Kind = Kind.Finish, Title = "READY", Need = 0,
-                Body = "That is the whole baton. Everything else is explained in the run, the first time "
-                     + "you meet it. TAB for extra practice : rolls, held notes and sparks.",
+                Body = "That is the whole baton. New things are explained when you meet them. TAB : extra practice.",
                 Goal = "Start a run whenever you are ready." },
 
             //Extra Practice : after READY, only for players who ask for it (TAB)
             new Lesson { Kind = Kind.Roll, Title = "TREMOLO", Need = 1, Bpm = 76,
-                Body = "A zigzag bar is a roll : elites and bosses end their rounds with one. Shake the baton as fast as you can.",
-                Goal = "Six shakes in one roll." },
+                Body = "Zigzag bar = roll. Shake the baton as fast as you can.",
+                Goal = "Five shakes in one roll." },
 
             new Lesson { Kind = Kind.Fermata, Title = "FERMATA", Need = 1, Bpm = 76,
-                Body = "A note under an arch is held, from the second floor. Stroke it, then keep the baton STILL.",
+                Body = "Note under an arch = hold. Stroke it, then keep the baton STILL.",
                 Goal = "Hold one fermata to the end." },
 
             new Lesson { Kind = Kind.Spark, Title = "THE SPARK", Need = 2, Bpm = 70,
-                Body = "From the second floor a note can come tied to a spark. Flick once more, any way, half a beat later.",
+                Body = "Note tied to a spark : flick once more, any way, half a beat later.",
                 Goal = "Land two sparks." },
 
             new Lesson { Kind = Kind.Finish, Title = "ALL DONE", Need = 0,

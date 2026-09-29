@@ -35,14 +35,12 @@ namespace Tacetno433.Screens
         private static string[] bodies =
         {
             "Hold the LEFT MOUSE BUTTON and swing. That is the whole game. "
-            + "Keys only help : SPACE for your conductor's signature, TAB for your band on the route, ESC to pause.",
+            + "SPACE : signature. TAB : your band. ESC : pause.",
 
-            "Every note tells you three things. The ARROW : which way to swing. The LETTER : how far, "
-            + "p small, mf middle, f big. The RING : stop as it closes. Your whole band plays every note you hit.",
+            "ARROW : which way. LETTER : how far (p small, mf middle, f big). RING : stop as it closes.",
 
-            "Every note you win pushes the line toward TACET. Push it all the way, or be ahead after three rounds. "
-            + "Notes TACET wins cost breath, and at zero the fight is lost. Where TACET is silent, let the beat pass to breathe. "
-            + "Win three floors to win the run."
+            "Win a note, push the line. Lose a note, lose breath. "
+            + "Push the line all the way to win. Let silent beats pass to breathe."
         };
 
         //Guide Layout

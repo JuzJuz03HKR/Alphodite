@@ -47,8 +47,8 @@ namespace Tacetno433.Screens
 
         //Notes : what the detail box says when the mouse is over nothing
         private const string NoteTitle = "A REAL ORCHESTRA, SEEN FROM THE PODIUM";
-        private const string NoteBand = "Everybody on stage plays every note you hit. Click a musician to move them on or off the stage.";
-        private const string NoteArrow = "ARROW : when the baton points their way, they hit 50 percent harder (CUE).";
+        private const string NoteBand = "Click a musician : on stage or on the bench. Everyone on stage plays every note.";
+        private const string NoteArrow = "ARROW : swing their way, they hit 50 percent harder.";
         private static string noteSection = "";        // SECTION, made once from BattleRules
 
         //Band State
@@ -70,8 +70,8 @@ namespace Tacetno433.Screens
             run.Formation.Tidy(run.Seats);
             run.RefreshLabels();
 
-            noteSection = "SECTION : two players of one family on stage hit " + (int)(BattleRules.SectionTwo * 100f + 0.5f)
-                        + " percent harder, all three " + (int)(BattleRules.SectionThree * 100f + 0.5f) + " percent.";
+            noteSection = "SECTION : 2 of a family +" + (int)(BattleRules.SectionTwo * 100f + 0.5f)
+                        + "%, all 3 +" + (int)(BattleRules.SectionThree * 100f + 0.5f) + "%.";
 
             //Side Beats : which beats of a round the baton points each way (CUE)
             for (int side = 0; side < 3; side++)
