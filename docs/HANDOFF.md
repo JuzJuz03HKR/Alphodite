@@ -133,6 +133,7 @@ Tacetno433/
 | โหมด TUTORIAL | `Screens/TutorialScreen.cs` (รายการบท `lessons` แก้ข้อความ/ลำดับที่นี่ · บทพื้นฐานจบที่ READY บทหลังจากนั้นคือ EXTRAS, รอบ 15) · `TutorialScreen.Practice.cs` (จังหวะ โน้ต การตัดสิน) |
 | HOW TO PLAY · ไอคอนปุ่ม | `Screens/GuideScreen.cs` (3 หน้า ข้อความอยู่ `bodies`) · `Ui.KeyCap` / `Ui.MouseIcon` |
 | สอนตอนเจอครั้งแรกในดวล (TEACH NOTES) | `DuelScreen.TeachNote` / `SetUpRound` · เวลา `BattleRules.TeachNoteTime` |
+| SECTION (กลุ่มเครื่องครบ แรงขึ้น) | `BattleState.SectionBonus` / `SectionSize` · ตัวเลข `BattleRules.SectionTwo` `SectionThree` · ป้ายหน้า THE BAND `BandScreen.Rebuild` |
 | **เพลง (รอบ 15)** : ตัวโน้ตเพลง · ศัตรูเล่นตามเพลง · เสียงเครื่องดนตรี | เพลง `Data/SongChart.cs` (`SongList`) · ศัตรูชี้เพลง `Enemy.Song` · ท่อนต่อ pass `BattleState.SongPhrase` / `NoteAt` · วงเล่นโน้ต `DuelScreen.PlayBandNote` · ไฟล์เสียง/pitch `SoundBank.PlayInstrument` / `PitchFor` (ADVANCED) · ไฟล์ของใคร `Musician.Sample` / `SampleNote` |
 | เส้นแสง CUE ในดวล | `Screens/DuelScreen.Stage.cs` `DrawCueBeam` |
 | หน้าเลือกเส้นทาง (ถนน · ทางแยก · ป้าย · กล่องรายละเอียด) | `Screens/RouteScreen.cs` `DrawRoad` `DrawFork` `DrawTiles` `DrawDetail` · ตัวอักษรชนิดที่ `RouteNodeInfo.Marks` |

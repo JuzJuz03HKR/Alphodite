@@ -43,12 +43,13 @@ namespace Tacetno433.Screens
 
         //Chart Words
         private const string MissingShort = "NOBODY SITS HERE YET";
+        private string[] sectionWords = { "", "", "" };   // "SECTION  +10%" when two or three of a family play
 
         //Notes : what the detail box says when the mouse is over nothing
         private const string NoteTitle = "A REAL ORCHESTRA, SEEN FROM THE PODIUM";
-        private const string NoteBand = "Everybody on stage plays every note you hit. More players, more power.";
+        private const string NoteBand = "Everybody on stage plays every note you hit. Click a musician to move them on or off the stage.";
         private const string NoteArrow = "ARROW : when the baton points their way, they hit 50 percent harder (CUE).";
-        private const string NoteClick = "Click a musician to move them on or off the stage.";
+        private static string noteSection = "";        // SECTION, made once from BattleRules
 
         //Band State
         private Musician picked;               // a bench player waiting to swap in, or null
@@ -69,6 +70,9 @@ namespace Tacetno433.Screens
             run.Formation.Tidy(run.Seats);
             run.RefreshLabels();
 
+            noteSection = "SECTION : two players of one family on stage hit " + (int)(BattleRules.SectionTwo * 100f + 0.5f)
+                        + " percent harder, all three " + (int)(BattleRules.SectionThree * 100f + 0.5f) + " percent.";
+
             //Side Beats : which beats of a round the baton points each way (CUE)
             for (int side = 0; side < 3; side++)
             {
@@ -87,9 +91,14 @@ namespace Tacetno433.Screens
             run.RefreshLabels();
             for (int section = 0; section < 3; section++)
             {
-                sectionEmpty[section] = true;
+                int playing = 0;
                 for (int side = 0; side < 3; side++)
-                    if (run.Formation.Seated[section * 3 + side] != null) sectionEmpty[section] = false;
+                    if (run.Formation.Seated[section * 3 + side] != null) playing++;
+                sectionEmpty[section] = playing == 0;
+
+                //SECTION : the bonus this family plays with, when two or three of them are on stage
+                float bonus = Battle.BattleState.SectionBonusFor(playing);
+                sectionWords[section] = bonus > 0f ? "SECTION  +" + (int)(bonus * 100f + 0.5f) + "%" : "";
             }
         }
 
@@ -268,6 +277,8 @@ namespace Tacetno433.Screens
                 Gfx.TextSpaced(sb, Game.Font, row.Name, LabelX + 66, y - 22, Palette.Paper, TextSize.Label, 2f);
                 if (sectionEmpty[section])
                     Gfx.TextSpaced(sb, Game.Font, MissingShort, LabelX + 66, y, Palette.Accent, TextSize.Tiny, 1.5f);
+                else if (sectionWords[section].Length > 0)
+                    Gfx.TextSpaced(sb, Game.Font, sectionWords[section], LabelX + 66, y, Palette.Highlight, TextSize.Tiny, 2f);
             }
 
             //Chairs
@@ -395,7 +406,7 @@ namespace Tacetno433.Screens
                 Gfx.TextSpaced(sb, Game.Font, NoteTitle, x, y + 2, Palette.LineGrey, TextSize.Tiny, 2f);
                 Gfx.Text(sb, Game.StoryFont, NoteBand, x, y + 20, Palette.Paper, TextSize.StorySmall);
                 Gfx.Text(sb, Game.StoryFont, NoteArrow, x, y + 42, Palette.Paper, TextSize.StorySmall);
-                Gfx.Text(sb, Game.StoryFont, NoteClick, x, y + 64, Palette.PaperDim, TextSize.StorySmall);
+                Gfx.Text(sb, Game.StoryFont, noteSection, x, y + 64, Palette.PaperDim, TextSize.StorySmall);
             }
 
             //Message : short warnings, fading out

@@ -766,10 +766,37 @@ namespace Tacetno433.Battle
             if (m.Family == Family.Percussion && Run.Has(MotifId.SpareSticks) && LoudNote(beat))
                 power *= BattleRules.SpareSticksPower;
 
+            //SECTION : more of the same family playing together sounds fuller
+            power *= 1f + SectionBonus(m.Family);
+
             //CUE : the baton goes this player's way
             if (IsCued(seat, beat)) power *= BattleRules.CuePower;
 
             return power;
+        }
+
+        //SECTION (round 15) : players of one instrument family on stage together, like a real string
+        //section. Two of them playing each hit SectionTwo harder, all three SectionThree. A player
+        //SILENT MOUTHS has silenced does not count.
+        public float SectionBonus(Family family)
+        {
+            return SectionBonusFor(SectionSize(family));
+        }
+
+        public static float SectionBonusFor(int players)
+        {
+            if (players >= 3) return BattleRules.SectionThree;
+            if (players == 2) return BattleRules.SectionTwo;
+            return 0f;
+        }
+
+        //Section Size : how many of this family are on stage and able to play
+        public int SectionSize(Family family)
+        {
+            int count = 0;
+            for (int s = 0; s < StageLayout.SeatCount; s++)
+                if (Plays(s) && Run.Formation.Seated[s].Family == family) count++;
+            return count;
         }
 
         //Quiet Note : TACET really plays this beat soft (p), a note that is there and not hidden

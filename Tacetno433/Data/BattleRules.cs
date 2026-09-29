@@ -53,6 +53,11 @@
         //matches the way hit harder. Down and up share one arrow. Round 15 : the arrow is where
         //their instrument sits in a real orchestra (violins left, cellos right).
         public static float CuePower = 1.5f;
+
+        //SECTION (round 15) : players of one family on stage together (a real orchestra's string section),
+        //each hits this much harder with two of them, and with all three
+        public static float SectionTwo = 0.10f;
+        public static float SectionThree = 0.25f;
         public static int[] CueSide = { 1, 0, 2, 1 };      // beat of the bar -> arrow : 0 left, 1 down and up, 2 right
 
         //Rest : a beat where TACET is silent and the baton lets it pass gives stamina back.
