@@ -4,7 +4,7 @@
 ปรับจากไฟล์ `TACET_Prototype1_Slides.md` (26 ก.ย.) ให้ตรงเกมตอนนี้ (รอบ 15, branch `Alpha6`) และเรียงตามหัวข้อให้คะแนน
 ข้อมูลมาจากโค้ดเกม เอกสารใน `docs/` และไฟล์ Excel เพลย์เทส 25 ก.ย. · ช่องที่ไม่มีข้อมูลเขียนว่า **(เว้นไว้)** · ถ้ารอบนี้ชื่อ Prototype 2 เปลี่ยนหัวสไลด์ได้เลย
 
-**ภาพประกอบที่ทำให้แล้ว :** `docs/diagrams/core_game_loop.png` · `docs/diagrams/gameplay_loop.png` (3200 × 1800 ใส่สไลด์ 16:9 ได้เต็มหน้า)
+**ภาพประกอบที่ทำให้แล้ว (3200 × 1800 ใส่สไลด์ 16:9 ได้เต็มหน้า) :** แบบเข้าใจง่าย อ่านทีเดียวรู้เรื่อง `docs/diagrams/core_game_loop.png` · `docs/diagrams/gameplay_loop.png` · แบบละเอียด (ไว้ตอบคำถาม / ภาคผนวก) `core_game_loop_detail.png` · `gameplay_loop_detail.png`
 
 ---
 

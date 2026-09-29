@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="th"><head><meta charset="utf-8"><title>Gameplay Loop</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
-<!-- Gameplay Loop, round 15 (29 Sep 2026). Render : node docs/diagrams/render.js (1600x900 at 2x = 3200x1800 PNG) -->
+<!-- Gameplay Loop, the simple one for slides (round 15, 29 Sep 2026). The detailed one is gameplay_loop_detail.html.
+     Render : NODE_PATH=$(npm root -g) node docs/diagrams/render.js -->
 <style>
   html, body { margin: 0; padding: 0; background: #F3F0E8; }
   body { font-family: 'IBM Plex Sans Thai', sans-serif; color: #17171A; }
@@ -9,127 +10,81 @@
   .sheet svg { position: absolute; left: 0; top: 0; }
   .hd { position: absolute; left: 56px; top: 34px; }
   .hd h1 { margin: 0; font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 46px; letter-spacing: 6px; line-height: 1; }
-  .hd p { margin: 10px 0 0; font-size: 21px; color: #5C5C64; font-weight: 500; }
-  .legend { position: absolute; right: 56px; top: 36px; font-size: 16px; color: #5C5C64; text-align: right; line-height: 1.9; }
-  .legend i { display: inline-block; width: 38px; height: 0; border-top: 4px solid; vertical-align: middle; margin-left: 10px; }
-  .badge { position: absolute; right: 14px; bottom: -14px; background: #C8432B; color: #fff; font-size: 13px; font-weight: 700; padding: 3px 10px; border-radius: 10px; }
-  .card { position: absolute; box-sizing: border-box; background: #fff; border: 2.5px solid #17171A; border-radius: 16px;
-          padding: 12px 16px 10px 62px; box-shadow: 0 5px 0 rgba(23,23,26,0.10); }
-  .card.accent { border-color: #C8432B; border-width: 3px; }
-  .num { position: absolute; left: 14px; top: 14px; width: 36px; height: 36px; border-radius: 50%; background: #17171A; color: #F3F0E8;
-         font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 19px; text-align: center; line-height: 36px; }
-  .card.accent .num { background: #C8432B; }
-  .tag { font-family: 'IBM Plex Mono', monospace; font-weight: 500; font-size: 12.5px; letter-spacing: 1.5px; white-space: nowrap; color: #5C5C64; line-height: 1.2; }
-  .title { font-size: 23px; font-weight: 700; line-height: 1.3; margin-top: 1px; }
-  .line { font-size: 15px; line-height: 1.45; color: #3A3A40; white-space: nowrap; }
-  .line b { color: #17171A; }
-  .pill { position: absolute; transform: translate(-50%, -50%); background: #F3F0E8; border: 2px solid; border-radius: 999px;
-          padding: 3px 13px; font-size: 15px; font-weight: 600; white-space: nowrap; }
-  .center { position: absolute; text-align: center; }
-  .center .big { font-size: 28px; font-weight: 700; color: #17171A; line-height: 1.25; }
-  .center .mid { font-size: 17px; font-weight: 500; color: #3A3A40; line-height: 1.55; }
-  .box { position: absolute; box-sizing: border-box; border: 2.5px dashed #17171A; border-radius: 16px; padding: 12px 18px; background: rgba(255,255,255,0.55); }
-  .box.soft { border-style: solid; border-color: #B9B4A8; }
-  .box h3 { margin: 0 0 4px; font-size: 19px; font-weight: 700; }
-  .box .k { font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; letter-spacing: 2px; color: #5C5C64; }
-  .box ul { margin: 2px 0 4px; padding-left: 20px; font-size: 15px; line-height: 1.5; color: #3A3A40; } .box li { white-space: nowrap; }
-  .box .win { color: #2F6B3F; font-weight: 700; font-size: 17px; margin-top: 4px; }
-  .box .lose { color: #C8432B; font-weight: 700; font-size: 17px; margin-top: 4px; }
-  .box .note { font-size: 14px; color: #3A3A40; white-space: nowrap; }
+  .hd p { margin: 10px 0 0; font-size: 22px; color: #5C5C64; font-weight: 500; }
+  .node { position: absolute; box-sizing: border-box; width: 400px; height: 124px; transform: translate(-50%, -50%);
+          background: #fff; border: 3px solid #17171A; border-radius: 22px; box-shadow: 0 6px 0 rgba(23,23,26,0.10);
+          padding: 16px 18px 0 86px; }
+  .node.accent { border-color: #C8432B; border-width: 4px; }
+  .num { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); width: 50px; height: 50px; border-radius: 50%;
+         background: #17171A; color: #F3F0E8; font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 26px; text-align: center; line-height: 50px; }
+  .node.accent .num { background: #C8432B; }
+  .t { font-size: 32px; font-weight: 700; line-height: 1.25; white-space: nowrap; }
+  .s { font-size: 19px; color: #3A3A40; line-height: 1.35; white-space: nowrap; }
+  .mid { position: absolute; transform: translate(-50%, -50%); text-align: center; }
+  .mid .big { font-size: 46px; font-weight: 700; line-height: 1.1; }
+  .mid .small { font-size: 20px; color: #5C5C64; margin-top: 6px; }
+  .out { position: absolute; box-sizing: border-box; border: 3px dashed #17171A; border-radius: 22px; padding: 18px 24px; background: rgba(255,255,255,0.6); }
+  .out .k { font-family: 'IBM Plex Mono', monospace; font-size: 14px; letter-spacing: 2px; color: #5C5C64; }
+  .out .row { font-size: 24px; font-weight: 700; margin-top: 12px; white-space: nowrap; }
+  .out .row span { font-weight: 500; font-size: 18px; color: #3A3A40; display: block; }
+  .win { color: #2F6B3F; } .lose { color: #C8432B; }
+  .entry { position: absolute; box-sizing: border-box; border: 3px dashed #17171A; border-radius: 22px; padding: 16px 22px; background: rgba(255,255,255,0.6); }
+  .entry .t { font-size: 28px; }
   .foot { position: absolute; left: 56px; bottom: 20px; font-size: 13px; color: #8A867C; }
 </style></head>
 <body><div class="sheet">
 <svg id="arrows" width="1600" height="900" viewBox="0 0 1600 900">
-  <defs>
-    <marker id="headK" markerWidth="10" markerHeight="10" refX="7" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,5 L0,10 z" fill="#17171A"/></marker>
-    <marker id="headR" markerWidth="10" markerHeight="10" refX="7" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,5 L0,10 z" fill="#C8432B"/></marker>
-  </defs>
+  <defs><marker id="head" markerWidth="14" markerHeight="14" refX="9" refY="7" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L14,7 L0,14 z" fill="#17171A"/></marker></defs>
 </svg>
 
-<div class="hd"><h1>GAMEPLAY LOOP</h1><p>ลูปของทั้งเกม · TACET 4'33</p></div>
-<div class="legend">ทางหลัก (วนตามเข็มนาฬิกา)<i style="border-color:#17171A"></i><br>วนซ้ำ / ย้อนกลับ<i style="border-color:#C8432B"></i></div>
+<div class="hd"><h1>GAMEPLAY LOOP</h1><p>1 รัน ของ TACET 4'33 (Roguelike)</p></div>
 
-<div class="card" style="left:620px;top:150px;width:392px;height:132px">
-  <div class="num">1</div><div class="tag">TITLE</div><div class="title">เมนูหลัก</div>
-  <div class="line">NEW RUN · CONTINUE</div>
-  <div class="line">TUTORIAL (6 บท) · HOW TO PLAY (3 หน้า)</div>
+<div class="entry" style="left:60px;top:190px;width:360px">
+  <div class="t">เริ่มรัน</div><div class="s">เลือกคอนดักเตอร์ + ยุค</div><div class="s">รับนักดนตรีเข้าวง</div>
 </div>
 
-<div class="card" style="left:1100px;top:250px;width:430px;height:132px">
-  <div class="num">2</div><div class="tag">CONDUCTOR SELECT</div><div class="title">เลือกคอนดักเตอร์</div>
-  <div class="line">5 คน สไตล์การเล่นต่างกัน</div>
-  <div class="line">แต่ละคนมี PASSIVE + SIGNATURE (กด SPACE)</div>
+<div class="node" id="n1"><div class="num">1</div><div class="t">เลือกทาง</div><div class="s">ดวล · ร้าน · พัก · เหตุการณ์</div></div>
+<div class="node accent" id="n2"><div class="num">2</div><div class="t">ดวล</div><div class="s">ตวัดไม้สู้ความเงียบ (Core Loop)</div></div>
+<div class="node" id="n3"><div class="num">3</div><div class="t">รับรางวัล</div><div class="s">Motif · นักดนตรี → วงแข็งขึ้น</div></div>
+
+<div class="mid" id="mid"><div class="big" style="font-size:40px">วนจนเจอบอส</div><div class="small">ชั้นละ 7–10 ด่าน</div></div>
+
+<div class="out" style="left:1190px;top:300px;width:370px">
+  <div class="k">หลังดวล</div>
+  <div class="row win">ชนะบอส → ชั้นถัดไป<span>1 รัน มี 3 ชั้น ยิ่งลึกยิ่งยาก</span></div>
+  <div class="row win">ชนะบอสชั้น 3 → จบเกม</div>
+  <div class="row lose">แพ้ดวล → เริ่มรันใหม่<span>Roguelike : ของที่เก็บมาหายหมด</span></div>
 </div>
 
-<div class="card" style="left:1130px;top:470px;width:400px;height:160px">
-  <div class="num">3</div><div class="tag">MOVEMENT · ERA · RECRUIT</div><div class="title">เปิดชั้นใหม่</div>
-  <div class="line">การ์ดเปิดชั้น MOVEMENT I – III</div>
-  <div class="line">→ เลือกยุค CLASSICAL · SIAM · ROMANTIC</div>
-  <div class="line">→ รับนักดนตรียุคนั้นเข้าวง (ชั้นแรกตั้งชื่อวง)</div>
-</div>
-
-<div class="card" style="left:850px;top:705px;width:430px;height:140px">
-  <div class="num">4</div><div class="tag">ROUTE · THE BAND</div><div class="title">เลือกเส้นทาง</div>
-  <div class="line">ถนนของชั้น + ทางแยก 2–4 ทาง เดินหน้าอย่างเดียว</div>
-  <div class="line">TAB = หน้า THE BAND เลือกใครขึ้นเวที</div>
-</div>
-
-<div class="card accent" style="left:400px;top:705px;width:390px;height:140px">
-  <div class="num">5</div><div class="tag">DUEL · SHOP · REST · ???</div><div class="title">เข้าด่าน</div>
-  <div class="line">ดวล : ธรรมดา · Elite · บอส</div>
-  <div class="line">ร้าน · พัก · เหตุการณ์ · CROSSING ข้ามยุค</div>
-  <div class="badge">ดวล = CORE GAME LOOP</div>
-</div>
-
-<div class="card" style="left:70px;top:480px;width:400px;height:165px">
-  <div class="num">6</div><div class="tag">RESULT · REWARD</div><div class="title">จบด่าน · รับรางวัล</div>
-  <div class="line">ชนะดวล → Shards + ลมคืนบางส่วน</div>
-  <div class="line">เลือก Motif 1 ใน 3 (Elite · บอส ได้ทุกครั้ง)</div>
-  <div class="line">จ้างนักดนตรีที่ร้าน / เหตุการณ์</div>
-</div>
-
-<div class="card" style="left:200px;top:236px;width:360px;height:132px">
-  <div class="num">7</div><div class="tag">CURTAIN CALL</div><div class="title">จบรัน</div>
-  <div class="line">สรุปทั้งรัน ชนะหรือแพ้</div>
-  <div class="line">เซฟของรันนี้ถูกลบ</div>
-</div>
-
-<div class="center" style="left:620px;top:330px;width:430px">
-  <div class="big" style="font-size:34px">1 รัน = 3 ชั้น</div>
-  <div class="mid">ชั้นละ 7–10 ด่าน · ด่านสุดท้ายของชั้นคือบอส<br>ลม · Shards · Motif · นักดนตรี ติดตัวไปทั้งรัน<br>แพ้ดวลครั้งเดียว = จบรัน (Roguelike)<br>ยิ่งลึก ยิ่งเร็ว ยิ่งแรง โน้ตพิเศษมาทีละชั้น</div>
-</div>
-
-<div class="pill" style="left:200px;top:432px;border-color:#17171A">แพ้ดวล หรือชนะบอสชั้น 3</div>
-<div class="pill" style="left:510px;top:188px;border-color:#17171A">กลับเมนู เริ่มรันใหม่</div>
-<div class="pill" style="left:760px;top:604px;border-color:#C8432B;color:#C8432B">ด่านถัดไป · วนจนถึงบอส</div>
-<div class="pill" style="left:840px;top:538px;border-color:#C8432B;color:#C8432B">ชนะบอส → ชั้นถัดไป</div>
-
-<div class="foot">อ้างอิงจากโค้ดเกม branch Alpha6 (รอบ 15 · 29 ก.ย. 2026)</div>
+<div class="foot">TACET 4'33 · รอบ 15 (29 ก.ย. 2026) · รายละเอียดเต็ม gameplay_loop_detail.png</div>
 </div>
 <script>
-  //Arrows : [x1, y1, cx, cy, x2, y2, colour, dashed] as quadratic curves with a head at the end
-  const arrows = [
-    [1016, 215, 1120, 200, 1220, 242, 'K', false],   // 1 -> 2
-    [1320, 386, 1350, 430, 1330, 462, 'K', false],  // 2 -> 3
-    [1330, 634, 1330, 690, 1250, 700, 'K', false],  // 3 -> 4
-    [846, 775, 820, 775, 798, 775, 'K', false],     // 4 -> 5
-    [396, 790, 270, 800, 268, 654, 'K', false],     // 5 -> 6
-    [268, 476, 270, 420, 330, 376, 'K', false],     // 6 -> 7
-    [562, 290, 580, 240, 612, 222, 'K', false],     // 7 -> 1
-    [474, 590, 760, 590, 1010, 698, 'R', false],    // 6 -> 4 : next stage
-    [474, 520, 840, 470, 1122, 530, 'R', false],    // 6 -> 3 : boss beaten, next floor
-  ];
+  //Ring : three stops on a circle, the arrows run along it between them
+  const C = { x: 740, y: 520 }, R = 265;
+  const angles = [-90, 30, 150];                          // top, bottom right, bottom left : clockwise
+  angles.forEach((a, i) => {
+    const r = a * Math.PI / 180, el = document.getElementById('n' + (i + 1));
+    el.style.left = (C.x + R * Math.cos(r)) + 'px';
+    el.style.top = (C.y + R * Math.sin(r)) + 'px';
+  });
+  const mid = document.getElementById('mid'); mid.style.left = C.x + 'px'; mid.style.top = (C.y + 20) + 'px';
+
   const svg = document.getElementById('arrows');
-  for (const a of arrows) {
+  function path(d, dashed) {
     const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    p.setAttribute('d', `M ${a[0]} ${a[1]} Q ${a[2]} ${a[3]} ${a[4]} ${a[5]}`);
-    p.setAttribute('fill', 'none');
-    p.setAttribute('stroke', a[6] === 'R' ? '#C8432B' : '#17171A');
-    p.setAttribute('stroke-width', a[7] ? '3' : '4');
-    p.setAttribute('stroke-linecap', 'round');
-    if (a[7]) p.setAttribute('stroke-dasharray', '8 8');
-    p.setAttribute('marker-end', a[6] === 'R' ? 'url(#headR)' : 'url(#headK)');
-    svg.appendChild(p);
+    p.setAttribute('d', d); p.setAttribute('fill', 'none'); p.setAttribute('stroke', '#17171A');
+    p.setAttribute('stroke-width', dashed ? '4' : '6'); p.setAttribute('stroke-linecap', 'round');
+    if (dashed) p.setAttribute('stroke-dasharray', '10 10');
+    p.setAttribute('marker-end', 'url(#head)'); svg.appendChild(p);
   }
+  //Arcs : from just past one stop to just before the next
+  const gaps = [[48, 28], [28, 28], [28, 48]];
+  angles.forEach((a, i) => {
+    const b = a + 120, s = (a + gaps[i][0]) * Math.PI / 180, e = (b - gaps[i][1]) * Math.PI / 180;
+    path(`M ${C.x + R * Math.cos(s)} ${C.y + R * Math.sin(s)} A ${R} ${R} 0 0 1 ${C.x + R * Math.cos(e)} ${C.y + R * Math.sin(e)}`, false);
+  });
+  //Entry and exit
+  path('M 420 262 Q 490 262 528 258', false);             // start of the run -> choose a path
+  path('M 1166 640 Q 1180 560 1184 470', true);            // the duel -> what happens after it
 </script>
 </body></html>

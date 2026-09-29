@@ -5,7 +5,7 @@ const path = require('path');
 (async () => {
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1600, height: 900 }, deviceScaleFactor: 2 });
-  for (const name of ['core_game_loop', 'gameplay_loop']) {
+  for (const name of ['core_game_loop', 'gameplay_loop', 'core_game_loop_detail', 'gameplay_loop_detail']) {
     await page.goto('file://' + path.join(__dirname, name + '.html'));
     await page.waitForLoadState('networkidle');
     await page.evaluate(() => document.fonts.ready);

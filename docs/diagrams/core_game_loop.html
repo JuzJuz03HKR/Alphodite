@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="th"><head><meta charset="utf-8"><title>Core Game Loop</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
-<!-- Core Game Loop, round 15 (29 Sep 2026). Render : node docs/diagrams/render.js (1600x900 at 2x = 3200x1800 PNG) -->
+<!-- Core Game Loop, the simple one for slides (round 15, 29 Sep 2026). The detailed one is core_game_loop_detail.html.
+     Render : NODE_PATH=$(npm root -g) node docs/diagrams/render.js -->
 <style>
   html, body { margin: 0; padding: 0; background: #F3F0E8; }
   body { font-family: 'IBM Plex Sans Thai', sans-serif; color: #17171A; }
@@ -9,144 +10,70 @@
   .sheet svg { position: absolute; left: 0; top: 0; }
   .hd { position: absolute; left: 56px; top: 34px; }
   .hd h1 { margin: 0; font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 46px; letter-spacing: 6px; line-height: 1; }
-  .hd p { margin: 10px 0 0; font-size: 21px; color: #5C5C64; font-weight: 500; }
-  .legend { position: absolute; right: 56px; top: 36px; font-size: 16px; color: #5C5C64; text-align: right; line-height: 1.9; }
-  .legend i { display: inline-block; width: 38px; height: 0; border-top: 4px solid; vertical-align: middle; margin-left: 10px; }
-  .card { position: absolute; box-sizing: border-box; background: #fff; border: 2.5px solid #17171A; border-radius: 16px;
-          padding: 12px 16px 10px 62px; box-shadow: 0 5px 0 rgba(23,23,26,0.10); }
-  .card.accent { border-color: #C8432B; border-width: 3px; }
-  .num { position: absolute; left: 14px; top: 14px; width: 36px; height: 36px; border-radius: 50%; background: #17171A; color: #F3F0E8;
-         font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 19px; text-align: center; line-height: 36px; }
-  .card.accent .num { background: #C8432B; }
-  .tag { font-family: 'IBM Plex Mono', monospace; font-weight: 500; font-size: 12.5px; letter-spacing: 1.5px; white-space: nowrap; color: #5C5C64; line-height: 1.2; }
-  .title { font-size: 23px; font-weight: 700; line-height: 1.3; margin-top: 1px; }
-  .line { font-size: 15px; line-height: 1.45; color: #3A3A40; white-space: nowrap; }
-  .line b { color: #17171A; }
-  .pill { position: absolute; transform: translate(-50%, -50%); background: #F3F0E8; border: 2px solid; border-radius: 999px;
-          padding: 3px 13px; font-size: 15px; font-weight: 600; white-space: nowrap; }
-  .center { position: absolute; text-align: center; }
-  .center .big { font-size: 28px; font-weight: 700; color: #17171A; line-height: 1.25; }
-  .center .mid { font-size: 17px; font-weight: 500; color: #3A3A40; line-height: 1.55; }
-  .box { position: absolute; box-sizing: border-box; border: 2.5px dashed #17171A; border-radius: 16px; padding: 12px 18px; background: rgba(255,255,255,0.55); }
-  .box.soft { border-style: solid; border-color: #B9B4A8; }
-  .box h3 { margin: 0 0 4px; font-size: 19px; font-weight: 700; }
-  .box .k { font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; letter-spacing: 2px; color: #5C5C64; }
-  .box ul { margin: 2px 0 4px; padding-left: 20px; font-size: 15px; line-height: 1.5; color: #3A3A40; } .box li { white-space: nowrap; }
-  .box .win { color: #2F6B3F; font-weight: 700; font-size: 17px; margin-top: 4px; }
-  .box .lose { color: #C8432B; font-weight: 700; font-size: 17px; margin-top: 4px; }
-  .box .note { font-size: 14px; color: #3A3A40; white-space: nowrap; }
+  .hd p { margin: 10px 0 0; font-size: 22px; color: #5C5C64; font-weight: 500; }
+  .node { position: absolute; box-sizing: border-box; width: 380px; height: 124px; transform: translate(-50%, -50%);
+          background: #fff; border: 3px solid #17171A; border-radius: 22px; box-shadow: 0 6px 0 rgba(23,23,26,0.10);
+          padding: 16px 18px 0 86px; }
+  .node.accent { border-color: #C8432B; border-width: 4px; }
+  .num { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); width: 50px; height: 50px; border-radius: 50%;
+         background: #17171A; color: #F3F0E8; font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 26px; text-align: center; line-height: 50px; }
+  .node.accent .num { background: #C8432B; }
+  .t { font-size: 32px; font-weight: 700; line-height: 1.25; white-space: nowrap; }
+  .s { font-size: 19px; color: #3A3A40; line-height: 1.35; white-space: nowrap; }
+  .mid { position: absolute; transform: translate(-50%, -50%); text-align: center; }
+  .mid .big { font-size: 46px; font-weight: 700; line-height: 1.1; }
+  .mid .small { font-size: 20px; color: #5C5C64; margin-top: 6px; }
+  .out { position: absolute; box-sizing: border-box; border: 3px dashed #17171A; border-radius: 22px; padding: 18px 24px; background: rgba(255,255,255,0.6); }
+  .out .k { font-family: 'IBM Plex Mono', monospace; font-size: 14px; letter-spacing: 2px; color: #5C5C64; }
+  .out .row { font-size: 24px; font-weight: 700; margin-top: 12px; white-space: nowrap; }
+  .out .row span { font-weight: 500; font-size: 18px; color: #3A3A40; display: block; }
+  .win { color: #2F6B3F; } .lose { color: #C8432B; }
   .foot { position: absolute; left: 56px; bottom: 20px; font-size: 13px; color: #8A867C; }
 </style></head>
 <body><div class="sheet">
 <svg id="arrows" width="1600" height="900" viewBox="0 0 1600 900">
-  <defs>
-    <marker id="headK" markerWidth="10" markerHeight="10" refX="7" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,5 L0,10 z" fill="#17171A"/></marker>
-    <marker id="headR" markerWidth="10" markerHeight="10" refX="7" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,5 L0,10 z" fill="#C8432B"/></marker>
-  </defs>
+  <defs><marker id="head" markerWidth="14" markerHeight="14" refX="9" refY="7" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L14,7 L0,14 z" fill="#17171A"/></marker></defs>
 </svg>
 
-<div class="hd"><h1>CORE GAME LOOP</h1><p>หัวใจของเกม : ดวลกับ TACET ทีละบีต</p></div>
-<div class="legend">ทางหลัก (วนตามเข็มนาฬิกา)<i style="border-color:#17171A"></i><br>วนซ้ำทุกบีต / ทุกรอบ<i style="border-color:#C8432B"></i></div>
+<div class="hd"><h1>CORE GAME LOOP</h1><p>ทุกบีตในการดวลกับ TACET (ความเงียบ)</p></div>
 
-<div class="box" style="left:600px;top:40px;width:470px;padding:10px 16px">
-  <div class="k">ENTRY · เริ่มดวล</div>
-  <div class="note">วงที่ขึ้นเวที (เลือกที่หน้า THE BAND) ยืนตามผังวงออร์เคสตราจริง</div>
-  <div class="note">2 ดวลแรกของรัน : ช้า 80 BPM · TACET เล่นแค่ f กับ p</div>
+<div class="node" id="n1"><div class="num">1</div><div class="t">อ่านโน้ต</div><div class="s">ลูกศร = ทิศ · ตัวอักษร = ขนาด</div></div>
+<div class="node accent" id="n2"><div class="num">2</div><div class="t">ตวัดไม้บาตอง</div><div class="s">ตามทิศ ตามขนาด ตรงจังหวะ</div></div>
+<div class="node" id="n3"><div class="num">3</div><div class="t">วงเล่นเพลง</div><div class="s">ทั้งวงเล่นโน้ตนั้นพร้อมกัน</div></div>
+<div class="node" id="n4"><div class="num">4</div><div class="t">ดันความเงียบ</div><div class="s">ชนะบีตดันเส้น · แพ้บีตเสียลม</div></div>
+
+<div class="mid" id="mid"><div class="big">ทุกบีต</div><div class="small">วนตามเพลง</div></div>
+
+<div class="out" style="left:1210px;top:330px;width:340px">
+  <div class="k">ดวลจบเมื่อ</div>
+  <div class="row win">ดันเส้นถึงสุด = ชนะ<span>วงเล่นเพลงต่อจนจบท่อน</span></div>
+  <div class="row lose">ลมหมด = แพ้<span>ความเงียบตัดเพลง</span></div>
 </div>
 
-<div class="card" style="left:80px;top:215px;width:420px;height:178px">
-  <div class="num">1</div><div class="tag">READ · TACET CALLS</div><div class="title">อ่านโน้ต</div>
-  <div class="line">TACET เล่นท่อนเพลงจริง (เช่น ODE TO JOY)</div>
-  <div class="line">โน้ตวิ่งมาตามเลน บอก 3 อย่าง :</div>
-  <div class="line"><b>ลูกศร</b> = ทิศตวัด · <b>ตัวอักษร</b> p · mf · f = ขนาด</div>
-  <div class="line"><b>วงแหวน</b> = จังหวะที่ต้องหยุดไม้</div>
-</div>
-
-<div class="card accent" style="left:700px;top:200px;width:440px;height:190px">
-  <div class="num">2</div><div class="tag">STROKE · THE BATON</div><div class="title">ตวัดไม้บาตอง (เมาส์)</div>
-  <div class="line">คลิกซ้ายค้าง ตวัดตามท่า 4/4 : ลง → ซ้าย → ขวา → ขึ้น</div>
-  <div class="line">p = ตวัดเล็ก · mf = กลาง · f = ใหญ่</div>
-  <div class="line">หยุดตรงวงแหวน : PERFECT · GOOD · MISS</div>
-  <div class="line">ผิดขนาด = แรงเหลือ 30%</div>
-</div>
-
-<div class="card" style="left:700px;top:560px;width:440px;height:196px">
-  <div class="num">3</div><div class="tag">PLAY · THE WHOLE BAND</div><div class="title">ทั้งวงเล่นโน้ตนั้น</div>
-  <div class="line">ทุกคนบนเวทีเล่น ด้วยเสียงเครื่องของตัวเอง</div>
-  <div class="line">ระดับเสียงตามเพลง</div>
-  <div class="line"><b>CUE</b> ตวัดไปทางฝั่งไหน คนฝั่งนั้นแรง ×1.5</div>
-  <div class="line"><b>SECTION</b> กลุ่มเครื่องเดียวกัน 2 คน +10% · 3 คน +25%</div>
-</div>
-
-<div class="card" style="left:80px;top:575px;width:420px;height:182px">
-  <div class="num">4</div><div class="tag">CLASH · THE LINE</div><div class="title">ปะทะ · ดันเส้น</div>
-  <div class="line">พลังวง ปะทะ โน้ตของ TACET</div>
-  <div class="line">ชนะบีต → ดันเส้นไปทาง TACET (สูงสุด 8)</div>
-  <div class="line">แพ้บีต → TACET ซัดวง เสีย <b>ลม (BREATH)</b></div>
-  <div class="line">บีตเงียบ = พัก ได้ลมคืน +12</div>
-</div>
-
-<div class="center" style="left:500px;top:430px;width:200px">
-  <div class="big">ทุกบีต</div>
-  <div class="mid">อ่าน → ตวัด<br>→ วงเล่น → ปะทะ</div>
-</div>
-
-<div class="pill" style="left:290px;top:466px;border-color:#C8432B;color:#C8432B">บีตถัดไป · ท่อนละ 8 บีต</div>
-<div class="pill" style="left:290px;top:508px;border-color:#C8432B;color:#C8432B">ครบท่อน → รอบถัดไป เร็วขึ้น</div>
-<div class="center" style="left:560px;top:846px;width:560px"><div class="mid" style="font-size:16px;color:#5C5C64">1 ดวล = สูงสุด 3 รอบ · รอบ 1 / 2 / 3 เล่นท่อน 8 บีต 1 / 2 / 3 ครั้ง</div></div>
-
-<div class="box soft" style="left:1200px;top:118px;width:360px;height:292px">
-  <div class="k">EXTRAS</div><h3>ระหว่างดวล</h3>
-  <ul>
-    <li><b>COMBO</b> PERFECT ติดกัน แรงขึ้นสูงสุด +30%</li>
-    <li><b>FORTISSIMO</b> PERFECT 8 ครั้งติด วงลุกเป็นไฟ</li>
-    <li><b>IN TUNE / COUNTER</b> ตรงเป๊ะ ลดโน้ต TACET</li>
-    <li><b>SIGNATURE</b> กด SPACE ท่าประจำคอนดักเตอร์</li>
-    <li>โน้ตพิเศษมาทีละชั้น :</li>
-    <li>TREMOLO รัว · FERMATA ค้าง · ✦ โน้ตคู่</li>
-    <li>ความเร็วตามชั้น 80 → 128 BPM</li>
-  </ul>
-</div>
-
-<div class="box" style="left:1200px;top:452px;width:360px;height:330px">
-  <div class="k">EXIT · RESULT</div><h3>ดวลจบเมื่อ...</h3>
-  <div class="win">ชนะ</div>
-  <ul>
-    <li>ดันเส้นถึง +100 → วงเล่นท่อนนั้นจนจบ</li>
-    <li>เส้นถึง +80 ตอนจบรอบ → FINALE สำเร็จ</li>
-    <li>ครบ 3 รอบ เส้นอยู่ฝั่งเรา</li>
-  </ul>
-  <div class="lose">แพ้ (ความเงียบตัดเพลง)</div>
-  <ul>
-    <li>ลมหมด หรือถูกดันถึง −100</li>
-    <li>ครบ 3 รอบ เส้นไม่อยู่ฝั่งเรา</li>
-  </ul>
-  <div class="note">→ หน้าผลดวล → GAMEPLAY LOOP ข้อ 6</div>
-</div>
-
-<div class="foot">อ้างอิงจากโค้ดเกม branch Alpha6 (รอบ 15 · 29 ก.ย. 2026)</div>
+<div class="foot">TACET 4'33 · รอบ 15 (29 ก.ย. 2026) · รายละเอียดเต็ม core_game_loop_detail.png</div>
 </div>
 <script>
-  //Arrows : [x1, y1, cx, cy, x2, y2, colour, dashed] as quadratic curves with a head at the end
-  const arrows = [
-    [500, 290, 600, 262, 692, 280, 'K', false],     // 1 READ -> 2 STROKE
-    [920, 398, 950, 480, 920, 552, 'K', false],     // 2 STROKE -> 3 PLAY
-    [692, 675, 600, 700, 508, 672, 'K', false],     // 3 PLAY -> 4 CLASH
-    [290, 567, 250, 480, 290, 402, 'R', false],     // 4 CLASH -> 1 READ, next beat
-    [620, 156, 520, 175, 470, 208, 'K', false],     // entry -> 1 READ
-    [440, 764, 820, 890, 1192, 740, 'K', true],     // 4 CLASH -> exit, under the cards
-  ];
+  //Ring : the nodes sit on a circle, the arrows run along it between them
+  const C = { x: 690, y: 490 }, R = 285;
+  const angles = [-90, 0, 90, 180];                       // top, right, bottom, left : clockwise
+  angles.forEach((a, i) => {
+    const r = a * Math.PI / 180, el = document.getElementById('n' + (i + 1));
+    el.style.left = (C.x + R * Math.cos(r)) + 'px';
+    el.style.top = (C.y + R * Math.sin(r)) + 'px';
+  });
+  const mid = document.getElementById('mid'); mid.style.left = C.x + 'px'; mid.style.top = C.y + 'px';
+
+  //Arcs : from just past one node to just before the next, with a head at the end
   const svg = document.getElementById('arrows');
-  for (const a of arrows) {
+  const gaps = [[45, 18], [16, 47], [45, 18], [16, 47]];  // degrees kept clear at the start and end of each arc (a node is wider than tall)
+  angles.forEach((a, i) => {
+    const b = a + 90, s = (a + gaps[i][0]) * Math.PI / 180, e = (b - gaps[i][1]) * Math.PI / 180;
+    const x1 = C.x + R * Math.cos(s), y1 = C.y + R * Math.sin(s), x2 = C.x + R * Math.cos(e), y2 = C.y + R * Math.sin(e);
     const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    p.setAttribute('d', `M ${a[0]} ${a[1]} Q ${a[2]} ${a[3]} ${a[4]} ${a[5]}`);
-    p.setAttribute('fill', 'none');
-    p.setAttribute('stroke', a[6] === 'R' ? '#C8432B' : '#17171A');
-    p.setAttribute('stroke-width', a[7] ? '3' : '4');
-    p.setAttribute('stroke-linecap', 'round');
-    if (a[7]) p.setAttribute('stroke-dasharray', '8 8');
-    p.setAttribute('marker-end', a[6] === 'R' ? 'url(#headR)' : 'url(#headK)');
+    p.setAttribute('d', `M ${x1} ${y1} A ${R} ${R} 0 0 1 ${x2} ${y2}`);
+    p.setAttribute('fill', 'none'); p.setAttribute('stroke', '#17171A'); p.setAttribute('stroke-width', '6');
+    p.setAttribute('stroke-linecap', 'round'); p.setAttribute('marker-end', 'url(#head)');
     svg.appendChild(p);
-  }
+  });
 </script>
 </body></html>
