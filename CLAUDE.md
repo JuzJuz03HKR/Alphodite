@@ -11,7 +11,7 @@
 3. `docs/GAME_REVIEW.md` — รีวิวทั้งเกมและสถานะแต่ละข้อ · `docs/DESIGN_RESEARCH.md` — เกมอ้างอิงและแผนระยะยาว
 4. `docs/ASSET_LIST.md` — ไฟล์ภาพ/เสียงที่ทีมต้องทำ (ชื่อไฟล์ ขนาด) · ภาพหน้าจอทุกหน้าอยู่ `docs/screenshots/`
 5. `docs/USER_BRIEFS.md` — **สิ่งที่ผู้ใช้สั่ง/อธิบายไว้คำต่อคำ** (แผนวันนี้ ความคืบหน้า การตัดสินใจ lore ตัวละคร เกมอ้างอิงที่ให้ศึกษา ผลเพลย์เทส เกณฑ์อาจารย์) ·
-   `docs/RESUME_PROMPT.md` — prompt สำหรับแชทใหม่ / หลัง compact · `docs/TACET_Slides_29Sep.md` — เนื้อหาสไลด์ตามเกณฑ์อาจารย์ · แผนภาพลูป `docs/diagrams/*.html` → PNG ด้วย `NODE_PATH=$(npm root -g) node docs/diagrams/render.js`
+   `docs/RESUME_PROMPT.md` — prompt สำหรับแชทใหม่ / หลัง compact · `docs/TACET_Slides_29Sep.md` — เนื้อหาสไลด์ตามเกณฑ์อาจารย์ · **`docs/TACET_GAME_OVERVIEW.md` (ข้อมูลเกมทั้งหมดสำหรับพูด) · `docs/TACET_CODE_OVERVIEW.md` (ภาพรวมโค้ด/VFX/ส่วน advance สำหรับฝ่ายโค้ด)** · แผนภาพลูป `docs/diagrams/*.html` → PNG ด้วย `NODE_PATH=$(npm root -g) node docs/diagrams/render.js`
 
 **อัปเดตเอกสารพวกนี้ทุกครั้งที่เกมเปลี่ยน** ผู้ใช้ย้ายแชทบ่อย และใช้เอกสารเป็นความจำของโปรเจกต์
 **ผู้ใช้สั่ง (29 ก.ย.)** : ข้อความยาวๆ ของผู้ใช้มีประโยชน์กับเกม ให้ **คัดลอกคำต่อคำลง `USER_BRIEFS.md`** · เกม/ตัวอย่างที่ผู้ใช้ยกมาเก็บไว้ทั้งหมด ·
