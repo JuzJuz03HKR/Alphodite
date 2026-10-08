@@ -9,7 +9,7 @@
    (ทุกระบบอยู่หัวข้อ 6, ตัวเลขบาลานซ์หัวข้อ 8)
 2. `docs/HANDOFF.md` — ความคืบหน้า % · แผนที่โค้ด (อยากแก้อะไร ไปไฟล์ไหน) · งานที่เหลือเรียงความสำคัญ
 3. `docs/GAME_REVIEW.md` — รีวิวทั้งเกมและสถานะแต่ละข้อ · `docs/DESIGN_RESEARCH.md` — เกมอ้างอิงและแผนระยะยาว
-4. `docs/ASSET_LIST.md` — ไฟล์ภาพ/เสียงที่ทีมต้องทำ (ชื่อไฟล์ ขนาด) · ภาพหน้าจอทุกหน้าอยู่ `docs/screenshots/`
+4. `docs/ASSET_LIST.md` — ไฟล์ภาพ/เสียงที่ทีมต้องทำ (ชื่อไฟล์ ขนาด) · **`docs/TACET_UI_Asset_List.xlsx`** — UI skin 126 ไฟล์สำหรับทีมอาร์ต (8 ต.ค., ยังไม่มีช่องโหลดในโค้ด) · ภาพหน้าจอทุกหน้าอยู่ `docs/screenshots/`
 5. `docs/USER_BRIEFS.md` — **สิ่งที่ผู้ใช้สั่ง/อธิบายไว้คำต่อคำ** (แผนวันนี้ ความคืบหน้า การตัดสินใจ lore ตัวละคร เกมอ้างอิงที่ให้ศึกษา ผลเพลย์เทส เกณฑ์อาจารย์) ·
    `docs/RESUME_PROMPT.md` — prompt สำหรับแชทใหม่ / หลัง compact · `docs/TACET_Slides_29Sep.md` — เนื้อหาสไลด์ตามเกณฑ์อาจารย์ · **`docs/TACET_GAME_OVERVIEW.md` (ข้อมูลเกมทั้งหมดสำหรับพูด) · `docs/TACET_CODE_OVERVIEW.md` (ภาพรวมโค้ด/VFX/ส่วน advance สำหรับฝ่ายโค้ด)** ·
    **งานนำเสนอ 30 ก.ย. : `docs/TACET_Speech_30Sep.md` (บทพูดละเอียด 19 สไลด์ + Q&A) · `docs/TACET_Slides_Revised_30Sep.md` (ข้อความปรับสไลด์ทีละหน้า) · `docs/TACET_Script_30Sep.md` (บทพูดสั้น + คำผิดบนสไลด์)** · แผนภาพลูป `docs/diagrams/*.html` → PNG ด้วย `NODE_PATH=$(npm root -g) node docs/diagrams/render.js`
