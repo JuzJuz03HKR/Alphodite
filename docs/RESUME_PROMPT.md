@@ -43,7 +43,9 @@ commit/push เมื่อฉันสั่งเท่านั้น · ย�
 
 ---
 
-## สถานะล่าสุด (8 ต.ค.)
+## สถานะล่าสุด (9 ต.ค.)
+
+**9 ต.ค. — Balance sheet** : ✅ `docs/TACET_Balance.xlsx` รูปแบบตามตัวอย่างอาจารย์ (Battlefleet_Balance.xlsx : Game States / Entity Tuning / Skill Damage) + Difficulty Curve / Economy / Sim Results / About · ตัวเลขอ่านจากโค้ดจริง คอลัมน์ Code บอกชื่อตัวแปร · แรงศัตรูต่อชั้นเป็นสูตรที่ปัดแบบ C# (ตรวจตรงเกมครบ 54 ช่อง) · ไฟล์ไม่เชื่อมกับเกม แก้ `BattleRules.cs` แล้วต้องอัปเดตชีต
 
 **8 ต.ค. — รายการ UI ให้ทีมอาร์ต** : ✅ `docs/TACET_UI_Asset_List.xlsx` (UI skin ทั้งชุด 126 ไฟล์ · คอลัมน์ตามชีตของทีม · ภาพตัวอย่างแคปจากเกม · แท็บ "อ่านก่อน") · ✅ `ASSET_LIST.md` ข้อ 10 · ⚠️ **โค้ดยังไม่มีช่องโหลดภาพ UI** ต้องเพิ่มเมื่อผู้ใช้สั่ง (`Core/Ui.cs` 3-slice / 9-slice + โหลดจาก `Content/Art/UI/`) · ยังไม่ได้ commit/push (รอผู้ใช้สั่ง)
 

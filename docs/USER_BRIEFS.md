@@ -1000,3 +1000,14 @@ Object (`Obj_Evm_Name_001` · Environment = Evm · Props = Prp · Items = Itm ·
 - รูปตัวอย่าง : **"ภาพหน้าจอตำแหน่งในเกม (Recommended)"**
 
 → ทำ `docs/TACET_UI_Asset_List.xlsx` (126 ไฟล์) + `ASSET_LIST.md` ข้อ 10 · ไม่ใส่ไอคอนกลุ่มเครื่อง (ผู้ใช้ตัดสินใจ 29 ก.ย. ให้เป็นคำ) · โค้ดยังไม่มีช่องโหลดภาพ UI
+
+**9 ต.ค.** (คำต่อคำ)
+
+```text
+สร้าง Balance sheet ของเกมเรา โดยอิงจากตัวอย่างของอาจารย์
+```
++ ไฟล์ตัวอย่างของอาจารย์ `Battlefleet_Balance.xlsx` : แท็บ Game States (Parameter / Value : Intermission Duration · Round Duration · Respawn Cooldown · Max Units Per Team) ·
+Entity Tuning (Player Setting · Enemy Settings ตาราง Enemy / Health / Damage / EXP · Base Setting · Combat Accuracy) · Skill Damage (Turret Settings · Tanker Support Unit · Skill Damage Matrix ตาราง Skill / Base Damage / Unit Damage / Notes) ·
+สไตล์ : ฟอนต์ Roboto · แถบหัวข้อสีฟ้าอ่อน DFE7FF ตัวอักษรน้ำเงิน 1E3989 · หัวตารางเทา F0F5F8 · แถวสลับสี
+
+→ ทำ `docs/TACET_Balance.xlsx` : 3 แท็บตามตัวอย่าง + Difficulty Curve / Economy / Sim Results / About
