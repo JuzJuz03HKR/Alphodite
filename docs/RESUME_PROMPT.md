@@ -13,7 +13,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 โปรเจกต์นี้คือเกม TACET 4'33 ของทีม Alphodite (MonoGame DesktopGL 3.8 / .NET 9) ทำงานต่อจาก branch Alpha7 (เปลี่ยนเป็น turn-based roguelike)
 ส่งงานแล้ว 29 ก.ย. (zip อยู่ branch Release) นำเสนอแล้ว 30 ก.ย. ตอนนี้อยู่เฟส 1 เดือนหลังส่งงาน
 อ่านแค่ CLAUDE.md ที่ราก repo และ docs/RESUME_PROMPT.md หัวข้อ "สถานะล่าสุด" ก่อน ส่วนอื่นอ่านเมื่องานต้องใช้
-อ่าน docs/ALPHA7_DESIGN.md ด้วย (เอกสารออกแบบใหม่ ข้อ 10 แผน 10 วัน ข้อ 11 คำถามที่ยังเปิด)
+อ่าน docs/ALPHA7_DESIGN.md ด้วย (เอกสารออกแบบใหม่ ข้อ 10 ลำดับงาน ข้อ 11 คำถามที่ยังเปิด · ไม่มีกำหนดส่งแล้ว · เนื้อเรื่องทำท้ายสุด)
 แล้วเช็ก git ว่า Alpha7 ในเครื่องตรงกับ GitHub และมีไฟล์ค้าง commit ไหม สรุปภาษาไทย 3–5 บรรทัด
 ยังไม่ต้องแก้โค้ด ไม่ต้อง build หรือรันตัวจำลองจนกว่าฉันจะสั่ง รอฉันสั่งงานก่อน
 commit/push เมื่อฉันสั่งเท่านั้น · ยังไม่ต้องสร้าง Pull Request
@@ -45,6 +45,15 @@ commit/push เมื่อฉันสั่งเท่านั้น · ย�
 ---
 
 ## สถานะล่าสุด (18 ต.ค.)
+
+**18 ต.ค. (ต่อ) — เครื่องมือ AI + ยกเลิก deadline** : ผู้ใช้สั่ง **ไม่ยึดกำหนดส่ง ทำเต็มที่** · **เนื้อเรื่องทำท้ายสุด** · **อย่าเอากฎ/deadline มาจำกัดความคิด** (คำต่อคำใน `USER_BRIEFS.md` ข้อ 12) · แก้ `ALPHA7_DESIGN.md` เป็นฉบับ 0.2 (ข้อ 10 = ลำดับงาน ไม่ใช่แผน 10 วัน) ·
+✅ `.mcp.json` = Context7 (แชท cloud ยังต่อไม่ได้ : proxy ตอบ CONNECT 403 ผู้ใช้ต้องเพิ่ม `mcp.context7.com` ใน Network access ของ environment) ·
+✅ ตรวจ 4 repo แล้ว (clone อ่านทั้งหมด ไม่เจอโค้ดส่งข้อมูลออก) แต่ **การคัดลอก skill เข้า `.claude/skills/` ถูกตัวกรองความปลอดภัยของ auto mode บล็อก (Instruction Poisoning) รอผู้ใช้อนุญาต** · ชุดที่เลือกไว้ :
+- `obra/superpowers` (`bb92a77`, MIT, v7.0.0) 12 ตัว : brainstorming writing-plans executing-plans subagent-driven-development dispatching-parallel-agents systematic-debugging test-driven-development verification-before-completion requesting-code-review receiving-code-review using-git-worktrees finishing-a-development-branch · ไม่เอา writing-skills diagnosing-superpowers using-superpowers และ hook SessionStart (hook ใส่คำสั่ง "มีโอกาส 1% ต้องเรียก skill" ทุกเซสชัน ทำให้เรียก skill หนักทุกงาน)
+- `gamedev-skills/awesome-gamedev-agent-skills` (`0a70cfc`, Apache-2.0 ต้องมี NOTICE) 5 ตัว : game-feel game-ui-ux rpg roguelike save-systems · visual-novel / dialogue-systems รอตอนทำเนื้อเรื่อง · ตัวอย่างโค้ดเป็น Godot/Unity ต้องแปลงเป็น MonoGame เอง
+- `alca259/monogame-skills` (`ddbe387`, MIT, **ผู้เขียน archive แล้ว 22 ก.ย. ไม่มีอัปเดต**) 9 ตัว : monogame-game-loop scenes input 2d math audio content-pipeline effects shaders · ไม่เอา ui-* (เรามี `Core/Ui.cs`) 3d camera-modes extended-* (ลบ MonoGame.Extended แล้ว) และโฟลเดอร์ instructions (บังคับ `docs/specs/`)
+- `fagemx/gstack-game` (`7259ab9`, MIT, 0.5.0) 10 ตัว : balance-review playtest feel-pass game-review player-experience game-ux-review gameplay-implementation-review prototype-slice-plan build-playability-review game-qa + `bin/` (ต้องเพิ่ม `!.claude/skills/gstack-game/bin/` ใน `.gitignore` เพราะ `[Bb]in/` ถูก ignore) · ผลรีวิวมันเก็บที่ `~/.gstack/projects/` ซึ่งหายในแชท cloud ให้คัดลอกผลที่ใช้ไป `docs/` · telemetry ปิดเป็นค่าเริ่มต้น และไม่มีตัวอัปโหลดในชุด
+- ไม่ลง : dm-game (ข้อมูลน้อย ทับ gstack-game) · plugin ที่ลงด้วย `claude plugin install` หรือประกาศใน `.claude/settings.json` **ไม่โหลดในแชท cloud** (คู่มือ cloud-environments "What carries over") จึงใช้วิธีใส่ skill ใน repo แทน
 
 **18 ต.ค. — เริ่ม Alpha 7 (branch `Alpha7` แตกจาก `Alpha6` `eb93436`)** : ผู้ใช้สั่งเปลี่ยนเกมเป็น **turn-based roguelike** ที่ยังเป็นดนตรี · ไม่เป็นเกม rhythm แล้ว เก็บบางระบบไว้ · โจมตี/ใช้สกิลมีการตวัดไม้เป็น QTE เสริมพลัง · เพิ่ม content แบบ roguelike · อ้างอิง Expedition 33 และ Limbus Company · งานแรก = **เขียนเอกสารออกแบบใหม่** `docs/ALPHA7_DESIGN.md` และจดบันทึกทุกก้อน (ยังไม่แตะโค้ด)
 ✅ ค้นระบบ Expedition 33 / Limbus Company แล้ว (แหล่งอยู่ข้อ 12 ของเอกสาร) · ✅ ผู้ใช้ตอบ 4 ข้อ : **วาทยากร + นักดนตรี 3 คน · parry ได้ · วาทยากร 6 คนตาม lore · ส่งภายใน ต.ค.** · ✅ `docs/ALPHA7_DESIGN.md` ฉบับร่าง 0.1 (ระบบต่อสู้ MVP · ตารางระบบจากเกมอ้างอิง · content · ค่าตั้งต้น · โครงโค้ด · แผน 10 วัน · คำถามเปิด 6 ข้อ) · **ถัดไป** : ผู้ใช้ตรวจเอกสาร + ตอบคำถามข้อ 11 → เริ่มวันที่ 1 ของแผน (`Battle/TurnBattle.cs`)

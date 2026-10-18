@@ -1113,3 +1113,44 @@ context window ตอนนี้ 65% used แล้ว ถ้ามันเก
 - ป้องกันตอนศัตรูตี : **"ได้ แบบ parry (Recommended)"**
 - ตัวละครหลัก : **"6 คนตาม lore (Recommended)"**
 - กำหนดส่ง : **"ภายใน ต.ค. (~10 วัน)"**
+
+**18 ต.ค. (ต่อ) : skill / plugin** (คำต่อคำ)
+
+```text
+1) Superpowers (คุมขั้นตอน: วางแผน → เขียนโค้ด → รีวิว)
+claude plugin install superpowers@claude-plugins-official
+
+2) awesome-gamedev-agent-skills (เลือกเฉพาะ 3 ตัวที่แนะนำ)
+npx skills add gamedev-skills/awesome-gamedev-agent-skills --skill game-feel --skill game-ui-ux --skill visual-novel -a claude-code
+
+3) dm-game ของ rbergman (game design + game feel)
+claude plugin marketplace add rbergman/dark-matter-marketplace
+claude plugin marketplace update dark-matter-marketplace
+claude plugin install dm-game@dark-matter-marketplace
+
+4) gstack-game (รีวิว GDD, /feel-pass, balance, QA)
+git clone https://github.com/fagemx/gstack-game.git ~/.claude/skills/gstack-game
+cd ~/.claude/skills/gstack-game && bun run build
+
+5) Context7 MCP (ดึงเอกสาร API ล่าสุด)
+claude mcp add --scope user --transport http context7 https://mcp.context7.com/mcp
+
+6) Monogame skills
+npx skills add alca259/monogame-skills --list
+
+ช่วยโหลด Skill และ plug-in พวกนี้ 
+คำถาม คิดว่าskill ในตอนนี้เยอะเกินไปหรือพอหรือไม่ เป้าหมายคือเพิ่มประสิทธิภาพในการทำเกมนี้ 
+ตอนนี้ขอคุยก่อนอย่าพึ่งเริ่มทำ
+```
+
+```text
+คือเป้าหมายตอนนี้ช่วยอย่าเอากฎที่ตั้งไว้ มาเพื่อขัดสิ่งที่จะทำ หรือสิ่งที่มีแล้วจะช่วยให้ทำงานได้ดี หรือมีประสิทธิภาพมากขึ้นได้ไหม ช่วยอย่าอิงตามกฎขนาดนั้น ช่วยสรุปมากอีกรอบว่าควรลงอะไรบ้างดี เอา deadline 10 วันออกไปเลย มันเยอะกว่านั้น อย่าให้ deadline กับ กฎ มาจำกัดกรอบความคิด เพราะยังไง progress มันไปไวมากๆอยู่แล้ว
+```
+
+```text
+1.ช่างหัว deadline ทำเต็มที่ไปเลย
+2.เรื่องเนื้อเรื่องเอาไว้ก่อน ไปทำท้ายสุด
+3.ลงที่ cloud หรือเครื่อง ลงที่ส่วนไหนจะเป็นการลงแบบไม่ให้ ai เปิดซ้ำๆหรือใช้งานหนักซ้ำๆ เป็นติดตัวไปเลย
+```
+→ **ไม่มีกำหนดส่งแล้ว** (แก้คำตอบ "ภายใน ต.ค. ~10 วัน" ข้างบน) · **เนื้อเรื่องทำท้ายสุด** · กฎใน CLAUDE.md ห้ามใช้เป็นเหตุผลปัดตกเครื่องมือหรือไอเดียที่ช่วยงาน (เสนอเต็มที่ แล้วบอกว่าชนกฎข้อไหนให้ผู้ใช้ตัดสิน) ·
+ที่ลงแบบติดตัว (ตรวจจากคู่มือ Claude Code) : skill ใน `.claude/skills/` ของ repo กับ MCP ใน `.mcp.json` ใช้ได้ทั้งแชท cloud และ Claude Code บนเครื่อง ไม่ต้องลงซ้ำ · plugin ที่ประกาศใน repo หรือลงด้วย `claude plugin install` ไม่โหลดในแชท cloud · ผลตรวจ repo และสิ่งที่ลงแล้วอยู่ `RESUME_PROMPT.md` สถานะล่าสุด
