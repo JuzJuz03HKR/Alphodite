@@ -118,6 +118,14 @@ namespace Tacetno433.Core
                 return;
             }
 
+            //Turn Check (Alpha 7) : scripted turn battles, one PASS or FAIL line per rule (DebugShots.Turn.cs)
+            if (names[0] == "turncheck")
+            {
+                TurnCheck();
+                game.Exit();
+                return;
+            }
+
             index = 0;
             frames = 0;
             Open(game, names[0]);

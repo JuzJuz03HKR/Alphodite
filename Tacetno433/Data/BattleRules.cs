@@ -5,6 +5,47 @@
     //hides its own tuning numbers.
     public static class BattleRules
     {
+        //TURN BATTLE (Alpha 7, 18 Oct) : the turn based fight that replaces the rhythm duel
+        //(docs/ALPHA7_DESIGN.md, sections 5 and 8). Battle/TurnBattle.cs reads every number here.
+        //They are FIRST GUESSES that nobody has played yet : tune them with "--shots turncheck"
+        //and real play. The rhythm duel numbers further down stay until the old duel is removed.
+
+        //Life and Speed of the band, by family in the order of the Family enum : strings, winds, percussion.
+        //Each round everybody acts once, the fastest first (winds, then strings, then percussion).
+        public static int[] TurnHp = { 30, 26, 36 };
+        public static int[] TurnSpeed = { 5, 7, 3 };
+
+        //Life and Speed of TACET, by EnemyKind : normal, elite, boss.
+        //Speed 4 puts an enemy after the strings and before the percussion.
+        public static int[] TurnEnemyHp = { 50, 120, 250 };
+        public static int[] TurnEnemySpeed = { 4, 4, 4 };
+
+        //Attack : damage = the musician's power x TurnAttackPerPower, then x how the swipe went
+        public static float TurnAttackPerPower = 2f;
+        public static float TurnPerfect = 1.3f;     // right way, right size, on time
+        public static float TurnGood = 1f;          // right way, right size, a little off time
+        public static float TurnWrongSize = 0.7f;   // on time but the wrong size
+        public static float TurnMiss = 0.4f;        // the wrong way, too early, too late or no swipe
+
+        //Enemy Attack : how many notes one attack has on floor 1, 2 and 3 (a random count from
+        //min to max), and how hard each note hits : the enemy's average Pattern power x TurnNoteDamage
+        public static int[] TurnNotesMin = { 1, 2, 3 };
+        public static int[] TurnNotesMax = { 2, 3, 4 };
+        public static float TurnNoteDamage = 1.5f;
+
+        //PARRY : swiping back at a note. PERFECT blocks all of it and gives breath back,
+        //GOOD lets this share through, a MISS or no swipe lets all of it through.
+        public static float TurnParryGoodKeep = 0.5f;
+
+        //BREATH : one pool for the whole band (the user chose shared, 18 Oct). Skills spend it.
+        public static int TurnBreathMax = 10;
+        public static int TurnBreathStart = 3;
+        public static int TurnBreathPerAttack = 1;
+        public static int TurnBreathPerParry = 1;   // for each note parried PERFECT
+
+        //KNOCKED OUT : a musician at 0 HP sits out the rest of the fight and gets up with this much after it
+        public static int TurnReviveHp = 1;
+
         //Battle Shape
         public const int BeatsPerRound = 8;       // sub-turns in one round
         public const int MaxRounds = 3;           // after this, whoever is ahead wins
