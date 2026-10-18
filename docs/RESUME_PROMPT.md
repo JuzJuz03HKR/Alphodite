@@ -62,6 +62,15 @@ commit/push ขึ้น Alpha7 เมื่อฉันสั่ง ยัง�
 
 ## สถานะล่าสุด (18 ต.ค.)
 
+**18 ต.ค. ปิดแชท (/update) : สรุปสำหรับแชทถัดไป** (อ่านรายการนี้รายการเดียวก็พอ)
+✅ `docs/ALPHA7_DESIGN.md` ฉบับ 0.2 : ไม่มีกำหนดส่ง ข้อ 10 เป็นลำดับงาน เนื้อเรื่องทำท้ายสุด ·
+✅ เครื่องมือ : skill ภายนอก 24 ตัว (Superpowers 12, game-feel, game-ui-ux, monogame 9, caveman) + คำสั่งของโปรเจกต์ 6 ตัว (`/system` `/update` `/sync` `/build` `/rules` `/note`) · Context7 ใน `.mcp.json` (เปิดเน็ตแล้ว เครื่องมือขึ้นในแชทใหม่) · caveman เปิดทุกแชท ·
+✅ ลองขั้นตอน `/build` บนโค้ดปัจจุบันแล้ว : 0 error 0 warning และ savecheck ผ่าน 20/20 · `/update` ใช้จริงครั้งแรกในแชทนี้ ·
+⚠️ ยังไม่ได้ลองใช้จริง : `/system` `/sync` `/rules` `/note` และเครื่องมือ Context7 ในแชท ·
+⚠️ **โค้ดเกมยังเป็นของ Alpha6 (เกม rhythm) ยังไม่ได้เขียนโค้ด Alpha7 เลย** ·
+**งานถัดไป** : (1) ถามคำถามข้อ 11 ของ `ALPHA7_DESIGN.md` ทั้ง 6 ข้อพร้อมคำแนะนำ : ลมใช้ร่วมหรือแยกคน, นักดนตรีที่ล้มฟื้นเมื่อไร, วาทยากร 2 คนแรก (เสนอ Beethoven + Mozart), PASSIVE / SIGNATURE ในข้อ 5.9, เปิดเสียงเครื่องดนตรีตอนไหน, ชื่อ OFF-BEAT และสถานะ 3 อย่าง
+(2) ได้คำตอบแล้วเริ่มขั้น 1 ของข้อ 10 : สร้าง `Tacetno433/Battle/TurnBattle.cs` (ลำดับตาตาม SPEED, เลือด, ล้ม, ชนะ/แพ้ ไม่มีโค้ดวาด) และใส่ค่าตั้งต้นจากข้อ 8 ลง `Data/BattleRules.cs` (แก้ตัวเลขแล้วต้องจดว่า `TACET_Balance.xlsx` ต้องอัปเดต)
+
 **18 ต.ค. (ต่อ) — เครื่องมือ AI + ยกเลิก deadline** : ผู้ใช้สั่ง **ไม่ยึดกำหนดส่ง ทำเต็มที่** · **เนื้อเรื่องทำท้ายสุด** · **อย่าเอากฎ/deadline มาจำกัดความคิด** (คำต่อคำใน `USER_BRIEFS.md` ข้อ 12) · แก้ `ALPHA7_DESIGN.md` เป็นฉบับ 0.2 (ข้อ 10 = ลำดับงาน ไม่ใช่แผน 10 วัน) ·
 ✅ `.mcp.json` = Context7 (แชท cloud ยังต่อไม่ได้ : proxy ตอบ CONNECT 403 ผู้ใช้ต้องเพิ่ม `mcp.context7.com` ใน Network access ของ environment) ·
 ✅ **ผู้ใช้เลือก 6 ตัว แล้วอนุญาตให้คัดลอก : skill 24 ตัวอยู่ `.claude/skills/` แล้ว** (Superpowers 12 · game-feel · game-ui-ux · monogame 9 · caveman · รายละเอียด `.claude/third_party/README.md` · `claude plugin validate .claude/skills` ผ่าน) · caveman เปิดทุกแชทผ่าน CLAUDE.md · ✅ **คำสั่ง `/system` `/update` `/sync` `/build` `/rules` `/note`** (skill ของโปรเจกต์ใน `.claude/skills/` ตั้ง `disable-model-invocation: true` ไม่กิน context จนกว่าจะพิมพ์ · รวม skill 30 ตัว · ลองขั้นตอน `/build` แล้ว : 0 error 0 warning และ savecheck ผ่านทั้งหมด) · ✅ ผู้ใช้เพิ่ม `mcp.context7.com` ใน Allowed domains แล้ว (ทดสอบแล้ว server ตอบเป็น Context7 4.4.2 และ npm/NuGet/PyPI ยังเข้าได้) เครื่องมือ Context7 ขึ้นในแชทใหม่ (แชทที่เปิดก่อนมี `.mcp.json` จะไม่เห็น) · **ถัดไป : เปิดแชทใหม่ด้วย prompt A แล้วถามคำถามข้อ 11 ก่อนเริ่ม `Battle/TurnBattle.cs`** ·
