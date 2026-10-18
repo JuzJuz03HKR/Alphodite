@@ -1154,3 +1154,22 @@ npx skills add alca259/monogame-skills --list
 ```
 → **ไม่มีกำหนดส่งแล้ว** (แก้คำตอบ "ภายใน ต.ค. ~10 วัน" ข้างบน) · **เนื้อเรื่องทำท้ายสุด** · กฎใน CLAUDE.md ห้ามใช้เป็นเหตุผลปัดตกเครื่องมือหรือไอเดียที่ช่วยงาน (เสนอเต็มที่ แล้วบอกว่าชนกฎข้อไหนให้ผู้ใช้ตัดสิน) ·
 ที่ลงแบบติดตัว (ตรวจจากคู่มือ Claude Code) : skill ใน `.claude/skills/` ของ repo กับ MCP ใน `.mcp.json` ใช้ได้ทั้งแชท cloud และ Claude Code บนเครื่อง ไม่ต้องลงซ้ำ · plugin ที่ประกาศใน repo หรือลงด้วย `claude plugin install` ไม่โหลดในแชท cloud · ผลตรวจ repo และสิ่งที่ลงแล้วอยู่ `RESUME_PROMPT.md` สถานะล่าสุด
+
+**18 ต.ค. (ต่อ) : เลือก 6 ตัว** (คำต่อคำ)
+
+```text
+1.Superpowers
+2. game-feel
+3. game-ui-ux
+4. Context7
+5. monogame-skills
+6.caveman 
+ถ้าต้องการลง 6 ตัวนี้ คุณจะให้ฉันโหลดตัวไหน แล้วคุณจะไปโหลดตัวไหน
+```
+
+```text
+อนุญาตให้คัดลอก skill ทั้ง 5 ตัวเข้า repo
+เพิ่ม mcp.context7.com ใน Network access → Allowed domains ของ environment นี่คือยังไงอธิบายให้ละเอียด
+```
+→ คัดลอก skill 24 ตัวเข้า `.claude/skills/` (รายการใน `.claude/third_party/README.md`) · Context7 อยู่ `.mcp.json` · caveman เปิดทุกแชทผ่าน CLAUDE.md ·
+rpg / roguelike / save-systems / gstack-game ที่ Claude เสนอเพิ่ม ไม่ได้ลง (ผู้ใช้เลือก 6 ตัวนี้)
