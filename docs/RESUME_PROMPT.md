@@ -7,6 +7,22 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 ---
 
+## วิธีที่ง่ายที่สุด : คำสั่ง /system /update /sync (18 ต.ค.)
+
+- **เปิดแชทใหม่** : พิมพ์ `/system` (ใส่งานต่อท้ายได้ เช่น `/system ทำ TurnBattle ต่อ`)
+- **ก่อนย้ายไปแชทใหม่** (context ใกล้เต็ม) : พิมพ์ `/update` ในแชทเดิม บันทึกเอกสารแล้ว commit และ push ให้
+- **ทำหลายแชทพร้อมกัน** : พิมพ์ `/sync` ดึงงานที่แชทอื่น push มา และส่งงานของแชทนี้ขึ้นไป (`/sync push` = commit งานที่ค้างด้วย)
+- **คำสั่งเสริม** : `/build` คอมไพล์ในแชท cloud (ต่อท้าย `shots duel,band` `simulate` `audit` `savecheck` ได้) · `/rules` ตรวจโค้ดกับกติกาที่อาจารย์ตรวจ · `/note` จดข้อความของผู้ใช้คำต่อคำทันที
+- ไฟล์คำสั่งอยู่ `.claude/skills/<ชื่อคำสั่ง>/SKILL.md` ถ้าคำสั่งไม่ขึ้นในแชท ให้ใช้ prompt A ข้างล่างแทน
+
+## แชทที่กำลังทำงาน (ใช้กับ /system /update /sync)
+
+| เริ่ม | งาน | ไฟล์ที่แตะ |
+|---|---|---|
+| (ว่าง) | | |
+
+---
+
 ## A. เปิดแชทใหม่ (ใช้อันนี้เป็นหลัก)
 
 ```text
@@ -48,7 +64,7 @@ commit/push ขึ้น Alpha7 เมื่อฉันสั่ง ยัง�
 
 **18 ต.ค. (ต่อ) — เครื่องมือ AI + ยกเลิก deadline** : ผู้ใช้สั่ง **ไม่ยึดกำหนดส่ง ทำเต็มที่** · **เนื้อเรื่องทำท้ายสุด** · **อย่าเอากฎ/deadline มาจำกัดความคิด** (คำต่อคำใน `USER_BRIEFS.md` ข้อ 12) · แก้ `ALPHA7_DESIGN.md` เป็นฉบับ 0.2 (ข้อ 10 = ลำดับงาน ไม่ใช่แผน 10 วัน) ·
 ✅ `.mcp.json` = Context7 (แชท cloud ยังต่อไม่ได้ : proxy ตอบ CONNECT 403 ผู้ใช้ต้องเพิ่ม `mcp.context7.com` ใน Network access ของ environment) ·
-✅ **ผู้ใช้เลือก 6 ตัว แล้วอนุญาตให้คัดลอก : skill 24 ตัวอยู่ `.claude/skills/` แล้ว** (Superpowers 12 · game-feel · game-ui-ux · monogame 9 · caveman · รายละเอียด `.claude/third_party/README.md` · `claude plugin validate .claude/skills` ผ่าน) · caveman เปิดทุกแชทผ่าน CLAUDE.md · ✅ ผู้ใช้เพิ่ม `mcp.context7.com` ใน Allowed domains แล้ว (ทดสอบแล้ว server ตอบเป็น Context7 4.4.2 และ npm/NuGet/PyPI ยังเข้าได้) เครื่องมือ Context7 ขึ้นในแชทใหม่ (แชทที่เปิดก่อนมี `.mcp.json` จะไม่เห็น) · **ถัดไป : เปิดแชทใหม่ด้วย prompt A แล้วถามคำถามข้อ 11 ก่อนเริ่ม `Battle/TurnBattle.cs`** ·
+✅ **ผู้ใช้เลือก 6 ตัว แล้วอนุญาตให้คัดลอก : skill 24 ตัวอยู่ `.claude/skills/` แล้ว** (Superpowers 12 · game-feel · game-ui-ux · monogame 9 · caveman · รายละเอียด `.claude/third_party/README.md` · `claude plugin validate .claude/skills` ผ่าน) · caveman เปิดทุกแชทผ่าน CLAUDE.md · ✅ **คำสั่ง `/system` `/update` `/sync` `/build` `/rules` `/note`** (skill ของโปรเจกต์ใน `.claude/skills/` ตั้ง `disable-model-invocation: true` ไม่กิน context จนกว่าจะพิมพ์ · รวม skill 30 ตัว · ลองขั้นตอน `/build` แล้ว : 0 error 0 warning และ savecheck ผ่านทั้งหมด) · ✅ ผู้ใช้เพิ่ม `mcp.context7.com` ใน Allowed domains แล้ว (ทดสอบแล้ว server ตอบเป็น Context7 4.4.2 และ npm/NuGet/PyPI ยังเข้าได้) เครื่องมือ Context7 ขึ้นในแชทใหม่ (แชทที่เปิดก่อนมี `.mcp.json` จะไม่เห็น) · **ถัดไป : เปิดแชทใหม่ด้วย prompt A แล้วถามคำถามข้อ 11 ก่อนเริ่ม `Battle/TurnBattle.cs`** ·
 ผลตรวจตอนแรก (4 repo + caveman clone อ่านทั้งหมด ไม่เจอโค้ดส่งข้อมูลออก · ครั้งแรกการคัดลอกถูกตัวกรอง auto mode บล็อก จนผู้ใช้พิมพ์อนุญาต) · ชุดที่เสนอตอนแรก (rpg roguelike save-systems และ gstack-game ไม่ได้ลง เพราะผู้ใช้เลือกแค่ 6 ตัว) :
 - `obra/superpowers` (`bb92a77`, MIT, v7.0.0) 12 ตัว : brainstorming writing-plans executing-plans subagent-driven-development dispatching-parallel-agents systematic-debugging test-driven-development verification-before-completion requesting-code-review receiving-code-review using-git-worktrees finishing-a-development-branch · ไม่เอา writing-skills diagnosing-superpowers using-superpowers และ hook SessionStart (hook ใส่คำสั่ง "มีโอกาส 1% ต้องเรียก skill" ทุกเซสชัน ทำให้เรียก skill หนักทุกงาน)
 - `gamedev-skills/awesome-gamedev-agent-skills` (`0a70cfc`, Apache-2.0 ต้องมี NOTICE) 5 ตัว : game-feel game-ui-ux rpg roguelike save-systems · visual-novel / dialogue-systems รอตอนทำเนื้อเรื่อง · ตัวอย่างโค้ดเป็น Godot/Unity ต้องแปลงเป็น MonoGame เอง
