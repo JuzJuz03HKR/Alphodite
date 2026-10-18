@@ -46,6 +46,35 @@
         //KNOCKED OUT : a musician at 0 HP sits out the rest of the fight and gets up with this much after it
         public static int TurnReviveHp = 1;
 
+        //OFF-BEAT (ALPHA7_DESIGN 5.6) : an enemy's gauge. Full, it loses its next turn and takes more damage until then.
+        public static int TurnOffBeatMax = 100;
+        public static int TurnPerfectOffBeat = 15;    // a PERFECT attack
+        public static int TurnParryOffBeat = 10;      // each note parried PERFECT
+        public static float TurnOffBeatScale = 1.5f;  // damage against an enemy off the beat
+
+        //Statuses (ALPHA7_DESIGN 5.7)
+        public static int TurnDissonanceMost = 9;     // DISSONANCE stacks no higher
+        public static float TurnCrescendoStep = 0.15f;// CRESCENDO : each stack hits this much harder
+        public static int TurnCrescendoMost = 5;
+        public static int TurnMuteTurns = 1;          // MUTE : turns without skills
+        public static float TurnGuardKeep = 0.5f;     // GUARD : the share of a hit that gets through
+
+        //COUNTER and CADENZA (ALPHA7_DESIGN 5.4) : parry every note PERFECT and the target hits back for free.
+        //Every third attack of a boss is its CADENZA : one note more, each note harder, and a counter twice as hard.
+        public static float TurnCounterScale = 1f;    // x the target's attack damage
+        public static float TurnCadenzaCounter = 2f;
+        public static int TurnCadenzaEvery = 3;
+        public static float TurnCadenzaPower = 1.5f;
+
+        //Skill Notes : a HOLD note gives this much let go at once, up to Base + Gain held to the end.
+        //A ROLL note is PERFECT with this many shakes, GOOD with this many (MAESTRO asks for more).
+        public static float TurnHoldBase = 0.6f;
+        public static float TurnHoldGain = 0.8f;
+        public static int TurnRollPerfect = 5;
+        public static int TurnRollGood = 3;
+        public static int MaestroTurnRollPerfect = 6;
+        public static int MaestroTurnRollGood = 4;
+
         //Turn Feel (seconds) : how the battle page paces a swipe. The ring always closes at the same
         //speed, never eased, so the eye can count it (docs/research/ALPHA7_qte_parry.md).
         public static float TurnRingTime = 1.1f;          // from a note showing to the moment to swipe
@@ -54,6 +83,10 @@
         public static float TurnPause = 0.8f;             // after a turn, before the next one starts
         public static float TurnHitStop = 0.075f;         // the band and TACET freeze for a moment on a PERFECT
         public static float TurnEndTime = 2.2f;           // the win or lose banner stays this long
+        public static float TurnSparkGap = 0.3f;          // a spark comes this soon after the note before it
+        public static float TurnHoldTime = 0.8f;          // how long a HOLD note wants holding
+        public static float TurnHoldStill = 260f;         // pixels per second the baton may drift and still count as still
+        public static float TurnRollTime = 1.2f;          // how long a ROLL note lasts
 
         //Battle Shape
         public const int BeatsPerRound = 8;       // sub-turns in one round

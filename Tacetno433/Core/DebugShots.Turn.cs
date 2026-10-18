@@ -51,20 +51,21 @@ namespace Tacetno433.Core
                 marksOk = enemy.IntentWays[i] != Flick.None && enemy.IntentSizes[i] >= 0 && enemy.IntentSizes[i] <= 2;
             report += Same("intent marks", "True", marksOk.ToString());
 
-            //PARRY every note PERFECT : no damage, 1 breath per note
+            //PARRY every note PERFECT : no damage, 1 breath per note, and the COUNTER hits HUSH for the target's power x 2
             Grade[] allPerfect = new Grade[notes];
             for (int i = 0; i < notes; i++) allPerfect[i] = Grade.Perfect;
+            int counter = enemy.IntentTarget.Musician.Power * 2;
             int taken = b.TakeEnemyAttack(allPerfect);
-            report += Same("parry perfect", "0 " + (5 + notes), taken + " " + b.Breath);
+            report += Same("parry perfect", "0 " + (5 + notes) + " " + (30 - counter), taken + " " + b.Breath + " " + enemy.Hp);
 
             //Wrong size : 6 x 2 x 0.7 = 8.4, then round two starts with KLARA again
             hit = b.Attack(enemy, Grade.Perfect, false);
-            report += Same("wrong size", "8 22", hit + " " + enemy.Hp);
+            report += Same("wrong size", "8 " + (22 - counter), hit + " " + enemy.Hp);
             report += Same("round two", "2 KLARA", b.Round + " " + b.Current.Name);
 
             //Miss : 4 x 2 x 0.4 = 3.2
             hit = b.Attack(enemy, Grade.Miss, true);
-            report += Same("miss", "3 19", hit + " " + enemy.Hp);
+            report += Same("miss", "3 " + (19 - counter), hit + " " + enemy.Hp);
 
             //Swipe table
             report += Same("swipe table", "1.3 1 0.7 0.4 0.4",
@@ -140,6 +141,94 @@ namespace Tacetno433.Core
                 else if (b.Step == TurnStep.EnemyTurn) b.TakeEnemyAttack(new Grade[] { Grade.Perfect, Grade.Perfect, Grade.Perfect, Grade.Perfect });
             }
             report += Same("breath top", BattleRules.TurnBreathMax.ToString(), b.Breath.ToString());
+
+            //SKILLS (step 4) : two for each musician, every cost 2 to 4, every skill has notes
+            bool skillsOk = SkillList.All.Length == MusicianList.All.Length * 2;
+            for (int i = 0; i < SkillList.All.Length && skillsOk; i++)
+                skillsOk = SkillList.All[i].Cost >= 2 && SkillList.All[i].Cost <= 4 && SkillList.All[i].Notes.Length > 0;
+            report += Same("skills", "18 True", SkillList.All.Length + " " + skillsOk);
+
+            //QUICK BOW (ANNA) : PERFECT 5 x 2 x 1.3 x 0.5 = 6.5 -> 6, GOOD 5, MISS nothing, 2 DISSONANCE, 2 breath spent
+            b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
+            b.Attack(b.Enemies[0], Grade.Good, true);                                  // KLARA 8, breath 4
+            bool used = b.UseSkill(SkillList.First(band[0]), b.Enemies[0], new NoteResult[] {
+                new NoteResult(Grade.Perfect, true, 1f), new NoteResult(Grade.Good, true, 1f), new NoteResult(Grade.Miss, true, 1f) });
+            report += Same("quick bow", "True 31 2 2", used + " " + b.Enemies[0].Hp + " " + b.Enemies[0].Dissonance + " " + b.Breath);
+
+            //DISSONANCE : at the end of HUSH's turn it loses 2, then 1 stack is left
+            b.TakeEnemyAttack(null);
+            report += Same("dissonance", "29 1", b.Enemies[0].Hp + " " + b.Enemies[0].Dissonance);
+
+            //OFF-BEAT : a full gauge throws HUSH off the beat, the next hit is x1.5 (5 x 2 x 1.5 = 15) and it loses its turn
+            b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
+            b.Enemies[0].OffBeat = 90;
+            b.Attack(b.Enemies[0], Grade.Perfect, true);                               // KLARA 10, the gauge fills
+            bool broke = b.Enemies[0].Staggered;
+            b.Attack(b.Enemies[0], Grade.Good, true);                                  // ANNA 15
+            report += Same("off-beat", "True 25 PlayerTurn OTTO False", broke + " " + b.Enemies[0].Hp + " " + b.Step + " " + b.Current.Name + " " + b.Enemies[0].Staggered);
+
+            //COUNTER : every note parried PERFECT, the target hits back for its attack (power x 2)
+            b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
+            b.Attack(b.Enemies[0], Grade.Good, true);                                  // KLARA 8
+            b.Attack(b.Enemies[0], Grade.Good, true);                                  // ANNA 10, HUSH 32
+            Fighter struck = b.Current.IntentTarget;
+            notes = b.Current.IntentNotes.Length;
+            allPerfect = new Grade[notes];
+            for (int i = 0; i < notes; i++) allPerfect[i] = Grade.Perfect;
+            b.TakeEnemyAttack(allPerfect);
+            report += Same("counter", (32 - struck.Musician.Power * 2).ToString(), b.Enemies[0].Hp.ToString());
+
+            //STAND FIRM (OTTO) : GUARD and TAUNT, HUSH turns to him and each note does half (6 -> 3)
+            b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
+            b.Attack(b.Enemies[0], Grade.Good, true);
+            b.Attack(b.Enemies[0], Grade.Good, true);
+            b.TakeEnemyAttack(null);
+            b.UseSkill(SkillList.Second(band[2]), null, new NoteResult[] { new NoteResult(Grade.Good, true, 1f) });
+            bool aimed = b.Enemies[0].IntentTarget == b.Party[2];
+            b.Attack(b.Enemies[0], Grade.Good, true);
+            b.Attack(b.Enemies[0], Grade.Good, true);
+            notes = b.Current.IntentNotes.Length;
+            int guarded = b.TakeEnemyAttack(null);
+            report += Same("guard taunt", "True " + (3 * notes), aimed + " " + guarded);
+
+            //CRESCENDO : 2 stacks hit 30 percent harder (5 x 2 x 1.3 = 13), a MISS loses them all
+            b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
+            b.Party[1].Crescendo = 2;
+            b.Attack(b.Enemies[0], Grade.Miss, true);                                  // KLARA misses
+            b.Party[0].Crescendo = 2;
+            int loud = b.Attack(b.Enemies[0], Grade.Good, true);                       // ANNA
+            report += Same("crescendo", "0 13 2", b.Party[1].Crescendo + " " + loud + " " + b.Party[0].Crescendo);
+
+            //MUTE : no skills on that turn, and it wears off at the end of it
+            b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
+            b.Party[1].Mute = 1;
+            bool canSkill = b.CanUse(SkillList.First(band[1]));
+            b.Attack(b.Enemies[0], Grade.Good, true);
+            report += Same("mute", "False 0", canSkill + " " + b.Party[1].Mute);
+
+            //SOFT AIR (KLARA) : 3 back per note that lands to the whole band, never past full life
+            b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433), new int[] { 20, 26, 30 });
+            b.UseSkill(SkillList.First(band[1]), null, new NoteResult[] { new NoteResult(Grade.Perfect, true, 1f), new NoteResult(Grade.Good, false, 1f) });
+            report += Same("soft air", "26 26 36 1", b.Party[0].Hp + " " + b.Party[1].Hp + " " + b.Party[2].Hp + " " + b.Breath);
+
+            //THE FLOOR (BORIS) : one held note hits every enemy. PERFECT held to the end : 7 x 2 x 1.3 x 1.4 = 25.48 -> 25
+            Musician boris = MusicianList.All[8];
+            b = new TurnBattle(new List<Musician> { boris }, new List<Enemy> { hush, deadAir }, 1, new Random(433));
+            while (b.Step == TurnStep.EnemyTurn) b.TakeEnemyAttack(null);
+            b.UseSkill(SkillList.First(boris), null, new NoteResult[] { new NoteResult(Grade.Perfect, true, 1f) });
+            report += Same("the floor", "25 25 0", b.Enemies[0].Hp + " " + b.Enemies[1].Hp + " " + b.Breath);
+
+            //CADENZA : REQUIEM's third attack has one note more and each note x1.5 (9 -> 13.5 -> 14)
+            b = new TurnBattle(band, new List<Enemy> { EnemyList.All[6] }, 1, new Random(433));
+            for (int i = 0; i < 40 && !b.Enemies[0].IntentCadenza && b.Step != TurnStep.Lost; i++)
+            {
+                if (b.Step == TurnStep.PlayerTurn) b.Attack(b.Enemies[0], Grade.Miss, true);
+                else b.TakeEnemyAttack(new Grade[] { Grade.Good, Grade.Good, Grade.Good, Grade.Good });
+            }
+            report += Same("cadenza", "True 14 2", b.Enemies[0].IntentCadenza + " " + b.Enemies[0].IntentNotes[0] + " " + b.Enemies[0].Attacks);
+
+            //ROLL : 5 shakes PERFECT, 3 GOOD, fewer a MISS, none at all a HESITATE (NORMAL)
+            report += Same("roll", "Perfect Good Miss Hesitate", b.RollGrade(5) + " " + b.RollGrade(3) + " " + b.RollGrade(1) + " " + b.RollGrade(0));
 
             File.WriteAllText(Path.Combine(outDir, "turncheck.txt"), report);
         }

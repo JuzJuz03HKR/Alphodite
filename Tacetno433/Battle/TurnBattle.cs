@@ -6,10 +6,49 @@ using Tacetno433.Data;
 namespace Tacetno433.Battle
 {
     //TurnStep : what the turn battle is waiting for (Alpha 7)
-    //   PlayerTurn   a musician is up : the screen asks for a target and the attack swipe
+    //   PlayerTurn   a musician is up : the screen asks for a command, a target and the swipes
     //   EnemyTurn    an enemy is up : the screen shows its notes and asks for the parry swipes
     //   Won / Lost   the fight is over
     public enum TurnStep { PlayerTurn, EnemyTurn, Won, Lost }
+
+    //TurnEventKind : something that happened, kept so the screen can show it (numbers, words, sparks).
+    //The rules never draw, they only write down what happened (docs/research/ALPHA7_battle_ui.md).
+    public enum TurnEventKind { Damage, Heal, Breath, Dissonance, Crescendo, Mute, Break, Skip, Counter, Down }
+
+    public struct TurnEvent
+    {
+        public TurnEventKind Kind;
+        public Fighter Who;
+        public int Amount;
+
+        public TurnEvent(TurnEventKind kind, Fighter who, int amount)
+        {
+            Kind = kind;
+            Who = who;
+            Amount = amount;
+        }
+    }
+
+    //NoteResult : how one note of a swipe went, handed in by the screen.
+    //Hold is the share of a held note's time the baton stayed still (1 for every other note).
+    public struct NoteResult
+    {
+        public Grade Grade;
+        public bool RightSize;
+        public float Hold;
+
+        public NoteResult(Grade grade, bool rightSize, float hold)
+        {
+            Grade = grade;
+            RightSize = rightSize;
+            Hold = hold;
+        }
+
+        public bool Lands
+        {
+            get { return Grade == Grade.Perfect || Grade == Grade.Good; }
+        }
+    }
 
     //Fighter : one body on the field, a musician of the band or a shape of TACET
     public class Fighter
@@ -29,16 +68,32 @@ namespace Tacetno433.Battle
         public int[] IntentNotes = new int[0];   // how hard each note of the attack hits
         public Flick[] IntentWays = new Flick[0];  // the way to swipe back at each note
         public int[] IntentSizes = new int[0];     // the size of each note : 0 p, 1 mf, 2 f (Baton.SizeOf order)
+        public bool IntentCadenza;                 // CADENZA : this attack is a boss's big move
+        public int Attacks;                        // attacks made so far, a boss's every third is a CADENZA
+
+        //Statuses (ALPHA7_DESIGN 5.7) and the two short guards of the percussion
+        public int Dissonance;         // DISSONANCE : loses this much life at the end of its turn, then one less
+        public int Crescendo;          // CRESCENDO : hits TurnCrescendoStep harder per stack, all lost on a MISS
+        public int Mute;               // MUTE : turns left without skills
+        public bool Guard;             // GUARD : takes TurnGuardKeep of every hit until its next turn
+        public bool Taunt;             // TAUNT : every enemy aims here until its next turn
+
+        //OFF-BEAT (enemies, ALPHA7_DESIGN 5.6) : the gauge fills from PERFECT hits, parries and
+        //percussion. Full, the enemy is thrown off the beat : it loses its next turn and takes
+        //TurnOffBeatScale damage until then.
+        public int OffBeat;
+        public bool Staggered;
 
         public bool Down { get { return Hp <= 0; } }
     }
 
     //TurnBattle : THE RULES OF THE TURN BASED FIGHT (Alpha 7). No drawing code lives here.
     //A screen runs it like this :
-    //   PlayerTurn : the player picks an enemy and swipes, the screen calls Attack(target, grade, rightSize)
+    //   PlayerTurn : the player attacks (Attack) or plays a skill (UseSkill) with the notes they swiped
     //   EnemyTurn  : the screen shows Current.IntentNotes flying at Current.IntentTarget, the player
     //                swipes back at each one, the screen calls ParryNote for each note as it lands
     //                and FinishEnemyTurn after the last (TakeEnemyAttack does all of it at once)
+    //   After every call the screen reads Events to show what happened, then clears it.
     //   Won / Lost : the fight is over, HpAfterBattle gives each musician's life to keep
     //Every number comes from Data/BattleRules.cs (TURN BATTLE section).
     //Grade is the same enum the rhythm duel uses (Battle/BattleState.cs).
@@ -54,10 +109,14 @@ namespace Tacetno433.Battle
 
         public int Breath;             // BREATH, shared by the whole band
         public int Floor;              // 1, 2 or 3
-        public bool Maestro;           // MAESTRO MODE : narrower timing windows
+        public bool Maestro;           // MAESTRO MODE : narrower timing windows, more shakes for a roll
         public TurnStep Step;
 
+        //Events : what happened since the screen last looked
+        public List<TurnEvent> Events = new List<TurnEvent>();
+
         private Random random;
+        private int parried;           // notes of the current enemy attack parried PERFECT, for the COUNTER
 
         //Current : whoever is acting now (null once the fight is over)
         public Fighter Current
@@ -107,6 +166,10 @@ namespace Tacetno433.Battle
             if (!CheckEnd()) StartRound();
         }
 
+        //======================================================================================
+        //Turn Order
+        //======================================================================================
+
         //Round Start : line up everybody still standing, fastest first, and let every enemy decide its move.
         //Ties : the band goes before TACET, then the order they were listed in.
         //A simple insertion sort, so equal speeds never swap places (List.Sort does not promise that).
@@ -136,13 +199,21 @@ namespace Tacetno433.Battle
             BeginTurn();
         }
 
-        //Enemy Intent : pick a musician to hit and how many notes, from the floor's range
+        //Enemy Intent : pick a musician to hit and how many notes, from the floor's range.
+        //CADENZA : every third attack of a boss is its big move, one note more and each note harder.
         private void PlanIntent(Fighter enemy)
         {
-            enemy.IntentTarget = RandomStanding();
+            enemy.IntentTarget = PickTarget();
 
             int count = random.Next(BattleRules.TurnNotesMin[Floor - 1], BattleRules.TurnNotesMax[Floor - 1] + 1);
             int hit = Math.Max(1, (int)Math.Round(enemy.Enemy.SongNotePower() * BattleRules.TurnNoteDamage));   // SongNotePower = the average of its Pattern notes
+
+            enemy.IntentCadenza = enemy.Enemy.Kind == EnemyKind.Boss && (enemy.Attacks + 1) % BattleRules.TurnCadenzaEvery == 0;
+            if (enemy.IntentCadenza)
+            {
+                count++;
+                hit = (int)Math.Round(hit * BattleRules.TurnCadenzaPower);
+            }
 
             enemy.IntentNotes = new int[count];
             enemy.IntentWays = new Flick[count];
@@ -155,8 +226,12 @@ namespace Tacetno433.Battle
             }
         }
 
-        private Fighter RandomStanding()
+        //Pick Target : a musician with TAUNT up if there is one, else anyone standing
+        private Fighter PickTarget()
         {
+            for (int i = 0; i < Party.Count; i++)
+                if (Party[i].Taunt && !Party[i].Down) return Party[i];
+
             List<Fighter> standing = new List<Fighter>();
             for (int i = 0; i < Party.Count; i++)
                 if (!Party[i].Down) standing.Add(Party[i]);
@@ -165,26 +240,113 @@ namespace Tacetno433.Battle
             return standing[random.Next(standing.Count)];
         }
 
-        //Turn Start : tell the screen whose turn it is. An enemy whose target fell before its
-        //turn came picks another musician, so the attack it showed still happens.
+        //Turn Start : tell the screen whose turn it is. GUARD and TAUNT end when their owner is up again.
+        //OFF-BEAT : an enemy thrown off the beat loses this turn (its statuses still count down).
+        //An enemy whose target fell, or who is now taunted, aims again, so the attack it showed still happens.
         private void BeginTurn()
         {
-            Fighter f = Order[OrderIndex];
-            if (f.IsEnemy)
+            while (true)
             {
-                if (f.IntentTarget == null || f.IntentTarget.Down) f.IntentTarget = RandomStanding();
-                Step = TurnStep.EnemyTurn;
-            }
-            else
-            {
-                Step = TurnStep.PlayerTurn;
+                Fighter f = Order[OrderIndex];
+                f.Guard = false;
+                f.Taunt = false;
+
+                if (f.IsEnemy && f.Staggered)
+                {
+                    f.Staggered = false;
+                    Events.Add(new TurnEvent(TurnEventKind.Skip, f, 0));
+                    EndOfTurn(f);
+                    if (CheckEnd()) return;
+                    if (!Advance())
+                    {
+                        StartRound();
+                        return;
+                    }
+                    continue;
+                }
+
+                if (f.IsEnemy)
+                {
+                    Fighter taunt = PickTaunt();
+                    if (taunt != null) f.IntentTarget = taunt;
+                    else if (f.IntentTarget == null || f.IntentTarget.Down) f.IntentTarget = PickTarget();
+                    parried = 0;
+                    Step = TurnStep.EnemyTurn;
+                }
+                else
+                {
+                    Step = TurnStep.PlayerTurn;
+                }
+                return;
             }
         }
+
+        private Fighter PickTaunt()
+        {
+            for (int i = 0; i < Party.Count; i++)
+                if (Party[i].Taunt && !Party[i].Down) return Party[i];
+            return null;
+        }
+
+        //Advance : move to the next one standing this round, false when the round is over
+        private bool Advance()
+        {
+            OrderIndex++;
+            while (OrderIndex < Order.Count && Order[OrderIndex].Down) OrderIndex++;
+            return OrderIndex < Order.Count;
+        }
+
+        //Next Turn : the one who just acted counts down its statuses, then the fight ends or the next one is up.
+        //When everybody has had a turn a new round starts.
+        private void NextTurn()
+        {
+            EndOfTurn(Order[OrderIndex]);
+            if (CheckEnd()) return;
+
+            if (Advance()) BeginTurn();
+            else StartRound();
+        }
+
+        //End Of Turn : DISSONANCE hurts, then fades by one. MUTE counts down.
+        private void EndOfTurn(Fighter f)
+        {
+            if (f.Dissonance > 0 && !f.Down)
+            {
+                Hurt(f, f.Dissonance);
+                f.Dissonance--;
+            }
+            if (f.Mute > 0) f.Mute--;
+        }
+
+        //Win / Lose : every enemy down wins, every musician down loses
+        private bool CheckEnd()
+        {
+            if (AllDown(Enemies)) { Step = TurnStep.Won; return true; }
+            if (AllDown(Party)) { Step = TurnStep.Lost; return true; }
+            return false;
+        }
+
+        private static bool AllDown(List<Fighter> side)
+        {
+            for (int i = 0; i < side.Count; i++)
+                if (!side[i].Down) return false;
+            return true;
+        }
+
+        //======================================================================================
+        //Player Turn
+        //======================================================================================
 
         //Can Target : the player may only attack an enemy that is still standing
         public bool CanTarget(Fighter f)
         {
             return f != null && f.IsEnemy && !f.Down;
+        }
+
+        //Can Use : enough BREATH, and not under MUTE
+        public bool CanUse(Skill s)
+        {
+            return Step == TurnStep.PlayerTurn && s != null && Breath >= s.Cost && Current.Mute == 0;
         }
 
         //Player Attack : the musician whose turn it is hits one enemy.
@@ -195,14 +357,97 @@ namespace Tacetno433.Battle
             if (Step != TurnStep.PlayerTurn || !CanTarget(target)) return 0;
 
             Fighter attacker = Current;
-            int power = attacker.Musician.Power + attacker.Musician.Rehearsed;
-            int damage = Math.Max(1, (int)Math.Round(power * BattleRules.TurnAttackPerPower * SwipeScale(grade, rightSize)));
-
-            target.Hp = Math.Max(0, target.Hp - damage);
+            int damage = HitDamage(attacker, target, SwipeScale(grade, rightSize));
+            Hurt(target, damage);
             AddBreath(BattleRules.TurnBreathPerAttack);
+
+            if (grade == Grade.Perfect && rightSize) AddOffBeat(target, BattleRules.TurnPerfectOffBeat);   // OFF-BEAT
+            if (grade != Grade.Perfect && grade != Grade.Good) attacker.Crescendo = 0;                    // CRESCENDO is lost on a MISS
 
             NextTurn();
             return damage;
+        }
+
+        //Player Skill : the musician whose turn it is plays a skill. target is the enemy or the musician
+        //it was played at (ignored for skills that pick their own targets). results holds how each note
+        //went, in order. EVERY NOTE THAT LANDS DOES THE SKILL ONCE (see Data/Skill.cs).
+        //Returns false when the skill could not be played.
+        public bool UseSkill(Skill s, Fighter target, NoteResult[] results)
+        {
+            if (!CanUse(s)) return false;
+
+            Fighter user = Current;
+            List<Fighter> targets = TargetsOf(s, target, user);
+            if (targets.Count == 0) return false;
+
+            Breath -= s.Cost;
+            bool anyLanded = false;
+
+            for (int n = 0; n < s.Notes.Length; n++)
+            {
+                NoteResult r = (results != null && n < results.Length) ? results[n] : new NoteResult(Grade.Hesitate, true, 1f);
+                if (!r.Lands)
+                {
+                    user.Crescendo = 0;                                                     // CRESCENDO is lost on a MISS
+                    continue;
+                }
+                anyLanded = true;
+
+                float hold = s.Notes[n].Kind == NoteKind.Hold ? HoldScale(r.Hold) : 1f;    // HOLD
+                float scale = SwipeScale(r.Grade, r.RightSize) * hold;
+
+                for (int t = 0; t < targets.Count; t++)
+                {
+                    Fighter f = targets[t];
+                    if (f.Down) continue;
+
+                    if (f.IsEnemy)
+                    {
+                        if (s.Damage > 0f) Hurt(f, HitDamage(user, f, scale * s.Damage));
+                        if (s.Dissonance > 0 && !f.Down) AddDissonance(f, s.Dissonance);
+                        if (s.OffBeat > 0 && !f.Down) AddOffBeat(f, s.OffBeat);
+                    }
+                    else
+                    {
+                        if (s.Heal > 0) Heal(f, (int)Math.Round(s.Heal * hold));
+                        if (s.Crescendo > 0) AddCrescendo(f, s.Crescendo);
+                    }
+                }
+
+                if (s.Breath > 0) AddBreath(s.Breath);
+            }
+
+            //GUARD and TAUNT : the percussion stands in front, every enemy turns to them at once
+            if (anyLanded && s.Guard) user.Guard = true;
+            if (anyLanded && s.Taunt)
+            {
+                user.Taunt = true;
+                for (int i = 0; i < Enemies.Count; i++)
+                    if (!Enemies[i].Down) Enemies[i].IntentTarget = user;
+            }
+
+            NextTurn();
+            return true;
+        }
+
+        //Targets Of : who a skill reaches. An enemy or a musician that is down cannot be picked.
+        private List<Fighter> TargetsOf(Skill s, Fighter target, Fighter user)
+        {
+            List<Fighter> list = new List<Fighter>();
+
+            if (s.Target == SkillTarget.Enemy && CanTarget(target)) list.Add(target);
+            if (s.Target == SkillTarget.Self) list.Add(user);
+            if (s.Target == SkillTarget.Ally && target != null && !target.IsEnemy && !target.Down) list.Add(target);
+
+            if (s.Target == SkillTarget.AllEnemies)
+                for (int i = 0; i < Enemies.Count; i++)
+                    if (!Enemies[i].Down) list.Add(Enemies[i]);
+
+            if (s.Target == SkillTarget.AllAllies)
+                for (int i = 0; i < Party.Count; i++)
+                    if (!Party[i].Down) list.Add(Party[i]);
+
+            return list;
         }
 
         //Swipe Scale : how much of the hit lands, from the table in ALPHA7_DESIGN 5.3
@@ -212,6 +457,26 @@ namespace Tacetno433.Battle
             if (!rightSize) return BattleRules.TurnWrongSize;
             return grade == Grade.Perfect ? BattleRules.TurnPerfect : BattleRules.TurnGood;
         }
+
+        //Hold Scale : a held note gives TurnHoldBase let go at once, up to TurnHoldBase + TurnHoldGain held to the end
+        public static float HoldScale(float held)
+        {
+            return BattleRules.TurnHoldBase + BattleRules.TurnHoldGain * MathF.Max(0f, MathF.Min(1f, held));
+        }
+
+        //Hit Damage : power x TurnAttackPerPower x scale, harder with CRESCENDO and against an enemy OFF-BEAT
+        public int HitDamage(Fighter attacker, Fighter target, float scale)
+        {
+            float power = attacker.IsEnemy ? attacker.Enemy.SongNotePower() : attacker.Musician.Power + attacker.Musician.Rehearsed;
+            float damage = power * BattleRules.TurnAttackPerPower * scale;
+            damage *= 1f + attacker.Crescendo * BattleRules.TurnCrescendoStep;               // CRESCENDO
+            if (target.Staggered) damage *= BattleRules.TurnOffBeatScale;                     // OFF-BEAT
+            return Math.Max(1, (int)Math.Round(damage));
+        }
+
+        //======================================================================================
+        //Enemy Turn
+        //======================================================================================
 
         //Enemy Attack : the enemy whose turn it is plays its notes at its target.
         //grades holds the parry swipe for each note in order. A note with no grade (the array is
@@ -238,14 +503,33 @@ namespace Tacetno433.Battle
             if (Step != TurnStep.EnemyTurn) return 0;
 
             Fighter enemy = Current;
-            if (note < 0 || note >= enemy.IntentNotes.Length) return 0;
+            Fighter target = enemy.IntentTarget;
+            if (note < 0 || note >= enemy.IntentNotes.Length || target == null) return 0;
 
-            //PARRY : a PERFECT swipe blocks the note and gives breath back
-            if (g == Grade.Perfect) AddBreath(BattleRules.TurnBreathPerParry);
+            //PARRY : a PERFECT swipe blocks the note, gives breath back and shakes the enemy (OFF-BEAT)
+            if (g == Grade.Perfect)
+            {
+                parried++;
+                AddBreath(BattleRules.TurnBreathPerParry);
+                AddOffBeat(enemy, BattleRules.TurnParryOffBeat);
+                return 0;
+            }
 
             int damage = NoteDamage(enemy.IntentNotes[note], g);
-            Fighter target = enemy.IntentTarget;
-            if (target != null) target.Hp = Math.Max(0, target.Hp - damage);
+            if (target.Guard) damage = (int)Math.Ceiling(damage * BattleRules.TurnGuardKeep);      // GUARD
+            Hurt(target, damage);
+
+            if (g != Grade.Good)
+            {
+                target.Crescendo = 0;                                                        // CRESCENDO is lost on a MISS
+
+                //SILENT MOUTHS : THE MUTE CHOIR's notes that get through take the target's skills away
+                if (enemy.Enemy.Trait == EnemyTrait.SilentMouths && !target.Down)
+                {
+                    target.Mute = BattleRules.TurnMuteTurns;
+                    Events.Add(new TurnEvent(TurnEventKind.Mute, target, target.Mute));
+                }
+            }
             return damage;
         }
 
@@ -257,10 +541,25 @@ namespace Tacetno433.Battle
             return note;
         }
 
-        //Enemy Turn End : after its last note, on to whoever is next
+        //Enemy Turn End : after its last note. COUNTER : when every note was parried PERFECT, the
+        //target hits back for free, twice as hard against a CADENZA. Then on to whoever is next.
         public void FinishEnemyTurn()
         {
             if (Step != TurnStep.EnemyTurn) return;
+
+            Fighter enemy = Current;
+            Fighter target = enemy.IntentTarget;
+            enemy.Attacks++;
+
+            if (parried > 0 && parried == enemy.IntentNotes.Length && target != null && !target.Down && !enemy.Down)
+            {
+                float scale = BattleRules.TurnCounterScale * (enemy.IntentCadenza ? BattleRules.TurnCadenzaCounter : 1f);
+                int damage = HitDamage(target, enemy, scale);
+                Events.Add(new TurnEvent(TurnEventKind.Counter, target, damage));
+                Hurt(enemy, damage);
+            }
+
+            enemy.IntentCadenza = false;
             NextTurn();
         }
 
@@ -274,6 +573,16 @@ namespace Tacetno433.Battle
 
             if (!rightWay || gap > good) return Grade.Miss;
             return gap <= perfect ? Grade.Perfect : Grade.Good;
+        }
+
+        //Roll Grade : how many shakes a roll note got (TREMOLO)
+        public Grade RollGrade(int shakes)
+        {
+            int perfect = Maestro ? BattleRules.MaestroTurnRollPerfect : BattleRules.TurnRollPerfect;   // MAESTRO
+            int good = Maestro ? BattleRules.MaestroTurnRollGood : BattleRules.TurnRollGood;
+            if (shakes >= perfect) return Grade.Perfect;
+            if (shakes >= good) return Grade.Good;
+            return shakes > 0 ? Grade.Miss : Grade.Hesitate;
         }
 
         //Late Limit : after this many seconds past the ring a note counts as not swiped at all
@@ -299,37 +608,60 @@ namespace Tacetno433.Battle
             return Flick.Down;
         }
 
+        //======================================================================================
+        //Life, Breath and Statuses
+        //======================================================================================
+
+        private void Hurt(Fighter f, int amount)
+        {
+            if (amount <= 0 || f.Down) return;
+            f.Hp = Math.Max(0, f.Hp - amount);
+            Events.Add(new TurnEvent(TurnEventKind.Damage, f, amount));
+            if (f.Down)
+            {
+                f.Staggered = false;
+                Events.Add(new TurnEvent(TurnEventKind.Down, f, 0));
+            }
+        }
+
+        private void Heal(Fighter f, int amount)
+        {
+            if (amount <= 0 || f.Down) return;
+            int before = f.Hp;
+            f.Hp = Math.Min(f.MaxHp, f.Hp + amount);
+            if (f.Hp > before) Events.Add(new TurnEvent(TurnEventKind.Heal, f, f.Hp - before));
+        }
+
         private void AddBreath(int amount)
         {
+            int before = Breath;
             Breath = Math.Max(0, Math.Min(BattleRules.TurnBreathMax, Breath + amount));
+            if (Breath > before) Events.Add(new TurnEvent(TurnEventKind.Breath, null, Breath - before));
         }
 
-        //Next Turn : end the fight if one side is down, else move to the next one standing.
-        //When everybody has had a turn a new round starts.
-        private void NextTurn()
+        private void AddDissonance(Fighter f, int stacks)
         {
-            if (CheckEnd()) return;
-
-            OrderIndex++;
-            while (OrderIndex < Order.Count && Order[OrderIndex].Down) OrderIndex++;
-
-            if (OrderIndex >= Order.Count) StartRound();
-            else BeginTurn();
+            f.Dissonance = Math.Min(BattleRules.TurnDissonanceMost, f.Dissonance + stacks);
+            Events.Add(new TurnEvent(TurnEventKind.Dissonance, f, f.Dissonance));
         }
 
-        //Win / Lose : every enemy down wins, every musician down loses
-        private bool CheckEnd()
+        private void AddCrescendo(Fighter f, int stacks)
         {
-            if (AllDown(Enemies)) { Step = TurnStep.Won; return true; }
-            if (AllDown(Party)) { Step = TurnStep.Lost; return true; }
-            return false;
+            f.Crescendo = Math.Min(BattleRules.TurnCrescendoMost, f.Crescendo + stacks);
+            Events.Add(new TurnEvent(TurnEventKind.Crescendo, f, f.Crescendo));
         }
 
-        private static bool AllDown(List<Fighter> side)
+        //OFF-BEAT : fill the gauge, and when it is full the enemy is thrown off the beat
+        private void AddOffBeat(Fighter enemy, int amount)
         {
-            for (int i = 0; i < side.Count; i++)
-                if (!side[i].Down) return false;
-            return true;
+            if (enemy.Staggered || enemy.Down) return;
+            enemy.OffBeat += amount;
+            if (enemy.OffBeat >= BattleRules.TurnOffBeatMax)
+            {
+                enemy.OffBeat = 0;
+                enemy.Staggered = true;
+                Events.Add(new TurnEvent(TurnEventKind.Break, enemy, 0));
+            }
         }
 
         //KNOCKED OUT : life a musician keeps after the fight. Anyone who fell gets up with TurnReviveHp.

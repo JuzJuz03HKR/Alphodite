@@ -100,6 +100,14 @@ namespace Tacetno433.Core
             Pointer(sb, way, cx, cy, radius, alpha);
         }
 
+        //Roll Note : the roll of a skill (TREMOLO), a ring with "tr" in it, as music writes a trill
+        public static void RollNote(SpriteBatch sb, SpriteFont font, float cx, float cy, float grow, float alpha)
+        {
+            float radius = noteRadius[1] * grow;
+            Hollow.Ring(sb, cx, cy, radius, noteThick[1] * grow, alpha);
+            Gfx.TextCentered(sb, font, "tr", cx, cy - 2f * grow, Palette.Highlight * alpha, TextSize.Small * 0.8f * grow);
+        }
+
         //Way : one step in the way a stroke goes, (0, 0) for none
         public static Vector2 Way(Flick dir)
         {

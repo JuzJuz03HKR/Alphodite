@@ -652,7 +652,7 @@ namespace Tacetno433.Core
         //       crossing recruit bandname route pause band (or view) duelbargain dueltrait duelmute duelmirror
         //       duel duelcombo duelboss duelcutin duelpause dueldouble dueltremolo duelfermata duelfire duelrepeat finale
         //       result defeat reward shop shopleave event eventchair rest curtain curtainwin
-        //       battle battleswing battleparry (Alpha 7, use a few frames, e.g. battleswing@10)
+        //       battle battleswing battleskill battleparry battlestatus (Alpha 7, use a few frames, e.g. battleswing@2)
         private static void Open(TacetGame game, string name)
         {
             RunState run = SampleRun(game, name);
@@ -676,7 +676,7 @@ namespace Tacetno433.Core
             if (name == "route" || name == "pause") screen = new RouteScreen();
             if (name == "view" || name == "band") screen = new BandScreen();
             if (name.StartsWith("duel") || name == "finale") screen = new DuelScreen();
-            if (name.StartsWith("battle")) screen = new BattleScreen();                // Alpha 7 : battle battleswing battleparry
+            if (name.StartsWith("battle")) screen = new BattleScreen();                // Alpha 7 : battle battleswing battleskill battleparry battlestatus
             if (name == "result" || name == "defeat") screen = new ResultScreen();
             if (name == "reward") screen = new MotifRewardScreen(false);
             if (name == "shop" || name == "shopleave") screen = new ShopScreen();
