@@ -46,6 +46,15 @@
         //KNOCKED OUT : a musician at 0 HP sits out the rest of the fight and gets up with this much after it
         public static int TurnReviveHp = 1;
 
+        //Turn Feel (seconds) : how the battle page paces a swipe. The ring always closes at the same
+        //speed, never eased, so the eye can count it (docs/research/ALPHA7_qte_parry.md).
+        public static float TurnRingTime = 1.1f;          // from a note showing to the moment to swipe
+        public static float MaestroTurnRingTime = 0.8f;   // MAESTRO
+        public static float TurnNoteGap = 0.55f;          // between the notes of one enemy attack
+        public static float TurnPause = 0.8f;             // after a turn, before the next one starts
+        public static float TurnHitStop = 0.075f;         // the band and TACET freeze for a moment on a PERFECT
+        public static float TurnEndTime = 2.2f;           // the win or lose banner stays this long
+
         //Battle Shape
         public const int BeatsPerRound = 8;       // sub-turns in one round
         public const int MaxRounds = 3;           // after this, whoever is ahead wins

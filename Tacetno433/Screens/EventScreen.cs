@@ -280,7 +280,7 @@ namespace Tacetno433.Screens
                 run.Chosen.Type = NodeType.Elite;
                 run.Chosen.Title = RouteNodeInfo.TitleOf(NodeType.Elite);
                 run.BeginBattle();
-                Game.Screens.Change(new DuelScreen());
+                Game.Screens.Change(RunFlow.FightScreen());
                 return;
             }
 

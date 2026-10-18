@@ -46,6 +46,10 @@ namespace Tacetno433.Core
             int notes = enemy.IntentNotes.Length;
             bool intentOk = notes >= 1 && notes <= 2 && enemy.IntentNotes[0] == 6 && enemy.IntentTarget != null && !enemy.IntentTarget.Down;
             report += Same("intent", "True", intentOk.ToString());
+            bool marksOk = enemy.IntentWays.Length == notes && enemy.IntentSizes.Length == notes;
+            for (int i = 0; i < notes && marksOk; i++)
+                marksOk = enemy.IntentWays[i] != Flick.None && enemy.IntentSizes[i] >= 0 && enemy.IntentSizes[i] <= 2;
+            report += Same("intent marks", "True", marksOk.ToString());
 
             //PARRY every note PERFECT : no damage, 1 breath per note
             Grade[] allPerfect = new Grade[notes];
@@ -67,6 +71,15 @@ namespace Tacetno433.Core
                 TurnBattle.SwipeScale(Grade.Perfect, true) + " " + TurnBattle.SwipeScale(Grade.Good, true) + " " +
                 TurnBattle.SwipeScale(Grade.Perfect, false) + " " + TurnBattle.SwipeScale(Grade.Miss, true) + " " +
                 TurnBattle.SwipeScale(Grade.Hesitate, true));
+
+            //Judge : PERFECT within 0.10 s, GOOD within 0.22 s (NORMAL), the wrong way is a MISS
+            report += Same("judge", "Perfect Good Miss Miss", b.Judge(0f, true) + " " + b.Judge(0.15f, true) + " " + b.Judge(0.3f, true) + " " + b.Judge(0f, false));
+            report += Same("note damage", "0 3 6", TurnBattle.NoteDamage(6, Grade.Perfect) + " " + TurnBattle.NoteDamage(6, Grade.Good) + " " + TurnBattle.NoteDamage(6, Grade.Miss));
+
+            //ATTACK PART : ANNA strings left, KLARA winds centre, OTTO percussion right
+            report += Same("attack part", "1 Left 0 Down 2 Right",
+                TurnBattle.AttackSize(band[0]) + " " + TurnBattle.AttackWay(band[0]) + " " + TurnBattle.AttackSize(band[1]) + " " +
+                TurnBattle.AttackWay(band[1]) + " " + TurnBattle.AttackSize(band[2]) + " " + TurnBattle.AttackWay(band[2]));
 
             //PARRY GOOD lets half through (6 -> 3 a note), no swipe lets all of it through
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));

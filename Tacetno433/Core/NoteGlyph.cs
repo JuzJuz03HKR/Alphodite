@@ -82,6 +82,24 @@ namespace Tacetno433.Core
             Gfx.Circle(sb, cx, cy - size * 0.28f, size * 0.2f, color);
         }
 
+        //Note : a whole swipe note for the turn battle (Alpha 7). The ring is sized by its mark,
+        //the mark sits in the middle and the pointer shows the way to swing. size is 0 p, 1 mf,
+        //2 f, the order of Baton.SizeOf. grow scales the whole note (1 is the duel's size).
+        //The duel and the tutorial still draw their own lane notes the same way.
+        private static readonly string[] noteMark = { "p", "mf", "f" };
+        private static readonly float[] noteRadius = { 23f, 27f, 31f };
+        private static readonly float[] noteThick = { 1.5f, 2.5f, 4.5f };
+        private static readonly float[] noteMarkScale = { 0.9f, 0.72f, 1.15f };
+
+        public static void Note(SpriteBatch sb, SpriteFont font, float cx, float cy, int size, Flick way, float grow, float time, float alpha)
+        {
+            float radius = noteRadius[size] * grow;
+            Hollow.Ring(sb, cx, cy, radius, noteThick[size] * grow, alpha);
+            if (size == 2) Crown(sb, cx, cy, radius, time, alpha);
+            Gfx.TextCentered(sb, font, noteMark[size], cx, cy - 2f * grow, Palette.Highlight * alpha, TextSize.Small * noteMarkScale[size] * grow);
+            Pointer(sb, way, cx, cy, radius, alpha);
+        }
+
         //Way : one step in the way a stroke goes, (0, 0) for none
         public static Vector2 Way(Flick dir)
         {

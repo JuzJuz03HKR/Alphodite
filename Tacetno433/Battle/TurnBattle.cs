@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Tacetno433.Core;
 using Tacetno433.Data;
 
 namespace Tacetno433.Battle
@@ -26,6 +27,8 @@ namespace Tacetno433.Battle
         //so the screen can show it BEFORE it happens and the player can plan (like Slay the Spire).
         public Fighter IntentTarget;
         public int[] IntentNotes = new int[0];   // how hard each note of the attack hits
+        public Flick[] IntentWays = new Flick[0];  // the way to swipe back at each note
+        public int[] IntentSizes = new int[0];     // the size of each note : 0 p, 1 mf, 2 f (Baton.SizeOf order)
 
         public bool Down { get { return Hp <= 0; } }
     }
@@ -34,7 +37,8 @@ namespace Tacetno433.Battle
     //A screen runs it like this :
     //   PlayerTurn : the player picks an enemy and swipes, the screen calls Attack(target, grade, rightSize)
     //   EnemyTurn  : the screen shows Current.IntentNotes flying at Current.IntentTarget, the player
-    //                swipes back at each one, and the screen calls TakeEnemyAttack(grades)
+    //                swipes back at each one, the screen calls ParryNote for each note as it lands
+    //                and FinishEnemyTurn after the last (TakeEnemyAttack does all of it at once)
     //   Won / Lost : the fight is over, HpAfterBattle gives each musician's life to keep
     //Every number comes from Data/BattleRules.cs (TURN BATTLE section).
     //Grade is the same enum the rhythm duel uses (Battle/BattleState.cs).
@@ -50,6 +54,7 @@ namespace Tacetno433.Battle
 
         public int Breath;             // BREATH, shared by the whole band
         public int Floor;              // 1, 2 or 3
+        public bool Maestro;           // MAESTRO MODE : narrower timing windows
         public TurnStep Step;
 
         private Random random;
@@ -140,7 +145,14 @@ namespace Tacetno433.Battle
             int hit = Math.Max(1, (int)Math.Round(enemy.Enemy.SongNotePower() * BattleRules.TurnNoteDamage));   // SongNotePower = the average of its Pattern notes
 
             enemy.IntentNotes = new int[count];
-            for (int i = 0; i < count; i++) enemy.IntentNotes[i] = hit;
+            enemy.IntentWays = new Flick[count];
+            enemy.IntentSizes = new int[count];
+            for (int i = 0; i < count; i++)
+            {
+                enemy.IntentNotes[i] = hit;
+                enemy.IntentWays[i] = (Flick)(1 + random.Next(4));     // Up, Down, Left or Right
+                enemy.IntentSizes[i] = random.Next(3);
+            }
         }
 
         private Fighter RandomStanding()
@@ -208,29 +220,83 @@ namespace Tacetno433.Battle
         {
             if (Step != TurnStep.EnemyTurn) return 0;
 
-            Fighter enemy = Current;
-            Fighter target = enemy.IntentTarget;
             int total = 0;
-
-            for (int i = 0; i < enemy.IntentNotes.Length; i++)
+            for (int i = 0; i < Current.IntentNotes.Length; i++)
             {
                 Grade g = (grades != null && i < grades.Length) ? grades[i] : Grade.Hesitate;
-                int note = enemy.IntentNotes[i];
-
-                //PARRY
-                if (g == Grade.Perfect)
-                {
-                    AddBreath(BattleRules.TurnBreathPerParry);
-                    continue;
-                }
-                if (g == Grade.Good) note = (int)Math.Ceiling(note * BattleRules.TurnParryGoodKeep);
-                total += note;
+                total += ParryNote(i, g);
             }
 
-            if (target != null) target.Hp = Math.Max(0, target.Hp - total);
-
-            NextTurn();
+            FinishEnemyTurn();
             return total;
+        }
+
+        //Parry Note : one note of the enemy's attack lands, swiped back with this grade.
+        //Returns the damage it did to the target.
+        public int ParryNote(int note, Grade g)
+        {
+            if (Step != TurnStep.EnemyTurn) return 0;
+
+            Fighter enemy = Current;
+            if (note < 0 || note >= enemy.IntentNotes.Length) return 0;
+
+            //PARRY : a PERFECT swipe blocks the note and gives breath back
+            if (g == Grade.Perfect) AddBreath(BattleRules.TurnBreathPerParry);
+
+            int damage = NoteDamage(enemy.IntentNotes[note], g);
+            Fighter target = enemy.IntentTarget;
+            if (target != null) target.Hp = Math.Max(0, target.Hp - damage);
+            return damage;
+        }
+
+        //Note Damage : what gets through a parry. PERFECT nothing, GOOD a share, anything else all of it.
+        public static int NoteDamage(int note, Grade g)
+        {
+            if (g == Grade.Perfect) return 0;
+            if (g == Grade.Good) return (int)Math.Ceiling(note * BattleRules.TurnParryGoodKeep);
+            return note;
+        }
+
+        //Enemy Turn End : after its last note, on to whoever is next
+        public void FinishEnemyTurn()
+        {
+            if (Step != TurnStep.EnemyTurn) return;
+            NextTurn();
+        }
+
+        //Judge : how a swipe landed. offset is the seconds between the swipe and the moment the
+        //ring meets the note (minus is early). The wrong way is always a MISS.
+        public Grade Judge(float offset, bool rightWay)
+        {
+            float perfect = Maestro ? BattleRules.MaestroPerfectWindow : BattleRules.PerfectWindow;   // MAESTRO
+            float good = Maestro ? BattleRules.MaestroGoodWindow : BattleRules.GoodWindow;
+            float gap = Math.Abs(offset);
+
+            if (!rightWay || gap > good) return Grade.Miss;
+            return gap <= perfect ? Grade.Perfect : Grade.Good;
+        }
+
+        //Late Limit : after this many seconds past the ring a note counts as not swiped at all
+        public float LateLimit
+        {
+            get { return Maestro ? BattleRules.MaestroGoodWindow : BattleRules.GoodWindow; }
+        }
+
+        //ATTACK PART : a musician's attack is the PART written on them since round 14, so each
+        //one always swings the same way : the size of their family (winds p, strings mf,
+        //percussion f) and the way of their arrow (left, down, right).
+        public static int AttackSize(Musician m)
+        {
+            if (m.Family == Family.Wind) return 0;
+            if (m.Family == Family.String) return 1;
+            return 2;
+        }
+
+        public static Flick AttackWay(Musician m)
+        {
+            if (m.Cue == 0) return Flick.Left;
+            if (m.Cue == 2) return Flick.Right;
+            return Flick.Down;
         }
 
         private void AddBreath(int amount)

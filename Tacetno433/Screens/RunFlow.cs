@@ -1,4 +1,5 @@
 using Tacetno433.Audio;
+using Tacetno433.Core;
 using Tacetno433.Data;
 
 namespace Tacetno433.Screens
@@ -37,7 +38,7 @@ namespace Tacetno433.Screens
                 //Fight : set up the battle and step straight into the duel. There is nothing to
                 //arrange first (round 14), every player's part is written on them.
                 run.BeginBattle(enemy);
-                game.Screens.Change(new DuelScreen());
+                game.Screens.Change(FightScreen());
             }
             else if (node.Type == NodeType.EraShift)
             {
@@ -58,6 +59,16 @@ namespace Tacetno433.Screens
             }
 
             SaveFile.SaveRun(run);
+        }
+
+        //TURN BATTLE (Alpha 7) : fights open the new turn based battle page. Set this to false to
+        //play the old rhythm duel again while the new one is still being built.
+        public static bool TurnBattleOn = true;
+
+        public static GameScreen FightScreen()
+        {
+            if (TurnBattleOn) return new BattleScreen();
+            return new DuelScreen();
         }
 
         //Continue : pick up the saved run where it was left. Returns false when there is none.
