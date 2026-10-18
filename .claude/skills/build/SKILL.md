@@ -29,7 +29,7 @@ disable-model-invocation: true
    ```
    xvfb-run -a -s "-screen 0 1280x720x24" env LIBGL_ALWAYS_SOFTWARE=1 SDL_AUDIODRIVER=dummy dotnet Tacetno433.dll --shots <สิ่งที่สั่ง> --out <โฟลเดอร์ผล>
    ```
-   - `shots` : ชื่อหน้าคั่นด้วยจุลภาค เช่น `duel@150,band` (รายชื่อหน้าอยู่ `docs/PROJECT_STATUS.md` หัวข้อ 11 และ CLAUDE.md ข้อ 5) แล้วเปิดดูภาพที่ได้
+   - `shots` : ชื่อหน้าคั่นด้วยจุลภาค เช่น `duel@150,band` (รายชื่อหน้าอยู่ `docs/PROJECT_STATUS.md` หัวข้อ 11 และ `docs/ALPHA6_HISTORY.md` ข้อ 2) แล้วเปิดดูภาพที่ได้
    - `simulate` ผลอยู่ `simulate.txt` · `audit` ผลอยู่ `audit.txt` (**ลบไฟล์ผลเก่าก่อนรันทุกครั้ง**) · `savecheck` ทดสอบเซฟ/โหลด
    - ผลจำลองแกว่ง ±5 ถึง 8% ถ้าจะเทียบก่อนกับหลัง ให้รันหลายรอบแล้วเฉลี่ย
    - ห้ามใช้ `pkill -f` กับคำที่อยู่ในคำสั่งของตัวเอง (จะฆ่า shell ตัวเอง)
