@@ -1,45 +1,45 @@
 # Prompt สำหรับแชทใหม่ / หลัง compact session
 
-อัปเดต : 15 ต.ค. 2026 (หลังส่งงาน 29 ก.ย. และนำเสนอ 30 ก.ย.) · **Claude อัปเดตไฟล์นี้ทุกครั้งที่จบก้อนงาน** เพื่อให้ copy ไปใช้ได้ทันที
+อัปเดต : 18 ต.ค. 2026 (Alpha7 turn-based roguelike) · **Claude อัปเดตไฟล์นี้ทุกครั้งที่จบก้อนงาน** เพื่อให้ copy ไปใช้ได้ทันที
 
 Claude มองไม่เห็นว่า context ใกล้เต็มแค่ไหน เลยเตือนล่วงหน้าไม่ได้ว่า auto-compact จะเกิดเมื่อไร
 วิธีที่ใช้แทน : ทุกจบก้อน Claude บันทึกเอกสาร + ไฟล์นี้ แล้ว commit/push · ถ้า compact แล้ว (หรือเปิดแชทใหม่) ให้ copy prompt ด้านล่างไปวาง
 
 ---
 
-## A. หลัง compact / แชทใหม่แบบสั้น (ประหยัด token)
+## A. เปิดแชทใหม่ (ใช้อันนี้เป็นหลัก)
 
 ```text
-โปรเจกต์นี้คือเกม TACET 4'33 ของทีม Alphodite (MonoGame DesktopGL 3.8 / .NET 9) ทำงานต่อจาก branch Alpha7 (เปลี่ยนเป็น turn-based roguelike)
-ส่งงานแล้ว 29 ก.ย. (zip อยู่ branch Release) นำเสนอแล้ว 30 ก.ย. ตอนนี้อยู่เฟส 1 เดือนหลังส่งงาน
-อ่านแค่ CLAUDE.md ที่ราก repo และ docs/RESUME_PROMPT.md หัวข้อ "สถานะล่าสุด" ก่อน ส่วนอื่นอ่านเมื่องานต้องใช้
-อ่าน docs/ALPHA7_DESIGN.md ด้วย (เอกสารออกแบบใหม่ ข้อ 10 ลำดับงาน ข้อ 11 คำถามที่ยังเปิด · ไม่มีกำหนดส่งแล้ว · เนื้อเรื่องทำท้ายสุด)
-แล้วเช็ก git ว่า Alpha7 ในเครื่องตรงกับ GitHub และมีไฟล์ค้าง commit ไหม สรุปภาษาไทย 3–5 บรรทัด
-ยังไม่ต้องแก้โค้ด ไม่ต้อง build หรือรันตัวจำลองจนกว่าฉันจะสั่ง รอฉันสั่งงานก่อน
-commit/push เมื่อฉันสั่งเท่านั้น · ยังไม่ต้องสร้าง Pull Request
+โปรเจกต์นี้คือเกม TACET 4'33 ของทีม Alphodite (MonoGame DesktopGL 3.8 / .NET 9) ทำงานต่อบน branch Alpha7
+Alpha7 คือการเปลี่ยนเกมเป็น turn-based roguelike ที่ยังเป็นดนตรี: วาทยากร + นักดนตรี 3 คน, ตวัดไม้เป็น QTE ตอนโจมตีและใช้สกิล, ตวัดสวน (parry) ตอนศัตรูตี, วาทยากร 6 คนตาม lore
+ไม่มีกำหนดส่ง ทำเต็มที่ เนื้อเรื่องเก็บไว้ทำท้ายสุด อย่าเอากฎหรือ deadline มาจำกัดความคิด ถ้าไอเดียไหนชนกฎให้บอกแล้วให้ฉันตัดสิน
+
+ก่อนเริ่ม อ่านตามลำดับ
+1. CLAUDE.md ที่ราก repo (หัวข้อ 0 สำคัญที่สุด)
+2. docs/RESUME_PROMPT.md หัวข้อ "สถานะล่าสุด"
+3. docs/ALPHA7_DESIGN.md ทั้งไฟล์ (ข้อ 10 ลำดับงาน, ข้อ 11 คำถามที่ยังเปิด)
+เอกสารอื่นอ่านเมื่องานต้องใช้
+
+แล้วเช็กให้ฉัน
+- git: Alpha7 ในเครื่องตรงกับ GitHub ไหม มีไฟล์ค้าง commit ไหม
+- เครื่องมือ: เห็น skill ใน .claude/skills ครบ 24 ตัวไหม และมีเครื่องมือของ Context7 (MCP จาก .mcp.json) ให้ใช้ไหม ถ้าไม่มีให้บอกตรงๆ
+- เปิดโหมด caveman ตามที่เขียนใน CLAUDE.md
+
+สรุปเป็นภาษาไทยสั้นๆ ว่าเกมอยู่ตรงไหนและงานถัดไปคืออะไร
+จากนั้นถามคำถามข้อ 11 ทั้ง 6 ข้อ พร้อมคำแนะนำของคุณ ให้ฉันตอบก่อนเขียนโค้ด
+ได้คำตอบแล้วค่อยเริ่มขั้น 1 ของข้อ 10 (Battle/TurnBattle.cs)
+
+ทุกจบก้อนงาน บันทึกเอกสารและ docs/RESUME_PROMPT.md ไว้เสมอ
+commit/push ขึ้น Alpha7 เมื่อฉันสั่ง ยังไม่ต้องสร้าง Pull Request
 ถ้า build หรือรันไม่ได้ให้บอกตรงๆ ฉันจะ build และเล่นทดสอบเองใน Visual Studio
 ```
 
-## B. แชทใหม่วันอื่น (เฟส 1 เดือน)
+## B. หลัง compact ในแชทเดิม (สั้น ประหยัด token)
 
 ```text
-โปรเจกต์นี้คือเกม TACET 4'33 ของทีม Alphodite (MonoGame DesktopGL 3.8 / .NET 9) ทำงานต่อจาก branch Alpha7 (หรือ branch ล่าสุดที่บอกใน docs/RESUME_PROMPT.md) · เอกสารออกแบบหลัก docs/ALPHA7_DESIGN.md
-ก่อนทำอะไร ให้อ่านตามลำดับนี้ให้ครบก่อน:
-1. CLAUDE.md ที่ราก repo (กติกาการทำงาน กติกาโค้ด กติกาออกแบบที่ตกลงกันแล้ว โดยเฉพาะรอบ 15)
-2. docs/PROJECT_STATUS.md หัวข้อ 0 (สถานะล่าสุด การตัดสินใจ ข้อเสนอที่รอเลือก งานถัดไป) และหัวข้อ 6 "รอบ 15"
-3. docs/USER_BRIEFS.md (สิ่งที่ฉันสั่งและอธิบายไว้คำต่อคำ · lore ตัวละคร · เกมอ้างอิง · ผลเพลย์เทส · เกณฑ์อาจารย์)
-4. docs/HANDOFF.md (แผนที่โค้ด และงานที่เหลือเรียงตามความสำคัญ)
-5. docs/GAME_REVIEW.md (หัวข้อแรก รีวิวหลังรอบ 15) และ docs/DESIGN_RESEARCH.md (หัวข้อ 6.13 เกมที่ศึกษาล่าสุด)
-6. ถ้างานเกี่ยวกับสไลด์/การนำเสนอ : docs/TACET_Speech_30Sep.md · docs/TACET_Slides_Revised_30Sep.md · docs/TACET_Script_30Sep.md · docs/TACET_GAME_OVERVIEW.md · docs/TACET_CODE_OVERVIEW.md
-อ่านเสร็จแล้ว ให้สรุปเป็นภาษาไทยสั้นๆ ว่า
-- ตอนนี้เกมอยู่ตรงไหน (รอบ 15 เปลี่ยนอะไร และความยากจากตัวจำลอง)
-- ระบบดวลเล่นยังไง (โน้ต f/mf/p บอกขนาดตวัด, หัวลูกศร, ทั้งวงเล่นทุกโน้ต, ลม = เลือด, โน้ตพิเศษที่มาทีละชั้น, เพลง, OUTRO)
-- กติกาที่ห้ามละเมิด
-- งานถัดไปที่แนะนำ 3 อย่าง
-- เช็ก git ว่า branch ในเครื่องตรงกับบน GitHub ไหม และมีไฟล์ที่ยังไม่ได้ commit หรือไม่
-ยังไม่ต้องแก้โค้ด รอฉันสั่งก่อน
-commit/push เมื่อฉันสั่งเท่านั้น · ยังไม่ต้องสร้าง Pull Request จนกว่าฉันจะสั่ง
-ถ้า build หรือรันเกมในนี้ไม่ได้ ให้บอกตรงๆ ฉันจะ build และเล่นทดสอบเองใน Visual Studio
+ทำงานต่อเกม TACET 4'33 บน branch Alpha7 (turn-based roguelike)
+อ่าน CLAUDE.md หัวข้อ 0 และ docs/RESUME_PROMPT.md หัวข้อ "สถานะล่าสุด" แล้วทำงานที่ค้างอยู่ต่อ
+เช็ก git ก่อนว่ามีไฟล์ค้าง commit ไหม ถ้าไม่แน่ใจว่างานไหนค้าง ให้ถามฉันก่อน
 ```
 
 ---
@@ -48,7 +48,7 @@ commit/push เมื่อฉันสั่งเท่านั้น · ย�
 
 **18 ต.ค. (ต่อ) — เครื่องมือ AI + ยกเลิก deadline** : ผู้ใช้สั่ง **ไม่ยึดกำหนดส่ง ทำเต็มที่** · **เนื้อเรื่องทำท้ายสุด** · **อย่าเอากฎ/deadline มาจำกัดความคิด** (คำต่อคำใน `USER_BRIEFS.md` ข้อ 12) · แก้ `ALPHA7_DESIGN.md` เป็นฉบับ 0.2 (ข้อ 10 = ลำดับงาน ไม่ใช่แผน 10 วัน) ·
 ✅ `.mcp.json` = Context7 (แชท cloud ยังต่อไม่ได้ : proxy ตอบ CONNECT 403 ผู้ใช้ต้องเพิ่ม `mcp.context7.com` ใน Network access ของ environment) ·
-✅ **ผู้ใช้เลือก 6 ตัว แล้วอนุญาตให้คัดลอก : skill 24 ตัวอยู่ `.claude/skills/` แล้ว** (Superpowers 12 · game-feel · game-ui-ux · monogame 9 · caveman · รายละเอียด `.claude/third_party/README.md` · `claude plugin validate .claude/skills` ผ่าน) · caveman เปิดทุกแชทผ่าน CLAUDE.md · ⚠️ ผู้ใช้ยังต้องเพิ่ม `mcp.context7.com` ใน Allowed domains เอง ·
+✅ **ผู้ใช้เลือก 6 ตัว แล้วอนุญาตให้คัดลอก : skill 24 ตัวอยู่ `.claude/skills/` แล้ว** (Superpowers 12 · game-feel · game-ui-ux · monogame 9 · caveman · รายละเอียด `.claude/third_party/README.md` · `claude plugin validate .claude/skills` ผ่าน) · caveman เปิดทุกแชทผ่าน CLAUDE.md · ✅ ผู้ใช้เพิ่ม `mcp.context7.com` ใน Allowed domains แล้ว (ทดสอบแล้ว server ตอบเป็น Context7 4.4.2 และ npm/NuGet/PyPI ยังเข้าได้) เครื่องมือ Context7 ขึ้นในแชทใหม่ (แชทที่เปิดก่อนมี `.mcp.json` จะไม่เห็น) · **ถัดไป : เปิดแชทใหม่ด้วย prompt A แล้วถามคำถามข้อ 11 ก่อนเริ่ม `Battle/TurnBattle.cs`** ·
 ผลตรวจตอนแรก (4 repo + caveman clone อ่านทั้งหมด ไม่เจอโค้ดส่งข้อมูลออก · ครั้งแรกการคัดลอกถูกตัวกรอง auto mode บล็อก จนผู้ใช้พิมพ์อนุญาต) · ชุดที่เสนอตอนแรก (rpg roguelike save-systems และ gstack-game ไม่ได้ลง เพราะผู้ใช้เลือกแค่ 6 ตัว) :
 - `obra/superpowers` (`bb92a77`, MIT, v7.0.0) 12 ตัว : brainstorming writing-plans executing-plans subagent-driven-development dispatching-parallel-agents systematic-debugging test-driven-development verification-before-completion requesting-code-review receiving-code-review using-git-worktrees finishing-a-development-branch · ไม่เอา writing-skills diagnosing-superpowers using-superpowers และ hook SessionStart (hook ใส่คำสั่ง "มีโอกาส 1% ต้องเรียก skill" ทุกเซสชัน ทำให้เรียก skill หนักทุกงาน)
 - `gamedev-skills/awesome-gamedev-agent-skills` (`0a70cfc`, Apache-2.0 ต้องมี NOTICE) 5 ตัว : game-feel game-ui-ux rpg roguelike save-systems · visual-novel / dialogue-systems รอตอนทำเนื้อเรื่อง · ตัวอย่างโค้ดเป็น Godot/Unity ต้องแปลงเป็น MonoGame เอง
