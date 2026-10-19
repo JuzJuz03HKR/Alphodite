@@ -313,6 +313,81 @@ namespace Tacetno433.Core
             run.RestoreAllStamina();
             report += Same("band life", "True " + max, halved + " " + run.Stamina);
 
+            //ENEMIES (step 8) : HUSH plays its phrases in turn (Dp Up first), and floor 2 makes it tougher (50 x 1.3)
+            b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
+            report += Same("phrase", "Down Up 0 0", b.Enemies[0].IntentWays[0] + " " + b.Enemies[0].IntentWays[1] + " " + b.Enemies[0].IntentSizes[0] + " " + b.Enemies[0].IntentSizes[1]);
+            b = new TurnBattle(band, new List<Enemy> { hush }, 2, new Random(433));
+            report += Same("floor 2", "65 2 7", b.Enemies[0].MaxHp + " " + b.Enemies[0].IntentNotes.Length + " " + b.Enemies[0].IntentNotes[0]);
+
+            //ECHO FADES (HUSH, floor 2) : each of its 2 notes that gets through adds 1 DISSONANCE
+            b.Attack(b.Enemies[0], Grade.Good, true);
+            b.Attack(b.Enemies[0], Grade.Good, true);
+            Fighter echoed = b.Current.IntentTarget;
+            b.TakeEnemyAttack(null);
+            report += Same("echo fades", "2", echoed.Dissonance.ToString());
+
+            //FILLS THE GAPS (DEAD AIR, floor 2) : a missed note hits x1.5, 7 -> 10.5 -> 10, two notes
+            b = new TurnBattle(band, new List<Enemy> { deadAir }, 2, new Random(433));
+            b.Attack(b.Enemies[0], Grade.Good, true);
+            b.Attack(b.Enemies[0], Grade.Good, true);
+            report += Same("fills the gaps", "20", b.TakeEnemyAttack(null).ToString());
+
+            //LULLABY (THE LULL, floor 2) : its third turn is a rest that heals 12
+            b = new TurnBattle(band, new List<Enemy> { EnemyList.All[2] }, 2, new Random(433));
+            for (int i = 0; i < 60 && !b.Enemies[0].IntentRest; i++)
+            {
+                if (b.Step == TurnStep.PlayerTurn) b.Attack(b.Enemies[0], Grade.Miss, true);
+                else b.TakeEnemyAttack(new Grade[] { Grade.Good, Grade.Good, Grade.Good, Grade.Good });
+            }
+            b.Enemies[0].Hp = 30;
+            for (int i = 0; i < 10 && b.Step == TurnStep.PlayerTurn; i++) b.Attack(b.Enemies[0], Grade.Miss, true);
+            int lullBefore = b.Enemies[0].Hp;
+            string resting = b.Enemies[0].IntentRest + " " + b.Enemies[0].IntentNotes.Length;   // read before it acts, a new round plans again
+            b.TakeEnemyAttack(null);
+            report += Same("lullaby", "True 0 12", resting + " " + (b.Enemies[0].Hp - lullBefore));
+
+            //NO REST (WHITE NOISE) : one note more, and parrying it gives no breath (KLARA's attack makes it 4)
+            b = new TurnBattle(band, new List<Enemy> { EnemyList.All[5] }, 1, new Random(433));
+            b.Attack(b.Enemies[0], Grade.Good, true);
+            notes = b.Current.IntentNotes.Length;
+            allPerfect = new Grade[notes];
+            for (int i = 0; i < notes; i++) allPerfect[i] = Grade.Perfect;
+            b.TakeEnemyAttack(allPerfect);
+            report += Same("no rest", "3 4", notes + " " + b.Breath);
+
+            //THE BARGAIN (THE DEVIL'S STRING) : its attack steals 1 breath
+            b = new TurnBattle(band, new List<Enemy> { EnemyList.All[8] }, 1, new Random(433));
+            b.Attack(b.Enemies[0], Grade.Good, true);
+            b.TakeEnemyAttack(null);
+            report += Same("bargain", "3", b.Breath.ToString());
+
+            //UNFINISHED (REQUIEM) : below half life its next phrase (Lf Rf) comes mirrored and faster
+            b = new TurnBattle(band, new List<Enemy> { EnemyList.All[6] }, 1, new Random(433));
+            b.Enemies[0].Hp = 100;
+            for (int i = 0; i < 10 && b.Round < 2; i++)
+            {
+                if (b.Step == TurnStep.PlayerTurn) b.Attack(b.Enemies[0], Grade.Miss, true);
+                else b.TakeEnemyAttack(null);
+            }
+            report += Same("unfinished", "True Right Left", b.Enemies[0].IntentFast + " " + b.Enemies[0].IntentWays[0] + " " + b.Enemies[0].IntentWays[1]);
+
+            //FALSE NOTES (STATIC, floor 2) : exactly one note shows a size it is not
+            b = new TurnBattle(band, new List<Enemy> { EnemyList.All[3] }, 2, new Random(433));
+            int lies = 0;
+            for (int i = 0; i < b.Enemies[0].IntentNotes.Length; i++)
+                if (b.Enemies[0].IntentShown[i] != b.Enemies[0].IntentSizes[i]) lies++;
+            report += Same("false notes", "1", lies.ToString());
+
+            //ANSWER BETTER (THE NAMELESS MASTER) : after KLARA's SOFT AIR (Dp Up) it plays those notes back
+            b = new TurnBattle(band, new List<Enemy> { EnemyList.All[7] }, 1, new Random(433));
+            b.UseSkill(SkillList.First(band[1]), null, new NoteResult[] { new NoteResult(Grade.Good, true, 1f), new NoteResult(Grade.Good, true, 1f) });
+            for (int i = 0; i < 10 && b.Round < 2; i++)
+            {
+                if (b.Step == TurnStep.PlayerTurn) b.Attack(b.Enemies[0], Grade.Miss, true);
+                else b.TakeEnemyAttack(null);
+            }
+            report += Same("answer better", "Down Up 0 0", b.Enemies[0].IntentWays[0] + " " + b.Enemies[0].IntentWays[1] + " " + b.Enemies[0].IntentSizes[0] + " " + b.Enemies[0].IntentSizes[1]);
+
             //ARCHIVE (step 7) : a lost run on floor 2 with 4 wins leaves 4 x 3 + 1 x 10 = 22 echoes, STRONGER BAND costs 30
             //and gives every musician 2 more life. The real archive is put back afterwards.
             int keptEchoes = Archive.Echoes;

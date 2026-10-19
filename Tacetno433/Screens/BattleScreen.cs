@@ -77,6 +77,7 @@ namespace Tacetno433.Screens
             public NoteKind Kind;
             public Flick Way;
             public int Size;
+            public int Shown;          // the size drawn (FALSE NOTES can show a wrong one)
             public float Due;
         }
         private List<QteNote> notes = new List<QteNote>();
@@ -402,7 +403,11 @@ namespace Tacetno433.Screens
         {
             Fighter enemy = battle.Current;
             notes.Clear();
-            for (int i = 0; i < enemy.IntentNotes.Length; i++) AddNote(NoteKind.Swipe, enemy.IntentWays[i], enemy.IntentSizes[i]);
+            for (int i = 0; i < enemy.IntentNotes.Length; i++)
+            {
+                AddNote(NoteKind.Swipe, enemy.IntentWays[i], enemy.IntentSizes[i]);
+                if (i < enemy.IntentShown.Length) notes[i].Shown = enemy.IntentShown[i];      // FALSE NOTES
+            }
             BeginSwipe(SwipeFor.Parry, null, enemy.IntentTarget);
         }
 
@@ -412,6 +417,7 @@ namespace Tacetno433.Screens
             n.Kind = kind;
             n.Way = way;
             n.Size = size;
+            n.Shown = size;
             notes.Add(n);
         }
 
@@ -420,12 +426,14 @@ namespace Tacetno433.Screens
         private void BeginSwipe(SwipeFor what, Skill s, Fighter target)
         {
             float due = RingTime;
+            bool fast = what == SwipeFor.Parry && battle.Current != null && battle.Current.IntentFast;   // UNFINISHED
+            float gap = BattleRules.TurnNoteGap * (fast ? BattleRules.TurnFastGap : 1f);
             for (int i = 0; i < notes.Count; i++)
             {
                 if (i > 0)
                 {
                     NoteKind before = notes[i - 1].Kind;
-                    due += notes[i].Kind == NoteKind.Spark ? BattleRules.TurnSparkGap : BattleRules.TurnNoteGap;
+                    due += notes[i].Kind == NoteKind.Spark ? BattleRules.TurnSparkGap : gap;
                     if (before == NoteKind.Hold) due += BattleRules.TurnHoldTime;
                     if (before == NoteKind.Roll) due += BattleRules.TurnRollTime;
                 }
@@ -614,6 +622,11 @@ namespace Tacetno433.Screens
                 {
                     Rectangle saved = BoxOf(e.Who);
                     effects.SpawnPop(saved.Center.X, saved.Y - 60, "SECOND WIND", Palette.Highlight, 0.8f);
+                    continue;
+                }
+                if (e.Kind == TurnEventKind.Steal)
+                {
+                    effects.SpawnPop(1050f, 568f, "-" + NumberText.Get(e.Amount) + " BREATH", Palette.PaperDim, 0.8f);
                     continue;
                 }
                 if (e.Kind == TurnEventKind.Ready)
@@ -910,10 +923,18 @@ namespace Tacetno433.Screens
             for (int i = 0; i < battle.Enemies.Count; i++)
             {
                 Fighter f = battle.Enemies[i];
-                if (f.Down || f.IntentNotes.Length == 0) continue;
-
+                if (f.Down) continue;
                 Rectangle r = enemyBox[i];
                 float cy = r.Y - 30;
+
+                //LULLABY : this turn it rests
+                if (f.IntentRest)
+                {
+                    Gfx.TextSpacedCentered(sb, Game.Font, "REST", r.Center.X, cy - 10, Palette.Paper, TextSize.Body, 3f);
+                    continue;
+                }
+                if (f.IntentNotes.Length == 0) continue;
+
                 float dots = f.IntentNotes.Length * 14f;
                 float left = r.Center.X - (40f + dots) / 2f;
                 Gfx.Text(sb, Game.BigFont, NumberText.Get(f.IntentNotes[0]), left, cy - 16, Palette.Highlight, TextSize.Small);
@@ -1034,7 +1055,7 @@ namespace Tacetno433.Screens
                 float x = MathHelper.Lerp(from.Center.X, HitX, p);
                 float y = MathHelper.Lerp(from.Center.Y, HitY, p);
                 float a = i == next ? 1f : 0.55f;
-                NoteGlyph.Note(sb, Game.BigFont, x, y, notes[i].Size, notes[i].Way, MathHelper.Lerp(1f, NoteGrow, p), time, a);
+                NoteGlyph.Note(sb, Game.BigFont, x, y, notes[i].Shown, notes[i].Way, MathHelper.Lerp(1f, NoteGrow, p), time, a);
                 if (i == next) NoteGlyph.TimingRing(sb, HitX, HitY, progress, RingMark, RingStart, 0f, Math.Min(1f, progress * 3f));
             }
 
@@ -1083,6 +1104,8 @@ namespace Tacetno433.Screens
                     Gfx.TextSpaced(sb, Game.Font, HintMute, 40, 684, Palette.Paper, TextSize.Label, 2f);
                 else if (hoverSkill != null)
                     Gfx.Text(sb, Game.Font, hoverSkill.Text, 40, 682, Palette.Paper, TextSize.Body);
+                else if (hover != null && hover.IsEnemy && battle.TraitOn(hover))
+                    Gfx.Text(sb, Game.Font, hover.Enemy.TurnTraitLine, 40, 682, Palette.Paper, TextSize.Body);   // what the enemy's trait does
                 else
                 {
                     string line = HintChoose;

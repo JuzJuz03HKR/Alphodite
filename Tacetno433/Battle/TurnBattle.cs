@@ -13,7 +13,7 @@ namespace Tacetno433.Battle
 
     //TurnEventKind : something that happened, kept so the screen can show it (numbers, words, sparks).
     //The rules never draw, they only write down what happened (docs/research/ALPHA7_battle_ui.md).
-    public enum TurnEventKind { Damage, Heal, Breath, Dissonance, Crescendo, Mute, Break, Skip, Counter, Down, Ready, Extra, Saved }
+    public enum TurnEventKind { Damage, Heal, Breath, Dissonance, Crescendo, Mute, Break, Skip, Counter, Down, Ready, Extra, Saved, Steal }
 
     public struct TurnEvent
     {
@@ -68,6 +68,9 @@ namespace Tacetno433.Battle
         public int[] IntentNotes = new int[0];   // how hard each note of the attack hits
         public Flick[] IntentWays = new Flick[0];  // the way to swipe back at each note
         public int[] IntentSizes = new int[0];     // the size of each note : 0 p, 1 mf, 2 f (Baton.SizeOf order)
+        public int[] IntentShown = new int[0];     // the size each note SHOWS (FALSE NOTES can lie), the screen draws these
+        public bool IntentRest;                    // LULLABY : this turn it hums and heals instead
+        public bool IntentFast;                    // UNFINISHED : the notes come faster
         public bool IntentCadenza;                 // CADENZA : this attack is a boss's big move
         public int Attacks;                        // attacks made so far, a boss's every third is a CADENZA
 
@@ -123,6 +126,10 @@ namespace Tacetno433.Battle
         private bool overtureDone;     // OVERTURE : the band's first hit has landed
         private bool secondWindUsed;   // SECOND WIND : once per fight
 
+        //Last Skill : the swipe notes of the band's last skill, for ANSWER BETTER (THE NAMELESS MASTER)
+        private List<Flick> lastWays = new List<Flick>();
+        private List<int> lastSizes = new List<int>();
+
         //Events : what happened since the screen last looked
         public List<TurnEvent> Events = new List<TurnEvent>();
 
@@ -167,9 +174,10 @@ namespace Tacetno433.Battle
                 f.IsEnemy = true;
                 f.Enemy = e;
                 f.Slot = i;
-                f.MaxHp = BattleRules.TurnEnemyHp[(int)e.Kind];
+                int life = e.TurnHp > 0 ? e.TurnHp : BattleRules.TurnEnemyHp[(int)e.Kind];
+                f.MaxHp = (int)Math.Round(life * BattleRules.TurnFloorLife[Floor - 1]);       // deeper floors, tougher enemies
                 f.Hp = f.MaxHp;
-                f.Speed = BattleRules.TurnEnemySpeed[(int)e.Kind];
+                f.Speed = e.TurnSpeed > 0 ? e.TurnSpeed : BattleRules.TurnEnemySpeed[(int)e.Kind];
                 Enemies.Add(f);
             }
 
@@ -210,16 +218,52 @@ namespace Tacetno433.Battle
             BeginTurn();
         }
 
-        //Enemy Intent : pick a musician to hit and how many notes, from the floor's range.
+        //Enemy Intent (step 8) : the next of its PHRASES, fitted to the floor's length, at a musician.
         //CADENZA : every third attack of a boss is its big move, one note more and each note harder.
+        //Its trait may change the plan, see the trait names below (from TraitFloor on).
         private void PlanIntent(Fighter enemy)
         {
+            Enemy e = enemy.Enemy;
+            bool trait = TraitOn(enemy);
             enemy.IntentTarget = PickTarget();
+            enemy.IntentRest = false;
+            enemy.IntentFast = false;
+            enemy.IntentCadenza = false;
 
-            int count = random.Next(BattleRules.TurnNotesMin[Floor - 1], BattleRules.TurnNotesMax[Floor - 1] + 1);
-            int hit = Math.Max(1, (int)Math.Round(enemy.Enemy.SongNotePower() * BattleRules.TurnNoteDamage));   // SongNotePower = the average of its Pattern notes
+            //LULLABY (THE LULL) : every third turn it hums instead of attacking, and heals
+            if (trait && e.Trait == EnemyTrait.Lullaby && (enemy.Attacks + 1) % BattleRules.TurnLullEvery == 0)
+            {
+                enemy.IntentRest = true;
+                enemy.IntentNotes = new int[0];
+                enemy.IntentWays = new Flick[0];
+                enemy.IntentSizes = new int[0];
+                enemy.IntentShown = new int[0];
+                return;
+            }
 
-            enemy.IntentCadenza = enemy.Enemy.Kind == EnemyKind.Boss && (enemy.Attacks + 1) % BattleRules.TurnCadenzaEvery == 0;
+            //Phrase : its phrases are played in turn, so they can be learned
+            List<Flick> ways = new List<Flick>();
+            List<int> sizes = new List<int>();
+            if (e.Phrases.Length > 0) ReadPhrase(e.Phrases[enemy.Attacks % e.Phrases.Length], ways, sizes);
+
+            //ANSWER BETTER (THE NAMELESS MASTER) : it plays back the band's last skill
+            if (trait && e.Trait == EnemyTrait.Mirror && lastWays.Count > 0)
+            {
+                ways = new List<Flick>(lastWays);
+                sizes = new List<int>(lastSizes);
+            }
+
+            if (ways.Count == 0)                                             // no phrase written : one random note
+            {
+                ways.Add((Flick)(1 + random.Next(4)));
+                sizes.Add(random.Next(3));
+            }
+
+            int count = Math.Max(BattleRules.TurnNotesMin[Floor - 1], Math.Min(BattleRules.TurnNotesMax[Floor - 1], ways.Count));
+            if (trait && e.Trait == EnemyTrait.NoRest) count++;              // NO REST (WHITE NOISE)
+            int hit = Math.Max(1, (int)Math.Round(e.SongNotePower() * BattleRules.TurnNoteDamage * BattleRules.TurnFloorDamage[Floor - 1]));   // SongNotePower = the average of its Pattern notes
+
+            enemy.IntentCadenza = e.Kind == EnemyKind.Boss && (enemy.Attacks + 1) % BattleRules.TurnCadenzaEvery == 0;
             if (enemy.IntentCadenza)
             {
                 count++;
@@ -229,12 +273,59 @@ namespace Tacetno433.Battle
             enemy.IntentNotes = new int[count];
             enemy.IntentWays = new Flick[count];
             enemy.IntentSizes = new int[count];
+            enemy.IntentShown = new int[count];
             for (int i = 0; i < count; i++)
             {
                 enemy.IntentNotes[i] = hit;
-                enemy.IntentWays[i] = (Flick)(1 + random.Next(4));     // Up, Down, Left or Right
-                enemy.IntentSizes[i] = random.Next(3);
+                enemy.IntentWays[i] = ways[i % ways.Count];
+                enemy.IntentSizes[i] = sizes[i % sizes.Count];
+                enemy.IntentShown[i] = enemy.IntentSizes[i];
             }
+
+            //UNFINISHED (REQUIEM) : below half life, left and right swap and the notes come faster
+            if (trait && e.Trait == EnemyTrait.Unfinished && enemy.Hp * 2 < enemy.MaxHp)
+            {
+                enemy.IntentFast = true;
+                for (int i = 0; i < count; i++)
+                {
+                    if (enemy.IntentWays[i] == Flick.Left) enemy.IntentWays[i] = Flick.Right;
+                    else if (enemy.IntentWays[i] == Flick.Right) enemy.IntentWays[i] = Flick.Left;
+                }
+            }
+
+            //FALSE NOTES (STATIC) : one note shows a size it is not
+            if (trait && e.Trait == EnemyTrait.FalseNotes)
+            {
+                int k = random.Next(count);
+                enemy.IntentShown[k] = (enemy.IntentSizes[k] + 1 + random.Next(2)) % 3;
+            }
+        }
+
+        //Read Phrase : "Lp Rmf Df" into ways and sizes
+        private static void ReadPhrase(string phrase, List<Flick> ways, List<int> sizes)
+        {
+            string[] notes = phrase.Split(' ');
+            for (int i = 0; i < notes.Length; i++)
+            {
+                string n = notes[i];
+                if (n.Length < 2) continue;
+
+                Flick way = Flick.Down;
+                if (n[0] == 'L') way = Flick.Left;
+                if (n[0] == 'R') way = Flick.Right;
+                if (n[0] == 'U') way = Flick.Up;
+
+                string mark = n.Substring(1);
+                int size = mark == "p" ? 0 : (mark == "f" ? 2 : 1);
+                ways.Add(way);
+                sizes.Add(size);
+            }
+        }
+
+        //Trait On : enemy traits switch on from their TraitFloor (ordinary enemies from floor 2)
+        public bool TraitOn(Fighter enemy)
+        {
+            return enemy.IsEnemy && enemy.Enemy.Trait != EnemyTrait.None && Floor >= enemy.Enemy.TraitFloor;
         }
 
         //Pick Target : a musician with TAUNT up if there is one, else anyone standing
@@ -398,6 +489,16 @@ namespace Tacetno433.Battle
             Breath -= s.Cost;
             bool anyLanded = false;
 
+            //Last Skill : remembered for ANSWER BETTER
+            lastWays.Clear();
+            lastSizes.Clear();
+            for (int n = 0; n < s.Notes.Length; n++)
+            {
+                if (s.Notes[n].Kind != NoteKind.Swipe && s.Notes[n].Kind != NoteKind.Hold) continue;
+                lastWays.Add(s.Notes[n].Way);
+                lastSizes.Add(s.Notes[n].Size);
+            }
+
             for (int n = 0; n < s.Notes.Length; n++)
             {
                 NoteResult r = (results != null && n < results.Length) ? results[n] : new NoteResult(Grade.Hesitate, true, 1f);
@@ -549,15 +650,21 @@ namespace Tacetno433.Battle
             if (g == Grade.Perfect)
             {
                 parried++;
-                AddBreath(BattleRules.TurnBreathPerParry);
-                if (Has(MotifId.Pianissimo) && enemy.IntentSizes[note] == 0) AddBreath(BattleRules.TurnPianissimoBreath);   // PIANISSIMO
+                bool noRest = TraitOn(enemy) && enemy.Enemy.Trait == EnemyTrait.NoRest;              // NO REST : no breath from it
+                if (!noRest) AddBreath(BattleRules.TurnBreathPerParry);
+                if (!noRest && Has(MotifId.Pianissimo) && enemy.IntentSizes[note] == 0) AddBreath(BattleRules.TurnPianissimoBreath);   // PIANISSIMO
                 AddOffBeat(enemy, BattleRules.TurnParryOffBeat);
                 return 0;
             }
 
             int damage = NoteDamage(enemy.IntentNotes[note], g);
+            bool trait = TraitOn(enemy);
+            if (trait && enemy.Enemy.Trait == EnemyTrait.FillsGaps && g != Grade.Good)             // FILLS THE GAPS (DEAD AIR)
+                damage = (int)Math.Round(damage * BattleRules.TurnFillsGapsScale);
             if (target.Guard) damage = (int)Math.Ceiling(damage * BattleRules.TurnGuardKeep);      // GUARD
             Hurt(target, damage);
+            if (trait && enemy.Enemy.Trait == EnemyTrait.EchoFades && damage > 0 && !target.Down)  // ECHO FADES (HUSH)
+                AddDissonance(target, 1);
 
             if (g != Grade.Good)
             {
@@ -590,6 +697,17 @@ namespace Tacetno433.Battle
             Fighter enemy = Current;
             Fighter target = enemy.IntentTarget;
             enemy.Attacks++;
+
+            //LULLABY : the humming turn heals it
+            if (enemy.IntentRest) Heal(enemy, BattleRules.TurnLullHeal);
+
+            //THE BARGAIN (THE DEVIL'S STRING) : every attack steals breath
+            if (TraitOn(enemy) && enemy.Enemy.Trait == EnemyTrait.Bargain && enemy.IntentNotes.Length > 0 && Breath > 0)
+            {
+                int stolen = Math.Min(Breath, BattleRules.TurnBargainSteal);
+                Breath -= stolen;
+                Events.Add(new TurnEvent(TurnEventKind.Steal, enemy, stolen));
+            }
 
             if (parried > 0 && parried == enemy.IntentNotes.Length && target != null && !target.Down && !enemy.Down)
             {

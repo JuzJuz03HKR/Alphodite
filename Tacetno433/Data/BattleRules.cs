@@ -35,6 +35,17 @@
         public static float TurnWrongSize = 0.7f;   // on time but the wrong size
         public static float TurnMiss = 0.4f;        // the wrong way, too early, too late or no swipe
 
+        //Floor Scale (step 8) : enemies are tougher deeper down, life and each note's damage, floor 1 / 2 / 3
+        public static float[] TurnFloorLife = { 1f, 1.3f, 1.6f };
+        public static float[] TurnFloorDamage = { 1f, 1.2f, 1.4f };
+
+        //Enemy Traits in the turn battle (step 8, the TurnTraitText of each enemy in Data/Enemy.cs)
+        public static float TurnFillsGapsScale = 1.5f;   // DEAD AIR : a missed note
+        public static int TurnLullHeal = 12;             // THE LULL : life back on its humming turn
+        public static int TurnLullEvery = 3;             //            every this many turns
+        public static float TurnFastGap = 0.7f;          // REQUIEM : the gap between notes below half life
+        public static int TurnBargainSteal = 1;          // THE DEVIL'S STRING : breath taken by each attack
+
         //Enemy Attack : how many notes one attack has on floor 1, 2 and 3 (a random count from
         //min to max), and how hard each note hits : the enemy's average Pattern power x TurnNoteDamage
         public static int[] TurnNotesMin = { 1, 2, 3 };

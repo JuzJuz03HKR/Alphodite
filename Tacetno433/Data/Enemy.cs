@@ -71,6 +71,17 @@ namespace Tacetno433.Data
         public string TraitText = "";
         public int TraitFloor = 1;
 
+        //Turn Battle (Alpha 7, step 8) : life, speed and the PHRASES it attacks with. A phrase is
+        //written as notes like "Lp Rmf Df" : the way to swipe back (L R U D) and the size (p mf f).
+        //It plays its phrases in turn, so a player can learn them. A deeper floor makes the phrase
+        //longer or shorter to fit BattleRules.TurnNotesMin / Max (it repeats from the start).
+        //TurnTraitText is what its trait does in the turn battle (the trait is checked in TurnBattle by name).
+        public int TurnHp;
+        public int TurnSpeed;
+        public string[] Phrases = new string[0];
+        public string TurnTraitText = "";
+        public string TurnTraitLine = "";     // "HUSH  ECHO FADES : ...", prepared, for the battle page
+
         //Enemy Look : brightness stand-in until the real figure goes in
         public Color Tone = Palette.ToneC;
 
@@ -89,25 +100,30 @@ namespace Tacetno433.Data
             //far weaker than the other two and never threatened anyone.
             //Round 15 : the roadside enemies play ODE TO JOY for now (the first song). In the month
             //after the 29 Sep hand in, each should get a piece of its own.
-            new Enemy { Name = "HUSH",      Title = "The first thing to go is the echo.",
+            new Enemy { Name = "HUSH",
+                        TurnHp = 50, TurnSpeed = 4, Phrases = new[] { "Dp Up", "Lp Rp Dp" }, TurnTraitText = "Each note that gets through adds 1 DISSONANCE.",      Title = "The first thing to go is the echo.",
                         Trait = EnemyTrait.EchoFades, TraitName = "ECHO FADES", TraitFloor = 2,
                         TraitText = "The f, mf and p marks on its notes fade before they reach you. Remember them.",
                         Kind = EnemyKind.Normal, Song = SongList.Twinkle, Pattern = new int[] { 4, 0, 3, 4, 0, 0, 5, 0 }, Tone = Palette.ToneD, Temper = 5 },
-            new Enemy { Name = "DEAD AIR",  Title = "It waits between your notes.",
+            new Enemy { Name = "DEAD AIR",
+                        TurnHp = 50, TurnSpeed = 4, Phrases = new[] { "Lmf Rmf", "Dmf Dmf Umf" }, TurnTraitText = "A note you miss hits 50 percent harder.",  Title = "It waits between your notes.",
                         Trait = EnemyTrait.FillsGaps, TraitName = "FILLS THE GAPS", TraitFloor = 2,
                         TraitText = "A note you miss or let pass hits 50 percent harder.",
                         Kind = EnemyKind.Normal, Song = SongList.OdeToJoy, Pattern = new int[] { 0, 4, 0, 4, 0, 4, 0, 5 }, Tone = Palette.ToneE },
-            new Enemy { Name = "THE LULL",  Title = "Soft, patient, and never finished.",
+            new Enemy { Name = "THE LULL",
+                        TurnHp = 60, TurnSpeed = 2, Phrases = new[] { "Dp Dp", "Up Dp Up" }, TurnTraitText = "Every third turn it hums instead of attacking and gets back 12 life.",  Title = "Soft, patient, and never finished.",
                         Trait = EnemyTrait.Lullaby, TraitName = "LULLABY", TraitFloor = 2,
                         TraitText = "Round three slows down instead of speeding up.",
                         Kind = EnemyKind.Normal, Song = SongList.Moonlight, Pattern = new int[] { 3, 3, 0, 0, 7, 0, 3, 3 }, Tone = Palette.ToneC, Temper = -10 },
-            new Enemy { Name = "STATIC",    Title = "It sounds like something. It is not.",
+            new Enemy { Name = "STATIC",
+                        TurnHp = 45, TurnSpeed = 5, Phrases = new[] { "Lf Rp", "Umf Df Lp" }, TurnTraitText = "One note of each attack shows the wrong size.",    Title = "It sounds like something. It is not.",
                         Trait = EnemyTrait.FalseNotes, TraitName = "FALSE NOTES", TraitFloor = 2,
                         TraitText = "One note in every bar shows the wrong loudness.",
                         Kind = EnemyKind.Normal, Song = SongList.OdeToJoy, Pattern = new int[] { 4, 0, 3, 0, 4, 0, 3, 6 }, Tone = Palette.ToneB, Temper = 10 },
 
             //Elite : any era
-            new Enemy { Name = "THE MUTE CHOIR", Title = "A hundred mouths, open, making nothing.",
+            new Enemy { Name = "THE MUTE CHOIR",
+                        TurnHp = 120, TurnSpeed = 4, Phrases = new[] { "Df Df Uf", "Lmf Rmf Lmf Rmf" }, TurnTraitText = "A note that gets through takes the target's skills away for a turn.", Title = "A hundred mouths, open, making nothing.",
                         Trait = EnemyTrait.SilentMouths, TraitName = "SILENT MOUTHS", TraitFloor = 1,
                         TraitText = "From round two it silences one section of your band each round, strings, winds or percussion: those players cannot play. Some notes stay hidden as ???",
                         Kind = EnemyKind.Elite, Song = SongList.FifthSymphony, Pattern = new int[] { 4, 0, 5, 0, 6, 0, 4, 6 }, Hidden = new int[] { 3, 7 }, Tone = Palette.ToneB },
@@ -121,23 +137,27 @@ namespace Tacetno433.Data
             //and it had stopped being a threat (a strong player lost to it 3 percent of the time, was 16).
             //Round 15 : notes 5, Temper 0. Playing is free, so soft notes on every beat were nothing,
             //now it is a reading test : a note on every beat, any mark, and no rest at all.
-            new Enemy { Name = "WHITE NOISE",    Title = "Every beat, all the time, forever.",
+            new Enemy { Name = "WHITE NOISE",
+                        TurnHp = 110, TurnSpeed = 6, Phrases = new[] { "Lp Rp Lp Rp", "Up Dp Up Dp" }, TurnTraitText = "One note more in every attack, and parrying it gives no BREATH.",    Title = "Every beat, all the time, forever.",
                         Trait = EnemyTrait.NoRest, TraitName = "NO REST", TraitFloor = 1,
                         TraitText = "It never stops, so silent beats give back only half the breath.",
                         Kind = EnemyKind.Elite, Song = SongList.PreludeInC, Pattern = new int[] { 5, 5, 5, 5, 5, 5, 5, 5 }, Tone = Palette.ToneA, Temper = 0 },
 
             //Boss : one per era
-            new Enemy { Name = "REQUIEM",            Title = "The piece that was never finished.",
+            new Enemy { Name = "REQUIEM",
+                        TurnHp = 250, TurnSpeed = 5, Phrases = new[] { "Df Lmf Rmf Uf", "Lf Rf Lf Rf" }, TurnTraitText = "Below half life it swaps left and right and plays faster.",            Title = "The piece that was never finished.",
                         Trait = EnemyTrait.Unfinished, TraitName = "UNFINISHED", TraitFloor = 1,
                         TraitText = "In round three it plays backwards and faster, and your band is mirrored: the players on the left and right swap sides.",
                         Kind = EnemyKind.Boss, Era = 0, Song = SongList.RondoAllaTurca, Pattern = new int[] { 6, 0, 4, 0, 8, 0, 4, 9 }, Hidden = new int[] { 2, 6 }, Tone = Palette.ToneA },
-            new Enemy { Name = "THE NAMELESS MASTER", Title = "He plays a phrase. You must answer better.",
+            new Enemy { Name = "THE NAMELESS MASTER",
+                        TurnHp = 230, TurnSpeed = 4, Phrases = new[] { "Dmf Umf Lmf", "Rf Lf Dp Up" }, TurnTraitText = "It answers with the notes of the last skill your band played.", Title = "He plays a phrase. You must answer better.",
                         Trait = EnemyTrait.Mirror, TraitName = "ANSWER BETTER", TraitFloor = 1,
                         TraitText = "From round two it plays your last round back at you.",
                         Kind = EnemyKind.Boss, Era = 1, Song = SongList.NachtMusik, Pattern = new int[] { 3, 0, 3, 5, 0, 3, 2, 7 }, Hidden = new int[] { 3, 7 }, Tone = Palette.ToneB },
                         // round 12.1, was 3 3 0 5 0 3 0 8 : a strong player lost to it on floor one 27 percent of the time,
                         // twice the hardest elite. Now about 15 percent, still the hardest boss. Round 12 : was 4 4 0 6 4 4 0 9
-            new Enemy { Name = "THE DEVIL'S STRING",  Title = "One string, one bow, one bargain.",
+            new Enemy { Name = "THE DEVIL'S STRING",
+                        TurnHp = 260, TurnSpeed = 6, Phrases = new[] { "Rf Rf Lf", "Uf Df Uf Df" }, TurnTraitText = "Each of its attacks steals 1 BREATH.",  Title = "One string, one bow, one bargain.",
                         Trait = EnemyTrait.Bargain, TraitName = "THE BARGAIN", TraitFloor = 1,
                         TraitText = "Before round two it offers a deal: more power now, less breath for ever.",
                         Kind = EnemyKind.Boss, Era = 2, Pattern = new int[] { 7, 0, 7, 0, 0, 9, 0, 9 }, Hidden = new int[] { 4 }, Tone = Palette.ToneA, Temper = 20 },
@@ -154,6 +174,7 @@ namespace Tacetno433.Data
                 e.KindLabel = kindNames[(int)e.Kind];
                 e.TraitWrapped = Gfx.WrapText(storyFont, e.TraitText, wrapWidth, TextSize.StorySmall);
                 e.TraitStory = "* " + e.Name + " : " + e.TraitText;
+                e.TurnTraitLine = e.TraitName + " : " + e.TurnTraitText;
             }
         }
 
