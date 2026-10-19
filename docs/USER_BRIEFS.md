@@ -1321,3 +1321,15 @@ Claude ตอบเรื่อง 45% : ไม่สมควร สาเห�
 ```text
 I hit my usage limit while you were working, but it has reset now. Please continue from where you left off.
 ```
+
+**19 ต.ค. : ขอให้ research ระบบต่อสู้ใหม่ให้สนุกขึ้น** (คำต่อคำ)
+
+```text
+ตอนนี้เกมยังไม่สนุกมากพอ ควรจะปรับปรุงเรื่องระบบ combat ให้ดีขึ้นกว่านี้ลองไป research ระบบที่ Tacet จะนำมาใช้ได้ลองวิเคราห์และทบทวนดู 2-3 รอบมองให้หลากหลายมุม แล้วลองเสนอมาดูหลายๆแบบจะต่อให้จะเปลี่ยน game play ไปบ้างแค่ให้เกมสนุกขึ้นก็พอ 
+นี้คือเว็บที่ผมไปเจอมาเป็นการรวม 20 เกม turn base ที่ดี https://www.gamespot.com/gallery/best-turn-based-strategy-games/2900-6859/#16
+อันนี้จะรวมของ roguelike https://www.gamesradar.com/best-roguelikes-roguelites/
+ข้อมูลลองไปดูจากแหล่งอื่นเพิ่มเติมด้วย 
+ถ้าจะแยก agent เลือกให้เหมาะสมกับงานต้องการให้ใช้โทเคนให้คุ้มค่าที่สุด
+เมื้อเสร็จแล้วให้ลองเขียนมาเป็น .md ผมจะไปนั่งอ่านแล้วเลือกอีกที
+```
+→ เปลี่ยน gameplay ได้ถ้าสนุกขึ้น · ผลอยู่ `docs/ALPHA7_COMBAT_PROPOSALS.md` (ผู้ใช้จะอ่านแล้วเลือก ยังไม่แก้โค้ด)
