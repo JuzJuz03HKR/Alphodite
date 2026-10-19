@@ -78,6 +78,7 @@ namespace Tacetno433.Data
         //TurnTraitText is what its trait does in the turn battle (the trait is checked in TurnBattle by name).
         public int TurnHp;
         public int TurnSpeed;
+        public int TurnPower;                   // how hard each note hits before the floor scale, 0 = the average of Pattern (SongNotePower)
         public string[] Phrases = new string[0];
         public string TurnTraitText = "";
         public string TurnTraitLine = "";     // "HUSH  ECHO FADES : ...", prepared, for the battle page

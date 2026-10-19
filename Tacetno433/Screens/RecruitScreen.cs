@@ -13,6 +13,8 @@ namespace Tacetno433.Screens
     //The band is named here too, but only on the very first floor of a run.
     public class RecruitScreen : GameScreen
     {
+        private static readonly string[] turnWays = { "LEFT", "DOWN", "RIGHT" };   // TURN BATTLE : a CUE as the way their ATTACK swings
+
         //Recruit Layout
         private const int ColumnW = 440;
         private const int ColumnGap = 40;
@@ -150,9 +152,11 @@ namespace Tacetno433.Screens
 
             //Seat : their section and the side of the stage they sit on, under the tag (round 15)
             MusicianArt.SideBadge(sb, m.Cue, column.X + 62, column.Y + 108, 18f, Palette.Ink, Palette.Paper, a);
-            Gfx.TextSpacedCentered(sb, Game.Font, "SEAT", column.X + 62, column.Y + 146, Palette.LineGrey * a, TextSize.Tiny, 2f);
-            Gfx.TextSpacedCentered(sb, Game.Font, StageLayout.Rows[StageLayout.SectionOf(m.Family)].Name, column.X + 62, column.Y + 164, Palette.PaperDim * a, TextSize.Tiny, 1f);
-            Gfx.TextSpacedCentered(sb, Game.Font, StageLayout.SideNames[m.Cue], column.X + 62, column.Y + 180, Palette.PaperDim * a, TextSize.Tiny, 1f);
+            //TURN BATTLE : the arrow is the way their ATTACK swings, the seat itself gives nothing
+            Gfx.TextSpacedCentered(sb, Game.Font, BattleRules.TurnBattleOn ? "SWINGS" : "SEAT", column.X + 62, column.Y + 146, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            if (!BattleRules.TurnBattleOn)
+                Gfx.TextSpacedCentered(sb, Game.Font, StageLayout.Rows[StageLayout.SectionOf(m.Family)].Name, column.X + 62, column.Y + 164, Palette.PaperDim * a, TextSize.Tiny, 1f);
+            Gfx.TextSpacedCentered(sb, Game.Font, BattleRules.TurnBattleOn ? turnWays[m.Cue] : StageLayout.SideNames[m.Cue], column.X + 62, column.Y + 164 + (BattleRules.TurnBattleOn ? 0 : 16), Palette.PaperDim * a, TextSize.Tiny, 1f);
             Gfx.TextVertical(sb, Game.Font, m.Instrument, column.Right - 40, column.Y + 50, Palette.PaperDim * a, TextSize.Label);
             Gfx.Rect(sb, column.Right - 60, column.Y + 40, 1, 200, Palette.LineGrey * a);
 

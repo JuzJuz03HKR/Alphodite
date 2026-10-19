@@ -66,11 +66,13 @@ namespace Tacetno433.Screens
         private static string[] rowHelp =
         {
             "The main fader. Every sound in the game is measured against this one.",
-            "Button clicks, baton strokes, and every clash in a duel.",
+            BattleRules.TurnBattleOn ? "Button clicks, baton strokes, and every hit in a fight." : "Button clicks, baton strokes, and every clash in a duel.",
             "The track playing behind the page you are on.",
             "Which language the game is written in. Only English is written so far, so the choice is remembered but the words do not change yet.",
             "Fills the whole monitor without changing its resolution, so other programs are left where they are and alt tab is instant. The picture keeps its shape and black bars fill whatever is left over.",
-            "If your strokes feel right on the beat but the duel calls them late, move this to the right. Early, to the left. Press ENTER or TEST and the game measures it for you."
+            BattleRules.TurnBattleOn
+                ? "If your strokes feel on time but the game calls them late, move this to the right. Early, to the left. Press ENTER or TEST and the game measures it for you."
+                : "If your strokes feel right on the beat but the duel calls them late, move this to the right. Early, to the left. Press ENTER or TEST and the game measures it for you."
         };
         private static string savedNote =
             "Options are saved the moment you leave this page, and come back the next time the game starts.";

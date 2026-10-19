@@ -108,7 +108,7 @@ namespace Tacetno433.Screens
             int before = index;
             index += direction;
             if (index < 0) index = 0;
-            if (index > ConductorList.All.Length - 1) index = ConductorList.All.Length - 1;
+            if (index > ConductorList.Shown.Length - 1) index = ConductorList.Shown.Length - 1;
 
             SoundBank.Play(index != before ? Sfx.UiMove : Sfx.UiDenied);
         }
@@ -192,7 +192,7 @@ namespace Tacetno433.Screens
         //Paintings : draw every frame, the further from the light the darker it gets
         private void DrawPaintings(SpriteBatch sb)
         {
-            for (int i = 0; i < ConductorList.All.Length; i++)
+            for (int i = 0; i < ConductorList.Shown.Length; i++)
             {
                 Rectangle frame = FrameRect(i);
 
@@ -207,10 +207,10 @@ namespace Tacetno433.Screens
                 Gfx.DrawGlowBox(sb, new Rectangle(frame.X - 26, frame.Y + 24, frame.Width + 52, frame.Height + 52),
                                 Color.Black * 0.55f);
 
-                PortraitBox.Draw(sb, frame, ConductorList.All[i], brightness, true);
+                PortraitBox.Draw(sb, frame, ConductorList.Shown[i], brightness, true);
 
                 //Chapter Mark : the big number above each painting, like an exhibition label
-                Conductor c = ConductorList.All[i];
+                Conductor c = ConductorList.Shown[i];
                 Gfx.TextCentered(sb, Game.BigFont, NumberText.Get(i + 1), frame.Center.X, frame.Y - 44, Palette.Paper * brightness, TextSize.Subtitle);
                 Gfx.Rect(sb, frame.Center.X - 16, frame.Y - 26, 32, 1, Palette.Paper * brightness);
                 Gfx.TextSpacedCentered(sb, Game.Font, c.Role, frame.Center.X, frame.Y - 20, Palette.PaperDim * brightness, TextSize.Tiny, 3f);
@@ -255,7 +255,7 @@ namespace Tacetno433.Screens
         //Interface : heading, arrows, back button and the lines under the painting
         private void DrawInterface(SpriteBatch sb)
         {
-            Conductor c = ConductorList.All[index];
+            Conductor c = ConductorList.Shown[index];
 
             //Header : spaced serif title with a thin rule and a small caption
             Gfx.TextSpacedCentered(sb, Game.BigFont, "CHOOSE YOUR CONDUCTOR", CenterX, 16, Palette.Paper, TextSize.Small, 5f);
@@ -275,10 +275,10 @@ namespace Tacetno433.Screens
 
             //Arrow Buttons : greyed out at the ends of the gallery
             DrawArrowButton(sb, leftButton, false, index > 0);
-            DrawArrowButton(sb, rightButton, true, index < ConductorList.All.Length - 1);
+            DrawArrowButton(sb, rightButton, true, index < ConductorList.Shown.Length - 1);
 
             //Position Diamonds : which painting out of how many
-            int count = ConductorList.All.Length;
+            int count = ConductorList.Shown.Length;
             for (int i = 0; i < count; i++)
             {
                 float dotX = CenterX - (count - 1) * 10f + i * 20f;

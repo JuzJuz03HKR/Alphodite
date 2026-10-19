@@ -53,6 +53,7 @@ namespace Tacetno433.Screens
 
         //Ware Rows
         private const int SeatRow = 0;
+        private static readonly string[] TurnWays = { "LEFT", "DOWN", "RIGHT" };   // a musician's CUE as the way their ATTACK swings
         private const int TuningRow = 1;
         private const int HireRow = 2;
         private const int FirstMotifRow = 3;
@@ -96,6 +97,8 @@ namespace Tacetno433.Screens
                 ? hire.Name + ", " + hire.Instrument + ". Sits " + StageLayout.Rows[StageLayout.SectionOf(hire.Family)].Name
                   + ", " + StageLayout.SideNames[hire.Cue] + ". " + hire.TraitName + " : " + hire.TraitText
                 : NobodyLine;
+            if (hire != null && BattleRules.TurnBattleOn)                                   // TURN BATTLE : the side is the way they swing
+                notes[HireRow] = hire.Name + ", " + hire.Instrument + ". Swings " + TurnWays[hire.Cue] + ". " + hire.TraitName + " : " + hire.TraitText;
             if (hire == null) sold[HireRow] = true;
 
             for (int i = 0; i < 3; i++)
@@ -275,7 +278,7 @@ namespace Tacetno433.Screens
                 Rectangle row = RowRect(r);
                 row.Inflate(-12, 0);
                 bool over = r == hoverRow;
-                bool gone = sold[r] || (r == SeatRow && !run.SeatForSale);
+                bool gone = sold[r] || (r == SeatRow && (!run.SeatForSale || BattleRules.TurnBattleOn));   // TURN BATTLE : no seats
                 float a = gone ? 0.35f : 1f;
 
                 Gfx.Rect(sb, row, (over && !gone ? Palette.Stage : Palette.Void * 0.4f));

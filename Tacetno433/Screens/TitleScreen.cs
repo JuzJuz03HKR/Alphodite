@@ -261,7 +261,7 @@ namespace Tacetno433.Screens
             Gfx.Rect(sb, 60, 30, 1, TacetGame.ScreenH - 60, Palette.Paper * 0.08f);
             Gfx.Rect(sb, 60, 30, 760, 1, Palette.Paper * 0.08f);
             Gfx.TextSpaced(sb, Game.Font, "ALPHODITE", 80, 38, Palette.LineGrey, TextSize.Tiny, 4f);
-            Gfx.TextSpaced(sb, Game.Font, "A DUEL AGAINST SILENCE", 470, 38, Palette.LineGrey, TextSize.Tiny, 4f);
+            Gfx.TextSpaced(sb, Game.Font, BattleRules.TurnBattleOn ? "A BAND AGAINST SILENCE" : "A DUEL AGAINST SILENCE", 470, 38, Palette.LineGrey, TextSize.Tiny, 4f);
             Ornament.Crosses(sb, 740, 44, 4, 1, 16, Palette.LineGrey);
 
             Ornament.Vignette(sb, 60, 0.55f);

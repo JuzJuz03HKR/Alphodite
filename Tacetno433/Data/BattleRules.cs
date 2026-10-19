@@ -108,6 +108,30 @@
         public static int TurnBoltDamage = 14;         // LIGHTNING : damage to every enemy at full strength (x1)
         public static int TurnMozartRun = 3;           // THE SHADOWLESS's PASSIVE : this many PERFECTs in a row give 1 breath
 
+        //The other four of the lore (step 10, ALPHA7_DESIGN 5.9). Signatures are x their strength (0.4 to 1.3).
+        //THE METRONOME (Bach) : LOCKED TEMPO needs no number (any size is right), FUGUE echoes at the strength.
+        public static int TurnPaganiniLife = 3;        // THE HEARTLESS's PASSIVE : life paid for each BREATH a skill is short of
+        public static float TurnCapricePrice = 0.1f;   // CAPRICE : when it ends, every musician pays this share of their life (never below 1)
+        public static float TurnLullyWindow = 0.03f;   // THE KING'S BATON's PASSIVE : seconds added to both parry windows (0.05 won 99 percent of STRONG runs, the others 83 to 90)
+        public static int TurnSunHeal = 12;            // THE SUN : life back for every musician at full strength
+        public static float TurnFannyScale = 0.25f;    // THE UNSIGNED's PASSIVE : FANNY's voice hits this much harder
+        public static float TurnFelixHeal = 1.5f;      //                          FELIX's voice heals this much more
+        public static int TurnFelixCrescendo = 1;      //                          and gives this much more CRESCENDO
+        public static int TurnDuetDamage = 9;          // TWO VOICES : damage to every enemy at full strength
+        public static int TurnDuetHeal = 6;            //              and life back for every musician
+
+        //Musician Traits in the turn battle (step 10, the TurnTraitText of each musician in Data/Musician.cs)
+        public static float TurnCountsWindow = 0.05f;  // COUNTS ALOUD (ANNA) : seconds added to her PERFECT window
+        public static float TurnQuietScale = 1.5f;     // THE QUIET PART (KLARA) : against an enemy showing a p note
+        public static int TurnMomentumMost = 3;        // MOMENTUM (OTTO) : power gained by hits in a row, at most
+        public static float TurnByEarScale = 1.5f;     // BY EAR (MALI) : against an enemy that is OFF-BEAT
+        public static float TurnHeldNoteShare = 0.4f;  // HELD NOTE (CHAI) : his ATTACK hits again for this share
+        public static float TurnStepBetterScale = 1.3f;   // ONE STEP BETTER (NUAN) : against an enemy showing an f note
+        public static int TurnFourBarsEvery = 4;       // FOUR BARS STRAIGHT (LUKA) : every this many ATTACKs
+        public static float TurnFourBarsScale = 2f;    //                             hits this much harder
+        public static float TurnLateBonus = 0.12f;     // FASHIONABLY LATE (IRIS) : seconds after the GOOD window a late stroke still counts
+        public static int TurnThunderSoften = 2;       // THE WHOLE FLOOR (BORIS) : taken off each note of the enemy's next attack
+
         //ARCHIVE (step 7, Data/Archive.cs) : ECHOES a finished run leaves, and what each upgrade level gives
         public static int EchoesPerWin = 3;            // each fight won
         public static int EchoesPerFloor = 10;         // each floor cleared

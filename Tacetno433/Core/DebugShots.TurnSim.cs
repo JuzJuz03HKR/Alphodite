@@ -9,16 +9,20 @@ namespace Tacetno433.Core
     //DebugShots.TurnSim : DEVELOPER TOOL, the balance check of the turn battle (Alpha 7, step 9).
     //   Tacetno433.exe --shots turnsim --out <folder>      writes turnsim.txt
     //
-    //Plays fights with Battle/TurnBattle.cs and no screen. A simulated player is a set of chances
-    //for every swipe (PERFECT, GOOD, the rest MISS, and how often a swipe on time is the wrong size)
-    //and one plain habit for choosing what to do :
+    //Plays fights with Battle/TurnBattle.cs and no screen. A simulated player swipes with a timing
+    //error (a bell curve this many seconds wide), now and then the wrong way or the wrong size, and
+    //TurnBattle.Judge grades it like the battle page does, so every wider window (STEADY HAND,
+    //COUNTS ALOUD, FASHIONABLY LATE, STEADY PULSE, CAPRICE) works as in the game.
+    //One plain habit chooses what to do :
     //   SIGNATURE as soon as it is full, a heal when someone is under half life, the dearest skill
     //   that hits enemies when there are 3 BREATH or more, otherwise ATTACK.
-    //Two reports :
-    //   FIGHTS  one fight at full life, every enemy kind on every floor
-    //   RUNS    three floors in a row with life carried over : N N E N, a rest (40 percent back),
-    //           then the boss, after every win the result page's life back. The band is ANNA,
-    //           KLARA and OTTO with THE UNHEARING, one more rehearsal each per floor, no motifs.
+    //Reports :
+    //   FIGHTS      one fight at full life, every enemy kind on every floor
+    //   RUNS        three floors in a row with life carried over : N N E N, a rest (40 percent back),
+    //               then the boss, after every win the result page's life back. The band is ANNA,
+    //               KLARA and OTTO with THE UNHEARING, one more rehearsal each per floor, no motifs.
+    //   CONDUCTORS  the same runs with each of the six conductors of the turn battle
+    //   BANDS       the same runs with the three musicians of each era (their traits)
     //How well real people swipe is a guess (nobody has played the turn battle yet), so read the
     //numbers side by side rather than as the truth. Results move by a few percent between runs.
     public static partial class DebugShots
@@ -26,17 +30,19 @@ namespace Tacetno433.Core
         private class SimPlayer
         {
             public string Name;
-            public float Perfect;       // chance of PERFECT
-            public float Good;          // chance of GOOD, the rest is MISS
-            public float WrongSize;     // chance a swipe on time is the wrong size
+            public float Spread;        // timing error in seconds (one standard deviation)
+            public float WrongWay;      // chance of swiping the wrong way
+            public float WrongSize;     // chance of the wrong size
         }
 
+        //With the normal windows (PERFECT 0.10, GOOD 0.22 seconds) these come out at about
+        //STRONG 60 / 33 / 7, AVERAGE 37 / 34 / 29, NEWCOMER 24 / 26 / 50 (PERFECT / GOOD / MISS percent)
         private static SimPlayer[] simPlayers =
         {
-            new SimPlayer { Name = "FLAWLESS", Perfect = 1f,    Good = 0f,    WrongSize = 0f },
-            new SimPlayer { Name = "STRONG",   Perfect = 0.6f,  Good = 0.3f,  WrongSize = 0.05f },
-            new SimPlayer { Name = "AVERAGE",  Perfect = 0.35f, Good = 0.4f,  WrongSize = 0.15f },
-            new SimPlayer { Name = "NEWCOMER", Perfect = 0.15f, Good = 0.4f,  WrongSize = 0.3f },
+            new SimPlayer { Name = "FLAWLESS", Spread = 0f,    WrongWay = 0f,    WrongSize = 0f },
+            new SimPlayer { Name = "STRONG",   Spread = 0.12f, WrongWay = 0.01f, WrongSize = 0.05f },
+            new SimPlayer { Name = "AVERAGE",  Spread = 0.2f,  WrongWay = 0.03f, WrongSize = 0.15f },
+            new SimPlayer { Name = "NEWCOMER", Spread = 0.3f,  WrongWay = 0.08f, WrongSize = 0.3f },
         };
 
         private const int SimFights = 200;
@@ -46,7 +52,7 @@ namespace Tacetno433.Core
         {
             Random rng = new Random(4330);
             string report = "TACET TURN BATTLE BALANCE  (" + SimFights + " fights per cell, " + SimRuns + " runs per player)\r\n";
-            report += "Players : FLAWLESS all PERFECT / STRONG 60 30 / AVERAGE 35 40 / NEWCOMER 15 40 (PERFECT GOOD percent)\r\n\r\n";
+            report += "Players : timing spread FLAWLESS 0 / STRONG 0.12 / AVERAGE 0.2 / NEWCOMER 0.3 seconds\r\n\r\n";
 
             MusicianList.ResetRehearsals();
             List<Musician> band = new List<Musician> { MusicianList.All[0], MusicianList.All[1], MusicianList.All[2] };
@@ -69,7 +75,7 @@ namespace Tacetno433.Core
                         for (int f = 0; f < SimFights; f++)
                         {
                             Enemy enemy = SimPick(kinds[k], f);
-                            TurnBattle b = SimFight(band, enemy, floor, player, null, rng);
+                            TurnBattle b = SimFight(band, enemy, floor, player, null, rng, TurnKit.Beethoven);
                             if (b.Step == TurnStep.Won) wins++;
                             rounds += b.Round;
                             for (int i = 0; i < b.Party.Count; i++)
@@ -95,7 +101,7 @@ namespace Tacetno433.Core
                 int rounds = 0;
                 for (int f = 0; f < SimFights; f++)
                 {
-                    TurnBattle b = SimFight(band, enemy, floor, simPlayers[2], null, rng);
+                    TurnBattle b = SimFight(band, enemy, floor, simPlayers[2], null, rng, TurnKit.Beethoven);
                     if (b.Step == TurnStep.Won) wins++;
                     rounds += b.Round;
                 }
@@ -110,12 +116,31 @@ namespace Tacetno433.Core
                 int[] lostOn = new int[4];
                 for (int r = 0; r < SimRuns; r++)
                 {
-                    int reached = SimRun(band, simPlayers[p], rng);
+                    int reached = SimRun(band, simPlayers[p], rng, TurnKit.Beethoven);
                     if (reached > 3) wins++;
                     else lostOn[reached]++;
                 }
                 report += "  " + simPlayers[p].Name.PadRight(9) + (wins * 100 / SimRuns).ToString().PadLeft(3) + "%    "
                         + (lostOn[1] * 100 / SimRuns) + "% / " + (lostOn[2] * 100 / SimRuns) + "% / " + (lostOn[3] * 100 / SimRuns) + "%\r\n";
+            }
+
+            //CONDUCTORS : the six of the turn battle, STRONG and AVERAGE players
+            report += "\r\nCONDUCTORS (runs as above) : WIN PERCENT  STRONG / AVERAGE\r\n";
+            for (int c = 0; c < ConductorList.Shown.Length; c++)
+            {
+                Conductor conductor = ConductorList.Shown[c];
+                report += "  " + conductor.Name.PadRight(18) + (SimRunWins(band, simPlayers[1], rng, conductor.Turn) + "%").PadLeft(5)
+                        + " / " + SimRunWins(band, simPlayers[2], rng, conductor.Turn) + "%\r\n";
+            }
+
+            //BANDS : the three musicians of each era, THE UNHEARING, AVERAGE player
+            report += "\r\nBANDS (runs as above, THE UNHEARING) : WIN PERCENT  STRONG / AVERAGE\r\n";
+            for (int era = 0; era < 3; era++)
+            {
+                List<Musician> trio = new List<Musician> { MusicianList.All[era * 3], MusicianList.All[era * 3 + 1], MusicianList.All[era * 3 + 2] };
+                string names = trio[0].Name + " " + trio[1].Name + " " + trio[2].Name;
+                report += "  " + names.PadRight(18) + (SimRunWins(trio, simPlayers[1], rng, TurnKit.Beethoven) + "%").PadLeft(5)
+                        + " / " + SimRunWins(trio, simPlayers[2], rng, TurnKit.Beethoven) + "%\r\n";
             }
 
             MusicianList.ResetRehearsals();
@@ -131,8 +156,17 @@ namespace Tacetno433.Core
             return pool[index % pool.Count];
         }
 
+        //Sim Run Wins : the percent of SimRuns runs won
+        private static int SimRunWins(List<Musician> band, SimPlayer player, Random rng, TurnKit kit)
+        {
+            int wins = 0;
+            for (int r = 0; r < SimRuns; r++)
+                if (SimRun(band, player, rng, kit) > 3) wins++;
+            return wins * 100 / SimRuns;
+        }
+
         //Sim Run : returns the floor the band fell on, or 4 for a won run
-        private static int SimRun(List<Musician> band, SimPlayer player, Random rng)
+        private static int SimRun(List<Musician> band, SimPlayer player, Random rng, TurnKit kit)
         {
             MusicianList.ResetRehearsals();
             int[] life = { -1, -1, -1 };
@@ -149,7 +183,7 @@ namespace Tacetno433.Core
                     int[] start = new int[band.Count];
                     for (int m = 0; m < band.Count; m++) start[m] = life[m] < 0 ? BattleRules.TurnHp[(int)band[m].Family] : life[m];
 
-                    TurnBattle b = SimFight(band, enemy, floor, player, start, rng);
+                    TurnBattle b = SimFight(band, enemy, floor, player, start, rng, kit);
                     if (b.Step != TurnStep.Won) return floor;
 
                     for (int m = 0; m < band.Count; m++) life[m] = b.HpAfterBattle(b.Party[m]);
@@ -171,10 +205,10 @@ namespace Tacetno433.Core
         }
 
         //Sim Fight : one fight to the end with the player's habit
-        private static TurnBattle SimFight(List<Musician> band, Enemy enemy, int floor, SimPlayer player, int[] startHp, Random rng)
+        private static TurnBattle SimFight(List<Musician> band, Enemy enemy, int floor, SimPlayer player, int[] startHp, Random rng, TurnKit kit)
         {
             TurnBattle b = new TurnBattle(band, new List<Enemy> { enemy }, floor, rng, startHp);
-            b.Kit = TurnKit.Beethoven;
+            b.Kit = kit;
 
             for (int step = 0; step < 400 && (b.Step == TurnStep.PlayerTurn || b.Step == TurnStep.EnemyTurn); step++)
             {
@@ -183,8 +217,8 @@ namespace Tacetno433.Core
                     Grade[] parries = new Grade[b.Current.IntentNotes.Length];
                     for (int i = 0; i < parries.Length; i++)
                     {
-                        NoteResult r = SimSwipe(player, rng);
-                        parries[i] = r.Grade == Grade.Perfect && !r.RightSize ? Grade.Good : r.Grade;
+                        NoteResult r = SimSwipe(b, player, rng);
+                        parries[i] = r.Grade == Grade.Perfect && !r.RightSize ? Grade.Good : r.Grade;   // the wrong size only half blocks
                     }
                     b.TakeEnemyAttack(parries);
                     continue;
@@ -194,7 +228,7 @@ namespace Tacetno433.Core
                 if (b.CanSignature)
                 {
                     NoteResult[] four = new NoteResult[4];
-                    for (int i = 0; i < 4; i++) four[i] = new NoteResult(SimSwipe(player, rng).Grade, true, 1f);
+                    for (int i = 0; i < 4; i++) four[i] = new NoteResult(SimSwipe(b, player, rng).Grade, true, 1f);
                     b.UseSignature(four);
                     continue;
                 }
@@ -215,23 +249,23 @@ namespace Tacetno433.Core
                 for (int i = 0; i < b.Party.Count; i++)
                     if (!b.Party[i].Down && b.Party[i].Hp * 2 < b.Party[i].MaxHp && (hurt == null || b.Party[i].Hp < hurt.Hp)) hurt = b.Party[i];
 
-                if (heal != null && hurt != null) b.UseSkill(heal, heal.Target == SkillTarget.Ally ? hurt : me, SimNotes(heal, player, rng));
-                else if (hit != null && b.Breath >= 3) b.UseSkill(hit, enemyF, SimNotes(hit, player, rng));
+                if (heal != null && hurt != null) b.UseSkill(heal, heal.Target == SkillTarget.Ally ? hurt : me, SimNotes(b, heal, player, rng));
+                else if (hit != null && b.Breath >= 3) b.UseSkill(hit, enemyF, SimNotes(b, hit, player, rng));
                 else
                 {
-                    NoteResult r = SimSwipe(player, rng);
+                    NoteResult r = SimSwipe(b, player, rng);
                     b.Attack(enemyF, r.Grade, r.RightSize);
                 }
             }
             return b;
         }
 
-        private static NoteResult[] SimNotes(Skill s, SimPlayer player, Random rng)
+        private static NoteResult[] SimNotes(TurnBattle b, Skill s, SimPlayer player, Random rng)
         {
             NoteResult[] results = new NoteResult[s.Notes.Length];
             for (int i = 0; i < results.Length; i++)
             {
-                NoteResult r = SimSwipe(player, rng);
+                NoteResult r = SimSwipe(b, player, rng);
                 if (s.Notes[i].Kind == NoteKind.Spark || s.Notes[i].Kind == NoteKind.Roll) r.RightSize = true;
                 if (s.Notes[i].Kind == NoteKind.Hold) r.Hold = r.Grade == Grade.Perfect ? 1f : 0.6f;
                 results[i] = r;
@@ -239,11 +273,21 @@ namespace Tacetno433.Core
             return results;
         }
 
-        private static NoteResult SimSwipe(SimPlayer player, Random rng)
+        //Sim Swipe : one swipe, graded by the battle's own Judge. Later than LateLimit is no swipe at all,
+        //earlier than EarlyTime is the hand getting ready and the note is missed.
+        private static NoteResult SimSwipe(TurnBattle b, SimPlayer player, Random rng)
         {
-            double roll = rng.NextDouble();
-            Grade g = roll < player.Perfect ? Grade.Perfect : (roll < player.Perfect + player.Good ? Grade.Good : Grade.Miss);
-            bool rightSize = rng.NextDouble() >= player.WrongSize;
+            //ADVANCED PART : Box-Muller, two even random numbers make one on a bell curve
+            double u1 = 1.0 - rng.NextDouble();
+            double u2 = rng.NextDouble();
+            float offset = (float)(Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Cos(2.0 * Math.PI * u2)) * player.Spread;
+
+            bool rightWay = rng.NextDouble() >= player.WrongWay;
+            Grade g;
+            if (offset > b.LateLimit) g = Grade.Hesitate;
+            else if (offset < -BattleRules.EarlyTime) g = Grade.Miss;
+            else g = b.Judge(offset, rightWay);
+            bool rightSize = b.AnySize || rng.NextDouble() >= player.WrongSize;              // LOCKED TEMPO
             return new NoteResult(g, rightSize, 1f);
         }
     }

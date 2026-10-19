@@ -359,7 +359,7 @@ namespace Tacetno433.Core
                 report += Same("chosen", Array.IndexOf(run.Options, run.Chosen).ToString(), Array.IndexOf(back.Options, back.Chosen).ToString());
                 report += Same("enemy", run.Battle.Enemy.Name, SaveFile.LoadedEnemy != null ? SaveFile.LoadedEnemy.Name : "none");
                 report += Same("event", run.CurrentEvent.Title, SaveFile.LoadedEvent != null ? SaveFile.LoadedEvent.Title : "none");
-                report += Same("summary", "THE INFERNO  /  FLOOR 2  /  STAGE 5", SaveFile.RunSummary());
+                report += Same("summary", run.Conductor.Name + "  /  FLOOR 2  /  STAGE 5", SaveFile.RunSummary());
             }
 
             //Settings : change them, save, scramble, load, compare, then put the defaults back
@@ -728,7 +728,8 @@ namespace Tacetno433.Core
         {
             RunState run = new RunState();
             bool ownConductor = IsConductorShot(name, "duelc") || IsConductorShot(name, "duels");
-            run.Start(ConductorList.All[ownConductor ? ShotConductor(name) : 2], game.StoryFont, RouteNodeInfo.CaptionWrapWidth);
+            Conductor sample = BattleRules.TurnBattleOn ? ConductorList.Shown[0] : ConductorList.All[2];      // Alpha 7 : THE UNHEARING, the turn battle hides THE INFERNO
+            run.Start(ownConductor ? ConductorList.All[ShotConductor(name)] : sample, game.StoryFont, RouteNodeInfo.CaptionWrapWidth);
             run.BandName = "THE SILENT CHOIR";
 
             //Ensemble : three from Siam on stage, one from the Classical era on the bench

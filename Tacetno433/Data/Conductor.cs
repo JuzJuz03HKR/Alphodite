@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Tacetno433.Core;
 
@@ -29,7 +30,8 @@ namespace Tacetno433.Data
     }
 
     //TurnKit : whose PASSIVE and SIGNATURE the turn battle plays (Alpha 7, step 5). None plays without.
-    public enum TurnKit { None, Beethoven, Mozart }
+    //Step 10 adds the other four of the lore. KEEP THE ORDER, append only.
+    public enum TurnKit { None, Beethoven, Mozart, Bach, Paganini, Lully, Fanny }
 
     //Conductor : one playable class. Everything shown on the select pages comes from these fields.
     public class Conductor
@@ -74,6 +76,7 @@ namespace Tacetno433.Data
         public string TurnPassiveText = "";
         public string TurnSignatureName = "";
         public string TurnSignatureText = "";
+        public string TurnRole = "";          // the role in the turn battle when it differs from Role
 
         //Conductor Prepared Text : built ONCE at startup by PrepareText below.
         //Wrapping and joining strings inside Draw would make new strings 60 times a
@@ -139,6 +142,12 @@ namespace Tacetno433.Data
                 SignatureCall = "* CLOCKWORK! Four strokes, every stroke on time is PERFECT.",
                 Recipe = new int[] { 3, 0, 3 },     // the rhythm section
                 Move = SignatureMove.Clockwork,
+                Turn = TurnKit.Bach,                // step 10
+                TurnRole = "PRECISION",
+                TurnPassiveName = "LOCKED TEMPO",
+                TurnPassiveText = "Any size you swing is the right size. You only keep time.",
+                TurnSignatureName = "FUGUE",
+                TurnSignatureText = "The 4/4 shape : every musician's next skill plays twice. Better strokes, louder echo.",
                 Stamina = 5, PushPower = 6, Perk = ConductorPerk.LockedTempo,        // round 15 : 10 -> 5, his size is never wrong and playing
                                                                                      // is free, at 10 he won 91 to 94 percent (the others 80 to 89).
                                                                                      // Round 10 : 9 -> 7, no cheaper notes. Round 11a : 9,
@@ -251,6 +260,7 @@ namespace Tacetno433.Data
                 Recipe = new int[] { 2, 2, 2 },
                 Stamina = 5, PushPower = 5, Perk = ConductorPerk.None, Move = SignatureMove.AbsolutePitch,   // the old duel plays him plain
                 Turn = TurnKit.Mozart,
+                TurnRole = "SPEED",
                 TurnPassiveName = "PRODIGY",
                 TurnPassiveText = "3 PERFECTs in a row give 1 BREATH back.",
                 TurnSignatureName = "FEATHER",
@@ -258,7 +268,96 @@ namespace Tacetno433.Data
                 ThemeColor = Palette.ToneB,
                 Unlocked = true
             },
+
+            //Conductors 7 to 9 : Alpha 7 step 10, the rest of the six from the lore (USER_BRIEFS 3). Like THE
+            //SHADOWLESS the names and lines are placeholders until the story is written, and there is no art yet.
+            //The old duel plays them plain (no perk, ABSOLUTE PITCH).
+
+            //Conductor 7 : Niccolo Paganini. His Hollow has no chest, only a hole, and leans toward a devil.
+            new Conductor
+            {
+                Name = "THE HEARTLESS",
+                BasedOn = "NICCOLO PAGANINI",
+                Role = "GAMBLE",
+                Epithet = "People swore he had made a deal with the devil.",
+                Story = "A violinist so fast that people said the devil played for him. "
+                      + "Something took his chest and left a hole where the heart was. He still plays like he has nothing to lose.",
+                MechanicName = "BORROWED BREATH",
+                MechanicText = "A skill short of BREATH can still be played. The rest is paid in life.",
+                SignatureMark = "Diabolico",
+                SignatureName = "CAPRICE",
+                SignatureText = "The 4/4 shape : every swipe goes one better for a while. Then the band pays for it.",
+                SignatureCall = "* CAPRICE! Everything goes one better, for now.",
+                Recipe = new int[] { 2, 2, 2 },
+                Stamina = 5, PushPower = 5, Perk = ConductorPerk.None, Move = SignatureMove.AbsolutePitch,   // the old duel plays him plain
+                Turn = TurnKit.Paganini,
+                TurnPassiveName = "BORROWED BREATH",
+                TurnPassiveText = "A skill short of BREATH can still be played. Each missing BREATH costs 3 life.",
+                TurnSignatureName = "CAPRICE",
+                TurnSignatureText = "The 4/4 shape : for one turn per stroke that lands, a MISS is GOOD and a GOOD is PERFECT. Then every musician pays 10 percent of their life.",
+                ThemeColor = Palette.ToneA,
+                Unlocked = true
+            },
+
+            //Conductor 8 : Jean-Baptiste Lully. His Hollow has no legs and leans on a staff, his baton is a sun.
+            new Conductor
+            {
+                Name = "THE KING'S BATON",
+                BasedOn = "J. B. LULLY",
+                Role = "DEFENCE",
+                Epithet = "He kept time for a king, and the staff killed him.",
+                Story = "Music master to the Sun King. He beat time with a heavy staff, struck his own foot with it, "
+                      + "and the wound killed him. His Hollow has no legs and leans on that staff.",
+                MechanicName = "STEADY HAND",
+                MechanicText = "Blocking TACET's notes is easier : both windows are wider.",
+                SignatureMark = "Maestoso",
+                SignatureName = "THE SUN",
+                SignatureText = "The 4/4 shape : life back for every musician, and DISSONANCE and MUTE are gone.",
+                SignatureCall = "* THE SUN! The band stands up again.",
+                Recipe = new int[] { 2, 2, 2 },
+                Stamina = 5, PushPower = 5, Perk = ConductorPerk.None, Move = SignatureMove.AbsolutePitch,   // the old duel plays him plain
+                Turn = TurnKit.Lully,
+                TurnPassiveName = "STEADY HAND",
+                TurnPassiveText = "Blocking TACET's notes is easier : both windows are wider.",
+                TurnSignatureName = "THE SUN",
+                TurnSignatureText = "The 4/4 shape : life back for every musician, and DISSONANCE and MUTE are gone. Better strokes, more life.",
+                ThemeColor = Palette.ToneD,
+                Unlocked = true
+            },
+
+            //Conductor 9 : Fanny Mendelssohn with the shadow of Felix. Her Hollow has no name, two people in one.
+            new Conductor
+            {
+                Name = "THE UNSIGNED",
+                BasedOn = "FANNY MENDELSSOHN",
+                Role = "TWO VOICES",
+                Epithet = "Some of her songs were printed under her brother's name.",
+                Story = "She wrote hundreds of pieces and was told to keep them at home. "
+                      + "Her Hollow has no name of its own, and her brother's shadow plays beside her.",
+                MechanicName = "TWO VOICES",
+                MechanicText = "The voices take turns : FANNY hits harder, FELIX heals more.",
+                SignatureMark = "A due",
+                SignatureName = "DUET",
+                SignatureText = "The 4/4 shape : FANNY strikes every enemy while FELIX heals every musician.",
+                SignatureCall = "* DUET! Two voices at once.",
+                Recipe = new int[] { 2, 2, 2 },
+                Stamina = 5, PushPower = 5, Perk = ConductorPerk.None, Move = SignatureMove.AbsolutePitch,   // the old duel plays her plain
+                Turn = TurnKit.Fanny,
+                TurnPassiveName = "TWO VOICES",
+                TurnPassiveText = "The voices take turns, one musician each : FANNY hits 25 percent harder, FELIX heals 50 percent more.",
+                TurnSignatureName = "DUET",
+                TurnSignatureText = "The 4/4 shape : FANNY strikes every enemy while FELIX heals every musician.",
+                ThemeColor = Palette.ToneC,
+                Unlocked = true
+            },
         };
+
+        //Shown : the conductors the gallery offers. The old duel shows all of them. The turn battle shows
+        //only the six of the lore, the ones with a PASSIVE and SIGNATURE (the user chose this, 19 Oct),
+        //Beethoven first. The others stay in All so the save file still finds them.
+        public static Conductor[] Shown = BattleRules.TurnBattleOn
+            ? new Conductor[] { All[3], All[5], All[1], All[6], All[7], All[8] }
+            : All;
 
         //Text Prepare : called once from LoadContent after the font exists.
         //Everything the screens need to print is built here so drawing stays free of
@@ -276,6 +375,7 @@ namespace Tacetno433.Data
                     c.MechanicText = c.TurnPassiveText;
                     c.SignatureName = c.TurnSignatureName;
                     c.SignatureText = c.TurnSignatureText;
+                    if (c.TurnRole != "") c.Role = c.TurnRole;
                 }
 
                 c.BasedOnLabel = "BASED ON " + c.BasedOn;
@@ -283,7 +383,8 @@ namespace Tacetno433.Data
                 c.MechanicWrapped = Gfx.WrapText(font, c.MechanicText, wrapWidth, scale);
                 c.SignatureWrapped = Gfx.WrapText(font, c.SignatureText, wrapWidth, scale);
                 c.SkillsLabel = c.MechanicName + "   /   SPACE  " + c.SignatureName;
-                c.IndexLabel = "No." + (i + 1).ToString("00");
+                int shownAt = Array.IndexOf(Shown, c);                              // the number the gallery shows
+                c.IndexLabel = "No." + ((shownAt >= 0 ? shownAt : i) + 1).ToString("00");
                 c.StaminaLabel = (BattleRules.StaminaBase + c.Stamina * BattleRules.StaminaPerPoint).ToString();
                 c.PushLabel = "x" + (BattleRules.PowerBase + c.PushPower * BattleRules.PowerPerPoint).ToString("0.00");
 

@@ -55,6 +55,12 @@ namespace Tacetno433.Screens
             names[3] = "DUELS WON";       values[3] = run.BattlesWon.ToString();
             names[4] = "PERFECT BEATS";   values[4] = run.PerfectsTotal.ToString();
             names[5] = "BEST COMBO";      values[5] = run.BestCombo.ToString();
+            if (BattleRules.TurnBattleOn)                                                  // TURN BATTLE : fights, not duels or beats
+            {
+                names[3] = "FIGHTS WON";
+                names[4] = "PERFECTS";
+                names[5] = "BEST STREAK";
+            }
             names[6] = "SHARDS LEFT";     values[6] = run.Shards.ToString();
 
             //ARCHIVE : the run leaves its ECHOES behind, saved at once (step 7)

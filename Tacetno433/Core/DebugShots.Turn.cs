@@ -21,6 +21,15 @@ namespace Tacetno433.Core
             string report = "TACET TURN BATTLE CHECK\r\n";
             MusicianList.ResetRehearsals();
 
+            //Traits Off : the checks of steps 1 to 9 are about the plain rules, so the musicians' own
+            //traits (step 10) are switched off until the trait checks near the end, then put back
+            MusicianTrait[] traits = new MusicianTrait[MusicianList.All.Length];
+            for (int i = 0; i < traits.Length; i++)
+            {
+                traits[i] = MusicianList.All[i].Trait;
+                MusicianList.All[i].Trait = MusicianTrait.None;
+            }
+
             //ANNA strings power 5, KLARA winds power 4, OTTO percussion power 6
             //HUSH : its Pattern notes average 4, so each of its notes hits round(4 x 1.5) = 6
             List<Musician> band = new List<Musician> { MusicianList.All[0], MusicianList.All[1], MusicianList.All[2] };
@@ -409,6 +418,8 @@ namespace Tacetno433.Core
             b = new TurnBattle(band, new List<Enemy> { EnemyList.Practice }, 1, new Random(433));
             report += Same("practice enemy", "-1 160 3", Array.IndexOf(EnemyList.All, EnemyList.Practice) + " " + b.Enemies[0].MaxHp + " " + b.Enemies[0].IntentNotes[0]);
 
+            for (int i = 0; i < traits.Length; i++) MusicianList.All[i].Trait = traits[i];
+            report += TurnCheckStep10(band, hush, deadAir);
             File.WriteAllText(Path.Combine(outDir, "turncheck.txt"), report);
         }
 

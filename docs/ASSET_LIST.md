@@ -73,6 +73,11 @@
 ### 4. คอนดักเตอร์ ⭐⭐
 `Content/Art/Conductors/` — 5 คน : `the_apprentice` · `the_metronome` · `the_inferno` · `the_unhearing` · `the_folk_leader`
 
+**Alpha 7 (19 ต.ค.) : โหมดผลัดตาโชว์ 6 คนตาม lore** ภาพที่ต้องใช้ก่อน (ชื่อไฟล์ตามชื่อในเกม ชื่อ 4 คนใหม่เป็นชื่อชั่วคราว ถ้าเปลี่ยนชื่อ ชื่อไฟล์เปลี่ยนตาม) :
+`the_unhearing` (Beethoven, มี gallery กับ face แล้ว) · `the_shadowless` (Mozart, ไร้เงา ไม้ขนนก) · `the_metronome` (Bach, ไร้ตา ผ้าพันตา เซราฟิมสลักอักษร) ·
+`the_heartless` (Paganini, ไร้อก อกเป็นรู ปีศาจ ไวโอลิน) · `the_king_s_baton` (Lully, ไร้ขา ไม้เท้า ดวงอาทิตย์) · `the_unsigned` (Fanny กับเงาของ Felix, สองคนซ้อนกัน 12 สี)
+ตัวอักษรที่ไม่ใช่ a–z หรือ 0–9 ในชื่อกลายเป็น `_` (`ArtBank.Key`) เช่น THE KING'S BATON → `the_king_s_baton` · `cutin_` ยังไม่ได้ใช้ในโหมดผลัดตา
+
 | ไฟล์ | ใช้ที่ | ขนาดแนะนำ |
 |---|---|---|
 | `gallery_<ชื่อ>.png` | ภาพในแกลเลอรี (302 × 402) ถ้าไม่มีใช้ `portrait_` แทน · มีแล้ว : THE UNHEARING | 604 × 804 |

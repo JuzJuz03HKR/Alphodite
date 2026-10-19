@@ -554,7 +554,7 @@ namespace Tacetno433.Screens
 
                 bool spark = n.Kind == NoteKind.Spark;                // a spark takes any way and any size
                 Grade grade = battle.Judge(offset, spark || gesture.Direction == n.Way);
-                bool rightSize = spark || n.Size < 0 || Baton.SizeOf(gesture.Length) == n.Size;
+                bool rightSize = spark || n.Size < 0 || battle.AnySize || Baton.SizeOf(gesture.Length) == n.Size;   // LOCKED TEMPO : any size
                 if (swipeFor == SwipeFor.Parry && grade == Grade.Perfect && !rightSize) grade = Grade.Good;   // the wrong size only half blocks
 
                 baton.Whip(gesture.Direction);
@@ -707,6 +707,18 @@ namespace Tacetno433.Screens
                     effects.SpawnPop(HitX, HitY - 60f, "+" + NumberText.Get(e.Amount) + " TURNS", Palette.Highlight, 0.9f);
                     continue;
                 }
+                if (e.Kind == TurnEventKind.Echo && e.Who != null)
+                {
+                    Rectangle echoed = BoxOf(e.Who);
+                    effects.SpawnPop(echoed.Center.X, echoed.Y - 60, "ECHO", Palette.Highlight, 0.7f);    // FUGUE
+                    continue;
+                }
+                if (e.Kind == TurnEventKind.Quieter && e.Who != null)
+                {
+                    Rectangle quiet = BoxOf(e.Who);
+                    effects.SpawnPop(quiet.Center.X, quiet.Y - 70, "QUIETER", Palette.Paper, 0.7f);       // THE WHOLE FLOOR
+                    continue;
+                }
                 if (e.Who == null || e.Kind == TurnEventKind.Down) continue;
 
                 Rectangle box = BoxOf(e.Who);
@@ -857,6 +869,18 @@ namespace Tacetno433.Screens
                 StartSignature();
                 clock = RingTime * 0.6f;
             }
+            else if (name == "battlevoice" || name == "battlecaprice" || name == "battlefugue")
+            {
+                //Step 10 kits : FANNY's voice tag, CAPRICE's count, and an ECHO waiting on a musician
+                battle.Kit = name == "battlevoice" ? TurnKit.Fanny : (name == "battlecaprice" ? TurnKit.Paganini : TurnKit.Bach);
+                for (int i = 0; i < ConductorList.All.Length; i++)
+                    if (ConductorList.All[i].Turn == battle.Kit) signatureName = ConductorList.All[i].TurnSignatureName;
+                if (name == "battlecaprice") battle.CapriceTurns = 3;
+                if (name == "battlefugue") battle.Party[0].Echo = 1f;
+                battle.Breath = 0;                                                      // BORROWED BREATH shows its price
+                battle.Events.Clear();
+                NextTurn();
+            }
             else if (name == "battleparry")
             {
                 while (battle.Step == TurnStep.PlayerTurn) battle.Attack(FirstStanding(), Grade.Good, true);
@@ -989,6 +1013,7 @@ namespace Tacetno433.Screens
                 if (f.Crescendo > 0) y = DrawTag(sb, "CRESCENDO", f.Crescendo, false, r.X, y);
                 if (f.Mute > 0) y = DrawTag(sb, "MUTE", 0, true, r.X, y);
                 if (f.Guard) y = DrawTag(sb, "GUARD", 0, false, r.X, y);
+                if (f.Echo > 0f) y = DrawTag(sb, "ECHO", 0, false, r.X, y);                  // FUGUE
 
                 //Target Mark : the musician an enemy means to hit next
                 for (int e = 0; e < battle.Enemies.Count; e++)
@@ -1077,7 +1102,7 @@ namespace Tacetno433.Screens
                 if (f.IntentCadenza)
                     Gfx.TextSpacedCentered(sb, Game.Font, "CADENZA", r.Center.X, cy - 44, Palette.Highlight * (0.7f + 0.3f * (float)Math.Sin(time * 6f)), TextSize.Label, 3f);
                 if (f.Staggered)
-                    Gfx.Line(sb, left - 6, cy, left + 46f + dots, cy, Palette.Highlight, 2f);   // OFF-BEAT : this move will not happen
+                    Gfx.Line(sb, left - 6, cy, left + 46f + dots, cy, Palette.Highlight, 2f);   // OFF-BEAT : it loses its next turn, this move waits for the one after
             }
         }
 
@@ -1108,6 +1133,20 @@ namespace Tacetno433.Screens
 
             Gfx.TextSpacedRight(sb, Game.Font, "ROUND", TacetGame.ScreenW - 64, 22, Palette.LineGrey, TextSize.Label, 3f);
             Gfx.Text(sb, Game.BigFont, NumberText.Get(battle.Round), TacetGame.ScreenW - 52, 12, Palette.Highlight, TextSize.Small);
+
+            //TWO VOICES (THE UNSIGNED) : whose voice leads the next musician's turn
+            if (battle.Kit == TurnKit.Fanny)
+            {
+                Gfx.TextSpacedRight(sb, Game.Font, "VOICE", TacetGame.ScreenW - 120, 58, Palette.LineGrey, TextSize.Label, 3f);
+                Gfx.TextSpacedRight(sb, Game.Font, battle.FelixVoice ? "FELIX" : "FANNY", TacetGame.ScreenW - 24, 56, Palette.Highlight, TextSize.Body, 2f);
+            }
+
+            //CAPRICE (THE HEARTLESS) : turns left with no MISS
+            if (battle.CapriceTurns > 0)
+            {
+                Gfx.TextSpacedRight(sb, Game.Font, "CAPRICE", TacetGame.ScreenW - 64, 58, Palette.LineGrey, TextSize.Label, 3f);
+                Gfx.Text(sb, Game.BigFont, NumberText.Get(battle.CapriceTurns), TacetGame.ScreenW - 52, 48, Palette.Highlight, TextSize.Small);
+            }
         }
 
         private void DrawHitPoint(SpriteBatch sb)
@@ -1231,6 +1270,14 @@ namespace Tacetno433.Screens
                     bool lit = view == View.Target && pending == s && (k > 0 || pending == null);
                     Ui.Button(sb, commandBox[k], k == 0 ? "ATTACK" : s.Name, commandKey[k], lit, usable, 1f);
                     if (k > 0) Ui.Pips(sb, commandBox[k].X + 26, commandBox[k].Bottom - 9, s.Cost, s.Cost, 4f, 11f, usable ? 1f : 0.35f);
+
+                    //BORROWED BREATH (THE HEARTLESS) : a skill short of BREATH says what it costs in life
+                    int lifeCost = k > 0 && usable ? battle.LifeCost(s) : 0;
+                    if (lifeCost > 0)
+                    {
+                        Gfx.TextRight(sb, Game.Font, NumberText.Get(lifeCost), commandBox[k].Right - 8, commandBox[k].Y - 20, Palette.Highlight, TextSize.Label);
+                        Gfx.TextSpacedRight(sb, Game.Font, "LIFE -", commandBox[k].Right - 24, commandBox[k].Y - 20, Palette.PaperDim, TextSize.Label, 2f);
+                    }
                 }
 
                 //Info Line : one line only. MUTE first, then the skill under the pointer, then what to do.

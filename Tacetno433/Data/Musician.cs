@@ -67,6 +67,7 @@ namespace Tacetno433.Data
         public MusicianTrait Trait = MusicianTrait.None;
         public string TraitName = "";
         public string TraitText = "";
+        public string TurnTraitText = "";     // Alpha 7 step 10 : what the trait does in the turn battle (TurnBattle, search the name)
 
         //Musician Look : brightness stand-in until the real sprite goes in
         public Color ThemeColor = Palette.ToneC;
@@ -99,16 +100,19 @@ namespace Tacetno433.Data
                            Power = 5, Sample = "violin", SampleNote = 60, ThemeColor = Palette.ToneB,
                            Trait = MusicianTrait.KeepsCount, TraitName = "COUNTS ALOUD",
                            TraitText = "On her beats, when the baton points her way, the PERFECT window is wider.",
+                           TurnTraitText = "Her own notes have a wider PERFECT window.",
                            Line = "Counts every bar out loud, even when nobody asked her to." },
             new Musician { Name = "KLARA", Instrument = "FLUTE",     Culture = "EUROPEAN", Family = Family.Wind,       Era = 0, Cue = 1,
                            Power = 4, Sample = "flute", SampleNote = 72, ThemeColor = Palette.ToneC,
                            Trait = MusicianTrait.QuietPart, TraitName = "THE QUIET PART",
                            TraitText = "Against TACET's soft p notes she plays twice as hard.",
+                           TurnTraitText = "Hits 50 percent harder against an enemy showing a p note.",
                            Line = "Plays the quiet parts nobody else wants and never misses one." },
             new Musician { Name = "OTTO",  Instrument = "TIMPANI",   Culture = "EUROPEAN", Family = Family.Percussion, Era = 0, Cue = 2,
                            Power = 6, Sample = "timpani", SampleNote = 0, ThemeColor = Palette.ToneD,
                            Trait = MusicianTrait.Momentum, TraitName = "MOMENTUM",
                            TraitText = "Each beat in a row he plays hits 1 harder, up to 3.",
+                           TurnTraitText = "Each of his turns in a row that lands hits 1 harder, up to 3.",
                            Line = "Slow to start, impossible to stop once he has." },
 
             //Era 1 : SIAM
@@ -116,16 +120,19 @@ namespace Tacetno433.Data
                            Power = 5, Sample = "soduang", SampleNote = 60, ThemeColor = Palette.ToneA,
                            Trait = MusicianTrait.ByEar, TraitName = "BY EAR",
                            TraitText = "Hits 50 percent harder on TACET's hidden ??? beats.",
+                           TurnTraitText = "Hits 50 percent harder against an enemy that is OFF-BEAT.",
                            Line = "Learned by ear in a courtyard and has never read a page." },
             new Musician { Name = "CHAI",  Instrument = "PI NAI",    Culture = "SIAM",     Family = Family.Wind,       Era = 1, Cue = 2,
                            Power = 4, Sample = "pinai", SampleNote = 62, ThemeColor = Palette.ToneC,
                            Trait = MusicianTrait.HeldNote, TraitName = "HELD NOTE",
                            TraitText = "When nobody plays a beat, his last note rings on at 40 percent.",
+                           TurnTraitText = "His ATTACK rings on : a second hit for 40 percent.",
                            Line = "Can hold one note longer than anyone thinks is possible." },
             new Musician { Name = "NUAN",  Instrument = "RANAT EK",  Culture = "SIAM",     Family = Family.Percussion, Era = 1, Cue = 0,
                            Power = 6, Sample = "ranatek", SampleNote = 72, ThemeColor = Palette.ToneB,
                            Trait = MusicianTrait.OneStepBetter, TraitName = "ONE STEP BETTER",
                            TraitText = "Hits 30 percent harder when TACET plays loud (f).",
+                           TurnTraitText = "Hits 30 percent harder against an enemy showing an f note.",
                            Line = "Answers whatever she hears, faster and one step better." },
 
             //Era 2 : ROMANTIC
@@ -133,16 +140,19 @@ namespace Tacetno433.Data
                            Power = 6, Sample = "cello", SampleNote = 48, ThemeColor = Palette.ToneC,
                            Trait = MusicianTrait.FourBars, TraitName = "FOUR BARS STRAIGHT",
                            TraitText = "Playing all four beats of a bar, the fourth hits twice as hard.",
+                           TurnTraitText = "Every fourth ATTACK he makes hits twice as hard.",
                            Line = "Says almost nothing and then plays for four bars straight." },
             new Musician { Name = "IRIS",  Instrument = "HORN",      Culture = "EUROPEAN", Family = Family.Wind,       Era = 2, Cue = 0,
                            Power = 5, Sample = "horn", SampleNote = 48, ThemeColor = Palette.ToneA,
                            Trait = MusicianTrait.Forgiven, TraitName = "FASHIONABLY LATE",
                            TraitText = "On her beats, when the baton points her way, a late stroke still counts as GOOD.",
+                           TurnTraitText = "On her own notes, a late stroke still counts as GOOD.",
                            Line = "Arrives late, plays louder than the rest, is forgiven." },
             new Musician { Name = "BORIS", Instrument = "BASS DRUM", Culture = "EUROPEAN", Family = Family.Percussion, Era = 2, Cue = 1,
                            Power = 7, Sample = "bassdrum", SampleNote = 0, ThemeColor = Palette.ToneD,
                            Trait = MusicianTrait.Thunder, TraitName = "THE WHOLE FLOOR",
                            TraitText = "His big stroke on an f note knocks 2 off TACET's next note.",
+                           TurnTraitText = "His PERFECT f swing takes 2 off each note of the enemy's next attack.",
                            Line = "One hit from him and the whole floor knows about it." },
         };
 
@@ -154,6 +164,7 @@ namespace Tacetno433.Data
             for (int i = 0; i < All.Length; i++)
             {
                 Musician m = All[i];
+                if (BattleRules.TurnBattleOn && m.TurnTraitText != "") m.TraitText = m.TurnTraitText;   // Alpha 7 : the turn battle's words
                 m.LineWrapped = Gfx.WrapText(storyFont, m.Line, wrapWidth, TextSize.Story);
                 m.TraitWrapped = Gfx.WrapText(storyFont, m.TraitText, wrapWidth, TextSize.StorySmall);
                 m.FamilyLabel = familyNames[(int)m.Family] + "  /  " + m.Culture;

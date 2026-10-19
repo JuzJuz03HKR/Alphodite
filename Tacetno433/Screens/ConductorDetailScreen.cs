@@ -59,7 +59,7 @@ namespace Tacetno433.Screens
         {
             this.index = index;
             this.sourceRect = sourceRect;
-            this.c = ConductorList.All[index];
+            this.c = ConductorList.Shown[index];
         }
 
         public override void Load()
@@ -125,14 +125,14 @@ namespace Tacetno433.Screens
         private void Switch(int direction)
         {
             int next = index + direction;
-            if (next < 0 || next > ConductorList.All.Length - 1)
+            if (next < 0 || next > ConductorList.Shown.Length - 1)
             {
                 SoundBank.Play(Sfx.UiDenied);
                 return;
             }
 
             index = next;
-            c = ConductorList.All[index];
+            c = ConductorList.Shown[index];
             sourceRect = figureBox;
             swap = 0f;
             Prepare();
@@ -175,7 +175,7 @@ namespace Tacetno433.Screens
                 Ui.Button(sb, backButton, "BACK", "ESC", false, true, alpha);
                 Ui.ModeSwitch(sb, modeBox, Settings.Maestro, Input.MouseOver(modeBox), alpha);
                 DrawArrow(sb, lastButton, false, index > 0, alpha);
-                DrawArrow(sb, nextButton, true, index < ConductorList.All.Length - 1, alpha);
+                DrawArrow(sb, nextButton, true, index < ConductorList.Shown.Length - 1, alpha);
             }
 
             DrawLetterbox(sb);
@@ -284,19 +284,23 @@ namespace Tacetno433.Screens
             DrawRow(sb, "ROLE", rowY, a);
             Gfx.TextSpaced(sb, Game.Font, c.Role, LeftX + 130, rowY - 3, Palette.Paper * a, TextSize.Body, 2f);
 
-            rowY += 36;
-            DrawRow(sb, "BREATH", rowY, a);
-            Ui.Pips(sb, LeftX + 136, rowY + 6, c.Stamina, 10, 5, 15, a);
-            Gfx.TextRight(sb, Game.Font, c.StaminaLabel, LeftX + 380, rowY - 3, Palette.Paper * a, TextSize.Body);
+            //BREATH, PUSH and SEATS are the old duel's numbers, the turn battle has none of them (Alpha 7)
+            if (!BattleRules.TurnBattleOn)
+            {
+                rowY += 36;
+                DrawRow(sb, "BREATH", rowY, a);
+                Ui.Pips(sb, LeftX + 136, rowY + 6, c.Stamina, 10, 5, 15, a);
+                Gfx.TextRight(sb, Game.Font, c.StaminaLabel, LeftX + 380, rowY - 3, Palette.Paper * a, TextSize.Body);
 
-            rowY += 36;
-            DrawRow(sb, "PUSH", rowY, a);
-            Ui.Pips(sb, LeftX + 136, rowY + 6, c.PushPower, 10, 5, 15, a);
-            Gfx.TextRight(sb, Game.Font, c.PushLabel, LeftX + 380, rowY - 3, Palette.Paper * a, TextSize.Body);
+                rowY += 36;
+                DrawRow(sb, "PUSH", rowY, a);
+                Ui.Pips(sb, LeftX + 136, rowY + 6, c.PushPower, 10, 5, 15, a);
+                Gfx.TextRight(sb, Game.Font, c.PushLabel, LeftX + 380, rowY - 3, Palette.Paper * a, TextSize.Body);
 
-            rowY += 36;
-            DrawRow(sb, "SEATS", rowY, a);
-            Gfx.Text(sb, Game.Font, seatsLabel, LeftX + 136, rowY - 3, Palette.Paper * a, TextSize.Body);
+                rowY += 36;
+                DrawRow(sb, "SEATS", rowY, a);
+                Gfx.Text(sb, Game.Font, seatsLabel, LeftX + 136, rowY - 3, Palette.Paper * a, TextSize.Body);
+            }
 
             rowY += 36;
             DrawRow(sb, "BASED ON", rowY, a);
@@ -334,8 +338,18 @@ namespace Tacetno433.Screens
             Gfx.Text(sb, Game.BigFont, c.SignatureName, RightX, y + 58, Palette.Highlight * a, TextSize.Subtitle);
             Gfx.Text(sb, Game.StoryFont, c.SignatureWrapped, RightX, y + 96, Palette.Paper * a, TextSize.Story);
 
-            //Recipe : NEEDS, then a number and the section's name for each family it asks for
+            //Turn Battle : the gauge fills with PERFECTs, the same for every conductor (Alpha 7)
             int ny = y + 190;
+            if (BattleRules.TurnBattleOn)
+            {
+                Gfx.TextSpaced(sb, Game.Font, "NEEDS", RightX, ny + 5, Palette.LineGrey * a, TextSize.Tiny, 2f);
+                Gfx.Text(sb, Game.Font, NumberText.Get(BattleRules.TurnSignatureNeed), RightX + 70, ny, Palette.Paper * a, TextSize.Body);
+                Gfx.TextSpaced(sb, Game.Font, "PERFECT", RightX + 92, ny + 5, Palette.Paper * a, TextSize.Tiny, 2f);
+                Gfx.TextSpaced(sb, Game.Font, "PERFECT HITS AND BLOCKS FILL IT", RightX, ny + 32, Palette.LineGrey * a, TextSize.Tiny, 2f);
+                return;
+            }
+
+            //Recipe : NEEDS, then a number and the section's name for each family it asks for
             Gfx.TextSpaced(sb, Game.Font, "NEEDS", RightX, ny + 5, Palette.LineGrey * a, TextSize.Tiny, 2f);
             float rx = RightX + 70;
             for (int f = 0; f < c.Recipe.Length; f++)

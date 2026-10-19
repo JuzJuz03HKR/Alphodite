@@ -124,7 +124,7 @@ namespace Tacetno433.Screens
 
             SceneBackdrop.Draw(sb, time);
 
-            Gfx.TextSpacedCentered(sb, Game.Font, "SPOILS OF THE DUEL", cx, 76, Palette.LineGrey, TextSize.Tiny, 5f);
+            Gfx.TextSpacedCentered(sb, Game.Font, BattleRules.TurnBattleOn ? "SPOILS OF THE FIGHT" : "SPOILS OF THE DUEL", cx, 76, Palette.LineGrey, TextSize.Tiny, 5f);
             Gfx.TextCentered(sb, Game.BigFont, "Choose a motif", cx, 122, Palette.Paper, TextSize.Title);
 
             if (offer.Length == 0)

@@ -73,7 +73,7 @@ namespace Tacetno433.Data
                 {
                     new EventChoice { Text = "Try to repair it", Check = true, CheckFamily = (int)Family.Percussion, CheckBase = 25,
                                       Win = Reward.Motif, WinAmount = 2, WinText = "It clicks back into time, and something small and bright falls out of its case.",
-                                      Lose = Reward.Stamina, LoseAmount = -12, LoseText = "It snaps at the fingers. The band loses its breath trying to hold the tempo." },
+                                      Lose = Reward.Stamina, LoseAmount = -12, LoseText = BattleRules.TurnBattleOn ? "It snaps at the fingers. The band gets hurt trying to hold the tempo." : "It snaps at the fingers. The band loses its breath trying to hold the tempo." },
                     new EventChoice { Text = "Smash it and sell the brass",
                                       Win = Reward.Shards, WinAmount = 25, WinText = "The brass is worth something. The silence it leaves behind is not." },
                     new EventChoice { Text = "Leave it ticking",

@@ -47,8 +47,14 @@ namespace Tacetno433.Screens
 
         //Notes : what the detail box says when the mouse is over nothing
         private const string NoteTitle = "A REAL ORCHESTRA, SEEN FROM THE PODIUM";
-        private const string NoteBand = "Click a musician : on stage or on the bench. Everyone on stage plays every note.";
-        private const string NoteArrow = "ARROW : swing their way, they hit 50 percent harder.";
+        //The turn battle (Alpha 7) has no beats and no section bonus : the three on stage fight, and the
+        //arrow and the family say how each one swings their ATTACK (TurnBattle ATTACK PART)
+        private static readonly string NoteBand = BattleRules.TurnBattleOn
+            ? "Click a musician : on stage or on the bench. The three on stage fight."
+            : "Click a musician : on stage or on the bench. Everyone on stage plays every note.";
+        private static readonly string NoteArrow = BattleRules.TurnBattleOn
+            ? "ARROW = the way their ATTACK swings."
+            : "ARROW : swing their way, they hit 50 percent harder.";
         private static string noteSection = "";        // SECTION, made once from BattleRules
 
         //Band State
@@ -72,6 +78,7 @@ namespace Tacetno433.Screens
 
             noteSection = "SECTION : 2 of a family +" + (int)(BattleRules.SectionTwo * 100f + 0.5f)
                         + "%, all 3 +" + (int)(BattleRules.SectionThree * 100f + 0.5f) + "%.";
+            if (BattleRules.TurnBattleOn) noteSection = "SIZE = strings mf, winds p, percussion f.";
 
             //Side Beats : which beats of a round the baton points each way (CUE)
             for (int side = 0; side < 3; side++)
@@ -81,6 +88,7 @@ namespace Tacetno433.Screens
                     if (BattleRules.CueSide[b % 4] == side) beats += "  " + (b + 1);
                 sideBeats[side] = beats;
             }
+            if (BattleRules.TurnBattleOn) sideBeats = new string[] { "SWINGS LEFT", "SWINGS DOWN", "SWINGS RIGHT" };   // CUE in the turn battle
 
             Rebuild(run);
         }
@@ -98,7 +106,7 @@ namespace Tacetno433.Screens
 
                 //SECTION : the bonus this family plays with, when two or three of them are on stage
                 float bonus = Battle.BattleState.SectionBonusFor(playing);
-                sectionWords[section] = bonus > 0f ? "SECTION  +" + (int)(bonus * 100f + 0.5f) + "%" : "";
+                sectionWords[section] = bonus > 0f && !BattleRules.TurnBattleOn ? "SECTION  +" + (int)(bonus * 100f + 0.5f) + "%" : "";   // no SECTION in the turn battle
             }
         }
 

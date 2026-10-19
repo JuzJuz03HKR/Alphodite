@@ -39,7 +39,7 @@ namespace Tacetno433.Data
                 Name = "SIAM",
                 Subtitle = "GOLD AND HEAT",
                 Years = "RATTANAKOSIN",
-                Description = "Courtyard duels. The percussion here hits hardest."
+                Description = BattleRules.TurnBattleOn ? "Courtyard fights. The percussion here hits hard." : "Courtyard duels. The percussion here hits hardest."
             },
 
             //Era 2
@@ -48,7 +48,7 @@ namespace Tacetno433.Data
                 Name = "ROMANTIC",
                 Subtitle = "EVERYTHING FELT",
                 Years = "1820 - 1900",
-                Description = "Bigger and louder. The breath bill comes later."
+                Description = BattleRules.TurnBattleOn ? "Bigger and louder. The bill comes later." : "Bigger and louder. The breath bill comes later."   // Alpha 7 : BREATH is skill points now
             },
         };
 

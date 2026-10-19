@@ -1,6 +1,26 @@
 # TACET 4'33 — เอกสารส่งต่อให้ฝ่ายโค้ด
 
-> **18 ต.ค. : Alpha 7** เกมกำลังเปลี่ยนเป็น turn-based roguelike (branch `Alpha7`) · โครงโค้ดใหม่ที่วางไว้อยู่ข้อ 9 ของ [`ALPHA7_DESIGN.md`](ALPHA7_DESIGN.md) · แผนที่โค้ดด้านล่างเป็นของเกม rhythm รอบ 15
+> **18 ต.ค. : Alpha 7** เกมกำลังเปลี่ยนเป็น turn-based roguelike (branch `Alpha7`) · โครงโค้ดใหม่ที่วางไว้อยู่ข้อ 9 ของ [`ALPHA7_DESIGN.md`](ALPHA7_DESIGN.md) · แผนที่โค้ดตั้งแต่ข้อ 1 ลงไปเป็นของเกม rhythm รอบ 15
+
+## 0. แผนที่โค้ด Alpha 7 (การต่อสู้แบบผลัดตา, อัปเดต 19 ต.ค. ขั้น 1–11)
+
+ตัวสลับ : `Data/BattleRules.cs` `TurnBattleOn` (true = ผลัดตา, false = กลับไปดวลเดิมทั้งเกม)
+
+| อยากแก้อะไร | ไปไฟล์ไหน |
+|---|---|
+| กติกาการต่อสู้ทั้งหมด (ลำดับตา ตี ปัด สกิล สถานะ เสียศูนย์ COUNTER CADENZA ท่าวาทยากร ความสามารถติดตัว) ไม่มีโค้ดวาด | `Battle/TurnBattle.cs` (ค้นชื่อกติกาตัวพิมพ์ใหญ่ เช่น `CAPRICE` `MOMENTUM`) |
+| หน้าต่อสู้ (วงแหวน QTE ปุ่มคำสั่ง แถบลำดับตา ป้ายสถานะ ไฟต์ฝึก PRACTICE) | `Screens/BattleScreen.cs` |
+| ตัวเลขบาลานซ์ทุกตัว | `Data/BattleRules.cs` หัวข้อ TURN BATTLE (บนสุด) และ Turn Feel |
+| สกิลนักดนตรี 18 สกิล (2 ต่อคน ตามลำดับ `MusicianList`) | `Data/Skill.cs` |
+| ความสามารถติดตัวนักดนตรีในโหมดผลัดตา | ข้อความ `Data/Musician.cs` `TurnTraitText` · ผล `TurnBattle.cs` (ค้นชื่อความสามารถ) |
+| วาทยากร 6 คน (PASSIVE / SIGNATURE) และคนที่โชว์ในแกลเลอรี | `Data/Conductor.cs` (`TurnKit`, `Turn*` text, `ConductorList.Shown`) · ผลอยู่ `TurnBattle.cs` (`UseSignature`, `Judge`, `CanUse`) |
+| ศัตรู 9 ตัว (เลือด ความเร็ว ท่อนโจมตี กลไก) + ศัตรูฝึก | `Data/Enemy.cs` (`TurnHp` `TurnSpeed` `Phrases` `TurnTraitText` `TurnPower` · `EnemyList.Practice`) |
+| Motif 21 ใบในโหมดผลัดตา | `Data/Motif.cs` `TurnText` · ผลอยู่ `TurnBattle.cs` (ค้นชื่อ Motif) |
+| เลือดนักดนตรีข้ามการต่อสู้ / เหตุการณ์ ร้าน พัก | `Data/RunState.cs` (`ChangeStamina` `LifeOf` `SetLife`) · เซฟ `Data/SaveFile.cs` บรรทัด `life=` |
+| ของถาวรหลังรัน THE ARCHIVE | `Data/Archive.cs` · `Screens/ArchiveScreen.cs` · ได้ ECHOES ที่ `Screens/CurtainCallScreen.cs` · เซฟ `archive.txt` |
+| Tutorial / HOW TO PLAY / ข้อความหน้าแรก | `Screens/TutorialScreen.cs` (`For.Turn`) · `Screens/GuideScreen.cs` · `Screens/TitleScreen.cs` `turnTips` |
+| ทดสอบ | `--shots turncheck` (`Core/DebugShots.Turn.cs` + `DebugShots.TurnKits.cs`) · `--shots turnsim` (`Core/DebugShots.TurnSim.cs`) · `--shots savecheck` · ภาพ `battle*` `practice*` `archive` |
+
 
 อัปเดต : 6 ตุลาคม 2026 (รอบ 15 · ส่งงาน 29 ก.ย. · นำเสนอ 30 ก.ย.) · repo `github.com/JuzJuz03HKR/Alphodite` branch **`Alpha6`** (รอบ 15 · `Release` = zip ตัวที่ส่งอย่างเดียว · `Alpha5` = รอบ 14 · `Alpha4` = รอบ 12–13 · `Alpha3` = รอบ 9–11b · รอบ 6–8 อยู่ `Alpha2`) · กติกาสำหรับ Claude อยู่ `CLAUDE.md` · อ่านคู่กับ [`PROJECT_STATUS.md`](PROJECT_STATUS.md) (รายละเอียดทุกระบบ)
 และ [`ASSET_LIST.md`](ASSET_LIST.md) (ไฟล์ภาพ/เสียงที่ต้องใส่) · สิ่งที่ผู้ใช้สั่งคำต่อคำ [`USER_BRIEFS.md`](USER_BRIEFS.md) · prompt หลัง compact [`RESUME_PROMPT.md`](RESUME_PROMPT.md) · เนื้อหาสไลด์ [`TACET_Slides_29Sep.md`](TACET_Slides_29Sep.md) · แผนภาพลูป `diagrams/core_game_loop.png` · `gameplay_loop.png` (+ `*_detail.png`)
