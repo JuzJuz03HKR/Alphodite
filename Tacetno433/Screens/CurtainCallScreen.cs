@@ -57,6 +57,15 @@ namespace Tacetno433.Screens
             names[5] = "BEST COMBO";      values[5] = run.BestCombo.ToString();
             names[6] = "SHARDS LEFT";     values[6] = run.Shards.ToString();
 
+            //ARCHIVE : the run leaves its ECHOES behind, saved at once (step 7)
+            if (BattleRules.TurnBattleOn)
+            {
+                int echoes = Archive.EchoesFor(run, won);
+                Archive.Echoes += echoes;
+                SaveFile.SaveArchive();
+                names[6] = "ECHOES";      values[6] = "+" + echoes;
+            }
+
             SoundBank.Play(won ? Sfx.RunComplete : Sfx.Defeat);
             SoundBank.PlayMusic(Music.Ending);
         }

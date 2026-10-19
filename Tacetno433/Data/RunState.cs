@@ -119,6 +119,14 @@ namespace Tacetno433.Data
             MusicianList.ResetRehearsals();
 
 
+            //ARCHIVE : what earlier runs bought (step 7)
+            Shards = Archive.Level(Archive.Savings) * BattleRules.ArchiveShardsPerLevel;                 // SAVINGS
+            if (Archive.Level(Archive.Keepsake) > 0)                                                     // KEEPSAKE
+            {
+                Motif[] keepsake = MotifList.Roll(Motifs, 1, 1, 1, random);
+                if (keepsake.Length > 0) Motifs.Add(keepsake[0]);
+            }
+
             //Conductor Stats : turn the 0 to 10 numbers into real values
             MaxStamina = BattleRules.StaminaBase + conductor.Stamina * BattleRules.StaminaPerPoint;
             Stamina = MaxStamina;
@@ -313,7 +321,7 @@ namespace Tacetno433.Data
         //BAND LIFE (Alpha 7) : each musician's life between fights, -1 on the musician means full
         public int MaxLifeOf(Musician m)
         {
-            return BattleRules.TurnHp[(int)m.Family];
+            return BattleRules.TurnHp[(int)m.Family] + Archive.Level(Archive.Life) * BattleRules.ArchiveLifePerLevel;   // STRONGER BAND
         }
 
         public int LifeOf(Musician m)

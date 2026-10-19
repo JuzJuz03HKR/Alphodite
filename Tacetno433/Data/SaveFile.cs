@@ -54,6 +54,7 @@ namespace Tacetno433.Data
 
         private static string SettingsPath { get { return Path.Combine(Folder, "settings.txt"); } }
         private static string RunPath { get { return Path.Combine(Folder, "run.txt"); } }
+        private static string ArchivePath { get { return Path.Combine(Folder, "archive.txt"); } }
 
         //Has Run : there is a run to CONTINUE
         public static bool HasRun
@@ -87,6 +88,29 @@ namespace Tacetno433.Data
             lines.Add("timing=" + Number(Settings.TimingOffset));
             lines.Add("maestro=" + (Settings.Maestro ? 1 : 0));
             Write(SettingsPath, lines);
+        }
+
+        //Archive Save : the ECHOES and the upgrade levels of the ARCHIVE (Alpha 7). Kept for good, apart from the run.
+        public static void SaveArchive()
+        {
+            List<string> lines = new List<string>();
+            lines.Add("version=" + Version);
+            lines.Add("echoes=" + Archive.Echoes);
+            List<string> levels = new List<string>();
+            for (int i = 0; i < Archive.All.Length; i++) levels.Add(Archive.All[i].Level.ToString());
+            lines.Add("levels=" + string.Join(",", levels));
+            Write(ArchivePath, lines);
+        }
+
+        //Archive Load : called once when the game starts. A missing file means nothing bought yet.
+        public static void LoadArchive()
+        {
+            Dictionary<string, string> v = Read(ArchivePath);
+            if (v == null) return;
+            Archive.Echoes = Math.Max(0, GetInt(v, "echoes", 0));
+            int[] levels = GetList(v, "levels");
+            for (int i = 0; i < Archive.All.Length && i < levels.Length; i++)
+                Archive.All[i].Level = Math.Max(0, Math.Min(Archive.All[i].Prices.Length, levels[i]));
         }
 
         //Settings Load : called once when the game starts. A missing file keeps the defaults.

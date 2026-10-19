@@ -34,8 +34,9 @@ namespace Tacetno433.Screens
         private const int ItemGuide = 3;
         private const int ItemSettings = 4;
         private const int ItemQuit = 5;
-        private static string[] allItems = { "CONTINUE", "NEW RUN", "TUTORIAL", "HOW TO PLAY", "SETTINGS", "QUIT" };
-        private static string[] allIndex = { "01", "02", "03", "04", "05", "06" };
+        private const int ItemArchive = 6;      // Alpha 7 : the after-run upgrades
+        private static string[] allItems = { "CONTINUE", "NEW RUN", "TUTORIAL", "HOW TO PLAY", "SETTINGS", "QUIT", "ARCHIVE" };
+        private static string[] allIndex = { "01", "02", "03", "04", "05", "06", "07" };
         private int[] menu;                 // which items are on the menu, top to bottom
         private Rectangle[] menuBoxes;
         private int selected;
@@ -67,9 +68,9 @@ namespace Tacetno433.Screens
         //Title Layout : up to six blades between the hook line and the tip strip
         private const int MenuX = 96;
         private const int MenuY = 350;
-        private const int MenuStep = 44;
+        private int MenuStep = 44;          // a little tighter with seven lines (Alpha 7 : ARCHIVE), see Load
         private const int MenuW = 400;
-        private const int MenuH = 40;
+        private int MenuH = 40;
         private const int NoticeY = 616;
 
         //Staff Layout : five lines, sixteen pixels apart, so half a step is eight pixels
@@ -97,12 +98,14 @@ namespace Tacetno433.Screens
 
             //Menu Lines : CONTINUE first when there is a saved run, and it starts chosen
             bool saved = SaveFile.HasRun;
-            if (saved) menu = new int[] { ItemContinue, ItemNewRun, ItemTutorial, ItemGuide, ItemSettings, ItemQuit };
-            else menu = new int[] { ItemNewRun, ItemTutorial, ItemGuide, ItemSettings, ItemQuit };
+            if (saved) menu = new int[] { ItemContinue, ItemNewRun, ItemArchive, ItemTutorial, ItemGuide, ItemSettings, ItemQuit };
+            else menu = new int[] { ItemNewRun, ItemArchive, ItemTutorial, ItemGuide, ItemSettings, ItemQuit };
             continueNote = saved ? SaveFile.RunSummary() : "";
             selected = 0;
 
             //Menu Boxes : one clickable box per line, built once
+            MenuStep = menu.Length > 6 ? 38 : 44;     // seven lines still clear the NOTE strip
+            MenuH = menu.Length > 6 ? 36 : 40;
             menuBoxes = new Rectangle[menu.Length];
             for (int i = 0; i < menu.Length; i++)
                 menuBoxes[i] = new Rectangle(MenuX, MenuY + i * MenuStep, MenuW, MenuH);
@@ -205,6 +208,8 @@ namespace Tacetno433.Screens
                 Game.Screens.Change(new GuideScreen());
             else if (item == ItemSettings)
                 Game.Screens.Change(new SettingsScreen());
+            else if (item == ItemArchive)
+                Game.Screens.Change(new ArchiveScreen());
             else
                 Game.Exit();
         }

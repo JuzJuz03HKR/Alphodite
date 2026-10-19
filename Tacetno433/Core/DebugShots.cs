@@ -679,6 +679,7 @@ namespace Tacetno433.Core
             if (name == "route" || name == "pause") screen = new RouteScreen();
             if (name == "view" || name == "band") screen = new BandScreen();
             if (name.StartsWith("duel") || name == "finale") screen = new DuelScreen();
+            if (name == "archive") screen = new ArchiveScreen();                          // Alpha 7 step 7
             if (name.StartsWith("battle")) screen = new BattleScreen();                // Alpha 7 : battle battleswing battleskill battleparry battlestatus
             if (name == "result" || name == "defeat") screen = new ResultScreen();
             if (name == "reward") screen = new MotifRewardScreen(false);

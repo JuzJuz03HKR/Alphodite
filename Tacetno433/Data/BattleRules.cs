@@ -91,6 +91,16 @@
         public static int TurnBoltDamage = 14;         // LIGHTNING : damage to every enemy at full strength (x1)
         public static int TurnMozartRun = 3;           // THE SHADOWLESS's PASSIVE : this many PERFECTs in a row give 1 breath
 
+        //ARCHIVE (step 7, Data/Archive.cs) : ECHOES a finished run leaves, and what each upgrade level gives
+        public static int EchoesPerWin = 3;            // each fight won
+        public static int EchoesPerFloor = 10;         // each floor cleared
+        public static int EchoesRunWon = 25;           // the whole run won
+        public static float EchoesMaestro = 1.5f;      // MAESTRO pays more
+        public static int ArchiveLifePerLevel = 2;     // STRONGER BAND
+        public static int ArchiveBreathPerLevel = 1;   // DEEP BREATH
+        public static int ArchiveSignaturePerLevel = 2;// WARM UP
+        public static int ArchiveShardsPerLevel = 20;  // SAVINGS
+
         //Turn Motifs (step 6) : what the 21 motifs do in the turn battle (their TurnText in Data/Motif.cs).
         //ROSIN keeps FamilyMotifPower, STEADY PULSE keeps SteadyWindowBonus, ENCORE and PATRON'S PURSE work on the result page.
         public static float TurnReedCaseHeal = 1.5f;      // REED CASE : wind players' healing

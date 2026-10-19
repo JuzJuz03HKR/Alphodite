@@ -140,7 +140,7 @@ namespace Tacetno433.Battle
         }
 
         //Battle Start : startHp is each musician's life carried in from the run, or null for full life
-        public TurnBattle(List<Musician> band, List<Enemy> enemies, int floor, Random random, int[] startHp = null)
+        public TurnBattle(List<Musician> band, List<Enemy> enemies, int floor, Random random, int[] startHp = null, int lifeBonus = 0)
         {
             this.random = random;
             Floor = Math.Max(1, Math.Min(3, floor));
@@ -153,7 +153,7 @@ namespace Tacetno433.Battle
                 f.Name = m.Name;
                 f.Musician = m;
                 f.Slot = i;
-                f.MaxHp = BattleRules.TurnHp[(int)m.Family];
+                f.MaxHp = BattleRules.TurnHp[(int)m.Family] + lifeBonus;          // lifeBonus : the ARCHIVE's STRONGER BAND
                 f.Hp = (startHp != null && i < startHp.Length) ? Math.Min(startHp[i], f.MaxHp) : f.MaxHp;
                 f.Speed = BattleRules.TurnSpeed[(int)m.Family];
                 Party.Add(f);

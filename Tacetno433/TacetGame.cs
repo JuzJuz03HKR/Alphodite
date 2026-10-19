@@ -101,6 +101,7 @@ namespace Tacetno433
             //the real save files alone, so its pictures always use the plain defaults.
             SaveFile.Enabled = !DebugShots.Active;
             SaveFile.LoadSettings();
+            SaveFile.LoadArchive();                     // Alpha 7 : the ARCHIVE's echoes and upgrades
 
             Font = Content.Load<SpriteFont>("MainFont");
             BigFont = Content.Load<SpriteFont>("BigFont");

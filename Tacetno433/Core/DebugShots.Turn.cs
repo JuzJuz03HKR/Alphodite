@@ -313,6 +313,23 @@ namespace Tacetno433.Core
             run.RestoreAllStamina();
             report += Same("band life", "True " + max, halved + " " + run.Stamina);
 
+            //ARCHIVE (step 7) : a lost run on floor 2 with 4 wins leaves 4 x 3 + 1 x 10 = 22 echoes, STRONGER BAND costs 30
+            //and gives every musician 2 more life. The real archive is put back afterwards.
+            int keptEchoes = Archive.Echoes;
+            int keptLife = Archive.All[Archive.Life].Level;
+            run.Floor = 2;
+            run.BattlesWon = 4;
+            run.Maestro = false;
+            int earned = Archive.EchoesFor(run, false);
+            Archive.Echoes = 29;
+            bool tooPoor = Archive.Buy(Archive.Life);
+            Archive.Echoes = 30;
+            Archive.All[Archive.Life].Level = 0;
+            bool bought = Archive.Buy(Archive.Life);
+            report += Same("archive", "22 False True 0 32", earned + " " + tooPoor + " " + bought + " " + Archive.Echoes + " " + run.MaxLifeOf(MusicianList.All[0]));
+            Archive.Echoes = keptEchoes;
+            Archive.All[Archive.Life].Level = keptLife;
+
             File.WriteAllText(Path.Combine(outDir, "turncheck.txt"), report);
         }
 

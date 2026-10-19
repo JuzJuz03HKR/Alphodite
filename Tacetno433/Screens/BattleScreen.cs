@@ -135,10 +135,15 @@ namespace Tacetno433.Screens
             for (int i = 0; i < band.Count; i++) life[i] = run.LifeOf(band[i]);
 
             List<Enemy> enemies = new List<Enemy> { run.Battle.Enemy };
-            battle = new TurnBattle(band, enemies, run.Floor, run.Rng, life);
+            battle = new TurnBattle(band, enemies, run.Floor, run.Rng, life, Archive.Level(Archive.Life) * BattleRules.ArchiveLifePerLevel);
             battle.GiveMotifs(run.Motifs);                                                   // the motifs the band carries
             battle.Maestro = run.Maestro;                                                    // MAESTRO
             battle.Kit = run.Conductor.Turn;                                                 // the conductor's PASSIVE and SIGNATURE
+
+            //ARCHIVE : DEEP BREATH and WARM UP, bought between runs (step 7)
+            battle.Breath = Math.Min(BattleRules.TurnBreathMax, battle.Breath + Archive.Level(Archive.Breath) * BattleRules.ArchiveBreathPerLevel);
+            if (battle.Kit != TurnKit.None)
+                battle.Signature = Math.Min(battle.SignatureNeed, Archive.Level(Archive.Signature) * BattleRules.ArchiveSignaturePerLevel);
             signatureName = run.Conductor.TurnSignatureName;
 
             partyBox = new Rectangle[battle.Party.Count];
