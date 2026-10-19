@@ -46,6 +46,12 @@
         public static float TurnFastGap = 0.7f;          // REQUIEM : the gap between notes below half life
         public static int TurnBargainSteal = 1;          // THE DEVIL'S STRING : breath taken by each attack
 
+        //PRACTICE (step 9) : the soft enemy of the tutorial's practice fight (EnemyList.Practice).
+        //Lots of life so the four lessons fit before it falls, and notes that barely hurt.
+        public static int TurnPracticeHp = 160;
+        public static int TurnPracticeSpeed = 4;
+        public static int TurnPracticePower = 2;         // each note hits this x TurnNoteDamage (3 life)
+
         //Enemy Attack : how many notes one attack has on floor 1, 2 and 3 (a random count from
         //min to max), and how hard each note hits : the enemy's average Pattern power x TurnNoteDamage
         public static int[] TurnNotesMin = { 1, 2, 3 };

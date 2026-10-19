@@ -44,8 +44,24 @@ namespace Tacetno433.Screens
         private ConfirmBox askBox = new ConfirmBox();
         private int confirmFor = -1;        // the item waiting for a yes
 
-        //Title Tips : the notice strip at the bottom, one every few seconds
-        private static string[] tips =
+        //Title Tips : the notice strip at the bottom, one every few seconds.
+        //The turn battle (Alpha 7) has its own list, the old duel's is kept below it.
+        private static string[] turnTips =
+        {
+            "A note TACET lands costs life. Block it as the ring closes.",
+            "PERFECT blocks the whole note. GOOD blocks half.",
+            "Block every note of an attack PERFECT and the musician hits back : COUNTER.",
+            "f big, mf middle, p small. The wrong size hits weaker.",
+            "Skills cost BREATH. Blocking notes gives it back.",
+            "PERFECT hits and blocks fill the enemy's OFF-BEAT bar. Full, it loses a turn.",
+            "Every third attack a boss plays a CADENZA : more notes, and harder.",
+            "PERFECTs fill the diamonds. Full, SPACE plays the SIGNATURE.",
+            "A musician who falls gets up with 1 life after the fight.",
+            "Every run leaves ECHOES. Spend them in the ARCHIVE.",
+            "Strokes judged early or late? Settings has a STROKE TIMING test.",
+        };
+
+        private static string[] duelTips =
         {
             "A beat TACET wins costs breath. At zero, the band collapses.",
             "The whole band plays every note you hit.",
@@ -63,6 +79,9 @@ namespace Tacetno433.Screens
             "Where TACET is silent, let the beat pass or stroke small to rest. A bigger swing is a free hit.",
             "Strokes judged early or late? Settings has a STROKE TIMING test.",
         };
+
+        //Tips In Use : after both lists, since static fields are set in the order they are written
+        private static string[] tips = BattleRules.TurnBattleOn ? turnTips : duelTips;
         private const float TipTime = 6f;
 
         //Title Layout : up to six blades between the hook line and the tip strip

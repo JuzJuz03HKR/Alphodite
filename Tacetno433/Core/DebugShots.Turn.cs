@@ -405,6 +405,10 @@ namespace Tacetno433.Core
             Archive.Echoes = keptEchoes;
             Archive.All[Archive.Life].Level = keptLife;
 
+            //PRACTICE (step 9) : the tutorial's enemy is in no list (never in a run, never saved), 160 life, notes of 3
+            b = new TurnBattle(band, new List<Enemy> { EnemyList.Practice }, 1, new Random(433));
+            report += Same("practice enemy", "-1 160 3", Array.IndexOf(EnemyList.All, EnemyList.Practice) + " " + b.Enemies[0].MaxHp + " " + b.Enemies[0].IntentNotes[0]);
+
             File.WriteAllText(Path.Combine(outDir, "turncheck.txt"), report);
         }
 

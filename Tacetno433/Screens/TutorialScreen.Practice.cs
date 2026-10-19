@@ -668,6 +668,15 @@ namespace Tacetno433.Screens
         }
 
         //Jump For Picture : DEVELOPER TOOL hook, lesson i already going, so a picture can show it
+        //Lesson Of : the first lesson of a kind by its name ("Size", "Finish"...), for --shots, since
+        //the lesson numbers differ between the duel and the turn battle. 0 when there is none.
+        public static int LessonOf(string kind)
+        {
+            for (int i = 0; i < lessons.Length; i++)
+                if (lessons[i].Kind.ToString() == kind) return i;
+            return 0;
+        }
+
         public void JumpForPicture(int lesson, float beats)
         {
             StartLesson(lesson);

@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Tacetno433.Audio;
 using Tacetno433.Core;
+using Tacetno433.Data;
 
 namespace Tacetno433.Screens
 {
@@ -12,6 +13,8 @@ namespace Tacetno433.Screens
     //   01 CONTROLS  the mouse and the four keys
     //   02 THE NOTE  what a note tells you : the arrow, the letter, the ring
     //   03 THE LINE  how a duel is won and lost
+    //Alpha 7 (step 9) : with the turn battle on, page 3 is THE FIGHT (turns, blocking, BREATH)
+    //and the controls page lists the keys of the turn battle.
     //Left  : a small drawing of the thing being explained
     //Right : the page number, a title and a few sentences
     //Bottom: the page track, click a diamond to jump
@@ -24,23 +27,29 @@ namespace Tacetno433.Screens
         }
 
         //Guide Text : THE PLACE TO EDIT HOW TO PLAY. A few short lines a page.
-        private static string[] steps = { "CONTROLS", "THE NOTE", "THE LINE" };
+        //Where the two games differ : turnBattle ? the turn battle's words : the old duel's (BattleRules.TurnBattleOn).
+        private static bool turnBattle = BattleRules.TurnBattleOn;
+        private static string[] steps = turnBattle ? new string[] { "CONTROLS", "THE NOTE", "THE FIGHT" }
+                                             : new string[] { "CONTROLS", "THE NOTE", "THE LINE" };
         private static string[] numbers = { "01", "02", "03" };
         private static string[] titles =
         {
             "Your baton",
             "The note says it all",
-            "Push back the silence"
+            turnBattle ? "Take turns" : "Push back the silence"
         };
         private static string[] bodies =
         {
-            "Hold the LEFT MOUSE BUTTON and swing. That is the whole game. "
-            + "SPACE : signature. TAB : your band. ESC : pause.",
+            turnBattle ? "Click to choose. When a ring shows, hold the LEFT MOUSE BUTTON and swing."
+                 : "Hold the LEFT MOUSE BUTTON and swing. That is the whole game. "
+                   + "SPACE : signature. TAB : your band. ESC : pause.",
 
             "ARROW : which way. LETTER : how far (p small, mf middle, f big). RING : stop as it closes.",
 
-            "Win a note, push the line. Lose a note, lose breath. "
-            + "Push the line all the way to win. Let silent beats pass to breathe."
+            turnBattle ? "Your turn : attack or use a skill, then swing on the ring. "
+                   + "Their turn : swipe back at each note to block it. Skills cost BREATH, blocks give it back."
+                 : "Win a note, push the line. Lose a note, lose breath. "
+                   + "Push the line all the way to win. Let silent beats pass to breathe."
         };
 
         //Guide Layout
@@ -54,8 +63,11 @@ namespace Tacetno433.Screens
         //Drawing Data : the made-up examples in the pictures, kept out of Draw so drawing never allocates
         private static string[] demoSizes = { "p", "mf", "f" };
         private static string[] demoBeats = { "1", "2", "3", "4" };
-        private static string[] keyNames = { "SPACE", "TAB", "ESC" };
-        private static string[] keyJobs = { "SIGNATURE  (WHEN ITS RECIPE IS FULL)", "THE BAND  (ON THE ROUTE)", "PAUSE" };
+        private static string[] keyNames = turnBattle ? new string[] { "1 2 3", "SPACE", "TAB", "ESC" } : new string[] { "SPACE", "TAB", "ESC" };
+        private static string[] keyJobs = turnBattle
+            ? new string[] { "ATTACK AND SKILLS", "SIGNATURE  (WHEN THE DIAMONDS ARE FULL)", "THE BAND  (ON THE ROUTE)", "PAUSE" }
+            : new string[] { "SIGNATURE  (WHEN ITS RECIPE IS FULL)", "THE BAND  (ON THE ROUTE)", "PAUSE" };
+        private static string[] demoOrder = { "1", "2", "TACET", "3" };
 
         //Demo Pattern : the four points of the 4/4 shape, in beat order, around the centre
         private static Vector2[] demoPoints =
@@ -121,7 +133,8 @@ namespace Tacetno433.Screens
             float a = turn;
             if (page == 0) DrawControls(sb, a);
             if (page == 1) DrawNote(sb, a);
-            if (page == 2) DrawLine(sb, a);
+            if (page == 2 && turnBattle) DrawFight(sb, a);
+            if (page == 2 && !turnBattle) DrawLine(sb, a);
 
             //Text Column : slides in a little on every flip
             float x = 740 + (1f - a) * 20f;
@@ -147,10 +160,11 @@ namespace Tacetno433.Screens
             Gfx.Text(sb, Game.StoryFont, "the left button raises the baton", 250, 232, Palette.PaperDim * a, TextSize.StorySmall);
             DrawShape(sb, 520f, 230f, 56f, a);
 
-            //Keys
+            //Keys : four rows in the turn battle, so they sit a little closer
+            float keyStep = keyNames.Length > 3 ? 46f : 56f;
             for (int i = 0; i < keyNames.Length; i++)
             {
-                float y = 360f + i * 56f;
+                float y = 350f + i * keyStep;
                 Ui.KeyCap(sb, keyNames[i], 130f, y, a);
                 Gfx.TextSpaced(sb, Game.Font, keyJobs[i], 250, y - 8, Palette.Paper * a, TextSize.Tiny, 2f);
             }
@@ -221,6 +235,43 @@ namespace Tacetno433.Screens
             Vector2 tip = new Vector2(px, py) + Vector2.Lerp(demoPoints[(leg + 3) % 4], demoPoints[leg], t) * arm;
             Gfx.DrawGlow(sb, tip.X, tip.Y, 24f, Palette.Paper * (0.4f * a));
             Gfx.Circle(sb, tip.X, tip.Y, 6f, Palette.Highlight * a);
+        }
+
+        //Page 3 (turn battle) : the turn order, the band and TACET, one of its notes flying in to
+        //be blocked on the ring, and the BREATH pips
+        private void DrawFight(SpriteBatch sb, float a)
+        {
+            //Turn Order : the band are filled plates, TACET an outline, like the fight page
+            Gfx.TextSpaced(sb, Game.Font, "TURN ORDER", 110, 140, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            int now = (int)(time / 1.6f) % demoOrder.Length;
+            for (int i = 0; i < demoOrder.Length; i++)
+            {
+                Rectangle plate = new Rectangle(110 + i * 92, 160, 84, 30);
+                bool enemy = i == 2;
+                Color ink = i == now ? Palette.Highlight : Palette.PaperDim;
+                if (enemy) Gfx.RectOutline(sb, plate, ink * a, i == now ? 2 : 1);
+                else Gfx.Rect(sb, plate, ink * a);
+                Gfx.TextCentered(sb, Game.Font, demoOrder[i], plate.Center.X, plate.Center.Y, (enemy ? ink : Palette.Ink) * a, TextSize.Label);
+            }
+
+            //The Band and TACET : empty frames, the art comes later
+            for (int i = 0; i < 3; i++)
+                Gfx.RectOutline(sb, new Rectangle(110 + i * 70, 240, 56, 100), Palette.PaperDim * a, 1);
+            Gfx.TextSpaced(sb, Game.Font, "BAND", 110, 350, Palette.Paper * a, TextSize.Label, 3f);
+            Gfx.RectOutline(sb, new Rectangle(490, 220, 110, 130), Palette.Paper * a, 2);
+            Gfx.TextSpaced(sb, Game.Font, "TACET", 490, 360, Palette.Paper * a, TextSize.Label, 3f);
+
+            //Block : a note flies from TACET to the ring, which closes as it arrives
+            float t = (time % 1.4f) / 1.4f;
+            float cx = 400f;
+            float cy = 290f;
+            NoteGlyph.TimingRing(sb, cx, cy, Math.Min(1f, t / 0.8f), 30f, 80f, 0f, a);
+            if (t < 0.8f) NoteGlyph.Note(sb, Game.BigFont, MathHelper.Lerp(480f, cx, t / 0.8f), cy, 1, Flick.Left, 1f, time, a);
+            else Gfx.TextSpacedCentered(sb, Game.Font, "BLOCK", cx, cy + 50, Palette.Highlight * a, TextSize.Label, 3f);
+
+            //BREATH : what skills spend and blocks give back
+            Gfx.TextSpaced(sb, Game.Font, "BREATH  :  SKILLS SPEND IT, BLOCKS GIVE IT BACK", 110, 440, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            Ui.Pips(sb, 116, 476, 3 + (int)(time * 0.8f) % 5, BattleRules.TurnBreathMax, 8f, 22f, a);
         }
 
         //Page 3 : the line and the breath bar

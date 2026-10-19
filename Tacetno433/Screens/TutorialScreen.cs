@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -25,6 +26,9 @@ namespace Tacetno433.Screens
     //From lesson 4 a slow beat runs, started by holding the button, with the same ring, lane
     //and notes as the duel (drawn by the same Core helpers).
     //
+    //Alpha 7 (step 9) : with the turn battle on, the lessons that only fit the old duel are left out
+    //(Lesson.For), and READY starts a PRACTICE FIGHT (BattleScreen in practice) instead of a run.
+    //
     //THIS CLASS IS SPLIT OVER TWO FILES (partial, like DuelScreen) :
     //   TutorialScreen.cs           the lessons, their order, and the page around the stage
     //   TutorialScreen.Practice.cs  the beat, the notes, judging a stroke, and drawing the stage
@@ -39,10 +43,14 @@ namespace Tacetno433.Screens
         //Lesson Kind : what the player has to do in a lesson
         private enum Kind { Hold, Pattern, Size, Timing, Loudness, Breath, Roll, Fermata, Spark, Finish }
 
+        //Lesson For : which game a lesson belongs to (BattleRules.TurnBattleOn picks)
+        private enum For { Both, Duel, Turn }
+
         //Lesson : one step of the tutorial
         private class Lesson
         {
             public Kind Kind;
+            public For For = For.Both;
             public string Title = "";
             public string Body = "";
             public string Goal = "";
@@ -57,35 +65,48 @@ namespace Tacetno433.Screens
 
         //Lessons : THE PLACE TO EDIT THE TUTORIAL. Keep each lesson to one idea and two short
         //sentences. The BASICS end at the first Finish lesson, the EXTRA PRACTICE comes after it.
-        private static Lesson[] lessons =
+        //For.Duel lessons only show in the old duel, For.Turn ones only in the turn battle.
+        private static Lesson[] allLessons =
         {
             new Lesson { Kind = Kind.Hold, Title = "RAISE THE BATON", Need = 1,
                 Body = "The mouse is your baton. Hold the LEFT BUTTON.",
                 Goal = "Hold the left button down." },
 
-            new Lesson { Kind = Kind.Pattern, Title = "THE 4/4 SHAPE", Need = 4,
+            new Lesson { Kind = Kind.Pattern, Title = "THE 4/4 SHAPE", Need = 4, For = For.Duel,
                 Body = "Hold, swing, stop. Every bar : DOWN, LEFT, RIGHT, UP.",
+                Goal = "Follow the arrow once round." },
+
+            new Lesson { Kind = Kind.Pattern, Title = "THE 4/4 SHAPE", Need = 4, For = For.Turn,
+                Body = "Hold, swing, stop. DOWN, LEFT, RIGHT, UP is the shape of the SIGNATURE.",
                 Goal = "Follow the arrow once round." },
 
             new Lesson { Kind = Kind.Size, Title = "SMALL, MIDDLE, BIG", Need = 3,
                 Body = "Short swing p, middle mf, long f.",
                 Goal = "Swing down : short, then middle, then long." },
 
-            new Lesson { Kind = Kind.Timing, Title = "ON THE BEAT", Need = 4, Bpm = 70,
+            new Lesson { Kind = Kind.Timing, Title = "ON THE BEAT", Need = 4, Bpm = 70, For = For.Duel,
                 Body = "Stop each stroke as the ring closes.",
+                Goal = "Four strokes GOOD or better." },
+
+            new Lesson { Kind = Kind.Timing, Title = "ON THE RING", Need = 4, Bpm = 70, For = For.Turn,
+                Body = "Stop each stroke as the ring closes. That is how you hit, and how you block.",
                 Goal = "Four strokes GOOD or better." },
 
             new Lesson { Kind = Kind.Loudness, Title = "READ THE NOTE", Need = 6, Bpm = 76,
                 Body = "Swing where the arrow points, as far as the letter says : f BIG, mf MIDDLE, p SMALL.",
                 Goal = "Six notes on time, the right size." },
 
-            new Lesson { Kind = Kind.Breath, Title = "BREATH", Need = 8, Bpm = BattleRules.TempoByFloor[0][0],
+            new Lesson { Kind = Kind.Breath, Title = "BREATH", Need = 8, Bpm = BattleRules.TempoByFloor[0][0], For = For.Duel,
                 Body = "The top bar is your band's life. Lose a note, lose breath. Let silent beats pass to breathe.",
                 Goal = "Play eight notes. Watch the bar." },
 
-            new Lesson { Kind = Kind.Finish, Title = "READY", Need = 0,
+            new Lesson { Kind = Kind.Finish, Title = "READY", Need = 0, For = For.Duel,
                 Body = "That is the whole baton. New things are explained when you meet them. TAB : extra practice.",
                 Goal = "Start a run whenever you are ready." },
+
+            new Lesson { Kind = Kind.Finish, Title = "READY", Need = 0, For = For.Turn,
+                Body = "That is the whole baton. Now try it in a practice fight. TAB : extra practice.",
+                Goal = "Start the practice fight." },
 
             //Extra Practice : after READY, only for players who ask for it (TAB)
             new Lesson { Kind = Kind.Roll, Title = "TREMOLO", Need = 1, Bpm = 76,
@@ -104,6 +125,17 @@ namespace Tacetno433.Screens
                 Body = "That was every note there is. The silence is waiting.",
                 Goal = "Start a run whenever you are ready." },
         };
+
+        //Lessons : the ones for the game being played, picked once
+        private static Lesson[] lessons = LessonsFor(BattleRules.TurnBattleOn ? For.Turn : For.Duel);
+
+        private static Lesson[] LessonsFor(For game)
+        {
+            List<Lesson> list = new List<Lesson>();
+            for (int i = 0; i < allLessons.Length; i++)
+                if (allLessons[i].For == For.Both || allLessons[i].For == game) list.Add(allLessons[i]);
+            return list.ToArray();
+        }
 
         //Page Layout : the card is as tall as its lesson needs, centred beside the stage
         private const int CardX = 40;
@@ -231,7 +263,8 @@ namespace Tacetno433.Screens
             if (l.Kind == Kind.Finish)
             {
                 gesture.Read();
-                if (Input.KeyPressed(Keys.Enter) || Input.ClickedOn(startButton)) StartRun();
+                if ((Input.KeyPressed(Keys.Enter) || Input.ClickedOn(startButton)) && BattleRules.TurnBattleOn) StartPractice();
+                else if (Input.KeyPressed(Keys.Enter) || Input.ClickedOn(startButton)) StartRun();
                 else if (index + 1 < lessons.Length && (Input.KeyPressed(Keys.Tab) || Input.ClickedOn(skipButton)))
                 {
                     SoundBank.Play(Sfx.PageTurn);
@@ -278,6 +311,13 @@ namespace Tacetno433.Screens
             SoundBank.Play(Sfx.UiConfirm);
             if (SaveFile.HasRun) Game.Screens.Change(new TitleScreen());
             else Game.Screens.Change(new ConductorSelectScreen());
+        }
+
+        //Start Practice : the turn battle's READY hands over to the PRACTICE FIGHT (BattleScreen)
+        private void StartPractice()
+        {
+            SoundBank.Play(Sfx.UiConfirm);
+            Game.Screens.Change(new BattleScreen(true));
         }
 
         //Hint : one line of feedback on the card for a couple of seconds
@@ -435,7 +475,8 @@ namespace Tacetno433.Screens
 
             if (l.Kind == Kind.Finish)
             {
-                Ui.Button(sb, startButton, SaveFile.HasRun ? "TO THE TITLE" : "NEW RUN", "ENTER", true);
+                if (BattleRules.TurnBattleOn) Ui.Button(sb, startButton, "PRACTICE", "ENTER", true);
+                else Ui.Button(sb, startButton, SaveFile.HasRun ? "TO THE TITLE" : "NEW RUN", "ENTER", true);
                 if (index + 1 < lessons.Length) Ui.Button(sb, skipButton, "EXTRAS", "TAB", false);
                 return;
             }

@@ -118,6 +118,14 @@ namespace Tacetno433.Core
                 return;
             }
 
+            //Turn Sim (Alpha 7) : the turn battle's balance check (DebugShots.TurnSim.cs)
+            if (names[0] == "turnsim")
+            {
+                TurnSim();
+                game.Exit();
+                return;
+            }
+
             //Turn Check (Alpha 7) : scripted turn battles, one PASS or FAIL line per rule (DebugShots.Turn.cs)
             if (names[0] == "turncheck")
             {
@@ -656,6 +664,7 @@ namespace Tacetno433.Core
         //       duel duelcombo duelboss duelcutin duelpause dueldouble dueltremolo duelfermata duelfire duelrepeat finale
         //       result defeat reward shop shopleave event eventchair rest curtain curtainwin
         //       battle battleswing battleskill battleparry battlestatus (Alpha 7, use a few frames, e.g. battleswing@2)
+        //       practice practiceskill practicesig (Alpha 7, the tutorial's practice fight, e.g. practice@60)
         private static void Open(TacetGame game, string name)
         {
             RunState run = SampleRun(game, name);
@@ -681,6 +690,7 @@ namespace Tacetno433.Core
             if (name.StartsWith("duel") || name == "finale") screen = new DuelScreen();
             if (name == "archive") screen = new ArchiveScreen();                          // Alpha 7 step 7
             if (name.StartsWith("battle")) screen = new BattleScreen();                // Alpha 7 : battle battleswing battleskill battleparry battlestatus
+            if (name.StartsWith("practice")) screen = new BattleScreen(true);          // Alpha 7 step 9 : practice practiceskill practicesig
             if (name == "result" || name == "defeat") screen = new ResultScreen();
             if (name == "reward") screen = new MotifRewardScreen(false);
             if (name == "shop" || name == "shopleave") screen = new ShopScreen();
@@ -693,16 +703,16 @@ namespace Tacetno433.Core
             //Picture Hooks : start the moment the picture is about
             if (name == "calibrate") ((SettingsScreen)screen).BeginTest();
             if (name == "finale") ((DuelScreen)screen).BeginFinaleForPicture();
-            if (name.StartsWith("battle")) ((BattleScreen)screen).ShowForPicture(name);
+            if (name.StartsWith("battle") || name.StartsWith("practice")) ((BattleScreen)screen).ShowForPicture(name);
             if (name == "dueltremolo" || name == "duelrepeat") ((DuelScreen)screen).JumpForPicture(BattleRules.BeatsPerRound - 1);
             if (name == "dueldouble") ((DuelScreen)screen).JumpForPicture(FirstPair(run.Battle));
             if (name == "duelfermata") ((DuelScreen)screen).HoldForPicture();
-            if (name == "tutorialsize") ((TutorialScreen)screen).JumpForPicture(2, 0f);
-            if (name == "tutorialtiming") ((TutorialScreen)screen).JumpForPicture(3, 5.6f);
-            if (name == "tutorialloud") ((TutorialScreen)screen).JumpForPicture(4, 6.6f);
-            if (name == "tutorialbreath") ((TutorialScreen)screen).JumpForPicture(5, 7.6f);
-            if (name == "tutorialready") ((TutorialScreen)screen).JumpForPicture(6, 0f);
-            if (name == "tutorialroll") ((TutorialScreen)screen).JumpForPicture(7, 5.8f);
+            if (name == "tutorialsize") ((TutorialScreen)screen).JumpForPicture(TutorialScreen.LessonOf("Size"), 0f);
+            if (name == "tutorialtiming") ((TutorialScreen)screen).JumpForPicture(TutorialScreen.LessonOf("Timing"), 5.6f);
+            if (name == "tutorialloud") ((TutorialScreen)screen).JumpForPicture(TutorialScreen.LessonOf("Loudness"), 6.6f);
+            if (name == "tutorialbreath") ((TutorialScreen)screen).JumpForPicture(TutorialScreen.LessonOf("Breath"), 7.6f);   // the duel only
+            if (name == "tutorialready") ((TutorialScreen)screen).JumpForPicture(TutorialScreen.LessonOf("Finish"), 0f);
+            if (name == "tutorialroll") ((TutorialScreen)screen).JumpForPicture(TutorialScreen.LessonOf("Roll"), 5.8f);
         }
 
         //First Pair : the first beat of the round that TACET plays as a pair, for the picture

@@ -163,6 +163,12 @@ namespace Tacetno433.Data
                         Kind = EnemyKind.Boss, Era = 2, Pattern = new int[] { 7, 0, 7, 0, 0, 9, 0, 9 }, Hidden = new int[] { 4 }, Tone = Palette.ToneA, Temper = 20 },
         };
 
+        //Practice : the enemy of the tutorial's practice fight (Alpha 7, step 9, BattleRules PRACTICE).
+        //It is not in All, so it never turns up in a run and the save file never sees it. No trait.
+        public static Enemy Practice = new Enemy { Name = "PRACTICE",
+                        TurnHp = BattleRules.TurnPracticeHp, TurnSpeed = BattleRules.TurnPracticeSpeed, Phrases = new[] { "Dp", "Lmf Rmf" },
+                        Kind = EnemyKind.Normal, Pattern = new int[] { BattleRules.TurnPracticePower } };
+
         private static string[] kindNames = { "ENCOUNTER", "ELITE", "BOSS" };
 
         //Text Prepare : called once from LoadContent
