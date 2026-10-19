@@ -133,6 +133,7 @@ namespace Tacetno433.Screens
             if (BattleRules.TurnBattleOn) footnote = "THE BAND FELL  -  THE RUN ENDS HERE";        // TURN BATTLE : life, not breath
             run.MarkLastStopLost();
             SaveFile.DeleteRun();          // a lost fight ends the run, there is nothing to continue
+            if (BattleRules.TurnBattleOn) Archive.Pay(run, false);   // ARCHIVE : the ECHOES are kept even if the player leaves from here
 
             SoundBank.Play(Sfx.Defeat);
             SoundBank.PlayMusic(Music.Defeat);

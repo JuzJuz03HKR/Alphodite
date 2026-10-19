@@ -116,6 +116,7 @@ namespace Tacetno433.Screens
             Game.CurrentRun = null;
 
             //Menu Lines : CONTINUE first when there is a saved run, and it starts chosen
+            SaveFile.CheckRunMode();                           // Alpha 7 : a run from the other battle is not offered
             bool saved = SaveFile.HasRun;
             if (saved) menu = new int[] { ItemContinue, ItemNewRun, ItemArchive, ItemTutorial, ItemGuide, ItemSettings, ItemQuit };
             else menu = new int[] { ItemNewRun, ItemArchive, ItemTutorial, ItemGuide, ItemSettings, ItemQuit };

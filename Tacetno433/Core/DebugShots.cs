@@ -371,6 +371,22 @@ namespace Tacetno433.Core
                            Settings.Master + "/" + Settings.Sfx + "/" + Settings.Music + "/" + Settings.Language + "/" + Settings.TimingLabel(Settings.TimingOffset) + "/" + Settings.Maestro);
             Settings.Master = 0.8f; Settings.Sfx = 0.8f; Settings.Music = 0.55f; Settings.Language = 0; Settings.SetTiming(0f); Settings.Maestro = false;
 
+            //KEEPSAKE (Alpha 7) : CONTINUE keeps exactly the saved motifs, it does not roll the keepsake again
+            int keptKeepsake = Archive.All[Archive.Keepsake].Level;
+            Archive.All[Archive.Keepsake].Level = 1;
+            RunState keep = SampleRun(game, "savecheck");
+            SaveFile.SaveRun(keep);
+            RunState keepBack = SaveFile.LoadRun(game);
+            report += Same("keepsake load", keep.Motifs.Count.ToString(), keepBack != null ? keepBack.Motifs.Count.ToString() : "none");
+            Archive.All[Archive.Keepsake].Level = keptKeepsake;
+
+            //Run Mode (Alpha 7) : a run saved by the other battle is not offered to CONTINUE and does not load
+            File.WriteAllText(Path.Combine(outDir, "run.txt"), "version=" + SaveFile.Version + "\nturn=" + (BattleRules.TurnBattleOn ? 0 : 1) + "\nconductor=3\n");
+            SaveFile.CheckRunMode();
+            report += Same("other mode", "False True", SaveFile.HasRun + " " + (SaveFile.LoadRun(game) == null));
+            SaveFile.SaveRun(keep);
+            report += Same("this mode", "True", SaveFile.HasRun.ToString());
+
             SaveFile.DeleteRun();
             report += Same("delete", "False", SaveFile.HasRun.ToString());
 

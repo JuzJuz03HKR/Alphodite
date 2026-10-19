@@ -61,6 +61,18 @@ namespace Tacetno433.Data
             return true;
         }
 
+        //Pay : give a finished run's ECHOES once and save them at once. Called the moment a fight is lost (so
+        //leaving from the result page keeps them) and again by the curtain call, which then only reads them.
+        public static int Pay(RunState run, bool won)
+        {
+            if (run.EchoesPaid) return run.EchoesEarned;
+            run.EchoesPaid = true;
+            run.EchoesEarned = EchoesFor(run, won);
+            Echoes += run.EchoesEarned;
+            SaveFile.SaveArchive();
+            return run.EchoesEarned;
+        }
+
         //Echoes For : what a finished run leaves behind. MAESTRO pays more.
         public static int EchoesFor(RunState run, bool won)
         {

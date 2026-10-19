@@ -276,10 +276,16 @@ namespace Tacetno433.Screens
         {
             if (startFight)
             {
-                run.Chosen = new RouteNode();
-                run.Chosen.Type = NodeType.Elite;
-                run.Chosen.Title = RouteNodeInfo.TitleOf(NodeType.Elite);
+                //The elite takes the event's place on the route and is saved like any fight, so CONTINUE
+                //goes back into it (quitting cannot undo the choice)
+                int slot = System.Array.IndexOf(run.Options, run.Chosen);
+                RouteNode elite = new RouteNode();
+                elite.Type = NodeType.Elite;
+                elite.Title = RouteNodeInfo.TitleOf(NodeType.Elite);
+                if (slot >= 0) run.Options[slot] = elite;
+                run.Chosen = elite;
                 run.BeginBattle();
+                SaveFile.SaveRun(run);
                 Game.Screens.Change(RunFlow.FightScreen());
                 return;
             }

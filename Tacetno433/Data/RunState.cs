@@ -54,6 +54,8 @@ namespace Tacetno433.Data
         public int Seats = 3;                // how many players fit on stage
         public int SeatsBoughtThisFloor = 0; // the shop will only sell two per floor
         public int LastRounds;               // Alpha 7 : rounds the last turn battle took, for the result page
+        public bool EchoesPaid;              // ARCHIVE : this run's ECHOES are already given (Archive.Pay)
+        public int EchoesEarned;
         public int Stamina = 100;
         public int MaxStamina = 100;
         public float PowerMultiplier = 1f;   // from the conductor's PUSH stat
@@ -123,8 +125,11 @@ namespace Tacetno433.Data
             Shards = Archive.Level(Archive.Savings) * BattleRules.ArchiveShardsPerLevel;                 // SAVINGS
             if (Archive.Level(Archive.Keepsake) > 0)                                                     // KEEPSAKE
             {
-                Motif[] keepsake = MotifList.Roll(Motifs, 1, 1, 1, random);
-                if (keepsake.Length > 0) Motifs.Add(keepsake[0]);
+                //One common motif from floor 1 (MotifList.Roll would let a rarer one in)
+                List<Motif> commons = new List<Motif>();
+                for (int i = 0; i < MotifList.All.Length; i++)
+                    if (MotifList.All[i].Rarity == 1 && MotifList.All[i].FromFloor <= 1) commons.Add(MotifList.All[i]);
+                if (commons.Count > 0) Motifs.Add(commons[random.Next(commons.Count)]);
             }
 
             //Conductor Stats : turn the 0 to 10 numbers into real values

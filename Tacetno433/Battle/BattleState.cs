@@ -1559,6 +1559,7 @@ namespace Tacetno433.Battle
         public string Rank()
         {
             if (!PlayerWon) return "-";
+            if (BattleRules.TurnBattleOn) return PerfectCount >= 6 ? "S" : "B";            // TURN BATTLE : a win is B, 6 PERFECTs or more S
             if (Line >= BattleRules.LineLimit && PerfectCount >= 6) return "S";
             if (Line >= 60f || PerfectCount >= 6) return "A";
             if (Line >= 25f) return "B";

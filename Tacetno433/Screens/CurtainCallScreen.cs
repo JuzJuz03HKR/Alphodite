@@ -66,9 +66,7 @@ namespace Tacetno433.Screens
             //ARCHIVE : the run leaves its ECHOES behind, saved at once (step 7)
             if (BattleRules.TurnBattleOn)
             {
-                int echoes = Archive.EchoesFor(run, won);
-                Archive.Echoes += echoes;
-                SaveFile.SaveArchive();
+                int echoes = Archive.Pay(run, won);                 // given once, maybe already when the last fight was lost
                 names[6] = "ECHOES";      values[6] = "+" + echoes;
             }
 
@@ -213,7 +211,7 @@ namespace Tacetno433.Screens
             float bow = Math.Max(0f, (float)Math.Sin(time * 1.6f + 0.5f)) * 8f;
             Rectangle figure = new Rectangle((int)left - 110, (int)(floor - 170 + bow), 76, 170 - (int)bow);
             PortraitBox.DrawFigure(sb, figure, run.Conductor, e);
-            Gfx.TextSpacedCentered(sb, Game.Font, run.Conductor.Name, figure.Center.X, floor + 10, Palette.Paper * e, TextSize.Tiny, 1.5f);
+            Gfx.TextSpacedCentered(sb, Game.Font, run.Conductor.Name, figure.Center.X, floor + 40, Palette.Paper * e, TextSize.Tiny, 1.5f);   // under the band's names, a long name never touches them
         }
 
         //Ledger : the run record, like the back page of a programme

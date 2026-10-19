@@ -141,7 +141,7 @@ namespace Tacetno433.Screens
         //Can Pause : not in PRACTICE, where ESC leaves like on every tutorial page
         public override bool CanPause
         {
-            get { return !practice; }
+            get { return !practice && (battle == null || (battle.Step != TurnStep.Won && battle.Step != TurnStep.Lost)); }   // no pause once it is decided
         }
 
         public override bool EntersWithWave
@@ -671,6 +671,14 @@ namespace Tacetno433.Screens
             view = View.Pause;
             viewTime = 0f;
             Game.IsMouseVisible = true;
+
+            //Lost : the run ends now, not when the result page opens, so quitting or closing the game during the
+            //banner cannot bring the fight back. The ECHOES are given at the same moment (ARCHIVE).
+            if (!practice && battle.Step == TurnStep.Lost)
+            {
+                SaveFile.DeleteRun();
+                Archive.Pay(run, false);
+            }
         }
 
         //Show Events : turn what the rules wrote down into numbers and words over the fighters.
@@ -762,7 +770,8 @@ namespace Tacetno433.Screens
 
         //Fight Over : every musician keeps the life they end with (KNOCKED OUT gets up with 1), and the
         //old duel's record carries the result to the result page, which hands out the rewards.
-        //Line is set so the rank reads the PERFECTs : a win is B, with 6 PERFECTs or more S.
+        //Line is set to the old duel's full win, which keeps its shards the same. The rank reads the PERFECTs
+        //(BattleState.Rank : a win is B, with 6 PERFECTs or more S).
         private void Finish()
         {
             //PRACTICE : a win goes back to the title, a loss tries again

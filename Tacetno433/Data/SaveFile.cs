@@ -59,7 +59,25 @@ namespace Tacetno433.Data
         //Has Run : there is a run to CONTINUE
         public static bool HasRun
         {
-            get { return PretendRun || (Enabled && File.Exists(RunPath)); }
+            get { return PretendRun || (Enabled && !otherModeRun && File.Exists(RunPath)); }
+        }
+
+        //Other Mode Run (Alpha 7) : a run saved by the other battle (the old duel or the turn battle) cannot go
+        //on in this one, so CONTINUE hides it. The file is left alone, the other mode can still continue it.
+        //Checked once when the title page opens, so drawing never reads a file.
+        private static bool otherModeRun;
+
+        public static void CheckRunMode()
+        {
+            otherModeRun = false;
+            if (!Enabled || !File.Exists(RunPath)) return;
+            Dictionary<string, string> v = Read(RunPath);
+            if (v != null && GetInt(v, "turn", 0) != RunMode) otherModeRun = true;
+        }
+
+        private static int RunMode
+        {
+            get { return BattleRules.TurnBattleOn ? 1 : 0; }
         }
 
         public static void DeleteRun()
@@ -136,6 +154,8 @@ namespace Tacetno433.Data
 
             List<string> lines = new List<string>();
             lines.Add("version=" + Version);
+            lines.Add("turn=" + RunMode);                      // Alpha 7 : which battle this run was played in
+            otherModeRun = false;
             lines.Add("conductor=" + Array.IndexOf(ConductorList.All, run.Conductor));
             lines.Add("band=" + run.BandName);
             lines.Add("floor=" + run.Floor);
@@ -208,6 +228,7 @@ namespace Tacetno433.Data
 
             int conductor = GetInt(v, "conductor", -1);
             if (conductor < 0 || conductor >= ConductorList.All.Length) return null;
+            if (GetInt(v, "turn", 0) != RunMode) return null;    // a run from the other battle (see CheckRunMode)
 
             //Start : the same start as a new run, then everything is written over from the file
             RunState run = new RunState();
@@ -247,6 +268,7 @@ namespace Tacetno433.Data
             run.Formation.Tidy(run.Seats);       // a save from before round 12 sat its first players down the centre
 
             int[] motifs = GetList(v, "motifs");
+            run.Motifs.Clear();                                // KEEPSAKE : Start rolled one, the save already holds it
             for (int i = 0; i < motifs.Length; i++)
                 if (motifs[i] >= 0 && motifs[i] < MotifList.All.Length) run.Motifs.Add(MotifList.All[motifs[i]]);
 
