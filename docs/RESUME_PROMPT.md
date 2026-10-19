@@ -62,6 +62,11 @@ commit/push ขึ้น Alpha7 เมื่อฉันสั่ง ยัง�
 
 ## สถานะล่าสุด (19 ต.ค.)
 
+**19 ต.ค. (ต่อ) : ผู้ใช้บอกว่าระบบต่อสู้ยังไม่สนุก ให้ research แล้วเสนอหลายแบบ** (คำต่อคำใน `USER_BRIEFS.md` ท้ายสุด)
+✅ `docs/ALPHA7_COMBAT_PROPOSALS.md` ฉบับร่าง : ปัญหา 8 ข้อจากโค้ดและตัวจำลอง · 4 แบบ (1 จุดอ่อน WEAK SPOT · 2 ตีต่อ ENCORE · 3 หนึ่งห้อง ONE BAR · 4 เวทีสี่ช่อง FOUR SEATS) · ชุดผสม ก ข ค · Claude แนะนำชุด ก (แบบ 1 + 2) · คำถาม 5 ข้อให้ผู้ใช้เลือก · ยังไม่แก้โค้ด ·
+⚠️ เว็บ gamespot.com / gamesradar.com ถูกการตั้งค่าเครือข่ายของ environment บล็อก (WebFetch ENOTFOUND, curl CONNECT 403) ลิสต์ของผู้ใช้ยังไม่ได้อ่าน · ผู้ใช้สั่งลด agent เหลือ 3-4 ตัว (workflow รอบสองใช้ 4) agent ที่สรุปเข้าใจว่าขอ 3-4 แบบ เลยเหลือ 4 แบบ ถามผู้ใช้แล้วว่าต้องการแบบเพิ่มไหม ·
+**งานถัดไป** : รอผู้ใช้อ่านแล้วเลือกชุด/ตอบคำถามท้ายเอกสาร
+
 **19 ต.ค. : ขั้น 10–11 เสร็จ + /update (ผู้ใช้สั่ง "ข้อ 12 เอาตามที่แนะนำ ทำขั้น 10และ11 ต่อได้เลย")** · commit ล่าสุดของงาน `ffaea84`
 ✅ วาทยากร 6 คนตาม lore เล่นได้ครบ (`Data/Conductor.cs` : Bach ใช้ METRONOME เดิม · HEARTLESS Paganini · KING'S BATON Lully · UNSIGNED Fanny เป็นลำดับ 7–9 · `ConductorList.Shown` ซ่อน APPRENTICE INFERNO FOLK LEADER ในโหมดผลัดตา) · ผลอยู่ `Battle/TurnBattle.cs` (`UseSignature` `Judge` `CanUse` `LifeCost` `PayCaprice`) ·
 ✅ ความสามารถติดตัวนักดนตรี 9 คนทำงาน (`Musician.TurnTraitText` + `TurnBattle` ค้นชื่อ) · ศัตรูตัดสินท่าถัดไปทันทีหลังตี (`FinishEnemyTurn` → `PlanIntent`) · `Enemy.TurnPower` เตรียมไว้ปรับบอส ·
