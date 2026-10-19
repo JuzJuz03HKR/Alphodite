@@ -41,7 +41,7 @@ namespace Tacetno433.Core
 
             //Stamina Chip : label, number and a bar
             int sx = 850;
-            Gfx.TextSpaced(sb, Ui.Font, "BREATH", sx, 12, Palette.LineGrey, TextSize.Tiny, 2f);
+            Gfx.TextSpaced(sb, Ui.Font, BattleRules.LifeWord, sx, 12, Palette.LineGrey, TextSize.Tiny, 2f);
             Gfx.TextRight(sb, Ui.Font, run.StaminaValue, sx + 150, 8, Palette.Paper, TextSize.Body);
             Ui.CapsuleBar(sb, new Rectangle(sx, 34, 150, 10), run.Stamina / (float)run.MaxStamina, Palette.Paper, 1f);
 

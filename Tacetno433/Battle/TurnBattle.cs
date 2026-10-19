@@ -13,7 +13,7 @@ namespace Tacetno433.Battle
 
     //TurnEventKind : something that happened, kept so the screen can show it (numbers, words, sparks).
     //The rules never draw, they only write down what happened (docs/research/ALPHA7_battle_ui.md).
-    public enum TurnEventKind { Damage, Heal, Breath, Dissonance, Crescendo, Mute, Break, Skip, Counter, Down, Ready, Extra }
+    public enum TurnEventKind { Damage, Heal, Breath, Dissonance, Crescendo, Mute, Break, Skip, Counter, Down, Ready, Extra, Saved }
 
     public struct TurnEvent
     {
@@ -116,6 +116,12 @@ namespace Tacetno433.Battle
         public TurnKit Kit;
         public int Signature;
         private int perfectRun;        // PERFECTs in a row, for PRODIGY
+        public int BestRun;            // the longest run of PERFECTs this fight, for the result page
+
+        //Motifs (step 6) : what the band carries, see GiveMotifs and Data/Motif.cs (TurnText)
+        private bool[] motif = new bool[64];
+        private bool overtureDone;     // OVERTURE : the band's first hit has landed
+        private bool secondWindUsed;   // SECOND WIND : once per fight
 
         //Events : what happened since the screen last looked
         public List<TurnEvent> Events = new List<TurnEvent>();
@@ -362,11 +368,14 @@ namespace Tacetno433.Battle
             if (Step != TurnStep.PlayerTurn || !CanTarget(target)) return 0;
 
             Fighter attacker = Current;
-            int damage = HitDamage(attacker, target, SwipeScale(grade, rightSize));
+            float scale = Scale(grade, rightSize);
+            if (Has(MotifId.Sforzando) && grade == Grade.Perfect && rightSize && AttackSize(attacker.Musician) == 2) scale *= BattleRules.TurnSforzandoScale;   // SFORZANDO
+            int damage = HitDamage(attacker, target, scale);
             Hurt(target, damage);
             AddBreath(BattleRules.TurnBreathPerAttack);
 
-            if (grade == Grade.Perfect && rightSize) AddOffBeat(target, BattleRules.TurnPerfectOffBeat);   // OFF-BEAT
+            int offBeat = BattleRules.TurnPerfectOffBeat * (Has(MotifId.Marcato) ? BattleRules.TurnMarcatoOffBeat : 1);   // MARCATO
+            if (grade == Grade.Perfect && rightSize) AddOffBeat(target, offBeat);                        // OFF-BEAT
             if (grade != Grade.Perfect && grade != Grade.Good) attacker.Crescendo = 0;                    // CRESCENDO is lost on a MISS
             CountNote(grade == Grade.Perfect && rightSize);
 
@@ -400,28 +409,43 @@ namespace Tacetno433.Battle
                 }
                 anyLanded = true;
 
-                float hold = s.Notes[n].Kind == NoteKind.Hold ? HoldScale(r.Hold) : 1f;    // HOLD
-                float scale = SwipeScale(r.Grade, r.RightSize) * hold;
+                SkillNote note = s.Notes[n];
+                float hold = 1f;
+                if (note.Kind == NoteKind.Hold) hold = HoldScale(Has(MotifId.Tenuto) ? 1f : r.Hold);     // HOLD, TENUTO
+                float scale = Scale(r.Grade, r.RightSize) * hold;
+                if (Has(MotifId.Sforzando) && r.Grade == Grade.Perfect && r.RightSize && note.Size == 2) scale *= BattleRules.TurnSforzandoScale;   // SFORZANDO
 
-                for (int t = 0; t < targets.Count; t++)
+                bool everyone = s.Target == SkillTarget.AllEnemies || s.Target == SkillTarget.AllAllies;
+                float tutti = everyone && Has(MotifId.Tutti) ? BattleRules.TurnTuttiScale : 1f;               // TUTTI
+                float heal = s.Heal * hold * tutti;
+                if (user.Musician.Family == Family.Wind && Has(MotifId.ReedCase)) heal *= BattleRules.TurnReedCaseHeal;   // REED CASE
+                int offBeat = s.OffBeat;
+                if (user.Musician.Family == Family.Percussion && Has(MotifId.SpareSticks)) offBeat = (int)Math.Round(offBeat * BattleRules.TurnSpareSticksOffBeat);   // SPARE STICKS
+
+                //GRACE NOTE : a spark that lands does the skill twice
+                int times = note.Kind == NoteKind.Spark && Has(MotifId.GraceNote) ? BattleRules.TurnGraceTimes : 1;
+                for (int k = 0; k < times; k++)
                 {
-                    Fighter f = targets[t];
-                    if (f.Down) continue;
+                    for (int t = 0; t < targets.Count; t++)
+                    {
+                        Fighter f = targets[t];
+                        if (f.Down) continue;
 
-                    if (f.IsEnemy)
-                    {
-                        if (s.Damage > 0f) Hurt(f, HitDamage(user, f, scale * s.Damage));
-                        if (s.Dissonance > 0 && !f.Down) AddDissonance(f, s.Dissonance);
-                        if (s.OffBeat > 0 && !f.Down) AddOffBeat(f, s.OffBeat);
+                        if (f.IsEnemy)
+                        {
+                            if (s.Damage > 0f) Hurt(f, HitDamage(user, f, scale * s.Damage * tutti));
+                            if (s.Dissonance > 0 && !f.Down) AddDissonance(f, s.Dissonance);
+                            if (offBeat > 0 && !f.Down) AddOffBeat(f, offBeat);
+                        }
+                        else
+                        {
+                            if (heal > 0f) Heal(f, (int)Math.Round(heal));
+                            if (s.Crescendo > 0) AddCrescendo(f, s.Crescendo);
+                        }
                     }
-                    else
-                    {
-                        if (s.Heal > 0) Heal(f, (int)Math.Round(s.Heal * hold));
-                        if (s.Crescendo > 0) AddCrescendo(f, s.Crescendo);
-                    }
+
+                    if (s.Breath > 0) AddBreath(s.Breath);
                 }
-
-                if (s.Breath > 0) AddBreath(s.Breath);
             }
 
             //GUARD and TAUNT : the percussion stands in front, every enemy turns to them at once
@@ -474,8 +498,14 @@ namespace Tacetno433.Battle
         //Hit Damage : power x TurnAttackPerPower x scale, harder with CRESCENDO and against an enemy OFF-BEAT
         public int HitDamage(Fighter attacker, Fighter target, float scale)
         {
-            float power = attacker.IsEnemy ? attacker.Enemy.SongNotePower() : attacker.Musician.Power + attacker.Musician.Rehearsed;
+            float power = attacker.IsEnemy ? attacker.Enemy.SongNotePower() : PowerOf(attacker.Musician);
             float damage = power * BattleRules.TurnAttackPerPower * scale;
+            if (target.IsEnemy && target.Hp < target.MaxHp * BattleRules.TurnCodaBelow && Has(MotifId.Coda)) damage *= BattleRules.TurnCodaScale;   // CODA
+            if (!attacker.IsEnemy && !overtureDone && Has(MotifId.Overture))                  // OVERTURE
+            {
+                damage *= BattleRules.TurnOvertureScale;
+                overtureDone = true;
+            }
             damage *= 1f + attacker.Crescendo * BattleRules.TurnCrescendoStep;               // CRESCENDO
             if (!attacker.IsEnemy) damage *= BeethovenScale();                                 // THE CLOSER THE LOUDER
             if (target.Staggered) damage *= BattleRules.TurnOffBeatScale;                     // OFF-BEAT
@@ -520,6 +550,7 @@ namespace Tacetno433.Battle
             {
                 parried++;
                 AddBreath(BattleRules.TurnBreathPerParry);
+                if (Has(MotifId.Pianissimo) && enemy.IntentSizes[note] == 0) AddBreath(BattleRules.TurnPianissimoBreath);   // PIANISSIMO
                 AddOffBeat(enemy, BattleRules.TurnParryOffBeat);
                 return 0;
             }
@@ -563,6 +594,7 @@ namespace Tacetno433.Battle
             if (parried > 0 && parried == enemy.IntentNotes.Length && target != null && !target.Down && !enemy.Down)
             {
                 float scale = BattleRules.TurnCounterScale * (enemy.IntentCadenza ? BattleRules.TurnCadenzaCounter : 1f);
+                if (Has(MotifId.Counterpoint)) scale *= BattleRules.TurnCounterpointScale;                     // COUNTERPOINT
                 int damage = HitDamage(target, enemy, scale);
                 Events.Add(new TurnEvent(TurnEventKind.Counter, target, damage));
                 Hurt(enemy, damage);
@@ -576,8 +608,9 @@ namespace Tacetno433.Battle
         //ring meets the note (minus is early). The wrong way is always a MISS.
         public Grade Judge(float offset, bool rightWay)
         {
-            float perfect = Maestro ? BattleRules.MaestroPerfectWindow : BattleRules.PerfectWindow;   // MAESTRO
-            float good = Maestro ? BattleRules.MaestroGoodWindow : BattleRules.GoodWindow;
+            float steady = Has(MotifId.SteadyPulse) ? BattleRules.SteadyWindowBonus : 0f;           // STEADY PULSE
+            float perfect = (Maestro ? BattleRules.MaestroPerfectWindow : BattleRules.PerfectWindow) + steady;   // MAESTRO
+            float good = (Maestro ? BattleRules.MaestroGoodWindow : BattleRules.GoodWindow) + steady;
             float gap = Math.Abs(offset);
 
             if (!rightWay || gap > good) return Grade.Miss;
@@ -589,6 +622,7 @@ namespace Tacetno433.Battle
         {
             int perfect = Maestro ? BattleRules.MaestroTurnRollPerfect : BattleRules.TurnRollPerfect;   // MAESTRO
             int good = Maestro ? BattleRules.MaestroTurnRollGood : BattleRules.TurnRollGood;
+            if (Has(MotifId.Accelerando)) shakes *= BattleRules.TurnAccelerandoShakes;              // ACCELERANDO
             if (shakes >= perfect) return Grade.Perfect;
             if (shakes >= good) return Grade.Good;
             return shakes > 0 ? Grade.Miss : Grade.Hesitate;
@@ -597,7 +631,7 @@ namespace Tacetno433.Battle
         //Late Limit : after this many seconds past the ring a note counts as not swiped at all
         public float LateLimit
         {
-            get { return Maestro ? BattleRules.MaestroGoodWindow : BattleRules.GoodWindow; }
+            get { return (Maestro ? BattleRules.MaestroGoodWindow : BattleRules.GoodWindow) + (Has(MotifId.SteadyPulse) ? BattleRules.SteadyWindowBonus : 0f); }
         }
 
         //ATTACK PART : a musician's attack is the PART written on them since round 14, so each
@@ -631,13 +665,14 @@ namespace Tacetno433.Battle
                 return;
             }
 
-            if (Kit != TurnKit.None && Signature < BattleRules.TurnSignatureNeed)
+            if (Kit != TurnKit.None && Signature < SignatureNeed)
             {
                 Signature++;
-                if (Signature == BattleRules.TurnSignatureNeed) Events.Add(new TurnEvent(TurnEventKind.Ready, null, 0));
+                if (Signature == SignatureNeed) Events.Add(new TurnEvent(TurnEventKind.Ready, null, 0));
             }
 
             perfectRun++;
+            if (perfectRun > BestRun) BestRun = perfectRun;
             if (Kit == TurnKit.Mozart && perfectRun >= BattleRules.TurnMozartRun)
             {
                 perfectRun = 0;
@@ -665,7 +700,13 @@ namespace Tacetno433.Battle
         //Can Signature : the gauge is full and a musician is up
         public bool CanSignature
         {
-            get { return Step == TurnStep.PlayerTurn && Kit != TurnKit.None && Signature >= BattleRules.TurnSignatureNeed; }
+            get { return Step == TurnStep.PlayerTurn && Kit != TurnKit.None && Signature >= SignatureNeed; }
+        }
+
+        //Signature Need : PERFECTs to fill the gauge (CON BRIO needs fewer)
+        public int SignatureNeed
+        {
+            get { return Has(MotifId.ConBrio) ? BattleRules.TurnConBrioNeed : BattleRules.TurnSignatureNeed; }   // CON BRIO
         }
 
         //Signature Shape : the 4/4 pattern a conductor beats, down, left, right, up (any size)
@@ -717,12 +758,57 @@ namespace Tacetno433.Battle
         }
 
         //======================================================================================
+        //Motifs (step 6)
+        //======================================================================================
+
+        //Give Motifs : the run's motifs, handed in once when the fight starts. BREATH MARK and
+        //CRESCENDO change the start of the fight, the others are checked where they work (search the name).
+        public void GiveMotifs(List<Motif> motifs)
+        {
+            for (int i = 0; i < motifs.Count; i++) motif[(int)motifs[i].Id] = true;
+
+            if (Has(MotifId.BreathMark)) Breath = Math.Min(BattleRules.TurnBreathMax, Breath + BattleRules.TurnBreathMarkStart);   // BREATH MARK
+            if (Has(MotifId.Crescendo))                                                                                             // CRESCENDO
+                for (int i = 0; i < Party.Count; i++) Party[i].Crescendo = BattleRules.TurnCrescendoStart;
+        }
+
+        public bool Has(MotifId id)
+        {
+            return motif[(int)id];
+        }
+
+        //Power Of : a musician's power with rehearsals, and ROSIN for the strings (the same number every page shows)
+        public int PowerOf(Musician m)
+        {
+            int power = m.Power + m.Rehearsed;
+            if (m.Family == Family.String && Has(MotifId.Resin)) power += BattleRules.FamilyMotifPower;   // ROSIN
+            return power;
+        }
+
+        //Scale : SwipeScale, with RUBATO softening a MISS
+        public float Scale(Grade grade, bool rightSize)
+        {
+            if (grade != Grade.Perfect && grade != Grade.Good && Has(MotifId.Rubato)) return BattleRules.TurnRubatoMiss;   // RUBATO
+            return SwipeScale(grade, rightSize);
+        }
+
+        //======================================================================================
         //Life, Breath and Statuses
         //======================================================================================
 
         private void Hurt(Fighter f, int amount)
         {
             if (amount <= 0 || f.Down) return;
+
+            //SECOND WIND : once per fight, a musician who would fall stays up with 1 life
+            if (!f.IsEnemy && amount >= f.Hp && Has(MotifId.SecondWind) && !secondWindUsed)
+            {
+                secondWindUsed = true;
+                amount = f.Hp - 1;
+                Events.Add(new TurnEvent(TurnEventKind.Saved, f, 0));
+                if (amount <= 0) return;
+            }
+
             f.Hp = Math.Max(0, f.Hp - amount);
             Events.Add(new TurnEvent(TurnEventKind.Damage, f, amount));
             if (f.Down)

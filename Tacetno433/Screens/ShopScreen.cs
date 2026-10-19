@@ -87,7 +87,8 @@ namespace Tacetno433.Screens
             names[SeatRow] = "EXTRA SEAT";
             notes[SeatRow] = "One more musician on stage. Two per floor at most.";
             names[TuningRow] = "TUNING";
-            notes[TuningRow] = "The band gets back " + (int)(BattleRules.TuningRecover * 100) + " percent of its breath.";
+            notes[TuningRow] = "The band gets back " + (int)(BattleRules.TuningRecover * 100) + " percent of its " + BattleRules.LifeWordLower + ".";
+            if (BattleRules.TurnBattleOn) notes[SeatRow] = "Three play in a turn battle. No more seats.";   // TURN BATTLE
             //Hire : one player from this era, known before buying, with their seat
             hire = MusicianList.RollFromEra(run.Era, run.Roster, run.Rng);
             names[HireRow] = hire != null ? "HIRE " + hire.Name : "HIRE A PLAYER";
@@ -186,7 +187,7 @@ namespace Tacetno433.Screens
             RunState run = Game.CurrentRun;
 
             if (sold[row]) { Deny(SoldLine); return; }
-            if (row == SeatRow && !run.SeatForSale) { Deny(SoldLine); return; }
+            if (row == SeatRow && (!run.SeatForSale || BattleRules.TurnBattleOn)) { Deny(SoldLine); return; }   // TURN BATTLE : three play, no seats for sale
             if (row == TuningRow && run.Stamina >= run.MaxStamina) { Deny(RestedLine); return; }
             if (row == HireRow && run.RosterFull) { Deny(FullLine); return; }
             if (row == HireRow && hire == null) { Deny(NobodyLine); return; }

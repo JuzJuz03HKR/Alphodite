@@ -13,6 +13,11 @@
         //Turn Battle On : fights open the turn battle page. False plays the old rhythm duel again.
         public static bool TurnBattleOn = true;
 
+        //Life Word : the run's old BREATH (stamina) is the band's life in the turn battle, and BREATH
+        //is the skill points of one fight. Pages outside the fight say this word for it.
+        public static readonly string LifeWord = TurnBattleOn ? "LIFE" : "BREATH";
+        public static readonly string LifeWordLower = TurnBattleOn ? "life" : "breath";
+
         //Life and Speed of the band, by family in the order of the Family enum : strings, winds, percussion.
         //Each round everybody acts once, the fastest first (winds, then strings, then percussion).
         public static int[] TurnHp = { 30, 26, 36 };
@@ -85,6 +90,25 @@
         public static float TurnBeethovenMost = 0.5f;  // THE UNHEARING's PASSIVE : up to this much harder as the band's life runs out
         public static int TurnBoltDamage = 14;         // LIGHTNING : damage to every enemy at full strength (x1)
         public static int TurnMozartRun = 3;           // THE SHADOWLESS's PASSIVE : this many PERFECTs in a row give 1 breath
+
+        //Turn Motifs (step 6) : what the 21 motifs do in the turn battle (their TurnText in Data/Motif.cs).
+        //ROSIN keeps FamilyMotifPower, STEADY PULSE keeps SteadyWindowBonus, ENCORE and PATRON'S PURSE work on the result page.
+        public static float TurnReedCaseHeal = 1.5f;      // REED CASE : wind players' healing
+        public static float TurnSpareSticksOffBeat = 1.5f;// SPARE STICKS : percussion skills' OFF-BEAT
+        public static int TurnPianissimoBreath = 1;       // PIANISSIMO : more breath for a p note parried PERFECT
+        public static int TurnBreathMarkStart = 2;        // BREATH MARK : more breath at the start of a fight
+        public static float TurnTuttiScale = 1.25f;       // TUTTI : skills that reach everyone
+        public static float TurnRubatoMiss = 0.6f;        // RUBATO : a MISS hits at this instead of TurnMiss
+        public static int TurnCrescendoStart = 1;         // CRESCENDO : stacks on every musician at the start
+        public static float TurnSforzandoScale = 1.3f;    // SFORZANDO : a PERFECT f note
+        public static float TurnOvertureScale = 2f;       // OVERTURE : the band's first hit of a fight
+        public static float TurnCounterpointScale = 2f;   // COUNTERPOINT : the COUNTER
+        public static int TurnAccelerandoShakes = 2;      // ACCELERANDO : each shake of a roll counts this many
+        public static int TurnGraceTimes = 2;             // GRACE NOTE : a spark that lands does its skill this many times
+        public static int TurnMarcatoOffBeat = 2;         // MARCATO : a PERFECT attack's OFF-BEAT, times this
+        public static int TurnConBrioNeed = 4;            // CON BRIO : PERFECTs the SIGNATURE needs instead
+        public static float TurnCodaBelow = 0.25f;        // CODA : an enemy under this share of its life
+        public static float TurnCodaScale = 1.5f;         //        takes this much more
 
         //Turn Feel (seconds) : how the battle page paces a swipe. The ring always closes at the same
         //speed, never eased, so the eye can count it (docs/research/ALPHA7_qte_parry.md).

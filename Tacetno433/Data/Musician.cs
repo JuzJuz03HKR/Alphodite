@@ -59,6 +59,10 @@ namespace Tacetno433.Data
         //RunState.Start sets it back to zero, so a new run starts clean.
         public int Rehearsed = 0;
 
+        //Life (Alpha 7) : this musician's life during THIS run, kept from one turn battle to the next.
+        //-1 means full. RunState.Start sets it back, see RunState.LifeOf.
+        public int Life = -1;
+
         //Trait : what makes them different in a duel, see MusicianTrait
         public MusicianTrait Trait = MusicianTrait.None;
         public string TraitName = "";
@@ -163,7 +167,10 @@ namespace Tacetno433.Data
         public static void ResetRehearsals()
         {
             for (int i = 0; i < All.Length; i++)
+            {
                 All[i].Rehearsed = 0;
+                All[i].Life = -1;
+            }
         }
 
         //Available In Era : how many musicians of this era are not in the band yet

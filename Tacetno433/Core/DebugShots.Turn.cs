@@ -16,7 +16,7 @@ namespace Tacetno433.Core
     //TURN BATTLE section of Data/BattleRules.cs : change a number there and update them here.
     public static partial class DebugShots
     {
-        private static void TurnCheck()
+        private static void TurnCheck(TacetGame game)
         {
             string report = "TACET TURN BATTLE CHECK\r\n";
             MusicianList.ResetRehearsals();
@@ -276,6 +276,42 @@ namespace Tacetno433.Core
             for (int i = 0; i < notes; i++) allPerfect[i] = Grade.Perfect;
             b.TakeEnemyAttack(allPerfect);
             report += Same("prodigy", Math.Min(BattleRules.TurnBreathMax, 6 + notes).ToString(), b.Breath.ToString());
+
+            //MOTIFS (step 6) : BREATH MARK starts with 5, CRESCENDO with 1 each, CON BRIO needs 4
+            List<Motif> carried = new List<Motif> { MotifList.All[(int)MotifId.BreathMark], MotifList.All[(int)MotifId.Crescendo], MotifList.All[(int)MotifId.ConBrio] };
+            b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
+            b.GiveMotifs(carried);
+            report += Same("motif start", "5 1 4", b.Breath + " " + b.Party[0].Crescendo + " " + b.SignatureNeed);
+
+            //OVERTURE doubles the first hit only (KLARA GOOD 8 -> 16, ANNA 10), RUBATO : a MISS at 0.6 (OTTO 6 x 2 x 0.6 = 7.2 -> 7)
+            b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
+            b.GiveMotifs(new List<Motif> { MotifList.All[(int)MotifId.Overture], MotifList.All[(int)MotifId.Rubato] });
+            int first = b.Attack(b.Enemies[0], Grade.Good, true);
+            int second = b.Attack(b.Enemies[0], Grade.Good, true);
+            b.TakeEnemyAttack(null);
+            int soft = b.Attack(b.Enemies[0], Grade.Miss, true);
+            report += Same("overture rubato", "16 10 7", first + " " + second + " " + soft);
+
+            //SECOND WIND : KLARA at 1 life is hit by one note and stays up with 1 (only once a fight)
+            b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433), new int[] { 30, 1, 36 });
+            b.GiveMotifs(new List<Motif> { MotifList.All[(int)MotifId.SecondWind] });
+            b.Attack(b.Enemies[0], Grade.Good, true);
+            b.Attack(b.Enemies[0], Grade.Good, true);
+            b.Current.IntentTarget = b.Party[1];
+            b.Current.IntentNotes = new int[] { 6 };
+            b.TakeEnemyAttack(null);
+            report += Same("second wind", "1", b.Party[1].Hp.ToString());
+
+            //BAND LIFE (step 6) : the run's breath numbers are the band's life, and a change hits each musician by share
+            RunState run = SampleRun(game, "turncheck");
+            run.RestoreAllStamina();
+            int max = run.MaxStamina;
+            run.ChangeStamina(-max / 2);
+            bool halved = run.Roster.Count > 0;
+            for (int i = 0; i < run.Roster.Count; i++)
+                halved = halved && run.LifeOf(run.Roster[i]) == run.MaxLifeOf(run.Roster[i]) / 2;
+            run.RestoreAllStamina();
+            report += Same("band life", "True " + max, halved + " " + run.Stamina);
 
             File.WriteAllText(Path.Combine(outDir, "turncheck.txt"), report);
         }

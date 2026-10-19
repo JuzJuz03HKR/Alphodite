@@ -130,8 +130,13 @@ namespace Tacetno433.Screens
                 if (run.Formation.Seated[s] != null) band.Add(run.Formation.Seated[s]);
             for (int i = 0; i < run.Roster.Count && band.Count == 0; i++) band.Add(run.Roster[i]);   // nobody seated : never happens in a real run
 
+            //BAND LIFE : everybody walks in with the life they left the last fight with (step 6)
+            int[] life = new int[band.Count];
+            for (int i = 0; i < band.Count; i++) life[i] = run.LifeOf(band[i]);
+
             List<Enemy> enemies = new List<Enemy> { run.Battle.Enemy };
-            battle = new TurnBattle(band, enemies, run.Floor, run.Rng);
+            battle = new TurnBattle(band, enemies, run.Floor, run.Rng, life);
+            battle.GiveMotifs(run.Motifs);                                                   // the motifs the band carries
             battle.Maestro = run.Maestro;                                                    // MAESTRO
             battle.Kit = run.Conductor.Turn;                                                 // the conductor's PASSIVE and SIGNATURE
             signatureName = run.Conductor.TurnSignatureName;
@@ -600,6 +605,12 @@ namespace Tacetno433.Screens
                     effects.SpawnPop(1050f, 568f, "+" + NumberText.Get(e.Amount), Palette.Highlight, 0.9f);
                     continue;
                 }
+                if (e.Kind == TurnEventKind.Saved && e.Who != null)
+                {
+                    Rectangle saved = BoxOf(e.Who);
+                    effects.SpawnPop(saved.Center.X, saved.Y - 60, "SECOND WIND", Palette.Highlight, 0.8f);
+                    continue;
+                }
                 if (e.Kind == TurnEventKind.Ready)
                 {
                     effects.SpawnPop(1100f, 640f, "SIGNATURE READY", Palette.Highlight, 0.7f);
@@ -651,14 +662,22 @@ namespace Tacetno433.Screens
             return f.IsEnemy ? enemyBox[f.Slot] : partyBox[f.Slot];
         }
 
-        //Fight Over : the old duel's record carries the result to the result page for now
-        //(step 6 of the design moves rewards to the turn battle)
+        //Fight Over : every musician keeps the life they end with (KNOCKED OUT gets up with 1), and the
+        //old duel's record carries the result to the result page, which hands out the rewards.
+        //Line is set so the rank reads the PERFECTs : a win is B, with 6 PERFECTs or more S.
         private void Finish()
         {
+            for (int i = 0; i < battle.Party.Count; i++)
+                run.SetLife(battle.Party[i].Musician, battle.HpAfterBattle(battle.Party[i]));
+            run.LastRounds = battle.Round;
+            run.RefreshLabels();
+
             BattleState record = run.Battle;
             record.Finished = true;
             record.PlayerWon = battle.Step == TurnStep.Won;
             record.PerfectCount = perfects;
+            record.BestCombo = battle.BestRun;
+            record.Line = record.PlayerWon ? BattleRules.LineLimit : -BattleRules.LineLimit;
             Game.Screens.Change(new ResultScreen());
             view = View.Pause;
             viewTime = -999f;                     // nothing more happens while the page fades
@@ -685,7 +704,7 @@ namespace Tacetno433.Screens
             {
                 battle.Kit = TurnKit.Beethoven;
                 signatureName = "LIGHTNING";
-                battle.Signature = BattleRules.TurnSignatureNeed;
+                battle.Signature = battle.SignatureNeed;
                 StartSignature();
                 clock = RingTime * 0.6f;
             }
@@ -1085,11 +1104,11 @@ namespace Tacetno433.Screens
             //SIGNATURE Gauge : one diamond per PERFECT. Full, it glows and SPACE plays it.
             if (battle.Kit != TurnKit.None)
             {
-                bool ready = battle.Signature >= BattleRules.TurnSignatureNeed;
+                bool ready = battle.Signature >= battle.SignatureNeed;
                 float glow = ready ? 0.6f + 0.4f * (float)Math.Sin(time * 6f) : 1f;
                 if (ready && view == View.Choose) Gfx.RectOutline(sb, signatureBox, Palette.Accent * glow, 1);
                 Gfx.TextSpaced(sb, Game.Font, signatureName, 970, 660, (ready ? Palette.Highlight : Palette.LineGrey) * glow, TextSize.Label, 3f);
-                Ui.Pips(sb, 976, 694, battle.Signature, BattleRules.TurnSignatureNeed, 7f, 22f, 1f);
+                Ui.Pips(sb, 976, 694, battle.Signature, battle.SignatureNeed, 7f, 22f, 1f);
                 if (ready) Ui.KeyChipRight(sb, "SPACE", 1232, 694, Palette.Highlight * glow);
             }
         }

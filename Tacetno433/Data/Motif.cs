@@ -47,6 +47,7 @@ namespace Tacetno433.Data
         public int Rarity = 1;            // 1 common, 2 rare, 3 treasured
         public int FromFloor = 1;         // never offered before this floor (its note is not in play yet)
         public string Text = "";
+        public string TurnText = "";      // what it does in the turn battle (Alpha 7), shown while BattleRules.TurnBattleOn
 
         //Prepared Text
         public string TextWrapped = "";   // for cards
@@ -62,54 +63,75 @@ namespace Tacetno433.Data
         {
             //Rarity 1
             new Motif { Id = MotifId.Resin,        Name = "ROSIN",         Mark = "arco", Rarity = 1,
-                        Text = "String players hit 1 harder." },
+                        Text = "String players hit 1 harder.",
+                        TurnText = "String players hit 1 harder." },
             new Motif { Id = MotifId.ReedCase,     Name = "REED CASE",     Mark = "o",    Rarity = 1,
-                        Text = "With a wind player on stage, every rest gives back 4 more breath." },
+                        Text = "With a wind player on stage, every rest gives back 4 more breath.",
+                        TurnText = "Wind players heal 50 percent more." },
             new Motif { Id = MotifId.SpareSticks,  Name = "SPARE STICKS",  Mark = "x",    Rarity = 1,
-                        Text = "Percussion players hit 30 percent harder on TACET's f notes." },
+                        Text = "Percussion players hit 30 percent harder on TACET's f notes.",
+                        TurnText = "Percussion skills fill OFF-BEAT 50 percent faster." },
             new Motif { Id = MotifId.Pianissimo,   Name = "PIANISSIMO",    Mark = "pp",   Rarity = 1,
-                        Text = "A small stroke on a p note gives back 3 breath." },
+                        Text = "A small stroke on a p note gives back 3 breath.",
+                        TurnText = "A p note parried PERFECT gives 1 more BREATH." },
             new Motif { Id = MotifId.PatronsPurse, Name = "PATRON'S PURSE", Mark = "$",   Rarity = 1,
-                        Text = "Won fights pay 30 percent more shards." },
+                        Text = "Won fights pay 30 percent more shards.",
+                        TurnText = "Won fights pay 30 percent more shards." },
 
             //Rarity 2
             new Motif { Id = MotifId.BreathMark,   Name = "BREATH MARK",   Mark = ",",    Rarity = 2,
-                        Text = "A rest gives back 15 breath instead of 12." },
+                        Text = "A rest gives back 15 breath instead of 12.",
+                        TurnText = "Every fight starts with 2 more BREATH." },
             new Motif { Id = MotifId.Tutti,        Name = "TUTTI",         Mark = "tutti", Rarity = 2,
-                        Text = "Playing together is stronger. Each extra player adds 6 percent more." },
+                        Text = "Playing together is stronger. Each extra player adds 6 percent more.",
+                        TurnText = "Skills that reach everyone are 25 percent stronger." },
             new Motif { Id = MotifId.SteadyPulse,  Name = "STEADY PULSE",  Mark = "=",    Rarity = 2,
-                        Text = "The PERFECT and GOOD timing windows are wider." },
+                        Text = "The PERFECT and GOOD timing windows are wider.",
+                        TurnText = "The PERFECT and GOOD timing windows are wider." },
             new Motif { Id = MotifId.Encore,       Name = "ENCORE",        Mark = "bis",  Rarity = 2,
-                        Text = "After a win, 15 percent more breath comes back." },
+                        Text = "After a win, 15 percent more breath comes back.",
+                        TurnText = "After a win, 15 percent more life comes back." },
             new Motif { Id = MotifId.Rubato,       Name = "RUBATO",        Mark = "rit.", Rarity = 2,
-                        Text = "A MISS costs no extra breath and loses less power." },
+                        Text = "A MISS costs no extra breath and loses less power.",
+                        TurnText = "A MISS still hits at 60 percent, not 40." },
 
             //Rarity 3
             new Motif { Id = MotifId.Crescendo,    Name = "CRESCENDO",     Mark = "<",    Rarity = 3,
-                        Text = "The COMBO bonus grows twice as fast." },
+                        Text = "The COMBO bonus grows twice as fast.",
+                        TurnText = "Every fight starts with 1 CRESCENDO on each musician." },
             new Motif { Id = MotifId.Sforzando,    Name = "SFORZANDO",     Mark = "sfz",  Rarity = 3,
-                        Text = "A big stroke on an f note hits 20 percent harder." },
+                        Text = "A big stroke on an f note hits 20 percent harder.",
+                        TurnText = "A PERFECT f note hits 30 percent harder." },
             new Motif { Id = MotifId.SecondWind,   Name = "SECOND WIND",   Mark = "V",    Rarity = 3,
-                        Text = "Once per fight, when the band would collapse, 15 percent of its breath comes back." },
+                        Text = "Once per fight, when the band would collapse, 15 percent of its breath comes back.",
+                        TurnText = "Once per fight, a musician who would fall stays up with 1 life." },
             new Motif { Id = MotifId.Overture,     Name = "OVERTURE",      Mark = "I",    Rarity = 3,
-                        Text = "The first beat of every round hits 50 percent harder." },
+                        Text = "The first beat of every round hits 50 percent harder.",
+                        TurnText = "The first hit of every fight is twice as hard." },
             new Motif { Id = MotifId.Counterpoint, Name = "COUNTERPOINT",  Mark = "+",    Rarity = 3, Initials = "CP",
-                        Text = "Against TACET's f notes, your answer hits 20 percent harder." },
+                        Text = "Against TACET's f notes, your answer hits 20 percent harder.",
+                        TurnText = "A COUNTER hits twice as hard." },
 
             //Special Notes : each bends one of the four notes or one big moment of the duel.
             //FromFloor keeps a motif away until its note has arrived (BattleRules teaching order).
             new Motif { Id = MotifId.Accelerando,  Name = "ACCELERANDO",   Mark = "accel.", Rarity = 1, FromFloor = BattleRules.TremoloFromFloor,
-                        Text = "Every shake in a TREMOLO counts twice." },
+                        Text = "Every shake in a TREMOLO counts twice.",
+                        TurnText = "Every shake in a roll counts twice." },
             new Motif { Id = MotifId.Tenuto,       Name = "TENUTO",        Mark = "-",    Rarity = 1, FromFloor = BattleRules.FermataFromFloor,
-                        Text = "A FERMATA held to the end gives back 8 breath." },
+                        Text = "A FERMATA held to the end gives back 8 breath.",
+                        TurnText = "A held note always counts as held to the end." },
             new Motif { Id = MotifId.GraceNote,    Name = "GRACE NOTE",    Mark = "gr.",  Rarity = 2, FromFloor = BattleRules.PairsFromFloor,
-                        Text = "A spark that lands on time hits three times as hard." },
+                        Text = "A spark that lands on time hits three times as hard.",
+                        TurnText = "A spark that lands does its skill twice." },
             new Motif { Id = MotifId.Marcato,      Name = "MARCATO",       Mark = "^",    Rarity = 2,
-                        Text = "A COUNTER can push the line up to 16 in one beat, not just 8." },
+                        Text = "A COUNTER can push the line up to 16 in one beat, not just 8.",
+                        TurnText = "A PERFECT attack fills OFF-BEAT twice as much." },
             new Motif { Id = MotifId.ConBrio,      Name = "CON BRIO",      Mark = "brio", Rarity = 3,
-                        Text = "FORTISSIMO lights after 6 PERFECTs in a row instead of 8." },
+                        Text = "FORTISSIMO lights after 6 PERFECTs in a row instead of 8.",
+                        TurnText = "The SIGNATURE needs 4 PERFECTs instead of 6." },
             new Motif { Id = MotifId.Coda,         Name = "CODA",          Mark = "coda", Rarity = 3,
-                        Text = "The FINALE is offered from +60 on the line instead of +80." },
+                        Text = "The FINALE is offered from +60 on the line instead of +80.",
+                        TurnText = "Enemies under a quarter of their life take 50 percent more." },
         };
 
         private static string[] rarityNames = { "", "COMMON", "RARE", "TREASURED" };
@@ -120,8 +142,9 @@ namespace Tacetno433.Data
             for (int i = 0; i < All.Length; i++)
             {
                 Motif m = All[i];
-                m.TextWrapped = Gfx.WrapText(storyFont, m.Text, cardWidth, TextSize.StorySmall, 4);
-                m.TipWrapped = Gfx.WrapText(storyFont, m.Text, tipWidth, TextSize.StorySmall);
+                string text = BattleRules.TurnBattleOn && m.TurnText.Length > 0 ? m.TurnText : m.Text;
+                m.TextWrapped = Gfx.WrapText(storyFont, text, cardWidth, TextSize.StorySmall, 4);
+                m.TipWrapped = Gfx.WrapText(storyFont, text, tipWidth, TextSize.StorySmall);
                 m.RarityLabel = rarityNames[m.Rarity];
 
                 //Initials : the first letters of the first two words, or the first two letters of one word.

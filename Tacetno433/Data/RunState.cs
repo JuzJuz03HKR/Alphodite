@@ -53,6 +53,7 @@ namespace Tacetno433.Data
         public int Shards = 0;
         public int Seats = 3;                // how many players fit on stage
         public int SeatsBoughtThisFloor = 0; // the shop will only sell two per floor
+        public int LastRounds;               // Alpha 7 : rounds the last turn battle took, for the result page
         public int Stamina = 100;
         public int MaxStamina = 100;
         public float PowerMultiplier = 1f;   // from the conductor's PUSH stat
@@ -279,19 +280,67 @@ namespace Tacetno433.Data
             if (Journey.Count > 0) Journey[Journey.Count - 1].Lost = true;
         }
 
-        //Stamina Change : always kept between zero and the maximum
+        //Stamina Change : always kept between zero and the maximum.
+        //BAND LIFE (Alpha 7) : in the turn battle the change goes to every musician's own life instead,
+        //as the same share of each one's maximum (an event's -12 out of a band of 92 is -13 percent each).
+        //Nobody drops below 1 outside a fight.
         public void ChangeStamina(int amount)
         {
+            if (BattleRules.TurnBattleOn)
+            {
+                SyncBandLife();
+                float share = MaxStamina > 0 ? amount / (float)MaxStamina : 0f;
+                for (int i = 0; i < Roster.Count; i++)
+                {
+                    Musician m = Roster[i];
+                    SetLife(m, LifeOf(m) + (int)Math.Round(share * MaxLifeOf(m)));
+                }
+                RefreshLabels();
+                return;
+            }
+
             Stamina += amount;
             if (Stamina < 0) Stamina = 0;
             if (Stamina > MaxStamina) Stamina = MaxStamina;
-            StaminaLabel = "BREATH  " + Stamina + " / " + MaxStamina;
-            StaminaValue = Stamina + " / " + MaxStamina;
+            RefreshLabels();
         }
 
         public void RestoreAllStamina()
         {
             ChangeStamina(MaxStamina);
+        }
+
+        //BAND LIFE (Alpha 7) : each musician's life between fights, -1 on the musician means full
+        public int MaxLifeOf(Musician m)
+        {
+            return BattleRules.TurnHp[(int)m.Family];
+        }
+
+        public int LifeOf(Musician m)
+        {
+            int max = MaxLifeOf(m);
+            return m.Life < 0 ? max : Math.Min(m.Life, max);
+        }
+
+        public void SetLife(Musician m, int life)
+        {
+            int max = MaxLifeOf(m);
+            m.Life = Math.Max(1, Math.Min(max, life));
+        }
+
+        //Sync Band Life : the run's breath numbers hold the whole band's life added up, so the run bar,
+        //the shop and the rest room read it like they read breath
+        private void SyncBandLife()
+        {
+            if (!BattleRules.TurnBattleOn) return;
+            Stamina = 0;
+            MaxStamina = 0;
+            for (int i = 0; i < Roster.Count; i++)
+            {
+                Stamina += LifeOf(Roster[i]);
+                MaxStamina += MaxLifeOf(Roster[i]);
+            }
+            if (MaxStamina == 0) MaxStamina = 1;          // before anybody has joined
         }
 
         //Shards : SpendShards returns false and changes nothing when there is not enough
@@ -377,7 +426,8 @@ namespace Tacetno433.Data
             ShardsLabel = "SHARDS  " + Shards;
             SeatsLabel = "SEATS  " + Formation.SeatedCount + " / " + Seats;
             SeatsValue = Formation.SeatedCount + " / " + Seats;
-            StaminaLabel = "BREATH  " + Stamina + " / " + MaxStamina;
+            SyncBandLife();
+            StaminaLabel = BattleRules.LifeWord + "  " + Stamina + " / " + MaxStamina;
             StaminaValue = Stamina + " / " + MaxStamina;
             RosterLabel = "ENSEMBLE  " + Roster.Count + " / " + RosterCapacity;
             MotifsLabel = "MOTIFS  " + Motifs.Count;

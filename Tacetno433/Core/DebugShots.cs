@@ -121,7 +121,7 @@ namespace Tacetno433.Core
             //Turn Check (Alpha 7) : scripted turn battles, one PASS or FAIL line per rule (DebugShots.Turn.cs)
             if (names[0] == "turncheck")
             {
-                TurnCheck();
+                TurnCheck(game);
                 game.Exit();
                 return;
             }
@@ -322,6 +322,8 @@ namespace Tacetno433.Core
             run.Chosen = run.Options[1];
             run.CurrentEvent = EventList.All[2];
             run.Maestro = true;                                                         // MAESTRO MODE is kept too
+            run.Roster[0].Life = 7;                                                     // Alpha 7 : life between turn battles
+            run.RefreshLabels();
             SaveFile.SaveRun(run);
 
             RunState back = SaveFile.LoadRun(game);
@@ -341,6 +343,7 @@ namespace Tacetno433.Core
                 report += Same("record", run.BattlesWon + "/" + run.PerfectsTotal + "/" + run.BestCombo, back.BattlesWon + "/" + back.PerfectsTotal + "/" + back.BestCombo);
                 report += Same("roster", Names(run), Names(back));
                 report += Same("rehearsed", run.Roster[0].Rehearsed + "/" + run.Roster[1].Rehearsed, back.Roster[0].Rehearsed + "/" + back.Roster[1].Rehearsed);
+                report += Same("life", "7", back.Roster[0].Life.ToString());
                 report += Same("seats", Seats(run), Seats(back));
                 report += Same("motifs", run.Motifs.Count + (run.Motifs.Count > 0 ? run.Motifs[0].Name : ""), back.Motifs.Count + (back.Motifs.Count > 0 ? back.Motifs[0].Name : ""));
                 report += Same("journey", run.Journey.Count + "/" + run.Journey[run.Journey.Count - 1].Type, back.Journey.Count + "/" + back.Journey[back.Journey.Count - 1].Type);

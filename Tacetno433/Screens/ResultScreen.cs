@@ -104,7 +104,8 @@ namespace Tacetno433.Screens
             statNames[0] = "PERFECT BEATS";    statValues[0] = NumberText.Get(battle.PerfectCount);
             statNames[1] = "BEST COMBO";       statValues[1] = NumberText.Get(battle.BestCombo);
             statNames[2] = "FINAL LINE";       statValues[2] = NumberText.Signed((int)battle.Line);
-            statNames[3] = "BREATH BACK";     statValues[3] = NumberText.Signed(recovered);
+            if (BattleRules.TurnBattleOn) { statNames[2] = "ROUNDS"; statValues[2] = NumberText.Get(run.LastRounds); }   // TURN BATTLE
+            statNames[3] = BattleRules.LifeWord + " BACK";     statValues[3] = NumberText.Signed(recovered);
             statNames[4] = "SHARDS";           statValues[4] = NumberText.Signed(shards);
             statCount = 5;
 
@@ -125,6 +126,7 @@ namespace Tacetno433.Screens
             statNames[1] = "CONDUCTOR";     statValues[1] = run.Conductor.Name;
             statNames[2] = "REACHED";       statValues[2] = run.StageLabel + "  /  FLOOR " + run.Floor;
             statNames[3] = "FINAL LINE";    statValues[3] = NumberText.Signed((int)battle.Line);
+            if (BattleRules.TurnBattleOn) { statNames[3] = "ROUNDS"; statValues[3] = NumberText.Get(run.LastRounds); }   // TURN BATTLE
             statCount = 4;
 
             footnote = battle.Collapsed ? "OUT OF BREATH  -  THE RUN ENDS HERE" : "THE RUN ENDS HERE";
@@ -319,7 +321,7 @@ namespace Tacetno433.Screens
             Gfx.TextSpacedCentered(sb, Game.Font, enemyLine, cx, 200, soft * e, TextSize.Label, 4f);
             Ornament.Divider(sb, cx, 230, 200, soft * e);
 
-            DrawSheet(sb, Game.CurrentRun.Battle, ink, soft, won, e);
+            if (!BattleRules.TurnBattleOn) DrawSheet(sb, Game.CurrentRun.Battle, ink, soft, won, e);   // the turn battle has no beats to show
 
             //Rank : a letter in a diamond, under the performance
             if (won)

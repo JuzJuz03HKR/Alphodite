@@ -138,6 +138,10 @@ namespace Tacetno433.Data
             for (int i = 0; i < MusicianList.All.Length; i++) rehearsed.Add(MusicianList.All[i].Rehearsed.ToString());
             lines.Add("rehearsed=" + string.Join(",", rehearsed));
 
+            List<string> life = new List<string>();
+            for (int i = 0; i < MusicianList.All.Length; i++) life.Add(MusicianList.All[i].Life.ToString());
+            lines.Add("life=" + string.Join(",", life));      // Alpha 7 : each musician's life between turn battles, -1 full
+
             //Seated : one entry per seat. Round 12 dropped the beat plan, an old save's plan= line is ignored.
             List<string> seated = new List<string>();
             for (int s = 0; s < StageLayout.SeatCount; s++)
@@ -208,6 +212,10 @@ namespace Tacetno433.Data
             int[] rehearsed = GetList(v, "rehearsed");
             for (int i = 0; i < rehearsed.Length && i < MusicianList.All.Length; i++)
                 MusicianList.All[i].Rehearsed = rehearsed[i];
+
+            int[] life = GetList(v, "life");                   // a save from before Alpha 7 has none : everybody full
+            for (int i = 0; i < MusicianList.All.Length; i++)
+                MusicianList.All[i].Life = i < life.Length ? life[i] : -1;
 
             int[] seated = GetList(v, "seated");
             for (int s = 0; s < StageLayout.SeatCount && s < seated.Length; s++)
