@@ -108,6 +108,13 @@ namespace Tacetno433.Core
             Gfx.TextCentered(sb, font, "tr", cx, cy - 2f * grow, Palette.Highlight * alpha, TextSize.Small * 0.8f * grow);
         }
 
+        //Shape Note : a stroke of the conductor's 4/4 SIGNATURE, a ring with an arrow and no mark, any size will do
+        public static void ShapeNote(SpriteBatch sb, float cx, float cy, Flick way, float grow, float alpha)
+        {
+            Hollow.Ring(sb, cx, cy, noteRadius[1] * grow, noteThick[2] * grow, alpha);
+            Arrow(sb, way, cx, cy, 26f * grow, 12f * grow, Palette.Highlight * alpha, 3f * grow);
+        }
+
         //Way : one step in the way a stroke goes, (0, 0) for none
         public static Vector2 Way(Flick dir)
         {

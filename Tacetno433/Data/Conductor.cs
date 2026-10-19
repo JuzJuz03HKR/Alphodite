@@ -28,6 +28,9 @@ namespace Tacetno433.Data
         VillageBand      // THE FOLK LEADER every stroke brings the whole band, and pays as a middle one
     }
 
+    //TurnKit : whose PASSIVE and SIGNATURE the turn battle plays (Alpha 7, step 5). None plays without.
+    public enum TurnKit { None, Beethoven, Mozart }
+
     //Conductor : one playable class. Everything shown on the select pages comes from these fields.
     public class Conductor
     {
@@ -63,6 +66,14 @@ namespace Tacetno433.Data
         //Conductor Unlock
         public bool Unlocked = true;
         public string UnlockHint = "";
+
+        //Turn Battle (Alpha 7) : the kit this conductor plays in the turn battle, and its words.
+        //While BattleRules.TurnBattleOn, PrepareText shows these instead of the duel's PASSIVE and SIGNATURE.
+        public TurnKit Turn = TurnKit.None;
+        public string TurnPassiveName = "";
+        public string TurnPassiveText = "";
+        public string TurnSignatureName = "";
+        public string TurnSignatureText = "";
 
         //Conductor Prepared Text : built ONCE at startup by PrepareText below.
         //Wrapping and joining strings inside Draw would make new strings 60 times a
@@ -180,6 +191,11 @@ namespace Tacetno433.Data
                 SignatureText = "4 strokes : TACET's blows take no breath.",
                 SignatureCall = "* DEAF EARS! Four strokes, TACET's blows take no breath.",
                 Recipe = new int[] { 3, 3, 0 },     // the strings carry it
+                Turn = TurnKit.Beethoven,
+                TurnPassiveName = "THE CLOSER THE LOUDER",
+                TurnPassiveText = "The less life the band has left, the harder it hits, up to 50 percent.",
+                TurnSignatureName = "LIGHTNING",
+                TurnSignatureText = "The 4/4 shape : strikes every enemy and throws it OFF-BEAT. Better strokes, bigger strike.",
                 Stamina = 5, PushPower = 3, Perk = ConductorPerk.CloserLouder, Move = SignatureMove.DeafEars,
                                                                                      // round 10 : push 3 -> 4, perk up to 130 percent.
                                                                                      // Round 12.2 : rests breathe deeper when behind too.
@@ -214,6 +230,34 @@ namespace Tacetno433.Data
                 ThemeColor = Palette.ToneE,
                 Unlocked = true
             },
+
+            //Conductor 6 : Alpha 7, the second of the six from the lore (W. A. Mozart). His Hollow has no
+            //right arm and no shadow, his baton is a feather (USER_BRIEFS 3). The name and the lines are
+            //placeholders until the story is written. No art yet : the painting is an empty frame.
+            new Conductor
+            {
+                Name = "THE SHADOWLESS",
+                BasedOn = "W. A. MOZART",
+                Role = "TEMPO",
+                Epithet = "He wrote as fast as other people breathe.",
+                Story = "A prodigy who never stopped writing. Something took his right hand and his shadow. "
+                      + "He conducts with a feather now, and the band moves twice.",
+                MechanicName = "PRODIGY",
+                MechanicText = "3 PERFECTs in a row give 1 breath back.",
+                SignatureMark = "Presto",
+                SignatureName = "FEATHER",
+                SignatureText = "The 4/4 shape : one extra turn for a musician per stroke that lands.",
+                SignatureCall = "* FEATHER! Everybody moves again.",
+                Recipe = new int[] { 2, 2, 2 },
+                Stamina = 5, PushPower = 5, Perk = ConductorPerk.None, Move = SignatureMove.AbsolutePitch,   // the old duel plays him plain
+                Turn = TurnKit.Mozart,
+                TurnPassiveName = "PRODIGY",
+                TurnPassiveText = "3 PERFECTs in a row give 1 BREATH back.",
+                TurnSignatureName = "FEATHER",
+                TurnSignatureText = "The 4/4 shape : one extra turn for a musician per stroke that lands.",
+                ThemeColor = Palette.ToneB,
+                Unlocked = true
+            },
         };
 
         //Text Prepare : called once from LoadContent after the font exists.
@@ -224,6 +268,16 @@ namespace Tacetno433.Data
             for (int i = 0; i < All.Length; i++)
             {
                 Conductor c = All[i];
+
+                //Turn Battle : the kit's words replace the duel's on every page
+                if (BattleRules.TurnBattleOn && c.Turn != TurnKit.None)
+                {
+                    c.MechanicName = c.TurnPassiveName;
+                    c.MechanicText = c.TurnPassiveText;
+                    c.SignatureName = c.TurnSignatureName;
+                    c.SignatureText = c.TurnSignatureText;
+                }
+
                 c.BasedOnLabel = "BASED ON " + c.BasedOn;
                 c.StoryWrapped = Gfx.WrapText(font, c.Story, wrapWidth, scale);
                 c.MechanicWrapped = Gfx.WrapText(font, c.MechanicText, wrapWidth, scale);

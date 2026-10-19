@@ -230,6 +230,53 @@ namespace Tacetno433.Core
             //ROLL : 5 shakes PERFECT, 3 GOOD, fewer a MISS, none at all a HESITATE (NORMAL)
             report += Same("roll", "Perfect Good Miss Hesitate", b.RollGrade(5) + " " + b.RollGrade(3) + " " + b.RollGrade(1) + " " + b.RollGrade(0));
 
+            //CONDUCTOR (step 5) : a conductor with no kit has no gauge, a PERFECT attack fills one diamond
+            b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
+            b.Attack(b.Enemies[0], Grade.Perfect, true);
+            report += Same("no kit", "0 False", b.Signature + " " + b.CanSignature);
+            b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
+            b.Kit = TurnKit.Beethoven;
+            b.Attack(b.Enemies[0], Grade.Perfect, true);
+            b.Attack(b.Enemies[0], Grade.Good, true);
+            notes = b.Current.IntentNotes.Length;
+            allPerfect = new Grade[notes];
+            for (int i = 0; i < notes; i++) allPerfect[i] = Grade.Perfect;
+            b.TakeEnemyAttack(allPerfect);
+            report += Same("signature fill", (1 + notes).ToString(), b.Signature.ToString());
+
+            //THE CLOSER THE LOUDER : the band at half its life hits x1.25 (KLARA GOOD 4 x 2 x 1.25 = 10)
+            b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433), new int[] { 15, 13, 18 });
+            b.Kit = TurnKit.Beethoven;
+            report += Same("beethoven", "10", b.Attack(b.Enemies[0], Grade.Good, true).ToString());
+
+            //LIGHTNING : all four PERFECT, strength 1.3 : 14 x 1.3 = 18.2 -> 18 to HUSH, thrown OFF-BEAT, KLARA still up
+            b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
+            b.Kit = TurnKit.Beethoven;
+            b.Signature = BattleRules.TurnSignatureNeed;
+            NoteResult[] four = { new NoteResult(Grade.Perfect, true, 1f), new NoteResult(Grade.Perfect, true, 1f),
+                                  new NoteResult(Grade.Perfect, true, 1f), new NoteResult(Grade.Perfect, true, 1f) };
+            bool played = b.UseSignature(four);
+            report += Same("lightning", "True 32 True PlayerTurn KLARA 0", played + " " + b.Enemies[0].Hp + " " + b.Enemies[0].Staggered + " " + b.Step + " " + b.Current.Name + " " + b.Signature);
+
+            //FEATHER : 3 strokes land, so ANNA, KLARA and OTTO each get an extra turn right after KLARA
+            b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
+            b.Kit = TurnKit.Mozart;
+            b.Signature = BattleRules.TurnSignatureNeed;
+            b.UseSignature(new NoteResult[] { new NoteResult(Grade.Perfect, true, 1f), new NoteResult(Grade.Good, true, 1f),
+                                              new NoteResult(Grade.Miss, true, 1f), new NoteResult(Grade.Perfect, true, 1f) });
+            report += Same("feather", "KLARA ANNA KLARA OTTO ANNA HUSH OTTO", OrderNames(b));
+
+            //PRODIGY : the third PERFECT in a row gives 1 breath (KLARA, ANNA, then the first parry)
+            b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
+            b.Kit = TurnKit.Mozart;
+            b.Attack(b.Enemies[0], Grade.Perfect, true);
+            b.Attack(b.Enemies[0], Grade.Perfect, true);
+            notes = b.Current.IntentNotes.Length;
+            allPerfect = new Grade[notes];
+            for (int i = 0; i < notes; i++) allPerfect[i] = Grade.Perfect;
+            b.TakeEnemyAttack(allPerfect);
+            report += Same("prodigy", Math.Min(BattleRules.TurnBreathMax, 6 + notes).ToString(), b.Breath.ToString());
+
             File.WriteAllText(Path.Combine(outDir, "turncheck.txt"), report);
         }
 

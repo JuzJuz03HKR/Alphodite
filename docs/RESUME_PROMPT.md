@@ -60,7 +60,10 @@ commit/push ขึ้น Alpha7 เมื่อฉันสั่ง ยัง�
 
 ---
 
-## สถานะล่าสุด (18 ต.ค.)
+## สถานะล่าสุด (19 ต.ค.)
+
+**19 ต.ค. : ขั้น 5 เสร็จ (ร่างแรก)** : เกจ SIGNATURE + SPACE ท่า 4/4 · THE UNHEARING = Beethoven (PASSIVE ยิ่งเลือดน้อยยิ่งแรง · LIGHTNING) · **THE SHADOWLESS = Mozart คนใหม่** ต่อท้าย `ConductorList` (PRODIGY · FEATHER ตาเพิ่ม) · ตัวสลับ `BattleRules.TurnBattleOn` (ย้ายจาก RunFlow) · turncheck 48/48 · savecheck 20/20 · build Linux 0/0 · ภาพ `--shots battlesig@2` · รายละเอียดข้อ 5.9 ของ `ALPHA7_DESIGN.md` ·
+**งานถัดไป** : ขั้น 6 ต่อโครงรัน (เลือดข้ามการต่อสู้ + เซฟ · รางวัลหลังชนะ สกิล/ของ/นักดนตรี · หน้าผลใหม่ · ร้าน พัก เหตุการณ์ให้เข้ากับเลือด/ลม · Motif 21 ใบเขียนผลใหม่) · ค้าง : ความสามารถติดตัว 9 คน · `TACET_Balance.xlsx` · วาทยากรเดิม 4 คนไม่มีท่าในการต่อสู้ใหม่
 
 **18 ต.ค. (แชท /system) : ผู้ใช้ตอบข้อ 11 ข้อ 1–6 + ส่งภาพแชทเรื่องทิศทางเกม** (อ่านรายการนี้ก่อน)
 ✅ `/system` ใช้จริงครั้งแรก : git ตรงกับ GitHub · skill 30 ตัวครบ · Context7 ใช้ได้แล้ว (ตอนแรกได้ `Monthly quota exceeded` ผู้ใช้ใส่ API key ใน environment แล้วเรียกได้ปกติ ถ้าสร้าง environment ใหม่ต้องใส่ key อีกครั้ง) ·
@@ -68,7 +71,7 @@ commit/push ขึ้น Alpha7 เมื่อฉันสั่ง ยัง�
 ✅ ข้อ 7–10 ตอบแล้ว (ฉบับ 0.4) : **ดนตรีเป็นแค่ธีม** ศัตรูตีแสดงเป็นโน้ตแต่ไม่ผูกเพลงจริง สกิลไม่เล่นทำนอง ตอนตีมีเสียงเฉพาะของอาวุธ (เสียงยังปิด) · QTE วงแหวนจับเวลา · **อัปเกรดหลังรัน = ข้อ 10 ขั้น 7** (ลำดับงานเป็น 11 ขั้นแล้ว) · UI ขาวดำ + สีเน้น อาร์ตทีมตัดสิน · ให้ใช้ skill UX/UI VFX และแนวคิดเกมชั้นนำ (ข้อ 13 ของเอกสาร) ·
 ⚠️ workflow แรกใช้ Opus xhigh ทุก agent กิน token มาก (ผู้ใช้ทักว่าไป 45% แล้ว) → หยุด เก็บผลค้น 2 ชุดไว้ `docs/research/` · กติกาเลือก model อยู่ CLAUDE.md ข้อ 0 · ย้ายประวัติเกม rhythm ไป `docs/ALPHA6_HISTORY.md` (CLAUDE.md 58 → 25 KB) ·
 ✅ **ขั้น 1 เสร็จ (ทำในแชทหลัก ไม่ใช้ agent)** : `Battle/TurnBattle.cs` (ลำดับตาทีละรอบตามความเร็ว · เลือด · โจมตีตามเกรดตวัด · ศัตรูประกาศเป้า/โน้ตล่วงหน้า · ปัด PERFECT/GOOD/MISS · ลมร่วม · ล้มแล้วฟื้นเลือด 1 · ชนะ/แพ้ · ศัตรูหลายตัว) + `BattleRules` หัวข้อ TURN BATTLE + `--shots turncheck` (`Core/DebugShots.Turn.cs`) ผ่าน 26/26 · build Linux 0 error 0 warning · savecheck 20/20 · ยังไม่มีหน้าจอ เกมที่เล่นได้ยังเป็นดวลเดิม ·
-✅ **ขั้น 2 เสร็จ (ทำในแชทหลัก ไม่ใช้ agent)** : `Screens/BattleScreen.cs` หน้าต่อสู้ใหม่ เลือกเป้า → ตวัดโจมตีที่จุดกลาง → ศัตรูยิงโน้ต → ตวัดปัด · ต่อเข้ารันแล้ว (`RunFlow.FightScreen`, สวิตช์ `RunFlow.TurnBattleOn`) · `NoteGlyph.Note` วาดโน้ตทั้งตัวที่เดียว · `TurnBattle` เพิ่ม ParryNote / Judge / ATTACK PART · turncheck 30/30 · build Linux 0/0 · ภาพ `--shots battle battleswing@2 battleparry@8` · สิ่งที่ตัดสินเองและที่ยังไม่ทำอยู่ `ALPHA7_DESIGN.md` ข้อ 13 ·
+✅ **ขั้น 2 เสร็จ (ทำในแชทหลัก ไม่ใช้ agent)** : `Screens/BattleScreen.cs` หน้าต่อสู้ใหม่ เลือกเป้า → ตวัดโจมตีที่จุดกลาง → ศัตรูยิงโน้ต → ตวัดปัด · ต่อเข้ารันแล้ว (`RunFlow.FightScreen`, สวิตช์ `BattleRules.TurnBattleOn`) · `NoteGlyph.Note` วาดโน้ตทั้งตัวที่เดียว · `TurnBattle` เพิ่ม ParryNote / Judge / ATTACK PART · turncheck 30/30 · build Linux 0/0 · ภาพ `--shots battle battleswing@2 battleparry@8` · สิ่งที่ตัดสินเองและที่ยังไม่ทำอยู่ `ALPHA7_DESIGN.md` ข้อ 13 ·
 ✅ **ขั้น 3–4 เสร็จ (ร่างแรก)** : COUNTER · CADENZA · เสียศูนย์ · DISSONANCE / CRESCENDO / MUTE · GUARD / TAUNT · สกิล 18 สกิล `Data/Skill.cs` (ตารางใน `ALPHA7_DESIGN.md` ข้อ 5.10) · หน้าต่อสู้มีปุ่ม ATTACK + สกิล 2 ปุ่ม (1 2 3) เลือกเป้าศัตรู/นักดนตรี โน้ต 4 ชนิด (ตวัด ประกาย ค้าง รัว) ป้ายสถานะ เกจเสียศูนย์ · `TurnBattle` ส่ง Events ให้หน้าจอแสดงตัวเลข/คำ · turncheck 42/42 · savecheck 20/20 · build Linux 0/0 · ภาพ `--shots battlestatus battleskill@2` ·
 **งานถัดไป** : ผู้ใช้ Rebuild แล้วลองเล่นบน Windows (สกิลยังไม่ได้จูน) · ความสามารถติดตัว 9 คน · ขั้น 5 วาทยากร Beethoven + Mozart (ออกแบบ PASSIVE / SIGNATURE ให้ผู้ใช้ดูก่อน) · `TACET_Balance.xlsx` ยังไม่ได้เพิ่มค่า TURN BATTLE
 

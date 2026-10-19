@@ -61,13 +61,11 @@ namespace Tacetno433.Screens
             SaveFile.SaveRun(run);
         }
 
-        //TURN BATTLE (Alpha 7) : fights open the new turn based battle page. Set this to false to
-        //play the old rhythm duel again while the new one is still being built.
-        public static bool TurnBattleOn = true;
-
+        //TURN BATTLE (Alpha 7) : fights open the new turn based battle page. BattleRules.TurnBattleOn
+        //set to false plays the old rhythm duel again while the new one is still being built.
         public static GameScreen FightScreen()
         {
-            if (TurnBattleOn) return new BattleScreen();
+            if (BattleRules.TurnBattleOn) return new BattleScreen();
             return new DuelScreen();
         }
 

@@ -12,7 +12,8 @@ namespace Tacetno433.Screens
 {
     //BattleScreen : the turn based fight (Alpha 7, steps 2 to 4 of docs/ALPHA7_DESIGN.md).
     //The rules live in Battle/TurnBattle.cs. This page only shows them and reads the baton.
-    //   CHOOSE  a musician is up : click an enemy to attack it, or pick ATTACK or a skill (1, 2, 3)
+    //   CHOOSE  a musician is up : click an enemy to attack it, or pick ATTACK or a skill (1, 2, 3).
+    //           SPACE plays the conductor's SIGNATURE once its gauge is full (step 5, costs no turn)
     //   TARGET  a skill waits for its enemy or musician to be clicked (right click goes back)
     //   SWIPE   the notes of the attack, the skill or the enemy's attack, one after another
     //   PAUSE   a short breath after a turn, so the result can be read
@@ -24,7 +25,7 @@ namespace Tacetno433.Screens
     public class BattleScreen : GameScreen
     {
         private enum View { Choose, Target, Swipe, Pause, Over }
-        private enum SwipeFor { Attack, Skill, Parry }
+        private enum SwipeFor { Attack, Skill, Parry, Signature }
 
         //Layout
         private const float HitX = 640f;
@@ -44,6 +45,7 @@ namespace Tacetno433.Screens
             new Rectangle(740, 600, 200, 60),
         };
         private static readonly string[] commandKey = { "1", "2", "3" };
+        private static readonly Rectangle signatureBox = new Rectangle(960, 652, 280, 56);
 
         private RunState run;
         private TurnBattle battle;
@@ -102,6 +104,7 @@ namespace Tacetno433.Screens
         private string judgeWord = "";
         private float judgeLife;
         private string bannerText = "";
+        private string signatureName = "";
 
         private const string HintChoose = "CLICK AN ENEMY TO ATTACK, OR PICK A SKILL";
         private const string HintEnemy = "CLICK AN ENEMY   /   RIGHT CLICK = BACK";
@@ -130,6 +133,8 @@ namespace Tacetno433.Screens
             List<Enemy> enemies = new List<Enemy> { run.Battle.Enemy };
             battle = new TurnBattle(band, enemies, run.Floor, run.Rng);
             battle.Maestro = run.Maestro;                                                    // MAESTRO
+            battle.Kit = run.Conductor.Turn;                                                 // the conductor's PASSIVE and SIGNATURE
+            signatureName = run.Conductor.TurnSignatureName;
 
             partyBox = new Rectangle[battle.Party.Count];
             for (int i = 0; i < partyBox.Length; i++)
@@ -267,6 +272,13 @@ namespace Tacetno433.Screens
 
             if (hover != null && Input.MouseClicked()) { StartAttack(hover); return; }
 
+            //SIGNATURE : SPACE, or a click on the gauge
+            if (battle.CanSignature && (Input.KeyPressed(Keys.Space) || Input.ClickedOn(signatureBox)))
+            {
+                StartSignature();
+                return;
+            }
+
             if (Input.ClickedOn(commandBox[0]) || Input.KeyPressed(Keys.D1) || Input.KeyPressed(Keys.NumPad1))
             {
                 if (StandingEnemies() == 1) StartAttack(FirstStanding());
@@ -367,6 +379,14 @@ namespace Tacetno433.Screens
             BeginSwipe(SwipeFor.Skill, s, target);
         }
 
+        //Signature : the 4/4 shape, any size (Size -1)
+        private void StartSignature()
+        {
+            notes.Clear();
+            for (int i = 0; i < TurnBattle.SignatureShape.Length; i++) AddNote(NoteKind.Swipe, TurnBattle.SignatureShape[i], -1);
+            BeginSwipe(SwipeFor.Signature, null, null);
+        }
+
         //Parry : the enemy's notes fly in one by one
         private void StartParry()
         {
@@ -449,7 +469,7 @@ namespace Tacetno433.Screens
 
                 bool spark = n.Kind == NoteKind.Spark;                // a spark takes any way and any size
                 Grade grade = battle.Judge(offset, spark || gesture.Direction == n.Way);
-                bool rightSize = spark || Baton.SizeOf(gesture.Length) == n.Size;
+                bool rightSize = spark || n.Size < 0 || Baton.SizeOf(gesture.Length) == n.Size;
                 if (swipeFor == SwipeFor.Parry && grade == Grade.Perfect && !rightSize) grade = Grade.Good;   // the wrong size only half blocks
 
                 baton.Whip(gesture.Direction);
@@ -550,6 +570,15 @@ namespace Tacetno433.Screens
         {
             if (swipeFor == SwipeFor.Attack) battle.Attack(swipeTarget, results[0].Grade, results[0].RightSize);
             else if (swipeFor == SwipeFor.Skill) battle.UseSkill(swipeSkill, swipeTarget, results);
+            else if (swipeFor == SwipeFor.Signature)
+            {
+                //SIGNATURE : the conductor's name for it fills the screen for a moment
+                battle.UseSignature(results);
+                judgeWord = signatureName;
+                judgeLife = 1.6f;
+                effects.SpawnFlare(HitX, HitY, 1f);
+                shake = 0.8f;
+            }
             else battle.FinishEnemyTurn();
 
             ShowEvents();
@@ -569,6 +598,16 @@ namespace Tacetno433.Screens
                 if (e.Kind == TurnEventKind.Breath)
                 {
                     effects.SpawnPop(1050f, 568f, "+" + NumberText.Get(e.Amount), Palette.Highlight, 0.9f);
+                    continue;
+                }
+                if (e.Kind == TurnEventKind.Ready)
+                {
+                    effects.SpawnPop(1100f, 640f, "SIGNATURE READY", Palette.Highlight, 0.7f);
+                    continue;
+                }
+                if (e.Kind == TurnEventKind.Extra)
+                {
+                    effects.SpawnPop(HitX, HitY - 60f, "+" + NumberText.Get(e.Amount) + " TURNS", Palette.Highlight, 0.9f);
                     continue;
                 }
                 if (e.Who == null || e.Kind == TurnEventKind.Down) continue;
@@ -640,6 +679,14 @@ namespace Tacetno433.Screens
                 Skill s = SkillList.First(battle.Current.Musician);
                 Fighter target = s.HitsEnemy ? FirstStanding() : battle.Current;
                 StartSkill(s, target);
+                clock = RingTime * 0.6f;
+            }
+            else if (name == "battlesig")
+            {
+                battle.Kit = TurnKit.Beethoven;
+                signatureName = "LIGHTNING";
+                battle.Signature = BattleRules.TurnSignatureNeed;
+                StartSignature();
                 clock = RingTime * 0.6f;
             }
             else if (name == "battleparry")
@@ -936,7 +983,8 @@ namespace Tacetno433.Screens
         //Glyph : one note of any kind, see NoteGlyph
         private void DrawGlyph(SpriteBatch sb, QteNote n, float x, float y, float grow, float a)
         {
-            if (n.Kind == NoteKind.Spark) NoteGlyph.Spark(sb, x, y, 14f * grow, Palette.Highlight * a);
+            if (n.Size < 0) NoteGlyph.ShapeNote(sb, x, y, n.Way, grow, a);                    // a SIGNATURE stroke
+            else if (n.Kind == NoteKind.Spark) NoteGlyph.Spark(sb, x, y, 14f * grow, Palette.Highlight * a);
             else if (n.Kind == NoteKind.Roll) NoteGlyph.RollNote(sb, Game.BigFont, x, y, grow, a);
             else
             {
@@ -985,7 +1033,7 @@ namespace Tacetno433.Screens
             Vector2 d = NoteGlyph.Way(n.Way);
             Vector2 anchor = gesture.InStroke ? gesture.StrokeStart : Input.MousePos;
             float along = Vector2.Dot(gesture.LiveVector, d);
-            Baton.DrawRuler(sb, anchor, d, along, gesture.InStroke ? Baton.SizeOf(along) : -1, true);
+            Baton.DrawRuler(sb, anchor, d, along, gesture.InStroke ? Baton.SizeOf(along) : -1, n.Size >= 0);
         }
 
         //Bottom Bar : who is up, the commands, a line about the skill under the pointer, and BREATH
@@ -1021,6 +1069,7 @@ namespace Tacetno433.Screens
             else if (view == View.Swipe)
             {
                 if (swipeFor == SwipeFor.Parry && f != null) Gfx.TextSpaced(sb, Game.BigFont, f.Name, 40, 600, Palette.Paper, TextSize.Subtitle, 3f);
+                else if (swipeFor == SwipeFor.Signature) Gfx.TextSpaced(sb, Game.BigFont, signatureName, 40, 600, Palette.Highlight, TextSize.Subtitle, 3f);
                 else if (swipeSkill != null) Gfx.TextSpaced(sb, Game.BigFont, swipeSkill.Name, 40, 600, Palette.Highlight, TextSize.Subtitle, 3f);
 
                 string line = swipeFor == SwipeFor.Parry ? HintParry : HintSwing;
@@ -1032,6 +1081,17 @@ namespace Tacetno433.Screens
             Gfx.TextSpaced(sb, Game.Font, "BREATH", 970, 596, Palette.LineGrey, TextSize.Label, 3f);
             Ui.Pips(sb, 976, 636, battle.Breath, BattleRules.TurnBreathMax, 8f, 22f, 1f);
             Gfx.Text(sb, Game.BigFont, NumberText.Get(battle.Breath), 1196, 620, Palette.Highlight, TextSize.Small);
+
+            //SIGNATURE Gauge : one diamond per PERFECT. Full, it glows and SPACE plays it.
+            if (battle.Kit != TurnKit.None)
+            {
+                bool ready = battle.Signature >= BattleRules.TurnSignatureNeed;
+                float glow = ready ? 0.6f + 0.4f * (float)Math.Sin(time * 6f) : 1f;
+                if (ready && view == View.Choose) Gfx.RectOutline(sb, signatureBox, Palette.Accent * glow, 1);
+                Gfx.TextSpaced(sb, Game.Font, signatureName, 970, 660, (ready ? Palette.Highlight : Palette.LineGrey) * glow, TextSize.Label, 3f);
+                Ui.Pips(sb, 976, 694, battle.Signature, BattleRules.TurnSignatureNeed, 7f, 22f, 1f);
+                if (ready) Ui.KeyChipRight(sb, "SPACE", 1232, 694, Palette.Highlight * glow);
+            }
         }
     }
 }

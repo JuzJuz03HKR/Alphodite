@@ -13,7 +13,7 @@ namespace Tacetno433.Battle
 
     //TurnEventKind : something that happened, kept so the screen can show it (numbers, words, sparks).
     //The rules never draw, they only write down what happened (docs/research/ALPHA7_battle_ui.md).
-    public enum TurnEventKind { Damage, Heal, Breath, Dissonance, Crescendo, Mute, Break, Skip, Counter, Down }
+    public enum TurnEventKind { Damage, Heal, Breath, Dissonance, Crescendo, Mute, Break, Skip, Counter, Down, Ready, Extra }
 
     public struct TurnEvent
     {
@@ -111,6 +111,11 @@ namespace Tacetno433.Battle
         public int Floor;              // 1, 2 or 3
         public bool Maestro;           // MAESTRO MODE : narrower timing windows, more shakes for a roll
         public TurnStep Step;
+
+        //Conductor (step 5) : whose PASSIVE and SIGNATURE this fight plays, and the SIGNATURE gauge
+        public TurnKit Kit;
+        public int Signature;
+        private int perfectRun;        // PERFECTs in a row, for PRODIGY
 
         //Events : what happened since the screen last looked
         public List<TurnEvent> Events = new List<TurnEvent>();
@@ -363,6 +368,7 @@ namespace Tacetno433.Battle
 
             if (grade == Grade.Perfect && rightSize) AddOffBeat(target, BattleRules.TurnPerfectOffBeat);   // OFF-BEAT
             if (grade != Grade.Perfect && grade != Grade.Good) attacker.Crescendo = 0;                    // CRESCENDO is lost on a MISS
+            CountNote(grade == Grade.Perfect && rightSize);
 
             NextTurn();
             return damage;
@@ -386,6 +392,7 @@ namespace Tacetno433.Battle
             for (int n = 0; n < s.Notes.Length; n++)
             {
                 NoteResult r = (results != null && n < results.Length) ? results[n] : new NoteResult(Grade.Hesitate, true, 1f);
+                CountNote(r.Grade == Grade.Perfect && r.RightSize);
                 if (!r.Lands)
                 {
                     user.Crescendo = 0;                                                     // CRESCENDO is lost on a MISS
@@ -470,6 +477,7 @@ namespace Tacetno433.Battle
             float power = attacker.IsEnemy ? attacker.Enemy.SongNotePower() : attacker.Musician.Power + attacker.Musician.Rehearsed;
             float damage = power * BattleRules.TurnAttackPerPower * scale;
             damage *= 1f + attacker.Crescendo * BattleRules.TurnCrescendoStep;               // CRESCENDO
+            if (!attacker.IsEnemy) damage *= BeethovenScale();                                 // THE CLOSER THE LOUDER
             if (target.Staggered) damage *= BattleRules.TurnOffBeatScale;                     // OFF-BEAT
             return Math.Max(1, (int)Math.Round(damage));
         }
@@ -507,6 +515,7 @@ namespace Tacetno433.Battle
             if (note < 0 || note >= enemy.IntentNotes.Length || target == null) return 0;
 
             //PARRY : a PERFECT swipe blocks the note, gives breath back and shakes the enemy (OFF-BEAT)
+            CountNote(g == Grade.Perfect);
             if (g == Grade.Perfect)
             {
                 parried++;
@@ -606,6 +615,105 @@ namespace Tacetno433.Battle
             if (m.Cue == 0) return Flick.Left;
             if (m.Cue == 2) return Flick.Right;
             return Flick.Down;
+        }
+
+        //======================================================================================
+        //Conductor (step 5) : PASSIVE and SIGNATURE
+        //======================================================================================
+
+        //Count Note : every PERFECT fills the SIGNATURE gauge (a conductor with no kit has none).
+        //PRODIGY (THE SHADOWLESS) : TurnMozartRun PERFECTs in a row give 1 breath back.
+        private void CountNote(bool perfect)
+        {
+            if (!perfect)
+            {
+                perfectRun = 0;
+                return;
+            }
+
+            if (Kit != TurnKit.None && Signature < BattleRules.TurnSignatureNeed)
+            {
+                Signature++;
+                if (Signature == BattleRules.TurnSignatureNeed) Events.Add(new TurnEvent(TurnEventKind.Ready, null, 0));
+            }
+
+            perfectRun++;
+            if (Kit == TurnKit.Mozart && perfectRun >= BattleRules.TurnMozartRun)
+            {
+                perfectRun = 0;
+                AddBreath(1);
+            }
+        }
+
+        //THE CLOSER THE LOUDER (THE UNHEARING) : the band hits harder the less life it has left,
+        //up to TurnBeethovenMost more with nobody standing. 1 for every other conductor.
+        public float BeethovenScale()
+        {
+            if (Kit != TurnKit.Beethoven) return 1f;
+
+            int hp = 0;
+            int max = 0;
+            for (int i = 0; i < Party.Count; i++)
+            {
+                hp += Party[i].Hp;
+                max += Party[i].MaxHp;
+            }
+            if (max <= 0) return 1f;
+            return 1f + BattleRules.TurnBeethovenMost * (1f - hp / (float)max);
+        }
+
+        //Can Signature : the gauge is full and a musician is up
+        public bool CanSignature
+        {
+            get { return Step == TurnStep.PlayerTurn && Kit != TurnKit.None && Signature >= BattleRules.TurnSignatureNeed; }
+        }
+
+        //Signature Shape : the 4/4 pattern a conductor beats, down, left, right, up (any size)
+        public static readonly Flick[] SignatureShape = { Flick.Down, Flick.Left, Flick.Right, Flick.Up };
+
+        //Signature : the conductor's big move. It is played before the musician's command and costs
+        //no turn. strokes holds how the four strokes went. Its strength is their average swipe scale :
+        //0.4 with all four missed, 1 all GOOD, 1.3 all PERFECT.
+        public bool UseSignature(NoteResult[] strokes)
+        {
+            if (!CanSignature) return false;
+            Signature = 0;
+
+            float strength = 0f;
+            int landed = 0;
+            for (int i = 0; i < SignatureShape.Length; i++)
+            {
+                NoteResult r = (strokes != null && i < strokes.Length) ? strokes[i] : new NoteResult(Grade.Hesitate, true, 1f);
+                strength += SwipeScale(r.Grade, true);
+                if (r.Lands) landed++;
+            }
+            strength /= SignatureShape.Length;
+
+            //LIGHTNING (THE UNHEARING) : every enemy is struck, and thrown OFF-BEAT at full strength
+            if (Kit == TurnKit.Beethoven)
+            {
+                for (int i = 0; i < Enemies.Count; i++)
+                {
+                    Fighter e = Enemies[i];
+                    if (e.Down) continue;
+                    Hurt(e, Math.Max(1, (int)Math.Round(BattleRules.TurnBoltDamage * strength * BeethovenScale())));
+                    if (!e.Down) AddOffBeat(e, (int)Math.Round(BattleRules.TurnOffBeatMax * strength));
+                }
+            }
+
+            //FEATHER (THE SHADOWLESS) : one extra turn per stroke that lands, for the band in order,
+            //right after the musician who is up now
+            if (Kit == TurnKit.Mozart)
+            {
+                List<Fighter> extra = new List<Fighter>();
+                for (int i = 0; i < Party.Count && extra.Count < landed; i++)
+                    if (!Party[i].Down) extra.Add(Party[i]);
+                for (int i = extra.Count - 1; i >= 0; i--) Order.Insert(OrderIndex + 1, extra[i]);
+                Events.Add(new TurnEvent(TurnEventKind.Extra, null, extra.Count));
+            }
+
+            CheckEnd();
+            return true;
         }
 
         //======================================================================================

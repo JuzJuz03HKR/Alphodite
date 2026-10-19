@@ -10,6 +10,9 @@
         //They are FIRST GUESSES that nobody has played yet : tune them with "--shots turncheck"
         //and real play. The rhythm duel numbers further down stay until the old duel is removed.
 
+        //Turn Battle On : fights open the turn battle page. False plays the old rhythm duel again.
+        public static bool TurnBattleOn = true;
+
         //Life and Speed of the band, by family in the order of the Family enum : strings, winds, percussion.
         //Each round everybody acts once, the fastest first (winds, then strings, then percussion).
         public static int[] TurnHp = { 30, 26, 36 };
@@ -74,6 +77,14 @@
         public static int TurnRollGood = 3;
         public static int MaestroTurnRollPerfect = 6;
         public static int MaestroTurnRollGood = 4;
+
+        //Conductors (ALPHA7_DESIGN 5.9, step 5). The SIGNATURE gauge fills one per PERFECT (an attack,
+        //a skill note or a parry). Full, SPACE plays the 4/4 shape : down, left, right, up, any size.
+        //How well the four strokes land sets how strong it is (the average of their swipe scale).
+        public static int TurnSignatureNeed = 6;
+        public static float TurnBeethovenMost = 0.5f;  // THE UNHEARING's PASSIVE : up to this much harder as the band's life runs out
+        public static int TurnBoltDamage = 14;         // LIGHTNING : damage to every enemy at full strength (x1)
+        public static int TurnMozartRun = 3;           // THE SHADOWLESS's PASSIVE : this many PERFECTs in a row give 1 breath
 
         //Turn Feel (seconds) : how the battle page paces a swipe. The ring always closes at the same
         //speed, never eased, so the eye can count it (docs/research/ALPHA7_qte_parry.md).
