@@ -66,7 +66,7 @@ commit/push ขึ้น Alpha7 เมื่อฉันสั่ง ยัง�
 ✅ ห้องละ 1 ท่าต่อคน เรียงเอง ENTER เล่น · ATTACK ไม่ต้องตวัด (ตวัดแค่สกิล ปัด SIGNATURE) · ม้านั่ง CALL ห้องละ 1 คน 3 แล้ว 4 BREATH (MAESTRO 5, 6) บนเวทีสูงสุด 6 · ไฟต์เริ่ม 2 คน ARCHIVE FULL STAGE (120) เป็น 3 · ศัตรูหลายตัว ครึ่งหลังของชั้นเยอะกว่า (`TurnPackEarly/Late` `TurnEliteEscort` `TurnBossEscort`) · CUT IN ศัตรูเร็ว 5+ แทรกหลังท่าที่ 2 · เหนือหัวศัตรูโชว์โน้ตทุกตัว ·
 ✅ game feel : พุ่งตี hit stop สั่น แวบขาว ดันถอย ตัวนับ HITS / BAR TOTAL ศัตรูเงียบแตกเป็นเศษ ·
 ✅ ยากขึ้น : `TurnNoteDamage` 1.5 → 2.2 · `FirstFloorRecruits` 2 → 3 · turnsim NORMAL STRONG 81 → 56% (AVERAGE 0) MAESTRO EXPERT 11% · ปรับวาทยากร (Lully 0.01, FEATHER 2/เส้น, CAPRICE 2/เส้น, FUGUE ซ้ำ ATTACK) เหลือ 44–66% ·
-✅ turncheck 95/95 · savecheck 25/25 · build Linux 0/0 · `Build/TACET4'33.zip` ใหม่ · `TACET_Balance.xlsx` แท็บ Turn สร้างใหม่จากโค้ดด้วย `docs/turn_balance_tabs.py` (ใส่ path ของ turnsim.txt) ·
+✅ turncheck 96/96 · savecheck 25/25 · build Linux 0/0 · `Build/TACET4'33.zip` ใหม่ · ตรวจโค้ดด้วย agent แก้แล้ว 5 ข้อ (กดเรียกคนสุดท้ายบนม้านั่งแล้วพัง FEATHER ล้าง GUARD คำใบ้เลือกเป้า แถบห้องล้น ข้อความร้าน) · `TACET_Balance.xlsx` แท็บ Turn สร้างใหม่จากโค้ดด้วย `docs/turn_balance_tabs.py` (ใส่ path ของ turnsim.txt) ·
 ⚠️ ยังไม่มีใครเล่น ONE BAR บน Windows · คนเล่นระดับ AVERAGE ในตัวจำลองแพ้เกือบทุกรัน (ตัวจำลองไม่มี Motif ร้าน เหตุการณ์) · บอสชั้น 3 ยังยากไม่เท่ากัน (ข้อ 12) · หน้า BAND ยังเป็นที่นั่ง 9 ช่องแบบเดิม ·
 **งานถัดไป** : (1) ผู้ใช้ Rebuild แล้วเล่น ONE BAR บน Windows บอกความรู้สึก (CALL แพงพอไหม ยากพอไหม ตีแล้วมันไหม) (2) จูนตาม `BattleRules` หัวข้อ ONE BAR / PACKS / `TurnNoteDamage` (3) หน้า BAND ให้เข้ากับม้านั่ง (4) ข้อ 7 "เพิ่มทีหลัง" (5) เสียง · เนื้อเรื่องท้ายสุด
 

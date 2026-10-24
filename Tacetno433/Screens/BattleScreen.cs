@@ -555,6 +555,7 @@ namespace Tacetno433.Screens
                 return;
             }
             Fighter f = battle.Call(bench);
+            hoverBench = -1;                                                           // the chip under the pointer is gone
             Name(f);
             if (practice) Learn(Lesson.Call);
             ShowEvents();
@@ -1506,7 +1507,7 @@ namespace Tacetno433.Screens
             int count = order.Count;
             if (count > 0)
             {
-                int w = Math.Max(64, Math.Min(108, 1096 / count - 6));
+                int w = Math.Max(30, Math.Min(108, 1096 / count - 6));             // up to 18 plates (FEATHER) still end before BAR
                 float x = 24f;
                 for (int i = 0; i < count; i++)
                 {
@@ -1697,7 +1698,7 @@ namespace Tacetno433.Screens
                 if (view == View.Target) line = pending != null && pending.Target == SkillTarget.Ally ? HintAlly : HintEnemy;
                 else if (hover != null && !hover.IsEnemy && hover.JustCalled) line = HintCalled;
                 else if (selected != null && selected.Mute > 0) line = HintMute;
-                if (hoverSkill != null)
+                if (hoverSkill != null && view == View.Plan)                               // while aiming, the line says how to aim
                 {
                     line = hoverSkill.Text;
                     ink = Palette.Paper;
@@ -1707,7 +1708,7 @@ namespace Tacetno433.Screens
                     line = hover.Enemy.TurnTraitLine;                                                    // what the enemy's trait does
                     ink = Palette.Paper;
                 }
-                else if (hoverBench >= 0)
+                else if (hoverBench >= 0 && hoverBench < battle.Bench.Count)
                 {
                     line = battle.Bench[hoverBench].TraitText;
                     ink = Palette.Paper;

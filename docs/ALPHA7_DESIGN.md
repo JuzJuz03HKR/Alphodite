@@ -330,6 +330,7 @@ ATTACK ตีเองไม่ต้องตวัด ทุกสกิลต
 - SIGNATURE กดตอนเขียนห้อง (SPACE) ไม่เสียท่า FEATHER (Mozart) = ตี ATTACK ฟรี 2 ครั้งต่อเส้นที่ลากโดน ต่อท้ายส่วนของวง วนตามที่นั่ง CAPRICE (Paganini) = 2 ตาต่อเส้น FUGUE (Bach) = ท่าถัดไปของทุกคนเล่นซ้ำ รวม ATTACK
 - RUBATO (Motif) เปลี่ยนเป็น โน้ตสกิลที่ MISS ยังเล่นได้ 60% MARCATO = ATTACK เติม OFF-BEAT 2 เท่า BORIS THE WHOLE FLOOR ทำงานกับโน้ต f ของสกิลที่ได้ PERFECT
 - MUTE จาก CUT IN หรือ BREATH โดนขโมย ทำให้สกิลที่เขียนไว้เล่นไม่ได้ ห้องจะเปลี่ยนท่านั้นเป็น ATTACK ให้เอง ไม่เสีย BREATH
+- ATTACK ฟรีของ FEATHER ไม่นับเป็นตาของคนนั้น GUARD TAUNT และสถานะจึงรอตาจริง (แก้หลังตรวจโค้ด 24 ต.ค.)
 
 ศัตรูหลายตัว (PACKS)
 - ไฟต์ธรรมดา ครึ่งแรกของชั้น 1 / 2 / 3 ตัว ครึ่งหลังของชั้น 2 / 3 / 4 ตัว (ชั้น 1 / 2 / 3) Elite มีลูกน้อง 0 / 1 / 2 บอสมีลูกน้อง 0 / 1 / 2 ลูกน้องเป็นศัตรูธรรมดาไม่ซ้ำกันถ้ามีพอ (`EnemyList.PickOther`)
@@ -368,7 +369,8 @@ ATTACK ตีเองไม่ต้องตวัด ทุกสกิลต
 - คลิกขวาหรือ BACKSPACE ลบท่าของคนที่เลือก TAB ไปคนถัดไป
 - PRACTICE สอน 5 อย่าง : เล่นห้อง ปัด สกิล CALL SIGNATURE (เริ่ม 2 คน มี OTTO บนม้านั่ง)
 
-ตรวจแล้ว : turncheck 95/95 (เขียนใหม่ตามแบบห้อง มีหมวด BENCH CALL CUT IN PACKS), savecheck 25/25 (เพิ่มเช็กศัตรูทั้งกลุ่ม), build Linux 0 error 0 warning, ภาพ `--shots battle battleplan battlestrike@2 battleskill@2 battleparry@8 battlecall@3 battlefull battleboss practice`, `Build/TACET4'33.zip` build ใหม่ (cloud, .NET 8, ฟอนต์แทน) ยังไม่มีใครเล่นแบบนี้บน Windows
+ตรวจโค้ดด้วย agent 1 ตัวแบบจับผิด เจอและแก้ : กดเรียกคนสุดท้ายบนม้านั่งแล้วเกมพัง (ไฟต์แรกของทุกรันและ PRACTICE โดน) ATTACK ฟรีของ FEATHER ล้าง GUARD TAUNT คำใบ้ตอนเลือกเป้าของสกิลไม่ขึ้น แถบห้องยาวเกินจอเมื่อมีคนเยอะ ข้อความร้านค้าเรื่องที่นั่ง
+ตรวจแล้ว : turncheck 96/96 (เขียนใหม่ตามแบบห้อง มีหมวด BENCH CALL CUT IN PACKS), savecheck 25/25 (เพิ่มเช็กศัตรูทั้งกลุ่ม), build Linux 0 error 0 warning, ภาพ `--shots battle battleplan battlestrike@2 battleskill@2 battleparry@8 battlecall@3 battlefull battleboss practice`, `Build/TACET4'33.zip` build ใหม่ (cloud, .NET 8, ฟอนต์แทน) ยังไม่มีใครเล่นแบบนี้บน Windows
 
 ยังไม่ได้ทำ / ต้องดูตอนเล่นจริง
 - ตัวเลข CALL 3 และ 4 พอดีไหม (ผู้ใช้พูดถึง 3–4 ในโหมดปกติ และ 5–6 ในโหมดยาก)

@@ -303,6 +303,18 @@ namespace Tacetno433.Core
             b.PlayBar();
             report += Same("feather", "ANNA KLARA OTTO ANNA KLARA OTTO ANNA KLARA OTTO HUSH", OrderNames(b));
 
+            //FEATHER : a free ATTACK is not the musician's turn, so OTTO's STAND FIRM still holds when HUSH plays
+            //(2 strokes land, 4 free ATTACKs : ANNA KLARA OTTO ANNA)
+            b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
+            b.Kit = TurnKit.Mozart;
+            b.Signature = BattleRules.TurnSignatureNeed;
+            b.UseSignature(new NoteResult[] { perfect, perfect, miss, miss });
+            b.PlanSkill(b.Party[2], SkillList.Second(band[2]), null);
+            b.Enemies[0].Hp = 200;                                                     // six ATTACKs would end HUSH before its turn
+            b.PlayBar();
+            PlayToEnemy(b);
+            report += Same("feather guard", "True True HUSH", b.Party[2].Guard + " " + b.Party[2].Taunt + " " + b.Current.Name);
+
             //PRODIGY : three PERFECT notes in a row give 1 breath (QUICK BOW : 3 - 2 + 1 = 2)
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             b.Kit = TurnKit.Mozart;

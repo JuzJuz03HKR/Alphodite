@@ -53,7 +53,7 @@ namespace Tacetno433.Screens
 
         //Ware Rows
         private const int SeatRow = 0;
-        private static readonly string[] TurnWays = { "LEFT", "DOWN", "RIGHT" };   // a musician's CUE as the way their ATTACK swings
+        private static readonly string[] TurnWays = { "LEFT", "DOWN", "RIGHT" };   // a musician's CUE as the way their skills start
         private const int TuningRow = 1;
         private const int HireRow = 2;
         private const int FirstMotifRow = 3;
@@ -89,7 +89,7 @@ namespace Tacetno433.Screens
             notes[SeatRow] = "One more musician on stage. Two per floor at most.";
             names[TuningRow] = "TUNING";
             notes[TuningRow] = "The band gets back " + (int)(BattleRules.TuningRecover * 100) + " percent of its " + BattleRules.LifeWordLower + ".";
-            if (BattleRules.TurnBattleOn) notes[SeatRow] = "Three play in a turn battle. No more seats.";   // TURN BATTLE
+            if (BattleRules.TurnBattleOn) notes[SeatRow] = "The fight starts with 2 and CALLS the rest. No more seats.";   // TURN BATTLE (ONE BAR, step 12)
             //Hire : one player from this era, known before buying, with their seat
             hire = MusicianList.RollFromEra(run.Era, run.Roster, run.Rng);
             names[HireRow] = hire != null ? "HIRE " + hire.Name : "HIRE A PLAYER";
@@ -97,8 +97,8 @@ namespace Tacetno433.Screens
                 ? hire.Name + ", " + hire.Instrument + ". Sits " + StageLayout.Rows[StageLayout.SectionOf(hire.Family)].Name
                   + ", " + StageLayout.SideNames[hire.Cue] + ". " + hire.TraitName + " : " + hire.TraitText
                 : NobodyLine;
-            if (hire != null && BattleRules.TurnBattleOn)                                   // TURN BATTLE : the side is the way they swing
-                notes[HireRow] = hire.Name + ", " + hire.Instrument + ". Swings " + TurnWays[hire.Cue] + ". " + hire.TraitName + " : " + hire.TraitText;
+            if (hire != null && BattleRules.TurnBattleOn)                                   // TURN BATTLE : the side is the way their skills start
+                notes[HireRow] = hire.Name + ", " + hire.Instrument + ". Skills " + TurnWays[hire.Cue] + ". " + hire.TraitName + " : " + hire.TraitText;
             if (hire == null) sold[HireRow] = true;
 
             for (int i = 0; i < 3; i++)
@@ -190,7 +190,7 @@ namespace Tacetno433.Screens
             RunState run = Game.CurrentRun;
 
             if (sold[row]) { Deny(SoldLine); return; }
-            if (row == SeatRow && (!run.SeatForSale || BattleRules.TurnBattleOn)) { Deny(SoldLine); return; }   // TURN BATTLE : three play, no seats for sale
+            if (row == SeatRow && (!run.SeatForSale || BattleRules.TurnBattleOn)) { Deny(SoldLine); return; }   // TURN BATTLE : no seats for sale
             if (row == TuningRow && run.Stamina >= run.MaxStamina) { Deny(RestedLine); return; }
             if (row == HireRow && run.RosterFull) { Deny(FullLine); return; }
             if (row == HireRow && hire == null) { Deny(NobodyLine); return; }

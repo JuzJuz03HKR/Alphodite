@@ -59,6 +59,7 @@ namespace Tacetno433.Battle
         public Fighter Who;
         public Skill Skill;            // null for ATTACK
         public Fighter Target;         // the enemy (ATTACK, or a skill at one enemy) or the musician it is for
+        public bool Free;              // FEATHER : a free ATTACK, not the musician's turn (GUARD, TAUNT and statuses wait)
     }
 
     //Fighter : one body on the field, a musician of the band or a shape of TACET
@@ -469,6 +470,7 @@ namespace Tacetno433.Battle
                 Fighter f = players[k % players.Count];
                 BarMove extra = new BarMove();
                 extra.Who = f;
+                extra.Free = true;
                 BarMove own = MoveOf(f);
                 extra.Target = own != null && own.Skill == null ? own.Target : FocusTarget();
                 band.Add(extra);
@@ -672,8 +674,9 @@ namespace Tacetno433.Battle
                     continue;
                 }
                 Fighter f = Order[OrderIndex];
-                f.Guard = false;
-                if (f.Taunt)
+                bool free = OrderMoves[OrderIndex] != null && OrderMoves[OrderIndex].Free;   // FEATHER : not their turn
+                if (!free) f.Guard = false;
+                if (f.Taunt && !free)
                 {
                     //TAUNT ends : an enemy that planned its next attack while taunted aims again
                     f.Taunt = false;
@@ -748,7 +751,8 @@ namespace Tacetno433.Battle
         private void NextTurn()
         {
             Fighter done = Order[OrderIndex];
-            EndOfTurn(done);
+            bool free = OrderMoves[OrderIndex] != null && OrderMoves[OrderIndex].Free;      // FEATHER : statuses wait for the real turn
+            if (!free) EndOfTurn(done);
             if (!done.IsEnemy && Kit == TurnKit.Fanny) FelixVoice = !FelixVoice;              // TWO VOICES : the other voice leads next
             if (CapriceTurns > 0)
             {
