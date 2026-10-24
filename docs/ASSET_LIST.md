@@ -65,6 +65,11 @@
 | `enemy_requiem.png` | REQUIEM | บอส Classical | The piece that was never finished. |
 | `enemy_the_nameless_master.png` | THE NAMELESS MASTER | บอส Siam | He plays a phrase. You must answer better. |
 | `enemy_the_devil_s_string.png` | THE DEVIL'S STRING | บอส Romantic | One string, one bow, one bargain. |
+| `enemy_room_tone.png` | ROOM TONE | ธรรมดา (ขั้น 13) | The sound of an empty room, holding the others up. |
+| `enemy_the_cue.png` | THE CUE | ธรรมดา (ขั้น 13) | It waits in the wings for whoever walks on next. |
+| `enemy_the_damper.png` | THE DAMPER | ธรรมดา (ขั้น 13) | A felt hand resting on every string. |
+| `enemy_stutter.png` | STUTTER | ธรรมดา (ขั้น 13) | It cannot finish a word, so it never stops starting. |
+| `enemy_the_round.png` | THE ROUND | Elite (ขั้น 13) | It sings your bar back at you, in your own order. |
 
 ### 3. ฉากหลังดวล ⭐⭐
 `Content/Art/Stage/` : `stage_classical.png` · `stage_siam.png` · `stage_romantic.png` — 1280 × 720 เต็มจอ
@@ -106,7 +111,7 @@
 ### 9. ร้าน ห้องพัก เหตุการณ์ ⭐
 - `Content/Art/Places/shop.png` 672 × 470 (มีคนขายของในภาพ) · `Content/Art/Places/rest.png` 960 × 236 (แถบกว้างเหนือตัวเลือก)
 - `Content/Art/Events/` 520 × 430 : `event_the_broken_metronome.png` · `event_a_street_musician.png` · `event_the_silent_audience.png` ·
-  `event_a_lost_score.png` · `event_tacet_s_echo.png` · `event_the_tea_house.png`
+  `event_a_lost_score.png` · `event_tacet_s_echo.png` · `event_the_tea_house.png` · `event_the_empty_chair.png` · (ขั้น 13) `event_a_rival_band.png` · `event_a_tuning_fork.png` · `event_a_cracked_bow.png`
 
 ### 10. UI skin — ปุ่ม กรอบ แถบ ไอคอน โลโก้ (8 ต.ค., ผู้ใช้เลือก "UI skin ทั้งชุด")
 รายการเต็มพร้อมภาพตัวอย่างตำแหน่ง ขนาด และหมายเหตุทีละไฟล์ : **[`TACET_UI_Asset_List.xlsx`](TACET_UI_Asset_List.xlsx)** (คอลัมน์ตามชีตของทีมอาร์ต นำเข้า Google Sheets ได้ · แท็บ "อ่านก่อน" มีกติกาทั้งหมด)

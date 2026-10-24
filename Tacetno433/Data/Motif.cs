@@ -32,7 +32,15 @@ namespace Tacetno433.Data
         GraceNote,
         Marcato,
         ConBrio,
-        Coda
+        Coda,
+
+        //ONE BAR (Alpha 7 step 13) : motifs about the order of the bar, the BENCH and packs of enemies. Added at the END.
+        Downbeat,
+        Entrance,
+        GreenRoom,
+        Unison,
+        Segue,
+        LastWord
     }
 
     //Motif : a small thing the band carries for the rest of the run, which changes how
@@ -132,6 +140,27 @@ namespace Tacetno433.Data
             new Motif { Id = MotifId.Coda,         Name = "CODA",          Mark = "coda", Rarity = 3,
                         Text = "The FINALE is offered from +60 on the line instead of +80.",
                         TurnText = "Enemies under a quarter of their life take 50 percent more." },
+
+            //ONE BAR (step 13) : each one is about the order of the bar, the BENCH or a pack of enemies,
+            //so carrying it changes how a bar is written. They only work in the turn battle.
+            new Motif { Id = MotifId.Downbeat,     Name = "DOWNBEAT",      Mark = "1",    Rarity = 1,
+                        Text = "The first move of every bar is 50 percent stronger.",
+                        TurnText = "The first move of every bar is 50 percent stronger." },
+            new Motif { Id = MotifId.Entrance,     Name = "ENTRANCE",      Mark = "ent.", Rarity = 1, Initials = "ET",
+                        Text = "A musician you CALL is twice as strong in their first bar.",
+                        TurnText = "A musician you CALL is twice as strong in their first bar." },
+            new Motif { Id = MotifId.GreenRoom,    Name = "GREEN ROOM",    Mark = "gr",   Rarity = 1,
+                        Text = "Musicians on the BENCH get back 2 life every bar.",
+                        TurnText = "Musicians on the BENCH get back 2 life every bar." },
+            new Motif { Id = MotifId.Unison,       Name = "UNISON",        Mark = "unis.", Rarity = 2,
+                        Text = "When every move of a bar is an ATTACK at one enemy, the last one hits twice as hard.",
+                        TurnText = "When every move of a bar is an ATTACK at one enemy, the last one hits twice as hard." },
+            new Motif { Id = MotifId.Segue,        Name = "SEGUE",         Mark = "segue", Rarity = 2,
+                        Text = "Damage left over when an enemy falls silent goes on to the next one.",
+                        TurnText = "Damage left over when an enemy falls silent goes on to the next one." },
+            new Motif { Id = MotifId.LastWord,     Name = "LAST WORD",     Mark = "fine", Rarity = 2,
+                        Text = "The last musician to play in a bar gets GUARD.",
+                        TurnText = "The last musician to play in a bar gets GUARD." },
         };
 
         private static string[] rarityNames = { "", "COMMON", "RARE", "TREASURED" };

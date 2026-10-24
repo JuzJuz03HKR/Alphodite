@@ -17,7 +17,8 @@ namespace Tacetno433.Core
     //One plain habit writes each bar (SimPlan) :
     //   SIGNATURE as soon as it is full. CALL the first one on the BENCH when the free BREATH covers it while
     //   fewer than four play or somebody fell. Then for each musician : a heal when someone is under half life,
-    //   the dearest skill that hits enemies when 3 BREATH or more are free, otherwise ATTACK the enemy with the least life.
+    //   the dearest skill that hits enemies when 3 BREATH or more are free (step 13 : and it leaves enough for a
+    //   CALL it is saving up for), otherwise ATTACK the enemy with the least life.
     //Reports :
     //   FIGHTS      one fight at full life with the PACKS of the run (BattleRules ONE BAR), four musicians, two on the field
     //   RUNS        three floors in a row with life carried over : N N E N N, a rest (40 percent back), then the boss,
@@ -57,7 +58,12 @@ namespace Tacetno433.Core
 
         private static void TurnSim()
         {
-            Random rng = new Random(4330);
+            //Seed : the same every time, so two reports can be compared. TACET_SIM_SEED picks another one (step 13),
+            //run a few seeds and take the average when a change is small, the results move by a few percent.
+            int seed = 4330;
+            string seedText = Environment.GetEnvironmentVariable("TACET_SIM_SEED");
+            if (seedText != null) int.TryParse(seedText, out seed);
+            Random rng = new Random(seed);
             string report = "TACET TURN BATTLE BALANCE, ONE BAR  (" + SimFights + " fights per cell, " + SimRuns + " runs per player)\r\n";
             report += "Players : timing spread FLAWLESS 0 / EXPERT 0.08 / STRONG 0.12 / AVERAGE 0.2 / NEWCOMER 0.3 seconds\r\n\r\n";
 
@@ -295,7 +301,13 @@ namespace Tacetno433.Core
                 if (b.Party[i].Down) fallen = true;
                 else standing++;
             }
-            if (b.Bench.Count > 0 && (standing < 4 || fallen) && b.CanCall(0)) b.Call(0);
+            bool wantCall = b.Bench.Count > 0 && (standing < 4 || fallen) && b.Party.Count < BattleRules.TurnFieldMost;
+            if (wantCall && b.CanCall(0))
+            {
+                b.Call(0);
+                wantCall = false;
+            }
+            int keep = wantCall ? b.CallCost : 0;   // step 13 : saving up for a CALL it cannot pay yet (FELT HAND makes it dearer)
 
             Fighter weakest = null;
             for (int i = 0; i < b.Enemies.Count; i++)
@@ -326,7 +338,7 @@ namespace Tacetno433.Core
                     b.PlanSkill(me, heal, heal.Target == SkillTarget.Ally ? hurt : me);
                     hurt = null;
                 }
-                else if (hit != null && b.BreathFree >= 3) b.PlanSkill(me, hit, weakest);
+                else if (hit != null && b.BreathFree >= 3 && b.BreathFree - hit.Cost >= keep) b.PlanSkill(me, hit, weakest);
                 else b.PlanAttack(me, weakest);
             }
         }

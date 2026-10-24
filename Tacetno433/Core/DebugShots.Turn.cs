@@ -460,6 +460,7 @@ namespace Tacetno433.Core
             report += TurnCheckBench(band, hush);
             for (int i = 0; i < traits.Length; i++) MusicianList.All[i].Trait = traits[i];
             report += TurnCheckStep10(band, hush, deadAir);
+            report += TurnCheckStep13(band, hush, deadAir);
             File.WriteAllText(Path.Combine(outDir, "turncheck.txt"), report);
         }
 

@@ -181,6 +181,58 @@ namespace Tacetno433.Data
                                       Win = Reward.Stamina, WinAmount = 8, WinText = "You leave the part where it lies. The quiet of the pit is almost restful." },
                 }
             },
+
+            //Alpha 7 step 13 (docs/ALPHA7_CONTENT_PROPOSALS.md 4.1) : three more, made of the rewards that already exist
+            new GameEvent
+            {
+                Title = "A RIVAL BAND",
+                Place = "A STAGE ACROSS THE SQUARE",
+                Text = "Another band is playing your road, louder than you. Their leader points a bow at you "
+                     + "and waits to see what you do.",
+                Choices = new EventChoice[]
+                {
+                    new EventChoice { Text = "Take the challenge",
+                                      Win = Reward.Fight, WinText = "They stop playing. Something under their music was never a band at all." },
+                    new EventChoice { Text = "Pay them to play for you", ShardCost = 20,
+                                      Win = Reward.Stamina, WinAmount = 12, WinText = "For once someone else does the work. The band sits and listens." },
+                    new EventChoice { Text = "Walk the other way",
+                                      Win = Reward.Nothing, WinText = "Their laughter follows you a little way down the road." },
+                }
+            },
+
+            new GameEvent
+            {
+                Title = "A TUNING FORK",
+                Place = "STILL HUMMING ON THE FLOOR",
+                Text = "A tuning fork lies on the stones, still ringing, though nobody is near. "
+                     + "The note it holds is almost the right one.",
+                Choices = new EventChoice[]
+                {
+                    new EventChoice { Text = "Strike it and listen", Check = true, CheckBase = 40,
+                                      Win = Reward.Motif, WinAmount = 2, WinText = "The note settles in your ear and stays there.",
+                                      Lose = Reward.Stamina, LoseAmount = -8, LoseText = "It rings far too loud. Everyone flinches." },
+                    new EventChoice { Text = "Pocket it to sell",
+                                      Win = Reward.Shards, WinAmount = 20, WinText = "Good steel. Somebody will pay for it." },
+                }
+            },
+
+            new GameEvent
+            {
+                Title = "A CRACKED BOW",
+                Place = "A CASE LEFT IN THE RAIN",
+                Text = "An open case, and in it a bow with a long crack down the stick. "
+                     + "It might hold for one more piece.",
+                Choices = new EventChoice[]
+                {
+                    new EventChoice { Text = "Play it as it is", Check = true, CheckFamily = (int)Family.String, CheckBase = 35,
+                                      Win = Reward.Rehearse, WinText = "It holds. Playing it that lightly teaches something new.",
+                                      Lose = Reward.Stamina, LoseAmount = -10, LoseText = "It snaps mid phrase and the whip of it stings." },
+                    new EventChoice { Text = "Sell the horsehair",
+                                      Win = Reward.Shards, WinAmount = 15, WinText = "Old horsehair, but good. A few shards for it." },
+                    new EventChoice { Text = "Close the case",
+                                      Win = Reward.Nothing, WinText = "You leave it for whoever owned it." },
+                }
+            },
         };
 
         private static string[] familyNames = { "STRING", "WIND", "PERCUSSION" };

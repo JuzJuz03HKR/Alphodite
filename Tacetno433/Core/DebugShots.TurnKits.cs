@@ -36,8 +36,8 @@ namespace Tacetno433.Core
             b.Kit = TurnKit.None;
             report += Same("locked tempo", "True False", bachAny + " " + b.AnySize);
 
-            //FUGUE : all four PERFECT give everybody an echo of 1.3. ANNA's QUICK BOW then lands more
-            //than twice as hard as without it (once, then x1.3), and the echo is used up.
+            //FUGUE : all four PERFECT give everybody an echo of 1.3 x TurnFugueScale 1.8 = 2.34. ANNA's QUICK BOW then lands more
+            //than twice as hard as without it (once, then x2.34), and the echo is used up.
             List<Musician> anna = new List<Musician> { MusicianList.All[0] };
             Skill quickBow = SkillList.First(MusicianList.All[0]);
             NoteResult[] goods = new NoteResult[quickBow.Notes.Length];
@@ -58,11 +58,11 @@ namespace Tacetno433.Core
             b.PlayBar();
             b.UseSkill(goods);
             int lossEcho = b.Enemies[0].MaxHp - b.Enemies[0].Hp;
-            report += Same("fugue", "1.3 True 0", echo + " " + (lossEcho > 2 * lossPlain) + " " + b.Party[0].Echo);
+            report += Same("fugue", "2.3 True 0", echo + " " + (lossEcho > 2 * lossPlain) + " " + b.Party[0].Echo);
 
             //CAPRICE (THE HEARTLESS) : 2 strokes land, so 4 turns where every swipe goes one better (a wrong way is
             //GOOD, 0.15 s off is PERFECT, one shake is GOOD). Three ATTACKs and HUSH's turn (blocked PERFECT) use them up.
-            //Then everybody pays 10 percent : ANNA 30 -> 27, KLARA 26 -> 23, OTTO 36 -> 32
+            //Then everybody pays 20 percent (step 13) : ANNA 30 -> 24, KLARA 26 -> 21, OTTO 36 -> 29
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             b.Kit = TurnKit.Paganini;
             b.Signature = b.SignatureNeed;
@@ -74,7 +74,7 @@ namespace Tacetno433.Core
             b.Attack();
             b.Attack();
             b.TakeEnemyAttack(AllGrades(b.Current.IntentNotes.Length, Grade.Perfect));
-            report += Same("caprice", "4 Good Perfect Good 0 27 23 32", caprice + " " + b.CapriceTurns + " " + b.Party[0].Hp + " " + b.Party[1].Hp + " " + b.Party[2].Hp);
+            report += Same("caprice", "4 Good Perfect Good 0 24 21 29", caprice + " " + b.CapriceTurns + " " + b.Party[0].Hp + " " + b.Party[1].Hp + " " + b.Party[2].Hp);
 
             //BORROWED BREATH (THE HEARTLESS) : no BREATH, KLARA's LONG BREATH (2) costs 6 life and gives 4 BREATH.
             //Without the kit it cannot be written, and with 6 life or less it cannot be paid.
@@ -103,14 +103,14 @@ namespace Tacetno433.Core
             b.Kit = TurnKit.None;
             report += Same("steady hand", "Good 0.23 Miss", steady + " " + b.Judge(0.225f, true));
 
-            //THE SUN : all four PERFECT, 12 x 1.3 = 15.6 -> 16 back for everybody (KLARA tops out at 26), DISSONANCE and MUTE gone
+            //THE SUN : all four PERFECT, 8 x 1.3 = 10.4 -> 10 back for everybody (step 13), DISSONANCE and MUTE gone
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433), new int[] { 10, 10, 10 });
             b.Kit = TurnKit.Lully;
             b.Party[0].Dissonance = 2;
             b.Party[1].Mute = 1;
             b.Signature = b.SignatureNeed;
             b.UseSignature(fourPerfect);
-            report += Same("the sun", "26 26 26 0 0", b.Party[0].Hp + " " + b.Party[1].Hp + " " + b.Party[2].Hp + " " + b.Party[0].Dissonance + " " + b.Party[1].Mute);
+            report += Same("the sun", "20 20 20 0 0", b.Party[0].Hp + " " + b.Party[1].Hp + " " + b.Party[2].Hp + " " + b.Party[0].Dissonance + " " + b.Party[1].Mute);
 
             //TWO VOICES (THE UNSIGNED) : KLARA (written first) in FANNY's voice 4 x 2 x 1.25 = 10, then FELIX leads
             //and ANNA hits a plain 10, then FANNY again
@@ -123,12 +123,12 @@ namespace Tacetno433.Core
             int felix = b.Attack();
             report += Same("two voices", "10 True 10 False", fanny + " " + felixNext + " " + felix + " " + b.FelixVoice);
 
-            //DUET : all four PERFECT, 9 x 1.3 = 11.7 -> 12 to DEAD AIR, 6 x 1.3 = 7.8 -> 8 back for everybody
+            //DUET : all four PERFECT, 12 x 1.3 = 15.6 -> 16 to DEAD AIR, 8 x 1.3 = 10.4 -> 10 back for everybody (step 13)
             b = new TurnBattle(band, new List<Enemy> { deadAir }, 1, new Random(433), new int[] { 10, 10, 10 });
             b.Kit = TurnKit.Fanny;
             b.Signature = b.SignatureNeed;
             b.UseSignature(fourPerfect);
-            report += Same("duet", "38 18 18 18", b.Enemies[0].Hp + " " + b.Party[0].Hp + " " + b.Party[1].Hp + " " + b.Party[2].Hp);
+            report += Same("duet", "34 20 20 20", b.Enemies[0].Hp + " " + b.Party[0].Hp + " " + b.Party[1].Hp + " " + b.Party[2].Hp);
 
             //Musician Traits (each musician on their own, the bar is played so their move is up)
 
@@ -199,14 +199,14 @@ namespace Tacetno433.Core
             }
             report += Same("prodigy streak", "True", (b.BestRun >= 5).ToString());
 
-            //FUGUE : an ATTACK echoes too (step 12), ANNA 10 then 13 more, HUSH 50 -> 27
+            //FUGUE : an ATTACK echoes too (step 12), ANNA 10 then 23 more (x2.34, step 13), HUSH 50 -> 17
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             b.Kit = TurnKit.Bach;
             b.Signature = b.SignatureNeed;
             b.UseSignature(fourPerfect);
             b.PlayBar();
             b.Attack();
-            report += Same("fugue attack", "27 0", b.Enemies[0].Hp + " " + b.Party[0].Echo);
+            report += Same("fugue attack", "17 0", b.Enemies[0].Hp + " " + b.Party[0].Echo);
 
             //FUGUE : LONG BREATH has nothing to repeat, so KLARA's echo waits for her next move
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
@@ -216,7 +216,7 @@ namespace Tacetno433.Core
             b.PlanSkill(b.Party[1], longBreath, null);
             b.PlayBar();
             b.UseSkill(fourGood);
-            report += Same("fugue waits", "1.3", b.Party[1].Echo.ToString("0.0"));
+            report += Same("fugue waits", "2.3", b.Party[1].Echo.ToString("0.0"));
 
             //TAUNT : when OTTO's next move comes, an enemy that planned while taunted aims again
             //(OTTO alone cannot show it, so ANNA and OTTO : OTTO taunts, HUSH hits him and plans again at him,

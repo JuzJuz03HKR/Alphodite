@@ -25,7 +25,14 @@ namespace Tacetno433.Data
         NoRest,          // WHITE NOISE  silent beats give back only half the stamina
         Unfinished,      // REQUIEM      round three plays its part backwards, faster, and swaps your left and right sides
         Mirror,          // NAMELESS     from round two it plays YOUR last round back at you
-        Bargain          // DEVIL'S STRING  before round two it offers a deal
+        Bargain,         // DEVIL'S STRING  before round two it offers a deal
+
+        //ONE BAR (Alpha 7 step 13) : turn battle only, the old rhythm duel plays these enemies plainly
+        HoldsTheRoom,    // ROOM TONE    while it stands, the other enemies take less
+        OnCue,           // THE CUE      it strikes the musician called in last
+        FeltHand,        // THE DAMPER   while it stands, a CALL costs more
+        TwiceABar,       // STUTTER      it cuts in twice a bar, one note each time
+        FirstInLine      // THE ROUND    it strikes the musician who plays first in the bar
     }
 
     //Enemy : one shape TACET takes. It has no face, only a written part it plays against you.
@@ -162,6 +169,36 @@ namespace Tacetno433.Data
                         Trait = EnemyTrait.Bargain, TraitName = "THE BARGAIN", TraitFloor = 1,
                         TraitText = "Before round two it offers a deal: more power now, less breath for ever.",
                         Kind = EnemyKind.Boss, Era = 2, Pattern = new int[] { 7, 0, 7, 0, 0, 9, 0, 9 }, Hidden = new int[] { 4 }, Tone = Palette.ToneA, Temper = 20 },
+
+            //ONE BAR (Alpha 7 step 13, docs/ALPHA7_CONTENT_PROPOSALS.md) : any era, added at the END because the
+            //save file and ArtBank keep enemies by their place in this list. Each one is a puzzle for one part of
+            //ONE BAR : who to hit first (ROOM TONE), when to CALL (THE CUE, THE DAMPER) and the order of the bar
+            //(STUTTER, THE ROUND). TurnPower 0 : each note hits the average of the Pattern, like the others.
+            new Enemy { Name = "ROOM TONE",
+                        TurnHp = 45, TurnSpeed = 2, Phrases = new[] { "Dp", "Up Dp" }, TurnTraitText = "While it stands, the other enemies take 30 percent less.", Title = "The sound of an empty room, holding the others up.",
+                        Trait = EnemyTrait.HoldsTheRoom, TraitName = "HOLDS THE ROOM", TraitFloor = 2,
+                        TraitText = "While it stands, the other enemies take 30 percent less.",
+                        Kind = EnemyKind.Normal, Pattern = new int[] { 4, 0, 4, 0, 4, 0, 4, 0 }, Tone = Palette.ToneE },
+            new Enemy { Name = "THE CUE",
+                        TurnHp = 55, TurnSpeed = 5, Phrases = new[] { "Rmf Lmf", "Uf" }, TurnTraitText = "It always strikes the musician who was CALLED in last.", Title = "It waits in the wings for whoever walks on next.",
+                        Trait = EnemyTrait.OnCue, TraitName = "ON CUE", TraitFloor = 2,
+                        TraitText = "It always strikes the musician who was CALLED in last.",
+                        Kind = EnemyKind.Normal, Pattern = new int[] { 4, 0, 4, 0, 4, 0, 4, 0 }, Tone = Palette.ToneC },
+            new Enemy { Name = "THE DAMPER",
+                        TurnHp = 42, TurnSpeed = 3, Phrases = new[] { "Dmf Dp", "Lmf Rmf" }, TurnTraitText = "While it stands, a CALL costs 1 more BREATH.", Title = "A felt hand resting on every string.",
+                        Trait = EnemyTrait.FeltHand, TraitName = "FELT HAND", TraitFloor = 2,
+                        TraitText = "While it stands, a CALL costs 1 more BREATH.",
+                        Kind = EnemyKind.Normal, Pattern = new int[] { 4, 0, 4, 0, 4, 0, 4, 0 }, Tone = Palette.ToneD },
+            new Enemy { Name = "STUTTER",
+                        TurnHp = 36, TurnSpeed = 7, Phrases = new[] { "Lp", "Rp", "Up" }, TurnTraitText = "It cuts in twice a bar, after the 1st and the 3rd move, one note each time.", Title = "It cannot finish a word, so it never stops starting.",
+                        Trait = EnemyTrait.TwiceABar, TraitName = "TWICE A BAR", TraitFloor = 2,
+                        TraitText = "It cuts in twice a bar, after the 1st and the 3rd move, one note each time.",
+                        Kind = EnemyKind.Normal, Pattern = new int[] { 4, 4, 4, 4, 4, 4, 4, 4 }, Tone = Palette.ToneB },
+            new Enemy { Name = "THE ROUND",
+                        TurnHp = 115, TurnSpeed = 4, Phrases = new[] { "Df Dmf Df", "Lmf Rmf Lf Rf" }, TurnTraitText = "It always strikes the musician who plays first in the bar.", Title = "It sings your bar back at you, in your own order.",
+                        Trait = EnemyTrait.FirstInLine, TraitName = "FIRST IN LINE", TraitFloor = 1,
+                        TraitText = "It always strikes the musician who plays first in the bar.",
+                        Kind = EnemyKind.Elite, Pattern = new int[] { 5, 0, 5, 0, 5, 0, 5, 5 }, Tone = Palette.ToneB },
         };
 
         //Practice : the enemy of the tutorial's practice fight (Alpha 7, step 9, BattleRules PRACTICE).

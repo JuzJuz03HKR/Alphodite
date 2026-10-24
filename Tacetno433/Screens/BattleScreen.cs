@@ -107,6 +107,8 @@ namespace Tacetno433.Screens
         //Bar Count : hits and damage the band landed this bar, shown while it plays
         private int barHits;
         private int barDamage;
+        private bool barPlaying;      // a bar is playing : true from PLAY THE BAR until the next bar is written (step 13, the last
+                                      // turn of a bar used to be left out, the rules are already back in Plan when its events show)
         private float barPulse;
         private string barHitsText = "";
         private string barDamageText = "";
@@ -382,6 +384,7 @@ namespace Tacetno433.Screens
             view = View.Plan;
             viewTime = 0f;
             pending = null;
+            barPlaying = false;
             Game.IsMouseVisible = true;
             if (!battle.CanPlan(selected) || battle.Bar.Count == 0) Select(NextUnwritten(null));     // a new bar starts at the front seat
             RefreshPreview();
@@ -570,6 +573,7 @@ namespace Tacetno433.Screens
             battle.PlayBar();
             barHits = 0;
             barDamage = 0;
+            barPlaying = true;
             pending = null;
             hover = null;
             NextStep();
@@ -956,7 +960,7 @@ namespace Tacetno433.Screens
                     if (e.Who.IsEnemy)
                     {
                         effects.SpawnSparks(x, box.Center.Y, 8 + Math.Min(12, e.Amount / 2), 0f);
-                        if (battle.Step != TurnStep.Plan)
+                        if (barPlaying)
                         {
                             barHits++;
                             barDamage += e.Amount;
@@ -1056,9 +1060,12 @@ namespace Tacetno433.Screens
             return r;
         }
 
+        //Bench Box : a long BENCH (7 with the whole ensemble) makes the chips narrower, so the row never runs
+        //under the SIGNATURE and PLAY THE BAR boxes (a click there played the bar instead of calling, step 13)
         private Rectangle BenchBox(int i)
         {
-            return new Rectangle(BenchX + i * BenchStep, BenchY, BenchW, BenchH);
+            int step = Math.Min(BenchStep, (signatureBox.X - 16 - BenchX) / Math.Max(1, battle.Bench.Count));
+            return new Rectangle(BenchX + i * step, BenchY, step - (BenchStep - BenchW), BenchH);
         }
 
         //Fight Over : every musician on the field keeps the life they end with (KNOCKED OUT gets up with 1),
@@ -1079,6 +1086,8 @@ namespace Tacetno433.Screens
 
             for (int i = 0; i < battle.Party.Count; i++)
                 run.SetLife(battle.Party[i].Musician, battle.HpAfterBattle(battle.Party[i]));
+            for (int i = 0; i < battle.Bench.Count; i++)                                    // GREEN ROOM : the BENCH may have healed
+                if (battle.BenchLife[i] >= 0) run.SetLife(battle.Bench[i], battle.BenchLife[i]);
             run.LastRounds = battle.Round;
             run.RefreshLabels();
 

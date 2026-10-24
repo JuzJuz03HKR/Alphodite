@@ -70,6 +70,11 @@
         public static int TurnLullEvery = 3;             //            every this many turns
         public static float TurnFastGap = 0.7f;          // REQUIEM : the gap between notes below half life
         public static int TurnBargainSteal = 1;          // THE DEVIL'S STRING : breath taken by each attack
+        //ONE BAR enemies (step 13)
+        public static float TurnRoomToneKeep = 0.7f;     // ROOM TONE : the share of the band's damage the OTHER enemies take while it stands
+        public static int TurnFeltHandCall = 1;          // THE DAMPER : a CALL costs this much more while it stands (2 left the sim's STRONG player at 23 percent against it)
+        public static int TurnTwiceFirst = 1;            // STUTTER : cuts in after this many of the band's moves
+        public static int TurnTwiceSecond = 3;           //           and again after this many
 
         //PRACTICE (step 9) : the soft enemy of the tutorial's practice fight (EnemyList.Practice).
         //Lots of life so the four lessons fit before it falls, and notes that barely hurt.
@@ -139,17 +144,18 @@
 
         //The other four of the lore (step 10, ALPHA7_DESIGN 5.9). Signatures are x their strength (0.4 to 1.3).
         //THE METRONOME (Bach) : LOCKED TEMPO needs no number (any size is right), FUGUE echoes the next move at the strength.
+        public static float TurnFugueScale = 1.8f;     // FUGUE : the echo plays at the SIGNATURE's strength x this (step 13 : was 1, THE METRONOME was the weakest at 44 percent)
         public static int TurnPaganiniLife = 3;        // THE HEARTLESS's PASSIVE : life paid for each BREATH a skill is short of
-        public static float TurnCapricePrice = 0.1f;   // CAPRICE : when it ends, every musician pays this share of their life (never below 1)
+        public static float TurnCapricePrice = 0.2f;   // CAPRICE : when it ends, every musician pays this share of their life (never below 1, step 13 : was 0.1)
         public static int TurnCapricePerStroke = 2;    // CAPRICE : turns per stroke that lands (step 12, a bar has more turns now)
         public static float TurnLullyWindow = 0.01f;   // THE KING'S BATON's PASSIVE : seconds added to both parry windows (0.05 won 99 percent of STRONG runs, the others 83 to 90;
                                                        // step 12 : 0.03 won 92 percent and 0.02 84 when parrying became most of the fight)
-        public static int TurnSunHeal = 12;            // THE SUN : life back for every musician at full strength
+        public static int TurnSunHeal = 8;             // THE SUN : life back for every musician at full strength (step 13 : was 12, THE KING'S BATON was the strongest at 71 percent)
         public static float TurnFannyScale = 0.25f;    // THE UNSIGNED's PASSIVE : FANNY's voice hits this much harder
         public static float TurnFelixHeal = 1.5f;      //                          FELIX's voice heals this much more
         public static int TurnFelixCrescendo = 1;      //                          and gives this much more CRESCENDO
-        public static int TurnDuetDamage = 9;          // TWO VOICES : damage to every enemy at full strength
-        public static int TurnDuetHeal = 6;            //              and life back for every musician
+        public static int TurnDuetDamage = 12;         // TWO VOICES : damage to every enemy at full strength (step 13 : was 9 and 6, THE UNSIGNED 46 percent)
+        public static int TurnDuetHeal = 8;             //              and life back for every musician
 
         //Musician Traits in the turn battle (step 10, the TurnTraitText of each musician in Data/Musician.cs)
         public static float TurnCountsWindow = 0.05f;  // COUNTS ALOUD (ANNA) : seconds added to her PERFECT window
@@ -192,6 +198,11 @@
         public static int TurnConBrioNeed = 4;            // CON BRIO : PERFECTs the SIGNATURE needs instead
         public static float TurnCodaBelow = 0.25f;        // CODA : an enemy under this share of its life
         public static float TurnCodaScale = 1.5f;         //        takes this much more
+        //ONE BAR motifs (step 13). SEGUE and LAST WORD need no number.
+        public static float TurnDownbeatScale = 1.5f;     // DOWNBEAT : the first move of a bar
+        public static float TurnEntranceScale = 2f;       // ENTRANCE : a called musician's moves in their first bar
+        public static int TurnGreenRoomHeal = 2;          // GREEN ROOM : life back for each musician on the BENCH at the end of a bar
+        public static float TurnUnisonScale = 2f;         // UNISON : the last ATTACK of a bar that all goes at one enemy
 
         //Turn Feel (seconds) : how the battle page paces a swipe. The ring always closes at the same
         //speed, never eased, so the eye can count it (docs/research/ALPHA7_qte_parry.md).

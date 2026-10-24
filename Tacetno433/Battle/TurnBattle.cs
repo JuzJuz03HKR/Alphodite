@@ -60,6 +60,7 @@ namespace Tacetno433.Battle
         public Skill Skill;            // null for ATTACK
         public Fighter Target;         // the enemy (ATTACK, or a skill at one enemy) or the musician it is for
         public bool Free;              // FEATHER : a free ATTACK, not the musician's turn (GUARD, TAUNT and statuses wait)
+        public bool Unison;            // UNISON (step 13) : the last ATTACK of a bar that all went at one enemy
     }
 
     //Fighter : one body on the field, a musician of the band or a shape of TACET
@@ -102,6 +103,7 @@ namespace Tacetno433.Battle
 
         //Band only (step 10)
         public bool JustCalled;        // CALL (step 12) : walked in from the BENCH this bar, plays from the next one
+        public int CalledBar;          // ENTRANCE (step 13) : the bar they were called in, 0 for the ones who started on the field
         public float Echo;             // FUGUE : the next skill plays again at this strength, 0 for none
         public int Momentum;           // MOMENTUM (OTTO) : hits in a row, each one 1 power more
         public int Swings;             // FOUR BARS STRAIGHT (LUKA) : ATTACKs made this fight
@@ -133,6 +135,7 @@ namespace Tacetno433.Battle
         public List<int> BenchLife = new List<int>();
         public int Calls;              // musicians called this fight
         public bool CalledThisBar;     // one call per bar
+        public Fighter LastCalled;     // ON CUE (THE CUE, step 13) : the musician called in last, null before the first call
         private int lifeBonus;         // the ARCHIVE's STRONGER BAND, for the ones called later
 
         //The Bar : the moves the player wrote, in the order they play (Plan)
@@ -144,6 +147,7 @@ namespace Tacetno433.Battle
         public List<BarMove> OrderMoves = new List<BarMove>();
         public int OrderIndex;
         public int Round;              // the bar
+        private int bandMovesDone;     // the band's own moves played so far in this bar (DOWNBEAT), FEATHER's free ATTACKs not counted
 
         public int Breath;             // BREATH, shared by the whole band
         public int Floor;              // 1, 2 or 3
@@ -265,6 +269,7 @@ namespace Tacetno433.Battle
         //decides its move so the player can write the bar against it.
         private void StartRound()
         {
+            if (Round > 0) GreenRoom();
             Round++;
             Order.Clear();
             OrderMoves.Clear();
@@ -274,12 +279,31 @@ namespace Tacetno433.Battle
             for (int i = 0; i < Party.Count; i++) Party[i].JustCalled = false;
 
             //Intent : decided once at the start, then again right after each of its attacks (FinishEnemyTurn),
-            //so what shows over its head is always the attack still to come (step 10, like Slay the Spire)
+            //so what shows over its head is always the attack still to come (step 10, like Slay the Spire).
+            //A musician it aimed at who fell later in the bar is swapped now, so the plan never shows a fallen target (step 13).
             for (int i = 0; i < Enemies.Count; i++)
-                if (!Enemies[i].Down && !Enemies[i].Planned) PlanIntent(Enemies[i]);
+            {
+                Fighter e = Enemies[i];
+                if (e.Down) continue;
+                if (!e.Planned) PlanIntent(e);
+                else if (e.IntentTarget != null && e.IntentTarget.Down) e.IntentTarget = PickTarget(e);
+            }
 
             FocusTarget();
             Step = TurnStep.Plan;
+            AimFirstInLine();
+        }
+
+        //GREEN ROOM (motif, step 13) : at the end of every bar the musicians on the BENCH get some life back
+        private void GreenRoom()
+        {
+            if (!Has(MotifId.GreenRoom)) return;
+            for (int i = 0; i < Bench.Count; i++)
+            {
+                if (BenchLife[i] < 0) continue;                                              // -1 : already at full life
+                int max = BattleRules.TurnHp[(int)Bench[i].Family] + lifeBonus;
+                BenchLife[i] = Math.Min(max, BenchLife[i] + BattleRules.TurnGreenRoomHeal);
+            }
         }
 
         //======================================================================================
@@ -361,6 +385,7 @@ namespace Tacetno433.Battle
             }
             move.Skill = s;
             move.Target = target;
+            AimFirstInLine();
         }
 
         //Unplan : the musician's move is rubbed out (they ATTACK Focus if nothing else is written)
@@ -368,6 +393,7 @@ namespace Tacetno433.Battle
         {
             BarMove move = MoveOf(who);
             if (move != null && Step == TurnStep.Plan) Bar.Remove(move);
+            AimFirstInLine();
         }
 
         //Focus Target : the enemy unwritten moves go to, the first one standing when the last one fell
@@ -384,7 +410,12 @@ namespace Tacetno433.Battle
         //The first call of a fight costs TurnCallCost (MAESTRO more), every one after it TurnCallCostStep more.
         public int CallCost
         {
-            get { return (Maestro ? BattleRules.MaestroTurnCallCost : BattleRules.TurnCallCost) + (Calls > 0 ? BattleRules.TurnCallCostStep : 0); }
+            get
+            {
+                int cost = (Maestro ? BattleRules.MaestroTurnCallCost : BattleRules.TurnCallCost) + (Calls > 0 ? BattleRules.TurnCallCostStep : 0);
+                if (AnyStanding(EnemyTrait.FeltHand)) cost += BattleRules.TurnFeltHandCall;   // FELT HAND (THE DAMPER)
+                return cost;
+            }
         }
 
         public bool CanCall(int bench)
@@ -402,10 +433,17 @@ namespace Tacetno433.Battle
 
             Fighter f = MakeMusician(Bench[bench], BenchLife[bench]);
             f.JustCalled = true;
+            f.CalledBar = Round;                                                             // ENTRANCE
             Party.Add(f);
             Bench.RemoveAt(bench);
             BenchLife.RemoveAt(bench);
             Events.Add(new TurnEvent(TurnEventKind.Called, f, 0));
+
+            //ON CUE (THE CUE) : it turns to the one who just walked in, so the screen shows it at once
+            LastCalled = f;
+            if (PickTaunt() == null)
+                for (int i = 0; i < Enemies.Count; i++)
+                    if (Cued(Enemies[i]) && !Enemies[i].IntentRest) Enemies[i].IntentTarget = f;
             return f;
         }
 
@@ -417,10 +455,21 @@ namespace Tacetno433.Battle
             for (int i = 0; i < Party.Count; i++)
                 if (CanPlan(Party[i]) && MoveOf(Party[i]) == null) Write(Party[i], null, FocusTarget());
 
+            MarkUnison();
             BuildOrder(Bar, Order, OrderMoves);
             Feather = 0;
             OrderIndex = 0;
+            bandMovesDone = 0;
             BeginTurn();
+        }
+
+        //UNISON (motif, step 13) : when every move of the bar is an ATTACK at the same enemy, the last one hits harder
+        private void MarkUnison()
+        {
+            if (!Has(MotifId.Unison) || Bar.Count < 2) return;
+            for (int i = 0; i < Bar.Count; i++)
+                if (Bar[i].Skill != null || Bar[i].Target != Bar[0].Target) return;
+            Bar[Bar.Count - 1].Unison = true;
         }
 
         //Preview Order : who will play in what order if the bar were played now, for the screen's bar strip.
@@ -450,10 +499,16 @@ namespace Tacetno433.Battle
 
             List<Fighter> fast = new List<Fighter>();
             List<Fighter> slow = new List<Fighter>();
+            List<Fighter> twice = new List<Fighter>();        // TWICE A BAR (STUTTER)
             for (int i = 0; i < Enemies.Count; i++)
             {
                 Fighter e = Enemies[i];
                 if (e.Down) continue;
+                if (Has(e, EnemyTrait.TwiceABar))
+                {
+                    twice.Add(e);
+                    continue;
+                }
                 List<Fighter> list = e.Speed >= BattleRules.TurnCutInSpeed ? fast : slow;
                 int at = list.Count;
                 while (at > 0 && list[at - 1].Speed < e.Speed) at--;
@@ -480,9 +535,13 @@ namespace Tacetno433.Battle
             {
                 order.Add(band[i].Who);
                 moves.Add(band[i]);
+                if (i + 1 == BattleRules.TurnTwiceFirst) AddEnemies(twice, order, moves);       // TWICE A BAR, the first time
                 if (i + 1 == BattleRules.TurnCutInAfter) AddEnemies(fast, order, moves);       // CUT IN
+                if (i + 1 == BattleRules.TurnTwiceSecond) AddEnemies(twice, order, moves);     // TWICE A BAR, again
             }
+            if (band.Count < BattleRules.TurnTwiceFirst) AddEnemies(twice, order, moves);
             if (band.Count < BattleRules.TurnCutInAfter) AddEnemies(fast, order, moves);
+            if (band.Count < BattleRules.TurnTwiceSecond) AddEnemies(twice, order, moves);
             AddEnemies(slow, order, moves);
         }
 
@@ -509,7 +568,7 @@ namespace Tacetno433.Battle
             Enemy e = enemy.Enemy;
             bool trait = TraitOn(enemy);
             enemy.Planned = true;
-            enemy.IntentTarget = PickTarget();
+            enemy.IntentTarget = PickTarget(enemy);
             enemy.IntentRest = false;
             enemy.IntentFast = false;
             enemy.IntentCadenza = false;
@@ -549,6 +608,7 @@ namespace Tacetno433.Battle
             int most = small ? BattleRules.TurnSmallNotesMax[Floor - 1] : BattleRules.TurnNotesMax[Floor - 1];
             int count = Math.Max(fewest, Math.Min(most, ways.Count));
             if (trait && e.Trait == EnemyTrait.NoRest) count++;              // NO REST (WHITE NOISE)
+            if (trait && e.Trait == EnemyTrait.TwiceABar) count = 1;         // TWICE A BAR (STUTTER) : one note each time
             int power = e.TurnPower > 0 ? e.TurnPower : e.SongNotePower();                  // SongNotePower = the average of its Pattern notes
             float maestroHit = Maestro ? BattleRules.MaestroTurnDamage : 1f;                 // MAESTRO
             int hit = Math.Max(1, (int)Math.Round(power * BattleRules.TurnNoteDamage * BattleRules.TurnFloorDamage[Floor - 1] * maestroHit));
@@ -641,11 +701,19 @@ namespace Tacetno433.Battle
             return enemy.IsEnemy && enemy.Enemy.Trait != EnemyTrait.None && Floor >= enemy.Enemy.TraitFloor;
         }
 
-        //Pick Target : a musician with TAUNT up if there is one, else anyone standing
-        private Fighter PickTarget()
+        //Pick Target : a musician with TAUNT up if there is one, else anyone standing.
+        //ON CUE and FIRST IN LINE (step 13) pick their own musician when there is one to pick.
+        private Fighter PickTarget(Fighter enemy)
         {
             for (int i = 0; i < Party.Count; i++)
                 if (Party[i].Taunt && !Party[i].Down) return Party[i];
+
+            if (Cued(enemy) && LastCalled != null && !LastCalled.Down) return LastCalled;          // ON CUE
+            if (enemy != null && Has(enemy, EnemyTrait.FirstInLine))                               // FIRST IN LINE
+            {
+                Fighter first = FirstInLine();
+                if (first != null) return first;
+            }
 
             List<Fighter> standing = new List<Fighter>();
             for (int i = 0; i < Party.Count; i++)
@@ -681,7 +749,7 @@ namespace Tacetno433.Battle
                     //TAUNT ends : an enemy that planned its next attack while taunted aims again
                     f.Taunt = false;
                     for (int i = 0; i < Enemies.Count; i++)
-                        if (!Enemies[i].Down && Enemies[i].IntentTarget == f) Enemies[i].IntentTarget = PickTarget();
+                        if (!Enemies[i].Down && Enemies[i].IntentTarget == f) Enemies[i].IntentTarget = PickTarget(Enemies[i]);
                 }
 
                 if (f.IsEnemy && f.Staggered)
@@ -703,7 +771,7 @@ namespace Tacetno433.Battle
                     Unfinished(f);                                                           // UNFINISHED
                     Fighter taunt = PickTaunt();
                     if (taunt != null) f.IntentTarget = taunt;
-                    else if (f.IntentTarget == null || f.IntentTarget.Down) f.IntentTarget = PickTarget();
+                    else if (f.IntentTarget == null || f.IntentTarget.Down) f.IntentTarget = PickTarget(f);
                     parried = 0;
                     Step = TurnStep.EnemyTurn;
                 }
@@ -738,6 +806,46 @@ namespace Tacetno433.Battle
             return null;
         }
 
+        //Has : the enemy's trait is this one and it is switched on (TraitOn)
+        private bool Has(Fighter enemy, EnemyTrait trait)
+        {
+            return enemy != null && TraitOn(enemy) && enemy.Enemy.Trait == trait;
+        }
+
+        //Any Standing : an enemy still standing has this trait switched on
+        private bool AnyStanding(EnemyTrait trait)
+        {
+            for (int i = 0; i < Enemies.Count; i++)
+                if (!Enemies[i].Down && Has(Enemies[i], trait)) return true;
+            return false;
+        }
+
+        private bool Cued(Fighter enemy)
+        {
+            return enemy != null && !enemy.Down && Has(enemy, EnemyTrait.OnCue);
+        }
+
+        //FIRST IN LINE (THE ROUND, step 13) : the musician who plays first in this bar. While the bar is written
+        //that is the first move written, or the first one on the field who will ATTACK without a move.
+        private Fighter FirstInLine()
+        {
+            for (int i = 0; i < Bar.Count; i++)
+                if (!Bar[i].Who.Down) return Bar[i].Who;
+            for (int i = 0; i < Party.Count; i++)
+                if (!Party[i].Down && !Party[i].JustCalled) return Party[i];
+            return null;
+        }
+
+        //Aim First In Line : the bar changed while it is written, so FIRST IN LINE turns to its new first musician
+        private void AimFirstInLine()
+        {
+            if (Step != TurnStep.Plan || PickTaunt() != null) return;
+            Fighter first = FirstInLine();
+            if (first == null) return;
+            for (int i = 0; i < Enemies.Count; i++)
+                if (!Enemies[i].Down && !Enemies[i].IntentRest && Has(Enemies[i], EnemyTrait.FirstInLine)) Enemies[i].IntentTarget = first;
+        }
+
         //Advance : move to the next one standing this round, false when the round is over
         private bool Advance()
         {
@@ -753,6 +861,7 @@ namespace Tacetno433.Battle
             Fighter done = Order[OrderIndex];
             bool free = OrderMoves[OrderIndex] != null && OrderMoves[OrderIndex].Free;      // FEATHER : statuses wait for the real turn
             if (!free) EndOfTurn(done);
+            if (!done.IsEnemy && !free) bandMovesDone++;                                     // DOWNBEAT
             if (!done.IsEnemy && Kit == TurnKit.Fanny) FelixVoice = !FelixVoice;              // TWO VOICES : the other voice leads next
             if (CapriceTurns > 0)
             {
@@ -841,13 +950,14 @@ namespace Tacetno433.Battle
             attacker.Swings++;
             if (trait == MusicianTrait.FourBars && attacker.Swings % BattleRules.TurnFourBarsEvery == 0) scale *= BattleRules.TurnFourBarsScale;
 
+            scale *= MoveScale(attacker, CurrentMove);                                              // DOWNBEAT, ENTRANCE, UNISON
             int damage = HitDamage(attacker, target, scale);
-            Hurt(target, damage);
+            Strike(target, damage);
             AddBreath(BattleRules.TurnBreathPerAttack);
 
             //HELD NOTE (CHAI) : his ATTACK rings on, a second hit for a share of the first
             if (trait == MusicianTrait.HeldNote && !target.Down)
-                Hurt(target, Math.Max(1, (int)Math.Round(damage * BattleRules.TurnHeldNoteShare)));
+                Strike(target, Math.Max(1, (int)Math.Round(damage * BattleRules.TurnHeldNoteShare)));
 
             //FUGUE (THE METRONOME) : an echo waiting on this musician plays the ATTACK once more at its strength (step 12)
             if (attacker.Echo > 0f && !target.Down)
@@ -855,11 +965,12 @@ namespace Tacetno433.Battle
                 float echo = attacker.Echo;
                 attacker.Echo = 0f;
                 Events.Add(new TurnEvent(TurnEventKind.Echo, attacker, 0));
-                Hurt(target, Math.Max(1, (int)Math.Round(damage * echo)));
+                Strike(target, Math.Max(1, (int)Math.Round(damage * echo)));
             }
 
             CountHit(attacker, true);                                                                // MOMENTUM
             AddOffBeat(target, BattleRules.TurnAttackOffBeat * (Has(MotifId.Marcato) ? BattleRules.TurnMarcatoOffBeat : 1));   // OFF-BEAT, MARCATO
+            LastWord(attacker);                                                                      // LAST WORD
 
             NextTurn();
             return damage;
@@ -890,6 +1001,7 @@ namespace Tacetno433.Battle
             Fighter user = Current;
             List<Fighter> targets = TargetsOf(s, target, user);
             if (targets.Count == 0) return false;
+            float moveScale = MoveScale(user, CurrentMove);                                        // DOWNBEAT, ENTRANCE
 
             int lifeCost = LifeCost(s);                                                            // BORROWED BREATH
             Breath = Math.Max(0, Breath - s.Cost);
@@ -915,11 +1027,11 @@ namespace Tacetno433.Battle
                 {
                     user.Crescendo = 0;                                                     // CRESCENDO is lost on a MISS
                     //RUBATO : a missed note still plays, at TurnRubatoMiss of a GOOD one and with no BREATH
-                    if (Has(MotifId.Rubato)) PlayNote(s, s.Notes[n], new NoteResult(Grade.Good, true, r.Hold), targets, user, BattleRules.TurnRubatoMiss, false);
+                    if (Has(MotifId.Rubato)) PlayNote(s, s.Notes[n], new NoteResult(Grade.Good, true, r.Hold), targets, user, BattleRules.TurnRubatoMiss * moveScale, false);
                     continue;
                 }
                 anyLanded = true;
-                PlayNote(s, s.Notes[n], r, targets, user, 1f, true);
+                PlayNote(s, s.Notes[n], r, targets, user, moveScale, true);
             }
             CountHit(user, anyLanded);                                                      // MOMENTUM
 
@@ -944,6 +1056,7 @@ namespace Tacetno433.Battle
                 for (int i = 0; i < Enemies.Count; i++)
                     if (!Enemies[i].Down) Enemies[i].IntentTarget = user;
             }
+            LastWord(user);                                                                 // LAST WORD
 
             NextTurn();
             return true;
@@ -985,7 +1098,7 @@ namespace Tacetno433.Battle
 
                     if (f.IsEnemy)
                     {
-                        if (s.Damage > 0f) Hurt(f, HitDamage(user, f, scale * s.Damage * tutti));
+                        if (s.Damage > 0f) Strike(f, HitDamage(user, f, scale * s.Damage * tutti));
                         if (s.Dissonance > 0 && !f.Down) AddDissonance(f, s.Dissonance);
                         if (offBeat > 0 && !f.Down) AddOffBeat(f, offBeat);
                         if (thunder && !f.Down) Quieten(f);
@@ -1198,7 +1311,7 @@ namespace Tacetno433.Battle
                 if (Has(MotifId.Counterpoint)) scale *= BattleRules.TurnCounterpointScale;                     // COUNTERPOINT
                 int damage = HitDamage(target, enemy, scale);
                 Events.Add(new TurnEvent(TurnEventKind.Counter, target, damage));
-                Hurt(enemy, damage);
+                Strike(enemy, damage);
             }
 
             //The next attack is decided now, so its intent shows until it comes (a fallen enemy has none)
@@ -1350,7 +1463,7 @@ namespace Tacetno433.Battle
                 {
                     Fighter e = Enemies[i];
                     if (e.Down) continue;
-                    Hurt(e, Math.Max(1, (int)Math.Round(BattleRules.TurnBoltDamage * strength * BeethovenScale())));
+                    Strike(e, Math.Max(1, (int)Math.Round(BattleRules.TurnBoltDamage * strength * BeethovenScale())));
                     if (!e.Down) AddOffBeat(e, (int)Math.Round(BattleRules.TurnOffBeatMax * strength));
                 }
             }
@@ -1369,7 +1482,7 @@ namespace Tacetno433.Battle
                 for (int i = 0; i < Party.Count; i++)
                 {
                     if (Party[i].Down) continue;
-                    Party[i].Echo = strength;
+                    Party[i].Echo = strength * BattleRules.TurnFugueScale;
                     Events.Add(new TurnEvent(TurnEventKind.Echo, Party[i], 0));
                 }
             }
@@ -1395,7 +1508,7 @@ namespace Tacetno433.Battle
             if (Kit == TurnKit.Fanny)
             {
                 for (int i = 0; i < Enemies.Count; i++)
-                    if (!Enemies[i].Down) Hurt(Enemies[i], Math.Max(1, (int)Math.Round(BattleRules.TurnDuetDamage * strength)));
+                    if (!Enemies[i].Down) Strike(Enemies[i], Math.Max(1, (int)Math.Round(BattleRules.TurnDuetDamage * strength)));
                 for (int i = 0; i < Party.Count; i++)
                     if (!Party[i].Down) Heal(Party[i], Math.Max(1, (int)Math.Round(BattleRules.TurnDuetHeal * strength)));
             }
@@ -1453,6 +1566,57 @@ namespace Tacetno433.Battle
         //======================================================================================
         //Life, Breath and Statuses
         //======================================================================================
+
+        //Strike : the band's damage to an enemy (an ATTACK, a skill, a COUNTER, a SIGNATURE).
+        //HOLDS THE ROOM (ROOM TONE) takes some off while another enemy has it, SEGUE (motif) carries what is
+        //left over a SILENCE on to the next enemy standing. DISSONANCE is not a strike, it uses Hurt.
+        private void Strike(Fighter enemy, int amount)
+        {
+            if (amount <= 0 || enemy.Down) return;
+            if (HeldUp(enemy)) amount = Math.Max(1, (int)Math.Round(amount * BattleRules.TurnRoomToneKeep));   // HOLDS THE ROOM
+            int over = amount - enemy.Hp;
+            Hurt(enemy, amount);
+            if (over <= 0 || !Has(MotifId.Segue)) return;
+
+            //SEGUE : the next enemy standing after this one in the line, round to the start
+            for (int k = 1; k < Enemies.Count; k++)
+            {
+                Fighter next = Enemies[(enemy.Slot + k) % Enemies.Count];
+                if (next.Down) continue;
+                Strike(next, over);
+                return;
+            }
+        }
+
+        //Held Up : HOLDS THE ROOM, another enemy standing has it (two ROOM TONEs hold each other up)
+        private bool HeldUp(Fighter enemy)
+        {
+            for (int i = 0; i < Enemies.Count; i++)
+                if (Enemies[i] != enemy && !Enemies[i].Down && Has(Enemies[i], EnemyTrait.HoldsTheRoom)) return true;
+            return false;
+        }
+
+        //Move Scale : how much stronger this musician's move is (1 for most). DOWNBEAT : the first move of the bar.
+        //ENTRANCE : a musician called in last bar. UNISON : the last ATTACK of a bar that all went at one enemy.
+        private float MoveScale(Fighter who, BarMove move)
+        {
+            float scale = 1f;
+            bool free = move != null && move.Free;
+            if (Has(MotifId.Downbeat) && !free && bandMovesDone == 0) scale *= BattleRules.TurnDownbeatScale;
+            if (Has(MotifId.Entrance) && who.CalledBar > 0 && Round == who.CalledBar + 1) scale *= BattleRules.TurnEntranceScale;
+            if (move != null && move.Unison) scale *= BattleRules.TurnUnisonScale;
+            return scale;
+        }
+
+        //LAST WORD (motif, step 13) : the musician who plays the band's last move of the bar stands GUARD
+        //until their next turn (FEATHER's free ATTACKs after it do not count)
+        private void LastWord(Fighter who)
+        {
+            if (!Has(MotifId.LastWord) || CurrentMove == null || CurrentMove.Free) return;
+            for (int j = OrderIndex + 1; j < Order.Count; j++)
+                if (OrderMoves[j] != null && !OrderMoves[j].Free && !Order[j].Down) return;
+            who.Guard = true;
+        }
 
         private void Hurt(Fighter f, int amount)
         {
