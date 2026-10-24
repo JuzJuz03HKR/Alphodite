@@ -36,7 +36,7 @@ namespace Tacetno433.Screens
         {
             "Your baton",
             "The note says it all",
-            turnBattle ? "Take turns" : "Push back the silence"
+            turnBattle ? "One bar at a time" : "Push back the silence"
         };
         private static string[] bodies =
         {
@@ -46,8 +46,8 @@ namespace Tacetno433.Screens
 
             "ARROW : which way. LETTER : how far (p small, mf middle, f big). RING : stop as it closes.",
 
-            turnBattle ? "Your turn : attack or use a skill, then swing on the ring. "
-                   + "Their turn : swipe back at each note to block it. Skills cost BREATH, blocks give it back."
+            turnBattle ? "Your bar : give each musician a move, ENTER plays them in order. ATTACK hits by itself, a skill asks for a swing. "
+                   + "Their turn : swipe back at each note to block it. BREATH pays for skills and for calling the BENCH."
                  : "Win a note, push the line. Lose a note, lose breath. "
                    + "Push the line all the way to win. Let silent beats pass to breathe."
         };
@@ -63,9 +63,9 @@ namespace Tacetno433.Screens
         //Drawing Data : the made-up examples in the pictures, kept out of Draw so drawing never allocates
         private static string[] demoSizes = { "p", "mf", "f" };
         private static string[] demoBeats = { "1", "2", "3", "4" };
-        private static string[] keyNames = turnBattle ? new string[] { "1 2 3", "SPACE", "TAB", "ESC" } : new string[] { "SPACE", "TAB", "ESC" };
+        private static string[] keyNames = turnBattle ? new string[] { "1 2 3", "ENTER", "SPACE", "TAB", "ESC" } : new string[] { "SPACE", "TAB", "ESC" };
         private static string[] keyJobs = turnBattle
-            ? new string[] { "ATTACK AND SKILLS", "SIGNATURE  (WHEN THE DIAMONDS ARE FULL)", "THE BAND  (ON THE ROUTE)", "PAUSE" }
+            ? new string[] { "ATTACK AND SKILLS", "PLAY THE BAR", "SIGNATURE  (WHEN THE DIAMONDS ARE FULL)", "THE BAND  (ON THE ROUTE)", "PAUSE" }
             : new string[] { "SIGNATURE  (WHEN ITS RECIPE IS FULL)", "THE BAND  (ON THE ROUTE)", "PAUSE" };
         private static string[] demoOrder = { "1", "2", "TACET", "3" };
 
@@ -160,8 +160,8 @@ namespace Tacetno433.Screens
             Gfx.Text(sb, Game.StoryFont, "the left button raises the baton", 250, 232, Palette.PaperDim * a, TextSize.StorySmall);
             DrawShape(sb, 520f, 230f, 56f, a);
 
-            //Keys : four rows in the turn battle, so they sit a little closer
-            float keyStep = keyNames.Length > 3 ? 46f : 56f;
+            //Keys : five rows in the turn battle, so they sit a little closer
+            float keyStep = keyNames.Length > 4 ? 40f : (keyNames.Length > 3 ? 46f : 56f);
             for (int i = 0; i < keyNames.Length; i++)
             {
                 float y = 350f + i * keyStep;
@@ -237,12 +237,12 @@ namespace Tacetno433.Screens
             Gfx.Circle(sb, tip.X, tip.Y, 6f, Palette.Highlight * a);
         }
 
-        //Page 3 (turn battle) : the turn order, the band and TACET, one of its notes flying in to
-        //be blocked on the ring, and the BREATH pips
+        //Page 3 (turn battle) : the bar (ONE BAR, a CUT IN in the middle), the band and TACET, one of its notes
+        //flying in to be blocked on the ring, and the BREATH pips
         private void DrawFight(SpriteBatch sb, float a)
         {
-            //Turn Order : the band are filled plates, TACET an outline, like the fight page
-            Gfx.TextSpaced(sb, Game.Font, "TURN ORDER", 110, 140, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            //The Bar : the band are filled plates, TACET an outline, like the fight page
+            Gfx.TextSpaced(sb, Game.Font, "THE BAR", 110, 140, Palette.LineGrey * a, TextSize.Tiny, 2f);
             int now = (int)(time / 1.6f) % demoOrder.Length;
             for (int i = 0; i < demoOrder.Length; i++)
             {
@@ -270,7 +270,7 @@ namespace Tacetno433.Screens
             else Gfx.TextSpacedCentered(sb, Game.Font, "BLOCK", cx, cy + 50, Palette.Highlight * a, TextSize.Label, 3f);
 
             //BREATH : what skills spend and blocks give back
-            Gfx.TextSpaced(sb, Game.Font, "BREATH  :  SKILLS SPEND IT, BLOCKS GIVE IT BACK", 110, 440, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            Gfx.TextSpaced(sb, Game.Font, "BREATH  :  SKILLS AND CALLS SPEND IT, HITS GIVE IT BACK", 110, 440, Palette.LineGrey * a, TextSize.Tiny, 2f);
             Ui.Pips(sb, 116, 476, 3 + (int)(time * 0.8f) % 5, BattleRules.TurnBreathMax, 8f, 22f, a);
         }
 

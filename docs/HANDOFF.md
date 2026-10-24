@@ -2,14 +2,16 @@
 
 > **18 ต.ค. : Alpha 7** เกมกำลังเปลี่ยนเป็น turn-based roguelike (branch `Alpha7`) · โครงโค้ดใหม่ที่วางไว้อยู่ข้อ 9 ของ [`ALPHA7_DESIGN.md`](ALPHA7_DESIGN.md) · แผนที่โค้ดตั้งแต่ข้อ 1 ลงไปเป็นของเกม rhythm รอบ 15
 
-## 0. แผนที่โค้ด Alpha 7 (การต่อสู้แบบผลัดตา, อัปเดต 19 ต.ค. ขั้น 1–11)
+## 0. แผนที่โค้ด Alpha 7 (การต่อสู้แบบผลัดตา, อัปเดต 24 ต.ค. ขั้น 1–12 ONE BAR)
 
 ตัวสลับ : `Data/BattleRules.cs` `TurnBattleOn` (true = ผลัดตา, false = กลับไปดวลเดิมทั้งเกม)
 
 | อยากแก้อะไร | ไปไฟล์ไหน |
 |---|---|
-| กติกาการต่อสู้ทั้งหมด (ลำดับตา ตี ปัด สกิล สถานะ เสียศูนย์ COUNTER CADENZA ท่าวาทยากร ความสามารถติดตัว) ไม่มีโค้ดวาด | `Battle/TurnBattle.cs` (ค้นชื่อกติกาตัวพิมพ์ใหญ่ เช่น `CAPRICE` `MOMENTUM`) |
-| หน้าต่อสู้ (วงแหวน QTE ปุ่มคำสั่ง แถบลำดับตา ป้ายสถานะ ไฟต์ฝึก PRACTICE) | `Screens/BattleScreen.cs` |
+| กติกาการต่อสู้ทั้งหมด (ห้อง ONE BAR ตี ปัด สกิล สถานะ เสียศูนย์ COUNTER CADENZA ท่าวาทยากร ความสามารถติดตัว) ไม่มีโค้ดวาด | `Battle/TurnBattle.cs` (ค้นชื่อกติกาตัวพิมพ์ใหญ่ เช่น `CAPRICE` `MOMENTUM`) |
+| ONE BAR (ขั้น 12) : เขียนห้อง `PlanAttack` `PlanSkill` `Unplan` `PlayBar` ม้านั่ง `Bench` `Call` `CallCost` แทรกกลางห้อง `CUT IN` (`BuildOrder`) | `Battle/TurnBattle.cs` หัวข้อ ONE BAR · ตัวเลข `BattleRules` หัวข้อ ONE BAR และ PACKS |
+| ศัตรูหลายตัวในรัน (PACKS) และเซฟ | `RunState.BeginBattle` `PackEscorts` · `BattleState.Pack` · `SaveFile` (`pack=`) · `EnemyList.PickOther` |
+| หน้าต่อสู้ (เขียนห้อง ม้านั่ง ATTACK พุ่งตี game feel วงแหวน QTE แถบห้อง ป้ายสถานะ ไฟต์ฝึก PRACTICE) | `Screens/BattleScreen.cs` |
 | ตัวเลขบาลานซ์ทุกตัว | `Data/BattleRules.cs` หัวข้อ TURN BATTLE (บนสุด) และ Turn Feel |
 | สกิลนักดนตรี 18 สกิล (2 ต่อคน ตามลำดับ `MusicianList`) | `Data/Skill.cs` |
 | ความสามารถติดตัวนักดนตรีในโหมดผลัดตา | ข้อความ `Data/Musician.cs` `TurnTraitText` · ผล `TurnBattle.cs` (ค้นชื่อความสามารถ) |

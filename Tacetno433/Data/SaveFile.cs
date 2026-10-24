@@ -37,6 +37,7 @@ namespace Tacetno433.Data
 
         //Loaded Place : what a loaded run was in the middle of, read by RunFlow.Continue
         public static Enemy LoadedEnemy;
+        public static List<Enemy> LoadedPack = new List<Enemy>();     // PACKS : everyone in that fight, LoadedEnemy first
         public static GameEvent LoadedEvent;
 
         //Folder Override : DEVELOPER TOOL ONLY. The capture tool's save check points this at its
@@ -211,6 +212,10 @@ namespace Tacetno433.Data
             lines.Add("options=" + string.Join(",", options));
             lines.Add("chosen=" + Array.IndexOf(run.Options, run.Chosen));
             lines.Add("enemy=" + (run.Battle != null ? Array.IndexOf(EnemyList.All, run.Battle.Enemy) : -1));
+            List<string> pack = new List<string>();                                       // PACKS (Alpha 7 step 12)
+            if (run.Battle != null)
+                for (int i = 0; i < run.Battle.Pack.Count; i++) pack.Add(Array.IndexOf(EnemyList.All, run.Battle.Pack[i]).ToString());
+            lines.Add("pack=" + string.Join(",", pack));
             lines.Add("event=" + (run.CurrentEvent != null ? Array.IndexOf(EventList.All, run.CurrentEvent) : -1));
 
             Write(RunPath, lines);
@@ -221,6 +226,7 @@ namespace Tacetno433.Data
         public static RunState LoadRun(TacetGame game)
         {
             LoadedEnemy = null;
+            LoadedPack.Clear();
             LoadedEvent = null;
 
             Dictionary<string, string> v = Read(RunPath);
@@ -298,6 +304,9 @@ namespace Tacetno433.Data
 
             int enemy = GetInt(v, "enemy", -1);
             if (enemy >= 0 && enemy < EnemyList.All.Length) LoadedEnemy = EnemyList.All[enemy];
+            int[] pack = GetList(v, "pack");
+            for (int i = 0; i < pack.Length; i++)
+                if (pack[i] >= 0 && pack[i] < EnemyList.All.Length) LoadedPack.Add(EnemyList.All[pack[i]]);
             int ev = GetInt(v, "event", -1);
             if (ev >= 0 && ev < EventList.All.Length) LoadedEvent = EventList.All[ev];
 

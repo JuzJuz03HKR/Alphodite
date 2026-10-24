@@ -405,8 +405,8 @@ namespace Tacetno433.Data
         }
 
         //Battle Begin Against : the same, with the enemy already known (a loaded save walks back
-        //into the fight it left). Null picks one as usual.
-        public void BeginBattle(Enemy known)
+        //into the fight it left). Null picks one as usual. knownPack is the whole saved PACK, or null.
+        public void BeginBattle(Enemy known, List<Enemy> knownPack = null)
         {
             EnemyKind kind = EnemyKind.Normal;
             if (Chosen != null && Chosen.Type == NodeType.Elite) kind = EnemyKind.Elite;
@@ -414,6 +414,26 @@ namespace Tacetno433.Data
 
             Enemy enemy = known != null ? known : EnemyList.Pick(kind, Era, random);
             Battle = new BattleState(this, enemy, random);
+
+            //PACKS (Alpha 7 step 12) : the turn battle brings ordinary enemies along, more on deeper floors
+            //and more in the second half of a floor (BattleRules ONE BAR)
+            if (!BattleRules.TurnBattleOn) return;
+            if (knownPack != null && knownPack.Count > 0 && knownPack[0] == enemy)
+            {
+                Battle.Pack = new List<Enemy>(knownPack);
+                return;
+            }
+            for (int i = 0; i < PackEscorts(kind); i++) Battle.Pack.Add(EnemyList.PickOther(EnemyKind.Normal, Era, Battle.Pack, random));
+        }
+
+        //Pack Escorts : how many ordinary enemies join the one picked for this fight
+        public int PackEscorts(EnemyKind kind)
+        {
+            int f = Math.Max(1, Math.Min(3, Floor)) - 1;
+            if (kind == EnemyKind.Elite) return BattleRules.TurnEliteEscort[f];
+            if (kind == EnemyKind.Boss) return BattleRules.TurnBossEscort[f];
+            bool late = Stage * 2 > StagesThisFloor;
+            return (late ? BattleRules.TurnPackLate[f] : BattleRules.TurnPackEarly[f]) - 1;
         }
 
         //Battle Finish : called once the player has seen the outcome

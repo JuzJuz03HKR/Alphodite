@@ -47,13 +47,14 @@ namespace Tacetno433.Screens
 
         //Notes : what the detail box says when the mouse is over nothing
         private const string NoteTitle = "A REAL ORCHESTRA, SEEN FROM THE PODIUM";
-        //The turn battle (Alpha 7) has no beats and no section bonus : the three on stage fight, and the
-        //arrow and the family say how each one swings their ATTACK (TurnBattle ATTACK PART)
+        //The turn battle (Alpha 7) has no beats and no section bonus. ONE BAR (step 12) : the first ones on stage
+        //start each fight (Archive.StartBand), everybody else waits on the BENCH and can be called in during it.
+        //The arrow says the way their skills start.
         private static readonly string NoteBand = BattleRules.TurnBattleOn
-            ? "Click a musician : on stage or on the bench. The three on stage fight."
+            ? "Click a musician : on stage or on the bench. The first on stage start the fight, the rest can be CALLED in."
             : "Click a musician : on stage or on the bench. Everyone on stage plays every note.";
         private static readonly string NoteArrow = BattleRules.TurnBattleOn
-            ? "ARROW = the way their ATTACK swings."
+            ? "ARROW = the way their skills start."
             : "ARROW : swing their way, they hit 50 percent harder.";
         private static string noteSection = "";        // SECTION, made once from BattleRules
 
@@ -88,7 +89,7 @@ namespace Tacetno433.Screens
                     if (BattleRules.CueSide[b % 4] == side) beats += "  " + (b + 1);
                 sideBeats[side] = beats;
             }
-            if (BattleRules.TurnBattleOn) sideBeats = new string[] { "SWINGS LEFT", "SWINGS DOWN", "SWINGS RIGHT" };   // CUE in the turn battle
+            if (BattleRules.TurnBattleOn) sideBeats = new string[] { "SKILLS LEFT", "SKILLS DOWN", "SKILLS RIGHT" };   // CUE in the turn battle : the way their skills start (ATTACK has no swing, step 12)
 
             Rebuild(run);
         }

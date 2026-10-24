@@ -13,7 +13,7 @@ namespace Tacetno433.Screens
     //The band is named here too, but only on the very first floor of a run.
     public class RecruitScreen : GameScreen
     {
-        private static readonly string[] turnWays = { "LEFT", "DOWN", "RIGHT" };   // TURN BATTLE : a CUE as the way their ATTACK swings
+        private static readonly string[] turnWays = { "LEFT", "DOWN", "RIGHT" };   // TURN BATTLE : a CUE as the way their skills start
 
         //Recruit Layout
         private const int ColumnW = 440;
@@ -152,8 +152,8 @@ namespace Tacetno433.Screens
 
             //Seat : their section and the side of the stage they sit on, under the tag (round 15)
             MusicianArt.SideBadge(sb, m.Cue, column.X + 62, column.Y + 108, 18f, Palette.Ink, Palette.Paper, a);
-            //TURN BATTLE : the arrow is the way their ATTACK swings, the seat itself gives nothing
-            Gfx.TextSpacedCentered(sb, Game.Font, BattleRules.TurnBattleOn ? "SWINGS" : "SEAT", column.X + 62, column.Y + 146, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            //TURN BATTLE : the arrow is the way their skills start, the seat itself gives nothing
+            Gfx.TextSpacedCentered(sb, Game.Font, BattleRules.TurnBattleOn ? "SKILLS" : "SEAT", column.X + 62, column.Y + 146, Palette.LineGrey * a, TextSize.Tiny, 2f);
             if (!BattleRules.TurnBattleOn)
                 Gfx.TextSpacedCentered(sb, Game.Font, StageLayout.Rows[StageLayout.SectionOf(m.Family)].Name, column.X + 62, column.Y + 164, Palette.PaperDim * a, TextSize.Tiny, 1f);
             Gfx.TextSpacedCentered(sb, Game.Font, BattleRules.TurnBattleOn ? turnWays[m.Cue] : StageLayout.SideNames[m.Cue], column.X + 62, column.Y + 164 + (BattleRules.TurnBattleOn ? 0 : 16), Palette.PaperDim * a, TextSize.Tiny, 1f);

@@ -60,7 +60,17 @@ commit/push ขึ้น Alpha7 เมื่อฉันสั่ง ยัง�
 
 ---
 
-## สถานะล่าสุด (19 ต.ค.)
+## สถานะล่าสุด (24 ต.ค.)
+
+**24 ต.ค. : ขั้น 12 ONE BAR เสร็จ (ผู้ใช้ลองเล่นแล้ว สั่งทำแล้ว push ได้)** คำต่อคำ `USER_BRIEFS.md` ท้ายสุด รายละเอียด `ALPHA7_DESIGN.md` ข้อ 5.17
+✅ ห้องละ 1 ท่าต่อคน เรียงเอง ENTER เล่น · ATTACK ไม่ต้องตวัด (ตวัดแค่สกิล ปัด SIGNATURE) · ม้านั่ง CALL ห้องละ 1 คน 3 แล้ว 4 BREATH (MAESTRO 5, 6) บนเวทีสูงสุด 6 · ไฟต์เริ่ม 2 คน ARCHIVE FULL STAGE (120) เป็น 3 · ศัตรูหลายตัว ครึ่งหลังของชั้นเยอะกว่า (`TurnPackEarly/Late` `TurnEliteEscort` `TurnBossEscort`) · CUT IN ศัตรูเร็ว 5+ แทรกหลังท่าที่ 2 · เหนือหัวศัตรูโชว์โน้ตทุกตัว ·
+✅ game feel : พุ่งตี hit stop สั่น แวบขาว ดันถอย ตัวนับ HITS / BAR TOTAL ศัตรูเงียบแตกเป็นเศษ ·
+✅ ยากขึ้น : `TurnNoteDamage` 1.5 → 2.2 · `FirstFloorRecruits` 2 → 3 · turnsim NORMAL STRONG 81 → 56% (AVERAGE 0) MAESTRO EXPERT 11% · ปรับวาทยากร (Lully 0.01, FEATHER 2/เส้น, CAPRICE 2/เส้น, FUGUE ซ้ำ ATTACK) เหลือ 44–66% ·
+✅ turncheck 95/95 · savecheck 25/25 · build Linux 0/0 · `Build/TACET4'33.zip` ใหม่ · `TACET_Balance.xlsx` แท็บ Turn สร้างใหม่จากโค้ดด้วย `docs/turn_balance_tabs.py` (ใส่ path ของ turnsim.txt) ·
+⚠️ ยังไม่มีใครเล่น ONE BAR บน Windows · คนเล่นระดับ AVERAGE ในตัวจำลองแพ้เกือบทุกรัน (ตัวจำลองไม่มี Motif ร้าน เหตุการณ์) · บอสชั้น 3 ยังยากไม่เท่ากัน (ข้อ 12) · หน้า BAND ยังเป็นที่นั่ง 9 ช่องแบบเดิม ·
+**งานถัดไป** : (1) ผู้ใช้ Rebuild แล้วเล่น ONE BAR บน Windows บอกความรู้สึก (CALL แพงพอไหม ยากพอไหม ตีแล้วมันไหม) (2) จูนตาม `BattleRules` หัวข้อ ONE BAR / PACKS / `TurnNoteDamage` (3) หน้า BAND ให้เข้ากับม้านั่ง (4) ข้อ 7 "เพิ่มทีหลัง" (5) เสียง · เนื้อเรื่องท้ายสุด
+
+## สถานะก่อนหน้า (19 ต.ค.)
 
 **19 ต.ค. (ต่อ) : ผู้ใช้บอกว่าระบบต่อสู้ยังไม่สนุก ให้ research แล้วเสนอหลายแบบ** (คำต่อคำใน `USER_BRIEFS.md` ท้ายสุด)
 ✅ `docs/ALPHA7_COMBAT_PROPOSALS.md` ฉบับร่าง : ปัญหา 8 ข้อจากโค้ดและตัวจำลอง · 4 แบบ (1 จุดอ่อน WEAK SPOT · 2 ตีต่อ ENCORE · 3 หนึ่งห้อง ONE BAR · 4 เวทีสี่ช่อง FOUR SEATS) · ชุดผสม ก ข ค · Claude แนะนำชุด ก (แบบ 1 + 2) · คำถาม 5 ข้อให้ผู้ใช้เลือก · ยังไม่แก้โค้ด ·

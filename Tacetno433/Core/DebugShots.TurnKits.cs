@@ -25,8 +25,7 @@ namespace Tacetno433.Core
 
             //Intent : decided again right after an attack, so HUSH now shows its second phrase (Lp Rp Dp, 2 notes on floor 1)
             TurnBattle b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
-            b.Attack(b.Enemies[0], Grade.Good, true);
-            b.Attack(b.Enemies[0], Grade.Good, true);
+            PlayToEnemy(b);
             b.TakeEnemyAttack(null);
             report += Same("intent after attack", "Left Right 1 True",
                 b.Enemies[0].IntentWays[0] + " " + b.Enemies[0].IntentWays[1] + " " + b.Enemies[0].Attacks + " " + b.Enemies[0].Planned);
@@ -45,7 +44,9 @@ namespace Tacetno433.Core
             for (int i = 0; i < goods.Length; i++) goods[i] = new NoteResult(Grade.Good, true, 1f);
             TurnBattle plain = new TurnBattle(anna, new List<Enemy> { deadAir }, 1, new Random(433));
             plain.Breath = 10;
-            plain.UseSkill(quickBow, plain.Enemies[0], goods);
+            plain.PlanSkill(plain.Party[0], quickBow, plain.Enemies[0]);
+            plain.PlayBar();
+            plain.UseSkill(goods);
             int lossPlain = plain.Enemies[0].MaxHp - plain.Enemies[0].Hp;
             b = new TurnBattle(anna, new List<Enemy> { deadAir }, 1, new Random(433));
             b.Kit = TurnKit.Bach;
@@ -53,12 +54,14 @@ namespace Tacetno433.Core
             b.UseSignature(fourPerfect);
             string echo = b.Party[0].Echo.ToString("0.0");
             b.Breath = 10;
-            b.UseSkill(quickBow, b.Enemies[0], goods);
+            b.PlanSkill(b.Party[0], quickBow, b.Enemies[0]);
+            b.PlayBar();
+            b.UseSkill(goods);
             int lossEcho = b.Enemies[0].MaxHp - b.Enemies[0].Hp;
             report += Same("fugue", "1.3 True 0", echo + " " + (lossEcho > 2 * lossPlain) + " " + b.Party[0].Echo);
 
-            //CAPRICE (THE HEARTLESS) : 2 strokes land, so 2 turns where every swipe goes one better (a wrong way is
-            //GOOD, 0.15 s off is PERFECT, one shake is GOOD).
+            //CAPRICE (THE HEARTLESS) : 2 strokes land, so 4 turns where every swipe goes one better (a wrong way is
+            //GOOD, 0.15 s off is PERFECT, one shake is GOOD). Three ATTACKs and HUSH's turn (blocked PERFECT) use them up.
             //Then everybody pays 10 percent : ANNA 30 -> 27, KLARA 26 -> 23, OTTO 36 -> 32
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             b.Kit = TurnKit.Paganini;
@@ -66,35 +69,39 @@ namespace Tacetno433.Core
             b.UseSignature(new NoteResult[] { new NoteResult(Grade.Perfect, true, 1f), new NoteResult(Grade.Perfect, true, 1f),
                                               new NoteResult(Grade.Miss, true, 1f), new NoteResult(Grade.Miss, true, 1f) });
             string caprice = b.CapriceTurns + " " + b.Judge(0.5f, false) + " " + b.Judge(0.15f, true) + " " + b.RollGrade(1);
-            b.Attack(b.Enemies[0], Grade.Miss, true);
-            b.Attack(b.Enemies[0], Grade.Miss, true);
-            report += Same("caprice", "2 Good Perfect Good 0 27 23 32", caprice + " " + b.CapriceTurns + " " + b.Party[0].Hp + " " + b.Party[1].Hp + " " + b.Party[2].Hp);
+            b.PlayBar();
+            b.Attack();
+            b.Attack();
+            b.Attack();
+            b.TakeEnemyAttack(AllGrades(b.Current.IntentNotes.Length, Grade.Perfect));
+            report += Same("caprice", "4 Good Perfect Good 0 27 23 32", caprice + " " + b.CapriceTurns + " " + b.Party[0].Hp + " " + b.Party[1].Hp + " " + b.Party[2].Hp);
 
             //BORROWED BREATH (THE HEARTLESS) : no BREATH, KLARA's LONG BREATH (2) costs 6 life and gives 4 BREATH.
-            //Without the kit it cannot be played, and with 6 life or less it cannot be paid.
+            //Without the kit it cannot be written, and with 6 life or less it cannot be paid.
             Skill longBreath = SkillList.Second(MusicianList.All[1]);
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             b.Breath = 0;
-            bool plainCan = b.CanUse(longBreath);
+            bool plainCan = b.CanPlanSkill(b.Party[1], longBreath);
             b.Kit = TurnKit.Paganini;
             int price = b.LifeCost(longBreath);
             NoteResult[] fourGood = { new NoteResult(Grade.Good, true, 1f), new NoteResult(Grade.Good, true, 1f),
                                       new NoteResult(Grade.Good, true, 1f), new NoteResult(Grade.Good, true, 1f) };
-            b.UseSkill(longBreath, b.Party[1], fourGood);
+            b.PlanSkill(b.Party[1], longBreath, null);
+            b.PlayBar();
+            b.UseSkill(fourGood);
             string paid = plainCan + " " + price + " " + b.Party[1].Hp + " " + b.Breath;
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433), new int[] { 30, 6, 36 });
             b.Kit = TurnKit.Paganini;
             b.Breath = 0;
-            report += Same("borrowed breath", "False 6 20 4 False", paid + " " + b.CanUse(longBreath));
+            report += Same("borrowed breath", "False 6 20 4 False", paid + " " + b.CanPlanSkill(b.Party[1], longBreath));
 
-            //STEADY HAND (THE KING'S BATON) : on HUSH's turn 0.24 s late is still GOOD (0.22 + 0.03), not without it
+            //STEADY HAND (THE KING'S BATON) : on HUSH's turn 0.225 s late is still GOOD (0.22 + 0.01), not without it
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
-            b.Attack(b.Enemies[0], Grade.Good, true);
-            b.Attack(b.Enemies[0], Grade.Good, true);
+            PlayToEnemy(b);
             b.Kit = TurnKit.Lully;
-            string steady = b.Judge(0.24f, true) + " " + b.LateLimit.ToString("0.00");
+            string steady = b.Judge(0.225f, true) + " " + b.LateLimit.ToString("0.00");
             b.Kit = TurnKit.None;
-            report += Same("steady hand", "Good 0.25 Miss", steady + " " + b.Judge(0.24f, true));
+            report += Same("steady hand", "Good 0.23 Miss", steady + " " + b.Judge(0.225f, true));
 
             //THE SUN : all four PERFECT, 12 x 1.3 = 15.6 -> 16 back for everybody (KLARA tops out at 26), DISSONANCE and MUTE gone
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433), new int[] { 10, 10, 10 });
@@ -105,13 +112,15 @@ namespace Tacetno433.Core
             b.UseSignature(fourPerfect);
             report += Same("the sun", "26 26 26 0 0", b.Party[0].Hp + " " + b.Party[1].Hp + " " + b.Party[2].Hp + " " + b.Party[0].Dissonance + " " + b.Party[1].Mute);
 
-            //TWO VOICES (THE UNSIGNED) : KLARA in FANNY's voice 4 x 2 x 1.25 = 10, then FELIX leads and ANNA hits a plain 10,
-            //then FANNY again
+            //TWO VOICES (THE UNSIGNED) : KLARA (written first) in FANNY's voice 4 x 2 x 1.25 = 10, then FELIX leads
+            //and ANNA hits a plain 10, then FANNY again
             b = new TurnBattle(band, new List<Enemy> { deadAir }, 1, new Random(433));
             b.Kit = TurnKit.Fanny;
-            int fanny = b.Attack(b.Enemies[0], Grade.Good, true);
+            b.PlanAttack(b.Party[1], b.Enemies[0]);
+            b.PlayBar();
+            int fanny = b.Attack();
             bool felixNext = b.FelixVoice;
-            int felix = b.Attack(b.Enemies[0], Grade.Good, true);
+            int felix = b.Attack();
             report += Same("two voices", "10 True 10 False", fanny + " " + felixNext + " " + felix + " " + b.FelixVoice);
 
             //DUET : all four PERFECT, 9 x 1.3 = 11.7 -> 12 to DEAD AIR, 6 x 1.3 = 7.8 -> 8 back for everybody
@@ -121,90 +130,110 @@ namespace Tacetno433.Core
             b.UseSignature(fourPerfect);
             report += Same("duet", "38 18 18 18", b.Enemies[0].Hp + " " + b.Party[0].Hp + " " + b.Party[1].Hp + " " + b.Party[2].Hp);
 
-            //Musician Traits (each musician on their own, so their turn comes first or after one enemy turn)
+            //Musician Traits (each musician on their own, the bar is played so their move is up)
 
-            //COUNTS ALOUD (ANNA) : 0.13 s off is PERFECT on her own notes (0.10 + 0.05), GOOD for KLARA
+            //COUNTS ALOUD (ANNA) : 0.13 s off is PERFECT on her skill notes (0.10 + 0.05), GOOD for KLARA
             b = new TurnBattle(anna, new List<Enemy> { deadAir }, 1, new Random(433));
+            b.PlayBar();
             string counts = b.Judge(0.13f, true).ToString();
             b = new TurnBattle(Solo(1), new List<Enemy> { deadAir }, 1, new Random(433));
+            b.PlayBar();
             report += Same("counts aloud", "Perfect Good", counts + " " + b.Judge(0.13f, true));
 
-            //THE QUIET PART (KLARA) : GOOD 4 x 2 = 8, x1.5 = 12 against HUSH's p notes, 8 against DEAD AIR's mf
-            b = new TurnBattle(Solo(1), new List<Enemy> { hush }, 1, new Random(433));
-            int quiet = b.Attack(b.Enemies[0], Grade.Good, true);
-            b = new TurnBattle(Solo(1), new List<Enemy> { deadAir }, 1, new Random(433));
-            report += Same("the quiet part", "12 8", quiet + " " + b.Attack(b.Enemies[0], Grade.Good, true));
+            //THE QUIET PART (KLARA) : ATTACK 4 x 2 = 8, x1.5 = 12 against HUSH's p notes, 8 against DEAD AIR's mf
+            report += Same("the quiet part", "12 8", SoloAttacks(1, hush, 1) + " " + SoloAttacks(1, deadAir, 1));
 
-            //MOMENTUM (OTTO) : GOOD 12, 14, 16, then a MISS at power 9 (9 x 2 x 0.4 = 7.2 -> 7) starts again at 12
-            Grade[] swings = { Grade.Good, Grade.Good, Grade.Good, Grade.Miss, Grade.Good };
-            report += Same("momentum", "12 14 16 7 12", SoloSwings(2, hush, swings));
+            //MOMENTUM (OTTO) : 12, 14, 16, then 18 at most (power 6 + 3). A skill that misses every note starts again at 12.
+            string momentum = SoloAttacks(2, EnemyNamed("THE MUTE CHOIR"), 5);                      // 120 life, so OTTO gets five
+            b = new TurnBattle(Solo(2), new List<Enemy> { EnemyNamed("THE MUTE CHOIR") }, 1, new Random(433));
+            Sturdy(b);
+            b.Breath = 10;
+            for (int i = 0; i < 12 && b.Party[0].Momentum < 3; i++) Step(b, Grade.Good);
+            while (b.Step != TurnStep.Plan) Step(b, Grade.Good);
+            b.PlanSkill(b.Party[0], SkillList.First(MusicianList.All[2]), b.Enemies[0]);
+            b.PlayBar();
+            b.UseSkill(new NoteResult[] { new NoteResult(Grade.Hesitate, true, 1f) });
+            report += Same("momentum", "12 14 16 18 18 0", momentum + " " + b.Party[0].Momentum);
 
-            //BY EAR (MALI) : PERFECT 5 x 2 x 1.3 = 13, OFF-BEAT x1.5 and BY EAR x1.5 = 29.25 -> 29
+            //BY EAR (MALI) : ATTACK 5 x 2 = 10, OFF-BEAT x1.5 and BY EAR x1.5 = 22.5 -> 22
             b = new TurnBattle(Solo(3), new List<Enemy> { deadAir }, 1, new Random(433));
             b.Enemies[0].Staggered = true;
-            report += Same("by ear", "29", b.Attack(b.Enemies[0], Grade.Perfect, true).ToString());
+            b.PlayBar();
+            report += Same("by ear", "22", b.Attack().ToString());
 
-            //HELD NOTE (CHAI) : GOOD 8, then it rings on for 8 x 0.4 = 3.2 -> 3, DEAD AIR 50 -> 39
+            //HELD NOTE (CHAI) : ATTACK 8, then it rings on for 8 x 0.4 = 3.2 -> 3, DEAD AIR 50 -> 39
             b = new TurnBattle(Solo(4), new List<Enemy> { deadAir }, 1, new Random(433));
-            int held = b.Attack(b.Enemies[0], Grade.Good, true);
+            b.PlayBar();
+            int held = b.Attack();
             report += Same("held note", "8 39", held + " " + b.Enemies[0].Hp);
 
-            //ONE STEP BETTER (NUAN) : after STATIC's turn it shows Umf Df, so GOOD 6 x 2 x 1.3 = 15.6 -> 16, against DEAD AIR 12
-            report += Same("one step better", "16 12", SoloSwings(5, staticEnemy, new Grade[] { Grade.Good }) + " " + SoloSwings(5, deadAir, new Grade[] { Grade.Good }));
+            //ONE STEP BETTER (NUAN) : STATIC shows Lf Rp (an f), so 6 x 2 x 1.3 = 15.6 -> 16, against DEAD AIR (mf only) 12
+            report += Same("one step better", "16 12", SoloAttacks(5, staticEnemy, 1) + " " + SoloAttacks(5, deadAir, 1));
 
-            //FOUR BARS STRAIGHT (LUKA) : GOOD 12, 12, 12, then the fourth x2 = 24
-            report += Same("four bars straight", "12 12 12 24", SoloSwings(6, hush, new Grade[] { Grade.Good, Grade.Good, Grade.Good, Grade.Good }));
+            //FOUR BARS STRAIGHT (LUKA) : 12, 12, 12, then the fourth ATTACK x2 = 24
+            report += Same("four bars straight", "12 12 12 24", SoloAttacks(6, hush, 4));
 
-            //FASHIONABLY LATE (IRIS) : 0.3 s late is still GOOD (0.22 + 0.12), 0.3 s early is not
+            //FASHIONABLY LATE (IRIS) : on her skill notes 0.3 s late is still GOOD (0.22 + 0.12), 0.3 s early is not
             b = new TurnBattle(Solo(7), new List<Enemy> { deadAir }, 1, new Random(433));
+            b.PlayBar();
             report += Same("fashionably late", "Good Miss 0.34", b.Judge(0.3f, true) + " " + b.Judge(-0.3f, true) + " " + b.LateLimit.ToString("0.00"));
 
-            //THE WHOLE FLOOR (BORIS) : after HUSH's turn, his PERFECT f swing takes 2 off each note of its next attack (6 -> 4)
+            //THE WHOLE FLOOR (BORIS) : his THE FLOOR held PERFECT (an f note) takes 2 off each note of HUSH's next attack (9 -> 7)
             b = new TurnBattle(Solo(8), new List<Enemy> { hush }, 1, new Random(433));
-            b.TakeEnemyAttack(new Grade[] { Grade.Good, Grade.Good });
-            b.Attack(b.Enemies[0], Grade.Perfect, true);
-            report += Same("the whole floor", "4", b.Enemies[0].IntentNotes[0].ToString());
+            b.PlanSkill(b.Party[0], SkillList.First(MusicianList.All[8]), null);
+            b.PlayBar();
+            b.UseSkill(new NoteResult[] { new NoteResult(Grade.Perfect, true, 1f) });
+            report += Same("the whole floor", "7", b.Enemies[0].IntentNotes[0].ToString());
 
             //Review fixes (step 10) ---------------------------------------------------------------
 
-            //PRODIGY keeps its own count, so THE SHADOWLESS's BEST STREAK can pass 3 (5 PERFECT attacks in a row)
+            //PRODIGY keeps its own count, so THE SHADOWLESS's BEST STREAK can pass 3 (PERFECT parries in a row,
+            //an ATTACK has no swipe and does not break it)
             b = new TurnBattle(band, new List<Enemy> { EnemyNamed("THE MUTE CHOIR") }, 1, new Random(433));
             b.Kit = TurnKit.Mozart;
-            for (int step = 0; step < 20 && b.BestRun < 5 && b.Step != TurnStep.Won && b.Step != TurnStep.Lost; step++)
+            for (int step = 0; step < 40 && b.BestRun < 5 && b.Step != TurnStep.Won && b.Step != TurnStep.Lost; step++)
             {
-                if (b.Step == TurnStep.PlayerTurn) b.Attack(b.Enemies[0], Grade.Perfect, true);
-                else
-                {
-                    Grade[] all = new Grade[b.Current.IntentNotes.Length];
-                    for (int n = 0; n < all.Length; n++) all[n] = Grade.Perfect;
-                    b.TakeEnemyAttack(all);
-                }
+                b.Enemies[0].Hp = b.Enemies[0].MaxHp;                                 // it must keep attacking : never down
+                b.Enemies[0].OffBeat = 0;                                             // and never OFF-BEAT
+                Step(b, Grade.Perfect);
             }
             report += Same("prodigy streak", "True", (b.BestRun >= 5).ToString());
 
-            //FUGUE : LONG BREATH has nothing to repeat, so KLARA's echo waits for her next skill
+            //FUGUE : an ATTACK echoes too (step 12), ANNA 10 then 13 more, HUSH 50 -> 27
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             b.Kit = TurnKit.Bach;
             b.Signature = b.SignatureNeed;
             b.UseSignature(fourPerfect);
-            b.UseSkill(longBreath, b.Party[1], fourGood);
+            b.PlayBar();
+            b.Attack();
+            report += Same("fugue attack", "27 0", b.Enemies[0].Hp + " " + b.Party[0].Echo);
+
+            //FUGUE : LONG BREATH has nothing to repeat, so KLARA's echo waits for her next move
+            b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
+            b.Kit = TurnKit.Bach;
+            b.Signature = b.SignatureNeed;
+            b.UseSignature(fourPerfect);
+            b.PlanSkill(b.Party[1], longBreath, null);
+            b.PlayBar();
+            b.UseSkill(fourGood);
             report += Same("fugue waits", "1.3", b.Party[1].Echo.ToString("0.0"));
 
-            //TAUNT : when OTTO's next turn comes, an enemy that planned while taunted aims again
+            //TAUNT : when OTTO's next move comes, an enemy that planned while taunted aims again
             //(OTTO alone cannot show it, so ANNA and OTTO : OTTO taunts, HUSH hits him and plans again at him,
-            //then OTTO's turn ends the taunt and HUSH picks among both)
+            //then OTTO's next move ends the taunt and HUSH picks among both)
             int otherTargets = 0;
             for (int seed = 0; seed < 20; seed++)
             {
                 b = new TurnBattle(new List<Musician> { MusicianList.All[0], MusicianList.All[2] }, new List<Enemy> { hush }, 1, new Random(seed));
                 b.Breath = 10;
-                b.Attack(b.Enemies[0], Grade.Good, true);                                  // ANNA
-                b.TakeEnemyAttack(null);                                                   // HUSH
-                b.UseSkill(SkillList.Second(MusicianList.All[2]), b.Party[1], new NoteResult[] { new NoteResult(Grade.Good, true, 1f) });   // OTTO : STAND FIRM
-                b.Attack(b.Enemies[0], Grade.Good, true);                                  // round 2 : ANNA
+                b.PlanSkill(b.Party[1], SkillList.Second(MusicianList.All[2]), null);
+                b.PlayBar();
+                b.UseSkill(new NoteResult[] { new NoteResult(Grade.Good, true, 1f) });   // OTTO : STAND FIRM
+                b.Attack();                                                                // ANNA
                 b.TakeEnemyAttack(null);                                                   // HUSH hits OTTO, plans again at OTTO
-                b.Attack(b.Enemies[0], Grade.Good, true);                                  // OTTO : the taunt is over
-                if (b.Enemies[0].IntentTarget == b.Party[0]) otherTargets++;
+                b.PlayBar();
+                b.Attack();                                                                // bar 2 : ANNA
+                if (b.Step == TurnStep.PlayerTurn && b.Current == b.Party[1] && b.Enemies[0].IntentTarget == b.Party[0]) otherTargets++;   // OTTO is up : the taunt is over
             }
             report += Same("taunt ends", "True", (otherTargets > 0).ToString());
 
@@ -217,23 +246,22 @@ namespace Tacetno433.Core
             return new List<Musician> { MusicianList.All[i] };
         }
 
-        //Solo Swings : musician i alone against the enemy, ATTACKing with these grades in turn. The enemy's
+        //Solo Attacks : musician i alone (and Sturdy) against the enemy, ATTACKing this many times, one a bar. The enemy's
         //turns in between are parried GOOD (no COUNTER). Returns the damage of each ATTACK, spaced.
-        private static string SoloSwings(int i, Enemy enemy, Grade[] grades)
+        private static string SoloAttacks(int i, Enemy enemy, int count)
         {
             TurnBattle b = new TurnBattle(Solo(i), new List<Enemy> { enemy }, 1, new Random(433));
+            Sturdy(b);
             string hits = "";
             int done = 0;
-            for (int step = 0; step < 40 && done < grades.Length && (b.Step == TurnStep.PlayerTurn || b.Step == TurnStep.EnemyTurn); step++)
+            for (int step = 0; step < 40 && done < count && b.Step != TurnStep.Won && b.Step != TurnStep.Lost; step++)
             {
-                if (b.Step == TurnStep.EnemyTurn)
+                if (b.Step != TurnStep.PlayerTurn)
                 {
-                    Grade[] good = new Grade[b.Current.IntentNotes.Length];
-                    for (int n = 0; n < good.Length; n++) good[n] = Grade.Good;
-                    b.TakeEnemyAttack(good);
+                    Step(b, Grade.Good);
                     continue;
                 }
-                hits += (done > 0 ? " " : "") + b.Attack(b.Enemies[0], grades[done], true);
+                hits += (done > 0 ? " " : "") + b.Attack();
                 done++;
             }
             return hits;

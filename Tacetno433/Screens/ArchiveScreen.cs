@@ -15,9 +15,9 @@ namespace Tacetno433.Screens
     {
         private const int RowX = 190;
         private const int RowW = 900;
-        private const int RowY = 170;
-        private const int RowH = 74;
-        private const int RowStep = 86;
+        private const int RowY = 150;
+        private const int RowH = 68;
+        private const int RowStep = 76;      // six rows since FULL STAGE (step 12)
 
         private Rectangle[] buyBox = new Rectangle[Archive.All.Length];
         private Rectangle backButton = new Rectangle(40, 640, 190, 48);

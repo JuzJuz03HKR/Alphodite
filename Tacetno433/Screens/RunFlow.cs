@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Tacetno433.Audio;
 using Tacetno433.Core;
 using Tacetno433.Data;
@@ -27,8 +28,9 @@ namespace Tacetno433.Screens
 
         //Enter : walk into a place on the route. The enemy and the event may already be known
         //(a loaded save walks back into the place it left), otherwise pass null to roll them.
+        //pack is the whole saved PACK of a turn battle, or null.
         //The run is saved as soon as the place is picked, so quitting inside it comes back here.
-        public static void Enter(TacetGame game, RouteNode node, Enemy enemy, GameEvent ev)
+        public static void Enter(TacetGame game, RouteNode node, Enemy enemy, GameEvent ev, List<Enemy> pack = null)
         {
             RunState run = game.CurrentRun;
             run.Chosen = node;
@@ -37,7 +39,7 @@ namespace Tacetno433.Screens
             {
                 //Fight : set up the battle and step straight into the duel. There is nothing to
                 //arrange first (round 14), every player's part is written on them.
-                run.BeginBattle(enemy);
+                run.BeginBattle(enemy, pack);
                 game.Screens.Change(FightScreen());
             }
             else if (node.Type == NodeType.EraShift)
@@ -79,7 +81,7 @@ namespace Tacetno433.Screens
             if (run.AtFloorOpening)
                 game.Screens.Change(new ChapterScreen());
             else if (run.Chosen != null)
-                Enter(game, run.Chosen, SaveFile.LoadedEnemy, SaveFile.LoadedEvent);
+                Enter(game, run.Chosen, SaveFile.LoadedEnemy, SaveFile.LoadedEvent, SaveFile.LoadedPack);
             else
                 game.Screens.Change(new RouteScreen());
             return true;

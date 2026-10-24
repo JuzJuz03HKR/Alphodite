@@ -100,7 +100,7 @@ namespace Tacetno433.Data
                            Power = 5, Sample = "violin", SampleNote = 60, ThemeColor = Palette.ToneB,
                            Trait = MusicianTrait.KeepsCount, TraitName = "COUNTS ALOUD",
                            TraitText = "On her beats, when the baton points her way, the PERFECT window is wider.",
-                           TurnTraitText = "Her own notes have a wider PERFECT window.",
+                           TurnTraitText = "The notes of her skills have a wider PERFECT window.",
                            Line = "Counts every bar out loud, even when nobody asked her to." },
             new Musician { Name = "KLARA", Instrument = "FLUTE",     Culture = "EUROPEAN", Family = Family.Wind,       Era = 0, Cue = 1,
                            Power = 4, Sample = "flute", SampleNote = 72, ThemeColor = Palette.ToneC,
@@ -112,7 +112,7 @@ namespace Tacetno433.Data
                            Power = 6, Sample = "timpani", SampleNote = 0, ThemeColor = Palette.ToneD,
                            Trait = MusicianTrait.Momentum, TraitName = "MOMENTUM",
                            TraitText = "Each beat in a row he plays hits 1 harder, up to 3.",
-                           TurnTraitText = "Each of his turns in a row that lands hits 1 harder, up to 3.",
+                           TurnTraitText = "Each of his moves in a row that lands hits 1 harder, up to 3.",
                            Line = "Slow to start, impossible to stop once he has." },
 
             //Era 1 : SIAM
@@ -146,13 +146,13 @@ namespace Tacetno433.Data
                            Power = 5, Sample = "horn", SampleNote = 48, ThemeColor = Palette.ToneA,
                            Trait = MusicianTrait.Forgiven, TraitName = "FASHIONABLY LATE",
                            TraitText = "On her beats, when the baton points her way, a late stroke still counts as GOOD.",
-                           TurnTraitText = "On her own notes, a late stroke still counts as GOOD.",
+                           TurnTraitText = "On the notes of her skills, a late stroke still counts as GOOD.",
                            Line = "Arrives late, plays louder than the rest, is forgiven." },
             new Musician { Name = "BORIS", Instrument = "BASS DRUM", Culture = "EUROPEAN", Family = Family.Percussion, Era = 2, Cue = 1,
                            Power = 7, Sample = "bassdrum", SampleNote = 0, ThemeColor = Palette.ToneD,
                            Trait = MusicianTrait.Thunder, TraitName = "THE WHOLE FLOOR",
                            TraitText = "His big stroke on an f note knocks 2 off TACET's next note.",
-                           TurnTraitText = "His PERFECT f swing takes 2 off each note of the enemy's next attack.",
+                           TurnTraitText = "A PERFECT f note of his skills takes 2 off each note of the enemy's next attack.",
                            Line = "One hit from him and the whole floor knows about it." },
         };
 

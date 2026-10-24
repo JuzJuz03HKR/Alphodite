@@ -185,6 +185,17 @@ namespace Tacetno433.Data
             }
         }
 
+        //Pick Other : like Pick, but someone not in the fight yet while there is anyone left (PACKS, Alpha 7 step 12)
+        public static Enemy PickOther(EnemyKind kind, int era, List<Enemy> already, Random random)
+        {
+            for (int tries = 0; tries < 20; tries++)
+            {
+                Enemy e = Pick(kind, era, random);
+                if (!already.Contains(e)) return e;
+            }
+            return Pick(kind, era, random);
+        }
+
         //Enemy Pick : a random enemy of this kind that fits the era.
         //Bosses prefer their own era, and fall back to any boss if none is written for it.
         public static Enemy Pick(EnemyKind kind, int era, Random random)

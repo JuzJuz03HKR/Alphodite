@@ -93,7 +93,7 @@ namespace Tacetno433.Data
                         TurnText = "After a win, 15 percent more life comes back." },
             new Motif { Id = MotifId.Rubato,       Name = "RUBATO",        Mark = "rit.", Rarity = 2,
                         Text = "A MISS costs no extra breath and loses less power.",
-                        TurnText = "A MISS still hits at 60 percent, not 40." },
+                        TurnText = "A skill note you MISS still plays, at 60 percent." },
 
             //Rarity 3
             new Motif { Id = MotifId.Crescendo,    Name = "CRESCENDO",     Mark = "<",    Rarity = 3,
@@ -125,7 +125,7 @@ namespace Tacetno433.Data
                         TurnText = "A spark that lands does its skill twice." },
             new Motif { Id = MotifId.Marcato,      Name = "MARCATO",       Mark = "^",    Rarity = 2,
                         Text = "A COUNTER can push the line up to 16 in one beat, not just 8.",
-                        TurnText = "A PERFECT attack fills OFF-BEAT twice as much." },
+                        TurnText = "An ATTACK fills OFF-BEAT twice as much." },
             new Motif { Id = MotifId.ConBrio,      Name = "CON BRIO",      Mark = "brio", Rarity = 3,
                         Text = "FORTISSIMO lights after 6 PERFECTs in a row instead of 8.",
                         TurnText = "The SIGNATURE needs 4 PERFECTs instead of 6." },

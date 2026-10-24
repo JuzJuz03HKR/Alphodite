@@ -34,6 +34,7 @@ namespace Tacetno433.Data
         public const int Signature = 2;     // the SIGNATURE gauge starts part full
         public const int Savings = 3;       // shards at the start of a run
         public const int Keepsake = 4;      // a common motif at the start of a run
+        public const int Stage = 5;         // FULL STAGE : one more musician on the field when a fight starts (step 12, ONE BAR)
 
         public static ArchiveUpgrade[] All = new ArchiveUpgrade[]
         {
@@ -42,7 +43,14 @@ namespace Tacetno433.Data
             new ArchiveUpgrade { Name = "WARM UP",       Text = "The SIGNATURE starts 2 diamonds fuller.",    Prices = new int[] { 40, 80 } },
             new ArchiveUpgrade { Name = "SAVINGS",       Text = "Every run starts with 20 more shards.",      Prices = new int[] { 25, 50, 75 } },
             new ArchiveUpgrade { Name = "KEEPSAKE",      Text = "Every run starts with a common motif.",      Prices = new int[] { 100 } },
+            new ArchiveUpgrade { Name = "FULL STAGE",    Text = "Every fight starts with 3 on the field.",    Prices = new int[] { 120 } },
         };
+
+        //Start Band : how many musicians are on the field when a fight starts (ONE BAR), FULL STAGE included
+        public static int StartBand
+        {
+            get { return BattleRules.TurnStartBand + Level(Stage) * BattleRules.ArchiveStagePerLevel; }
+        }
 
         public static int Echoes;           // ECHOES to spend (saved in archive.txt)
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Tacetno433.Core;
 using Tacetno433.Data;
@@ -100,6 +101,7 @@ namespace Tacetno433.Battle
     {
         public RunState Run;
         public Enemy Enemy;
+        public List<Enemy> Pack = new List<Enemy>();   // PACKS (Alpha 7 step 12) : everyone in the turn battle, Enemy (the leader) first
 
         //Battle Progress
         public int Round = 1;
@@ -190,6 +192,7 @@ namespace Tacetno433.Battle
         {
             Run = run;
             Enemy = enemy;
+            Pack.Add(enemy);
             this.random = random;
 
             //Enemy Scale : deeper floors hit harder, elites and bosses harder still
@@ -1550,6 +1553,7 @@ namespace Tacetno433.Battle
             reward += PerfectCount * BattleRules.ShardsPerPerfect;
             if (Line > 0f) reward += (int)(Line / 10f);
             if (FinaleWon) reward += BattleRules.FinaleShards;                           // FINALE
+            reward += (Pack.Count - 1) * BattleRules.TurnShardsPerEscort;                 // PACKS : each enemy more in the fight
 
             if (Run.Has(MotifId.PatronsPurse)) reward = (int)(reward * BattleRules.PurseBonus);   // PATRON'S PURSE
             return reward;

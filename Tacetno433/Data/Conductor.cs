@@ -147,7 +147,7 @@ namespace Tacetno433.Data
                 TurnPassiveName = "LOCKED TEMPO",
                 TurnPassiveText = "Any size you swing is the right size. You only keep time.",
                 TurnSignatureName = "FUGUE",
-                TurnSignatureText = "The 4/4 shape : every musician's next skill plays twice. Better strokes, louder echo.",
+                TurnSignatureText = "The 4/4 shape : every musician's next move plays twice. Better strokes, louder echo.",
                 Stamina = 5, PushPower = 6, Perk = ConductorPerk.LockedTempo,        // round 15 : 10 -> 5, his size is never wrong and playing
                                                                                      // is free, at 10 he won 91 to 94 percent (the others 80 to 89).
                                                                                      // Round 10 : 9 -> 7, no cheaper notes. Round 11a : 9,
@@ -255,7 +255,7 @@ namespace Tacetno433.Data
                 MechanicText = "3 PERFECTs in a row give 1 breath back.",
                 SignatureMark = "Presto",
                 SignatureName = "FEATHER",
-                SignatureText = "The 4/4 shape : one extra turn for a musician per stroke that lands.",
+                SignatureText = "The 4/4 shape : two free ATTACKs at the end of the bar per stroke that lands.",
                 SignatureCall = "* FEATHER! Everybody moves again.",
                 Recipe = new int[] { 2, 2, 2 },
                 Stamina = 5, PushPower = 5, Perk = ConductorPerk.None, Move = SignatureMove.AbsolutePitch,   // the old duel plays him plain
@@ -264,7 +264,7 @@ namespace Tacetno433.Data
                 TurnPassiveName = "PRODIGY",
                 TurnPassiveText = "3 PERFECTs in a row give 1 BREATH back.",
                 TurnSignatureName = "FEATHER",
-                TurnSignatureText = "The 4/4 shape : one extra turn for a musician per stroke that lands.",
+                TurnSignatureText = "The 4/4 shape : two free ATTACKs at the end of the bar per stroke that lands.",
                 ThemeColor = Palette.ToneB,
                 Unlocked = true
             },
@@ -294,7 +294,7 @@ namespace Tacetno433.Data
                 TurnPassiveName = "BORROWED BREATH",
                 TurnPassiveText = "A skill short of BREATH can still be played. Each missing BREATH costs 3 life.",
                 TurnSignatureName = "CAPRICE",
-                TurnSignatureText = "The 4/4 shape : for one turn per stroke that lands, a MISS is GOOD and a GOOD is PERFECT. Then every musician pays 10 percent of their life.",
+                TurnSignatureText = "The 4/4 shape : for two turns per stroke that lands, a MISS is GOOD and a GOOD is PERFECT. Then every musician pays 10 percent of their life.",
                 ThemeColor = Palette.ToneA,
                 Unlocked = true
             },

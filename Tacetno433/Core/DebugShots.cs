@@ -358,6 +358,7 @@ namespace Tacetno433.Core
                 report += Same("options", Options(run), Options(back));
                 report += Same("chosen", Array.IndexOf(run.Options, run.Chosen).ToString(), Array.IndexOf(back.Options, back.Chosen).ToString());
                 report += Same("enemy", run.Battle.Enemy.Name, SaveFile.LoadedEnemy != null ? SaveFile.LoadedEnemy.Name : "none");
+                report += Same("pack", PackNames(run.Battle.Pack), PackNames(SaveFile.LoadedPack));      // PACKS (Alpha 7 step 12)
                 report += Same("event", run.CurrentEvent.Title, SaveFile.LoadedEvent != null ? SaveFile.LoadedEvent.Title : "none");
                 report += Same("summary", run.Conductor.Name + "  /  FLOOR 2  /  STAGE 5", SaveFile.RunSummary());
             }
@@ -731,6 +732,14 @@ namespace Tacetno433.Core
             if (name == "tutorialroll") ((TutorialScreen)screen).JumpForPicture(TutorialScreen.LessonOf("Roll"), 5.8f);
         }
 
+        //Pack Names : the enemies of a fight, for the save check
+        private static string PackNames(List<Enemy> pack)
+        {
+            string s = pack.Count.ToString();
+            for (int i = 0; i < pack.Count; i++) s += " " + pack[i].Name;
+            return s;
+        }
+
         //First Pair : the first beat of the round that TACET plays as a pair, for the picture
         private static int FirstPair(BattleState b)
         {
@@ -796,7 +805,15 @@ namespace Tacetno433.Core
 
             //Battle
             run.Chosen = new RouteNode();
-            run.Chosen.Type = name == "duelboss" ? NodeType.Boss : NodeType.Battle;
+            run.Chosen.Type = name == "duelboss" || name == "battleboss" ? NodeType.Boss : NodeType.Battle;
+            if (name == "battleboss") run.Floor = 3;                                  // Alpha 7 step 12 : the boss and two more
+            if (name == "battlefull")                                                 // six musicians, four enemies (floor 3, late)
+            {
+                run.ChooseEra(2);
+                run.RecruitOne();
+                run.RecruitOne();
+                run.Floor = 3;
+            }
             if (name == "reward" || name == "dueltremolo" || name.EndsWith("repeat")) run.Chosen.Type = NodeType.Elite;
             if (name == "dueldouble") run.Floor = 3;                                  // pairs from floor two, more on the last
             if (name == "duelfermata") run.Floor = 2;                                 // held notes from floor two
