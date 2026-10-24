@@ -36,6 +36,15 @@ namespace Tacetno433.Core
             MousePos = new Vector2((mouseNow.X - view.X) * scale, (mouseNow.Y - view.Y) * scale);
         }
 
+        //Move Mouse To : puts the pointer at this place of the game picture (1280 x 720 positions), the
+        //opposite of the sum in Update. The battle page starts every swipe from the middle (step 14).
+        public static void MoveMouseTo(Vector2 game)
+        {
+            float scale = view.Width / (float)TacetGame.ScreenW;
+            Mouse.SetPosition(view.X + (int)System.Math.Round(game.X * scale), view.Y + (int)System.Math.Round(game.Y * scale));
+            MousePos = game;
+        }
+
         //Key Held : true every frame the key is down
         public static bool KeyDown(Keys key)
         {

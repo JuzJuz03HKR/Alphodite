@@ -127,6 +127,15 @@ namespace Tacetno433.Screens
         private int next;
         private SwipeFor swipeFor;
 
+        //MISS WAIT (step 14) : a stroke that would be a MISS (the wrong way, or too early) is kept, not judged, while the
+        //note's window is still open. The user found many swipes counted the wrong way : with the button held, the hand
+        //going back to the middle after a note is a stroke too, and it was taken as the answer to the next note, and the
+        //real swipe then slid on to the note after. Now a better stroke before the window closes is judged instead, and
+        //the kept one only counts if none comes.
+        private bool missKept;
+        private Grade missGrade;
+        private bool missSize;
+
         //HOLD : after a held note's swipe, the button stays down and the baton still
         private bool holding;
         private float holdTime;
@@ -156,6 +165,8 @@ namespace Tacetno433.Screens
         private const string HintHold = "HOLD STILL";
         private const string HintRoll = "SHAKE!";
         private const string HintMute = "MUTE : NO SKILLS THIS BAR";
+        private const string HintNoSkills = "DECREE : A SKILL THIS BAR HURTS WHOEVER PLAYS IT";
+        private const string HintNoAttacks = "DECREE : AN ATTACK THIS BAR HURTS WHOEVER PLAYS IT (NO MOVE = ATTACK)";
         private const string WordAttack = "ATTACK";
 
         //PRACTICE : what the card at the top says, and which of the five lessons are done
@@ -730,6 +741,12 @@ namespace Tacetno433.Screens
             view = View.Swipe;
             viewTime = 0f;
             clock = 0f;
+            missKept = false;
+
+            //Centre : the pointer is hidden while swiping and was left on a button (PLAY THE BAR is near the bottom right
+            //corner), where the edge of the screen stops a swipe down or right short, or bends it into the wrong way.
+            //It starts every swipe from the middle instead (step 14).
+            Input.MoveMouseTo(new Vector2(TacetGame.ScreenW / 2f, TacetGame.ScreenH / 2f));
             gesture.Clear();
             baton.Reset(Input.MousePos);
             Game.IsMouseVisible = false;
@@ -764,11 +781,22 @@ namespace Tacetno433.Screens
                 if (offset < -BattleRules.EarlyTime) return;          // the hand getting ready, not the swipe
 
                 bool spark = n.Kind == NoteKind.Spark;                // a spark takes any way and any size
-                Grade grade = battle.Judge(offset, spark || gesture.Direction == n.Way);
+                bool rightWay = spark || gesture.Direction == n.Way;
                 bool rightSize = spark || n.Size < 0 || battle.AnySize || Baton.SizeOf(gesture.Length) == n.Size;   // LOCKED TEMPO : any size
+                baton.Whip(gesture.Direction);
+
+                //MISS WAIT : kept until the window closes, a better stroke may still come (CAPRICE has already made a MISS a GOOD)
+                Grade grade = battle.Judge(offset, rightWay);
+                if (!rightWay || grade == Grade.Miss)
+                {
+                    missKept = true;
+                    missGrade = grade;
+                    missSize = rightSize;
+                    return;
+                }
+
                 if (swipeFor == SwipeFor.Parry && grade == Grade.Perfect && !rightSize) grade = Grade.Good;   // the wrong size only half blocks
 
-                baton.Whip(gesture.Direction);
                 effects.SpawnSlash(gesture.From, gesture.To, grade == Grade.Perfect ? 1f : 0.55f);
 
                 //HOLD : a held note that landed waits for the hold before it counts
@@ -785,7 +813,8 @@ namespace Tacetno433.Screens
             }
             else if (now > n.Due + battle.LateLimit)
             {
-                Land(Grade.Hesitate, true, 0f);                        // no swipe at all
+                if (missKept) Land(missGrade, missSize, 1f);           // only a stroke the wrong way or too early came
+                else Land(Grade.Hesitate, true, 0f);                   // no swipe at all
             }
         }
 
@@ -832,6 +861,7 @@ namespace Tacetno433.Screens
         //are handed in together when the last one is done.
         private void Land(Grade grade, bool rightSize, float hold)
         {
+            missKept = false;
             results[next] = new NoteResult(grade, rightSize, hold);
             effects.SpawnHit(HitX, HitY, grade);
             judgeLife = 1f;
@@ -998,6 +1028,7 @@ namespace Tacetno433.Screens
                 else if (e.Kind == TurnEventKind.Skip) effects.SpawnPop(x, y, "OFF-BEAT", Palette.PaperDim, 0.7f);
                 else if (e.Kind == TurnEventKind.Echo) effects.SpawnPop(x, box.Y - 60, "ECHO", Palette.Highlight, 0.7f);       // FUGUE
                 else if (e.Kind == TurnEventKind.Quieter) effects.SpawnPop(x, box.Y - 70, "QUIETER", Palette.Paper, 0.7f);    // THE WHOLE FLOOR
+                else if (e.Kind == TurnEventKind.Thorns) effects.SpawnPop(x, box.Y - 70, "DECREE", Palette.Accent, 0.8f);     // DECREE broken
                 else if (e.Kind == TurnEventKind.Counter)
                 {
                     effects.SpawnPop(x, y, "COUNTER", Palette.Highlight, 0.9f);
@@ -1392,7 +1423,8 @@ namespace Tacetno433.Screens
                 for (int e = 0; e < battle.Enemies.Count; e++)
                 {
                     Fighter enemy = battle.Enemies[e];
-                    if (!enemy.Down && enemy.IntentTarget == f && view != View.Swipe && view != View.Over)
+                    bool aimed = enemy.IntentTarget == f || (enemy.IntentAll && !f.Down);                   // THE COURT : everybody
+                    if (!enemy.Down && aimed && view != View.Swipe && view != View.Over)
                     {
                         Gfx.Triangle(sb, r.Center.X, r.Y - 40, 11f, false, Palette.Accent * (0.6f + 0.4f * (float)Math.Sin(time * 5f)));
                         break;
@@ -1491,8 +1523,8 @@ namespace Tacetno433.Screens
                 Gfx.Text(sb, Game.BigFont, NumberText.Get(f.IntentNotes[0]), left, cy - 16, Palette.Highlight, TextSize.Small);
                 for (int n = 0; n < f.IntentNotes.Length; n++)
                     NoteGlyph.Note(sb, Game.BigFont, left + NumberRoom + NoteStep * (n + 0.5f), cy, f.IntentShown[n], f.IntentWays[n], 0.46f, time, 1f);
-                if (f.IntentCadenza)
-                    Gfx.TextSpacedCentered(sb, Game.Font, "CADENZA", r.Center.X, cy - 40, Palette.Highlight * (0.7f + 0.3f * (float)Math.Sin(time * 6f)), TextSize.Label, 3f);
+                if (f.IntentCadenza || f.IntentAll)
+                    Gfx.TextSpacedCentered(sb, Game.Font, f.IntentAll ? "EVERYONE" : "CADENZA", r.Center.X, cy - 40, Palette.Highlight * (0.7f + 0.3f * (float)Math.Sin(time * 6f)), TextSize.Label, 3f);
                 if (f.Staggered)
                     Gfx.Line(sb, left - 6, cy, left + NumberRoom + 6f + row, cy, Palette.Highlight, 2f);   // OFF-BEAT : it loses its next turn, this move waits for the one after
 
@@ -1546,6 +1578,14 @@ namespace Tacetno433.Screens
             {
                 Gfx.TextSpacedRight(sb, Game.Font, "VOICE", TacetGame.ScreenW - 120, 62, Palette.LineGrey, TextSize.Label, 3f);
                 Gfx.TextSpacedRight(sb, Game.Font, battle.FelixVoice ? "FELIX" : "FANNY", TacetGame.ScreenW - 24, 60, Palette.Highlight, TextSize.Body, 2f);
+            }
+
+            //DECREE (THE DEAF CROWN) : what this bar forbids
+            if (battle.Decree != DecreeKind.None)
+            {
+                Gfx.TextSpacedRight(sb, Game.Font, "DECREE", TacetGame.ScreenW - 24, 92, Palette.LineGrey, TextSize.Label, 3f);
+                Gfx.TextSpacedRight(sb, Game.Font, battle.Decree == DecreeKind.NoSkills ? "NO SKILLS" : "NO ATTACKS", TacetGame.ScreenW - 24, 110,
+                                    Palette.Accent * (0.75f + 0.25f * (float)Math.Sin(time * 5f)), TextSize.Body, 2f);
             }
 
             //CAPRICE (THE HEARTLESS) : turns left with no MISS
@@ -1649,10 +1689,12 @@ namespace Tacetno433.Screens
                 if (i == next) NoteGlyph.TimingRing(sb, HitX, HitY, progress, RingMark, RingStart, 0f, Math.Min(1f, progress * 3f));
             }
 
-            //Target : a line from the hit point to the musician being attacked
-            if (enemy.IntentTarget != null)
+            //Target : a line from the hit point to the musician being attacked (THE COURT : to every one standing)
+            for (int i = 0; i < battle.Party.Count; i++)
             {
-                Rectangle t = BoxOf(enemy.IntentTarget);
+                Fighter m = battle.Party[i];
+                if (m != enemy.IntentTarget && !(enemy.IntentAll && !m.Down)) continue;
+                Rectangle t = BoxOf(m);
                 Gfx.Line(sb, HitX - NoteGlyph.WellRadius, HitY, t.Center.X, t.Y + 20, Palette.Accent * 0.35f, 2f);
             }
         }
@@ -1707,6 +1749,7 @@ namespace Tacetno433.Screens
                 if (view == View.Target) line = pending != null && pending.Target == SkillTarget.Ally ? HintAlly : HintEnemy;
                 else if (hover != null && !hover.IsEnemy && hover.JustCalled) line = HintCalled;
                 else if (selected != null && selected.Mute > 0) line = HintMute;
+                else if (battle.Decree != DecreeKind.None) line = battle.Decree == DecreeKind.NoSkills ? HintNoSkills : HintNoAttacks;   // DECREE
                 if (hoverSkill != null && view == View.Plan)                               // while aiming, the line says how to aim
                 {
                     line = hoverSkill.Text;

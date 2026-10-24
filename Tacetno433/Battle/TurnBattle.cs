@@ -16,7 +16,10 @@ namespace Tacetno433.Battle
 
     //TurnEventKind : something that happened, kept so the screen can show it (numbers, words, sparks).
     //The rules never draw, they only write down what happened (docs/research/ALPHA7_battle_ui.md).
-    public enum TurnEventKind { Damage, Heal, Breath, Dissonance, Crescendo, Mute, Break, Skip, Counter, Down, Ready, Extra, Saved, Steal, Echo, Quieter, Called }
+    public enum TurnEventKind { Damage, Heal, Breath, Dissonance, Crescendo, Mute, Break, Skip, Counter, Down, Ready, Extra, Saved, Steal, Echo, Quieter, Called, Thorns }
+
+    //DecreeKind : DECREE (THE DEAF CROWN, step 14), what the band may not do this bar
+    public enum DecreeKind { None, NoSkills, NoAttacks }
 
     public struct TurnEvent
     {
@@ -61,6 +64,7 @@ namespace Tacetno433.Battle
         public Fighter Target;         // the enemy (ATTACK, or a skill at one enemy) or the musician it is for
         public bool Free;              // FEATHER : a free ATTACK, not the musician's turn (GUARD, TAUNT and statuses wait)
         public bool Unison;            // UNISON (step 13) : the last ATTACK of a bar that all went at one enemy
+        public bool Forced;            // a skill that could not be played any more and became an ATTACK (DECREE lets it pass)
     }
 
     //Fighter : one body on the field, a musician of the band or a shape of TACET
@@ -85,6 +89,9 @@ namespace Tacetno433.Battle
         public bool IntentRest;                    // LULLABY : this turn it hums and heals instead
         public bool IntentFast;                    // UNFINISHED : the notes come faster
         public bool IntentCadenza;                 // CADENZA : this attack is a boss's big move
+        public bool IntentAll;                     // THE COURT (THE STAFF, step 14) : this attack hits every musician standing
+        public List<Flick> MissedWays = new List<Flick>();   // BY TOUCH (THE BLIND CANTOR, step 14) : notes that got through,
+        public List<int> MissedSizes = new List<int>();      //          played again in its next attack
         public int Attacks;                        // attacks made so far, a boss's every third is a CADENZA
         public bool Planned;                       // the intent is decided (step 10 : right after its last attack)
 
@@ -150,6 +157,7 @@ namespace Tacetno433.Battle
         private int bandMovesDone;     // the band's own moves played so far in this bar (DOWNBEAT), FEATHER's free ATTACKs not counted
 
         public int Breath;             // BREATH, shared by the whole band
+        public DecreeKind Decree;      // DECREE (THE DEAF CROWN) : what this bar forbids, None without it
         public int Floor;              // 1, 2 or 3
         public TurnStep Step;
 
@@ -288,6 +296,10 @@ namespace Tacetno433.Battle
                 if (!e.Planned) PlanIntent(e);
                 else if (e.IntentTarget != null && e.IntentTarget.Down) e.IntentTarget = PickTarget(e);
             }
+
+            //DECREE (THE DEAF CROWN) : SKILLS and ATTACKS are forbidden in turn, one bar each
+            Decree = DecreeKind.None;
+            if (AnyStanding(EnemyTrait.Decree)) Decree = Round % 2 == 1 ? DecreeKind.NoSkills : DecreeKind.NoAttacks;
 
             FocusTarget();
             Step = TurnStep.Plan;
@@ -572,6 +584,7 @@ namespace Tacetno433.Battle
             enemy.IntentRest = false;
             enemy.IntentFast = false;
             enemy.IntentCadenza = false;
+            enemy.IntentAll = false;
 
             //LULLABY (THE LULL) : every third turn it hums instead of attacking, and heals
             if (trait && e.Trait == EnemyTrait.Lullaby && (enemy.Attacks + 1) % BattleRules.TurnLullEvery == 0)
@@ -613,24 +626,40 @@ namespace Tacetno433.Battle
             float maestroHit = Maestro ? BattleRules.MaestroTurnDamage : 1f;                 // MAESTRO
             int hit = Math.Max(1, (int)Math.Round(power * BattleRules.TurnNoteDamage * BattleRules.TurnFloorDamage[Floor - 1] * maestroHit));
 
-            enemy.IntentCadenza = e.Kind == EnemyKind.Boss && (enemy.Attacks + 1) % BattleRules.TurnCadenzaEvery == 0;
+            //THE COURT (THE STAFF) : its big move is one heavy note down at the floor that hits everybody
+            if (trait && e.Trait == EnemyTrait.TheCourt && (enemy.Attacks + 1) % BattleRules.TurnStaffEvery == 0)
+            {
+                enemy.IntentAll = true;
+                count = 1;
+                ways = new List<Flick> { Flick.Down };
+                sizes = new List<int> { 2 };
+                hit = (int)Math.Round(hit * BattleRules.TurnStaffPower);
+            }
+
+            enemy.IntentCadenza = e.Kind == EnemyKind.Boss && !enemy.IntentAll && (enemy.Attacks + 1) % BattleRules.TurnCadenzaEvery == 0;
             if (enemy.IntentCadenza)
             {
                 count++;
                 hit = (int)Math.Round(hit * BattleRules.TurnCadenzaPower);
             }
 
-            enemy.IntentNotes = new int[count];
-            enemy.IntentWays = new Flick[count];
-            enemy.IntentSizes = new int[count];
-            enemy.IntentShown = new int[count];
-            for (int i = 0; i < count; i++)
+            //BY TOUCH (THE BLIND CANTOR) : the notes that got through last time come back after its own
+            int back = trait && e.Trait == EnemyTrait.ByTouch ? Math.Min(BattleRules.TurnByTouchMost, enemy.MissedWays.Count) : 0;
+
+            enemy.IntentNotes = new int[count + back];
+            enemy.IntentWays = new Flick[count + back];
+            enemy.IntentSizes = new int[count + back];
+            enemy.IntentShown = new int[count + back];
+            for (int i = 0; i < count + back; i++)
             {
                 enemy.IntentNotes[i] = hit;
-                enemy.IntentWays[i] = ways[i % ways.Count];
-                enemy.IntentSizes[i] = sizes[i % sizes.Count];
+                enemy.IntentWays[i] = i < count ? ways[i % ways.Count] : enemy.MissedWays[i - count];
+                enemy.IntentSizes[i] = i < count ? sizes[i % sizes.Count] : enemy.MissedSizes[i - count];
                 enemy.IntentShown[i] = enemy.IntentSizes[i];
             }
+            enemy.MissedWays.Clear();
+            enemy.MissedSizes.Clear();
+            count += back;
 
             Unfinished(enemy);
 
@@ -709,6 +738,13 @@ namespace Tacetno433.Battle
                 if (Party[i].Taunt && !Party[i].Down) return Party[i];
 
             if (Cued(enemy) && LastCalled != null && !LastCalled.Down) return LastCalled;          // ON CUE
+            if (enemy != null && Has(enemy, EnemyTrait.ByTouch))                                   // BY TOUCH : the seats in turn, front to back
+            {
+                List<Fighter> seats = new List<Fighter>();
+                for (int i = 0; i < Party.Count; i++)
+                    if (!Party[i].Down) seats.Add(Party[i]);
+                if (seats.Count > 0) return seats[enemy.Attacks % seats.Count];
+            }
             if (enemy != null && Has(enemy, EnemyTrait.FirstInLine))                               // FIRST IN LINE
             {
                 Fighter first = FirstInLine();
@@ -779,7 +815,11 @@ namespace Tacetno433.Battle
                 {
                     Step = TurnStep.PlayerTurn;
                     BarMove move = OrderMoves[OrderIndex];
-                    if (move.Skill != null && !CanUse(move.Skill)) move.Skill = null;
+                    if (move.Skill != null && !CanUse(move.Skill))
+                    {
+                        move.Skill = null;
+                        move.Forced = true;                                                  // not the player's choice, DECREE lets it pass
+                    }
                     Retarget(move);
                 }
                 return;
@@ -971,6 +1011,7 @@ namespace Tacetno433.Battle
             CountHit(attacker, true);                                                                // MOMENTUM
             AddOffBeat(target, BattleRules.TurnAttackOffBeat * (Has(MotifId.Marcato) ? BattleRules.TurnMarcatoOffBeat : 1));   // OFF-BEAT, MARCATO
             LastWord(attacker);                                                                      // LAST WORD
+            BreaksDecree(attacker, DecreeKind.NoAttacks);                                            // DECREE
 
             NextTurn();
             return damage;
@@ -1057,6 +1098,7 @@ namespace Tacetno433.Battle
                     if (!Enemies[i].Down) Enemies[i].IntentTarget = user;
             }
             LastWord(user);                                                                 // LAST WORD
+            BreaksDecree(user, DecreeKind.NoSkills);                                        // DECREE
 
             NextTurn();
             return true;
@@ -1253,6 +1295,24 @@ namespace Tacetno433.Battle
                 return 0;
             }
 
+            //BY TOUCH (THE BLIND CANTOR) : a note that gets through whole comes back in its next attack
+            if (Has(enemy, EnemyTrait.ByTouch) && g != Grade.Good && enemy.MissedWays.Count < BattleRules.TurnByTouchMost)
+            {
+                enemy.MissedWays.Add(enemy.IntentWays[note]);
+                enemy.MissedSizes.Add(enemy.IntentSizes[note]);
+            }
+
+            //THE COURT (THE STAFF) : the floor is struck, every musician standing takes the note
+            if (!enemy.IntentAll) return NoteHits(enemy, target, note, g);
+            int total = 0;
+            for (int i = 0; i < Party.Count; i++)
+                if (!Party[i].Down) total += NoteHits(enemy, Party[i], note, g);
+            return total;
+        }
+
+        //Note Hits : one note that was not parried PERFECT lands on one musician
+        private int NoteHits(Fighter enemy, Fighter target, int note, Grade g)
+        {
             int damage = NoteDamage(enemy.IntentNotes[note], g);
             bool trait = TraitOn(enemy);
             if (trait && enemy.Enemy.Trait == EnemyTrait.FillsGaps && g != Grade.Good)             // FILLS THE GAPS (DEAD AIR)
@@ -1305,7 +1365,8 @@ namespace Tacetno433.Battle
                 Events.Add(new TurnEvent(TurnEventKind.Steal, enemy, stolen));
             }
 
-            if (parried > 0 && parried == enemy.IntentNotes.Length && target != null && !target.Down && !enemy.Down)
+            bool deaf = Has(enemy, EnemyTrait.Decree);                                                       // DECREE : it never takes a COUNTER
+            if (parried > 0 && parried == enemy.IntentNotes.Length && target != null && !target.Down && !enemy.Down && !deaf)
             {
                 float scale = BattleRules.TurnCounterScale * (enemy.IntentCadenza ? BattleRules.TurnCadenzaCounter : 1f);
                 if (Has(MotifId.Counterpoint)) scale *= BattleRules.TurnCounterpointScale;                     // COUNTERPOINT
@@ -1574,6 +1635,8 @@ namespace Tacetno433.Battle
         {
             if (amount <= 0 || enemy.Down) return;
             if (HeldUp(enemy)) amount = Math.Max(1, (int)Math.Round(amount * BattleRules.TurnRoomToneKeep));   // HOLDS THE ROOM
+            if (Has(enemy, EnemyTrait.TheCourt) && OthersStanding(enemy))                                     // THE COURT
+                amount = Math.Max(1, (int)Math.Round(amount * BattleRules.TurnCourtKeep));
             int over = amount - enemy.Hp;
             Hurt(enemy, amount);
             if (over <= 0 || !Has(MotifId.Segue)) return;
@@ -1586,6 +1649,26 @@ namespace Tacetno433.Battle
                 Strike(next, over);
                 return;
             }
+        }
+
+        //Others Standing : another enemy is still up (THE COURT)
+        private bool OthersStanding(Fighter enemy)
+        {
+            for (int i = 0; i < Enemies.Count; i++)
+                if (Enemies[i] != enemy && !Enemies[i].Down) return true;
+            return false;
+        }
+
+        //Breaks Decree : DECREE (THE DEAF CROWN), a move of a kind this bar forbids hurts the musician who played it.
+        //FEATHER's free ATTACKs and a skill turned into an ATTACK by the rules do not count.
+        private void BreaksDecree(Fighter who, DecreeKind kind)
+        {
+            BarMove move = CurrentMove;
+            if (Decree != kind || move == null || move.Free || move.Forced || who.Down) return;
+            if (!AnyStanding(EnemyTrait.Decree)) return;
+            int thorns = Math.Max(1, (int)Math.Round(BattleRules.TurnThorns * BattleRules.TurnFloorDamage[Floor - 1]));
+            Events.Add(new TurnEvent(TurnEventKind.Thorns, who, thorns));
+            Hurt(who, thorns);
         }
 
         //Held Up : HOLDS THE ROOM, another enemy standing has it (two ROOM TONEs hold each other up)

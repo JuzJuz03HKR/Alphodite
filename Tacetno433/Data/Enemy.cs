@@ -32,7 +32,12 @@ namespace Tacetno433.Data
         OnCue,           // THE CUE      it strikes the musician called in last
         FeltHand,        // THE DAMPER   while it stands, a CALL costs more
         TwiceABar,       // STUTTER      it cuts in twice a bar, one note each time
-        FirstInLine      // THE ROUND    it strikes the musician who plays first in the bar
+        FirstInLine,     // THE ROUND    it strikes the musician who plays first in the bar
+
+        //Bosses of step 14 (option B of docs/ALPHA7_CONTENT_PROPOSALS.md, the Hollow of Bach, Lully and Beethoven)
+        ByTouch,         // THE BLIND CANTOR  it strikes the seats in turn, a note you miss comes back in its next attack
+        TheCourt,        // THE STAFF         half damage while its court stands, every third attack hits everyone
+        Decree           // THE DEAF CROWN    each bar it forbids SKILLS or ATTACKS, and it never takes a COUNTER
     }
 
     //Enemy : one shape TACET takes. It has no face, only a written part it plays against you.
@@ -199,6 +204,25 @@ namespace Tacetno433.Data
                         Trait = EnemyTrait.FirstInLine, TraitName = "FIRST IN LINE", TraitFloor = 1,
                         TraitText = "It always strikes the musician who plays first in the bar.",
                         Kind = EnemyKind.Elite, Pattern = new int[] { 5, 0, 5, 0, 5, 0, 5, 5 }, Tone = Palette.ToneB },
+
+            //Bosses of step 14 (option B : no new era, each era picks one of its two bosses at random). The Hollow
+            //of three conductors from the lore (docs/USER_BRIEFS.md) : Bach with no eyes, Lully with no legs and a cane,
+            //Beethoven with no ears and a crown of black thorns. The names are stand-ins until the story is written.
+            new Enemy { Name = "THE DEAF CROWN",
+                        TurnHp = 240, TurnSpeed = 5, TurnPower = 6, Phrases = new[] { "Uf Uf Uf Df", "Lf Rf Df" }, TurnTraitText = "Each bar it forbids SKILLS or ATTACKS, and breaking it hurts. It never takes a COUNTER.", Title = "It cannot hear you. It only gives orders.",
+                        Trait = EnemyTrait.Decree, TraitName = "DECREE", TraitFloor = 1,
+                        TraitText = "Each bar it forbids SKILLS or ATTACKS, and breaking it hurts. It never takes a COUNTER.",
+                        Kind = EnemyKind.Boss, Era = 0, Pattern = new int[] { 6, 0, 6, 0, 6, 0, 6, 9 }, Tone = Palette.ToneA },
+            new Enemy { Name = "THE STAFF",
+                        TurnHp = 250, TurnSpeed = 3, TurnPower = 7, Phrases = new[] { "Df Dmf Df", "Dmf Lmf Dmf Rmf" }, TurnTraitText = "While its court stands it takes half. Every third attack it strikes the floor and hits everyone.", Title = "It cannot walk. It beats time on the floor instead.",
+                        Trait = EnemyTrait.TheCourt, TraitName = "THE COURT", TraitFloor = 1,
+                        TraitText = "While its court stands it takes half. Every third attack it strikes the floor and hits everyone.",
+                        Kind = EnemyKind.Boss, Era = 1, Pattern = new int[] { 6, 0, 6, 0, 6, 0, 6, 6 }, Tone = Palette.ToneB },
+            new Enemy { Name = "THE BLIND CANTOR",
+                        TurnHp = 240, TurnSpeed = 4, TurnPower = 6, Phrases = new[] { "Df Umf Df Umf", "Lmf Rmf Lp Rp" }, TurnTraitText = "It strikes the seats in turn, front to back. A note you miss comes back in its next attack.", Title = "It plays by touch, one voice after another.",
+                        Trait = EnemyTrait.ByTouch, TraitName = "BY TOUCH", TraitFloor = 1,
+                        TraitText = "It strikes the seats in turn, front to back. A note you miss comes back in its next attack.",
+                        Kind = EnemyKind.Boss, Era = 2, Pattern = new int[] { 6, 0, 6, 0, 6, 0, 6, 6 }, Tone = Palette.ToneA },
         };
 
         //Practice : the enemy of the tutorial's practice fight (Alpha 7, step 9, BattleRules PRACTICE).

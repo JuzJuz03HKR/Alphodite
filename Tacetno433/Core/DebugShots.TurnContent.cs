@@ -5,8 +5,8 @@ using Tacetno433.Data;
 
 namespace Tacetno433.Core
 {
-    //DebugShots.TurnContent : DEVELOPER TOOL, the checks of step 13 (Alpha 7), part of --shots turncheck.
-    //The six ONE BAR motifs, the five new enemies and the bugs fixed with them.
+    //DebugShots.TurnContent : DEVELOPER TOOL, the checks of steps 13 and 14 (Alpha 7), part of --shots turncheck.
+    //The six ONE BAR motifs, the five new enemies, the three bosses of step 14 and the bugs fixed with them.
     //The musicians' own traits are switched off here so the numbers stay plain (ANNA 10, KLARA 8, OTTO 12 an ATTACK).
     public static partial class DebugShots
     {
@@ -21,8 +21,8 @@ namespace Tacetno433.Core
                 MusicianList.All[i].Trait = MusicianTrait.None;
             }
 
-            //Lists : 21 + 6 motifs, 9 + 5 enemies, 7 + 3 events, the new ones at the end (the save keeps their places)
-            report += Same("content", "27 14 10 ROOM TONE", MotifList.All.Length + " " + EnemyList.All.Length + " " + EventList.All.Length + " " + EnemyList.All[9].Name);
+            //Lists : 21 + 6 motifs, 9 + 5 + 3 enemies, 7 + 3 events, the new ones at the end (the save keeps their places)
+            report += Same("content", "27 17 10 ROOM TONE", MotifList.All.Length + " " + EnemyList.All.Length + " " + EventList.All.Length + " " + EnemyList.All[9].Name);
 
             //DOWNBEAT : the first move of the bar x1.5 (ANNA 10 -> 15), the second plain (KLARA 8)
             TurnBattle b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
@@ -152,7 +152,77 @@ namespace Tacetno433.Core
             b.TakeEnemyAttack(null);
             report += Same("fallen target", "Plan False", b.Step + " " + b.Enemies[0].IntentTarget.Down);
 
+            report += TurnCheckBosses(band, hush);
             for (int i = 0; i < traits.Length; i++) MusicianList.All[i].Trait = traits[i];
+            return report;
+        }
+
+        //Turn Check Bosses : step 14, option B. Each era picks one of two bosses, and the three new ones' rules.
+        private static string TurnCheckBosses(List<Musician> band, Enemy hush)
+        {
+            string report = "";
+            string eras = "";
+            for (int era = 0; era < 3; era++)
+            {
+                if (era > 0) eras += " / ";
+                for (int i = 0; i < EnemyList.All.Length; i++)
+                    if (EnemyList.All[i].Kind == EnemyKind.Boss && EnemyList.All[i].Era == era) eras += EnemyList.All[i].Name + ",";
+            }
+            report += Same("bosses by era", "REQUIEM,THE DEAF CROWN, / THE NAMELESS MASTER,THE STAFF, / THE DEVIL'S STRING,THE BLIND CANTOR,", eras);
+
+            //BY TOUCH (THE BLIND CANTOR) : ANNA's seat first, then KLARA's. Both of its notes got through,
+            //so its next attack is its own 2 (Lmf Rmf) and those 2 again (Df Umf), 13 each on floor 1
+            TurnBattle b = new TurnBattle(band, new List<Enemy> { EnemyNamed("THE BLIND CANTOR") }, 1, new Random(433));
+            Sturdy(b);
+            string first = b.Enemies[0].IntentTarget.Name;
+            PlayToEnemy(b);
+            b.TakeEnemyAttack(null);
+            Fighter cantor = b.Enemies[0];
+            report += Same("by touch", "ANNA KLARA 4 Left Right Down Up 13", first + " " + cantor.IntentTarget.Name + " " + cantor.IntentNotes.Length + " "
+                + cantor.IntentWays[0] + " " + cantor.IntentWays[1] + " " + cantor.IntentWays[2] + " " + cantor.IntentWays[3] + " " + cantor.IntentNotes[3]);
+
+            //THE COURT (THE STAFF) : with HUSH standing, ANNA's 10 is halved (250 -> 245)
+            Enemy staffBoss = EnemyNamed("THE STAFF");
+            b = new TurnBattle(Duo(), new List<Enemy> { staffBoss, hush }, 1, new Random(433));
+            b.PlanAttack(b.Party[0], b.Enemies[0]);
+            b.PlayBar();
+            b.Attack();
+            string court = b.Enemies[0].Hp.ToString();
+
+            //THE COURT : its third attack is one note down that hits everybody, 15 x 1.5 = 22.5 -> 22 (C# rounds to even)
+            b = new TurnBattle(Duo(), new List<Enemy> { staffBoss }, 1, new Random(433));
+            Tough(b);
+            for (int i = 0; i < 80 && !b.Enemies[0].IntentAll; i++) Step(b, Grade.Good);
+            Fighter staff = b.Enemies[0];
+            court += " " + staff.IntentAll + " " + staff.IntentNotes.Length + " " + staff.IntentWays[0] + " " + staff.IntentNotes[0];
+            for (int i = 0; i < 20 && !(b.Step == TurnStep.EnemyTurn && b.Current == staff); i++) Step(b, Grade.Good);
+            int anna = b.Party[0].Hp;
+            int klara = b.Party[1].Hp;
+            b.TakeEnemyAttack(null);
+            report += Same("the court", "245 True 1 Down 22 22 22", court + " " + (anna - b.Party[0].Hp) + " " + (klara - b.Party[1].Hp));
+
+            //DECREE (THE DEAF CROWN) : bar 1 forbids skills, ANNA's QUICK BOW costs her 5 (30 -> 25). It CUTS IN after
+            //KLARA, every note is parried PERFECT and still no COUNTER. Bar 2 forbids attacks, ANNA's ATTACK costs 5 more.
+            Skill quickBow = SkillList.First(MusicianList.All[0]);
+            NoteResult[] goods = new NoteResult[quickBow.Notes.Length];
+            for (int i = 0; i < goods.Length; i++) goods[i] = new NoteResult(Grade.Good, true, 1f);
+            b = new TurnBattle(band, new List<Enemy> { EnemyNamed("THE DEAF CROWN") }, 1, new Random(433));
+            b.Breath = 10;
+            string decree = b.Decree.ToString();
+            b.PlanSkill(b.Party[0], quickBow, b.Enemies[0]);
+            b.PlayBar();
+            b.UseSkill(goods);
+            decree += " " + b.Party[0].Hp;
+            b.Attack();
+            b.Enemies[0].Dissonance = 0;                                               // QUICK BOW's DISSONANCE would tick at the end of its turn
+            int crownBefore = b.Enemies[0].Hp;
+            b.TakeEnemyAttack(AllGrades(b.Current.IntentNotes.Length, Grade.Perfect));
+            decree += " " + (crownBefore - b.Enemies[0].Hp);
+            b.Attack();
+            decree += " " + b.Decree;
+            b.PlayBar();
+            b.Attack();
+            report += Same("decree", "NoSkills 25 0 NoAttacks 20", decree + " " + b.Party[0].Hp);
             return report;
         }
 

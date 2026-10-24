@@ -75,6 +75,12 @@
         public static int TurnFeltHandCall = 1;          // THE DAMPER : a CALL costs this much more while it stands (2 left the sim's STRONG player at 23 percent against it)
         public static int TurnTwiceFirst = 1;            // STUTTER : cuts in after this many of the band's moves
         public static int TurnTwiceSecond = 3;           //           and again after this many
+        //Bosses of step 14
+        public static int TurnByTouchMost = 2;           // THE BLIND CANTOR : missed notes that come back in its next attack, at most
+        public static float TurnCourtKeep = 0.5f;        // THE STAFF : the share of the band's damage it takes while another enemy stands
+        public static int TurnStaffEvery = 3;            //            every this many attacks it strikes the floor (instead of a CADENZA)
+        public static float TurnStaffPower = 1.5f;       //            that one note hits everyone this much harder
+        public static int TurnThorns = 5;                // THE DEAF CROWN : life lost by a musician who breaks the DECREE (x the floor's note scale)
 
         //PRACTICE (step 9) : the soft enemy of the tutorial's practice fight (EnemyList.Practice).
         //Lots of life so the four lessons fit before it falls, and notes that barely hurt.

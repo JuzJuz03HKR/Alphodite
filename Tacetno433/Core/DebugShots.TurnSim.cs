@@ -107,24 +107,30 @@ namespace Tacetno433.Core
                 }
             }
 
-            //EACH ENEMY as the leader of its pack on floor 2 (bosses floor 3), AVERAGE player
-            report += "\r\nEACH ENEMY leading its pack (normal floor 2 late, elite floor 2, boss floor 3), AVERAGE player : WIN PERCENT / BARS\r\n";
+            //EACH ENEMY as the leader of its pack on floor 2 (bosses floor 3), AVERAGE and STRONG players (step 14 : STRONG added,
+            //every boss was 0 to 3 percent for AVERAGE, so they could not be told apart)
+            report += "\r\nEACH ENEMY leading its pack (normal floor 2 late, elite floor 2, boss floor 3) : WIN PERCENT / BARS  AVERAGE, then STRONG\r\n";
             for (int e = 0; e < EnemyList.All.Length; e++)
             {
                 Enemy enemy = EnemyList.All[e];
                 int floor = enemy.Kind == EnemyKind.Boss ? 3 : 2;
-                int wins = 0;
-                int bars = 0;
-                for (int f = 0; f < SimFights; f++)
+                string line = "  " + enemy.Name.PadRight(22);
+                for (int p = 3; p >= 2; p--)
                 {
-                    List<Enemy> pack = new List<Enemy> { enemy };
-                    int escorts = SimEscorts(enemy.Kind == EnemyKind.Normal ? "LATE" : (enemy.Kind == EnemyKind.Elite ? "ELITE" : "BOSS"), floor);
-                    for (int k = 0; k < escorts; k++) pack.Add(EnemyList.PickOther(EnemyKind.Normal, 0, pack, rng));
-                    TurnBattle b = SimFight(four, pack, floor, simPlayers[3], null, rng, TurnKit.Beethoven, false);
-                    if (b.Step == TurnStep.Won) wins++;
-                    bars += b.Round;
+                    int wins = 0;
+                    int bars = 0;
+                    for (int f = 0; f < SimFights; f++)
+                    {
+                        List<Enemy> pack = new List<Enemy> { enemy };
+                        int escorts = SimEscorts(enemy.Kind == EnemyKind.Normal ? "LATE" : (enemy.Kind == EnemyKind.Elite ? "ELITE" : "BOSS"), floor);
+                        for (int k = 0; k < escorts; k++) pack.Add(EnemyList.PickOther(EnemyKind.Normal, 0, pack, rng));
+                        TurnBattle b = SimFight(four, pack, floor, simPlayers[p], null, rng, TurnKit.Beethoven, false);
+                        if (b.Step == TurnStep.Won) wins++;
+                        bars += b.Round;
+                    }
+                    line += (wins * 100 / SimFights).ToString().PadLeft(3) + "%  " + (bars / (float)SimFights).ToString("0.0") + "b    ";
                 }
-                report += "  " + enemy.Name.PadRight(22) + (wins * 100 / SimFights).ToString().PadLeft(3) + "%  " + (bars / (float)SimFights).ToString("0.0") + "b\r\n";
+                report += line + "\r\n";
             }
 
             //RUNS : three floors with life carried over, NORMAL and MAESTRO
@@ -333,12 +339,16 @@ namespace Tacetno433.Core
                     if (mine[k].HitsEnemy && (hit == null || mine[k].Cost > hit.Cost)) hit = mine[k];
                 }
 
-                if (heal != null && hurt != null)
+                //DECREE (THE DEAF CROWN, step 14) : no skill in a NO SKILLS bar, a skill if there is BREATH for one in a NO ATTACKS bar
+                bool noSkills = b.Decree == DecreeKind.NoSkills;
+                bool noAttacks = b.Decree == DecreeKind.NoAttacks;
+                if (!noSkills && heal != null && hurt != null)
                 {
                     b.PlanSkill(me, heal, heal.Target == SkillTarget.Ally ? hurt : me);
                     hurt = null;
                 }
-                else if (hit != null && b.BreathFree >= 3 && b.BreathFree - hit.Cost >= keep) b.PlanSkill(me, hit, weakest);
+                else if (!noSkills && hit != null && (noAttacks || (b.BreathFree >= 3 && b.BreathFree - hit.Cost >= keep))) b.PlanSkill(me, hit, weakest);
+                else if (noAttacks && heal != null) b.PlanSkill(me, heal, me);
                 else b.PlanAttack(me, weakest);
             }
         }

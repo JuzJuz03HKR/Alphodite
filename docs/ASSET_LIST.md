@@ -70,6 +70,9 @@
 | `enemy_the_damper.png` | THE DAMPER | ธรรมดา (ขั้น 13) | A felt hand resting on every string. |
 | `enemy_stutter.png` | STUTTER | ธรรมดา (ขั้น 13) | It cannot finish a word, so it never stops starting. |
 | `enemy_the_round.png` | THE ROUND | Elite (ขั้น 13) | It sings your bar back at you, in your own order. |
+| `enemy_the_deaf_crown.png` | THE DEAF CROWN | บอส Classical (ขั้น 14, Hollow ของ Beethoven) | It cannot hear you. It only gives orders. |
+| `enemy_the_staff.png` | THE STAFF | บอส Siam (ขั้น 14, Hollow ของ Lully) | It cannot walk. It beats time on the floor instead. |
+| `enemy_the_blind_cantor.png` | THE BLIND CANTOR | บอส Romantic (ขั้น 14, Hollow ของ Bach) | It plays by touch, one voice after another. |
 
 ### 3. ฉากหลังดวล ⭐⭐
 `Content/Art/Stage/` : `stage_classical.png` · `stage_siam.png` · `stage_romantic.png` — 1280 × 720 เต็มจอ

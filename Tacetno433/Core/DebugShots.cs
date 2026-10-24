@@ -807,6 +807,12 @@ namespace Tacetno433.Core
             run.Chosen = new RouteNode();
             run.Chosen.Type = name == "duelboss" || name == "battleboss" ? NodeType.Boss : NodeType.Battle;
             if (name == "battleboss") run.Floor = 3;                                  // Alpha 7 step 12 : the boss and two more
+            string newBoss = name == "battlecrown" ? "THE DEAF CROWN" : (name == "battlestaff" ? "THE STAFF" : (name == "battlecantor" ? "THE BLIND CANTOR" : null));
+            if (newBoss != null)                                                      // step 14 : each new boss on floor 2 with one more
+            {
+                run.Chosen.Type = NodeType.Boss;
+                run.Floor = 2;
+            }
             if (name == "battlefull")                                                 // six musicians, four enemies (floor 3, late)
             {
                 run.ChooseEra(2);
@@ -821,6 +827,7 @@ namespace Tacetno433.Core
             run.Chosen.Title = RouteNodeInfo.TitleOf(run.Chosen.Type);
             run.Chosen.Caption = RouteNodeInfo.CaptionOf(run.Chosen.Type);
             run.BeginBattle();
+            if (newBoss != null) run.BeginBattle(EnemyNamed(newBoss));
             run.ChangeStamina(-20);
 
             //Combo Picture : a fight already a few PERFECTs in
