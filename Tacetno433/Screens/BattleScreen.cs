@@ -208,11 +208,12 @@ namespace Tacetno433.Screens
             }
             run = Game.CurrentRun;
 
-            //The Band : the ones on stage in seat order, then the rest of the ensemble. The first
-            //Archive.StartBand of them start on the field, the others wait on the BENCH (ONE BAR).
+            //The Band : the ones on stage in seat order, then the rest of the ensemble. Everybody seated on the
+            //BAND page starts on the field, the others wait on the BENCH (ONE BAR, step 15 : it was always the first 2).
             List<Musician> band = new List<Musician>();
             for (int s = 0; s < run.Formation.Seated.Length; s++)
                 if (run.Formation.Seated[s] != null) band.Add(run.Formation.Seated[s]);
+            int onStage = Math.Max(1, Math.Min(band.Count, run.Seats));
             for (int i = 0; i < run.Roster.Count; i++)
                 if (!band.Contains(run.Roster[i])) band.Add(run.Roster[i]);
 
@@ -222,7 +223,7 @@ namespace Tacetno433.Screens
 
             //PACKS : every enemy of the fight (step 12)
             List<Enemy> enemies = new List<Enemy>(run.Battle.Pack);
-            battle = new TurnBattle(band, enemies, run.Floor, run.Rng, life, Archive.Level(Archive.Life) * BattleRules.ArchiveLifePerLevel, Archive.StartBand);
+            battle = new TurnBattle(band, enemies, run.Floor, run.Rng, life, Archive.Level(Archive.Life) * BattleRules.ArchiveLifePerLevel, onStage);
             battle.GiveMotifs(run.Motifs);                                                   // the motifs the band carries
             battle.Maestro = run.Maestro;                                                    // MAESTRO
             battle.Kit = run.Conductor.Turn;                                                 // the conductor's PASSIVE and SIGNATURE
@@ -1763,6 +1764,11 @@ namespace Tacetno433.Screens
                 else if (hoverBench >= 0 && hoverBench < battle.Bench.Count)
                 {
                     line = battle.Bench[hoverBench].TraitText;
+                    ink = Palette.Paper;
+                }
+                else if (hover != null && !hover.IsEnemy && !hover.JustCalled && view == View.Plan)
+                {
+                    line = hover.Musician.TraitText;                                                     // step 15 : the ones on the field too
                     ink = Palette.Paper;
                 }
                 Gfx.Text(sb, Game.Font, line, 40, 680, ink, TextSize.Label);

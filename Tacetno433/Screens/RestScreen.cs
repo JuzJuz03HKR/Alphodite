@@ -20,7 +20,7 @@ namespace Tacetno433.Screens
         private const int Breathe = 0;
         private const int Rehearse = 1;
         private const int DeepRest = 2;
-        private static string[] optionNames = { "BREATHE", "REHEARSE", "DEEP REST" };
+        private static string[] optionNames = { BattleRules.TurnBattleOn ? "RECOVER" : "BREATHE", "REHEARSE", "DEEP REST" };   // step 15 : BREATH is the fight's skill points, rest gives LIFE
         private static string[] optionNumerals = { "I", "II", "III" };
 
         //Rest Layout

@@ -89,7 +89,7 @@ namespace Tacetno433.Screens
                 Goal = "Four strokes GOOD or better." },
 
             new Lesson { Kind = Kind.Timing, Title = "ON THE RING", Need = 4, Bpm = 70, For = For.Turn,
-                Body = "Stop each stroke as the ring closes. That is how you hit, and how you block.",
+                Body = "Stop each stroke as the ring closes. That is how skills land, and how you block.",
                 Goal = "Four strokes GOOD or better." },
 
             new Lesson { Kind = Kind.Loudness, Title = "READ THE NOTE", Need = 6, Bpm = 76,

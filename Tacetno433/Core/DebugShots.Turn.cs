@@ -31,7 +31,8 @@ namespace Tacetno433.Core
             }
 
             //ANNA strings power 5, KLARA winds power 4, OTTO percussion power 6
-            //HUSH : its Pattern notes average 4, so each of its notes hits round(4 x 2.2) = 9
+            //HUSH : its Pattern notes average 4, so each of its notes hits round(4 x 1.85) = 7 (step 15).
+            //Floor 1 enemies have TurnFloorLife 1.6 x their life : HUSH 50 x 1.6 = 80
             List<Musician> band = new List<Musician> { MusicianList.All[0], MusicianList.All[1], MusicianList.All[2] };
             Enemy hush = EnemyList.All[0];
             Enemy deadAir = EnemyList.All[1];
@@ -42,7 +43,7 @@ namespace Tacetno433.Core
 
             //Life, and the bar being written first
             TurnBattle b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
-            report += Same("life", "30/26/36/50", b.Party[0].Hp + "/" + b.Party[1].Hp + "/" + b.Party[2].Hp + "/" + b.Enemies[0].Hp);
+            report += Same("life", "30/26/36/80", b.Party[0].Hp + "/" + b.Party[1].Hp + "/" + b.Party[2].Hp + "/" + b.Enemies[0].Hp);
             report += Same("plan first", "Plan 1 3 True", b.Step + " " + b.Round + " " + b.Breath + " " + (b.Current == null));
             List<Fighter> preview = new List<Fighter>();
             List<BarMove> previewMoves = new List<BarMove>();
@@ -56,27 +57,27 @@ namespace Tacetno433.Core
             b.PlayBar();
             report += Same("written order", "OTTO ANNA KLARA HUSH", OrderNames(b));
 
-            //ATTACK : no swipe, power x 2 (OTTO 12, ANNA 10, KLARA 8), 1 breath each
+            //ATTACK : no swipe, power x 2 x 0.55 (OTTO 6.6 -> 7, ANNA 5.5 -> 6, KLARA 4.4 -> 4), 2 breath each (step 15)
             int h1 = b.Attack();
             int h2 = b.Attack();
             int h3 = b.Attack();
-            report += Same("attack", "12 10 8 20 6", h1 + " " + h2 + " " + h3 + " " + enemy.Hp + " " + b.Breath);
+            report += Same("attack", "7 6 4 63 9", h1 + " " + h2 + " " + h3 + " " + enemy.Hp + " " + b.Breath);
 
-            //Enemy turn : an ordinary enemy plays 1 or 2 notes on floor 1, HUSH's first phrase has 2 of 9
+            //Enemy turn : an ordinary enemy plays 1 or 2 notes on floor 1, HUSH's first phrase has 2 of 7
             report += Same("enemy turn", "EnemyTurn HUSH", b.Step + " " + b.Current.Name);
             int notes = enemy.IntentNotes.Length;
-            bool intentOk = notes == 2 && enemy.IntentNotes[0] == 9 && enemy.IntentTarget != null && !enemy.IntentTarget.Down;
+            bool intentOk = notes == 2 && enemy.IntentNotes[0] == 7 && enemy.IntentTarget != null && !enemy.IntentTarget.Down;
             report += Same("intent", "True", intentOk.ToString());
             bool marksOk = enemy.IntentWays.Length == notes && enemy.IntentSizes.Length == notes;
             for (int i = 0; i < notes && marksOk; i++)
                 marksOk = enemy.IntentWays[i] != Flick.None && enemy.IntentSizes[i] >= 0 && enemy.IntentSizes[i] <= 2;
             report += Same("intent marks", "True", marksOk.ToString());
 
-            //PARRY every note PERFECT : no damage, 1 breath per note, the COUNTER hits HUSH for the target's power x 2,
-            //and the next bar is written
+            //PARRY every note PERFECT : no damage, 1 breath per note (9 + 2, the top is 10), the COUNTER hits HUSH for
+            //the target's power x 2, and the next bar is written
             int counter = enemy.IntentTarget.Musician.Power * 2;
             int taken = b.TakeEnemyAttack(AllGrades(notes, Grade.Perfect));
-            report += Same("parry perfect", "0 8 " + (20 - counter) + " Plan 2", taken + " " + b.Breath + " " + enemy.Hp + " " + b.Step + " " + b.Round);
+            report += Same("parry perfect", "0 10 " + (63 - counter) + " Plan 2", taken + " " + b.Breath + " " + enemy.Hp + " " + b.Step + " " + b.Round);
 
             //Swipe table
             report += Same("swipe table", "1.3 1 0.7 0.4 0.4",
@@ -88,15 +89,15 @@ namespace Tacetno433.Core
             report += Same("judge", "Perfect Good Miss Miss", b.Judge(0f, true) + " " + b.Judge(0.15f, true) + " " + b.Judge(0.3f, true) + " " + b.Judge(0f, false));
             report += Same("note damage", "0 3 6", TurnBattle.NoteDamage(6, Grade.Perfect) + " " + TurnBattle.NoteDamage(6, Grade.Good) + " " + TurnBattle.NoteDamage(6, Grade.Miss));
 
-            //PARRY GOOD lets half through (9 -> 5 a note), no swipe lets all of it through
+            //PARRY GOOD lets half through (7 -> 4 a note), no swipe lets all of it through
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             PlayToEnemy(b);
             notes = b.Current.IntentNotes.Length;
-            report += Same("parry good", (5 * notes).ToString(), b.TakeEnemyAttack(AllGrades(notes, Grade.Good)).ToString());
-            b.Enemies[0].Hp = 50;                                                      // the band's 30 a bar would end HUSH first
+            report += Same("parry good", (4 * notes).ToString(), b.TakeEnemyAttack(AllGrades(notes, Grade.Good)).ToString());
+            b.Enemies[0].Hp = 50;                                                      // so the band's ATTACKs never end HUSH first
             PlayToEnemy(b);
             notes = b.Current.IntentNotes.Length;
-            report += Same("no parry", (9 * notes).ToString(), b.TakeEnemyAttack(null).ToString());
+            report += Same("no parry", (7 * notes).ToString(), b.TakeEnemyAttack(null).ToString());
 
             //KNOCKED OUT : KLARA starts the fight down, has no move in the bar and gets up with 1 after it
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433), new int[] { 30, 0, 36 });
@@ -169,21 +170,21 @@ namespace Tacetno433.Core
             b.Unplan(b.Party[0]);
             report += Same("rewrite", "1 0 0", moves + " " + b.Bar.Count + " " + b.Reserved);
 
-            //QUICK BOW (ANNA) : PERFECT 5 x 2 x 1.3 x 0.5 = 6.5 -> 6, GOOD 5, MISS nothing, 2 DISSONANCE, 2 breath spent
+            //QUICK BOW (ANNA) : PERFECT 5 x 2 x 1.3 x 0.5 = 6.5 -> 6, GOOD 5, MISS nothing (HUSH 80 -> 69), 2 DISSONANCE, 2 breath spent
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             b.PlanSkill(b.Party[0], quickBow, b.Enemies[0]);
             b.PlayBar();
             bool used = b.UseSkill(new NoteResult[] { perfect, good, miss });
-            report += Same("quick bow", "True 39 2 1", used + " " + b.Enemies[0].Hp + " " + b.Enemies[0].Dissonance + " " + b.Breath);
+            report += Same("quick bow", "True 69 2 1", used + " " + b.Enemies[0].Hp + " " + b.Enemies[0].Dissonance + " " + b.Breath);
 
-            //DISSONANCE : KLARA 8 and OTTO 12 bring HUSH to 19, at the end of its turn it loses 2, then 1 stack is left
+            //DISSONANCE : KLARA 4 and OTTO 7 bring HUSH to 58, at the end of its turn it loses 2, then 1 stack is left
             b.Attack();
             b.Attack();
             b.TakeEnemyAttack(null);
-            report += Same("dissonance", "17 1", b.Enemies[0].Hp + " " + b.Enemies[0].Dissonance);
+            report += Same("dissonance", "56 1", b.Enemies[0].Hp + " " + b.Enemies[0].Dissonance);
 
-            //OFF-BEAT : ANNA's ATTACK fills the gauge (90 + 10), KLARA then hits x1.5 (4 x 2 x 1.5 = 12),
-            //OTTO 18, and HUSH loses its turn, so the next bar is written at once
+            //OFF-BEAT : ANNA's ATTACK (6) fills the gauge (90 + 10), KLARA then hits x1.5 (4 x 2 x 0.55 x 1.5 = 6.6 -> 7),
+            //OTTO 9.9 -> 10 (80 - 23 = 57), and HUSH loses its turn, so the next bar is written at once
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             b.Enemies[0].OffBeat = 90;
             b.PlayBar();
@@ -191,16 +192,16 @@ namespace Tacetno433.Core
             bool broke = b.Enemies[0].Staggered;
             b.Attack();
             b.Attack();
-            report += Same("off-beat", "True 10 Plan 2 False", broke + " " + b.Enemies[0].Hp + " " + b.Step + " " + b.Round + " " + b.Enemies[0].Staggered);
+            report += Same("off-beat", "True 57 Plan 2 False", broke + " " + b.Enemies[0].Hp + " " + b.Step + " " + b.Round + " " + b.Enemies[0].Staggered);
 
             //COUNTER : every note parried PERFECT, the target hits back for its attack (power x 2)
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
-            PlayToEnemy(b);                                                            // HUSH 50 - 30 = 20
+            PlayToEnemy(b);                                                            // HUSH 80 - 17 = 63
             Fighter struck = b.Current.IntentTarget;
             b.TakeEnemyAttack(AllGrades(b.Current.IntentNotes.Length, Grade.Perfect));
-            report += Same("counter", (20 - struck.Musician.Power * 2).ToString(), b.Enemies[0].Hp.ToString());
+            report += Same("counter", (63 - struck.Musician.Power * 2).ToString(), b.Enemies[0].Hp.ToString());
 
-            //STAND FIRM (OTTO) : GUARD and TAUNT, HUSH turns to him and each note does half (9 -> 5)
+            //STAND FIRM (OTTO) : GUARD and TAUNT, HUSH turns to him and each note does half (7 -> 4)
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             b.PlanSkill(b.Party[2], SkillList.Second(band[2]), null);
             b.PlayBar();
@@ -210,9 +211,9 @@ namespace Tacetno433.Core
             b.Attack();
             notes = b.Current.IntentNotes.Length;
             int guarded = b.TakeEnemyAttack(null);
-            report += Same("guard taunt", "True " + (5 * notes), aimed + " " + guarded);
+            report += Same("guard taunt", "True " + (4 * notes), aimed + " " + guarded);
 
-            //CRESCENDO : 2 stacks hit 30 percent harder (ANNA 5 x 2 x 1.3 = 13), a skill note MISSed loses them all
+            //CRESCENDO : 2 stacks hit 30 percent harder (ANNA 5 x 2 x 0.55 x 1.3 = 7.15 -> 7), a skill note MISSed loses them all
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             b.Party[0].Crescendo = 2;
             b.Party[1].Crescendo = 2;
@@ -220,7 +221,7 @@ namespace Tacetno433.Core
             b.PlayBar();
             b.UseSkill(new NoteResult[] { miss, miss });                               // KLARA misses both notes
             int loud = b.Attack();                                                     // ANNA
-            report += Same("crescendo", "0 13 2", b.Party[1].Crescendo + " " + loud + " " + b.Party[0].Crescendo);
+            report += Same("crescendo", "0 7 2", b.Party[1].Crescendo + " " + loud + " " + b.Party[0].Crescendo);
 
             //MUTE : no skill can be written, and it wears off at the end of the musician's move
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
@@ -245,18 +246,18 @@ namespace Tacetno433.Core
             b.UseSkill(new NoteResult[] { perfect, new NoteResult(Grade.Good, false, 1f) });
             report += Same("soft air", "26 26 36 1", b.Party[0].Hp + " " + b.Party[1].Hp + " " + b.Party[2].Hp + " " + b.Breath);
 
-            //THE FLOOR (BORIS) : one held note hits every enemy. PERFECT held to the end : 7 x 2 x 1.3 x 1.4 = 25.48 -> 25
+            //THE FLOOR (BORIS) : one held note hits every enemy. PERFECT held to the end : 7 x 2 x 1.3 x 1.4 = 25.48 -> 25 (80 -> 55 each)
             Musician boris = MusicianList.All[8];
             b = new TurnBattle(new List<Musician> { boris }, new List<Enemy> { hush, deadAir }, 1, new Random(433));
             b.PlanSkill(b.Party[0], SkillList.First(boris), null);
             b.PlayBar();
             b.UseSkill(new NoteResult[] { perfect });
-            report += Same("the floor", "25 25 0", b.Enemies[0].Hp + " " + b.Enemies[1].Hp + " " + b.Breath);
+            report += Same("the floor", "55 55 0", b.Enemies[0].Hp + " " + b.Enemies[1].Hp + " " + b.Breath);
 
-            //CADENZA : REQUIEM's third attack has one note more and each note x1.5 (13 -> 19.5 -> 20)
+            //CADENZA : REQUIEM's third attack has one note more and each note x1.5 (6 x 1.85 = 11.1 -> 11, x1.5 = 16.5 -> 16, C# rounds to even)
             b = new TurnBattle(band, new List<Enemy> { EnemyList.All[6] }, 1, new Random(433));
             for (int i = 0; i < 60 && !b.Enemies[0].IntentCadenza && b.Step != TurnStep.Lost; i++) Step(b, Grade.Good);
-            report += Same("cadenza", "True 20 2", b.Enemies[0].IntentCadenza + " " + b.Enemies[0].IntentNotes[0] + " " + b.Enemies[0].Attacks);
+            report += Same("cadenza", "True 16 2", b.Enemies[0].IntentCadenza + " " + b.Enemies[0].IntentNotes[0] + " " + b.Enemies[0].Attacks);
 
             //ROLL : 5 shakes PERFECT, 3 GOOD, fewer a MISS, none at all a HESITATE (NORMAL)
             report += Same("roll", "Perfect Good Miss Hesitate", b.RollGrade(5) + " " + b.RollGrade(3) + " " + b.RollGrade(1) + " " + b.RollGrade(0));
@@ -279,21 +280,21 @@ namespace Tacetno433.Core
             b.TakeEnemyAttack(AllGrades(notes, Grade.Perfect));
             report += Same("signature fill", (2 + notes).ToString(), b.Signature.ToString());
 
-            //THE CLOSER THE LOUDER : the band at half its life hits x1.25 (KLARA written first, 4 x 2 x 1.25 = 10)
+            //THE CLOSER THE LOUDER : the band at half its life hits x1.25 (KLARA written first, 4 x 2 x 0.55 x 1.25 = 5.5 -> 6)
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433), new int[] { 15, 13, 18 });
             b.Kit = TurnKit.Beethoven;
             b.PlanAttack(b.Party[1], b.Enemies[0]);
             b.PlayBar();
-            report += Same("beethoven", "10", b.Attack().ToString());
+            report += Same("beethoven", "6", b.Attack().ToString());
 
-            //LIGHTNING : played while the bar is written. All four PERFECT, strength 1.3 : 14 x 1.3 = 18.2 -> 18 to HUSH,
+            //LIGHTNING : played while the bar is written. All four PERFECT, strength 1.3 : 14 x 1.3 = 18.2 -> 18 to HUSH (80 -> 62),
             //thrown OFF-BEAT, and the bar is still being written
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             b.Kit = TurnKit.Beethoven;
             b.Signature = BattleRules.TurnSignatureNeed;
             NoteResult[] four = { perfect, perfect, perfect, perfect };
             bool played = b.UseSignature(four);
-            report += Same("lightning", "True 32 True Plan 0", played + " " + b.Enemies[0].Hp + " " + b.Enemies[0].Staggered + " " + b.Step + " " + b.Signature);
+            report += Same("lightning", "True 62 True Plan 0", played + " " + b.Enemies[0].Hp + " " + b.Enemies[0].Staggered + " " + b.Step + " " + b.Signature);
 
             //FEATHER : 3 strokes land, so 6 free ATTACKs at the end of the band's part, ANNA KLARA OTTO and round again
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
@@ -329,21 +330,21 @@ namespace Tacetno433.Core
             b.GiveMotifs(carried);
             report += Same("motif start", "5 1 4", b.Breath + " " + b.Party[0].Crescendo + " " + b.SignatureNeed);
 
-            //OVERTURE doubles the first hit only (ANNA 10 -> 20, KLARA 8)
+            //OVERTURE doubles the first hit only (ANNA 5 x 2 x 0.55 x 2 = 11, KLARA 4)
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             b.GiveMotifs(new List<Motif> { MotifList.All[(int)MotifId.Overture] });
             b.PlayBar();
             int first = b.Attack();
             int second = b.Attack();
-            report += Same("overture", "20 8", first + " " + second);
+            report += Same("overture", "11 4", first + " " + second);
 
-            //RUBATO : QUICK BOW's three notes all MISSed still play at 0.6 (5 x 2 x 0.5 x 0.6 = 3 each)
+            //RUBATO : QUICK BOW's three notes all MISSed still play at 0.6 (5 x 2 x 0.5 x 0.6 = 3 each, 80 -> 71)
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             b.GiveMotifs(new List<Motif> { MotifList.All[(int)MotifId.Rubato] });
             b.PlanSkill(b.Party[0], quickBow, b.Enemies[0]);
             b.PlayBar();
             b.UseSkill(new NoteResult[] { miss, miss, miss });
-            report += Same("rubato", "41", b.Enemies[0].Hp.ToString());
+            report += Same("rubato", "71", b.Enemies[0].Hp.ToString());
 
             //SECOND WIND : KLARA at 1 life is hit by one note and stays up with 1 (only once a fight)
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433), new int[] { 30, 1, 36 });
@@ -365,11 +366,11 @@ namespace Tacetno433.Core
             run.RestoreAllStamina();
             report += Same("band life", "True " + max, halved + " " + run.Stamina);
 
-            //ENEMIES (step 8) : HUSH plays its phrases in turn (Dp Up first), and floor 2 makes it tougher (50 x 1.3, notes 8.8 x 1.2)
+            //ENEMIES (step 8) : HUSH plays its phrases in turn (Dp Up first), and floor 2 makes it tougher (50 x 2.1, notes 7.4 x 1.2 = 8.88 -> 9)
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             report += Same("phrase", "Down Up 0 0", b.Enemies[0].IntentWays[0] + " " + b.Enemies[0].IntentWays[1] + " " + b.Enemies[0].IntentSizes[0] + " " + b.Enemies[0].IntentSizes[1]);
             b = new TurnBattle(band, new List<Enemy> { hush }, 2, new Random(433));
-            report += Same("floor 2", "65 2 11", b.Enemies[0].MaxHp + " " + b.Enemies[0].IntentNotes.Length + " " + b.Enemies[0].IntentNotes[0]);
+            report += Same("floor 2", "105 2 9", b.Enemies[0].MaxHp + " " + b.Enemies[0].IntentNotes.Length + " " + b.Enemies[0].IntentNotes[0]);
 
             //ECHO FADES (HUSH, floor 2) : each of its 2 notes that gets through adds 1 DISSONANCE
             PlayToEnemy(b);
@@ -377,10 +378,10 @@ namespace Tacetno433.Core
             b.TakeEnemyAttack(null);
             report += Same("echo fades", "2", echoed.Dissonance.ToString());
 
-            //FILLS THE GAPS (DEAD AIR, floor 2) : a missed note hits x1.5, 11 -> 16.5 -> 16, two notes
+            //FILLS THE GAPS (DEAD AIR, floor 2) : a missed note hits x1.5, 9 -> 13.5 -> 14 (C# rounds to even), two notes
             b = new TurnBattle(band, new List<Enemy> { deadAir }, 2, new Random(433));
             PlayToEnemy(b);
-            report += Same("fills the gaps", "32", b.TakeEnemyAttack(null).ToString());
+            report += Same("fills the gaps", "28", b.TakeEnemyAttack(null).ToString());
 
             //LULLABY (THE LULL, floor 2) : its third turn is a rest that heals 12 (KLARA alone, so it lives that long)
             b = new TurnBattle(Solo(1), new List<Enemy> { EnemyList.All[2] }, 2, new Random(433));
@@ -394,18 +395,18 @@ namespace Tacetno433.Core
             b.TakeEnemyAttack(null);
             report += Same("lullaby", "True 0 12", resting + " " + (b.Enemies[0].Hp - lullBefore));
 
-            //NO REST (WHITE NOISE, a CUT IN) : one note more (3), and parrying it gives no breath (ANNA and KLARA make it 5)
+            //NO REST (WHITE NOISE, a CUT IN) : one note more (3), and parrying it gives no breath (ANNA and KLARA make it 3 + 4 = 7)
             b = new TurnBattle(band, new List<Enemy> { EnemyList.All[5] }, 1, new Random(433));
             PlayToEnemy(b);
             notes = b.Current.IntentNotes.Length;
             b.TakeEnemyAttack(AllGrades(notes, Grade.Perfect));
-            report += Same("no rest", "3 5", notes + " " + b.Breath);
+            report += Same("no rest", "3 7", notes + " " + b.Breath);
 
-            //THE BARGAIN (THE DEVIL'S STRING, a CUT IN) : its attack steals 1 breath (5 -> 4)
+            //THE BARGAIN (THE DEVIL'S STRING, a CUT IN) : its attack steals 1 breath (7 -> 6)
             b = new TurnBattle(band, new List<Enemy> { EnemyList.All[8] }, 1, new Random(433));
             PlayToEnemy(b);
             b.TakeEnemyAttack(null);
-            report += Same("bargain", "4", b.Breath.ToString());
+            report += Same("bargain", "6", b.Breath.ToString());
 
             //UNFINISHED (REQUIEM) : below half life its next phrase (Lf Rf) comes mirrored and faster
             b = new TurnBattle(band, new List<Enemy> { EnemyList.All[6] }, 1, new Random(433));
@@ -453,9 +454,9 @@ namespace Tacetno433.Core
             Archive.All[Archive.Life].Level = keptLife;
             Archive.All[Archive.Stage].Level = keptStage;
 
-            //PRACTICE (step 9) : the tutorial's enemy is in no list (never in a run, never saved), 160 life, notes of 4
+            //PRACTICE (step 9) : the tutorial's enemy is in no list (never in a run, never saved), 60 x 1.6 = 96 life, notes of 2 x 1.85 = 3.7 -> 4
             b = new TurnBattle(band, new List<Enemy> { EnemyList.Practice }, 1, new Random(433));
-            report += Same("practice enemy", "-1 160 4", Array.IndexOf(EnemyList.All, EnemyList.Practice) + " " + b.Enemies[0].MaxHp + " " + b.Enemies[0].IntentNotes[0]);
+            report += Same("practice enemy", "-1 96 4", Array.IndexOf(EnemyList.All, EnemyList.Practice) + " " + b.Enemies[0].MaxHp + " " + b.Enemies[0].IntentNotes[0]);
 
             report += TurnCheckBench(band, hush);
             for (int i = 0; i < traits.Length; i++) MusicianList.All[i].Trait = traits[i];

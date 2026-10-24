@@ -217,8 +217,9 @@ namespace Tacetno433.Screens
 
             if (reward == Reward.Stamina)
             {
+                int before = run.Stamina;                                  // step 15 : say what really changed (full life gains nothing)
                 run.ChangeStamina(amount);
-                return NumberText.Signed(amount) + " " + BattleRules.LifeWord;
+                return NumberText.Signed(run.Stamina - before) + " " + BattleRules.LifeWord;
             }
 
             if (reward == Reward.Motif)

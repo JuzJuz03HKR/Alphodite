@@ -47,11 +47,11 @@ namespace Tacetno433.Screens
 
         //Notes : what the detail box says when the mouse is over nothing
         private const string NoteTitle = "A REAL ORCHESTRA, SEEN FROM THE PODIUM";
-        //The turn battle (Alpha 7) has no beats and no section bonus. ONE BAR (step 12) : the first ones on stage
-        //start each fight (Archive.StartBand), everybody else waits on the BENCH and can be called in during it.
+        //The turn battle (Alpha 7) has no beats and no section bonus. ONE BAR (step 12, step 15) : everybody on stage
+        //starts each fight, everybody else waits on the BENCH and can be called in during it.
         //The arrow says the way their skills start.
         private static readonly string NoteBand = BattleRules.TurnBattleOn
-            ? "Click a musician : on stage or on the bench. The first on stage start the fight, the rest can be CALLED in."
+            ? "Click a musician : on stage or on the bench. Everyone on stage starts the fight, the bench can be CALLED in."
             : "Click a musician : on stage or on the bench. Everyone on stage plays every note.";
         private static readonly string NoteArrow = BattleRules.TurnBattleOn
             ? "ARROW = the way their skills start."
@@ -403,6 +403,14 @@ namespace Tacetno433.Screens
                 //Numbers : the same power as the cards, rehearsals and motifs included
                 Gfx.TextSpaced(sb, Game.Font, "POWER", x + 300, y + 66, Palette.LineGrey, TextSize.Tiny, 2f);
                 Gfx.Text(sb, Game.Font, NumberText.Get(run.PowerOf(m)), x + 360, y + 62, Palette.Paper, TextSize.Body);
+                if (BattleRules.TurnBattleOn)
+                {
+                    //LIFE (step 15) : what this musician walks into the next fight with, out of their most
+                    Gfx.TextSpaced(sb, Game.Font, "LIFE", x + 400, y + 66, Palette.LineGrey, TextSize.Tiny, 2f);
+                    Gfx.Text(sb, Game.Font, NumberText.Get(run.LifeOf(m)), x + 440, y + 62, Palette.Paper, TextSize.Body);
+                    Gfx.Text(sb, Game.Font, "/", x + 470, y + 64, Palette.LineGrey, TextSize.Tiny);
+                    Gfx.Text(sb, Game.Font, NumberText.Get(run.MaxLifeOf(m)), x + 480, y + 66, Palette.LineGrey, TextSize.Tiny);
+                }
 
                 //Trait : what this musician does that nobody else does
                 Gfx.Rect(sb, x + 520, y, 1, 80, Palette.LineGrey * 0.5f);

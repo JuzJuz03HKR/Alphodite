@@ -82,6 +82,15 @@ namespace Tacetno433.Core
             Gfx.Text(sb, Ui.Font, NumberText.Get(run.PowerOf(m)), r.X + 8 + Gfx.TextWidth(Ui.Font, "PWR", TextSize.Tiny) + 5, art.Bottom + 19, Palette.Paper * bright, TextSize.Body);
             Gfx.TextSpacedRight(sb, Ui.Font, StageLayout.Rows[StageLayout.SectionOf(m.Family)].Short, r.Right - 8, art.Bottom + 23, Palette.LineGrey * bright, TextSize.Tiny, 1f);
 
+            //LIFE (step 15) : each musician carries their own life from fight to fight, so the line under the name fills
+            //with it when picking who plays (lit under half). The card has no room for the number, the BAND page's detail shows it.
+            if (BattleRules.TurnBattleOn)
+            {
+                int now = run.LifeOf(m);
+                int most = System.Math.Max(1, run.MaxLifeOf(m));
+                Gfx.Rect(sb, r.X + 8, art.Bottom, (int)((r.Width - 16) * now / (float)most), 3, (now * 2 < most ? Palette.Highlight : Palette.Paper) * (0.8f * bright));
+            }
+
             //Seat Word : FRONT / MIDDLE / BACK / BENCH, or a chance like "65%"
             if (seatWord.Length > 0)
             {

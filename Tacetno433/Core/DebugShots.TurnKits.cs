@@ -76,8 +76,8 @@ namespace Tacetno433.Core
             b.TakeEnemyAttack(AllGrades(b.Current.IntentNotes.Length, Grade.Perfect));
             report += Same("caprice", "4 Good Perfect Good 0 24 21 29", caprice + " " + b.CapriceTurns + " " + b.Party[0].Hp + " " + b.Party[1].Hp + " " + b.Party[2].Hp);
 
-            //BORROWED BREATH (THE HEARTLESS) : no BREATH, KLARA's LONG BREATH (2) costs 6 life and gives 4 BREATH.
-            //Without the kit it cannot be written, and with 6 life or less it cannot be paid.
+            //BORROWED BREATH (THE HEARTLESS) : no BREATH, KLARA's LONG BREATH (2) costs 2 x 6 = 12 life and gives 4 BREATH.
+            //Without the kit it cannot be written, and with 12 life or less it cannot be paid (she has 6).
             Skill longBreath = SkillList.Second(MusicianList.All[1]);
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             b.Breath = 0;
@@ -93,7 +93,7 @@ namespace Tacetno433.Core
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433), new int[] { 30, 6, 36 });
             b.Kit = TurnKit.Paganini;
             b.Breath = 0;
-            report += Same("borrowed breath", "False 6 20 4 False", paid + " " + b.CanPlanSkill(b.Party[1], longBreath));
+            report += Same("borrowed breath", "False 12 14 4 False", paid + " " + b.CanPlanSkill(b.Party[1], longBreath));
 
             //STEADY HAND (THE KING'S BATON) : on HUSH's turn 0.225 s late is still GOOD (0.22 + 0.01), not without it
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
@@ -103,17 +103,17 @@ namespace Tacetno433.Core
             b.Kit = TurnKit.None;
             report += Same("steady hand", "Good 0.23 Miss", steady + " " + b.Judge(0.225f, true));
 
-            //THE SUN : all four PERFECT, 8 x 1.3 = 10.4 -> 10 back for everybody (step 13), DISSONANCE and MUTE gone
+            //THE SUN : all four PERFECT, 6 x 1.3 = 7.8 -> 8 back for everybody (step 15), DISSONANCE and MUTE gone
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433), new int[] { 10, 10, 10 });
             b.Kit = TurnKit.Lully;
             b.Party[0].Dissonance = 2;
             b.Party[1].Mute = 1;
             b.Signature = b.SignatureNeed;
             b.UseSignature(fourPerfect);
-            report += Same("the sun", "20 20 20 0 0", b.Party[0].Hp + " " + b.Party[1].Hp + " " + b.Party[2].Hp + " " + b.Party[0].Dissonance + " " + b.Party[1].Mute);
+            report += Same("the sun", "18 18 18 0 0", b.Party[0].Hp + " " + b.Party[1].Hp + " " + b.Party[2].Hp + " " + b.Party[0].Dissonance + " " + b.Party[1].Mute);
 
-            //TWO VOICES (THE UNSIGNED) : KLARA (written first) in FANNY's voice 4 x 2 x 1.25 = 10, then FELIX leads
-            //and ANNA hits a plain 10, then FANNY again
+            //TWO VOICES (THE UNSIGNED) : KLARA (written first) in FANNY's voice 4 x 2 x 0.55 x 1.25 = 5.5 -> 6, then FELIX
+            //leads and ANNA hits a plain 5.5 -> 6, then FANNY again
             b = new TurnBattle(band, new List<Enemy> { deadAir }, 1, new Random(433));
             b.Kit = TurnKit.Fanny;
             b.PlanAttack(b.Party[1], b.Enemies[0]);
@@ -121,14 +121,14 @@ namespace Tacetno433.Core
             int fanny = b.Attack();
             bool felixNext = b.FelixVoice;
             int felix = b.Attack();
-            report += Same("two voices", "10 True 10 False", fanny + " " + felixNext + " " + felix + " " + b.FelixVoice);
+            report += Same("two voices", "6 True 6 False", fanny + " " + felixNext + " " + felix + " " + b.FelixVoice);
 
-            //DUET : all four PERFECT, 12 x 1.3 = 15.6 -> 16 to DEAD AIR, 8 x 1.3 = 10.4 -> 10 back for everybody (step 13)
+            //DUET : all four PERFECT, 12 x 1.3 = 15.6 -> 16 to DEAD AIR (80 -> 64), 8 x 1.3 = 10.4 -> 10 back for everybody (step 13)
             b = new TurnBattle(band, new List<Enemy> { deadAir }, 1, new Random(433), new int[] { 10, 10, 10 });
             b.Kit = TurnKit.Fanny;
             b.Signature = b.SignatureNeed;
             b.UseSignature(fourPerfect);
-            report += Same("duet", "34 20 20 20", b.Enemies[0].Hp + " " + b.Party[0].Hp + " " + b.Party[1].Hp + " " + b.Party[2].Hp);
+            report += Same("duet", "64 20 20 20", b.Enemies[0].Hp + " " + b.Party[0].Hp + " " + b.Party[1].Hp + " " + b.Party[2].Hp);
 
             //Musician Traits (each musician on their own, the bar is played so their move is up)
 
@@ -140,10 +140,10 @@ namespace Tacetno433.Core
             b.PlayBar();
             report += Same("counts aloud", "Perfect Good", counts + " " + b.Judge(0.13f, true));
 
-            //THE QUIET PART (KLARA) : ATTACK 4 x 2 = 8, x1.5 = 12 against HUSH's p notes, 8 against DEAD AIR's mf
-            report += Same("the quiet part", "12 8", SoloAttacks(1, hush, 1) + " " + SoloAttacks(1, deadAir, 1));
+            //THE QUIET PART (KLARA) : ATTACK 4 x 2 x 0.55 = 4.4, x1.5 = 6.6 -> 7 against HUSH's p notes, 4 against DEAD AIR's mf
+            report += Same("the quiet part", "7 4", SoloAttacks(1, hush, 1) + " " + SoloAttacks(1, deadAir, 1));
 
-            //MOMENTUM (OTTO) : 12, 14, 16, then 18 at most (power 6 + 3). A skill that misses every note starts again at 12.
+            //MOMENTUM (OTTO) : power 6, 7, 8, 9 x 1.1 = 7, 8, 9, 10 at most (power 6 + 3). A skill that misses every note starts again.
             string momentum = SoloAttacks(2, EnemyNamed("THE MUTE CHOIR"), 5);                      // 120 life, so OTTO gets five
             b = new TurnBattle(Solo(2), new List<Enemy> { EnemyNamed("THE MUTE CHOIR") }, 1, new Random(433));
             Sturdy(b);
@@ -153,37 +153,37 @@ namespace Tacetno433.Core
             b.PlanSkill(b.Party[0], SkillList.First(MusicianList.All[2]), b.Enemies[0]);
             b.PlayBar();
             b.UseSkill(new NoteResult[] { new NoteResult(Grade.Hesitate, true, 1f) });
-            report += Same("momentum", "12 14 16 18 18 0", momentum + " " + b.Party[0].Momentum);
+            report += Same("momentum", "7 8 9 10 10 0", momentum + " " + b.Party[0].Momentum);
 
-            //BY EAR (MALI) : ATTACK 5 x 2 = 10, OFF-BEAT x1.5 and BY EAR x1.5 = 22.5 -> 22
+            //BY EAR (MALI) : ATTACK 5 x 2 x 0.55 = 5.5, OFF-BEAT x1.5 and BY EAR x1.5 = 12.375 -> 12
             b = new TurnBattle(Solo(3), new List<Enemy> { deadAir }, 1, new Random(433));
             b.Enemies[0].Staggered = true;
             b.PlayBar();
-            report += Same("by ear", "22", b.Attack().ToString());
+            report += Same("by ear", "12", b.Attack().ToString());
 
-            //HELD NOTE (CHAI) : ATTACK 8, then it rings on for 8 x 0.4 = 3.2 -> 3, DEAD AIR 50 -> 39
+            //HELD NOTE (CHAI) : ATTACK 4.4 -> 4, then it rings on for 4 x 0.4 = 1.6 -> 2, DEAD AIR 80 -> 74
             b = new TurnBattle(Solo(4), new List<Enemy> { deadAir }, 1, new Random(433));
             b.PlayBar();
             int held = b.Attack();
-            report += Same("held note", "8 39", held + " " + b.Enemies[0].Hp);
+            report += Same("held note", "4 74", held + " " + b.Enemies[0].Hp);
 
-            //ONE STEP BETTER (NUAN) : STATIC shows Lf Rp (an f), so 6 x 2 x 1.3 = 15.6 -> 16, against DEAD AIR (mf only) 12
-            report += Same("one step better", "16 12", SoloAttacks(5, staticEnemy, 1) + " " + SoloAttacks(5, deadAir, 1));
+            //ONE STEP BETTER (NUAN) : STATIC shows Lf Rp (an f), so 6 x 2 x 0.55 x 1.3 = 8.58 -> 9, against DEAD AIR (mf only) 6.6 -> 7
+            report += Same("one step better", "9 7", SoloAttacks(5, staticEnemy, 1) + " " + SoloAttacks(5, deadAir, 1));
 
-            //FOUR BARS STRAIGHT (LUKA) : 12, 12, 12, then the fourth ATTACK x2 = 24
-            report += Same("four bars straight", "12 12 12 24", SoloAttacks(6, hush, 4));
+            //FOUR BARS STRAIGHT (LUKA) : 6.6 -> 7 three times, then the fourth ATTACK x2 = 13.2 -> 13
+            report += Same("four bars straight", "7 7 7 13", SoloAttacks(6, hush, 4));
 
             //FASHIONABLY LATE (IRIS) : on her skill notes 0.3 s late is still GOOD (0.22 + 0.12), 0.3 s early is not
             b = new TurnBattle(Solo(7), new List<Enemy> { deadAir }, 1, new Random(433));
             b.PlayBar();
             report += Same("fashionably late", "Good Miss 0.34", b.Judge(0.3f, true) + " " + b.Judge(-0.3f, true) + " " + b.LateLimit.ToString("0.00"));
 
-            //THE WHOLE FLOOR (BORIS) : his THE FLOOR held PERFECT (an f note) takes 2 off each note of HUSH's next attack (9 -> 7)
+            //THE WHOLE FLOOR (BORIS) : his THE FLOOR held PERFECT (an f note) takes 2 off each note of HUSH's next attack (7 -> 5)
             b = new TurnBattle(Solo(8), new List<Enemy> { hush }, 1, new Random(433));
             b.PlanSkill(b.Party[0], SkillList.First(MusicianList.All[8]), null);
             b.PlayBar();
             b.UseSkill(new NoteResult[] { new NoteResult(Grade.Perfect, true, 1f) });
-            report += Same("the whole floor", "7", b.Enemies[0].IntentNotes[0].ToString());
+            report += Same("the whole floor", "5", b.Enemies[0].IntentNotes[0].ToString());
 
             //Review fixes (step 10) ---------------------------------------------------------------
 
@@ -199,14 +199,14 @@ namespace Tacetno433.Core
             }
             report += Same("prodigy streak", "True", (b.BestRun >= 5).ToString());
 
-            //FUGUE : an ATTACK echoes too (step 12), ANNA 10 then 23 more (x2.34, step 13), HUSH 50 -> 17
+            //FUGUE : an ATTACK echoes too (step 12), ANNA 5.5 -> 6 then 6 x 2.34 = 14 more, HUSH 80 -> 60
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             b.Kit = TurnKit.Bach;
             b.Signature = b.SignatureNeed;
             b.UseSignature(fourPerfect);
             b.PlayBar();
             b.Attack();
-            report += Same("fugue attack", "17 0", b.Enemies[0].Hp + " " + b.Party[0].Echo);
+            report += Same("fugue attack", "60 0", b.Enemies[0].Hp + " " + b.Party[0].Echo);
 
             //FUGUE : LONG BREATH has nothing to repeat, so KLARA's echo waits for her next move
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));

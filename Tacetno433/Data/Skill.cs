@@ -103,7 +103,7 @@ namespace Tacetno433.Data
             //CHAI, pi nai (winds, right)
             new Skill { Name = "HELD NOTE", Text = "Heals one musician. Hold still = more.", Cost = 3, Target = SkillTarget.Ally,
                         Notes = new[] { H(R, 0) }, Heal = 9 },
-            new Skill { Name = "CIRCULAR", Text = "Shake fast. Heals all 3, 3 BREATH back.", Cost = 3, Target = SkillTarget.AllAllies,
+            new Skill { Name = "CIRCULAR", Text = "Shake fast. Heals everyone 3, 3 BREATH back.", Cost = 3, Target = SkillTarget.AllAllies,
                         Notes = new[] { T() }, Heal = 3, Breath = 3 },
 
             //NUAN, ranat ek (percussion, left)

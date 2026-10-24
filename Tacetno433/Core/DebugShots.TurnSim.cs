@@ -51,6 +51,11 @@ namespace Tacetno433.Core
         };
 
         private const int SimFights = 200;
+
+        //Damage Share (step 15) : the enemy life taken by ATTACKs and by skills in every simulated fight, so a change
+        //to ATTACK shows how much the skills carry (the user asked for ATTACK to matter less than the other moves)
+        private static long simAttackDamage;
+        private static long simSkillDamage;
         private const int SimRuns = 300;
 
         //Sim Roster : who joins a simulated run, in this order (two of them start floor 1)
@@ -64,6 +69,8 @@ namespace Tacetno433.Core
             string seedText = Environment.GetEnvironmentVariable("TACET_SIM_SEED");
             if (seedText != null) int.TryParse(seedText, out seed);
             Random rng = new Random(seed);
+            simAttackDamage = 0;
+            simSkillDamage = 0;
             string report = "TACET TURN BATTLE BALANCE, ONE BAR  (" + SimFights + " fights per cell, " + SimRuns + " runs per player)\r\n";
             report += "Players : timing spread FLAWLESS 0 / EXPERT 0.08 / STRONG 0.12 / AVERAGE 0.2 / NEWCOMER 0.3 seconds\r\n\r\n";
 
@@ -106,6 +113,10 @@ namespace Tacetno433.Core
                     report += line + "\r\n";
                 }
             }
+
+            //Damage Share : from the FIGHTS above
+            long allDamage = Math.Max(1, simAttackDamage + simSkillDamage);
+            report += "  DAMAGE SHARE in all of the fights above : ATTACK " + (simAttackDamage * 100 / allDamage) + "%  SKILLS " + (simSkillDamage * 100 / allDamage) + "%\r\n";
 
             //EACH ENEMY as the leader of its pack on floor 2 (bosses floor 3), AVERAGE and STRONG players (step 14 : STRONG added,
             //every boss was 0 to 3 percent for AVERAGE, so they could not be told apart)
@@ -270,8 +281,11 @@ namespace Tacetno433.Core
                 else if (b.Step == TurnStep.PlayerTurn)
                 {
                     BarMove move = b.CurrentMove;
+                    int before = EnemyLife(b);
                     if (move.Skill == null) b.Attack();
                     else b.UseSkill(SimNotes(b, move.Skill, player, rng));
+                    if (move.Skill == null) simAttackDamage += before - EnemyLife(b);
+                    else simSkillDamage += before - EnemyLife(b);
                 }
                 else
                 {
@@ -285,6 +299,13 @@ namespace Tacetno433.Core
                 }
             }
             return b;
+        }
+
+        private static int EnemyLife(TurnBattle b)
+        {
+            int life = 0;
+            for (int i = 0; i < b.Enemies.Count; i++) life += b.Enemies[i].Hp;
+            return life;
         }
 
         //Sim Plan : the habit that writes one bar (see the top of this file)

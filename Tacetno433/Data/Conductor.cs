@@ -292,9 +292,9 @@ namespace Tacetno433.Data
                 Stamina = 5, PushPower = 5, Perk = ConductorPerk.None, Move = SignatureMove.AbsolutePitch,   // the old duel plays him plain
                 Turn = TurnKit.Paganini,
                 TurnPassiveName = "BORROWED BREATH",
-                TurnPassiveText = "A skill short of BREATH can still be played. Each missing BREATH costs 3 life.",
+                TurnPassiveText = "A skill short of BREATH can still be played. Each missing BREATH costs " + BattleRules.TurnPaganiniLife + " life.",
                 TurnSignatureName = "CAPRICE",
-                TurnSignatureText = "The 4/4 shape : for two turns per stroke that lands, a MISS is GOOD and a GOOD is PERFECT. Then every musician pays 10 percent of their life.",
+                TurnSignatureText = "The 4/4 shape : for two turns per stroke that lands, a MISS is GOOD and a GOOD is PERFECT. Then every musician pays " + (int)System.Math.Round(BattleRules.TurnCapricePrice * 100) + " percent of their life.",
                 ThemeColor = Palette.ToneA,
                 Unlocked = true
             },

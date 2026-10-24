@@ -136,7 +136,7 @@ namespace Tacetno433.Data
 
             //Elite : any era
             new Enemy { Name = "THE MUTE CHOIR",
-                        TurnHp = 120, TurnSpeed = 4, Phrases = new[] { "Df Df Uf", "Lmf Rmf Lmf Rmf" }, TurnTraitText = "A note that gets through takes the target's skills away for a turn.", Title = "A hundred mouths, open, making nothing.",
+                        TurnHp = 120, TurnSpeed = 4, Phrases = new[] { "Df Df Uf", "Lmf Rmf Lmf Rmf" }, TurnTraitText = "A note you miss takes the target's skills away for a turn.", Title = "A hundred mouths, open, making nothing.",
                         Trait = EnemyTrait.SilentMouths, TraitName = "SILENT MOUTHS", TraitFloor = 1,
                         TraitText = "From round two it silences one section of your band each round, strings, winds or percussion: those players cannot play. Some notes stay hidden as ???",
                         Kind = EnemyKind.Elite, Song = SongList.FifthSymphony, Pattern = new int[] { 4, 0, 5, 0, 6, 0, 4, 6 }, Hidden = new int[] { 3, 7 }, Tone = Palette.ToneB },

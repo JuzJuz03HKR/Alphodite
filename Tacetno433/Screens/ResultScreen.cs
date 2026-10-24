@@ -104,7 +104,7 @@ namespace Tacetno433.Screens
             statNames[0] = BattleRules.TurnBattleOn ? "PERFECTS" : "PERFECT BEATS";    statValues[0] = NumberText.Get(battle.PerfectCount);   // TURN BATTLE : no beats or combo
             statNames[1] = BattleRules.TurnBattleOn ? "BEST STREAK" : "BEST COMBO";    statValues[1] = NumberText.Get(battle.BestCombo);
             statNames[2] = "FINAL LINE";       statValues[2] = NumberText.Signed((int)battle.Line);
-            if (BattleRules.TurnBattleOn) { statNames[2] = "ROUNDS"; statValues[2] = NumberText.Get(run.LastRounds); }   // TURN BATTLE
+            if (BattleRules.TurnBattleOn) { statNames[2] = "BARS"; statValues[2] = NumberText.Get(run.LastRounds); }   // TURN BATTLE
             statNames[3] = BattleRules.LifeWord + " BACK";     statValues[3] = NumberText.Signed(recovered);
             statNames[4] = "SHARDS";           statValues[4] = NumberText.Signed(shards);
             statCount = 5;
@@ -126,8 +126,12 @@ namespace Tacetno433.Screens
             statNames[1] = "CONDUCTOR";     statValues[1] = run.Conductor.Name;
             statNames[2] = "REACHED";       statValues[2] = run.StageLabel + "  /  FLOOR " + run.Floor;
             statNames[3] = "FINAL LINE";    statValues[3] = NumberText.Signed((int)battle.Line);
-            if (BattleRules.TurnBattleOn) { statNames[3] = "ROUNDS"; statValues[3] = NumberText.Get(run.LastRounds); }   // TURN BATTLE
+            if (BattleRules.TurnBattleOn) { statNames[3] = "BARS"; statValues[3] = NumberText.Get(run.LastRounds); }   // TURN BATTLE
             statCount = 4;
+
+            //Run Record : the fight that ended the run counts too (step 15, the curtain call left its PERFECTs out)
+            run.PerfectsTotal += battle.PerfectCount;
+            if (battle.BestCombo > run.BestCombo) run.BestCombo = battle.BestCombo;
 
             footnote = battle.Collapsed ? "OUT OF BREATH  -  THE RUN ENDS HERE" : "THE RUN ENDS HERE";
             if (BattleRules.TurnBattleOn) footnote = "THE BAND FELL  -  THE RUN ENDS HERE";        // TURN BATTLE : life, not breath

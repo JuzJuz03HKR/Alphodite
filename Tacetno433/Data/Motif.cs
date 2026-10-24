@@ -53,7 +53,8 @@ namespace Tacetno433.Data
         public string Mark = "";          // the notation mark it is named after, like "sfz" (round 15 : no longer drawn)
         public string Initials = "";      // two letters on its badge, "SF" (round 15, the player found the notation marks hard to read)
         public int Rarity = 1;            // 1 common, 2 rare, 3 treasured
-        public int FromFloor = 1;         // never offered before this floor (its note is not in play yet)
+        public int FromFloor = 1;         // never offered before this floor (its note is not in play yet). The turn battle's skills
+                                          // have every kind of note from the first fight, so there it is always 1 (step 15)
         public string Text = "";
         public string TurnText = "";      // what it does in the turn battle (Alpha 7), shown while BattleRules.TurnBattleOn
 
@@ -122,13 +123,13 @@ namespace Tacetno433.Data
 
             //Special Notes : each bends one of the four notes or one big moment of the duel.
             //FromFloor keeps a motif away until its note has arrived (BattleRules teaching order).
-            new Motif { Id = MotifId.Accelerando,  Name = "ACCELERANDO",   Mark = "accel.", Rarity = 1, FromFloor = BattleRules.TremoloFromFloor,
+            new Motif { Id = MotifId.Accelerando,  Name = "ACCELERANDO",   Mark = "accel.", Rarity = 1, FromFloor = BattleRules.TurnBattleOn ? 1 : BattleRules.TremoloFromFloor,
                         Text = "Every shake in a TREMOLO counts twice.",
                         TurnText = "Every shake in a roll counts twice." },
-            new Motif { Id = MotifId.Tenuto,       Name = "TENUTO",        Mark = "-",    Rarity = 1, FromFloor = BattleRules.FermataFromFloor,
+            new Motif { Id = MotifId.Tenuto,       Name = "TENUTO",        Mark = "-",    Rarity = 1, FromFloor = BattleRules.TurnBattleOn ? 1 : BattleRules.FermataFromFloor,
                         Text = "A FERMATA held to the end gives back 8 breath.",
                         TurnText = "A held note always counts as held to the end." },
-            new Motif { Id = MotifId.GraceNote,    Name = "GRACE NOTE",    Mark = "gr.",  Rarity = 2, FromFloor = BattleRules.PairsFromFloor,
+            new Motif { Id = MotifId.GraceNote,    Name = "GRACE NOTE",    Mark = "gr.",  Rarity = 2, FromFloor = BattleRules.TurnBattleOn ? 1 : BattleRules.PairsFromFloor,
                         Text = "A spark that lands on time hits three times as hard.",
                         TurnText = "A spark that lands does its skill twice." },
             new Motif { Id = MotifId.Marcato,      Name = "MARCATO",       Mark = "^",    Rarity = 2,

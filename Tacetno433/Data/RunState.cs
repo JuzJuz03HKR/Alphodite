@@ -106,7 +106,7 @@ namespace Tacetno433.Data
 
             Floor = 1;
             Shards = 0;
-            Seats = 3;
+            Seats = StartSeats;
             BandName = "";
             RunComplete = false;
             BattlesWon = 0;
@@ -176,10 +176,17 @@ namespace Tacetno433.Data
             get { return EraList.All[Era]; }
         }
 
-        //Roster Limits : everyone on stage plus a small bench
+        //Start Seats : the seats on stage a run starts with. TURN BATTLE (step 15) : the ones seated on the BAND page
+        //are the ones on the field when a fight starts, so it starts with Archive.StartBand (2, FULL STAGE 3).
+        public static int StartSeats
+        {
+            get { return BattleRules.TurnBattleOn ? Archive.StartBand : 3; }
+        }
+
+        //Roster Limits : everyone on stage plus a small bench (the turn battle's bench is one longer, so a run still holds 6 at the start)
         public int RosterCapacity
         {
-            get { return Seats + BattleRules.BenchSize; }
+            get { return Seats + (BattleRules.TurnBattleOn ? BattleRules.TurnBenchSize : BattleRules.BenchSize); }
         }
 
         public bool RosterFull
@@ -382,13 +389,13 @@ namespace Tacetno433.Data
         {
             get
             {
-                return Seats - 3;      // every run starts with 3 (round 15 : THE FOLK LEADER no longer starts with 2)
+                return Seats - StartSeats;      // round 15 : THE FOLK LEADER no longer starts with 2
             }
         }
 
         public bool SeatForSale
         {
-            get { return SeatsBoughtThisFloor < BattleRules.SeatsPerFloor && Seats < StageLayout.SeatCount; }
+            get { return SeatsBoughtThisFloor < BattleRules.SeatsPerFloor && Seats < (BattleRules.TurnBattleOn ? BattleRules.TurnFieldMost : StageLayout.SeatCount); }
         }
 
         public void AddSeat()

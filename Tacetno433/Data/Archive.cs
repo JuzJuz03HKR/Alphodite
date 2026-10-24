@@ -43,10 +43,10 @@ namespace Tacetno433.Data
             new ArchiveUpgrade { Name = "WARM UP",       Text = "The SIGNATURE starts 2 diamonds fuller.",    Prices = new int[] { 40, 80 } },
             new ArchiveUpgrade { Name = "SAVINGS",       Text = "Every run starts with 20 more shards.",      Prices = new int[] { 25, 50, 75 } },
             new ArchiveUpgrade { Name = "KEEPSAKE",      Text = "Every run starts with a common motif.",      Prices = new int[] { 100 } },
-            new ArchiveUpgrade { Name = "FULL STAGE",    Text = "Every fight starts with 3 on the field.",    Prices = new int[] { 120 } },
+            new ArchiveUpgrade { Name = "FULL STAGE",    Text = "Every run starts with 3 seats on stage.",    Prices = new int[] { 120 } },
         };
 
-        //Start Band : how many musicians are on the field when a fight starts (ONE BAR), FULL STAGE included
+        //Start Band : the seats on stage a run starts with (ONE BAR), FULL STAGE included. Whoever sits in them starts each fight.
         public static int StartBand
         {
             get { return BattleRules.TurnStartBand + Level(Stage) * BattleRules.ArchiveStagePerLevel; }

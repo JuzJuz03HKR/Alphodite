@@ -40,9 +40,11 @@
         //as one phrase and TACET answers. ATTACK needs no swipe any more, only skills and parries do.
         //The fight starts with a few musicians, the rest wait on the BENCH and can be CALLED in during it
         //(like Wildfrost, where a new card on the board costs your turn).
-        public static float TurnAttackScale = 1f;     // ATTACK : no swipe, it always hits at this
+        public static float TurnAttackScale = 0.55f;  // ATTACK : no swipe, it always hits at this (step 15 : was 1, the user found ATTACK far too strong and fights too short.
+                                                      // turnsim : ATTACK did 68 percent of the band's damage, now about 36, the skills carry the rest)
         public static int TurnAttackOffBeat = 10;     // ATTACK : the OFF-BEAT it adds
-        public static int TurnStartBand = 2;          // musicians on the field when a fight starts (FULL STAGE in the ARCHIVE adds 1)
+        public static int TurnStartBand = 2;          // seats on stage a run starts with (FULL STAGE in the ARCHIVE adds 1, EXTRA SEAT in the shop 1 each).
+                                                      // Step 15 : everybody seated on the BAND page starts the fight on the field
         public static int TurnFieldMost = 6;          // musicians on the field at most, the called ones too
         public static int TurnCallCost = 3;           // CALL : BREATH to bring one in from the BENCH, one per bar (NORMAL)
         public static int MaestroTurnCallCost = 5;    //        MAESTRO
@@ -56,12 +58,12 @@
         public static int[] TurnPackLate = { 2, 3, 4 };       //              in the second half
         public static int[] TurnEliteEscort = { 0, 1, 2 };    // ordinary enemies that come with an ELITE
         public static int[] TurnBossEscort = { 0, 1, 2 };     // and with the BOSS
-        public static float MaestroTurnDamage = 1f;           // MAESTRO : each of TACET's notes hits this much harder (1 = as NORMAL :
+        public static float MaestroTurnDamage = 1.15f;           // MAESTRO : each of TACET's notes hits this much harder (1 = as NORMAL :
                                                               // its narrower windows and dearer CALL already make it hard, 1.25 left EXPERT at 0 percent)
         public static int TurnShardsPerEscort = 6;            // shards for each enemy beyond the first
 
         //Floor Scale (step 8) : enemies are tougher deeper down, life and each note's damage, floor 1 / 2 / 3
-        public static float[] TurnFloorLife = { 1f, 1.3f, 1.6f };
+        public static float[] TurnFloorLife = { 1.6f, 2.1f, 2.7f };   // step 15 : was 1 / 1.3 / 1.6, fights about 1.5 times longer (the user asked for longer fights)
         public static float[] TurnFloorDamage = { 1f, 1.2f, 1.4f };
 
         //Enemy Traits in the turn battle (step 8, the TurnTraitText of each enemy in Data/Enemy.cs)
@@ -84,7 +86,7 @@
 
         //PRACTICE (step 9) : the soft enemy of the tutorial's practice fight (EnemyList.Practice).
         //Lots of life so the four lessons fit before it falls, and notes that barely hurt.
-        public static int TurnPracticeHp = 160;
+        public static int TurnPracticeHp = 60;           // x TurnFloorLife on floor 1 (1.6) = 96, step 15 (was 160 with the floor at 1)
         public static int TurnPracticeSpeed = 4;
         public static int TurnPracticePower = 2;         // each note hits this x TurnNoteDamage (4 life)
 
@@ -95,7 +97,9 @@
         public static int[] TurnNotesMax = { 2, 3, 4 };
         public static int[] TurnSmallNotesMin = { 1, 1, 2 };   // ordinary enemies
         public static int[] TurnSmallNotesMax = { 2, 2, 2 };
-        public static float TurnNoteDamage = 2.2f;           // step 12 : was 1.5, the user found NORMAL far too easy (turnsim STRONG 81 -> 57 percent)
+        public static float TurnNoteDamage = 1.85f;          // step 12 : was 1.5, the user found NORMAL far too easy (turnsim STRONG 81 -> 57 percent).
+                                                             // Step 15 : was 2.2, longer fights give TACET more turns, so each note is softer and the run is as hard as before.
+                                                             // Notes are rounded to whole numbers, so a small change can jump (1.9 made power 4 notes 8 instead of 7)
 
         //PARRY : swiping back at a note. PERFECT blocks all of it and gives breath back,
         //GOOD lets this share through, a MISS or no swipe lets all of it through.
@@ -104,7 +108,7 @@
         //BREATH : one pool for the whole band (the user chose shared, 18 Oct). Skills spend it.
         public static int TurnBreathMax = 10;
         public static int TurnBreathStart = 3;
-        public static int TurnBreathPerAttack = 1;
+        public static int TurnBreathPerAttack = 2;   // step 15 : was 1. A weaker ATTACK pays for the skills instead
         public static int TurnBreathPerParry = 1;   // for each note parried PERFECT
 
         //KNOCKED OUT : a musician at 0 HP sits out the rest of the fight and gets up with this much after it
@@ -151,12 +155,12 @@
         //The other four of the lore (step 10, ALPHA7_DESIGN 5.9). Signatures are x their strength (0.4 to 1.3).
         //THE METRONOME (Bach) : LOCKED TEMPO needs no number (any size is right), FUGUE echoes the next move at the strength.
         public static float TurnFugueScale = 1.8f;     // FUGUE : the echo plays at the SIGNATURE's strength x this (step 13 : was 1, THE METRONOME was the weakest at 44 percent)
-        public static int TurnPaganiniLife = 3;        // THE HEARTLESS's PASSIVE : life paid for each BREATH a skill is short of
+        public static int TurnPaganiniLife = 6;        // THE HEARTLESS's PASSIVE : life paid for each BREATH a skill is short of (step 15 : was 3, skills carry the fight now)
         public static float TurnCapricePrice = 0.2f;   // CAPRICE : when it ends, every musician pays this share of their life (never below 1, step 13 : was 0.1)
         public static int TurnCapricePerStroke = 2;    // CAPRICE : turns per stroke that lands (step 12, a bar has more turns now)
         public static float TurnLullyWindow = 0.01f;   // THE KING'S BATON's PASSIVE : seconds added to both parry windows (0.05 won 99 percent of STRONG runs, the others 83 to 90;
                                                        // step 12 : 0.03 won 92 percent and 0.02 84 when parrying became most of the fight)
-        public static int TurnSunHeal = 8;             // THE SUN : life back for every musician at full strength (step 13 : was 12, THE KING'S BATON was the strongest at 71 percent)
+        public static int TurnSunHeal = 6;             // THE SUN : life back for every musician at full strength (step 13 : was 12, THE KING'S BATON was the strongest at 71 percent. Step 15 : 8 -> 6)
         public static float TurnFannyScale = 0.25f;    // THE UNSIGNED's PASSIVE : FANNY's voice hits this much harder
         public static float TurnFelixHeal = 1.5f;      //                          FELIX's voice heals this much more
         public static int TurnFelixCrescendo = 1;      //                          and gives this much more CRESCENDO
@@ -505,6 +509,7 @@
 
         //Party
         public static int BenchSize = 3;             // musicians you can keep off stage
+        public static int TurnBenchSize = 4;         // TURN BATTLE (step 15) : the stage starts with 2 seats, so the bench holds one more
         public static int FirstFloorRecruits = 3;    // how many join at the very first opening (step 12 : was 2, so the first fight already has one on the BENCH)
         public static int LaterFloorRecruits = 1;
 

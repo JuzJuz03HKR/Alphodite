@@ -89,7 +89,7 @@ namespace Tacetno433.Screens
             notes[SeatRow] = "One more musician on stage. Two per floor at most.";
             names[TuningRow] = "TUNING";
             notes[TuningRow] = "The band gets back " + (int)(BattleRules.TuningRecover * 100) + " percent of its " + BattleRules.LifeWordLower + ".";
-            if (BattleRules.TurnBattleOn) notes[SeatRow] = "The fight starts with 2 and CALLS the rest. No more seats.";   // TURN BATTLE (ONE BAR, step 12)
+            if (BattleRules.TurnBattleOn) notes[SeatRow] = "One more musician on stage when a fight starts. Two per floor at most.";   // TURN BATTLE (step 15)
             //Hire : one player from this era, known before buying, with their seat
             hire = MusicianList.RollFromEra(run.Era, run.Roster, run.Rng);
             names[HireRow] = hire != null ? "HIRE " + hire.Name : "HIRE A PLAYER";
@@ -107,7 +107,7 @@ namespace Tacetno433.Screens
                 if (i < motifs.Length)
                 {
                     names[row] = motifs[i].Name;
-                    notes[row] = motifs[i].Text;
+                    notes[row] = BattleRules.TurnBattleOn && motifs[i].TurnText.Length > 0 ? motifs[i].TurnText : motifs[i].Text;   // step 15 : the turn battle's words, like the cards
                 }
                 else
                 {
@@ -190,7 +190,7 @@ namespace Tacetno433.Screens
             RunState run = Game.CurrentRun;
 
             if (sold[row]) { Deny(SoldLine); return; }
-            if (row == SeatRow && (!run.SeatForSale || BattleRules.TurnBattleOn)) { Deny(SoldLine); return; }   // TURN BATTLE : no seats for sale
+            if (row == SeatRow && !run.SeatForSale) { Deny(SoldLine); return; }
             if (row == TuningRow && run.Stamina >= run.MaxStamina) { Deny(RestedLine); return; }
             if (row == HireRow && run.RosterFull) { Deny(FullLine); return; }
             if (row == HireRow && hire == null) { Deny(NobodyLine); return; }
@@ -278,7 +278,7 @@ namespace Tacetno433.Screens
                 Rectangle row = RowRect(r);
                 row.Inflate(-12, 0);
                 bool over = r == hoverRow;
-                bool gone = sold[r] || (r == SeatRow && (!run.SeatForSale || BattleRules.TurnBattleOn));   // TURN BATTLE : no seats
+                bool gone = sold[r] || (r == SeatRow && !run.SeatForSale);
                 float a = gone ? 0.35f : 1f;
 
                 Gfx.Rect(sb, row, (over && !gone ? Palette.Stage : Palette.Void * 0.4f));
