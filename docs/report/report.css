@@ -184,7 +184,8 @@ table.tbl.small { font-size: 9.2pt; }
 .cover .label { font-size: 11pt; color: var(--mid); margin-bottom: 3mm; }
 .cover .team { font-size: 15pt; font-weight: 700; margin-bottom: 6mm; }
 .cover table.members { margin: 0 auto 18mm; border-collapse: collapse; font-size: 12pt; }
-.cover table.members td { padding: 1.2mm 3mm; text-align: left; }
+.cover table.members td { padding: 1mm 4mm; text-align: left; }
+.cover .teacher { font-size: 12.5pt; font-weight: 600; margin-bottom: 4mm; }
 .cover .blank { display: inline-block; border-bottom: 0.8pt dotted var(--ink); }
 .cover .course { font-size: 12pt; line-height: 2.1; }
 
