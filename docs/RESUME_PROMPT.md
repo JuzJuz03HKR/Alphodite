@@ -15,6 +15,8 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 - **คำสั่งเสริม** : `/build` คอมไพล์ในแชท cloud (ต่อท้าย `shots duel,band` `simulate` `audit` `savecheck` ได้) · `/rules` ตรวจโค้ดกับกติกาที่อาจารย์ตรวจ · `/note` จดข้อความของผู้ใช้คำต่อคำทันที
 - ไฟล์คำสั่งอยู่ `.claude/skills/<ชื่อคำสั่ง>/SKILL.md` ถ้าคำสั่งไม่ขึ้นในแชท ให้ใช้ prompt A ข้างล่างแทน
 
+**27 ต.ค. งานรายงาน (ไม่แตะโค้ดเกม)** : `docs/report/TACET_DataStructures_Report1.pdf` "A report of data structures used in game development 1" ภาษาไทย 19 หน้า (ปก คำนำ สารบัญ บท 1-7 บรรณานุกรม) อิง Alpha7 · หน้าปกเว้นช่องชื่อสมาชิก รหัส วิชา อาจารย์ ให้ทีมกรอก · แผนที่ผู้ใช้เลือก : heap/PriorityQueue ลำดับเทิร์น, decision tree เลือกเป้าหมายศัตรู, แผนที่กราฟ DAG + BFS (ยังไม่ได้อยู่ในเกม) · แก้เนื้อหา `docs/report/report.html` / `front.html` แล้ว build `NODE_PATH=$(npm root -g) node docs/report/build.js` (ต้องมีฟอนต์ Sarabun, pypdf, graphviz ถ้าแก้ `diagrams/*.dot`) · โค้ดร่างทดสอบที่ `docs/report/sketch_test` (`dotnet run`) · เรื่องฉากต่อสู้ 3D/2.5D + คลื่นความมืด (คุย 27 ต.ค.) ยังรอผู้ใช้ตอบ 5 ข้อ (`USER_BRIEFS.md` ท้ายไฟล์)
+
 ## แชทที่กำลังทำงาน (ใช้กับ /system /update /sync)
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |

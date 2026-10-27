@@ -1,0 +1,24 @@
+digraph Tree {
+  graph [rankdir=TB, fontname="Sarabun", nodesep=0.3, ranksep=0.35, bgcolor="transparent"];
+  node  [fontname="Sarabun", fontsize=10, style="filled", fillcolor="white", color="#222222"];
+  edge  [fontname="Sarabun", fontsize=9, color="#333333", arrowsize=0.6];
+
+  q1 [shape=box, style="rounded,filled", fillcolor="#eeeeee", label="มีนักดนตรีใช้ TAUNT อยู่ไหม"];
+  q2 [shape=box, style="rounded,filled", fillcolor="#eeeeee", label="ศัตรูมีนิสัย ON CUE\nและมีคนเพิ่งถูกเรียกเข้ามาไหม"];
+  q3 [shape=box, style="rounded,filled", fillcolor="#eeeeee", label="ศัตรูมีนิสัย BY TOUCH ไหม"];
+  q4 [shape=box, style="rounded,filled", fillcolor="#eeeeee", label="ศัตรูมีนิสัย FIRST IN LINE ไหม"];
+  l1 [shape=box, label="ตีคนที่ TAUNT"];
+  l2 [shape=box, label="ตีคนที่เพิ่งเข้ามา"];
+  l3 [shape=box, label="ไล่ตีทีละที่นั่ง\nstanding[Attacks % n]"];
+  l4 [shape=box, label="ตีคนที่เล่นคนแรกของห้อง"];
+  l5 [shape=box, label="สุ่ม 1 คนที่ยังยืนอยู่"];
+
+  q1 -> l1 [label=" ใช่"];
+  q1 -> q2 [label=" ไม่"];
+  q2 -> l2 [label=" ใช่"];
+  q2 -> q3 [label=" ไม่"];
+  q3 -> l3 [label=" ใช่"];
+  q3 -> q4 [label=" ไม่"];
+  q4 -> l4 [label=" ใช่"];
+  q4 -> l5 [label=" ไม่"];
+}

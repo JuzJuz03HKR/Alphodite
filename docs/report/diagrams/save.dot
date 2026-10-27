@@ -1,0 +1,19 @@
+digraph Save {
+  graph [rankdir=LR, fontname="Sarabun", nodesep=0.3, ranksep=0.4, bgcolor="transparent"];
+  node  [fontname="Sarabun", fontsize=10, shape=box, style="rounded,filled", fillcolor="white", color="#222222"];
+  edge  [fontname="Sarabun", fontsize=9, color="#333333", arrowsize=0.6];
+  run1 [label="RunState\n(ใน RAM)", fillcolor="#eeeeee"];
+  file [shape=note, fontname="DejaVu Sans Mono", fontsize=9, label="run.txt\l\lversion=1\lfloor=2\lstage=5\lroster=0,4,7\lmotifs=3,12\l"];
+  dict [shape=plain, label=<<table border="1" cellborder="1" cellspacing="0" cellpadding="3" bgcolor="white">
+        <tr><td colspan="2" bgcolor="#e8e8e8"><b>Dictionary&lt;string, string&gt;</b></td></tr>
+        <tr><td><b>key</b></td><td><b>value</b></td></tr>
+        <tr><td>"version"</td><td>"1"</td></tr>
+        <tr><td>"floor"</td><td>"2"</td></tr>
+        <tr><td>"stage"</td><td>"5"</td></tr>
+        <tr><td>"roster"</td><td>"0,4,7"</td></tr>
+        <tr><td>"motifs"</td><td>"3,12"</td></tr></table>>];
+  run2 [label="RunState\n(โหลดกลับ)", fillcolor="#eeeeee"];
+  run1 -> file [label=" Array.IndexOf\n แปลงของเป็นเลขช่อง"];
+  file -> dict [label=" Read()\n ตัดที่ '='"];
+  dict -> run2 [label=" TryGetValue\n + GetList"];
+}

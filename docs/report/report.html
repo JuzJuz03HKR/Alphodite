@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<title>A report of data structures used in game development 1</title>
+<link rel="stylesheet" href="report.css">
+</head>
+<body class="body">
+
+<!-- ===================================================== บทที่ 1 -->
+<section class="chapter">
+<h1 id="ch1"><span class="chno">บทที่ 1</span>บทนำ</h1>
+
+<h2 id="s1-1">1.1 เกี่ยวกับเกม TACET 4'33</h2>
+<p>TACET 4'33 เป็นเกมแนว roguelike ที่ผู้เล่นรับบทวาทยากร (conductor) คุมวงนักดนตรีออกไปสู้กับ TACET หรือ "ความเงียบ" ผู้เล่นใช้เมาส์แทนไม้บาตอง รายงานนี้อ้างอิงเกมเวอร์ชัน <b>Alpha7</b> ซึ่งเปลี่ยนการต่อสู้จากเกมจังหวะมาเป็นแบบผลัดกันเล่น (turn-based)</p>
+<p>การต่อสู้แบ่งเป็นรอบ เกมเรียกหนึ่งรอบว่า 1 ห้อง (bar) ในแต่ละห้องผู้เล่นเลือกท่าให้นักดนตรีบนเวทีคนละ 1 ท่า เช่น ATTACK หรือสกิล แล้วกด ENTER ให้ทั้งวงเล่นตามลำดับที่เรียงไว้ ศัตรูจะแทรกเข้ามาเล่นตามความเร็วของมัน ตอนใช้สกิล ผู้เล่นต้องตวัดเมาส์ตามทิศของโน้ตให้ทันตอนวงแหวนบีบเข้ามา (QTE) และตอนศัตรูตีก็ตวัดสวนเพื่อปัดป้องได้</p>
+<p>นอกการต่อสู้ ผู้เล่นเดินไปตามเส้นทางทีละขั้น ผ่านห้องต่อสู้ เหตุการณ์ ร้านค้า และจุดพัก จนถึงบอสของแต่ละชั้น ข้อมูลของรันทั้งหมดเซฟเป็นไฟล์ข้อความ ปิดเกมแล้วกลับมาเล่นต่อได้</p>
+<p>เกมเขียนด้วยภาษา C# บน MonoGame (DesktopGL 3.8, .NET 9) โค้ดแบ่งเป็น 4 โฟลเดอร์หลัก คือ <code>Data</code> (ข้อมูลของเกม) <code>Battle</code> (กติกาการต่อสู้) <code>Screens</code> (หน้าจอแต่ละหน้า) และ <code>Core</code> (เครื่องมือกลาง เช่น การวาด การอ่านเมาส์)</p>
+
+<h2 id="s1-2">1.2 สรุปโครงสร้างข้อมูลในเกม</h2>
+<p>ตารางที่ 1-1 สรุปโครงสร้างข้อมูลที่อธิบายในรายงาน เรียงตามหัวข้อที่เรียน ช่องสถานะบอกว่าอยู่ในเกมแล้ว หรือเป็นแผนที่ทีมจะนำไปใช้</p>
+<table class="tbl">
+<caption>ตารางที่ 1-1 โครงสร้างข้อมูลที่ใช้และวางแผนจะใช้</caption>
+<thead><tr><th>หัวข้อ</th><th>โครงสร้างข้อมูล</th><th>ใช้ที่ไหน</th><th>สถานะ</th><th>ข้อ</th></tr></thead>
+<tbody>
+<tr><td rowspan="3">Arrays and Sorting</td><td>Array แบบตารางข้อมูล</td><td>รายชื่อนักดนตรี ศัตรู Motif</td><td><span class="tag on">ใช้จริง</span></td><td>2.1</td></tr>
+<tr><td>Array ขนาดคงที่ (object pool)</td><td>ตัวเลขเด้ง ประกายไฟ</td><td><span class="tag on">ใช้จริง</span></td><td>2.2</td></tr>
+<tr><td>Insertion sort, Array.Sort</td><td>ลำดับเทิร์น, การวัดจังหวะมือ</td><td><span class="tag on">ใช้จริง</span></td><td>2.3</td></tr>
+<tr><td rowspan="2">Variants of Lists</td><td>List&lt;T&gt; (dynamic array)</td><td>คนในสนาม ศัตรู ม้านั่ง</td><td><span class="tag on">ใช้จริง</span></td><td>3.1</td></tr>
+<tr><td>List ใช้เป็นคิวเหตุการณ์</td><td>ส่งผลการต่อสู้ให้หน้าจอ</td><td><span class="tag on">ใช้จริง</span></td><td>3.2</td></tr>
+<tr><td rowspan="3">Key-Value Pair</td><td>Dictionary&lt;string, string&gt;</td><td>อ่านไฟล์เซฟ</td><td><span class="tag on">ใช้จริง</span></td><td>4.1</td></tr>
+<tr><td>Dictionary&lt;Fighter, Look&gt;</td><td>สถานะภาพของตัวละคร</td><td><span class="tag on">ใช้จริง</span></td><td>4.2</td></tr>
+<tr><td>Array ที่ใช้ตัวเลขเป็น key</td><td>ข้อความตัวเลขที่เตรียมไว้</td><td><span class="tag on">ใช้จริง</span></td><td>4.3</td></tr>
+<tr><td rowspan="2">Variants of Trees</td><td>Heap (PriorityQueue)</td><td>ลำดับเทิร์น</td><td><span class="tag plan">แผน</span></td><td>5.1</td></tr>
+<tr><td>Decision tree</td><td>ศัตรูเลือกเป้าหมาย</td><td><span class="tag plan">แผน</span></td><td>5.2</td></tr>
+<tr><td>Exploring Graphs</td><td>DAG, adjacency list, BFS</td><td>แผนที่เส้นทาง</td><td><span class="tag plan">แผน</span></td><td>6.2, 6.3</td></tr>
+</tbody>
+</table>
+<h2 id="s1-3">1.3 คลาสหลักที่เกี่ยวข้องกับโครงสร้างข้อมูล</h2>
+<p>รูปที่ 1-1 แสดงคลาสหลักและ field ที่เป็นโครงสร้างข้อมูล (ตัดส่วนที่ไม่เกี่ยวข้องออก) <code>RunState</code> เก็บทุกอย่างของการเล่นหนึ่งรัน <code>TurnBattle</code> เก็บสถานะของการต่อสู้หนึ่งครั้งและไม่มีโค้ดวาดภาพเลย ส่วน <code>BattleScreen</code> อ่านข้อมูลจาก <code>TurnBattle</code> แล้ววาดออกจอ การแยกกติกากับหน้าจอแบบนี้มีผลต่อการเลือกโครงสร้างข้อมูลหลายจุด ซึ่งจะเห็นในบทที่ 3 และ 4</p>
+<figure class="fig">
+  <img src="diagrams/uml.svg" style="width:150mm">
+  <figcaption>รูปที่ 1-1 UML class diagram ของคลาสหลัก (◆ = เป็นเจ้าของ, เส้นประ = ใช้งาน)</figcaption>
+</figure>
+
+</section>
+
+<!-- ===================================================== บทที่ 2 -->
+<section class="chapter">
+<h1 id="ch2"><span class="chno">บทที่ 2</span>Arrays and Sorting</h1>
+
+<h2 id="s2-1">2.1 Array เป็นตารางข้อมูลของเกม</h2>
+<p>ข้อมูลที่ไม่เปลี่ยนระหว่างเล่น เช่น นักดนตรี (9 รายการ) ศัตรูรวมบอส (18 รายการ) และ Motif (28 รายการ) เก็บเป็น array แบบ <code>static</code> ที่เขียนไว้ในโค้ดครั้งเดียว เหตุผลที่เลือก array คือจำนวนคงที่ เรียงตามลำดับที่ออกแบบไว้ และหยิบตัวไหนก็ได้ทันทีด้วย index ในเวลา O(1)</p>
+<pre class="cs" data-file="Data/Musician.cs">public static class MusicianList
+{
+    public static Musician[] All = new Musician[]
+    {
+        //Era 0 : CLASSICAL
+        new Musician { Name = "ANNA",  Instrument = "VIOLIN", ... },
+        new Musician { Name = "KLARA", Instrument = "FLUTE",  ... },
+        // ... อีก 7 คน
+    };
+}</pre>
+<p>ลำดับใน array ยังมีหน้าที่เพิ่ม เพราะไฟล์เซฟไม่ได้เก็บข้อมูลนักดนตรีทั้งก้อน แต่เก็บแค่เลขช่อง (index) ของคนที่อยู่ในวง ตอนเซฟใช้ <code>Array.IndexOf</code> หาเลขช่อง ตอนโหลดก็หยิบจากช่องนั้นกลับมา (รูปที่ 2-1)</p>
+<pre class="cs" data-file="Data/SaveFile.cs">// เซฟ : นักดนตรีแต่ละคนในวง กลายเป็นเลขช่องใน MusicianList.All
+for (int i = 0; i &lt; run.Roster.Count; i++)
+    roster.Add(Array.IndexOf(MusicianList.All, run.Roster[i]).ToString());
+
+// โหลด : เลขช่องกลับเป็นตัวนักดนตรี (ตรวจขอบเขตก่อน กันไฟล์เสีย)
+if (roster[i] &gt;= 0 &amp;&amp; roster[i] &lt; MusicianList.All.Length)
+    run.Roster.Add(MusicianList.All[roster[i]]);</pre>
+<figure class="fig">
+  <div class="arr">
+    <div class="arrlabel">MusicianList.All</div>
+    <div class="cells">
+      <div class="cell hi"><i>0</i>ANNA</div><div class="cell"><i>1</i>KLARA</div><div class="cell"><i>2</i>OTTO</div>
+      <div class="cell"><i>3</i>MALI</div><div class="cell hi"><i>4</i>CHAI</div><div class="cell"><i>5</i>NUAN</div>
+      <div class="cell"><i>6</i>LUKA</div><div class="cell hi"><i>7</i>IRIS</div><div class="cell"><i>8</i>BORIS</div>
+    </div>
+  </div>
+  <div class="flow">
+    <div class="box">Roster = [ANNA, CHAI, IRIS]</div><div class="arrow">Array.IndexOf &#8594;</div>
+    <div class="box mono">roster=0,4,7</div><div class="arrow">&#8592; MusicianList.All[i]</div>
+  </div>
+  <figcaption>รูปที่ 2-1 ไฟล์เซฟเก็บแค่เลขช่องของ array แทนตัวข้อมูล</figcaption>
+</figure>
+<p><b>ข้อดีและข้อควรระวัง</b> ไฟล์เซฟเล็กและอ่านง่าย แต่มีกฎตามมา คือห้ามสลับหรือแทรกรายการกลาง array เพราะเซฟเก่าจะชี้ไปผิดคน ทีมจึงเขียนกฎนี้ไว้ในเอกสารของโปรเจกต์ ของใหม่ต้องต่อท้ายเท่านั้น ส่วน <code>Array.IndexOf</code> เป็นการค้นหาแบบไล่ทีละช่อง (linear search) ใช้เวลา O(n) แต่ n มีแค่ 9 ถึง 28 และเรียกตอนเซฟเท่านั้น จึงไม่กระทบความเร็วของเกม</p>
+<p>อีกรูปแบบที่ใช้บ่อยคือ array หลายตัวที่เรียงตาม enum เดียวกัน (parallel arrays) เช่น <code>RouteNodeInfo.Titles[(int)NodeType.Shop]</code> คืนคำว่า SHOP และ <code>RouteNodeInfo.Marks</code> ช่องเดียวกันคืนตัวอักษร $ ข้อมูลของสถานที่แต่ละชนิดจึงแก้ได้ในไฟล์เดียว</p>
+
+<h2 id="s2-2">2.2 Object pool ด้วย array ขนาดคงที่</h2>
+<p>ตัวเลขดาเมจที่เด้งขึ้นมา ประกายไฟ และเศษแสง เกิดขึ้นและหายไปหลายสิบครั้งต่อวินาที ถ้าสร้างด้วย <code>new</code> ทุกครั้งแล้วทิ้ง หน่วยความจำจะมีขยะสะสม และ garbage collector ของ C# อาจหยุดเกมสั้นๆ เพื่อเก็บขยะ ทำให้ภาพกระตุก</p>
+<p>เกมแก้ด้วย object pool คือสร้างของไว้ล่วงหน้าใน array ขนาดคงที่ตั้งแต่เริ่ม (ตัวเลขเด้ง 20 ช่อง ประกายไฟ 60 ช่อง) แต่ละช่องมีธง <code>On</code> บอกว่ากำลังใช้อยู่ไหม ตอนต้องการก็ไล่หาช่องแรกที่ว่าง ตอนหมดอายุ (<code>Life &lt;= 0</code>) ก็ตั้ง <code>On = false</code> ให้ช่องนั้นกลับมาว่าง ระหว่างเล่นจึงไม่มีการ <code>new</code> เลย</p>
+<pre class="cs" data-file="Battle/DuelEffects.cs">private Pop[] pops = new Pop[20];      // สร้างครบ 20 ตัวใน constructor
+
+//Pop Spawn : text should come from NumberText or a fixed word, never built on the spot
+public void SpawnPop(float x, float y, string text, Color color, float scale)
+{
+    for (int i = 0; i &lt; pops.Length; i++)
+    {
+        if (pops[i].On) continue;          // ช่องนี้ใช้อยู่ ข้ามไป
+        pops[i].On = true;
+        pops[i].X = x;
+        pops[i].Y = y;
+        pops[i].Life = PopLife;
+        pops[i].Text = text;
+        // ...
+        return;
+    }
+}</pre>
+<figure class="fig">
+  <div class="pool">
+    <div class="slot on">0<br><small>On</small></div><div class="slot on">1<br><small>On</small></div><div class="slot">2<br><small>ว่าง</small></div><div class="slot on">3<br><small>On</small></div><div class="slot">4<br><small>ว่าง</small></div><div class="slot">5<br><small>ว่าง</small></div><div class="slot dots">...</div><div class="slot">19<br><small>ว่าง</small></div>
+  </div>
+  <div class="poolnote">SpawnPop ไล่จากช่อง 0 และใช้ช่อง 2 ซึ่งเป็นช่องว่างช่องแรก &#8594; ตั้ง On = true</div>
+  <figcaption>รูปที่ 2-2 Object pool ของตัวเลขเด้ง (ช่องสีเข้ม = กำลังแสดงอยู่)</figcaption>
+</figure>
+<p><b>การวิเคราะห์</b> การหาช่องว่างแบบไล่จากหน้าใช้เวลา O(n) ต่อครั้ง แต่ n เป็นแค่ 20 ถึง 60 ถ้าช่องเต็มหมด ของชิ้นใหม่จะไม่แสดง (ไม่ error) ซึ่งยอมรับได้สำหรับเอฟเฟกต์ ถ้าวันหนึ่ง pool ใหญ่มาก วิธีที่เร็วกว่าคือเก็บเลขช่องว่างไว้ใน stack (free list) จะได้ช่องว่างใน O(1)</p>
+
+<h2 id="s2-3">2.3 Sorting : insertion sort แบบเสถียรสำหรับลำดับเทิร์น</h2>
+<p>ในหนึ่งห้อง วงจะเล่นตามลำดับที่ผู้เล่นเรียง ส่วนศัตรูแบ่งเป็น 3 กลุ่มตามกติกา ศัตรูที่เร็วตั้งแต่ 5 ขึ้นไปแทรกเข้ามาหลังท่าที่ 2 ของวง (CUT IN) ศัตรูนิสัย TWICE A BAR แทรก 2 ครั้งหลังท่าที่ 1 และท่าที่ 3 ที่เหลือเล่นหลังวง ในกลุ่มเดียวกันตัวที่เร็วกว่าเล่นก่อน และ<b>ถ้าเร็วเท่ากันต้องเล่นตามลำดับที่ยืนในสนาม</b> ผู้เล่นจะได้คาดเดาลำดับได้</p>
+<p>เงื่อนไขสุดท้ายคือการเรียงแบบเสถียร (stable sort) เอกสารของ .NET ระบุว่า <code>List&lt;T&gt;.Sort</code> เรียงแบบไม่เสถียร ของที่มีค่าเท่ากันอาจสลับที่กันได้ ทีมจึงเขียน insertion sort เองตอนใส่ศัตรูแต่ละตัวลงกลุ่ม</p>
+<pre class="cs" data-file="Battle/TurnBattle.cs (BuildOrder)">List&lt;Fighter&gt; list = e.Speed &gt;= BattleRules.TurnCutInSpeed ? fast : slow;
+int at = list.Count;                                   // เริ่มจากท้าย list
+while (at &gt; 0 &amp;&amp; list[at - 1].Speed &lt; e.Speed) at--;   // ถอยผ่านตัวที่ช้ากว่าเท่านั้น
+list.Insert(at, e);                                    // ตัวที่เร็วเท่ากันยังอยู่ข้างหน้า</pre>
+<figure class="fig">
+  <div class="steps">
+    <div class="srow"><span class="sl">ศัตรูในสนาม</span><span class="pill">A 3</span><span class="pill">B 6</span><span class="pill">C 4</span><span class="pill">D 6</span></div>
+    <div class="srow"><span class="sl">fast (&#8805; 5)</span><span class="pill dark">B 6</span><span class="pill dark">D 6</span><span class="snote">D เร็วเท่า B จึงต่อท้าย B (เสถียร)</span></div>
+    <div class="srow"><span class="sl">slow</span><span class="pill">C 4</span><span class="pill">A 3</span><span class="snote">C เร็วกว่า A จึงแทรกหน้า A</span></div>
+    <div class="srow"><span class="sl">ลำดับในห้อง</span><span class="pill band">ANNA</span><span class="pill band">OTTO</span><span class="pill dark">B</span><span class="pill dark">D</span><span class="pill band">KLARA</span><span class="pill">C</span><span class="pill">A</span></div>
+  </div>
+  <figcaption>รูปที่ 2-3 ตัวอย่างการจัดลำดับ เมื่อวงเล่น 3 ท่า (ตัวเลขคือความเร็ว)</figcaption>
+</figure>
+<p><b>การวิเคราะห์</b> insertion sort ใช้เวลา O(n²) ในกรณีแย่สุด แต่ในสนามมีศัตรูไม่กี่ตัว และเป็นการใส่ทีละตัวลง list ที่เรียงอยู่แล้ว จึงเร็วพอและเขียนสั้น ข้อสำคัญกว่าความเร็วคือได้ลำดับที่แน่นอนทุกครั้ง</p>
+<p>เกมใช้ <code>Array.Sort</code> อีกจุดในหน้าตั้งค่า ผู้เล่นตวัดตามจังหวะหลายครั้งเพื่อวัดว่ามือเร็วหรือช้ากว่าจังหวะเท่าไร เกมเรียงค่าที่วัดได้ ตัดค่าน้อยสุดและมากสุดทิ้ง (ครั้งที่มือพลาด) แล้วเฉลี่ยค่าที่เหลือ (trimmed mean) การเรียงก่อนทำให้รู้ทันทีว่าค่าน้อยสุดอยู่ช่องแรกและค่ามากสุดอยู่ช่องสุดท้าย</p>
+<pre class="cs" data-file="Screens/SettingsScreen.cs (FinishTest)">float[] sorted = (float[])testOffsets.Clone();   // copy ก่อน ของเดิมไม่ถูกแก้
+Array.Sort(sorted);                                // O(n log n)
+float total = 0f;
+for (int i = 1; i &lt; sorted.Length - 1; i++) total += sorted[i];   // ข้ามช่องแรกกับช่องสุดท้าย
+float middle = total / (sorted.Length - 2);</pre>
+</section>
+
+<!-- ===================================================== บทที่ 3 -->
+<section class="chapter">
+<h1 id="ch3"><span class="chno">บทที่ 3</span>Variants of Lists</h1>
+
+<h2 id="s3-1">3.1 List&lt;T&gt; สำหรับคนในสนามและม้านั่ง</h2>
+<p><code>List&lt;T&gt;</code> ของ C# คือ dynamic array ข้างในเป็น array ที่ขยายขนาดเองเมื่อเต็ม การเพิ่มท้าย list (<code>Add</code>) เฉลี่ยแล้วเป็น O(1) แต่การลบตรงกลาง (<code>RemoveAt</code>) เป็น O(n) เพราะของที่อยู่หลังช่องนั้นต้องเลื่อนมาปิดช่องว่าง เกมใช้ List กับข้อมูลที่จำนวนเปลี่ยนระหว่างการต่อสู้ ได้แก่ <code>Party</code> (นักดนตรีในสนาม สูงสุด 6 คน) <code>Enemies</code> และ <code>Bench</code> (คนที่รออยู่บนม้านั่ง)</p>
+<p>ตัวอย่างคือการ CALL ซึ่งเรียกนักดนตรีจากม้านั่งเข้าสนาม เกมสร้าง <code>Fighter</code> ใหม่ ต่อท้าย <code>Party</code> แล้วลบออกจาก <code>Bench</code></p>
+<pre class="cs" data-file="Battle/TurnBattle.cs (Call)">Fighter f = MakeMusician(Bench[bench], BenchLife[bench]);
+f.JustCalled = true;
+Party.Add(f);                 // ต่อท้าย : O(1)
+Bench.RemoveAt(bench);        // ลบกลาง list : ตัวหลังเลื่อนมาแทน O(n)
+BenchLife.RemoveAt(bench);    // list คู่ขนาน ต้องลบช่องเดียวกันเสมอ
+Events.Add(new TurnEvent(TurnEventKind.Called, f, 0));</pre>
+<figure class="fig">
+  <div class="lists">
+    <div class="lrow"><span class="sl">Bench ก่อน</span><span class="pill"><i>0</i> MALI</span><span class="pill hl"><i>1</i> NUAN</span><span class="pill"><i>2</i> LUKA</span><span class="sl2">BenchLife</span><span class="pill">30</span><span class="pill hl">25</span><span class="pill">40</span></div>
+    <div class="lrow"><span class="sl">RemoveAt(1)</span><span class="pill"><i>0</i> MALI</span><span class="pill"><i>1</i> LUKA &#8592;</span><span class="sl2"></span><span class="pill">30</span><span class="pill">40 &#8592;</span></div>
+    <div class="lrow"><span class="sl">Party.Add</span><span class="pill">ANNA</span><span class="pill">OTTO</span><span class="pill hl">NUAN (ใหม่)</span></div>
+  </div>
+  <figcaption>รูปที่ 3-1 เรียก NUAN เข้าสนาม : LUKA เลื่อนจากช่อง 2 มาช่อง 1 (ตัวเลขชีวิตเป็นตัวอย่าง)</figcaption>
+</figure>
+<p><b>ข้อสังเกต</b> <code>Bench</code> กับ <code>BenchLife</code> เป็น list คู่ขนาน ช่องเดียวกันคือคนเดียวกัน ทุกครั้งที่เพิ่มหรือลบต้องทำกับทั้งสอง list ถ้าลืมอันใดอันหนึ่ง ชีวิตจะเลื่อนไปเป็นของคนอื่นทันที วิธีที่ปลอดภัยกว่าคือรวมเป็น list ของ class เดียว เช่น <code>BenchSeat { Musician, Life }</code> ซึ่งเป็นจุดที่ควรปรับต่อ</p>
+
+<h2 id="s3-2">3.2 List เป็นคิวเหตุการณ์ระหว่างกติกากับหน้าจอ</h2>
+<p><code>TurnBattle</code> ไม่มีโค้ดวาดภาพ เมื่อเกิดอะไรขึ้น เช่น มีคนโดนตี ล้ม หรือวงได้ลมหายใจ (BREATH) เพิ่ม กติกาจะต่อท้าย <code>TurnEvent</code> ลงใน <code>Events</code> หน้าจออ่านจากหัวไปท้ายตามลำดับที่เกิด แล้วแปลงเป็นตัวเลขเด้ง แฟลช และจอสั่น เสร็จแล้วล้าง list ทิ้ง</p>
+<pre class="cs" data-file="Battle/TurnBattle.cs (ตอนลดเลือด)">f.Hp = Math.Max(0, f.Hp - amount);
+Events.Add(new TurnEvent(TurnEventKind.Damage, f, amount));
+if (f.Down)
+    Events.Add(new TurnEvent(TurnEventKind.Down, f, 0));</pre>
+<pre class="cs" data-file="Screens/BattleScreen.cs (ShowEvents)">for (int i = 0; i &lt; battle.Events.Count; i++)
+{
+    TurnEvent e = battle.Events[i];
+    // ... สร้างตัวเลขเด้ง แฟลช ตามชนิดของ e.Kind
+}
+// ...
+battle.Events.Clear();</pre>
+<figure class="fig">
+  <img src="diagrams/events.svg" style="width:158mm">
+  <figcaption>รูปที่ 3-2 List&lt;TurnEvent&gt; ทำหน้าที่เป็นคิว (เข้าก่อน แสดงก่อน)</figcaption>
+</figure>
+<p>รูปแบบนี้คือ event queue ที่เข้าก่อนออกก่อน (FIFO) เหตุผลที่ใช้ <code>List</code> แทน <code>Queue&lt;T&gt;</code> คือหน้าจออ่านทั้งชุดในเฟรมเดียวแล้วล้างทีเดียว ไม่ต้องดึงออกทีละตัว และ <code>TurnEvent</code> เป็น <code>struct</code> ขนาดเล็ก 3 field จึงเก็บลงใน array ภายใน list ได้ตรงๆ ไม่ต้องสร้าง object แยกทีละตัว ข้อดีที่สำคัญคือกติกากับภาพแยกจากกัน เกมจึงมีโหมดทดสอบ (<code>--shots turncheck</code>) ที่สร้าง <code>TurnBattle</code> ขึ้นมาตรงๆ แล้วตรวจผลของกติกา โดยไม่ต้องผ่านหน้าต่อสู้</p>
+</section>
+
+<!-- ===================================================== บทที่ 4 -->
+<section class="chapter">
+<h1 id="ch4"><span class="chno">บทที่ 4</span>Key-Value Pair Data Structures</h1>
+
+<h2 id="s4-1">4.1 Dictionary&lt;string, string&gt; ในระบบเซฟ</h2>
+<p>ไฟล์เซฟเป็นข้อความบรรทัดละหนึ่งค่า รูปแบบ <code>name=value</code> ตอนโหลด ฟังก์ชัน <code>Read</code> ตัดแต่ละบรรทัดที่เครื่องหมาย = แล้วเก็บลง <code>Dictionary</code> โดยใช้ชื่อเป็น key ตามเอกสารของ .NET <code>Dictionary</code> ทำงานแบบ hash table การค้นหาด้วย key จึงเร็วใกล้เคียง O(1)</p>
+<pre class="cs" data-file="Data/SaveFile.cs (Read)">Dictionary&lt;string, string&gt; values = new Dictionary&lt;string, string&gt;();
+string[] lines = File.ReadAllLines(path);
+for (int i = 0; i &lt; lines.Length; i++)
+{
+    int cut = lines[i].IndexOf('=');
+    if (cut &lt;= 0) continue;                                  // บรรทัดเสีย ข้ามไป
+    values[lines[i].Substring(0, cut)] = lines[i].Substring(cut + 1);
+}
+if (GetInt(values, "version", 0) != Version) return null;   // เซฟคนละเวอร์ชัน ไม่ใช้</pre>
+<pre class="cs" data-file="Data/SaveFile.cs (ตัวอ่านค่า)">private static string GetText(Dictionary&lt;string, string&gt; v, string name)
+{
+    string text;
+    return v.TryGetValue(name, out text) ? text : "";   // ไม่มี key = ข้อความว่าง
+}</pre>
+<figure class="fig">
+  <img src="diagrams/save.svg" style="width:160mm">
+  <figcaption>รูปที่ 4-1 จากไฟล์เซฟ ผ่าน Dictionary กลับเป็น RunState (ค่าในไฟล์เป็นตัวอย่าง)</figcaption>
+</figure>
+<p><b>เหตุผลที่เลือก Dictionary</b> ลำดับบรรทัดในไฟล์ไม่มีผล บรรทัดที่หายหรือพังได้ค่าสำรอง (fallback) ผ่าน <code>TryGetValue</code> แทนที่เกมจะ crash เพิ่ม key ใหม่ในเวอร์ชันหลังได้โดยไม่ต้องเปลี่ยนรูปแบบไฟล์ และไฟล์เปิดอ่านด้วยตาได้ ช่วยตอนหาบั๊ก ค่าที่เป็นรายการ เช่น <code>roster</code> เก็บเป็น "0,4,7" แล้ว <code>GetList</code> แยกด้วย <code>Split(',')</code> เป็น <code>int[]</code> ซึ่งก็คือเลขช่องในข้อ 2.1 นอกจากนี้ตัวเลขทศนิยมเขียนด้วย <code>CultureInfo.InvariantCulture</code> เสมอ ไฟล์ที่เซฟบน Windows ภาษาไทยหรือภาษาเยอรมันจึงอ่านกลับได้เหมือนกัน</p>
+
+<h2 id="s4-2">4.2 Dictionary&lt;Fighter, Look&gt; เก็บสถานะภาพแยกจากกติกา</h2>
+<p>หน้าต่อสู้ต้องจำค่าบางอย่างที่ใช้วาดอย่างเดียว เช่น ความสว่างของแฟลชตอนโดนตี (<code>Flash</code>) และระยะเด้งถอย (<code>Knock</code>) ของแต่ละตัว ค่าพวกนี้ไม่ใช่กติกา ถ้าใส่ไว้ใน <code>Fighter</code> คลาสของกติกาจะปนกับเรื่องภาพ หน้าจอจึงเก็บไว้เองใน <code>Dictionary</code> โดยใช้ตัว <code>Fighter</code> เป็น key (เทียบด้วย reference ของ object)</p>
+<pre class="cs" data-file="Screens/BattleScreen.cs">private class Look
+{
+    public float Flash;
+    public float Knock;
+}
+private Dictionary&lt;Fighter, Look&gt; looks = new Dictionary&lt;Fighter, Look&gt;();
+private Dictionary&lt;Fighter, string&gt; maxLabel = new Dictionary&lt;Fighter, string&gt;();
+
+//Name : a fighter's plate words and look, made once when they come onto the field
+private void Name(Fighter f)
+{
+    shortName[f] = ShortName(f.Name);
+    maxLabel[f] = "/ " + NumberText.Get(f.MaxHp);    // สร้างครั้งเดียว ไม่สร้างตอนวาด
+    looks[f] = new Look();
+}
+
+// ตอนวาด : ตัวที่โดนตีถูกเลื่อนถอยหลังตาม Knock
+Look look;
+if (looks.TryGetValue(f, out look) &amp;&amp; look.Knock &gt; 0f) r.X += ...;</pre>
+<p>หน้าจอยังใช้ <code>Dictionary&lt;Fighter, string&gt;</code> เก็บข้อความที่เตรียมไว้ของแต่ละตัว เพราะโปรเจกต์มีกติกาว่าห้ามสร้าง string ในฟังก์ชัน <code>Draw</code> และใช้ <code>Dictionary&lt;Fighter, int&gt;</code> นับว่าตัวไหนมีตัวเลขเด้งซ้อนอยู่กี่อัน เพื่อเลื่อนอันใหม่ขึ้นไปไม่ให้ทับกัน</p>
+
+<h2 id="s4-3">4.3 Array เมื่อ key เป็นตัวเลขเรียงกัน</h2>
+<p>ถ้า key เป็นจำนวนเต็มในช่วงแคบ ใช้ array แทน Dictionary ได้ เรียกว่า direct-address table ตัวเลขคือ index ตรงๆ ไม่ต้องคำนวณ hash <code>NumberText</code> เตรียมข้อความ "0" ถึง "999" ไว้ตั้งแต่เปิดเกม ตอนวาดแค่หยิบจากช่อง ไม่ต้องสร้าง string ใหม่</p>
+<pre class="cs" data-file="Core/NumberText.cs">private static string[] plain = new string[Max + 1];     // "0" .. "999"
+
+public static string Get(int value)
+{
+    if (value &lt; 0) return minus[Clamp(-value)];
+    return plain[Clamp(value)];        // key = ตัวเลข = index ของ array
+}</pre>
+<table class="tbl small">
+<caption>ตารางที่ 4-1 เทียบ Dictionary กับ array ที่ใช้ตัวเลขเป็น key</caption>
+<thead><tr><th></th><th>Dictionary (hash table)</th><th>Array (direct-address)</th></tr></thead>
+<tbody>
+<tr><td>ชนิดของ key</td><td>อะไรก็ได้ เช่น string, object</td><td>จำนวนเต็มในช่วงแคบเท่านั้น</td></tr>
+<tr><td>เวลาค้นหา</td><td>ใกล้ O(1) ต้องคำนวณ hash</td><td>O(1) แท้ ไม่ต้องคำนวณ</td></tr>
+<tr><td>ที่ใช้ในเกม</td><td>ไฟล์เซฟ, สถานะภาพต่อตัวละคร</td><td>NumberText, ตารางตาม enum</td></tr>
+</tbody>
+</table>
+</section>
+
+<!-- ===================================================== บทที่ 5 -->
+<section class="chapter">
+<h1 id="ch5"><span class="chno">บทที่ 5</span>Variants of Trees <span class="tag plan">แผน</span></h1>
+<p>ตอนนี้โค้ดของเกมยังไม่มีโครงสร้างข้อมูลแบบต้นไม้ ทีมวางแผนนำมาใช้ 2 จุด <b>โค้ดในบทนี้และบทที่ 6 เป็นโค้ดร่าง ยังไม่ได้อยู่ในเกม</b> แต่ได้นำไปคอมไพล์และทดสอบในโปรแกรมทดสอบแยกแล้ว ผลทดสอบบอกไว้ท้ายแต่ละข้อ</p>
+
+<h2 id="s5-1">5.1 Heap และ PriorityQueue สำหรับลำดับเทิร์น</h2>
+<p><b>ปัญหาของวิธีเดิม</b> ฟังก์ชัน <code>BuildOrder</code> ในข้อ 2.3 ใช้ list 3 ตัว (fast, slow, twice) และเขียนจุดแทรกแยกเป็นกรณี ถ้าเพิ่มกติกาลำดับใหม่ เช่น ศัตรูที่ได้เล่นก่อนวง ต้องเพิ่มทั้ง list และ if อีกชุด</p>
+<p><b>แผน</b> ให้ทุกตาในห้อง ทั้งของวงและของศัตรู มีคีย์ลำดับ 3 ค่า คือ (จังหวะ, ความเร็วติดลบ, ลำดับที่ใส่) แล้วใส่ลง <code>PriorityQueue</code> ซึ่งคืนตัวที่คีย์น้อยที่สุดก่อน ค่าจังหวะกำหนดว่า ท่าที่ i ของวงอยู่ที่ i&times;10 ตาที่แทรกหลังท่าที่ n อยู่ที่ n&times;10 &minus; 5 และตาที่เล่นหลังวงอยู่ที่ 10000 ความเร็วใส่เป็นค่าลบเพื่อให้ตัวที่เร็วกว่าได้คีย์น้อยกว่า ส่วนลำดับที่ใส่ (seq) ใช้ตัดสินตอนเท่ากัน เพราะเอกสารของ .NET ระบุว่า <code>PriorityQueue</code> ไม่รับประกันว่าตัวที่มีคีย์เท่ากันจะออกตามลำดับที่ใส่</p>
+<p><b>Heap</b> <code>PriorityQueue</code> ของ .NET เป็น min-heap แบบ 4 ลูก (quaternary heap) เก็บใน array ลูกของช่อง i อยู่ที่ช่อง 4i+1 ถึง 4i+4 พ่อของช่อง i อยู่ที่ (i&minus;1)/4 ตัวที่คีย์น้อยสุดอยู่ช่อง 0 เสมอ การใส่และการดึงออกใช้เวลา O(log n) รูปที่ 5-1 คือ heap จริงของห้องแบบเดียวกับรูปที่ 2-3 แต่ไม่มีศัตรู D (อ่านจาก <code>UnorderedItems</code> ของโปรแกรมทดสอบ) เมื่อดึงออกจนหมดได้ลำดับ ANNA, OTTO, B, KLARA, C, A</p>
+<figure class="fig">
+  <img src="diagrams/heap.svg" style="width:138mm">
+  <div class="arr tight">
+    <div class="arrlabel">array ภายใน</div>
+    <div class="cells">
+      <div class="cell hi"><i>0</i>ANNA</div><div class="cell"><i>1</i>OTTO</div><div class="cell"><i>2</i>KLARA</div><div class="cell"><i>3</i>A</div><div class="cell"><i>4</i>B</div><div class="cell"><i>5</i>C</div>
+    </div>
+  </div>
+  <figcaption>รูปที่ 5-1 Min-heap 4 ลูกของ PriorityQueue (ตัวเลขในวงเล็บคือคีย์ (จังหวะ, ความเร็วติดลบ, seq))</figcaption>
+</figure>
+<pre class="cs plan" data-file="โค้ดร่าง : TurnQueue.BuildOrder (ใช้ชื่อตัวแปรเดียวกับ BuildOrder เดิม)">//TURN QUEUE : every turn of the bar gets a key, the smallest key plays first
+static int After(int n) { return n * 10 - 5; }    // right after the band's n-th move
+const int AfterBand = 10000;
+
+PriorityQueue&lt;TurnSlot, (int Beat, int Speed, int Seq)&gt; queue =
+    new PriorityQueue&lt;TurnSlot, (int, int, int)&gt;();
+int seq = 0;
+for (int i = 0; i &lt; band.Count; i++)
+{
+    TurnSlot move = new TurnSlot { Who = band[i].Who, Move = band[i] };
+    queue.Enqueue(move, (i * 10, 0, seq++));                         // ท่าที่ i ของวง
+}
+
+for (int i = 0; i &lt; enemies.Count; i++)
+{
+    Fighter e = enemies[i];
+    if (e.Down) continue;
+    if (Has(e, EnemyTrait.TwiceABar))                                // TWICE A BAR
+    {
+        int first = After(BattleRules.TurnTwiceFirst);
+        int second = After(BattleRules.TurnTwiceSecond);
+        queue.Enqueue(new TurnSlot { Who = e }, (first, 0, seq++));
+        queue.Enqueue(new TurnSlot { Who = e }, (second, 0, seq++));
+        continue;
+    }
+    bool cutIn = e.Speed &gt;= BattleRules.TurnCutInSpeed;               // CUT IN
+    int beat = cutIn ? After(BattleRules.TurnCutInAfter) : AfterBand;
+    queue.Enqueue(new TurnSlot { Who = e }, (beat, -e.Speed, seq++));   // เร็วกว่าได้คีย์น้อยกว่า
+}
+
+while (queue.Count &gt; 0)
+{
+    TurnSlot slot = queue.Dequeue();      // O(log n)
+    order.Add(slot.Who);
+    moves.Add(slot.Move);
+}</pre>
+<p><b>ผลทดสอบ</b> สุ่มสถานการณ์ 20,000 แบบ (วงเล่น 0 ถึง 6 ท่า ศัตรู 0 ถึง 6 ตัว สุ่มความเร็ว การล้ม และนิสัย TWICE A BAR) แล้วเทียบกับ <code>BuildOrder</code> เดิม ได้ลำดับตรงกันทั้ง 20,000 แบบ <b>ข้อพิจารณา</b> ในหนึ่งห้องมีนักดนตรีไม่เกิน 6 คนและศัตรูไม่เกิน 4 ตัว ความเร็วจึงไม่ต่างจากเดิมมาก ข้อดีหลักคือกติกาลำดับทั้งหมดอยู่ในคีย์ชุดเดียว อ่านง่ายและเพิ่มกติกาใหม่ได้โดยไม่ต้องเพิ่ม list</p>
+
+<h2 id="s5-2">5.2 Decision tree สำหรับการเลือกเป้าหมายของศัตรู</h2>
+<p>ตอนนี้ศัตรูเลือกว่าจะตีใครด้วยฟังก์ชัน <code>PickTarget</code> ซึ่งเป็น if เรียงกัน ศัตรูทุกตัวใช้ลำดับคำถามชุดเดียวกัน</p>
+<pre class="cs" data-file="Battle/TurnBattle.cs (PickTarget ย่อ)">for (int i = 0; i &lt; Party.Count; i++)
+    if (Party[i].Taunt &amp;&amp; !Party[i].Down) return Party[i];         // TAUNT
+if (Cued(enemy) &amp;&amp; LastCalled != null &amp;&amp; !LastCalled.Down)
+    return LastCalled;                                            // ON CUE
+if (enemy != null &amp;&amp; Has(enemy, EnemyTrait.ByTouch)) { ... }      // BY TOUCH
+if (enemy != null &amp;&amp; Has(enemy, EnemyTrait.FirstInLine)) { ... }  // FIRST IN LINE
+return standing[random.Next(standing.Count)];                     // สุ่มคนที่ยังยืน</pre>
+<p><b>แผน</b> เปลี่ยนเป็นต้นไม้ตัดสินใจแบบ binary tree โหนดคำถาม (<code>Test</code>) มีลูก 2 ตัวคือ <code>Yes</code> กับ <code>No</code> และใบ (leaf) บอกว่าจะตีใคร (<code>Pick</code>) ต้นไม้กลายเป็นข้อมูล ศัตรูหรือบอสแต่ละตัวจึงมีต้นไม้ของตัวเองได้โดยไม่ต้องแก้ฟังก์ชัน รูปที่ 5-2 คือต้นไม้ที่ให้ผลเหมือน <code>PickTarget</code> ตอนนี้</p>
+<figure class="fig">
+  <img src="diagrams/tree.svg" style="width:120mm">
+  <figcaption>รูปที่ 5-2 Decision tree ที่ให้ผลเท่ากับ PickTarget เดิม (กล่องมน = คำถาม, กล่องเหลี่ยม = ใบ)</figcaption>
+</figure>
+<pre class="cs plan" data-file="โค้ดร่าง : TargetNode">public enum TargetTest { None, SomeoneTaunts, OnCue, ByTouch, FirstInLine }
+public enum TargetPick { Taunter, LastCalled, NextSeat, FirstInLine, Anyone }
+
+//TargetNode : one question of the tree, or a leaf when Test is None
+public class TargetNode
+{
+    public TargetTest Test;
+    public TargetPick Pick;
+    public TargetNode Yes;
+    public TargetNode No;
+}
+
+//Decide : walk down from the root, one question per level, until a leaf
+public Fighter Decide(TargetNode root, Fighter enemy)
+{
+    TargetNode node = root;
+    while (node.Test != TargetTest.None)
+        node = Check(node.Test, enemy) ? node.Yes : node.No;
+    return Choose(node.Pick, enemy);
+}</pre>
+<p>การเดินจากรากลงไปใบใช้เวลา O(h) เมื่อ h คือความสูงของต้นไม้ ต้นไม้ในรูปที่ 5-2 สูง 4 ระดับ ในโปรแกรมทดสอบ ต้นไม้นี้เลือกคนที่ TAUNT ได้ถูกต้อง และเมื่อเปิดนิสัย BY TOUCH ก็ไล่ตีตามที่นั่งเหมือนโค้ดเดิม ตัวอย่างการต่อยอดคือบอสที่มีคำถามเพิ่มว่า "เลือดของตัวเองต่ำกว่าครึ่งไหม" แล้วเปลี่ยนไปตีคนที่เลือดน้อยที่สุด (ตัวอย่างแนวคิด ยังไม่ได้ออกแบบกติกาจริง)</p>
+</section>
+
+<!-- ===================================================== บทที่ 6 -->
+<section class="chapter">
+<h1 id="ch6"><span class="chno">บทที่ 6</span>Exploring Graphs <span class="tag plan">แผน</span></h1>
+
+<h2 id="s6-1">6.1 หน้าเส้นทางในตอนนี้</h2>
+<p>ตอนนี้เมื่อผู้เล่นมาถึงแต่ละขั้น <code>RollOptions</code> จะสุ่มทางเลือก 2 ถึง 4 ทาง เก็บไว้ใน array <code>RouteNode[] Options</code> ผู้เล่นเลือกหนึ่งทาง แล้วขั้นถัดไปจึงสุ่มใหม่ ผู้เล่นเห็นแค่ขั้นที่อยู่ตรงหน้า จึงวางแผนล่วงหน้าไม่ได้ เช่น อยากแวะร้านค้าก่อนถึงบอส</p>
+<pre class="cs" data-file="Data/RunState.cs (RollOptions ย่อ)">int count = 2 + random.Next(3);        // two to four paths
+Options = new RouteNode[count];
+for (int i = 0; i &lt; count; i++)
+    Options[i] = MakeNode(PickType());</pre>
+
+<h2 id="s6-2">6.2 แผนที่แบบกราฟมีทิศทาง (DAG) เก็บด้วย adjacency list</h2>
+<p><b>แผน</b> สร้างแผนที่ทั้งชั้นไว้ตั้งแต่เข้าชั้น แต่ละสถานที่เป็นโหนด (vertex) และทางไปขั้นถัดไปเป็นเส้นเชื่อม (edge) ที่ชี้ไปข้างหน้าอย่างเดียว กราฟนี้จึงเป็นกราฟมีทิศทางที่ไม่มีวงวน (directed acyclic graph หรือ DAG) ผู้เล่นเดินย้อนหรือวนกลับไม่ได้ แต่ละขั้นยังมี 2 ถึง 4 จุดเหมือนตอนนี้</p>
+<p>เก็บกราฟแบบ adjacency list คือแต่ละโหนดมี list ของโหนดที่ไปต่อได้ เพราะแผนที่หนึ่งชั้นมีราว 20 โหนด แต่ละโหนดมีทางออกแค่ 1 ถึง 2 ทาง ถ้าใช้ adjacency matrix ขนาด 20&times;20 ช่องส่วนใหญ่จะว่าง (sparse graph)</p>
+<pre class="cs plan" data-file="โค้ดร่าง : MapNode และ RouteMap.Build">public class MapNode
+{
+    public NodeType Type;
+    public int Stage;                                     // ขั้นที่ 1 ถึง 8
+    public List&lt;MapNode&gt; Next = new List&lt;MapNode&gt;();   // adjacency list
+}
+
+// ต่อเส้นจากขั้น r ไปขั้น r + 1
+for (int i = 0; i &lt; here.Count; i++)
+{
+    int j = i * next.Count / here.Count;          // จุดตำแหน่งตรงกันในขั้นถัดไป
+    Link(here[i], next[j]);
+    if (j + 1 &lt; next.Count &amp;&amp; random.Next(2) == 0) Link(here[i], next[j + 1]);
+}
+for (int j = 0; j &lt; next.Count; j++)              // ทุกจุดต้องมีทางเข้าอย่างน้อย 1 ทาง
+    if (!HasWayIn(here, next[j])) Link(here[j * here.Count / next.Count], next[j]);</pre>
+<figure class="fig">
+  <img src="diagrams/route.svg" style="width:150mm">
+  <figcaption>รูปที่ 6-1 แผนที่ 8 ขั้นที่โค้ดร่างสร้าง (seed 3) ผู้เล่นอยู่ที่ R ขั้นแรก (ซ้ายล่าง) วงเส้นประคือจุดที่ BFS บอกว่าไปไม่ถึงแล้ว<br>(E ต่อสู้, ? เหตุการณ์, $ ร้านค้า, ! elite, R พัก, B บอส)</figcaption>
+</figure>
+
+<h2 id="s6-3">6.3 BFS หาจุดที่ยังไปถึงได้</h2>
+<p>การค้นแบบกว้างก่อน (breadth-first search, BFS) เริ่มจากจุดที่ผู้เล่นยืน ใช้ <code>Queue</code> เก็บจุดที่ต้องไปดูต่อ และ <code>HashSet</code> จำจุดที่เจอแล้วไม่ให้นับซ้ำ แผนนี้ใช้ BFS 2 ที่ ที่แรกคือหลังสร้างแผนที่ ตรวจว่าทุกจุดเริ่มไปถึงบอสได้ ที่สองคือหน้าจอทำให้จุดที่ไปไม่ถึงแล้วจางลง ผู้เล่นจะเห็นทันทีว่าเลือกทางนี้แล้วตัดทางไหนทิ้ง (รูปที่ 6-1)</p>
+<pre class="cs plan" data-file="โค้ดร่าง : RouteMap.Reach (BFS)">public static HashSet&lt;MapNode&gt; Reach(MapNode start)
+{
+    HashSet&lt;MapNode&gt; seen = new HashSet&lt;MapNode&gt;();
+    Queue&lt;MapNode&gt; queue = new Queue&lt;MapNode&gt;();
+    seen.Add(start);
+    queue.Enqueue(start);
+    while (queue.Count &gt; 0)
+    {
+        MapNode node = queue.Dequeue();
+        for (int i = 0; i &lt; node.Next.Count; i++)
+        {
+            MapNode to = node.Next[i];
+            if (seen.Contains(to)) continue;      // เจอแล้ว ไม่ต้องเข้าคิวซ้ำ
+            seen.Add(to);
+            queue.Enqueue(to);
+        }
+    }
+    return seen;
+}</pre>
+<p>BFS ผ่านทุกโหนดและทุกเส้นอย่างละครั้ง ใช้เวลา O(V + E) เมื่อ V คือจำนวนโหนดและ E คือจำนวนเส้น แผนที่หนึ่งชั้นมีไม่ถึง 30 โหนด จึงคำนวณใหม่ได้ทุกครั้งที่ผู้เล่นเลือกทาง <b>ผลทดสอบ</b> สร้างแผนที่ 2,000 แผ่น (seed 0 ถึง 1999) ทุกแผ่นไปถึงบอสได้จากทุกจุดเริ่ม และทุกจุดก่อนบอสมีทางออกอย่างน้อย 1 ทาง ในโค้ดร่างชนิดของสถานที่ยังสุ่มเท่ากันทุกชนิด ตอนนำเข้าเกมจริงจะใช้ความถี่จาก <code>PickType</code> เดิม</p>
+</section>
+
+<!-- ===================================================== บทที่ 7 -->
+<section class="chapter">
+<h1 id="ch7"><span class="chno">บทที่ 7</span>สรุป</h1>
+<p>ตารางที่ 7-1 รวมความเร็วของการทำงานแต่ละแบบที่ใช้ในรายงาน n คือจำนวนข้อมูลในโครงสร้างนั้น</p>
+<table class="tbl small">
+<caption>ตารางที่ 7-1 ความเร็วของการทำงานที่ใช้ในเกม</caption>
+<thead><tr><th>โครงสร้าง</th><th>การทำงาน</th><th>ความเร็ว</th><th>ใช้ที่</th></tr></thead>
+<tbody>
+<tr><td>Array</td><td>หยิบด้วย index</td><td>O(1)</td><td>ตารางข้อมูล, NumberText</td></tr>
+<tr><td>Array</td><td>Array.IndexOf</td><td>O(n)</td><td>ตอนเซฟ</td></tr>
+<tr><td>Array (pool)</td><td>หาช่องว่าง</td><td>O(n)</td><td>เอฟเฟกต์</td></tr>
+<tr><td>List</td><td>ใส่ทีละตัวแบบ insertion sort</td><td>O(n) ต่อตัว, O(n&sup2;) ทั้งหมด</td><td>ลำดับเทิร์น</td></tr>
+<tr><td>Array</td><td>Array.Sort</td><td>O(n log n)</td><td>วัดจังหวะมือ</td></tr>
+<tr><td>List</td><td>Add / RemoveAt</td><td>O(1) เฉลี่ย / O(n)</td><td>สนาม ม้านั่ง เหตุการณ์</td></tr>
+<tr><td>Dictionary</td><td>TryGetValue</td><td>ใกล้ O(1)</td><td>เซฟ, สถานะภาพ</td></tr>
+<tr><td>PriorityQueue (heap)</td><td>Enqueue / Dequeue</td><td>O(log n)</td><td>ลำดับเทิร์น <span class="tag plan">แผน</span></td></tr>
+<tr><td>Decision tree</td><td>Decide</td><td>O(h)</td><td>เป้าหมายศัตรู <span class="tag plan">แผน</span></td></tr>
+<tr><td>Graph</td><td>BFS</td><td>O(V + E)</td><td>แผนที่ <span class="tag plan">แผน</span></td></tr>
+</tbody>
+</table>
+<p>สิ่งที่ทีมได้เรียนรู้จากการพัฒนาเกมนี้มี 3 ข้อ ข้อแรก ข้อมูลในเกมของเรามีขนาดเล็ก การเลือกโครงสร้างข้อมูลจึงมีผลกับความถูกต้องและการดูแลโค้ดมากกว่าความเร็ว ตัวอย่างคือการเลือก insertion sort เพื่อให้ได้ลำดับที่เสถียร และการแยก <code>Events</code> ออกจากหน้าจอ ข้อสอง ในเกมที่วาดภาพ 60 ครั้งต่อวินาที การไม่สร้างของใหม่ระหว่างเล่น (object pool, ข้อความที่เตรียมไว้) ช่วยไม่ให้ภาพกระตุก ข้อสาม ลำดับของ array ที่ใช้เป็นเลขอ้างอิงในไฟล์เซฟเป็นข้อตกลงที่ต้องรักษา ต้องเขียนกฎไว้ให้ทั้งทีมรู้</p>
+<p>งานขั้นต่อไปคือนำแผนในบทที่ 5 และ 6 เข้าเกมจริง และรวม <code>Bench</code> กับ <code>BenchLife</code> ให้เป็น list เดียว เพื่อลดโอกาสที่ข้อมูลจะเลื่อนผิดคน</p>
+</section>
+
+<!-- ===================================================== บรรณานุกรม -->
+<section class="chapter refs">
+<h1 id="refs">บรรณานุกรม</h1>
+<p class="ref">Cormen, T. H., Leiserson, C. E., Rivest, R. L., &amp; Stein, C. (2009). <i>Introduction to Algorithms</i> (3rd ed.). MIT Press.</p>
+<p class="ref">Microsoft. (n.d.). <i>Dictionary&lt;TKey,TValue&gt; Class</i>. .NET API documentation. https://learn.microsoft.com/dotnet/api/system.collections.generic.dictionary-2</p>
+<p class="ref">Microsoft. (n.d.). <i>List&lt;T&gt; Class</i>. .NET API documentation. https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1</p>
+<p class="ref">Microsoft. (n.d.). <i>PriorityQueue&lt;TElement,TPriority&gt; Class</i>. .NET API documentation. https://learn.microsoft.com/dotnet/api/system.collections.generic.priorityqueue-2</p>
+<p class="ref">MonoGame Foundation. (n.d.). <i>MonoGame Documentation</i>. https://docs.monogame.net</p>
+<p class="ref">Nystrom, R. (2014). <i>Game Programming Patterns</i>. Genever Benning. บท Object Pool และ Event Queue. https://gameprogrammingpatterns.com</p>
+<p class="ref">ทีม Alphodite. (2026). <i>TACET 4'33</i> [ซอร์สโค้ด, branch Alpha7]. https://github.com/JuzJuz03HKR/Alphodite</p>
+</section>
+
+</body>
+</html>

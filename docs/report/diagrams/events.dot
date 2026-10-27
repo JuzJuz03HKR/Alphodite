@@ -1,0 +1,13 @@
+digraph Events {
+  graph [rankdir=LR, fontname="Sarabun", nodesep=0.3, ranksep=0.35, bgcolor="transparent"];
+  node  [fontname="Sarabun", fontsize=10, shape=box, style="rounded,filled", fillcolor="white", color="#222222"];
+  edge  [fontname="Sarabun", fontsize=9, color="#333333", arrowsize=0.6];
+  rules  [label="TurnBattle\n(กติกา ไม่มีโค้ดวาด)", fillcolor="#eeeeee"];
+  list   [shape=plain, label=<<table border="1" cellborder="1" cellspacing="0" cellpadding="4" bgcolor="white">
+           <tr><td colspan="4" bgcolor="#e8e8e8"><b>Events : List&lt;TurnEvent&gt;</b></td></tr>
+           <tr><td>[0]<br/>Damage<br/>ศัตรู A, 7</td><td>[1]<br/>Damage<br/>ศัตรู A, 5</td><td>[2]<br/>Down<br/>ศัตรู A</td><td>[3]<br/>Breath<br/>null, 2</td></tr></table>>];
+  screen [label="BattleScreen.ShowEvents()\n(ตัวเลขเด้ง แฟลช จอสั่น)", fillcolor="#eeeeee"];
+  rules -> list [label=" Events.Add(...)\n เพิ่มท้าย"];
+  list -> screen [label=" อ่าน [0] ถึง [n-1]\n ตามลำดับ"];
+  screen -> list [label=" Events.Clear()", style=dashed, constraint=false];
+}

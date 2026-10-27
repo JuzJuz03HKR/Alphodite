@@ -1,0 +1,60 @@
+digraph UML {
+  graph [rankdir=TB, fontname="Sarabun", nodesep=0.35, ranksep=0.55, pad=0.1, bgcolor="transparent"];
+  node  [shape=plain, fontname="Sarabun", fontsize=10];
+  edge  [fontname="Sarabun", fontsize=9, color="#333333", arrowsize=0.7];
+
+  RunState [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="3" bgcolor="white">
+    <tr><td bgcolor="#e8e8e8"><b>RunState</b></td></tr>
+    <tr><td align="left" balign="left">+ Roster : List&lt;Musician&gt;<br/>+ Motifs : List&lt;Motif&gt;<br/>+ Journey : List&lt;JourneyStop&gt;<br/>+ Options : RouteNode[]<br/>+ Floor, Stage, Seats : int</td></tr>
+    <tr><td align="left" balign="left">+ RollOptions()<br/>+ BeginBattle(...)</td></tr></table>>];
+
+  TurnBattle [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="3" bgcolor="white">
+    <tr><td bgcolor="#e8e8e8"><b>TurnBattle</b></td></tr>
+    <tr><td align="left" balign="left">+ Party, Enemies : List&lt;Fighter&gt;<br/>+ Bench : List&lt;Musician&gt;<br/>+ BenchLife : List&lt;int&gt;<br/>+ Bar : List&lt;BarMove&gt;<br/>+ Order : List&lt;Fighter&gt;<br/>+ Events : List&lt;TurnEvent&gt;</td></tr>
+    <tr><td align="left" balign="left">+ Call(bench) : Fighter<br/>- BuildOrder(...)<br/>- PickTarget(enemy) : Fighter</td></tr></table>>];
+
+  Fighter [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="3" bgcolor="white">
+    <tr><td bgcolor="#e8e8e8"><b>Fighter</b></td></tr>
+    <tr><td align="left" balign="left">+ Hp, MaxHp, Speed : int<br/>+ Musician : Musician<br/>+ Enemy : Enemy<br/>+ IntentNotes : int[]<br/>+ IntentWays : Flick[]<br/>+ Down : bool  (Hp &lt;= 0)</td></tr></table>>];
+
+  BarMove [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="3" bgcolor="white">
+    <tr><td bgcolor="#e8e8e8"><b>BarMove</b></td></tr>
+    <tr><td align="left" balign="left">+ Who : Fighter<br/>+ Target : Fighter<br/>+ Skill : Skill  (null = ATTACK)</td></tr></table>>];
+
+  TurnEvent [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="3" bgcolor="white">
+    <tr><td bgcolor="#e8e8e8"><b>«struct» TurnEvent</b></td></tr>
+    <tr><td align="left" balign="left">+ Kind : TurnEventKind<br/>+ Who : Fighter<br/>+ Amount : int</td></tr></table>>];
+
+  Musician [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="3" bgcolor="white">
+    <tr><td bgcolor="#e8e8e8"><b>Musician</b></td></tr>
+    <tr><td align="left" balign="left">+ Name, Instrument : string<br/>+ Power : int</td></tr>
+    <tr><td align="left" balign="left"><i>MusicianList.All : Musician[]</i></td></tr></table>>];
+
+  Enemy [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="3" bgcolor="white">
+    <tr><td bgcolor="#e8e8e8"><b>Enemy</b></td></tr>
+    <tr><td align="left" balign="left">+ Phrases : string[]<br/>+ Trait : EnemyTrait</td></tr>
+    <tr><td align="left" balign="left"><i>EnemyList.All : Enemy[]</i></td></tr></table>>];
+
+  BattleScreen [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="3" bgcolor="white">
+    <tr><td bgcolor="#e8e8e8"><b>BattleScreen</b></td></tr>
+    <tr><td align="left" balign="left">- looks : Dictionary&lt;Fighter, Look&gt;<br/>- effects : DuelEffects  (object pool)</td></tr>
+    <tr><td align="left" balign="left">- ShowEvents()</td></tr></table>>];
+
+  SaveFile [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="3" bgcolor="white">
+    <tr><td bgcolor="#e8e8e8"><b>«static» SaveFile</b></td></tr>
+    <tr><td align="left" balign="left">- Read(path) : Dictionary&lt;string, string&gt;<br/>- GetList(v, name) : int[]</td></tr></table>>];
+
+  BattleScreen -> TurnBattle [arrowhead=vee, label=" ใช้กติกา"];
+  BattleScreen -> RunState [arrowhead=vee, label=" อ่านข้อมูลรัน"];
+  SaveFile -> RunState [style=dashed, arrowhead=vee, label=" เขียน/อ่าน"];
+  TurnBattle -> Fighter [arrowhead=diamond, dir=back, arrowtail=diamond, label=" 1..*", headlabel=""];
+  TurnBattle -> BarMove [dir=back, arrowtail=diamond, label=" 0..*"];
+  TurnBattle -> TurnEvent [dir=back, arrowtail=diamond, label=" 0..*"];
+  BarMove -> Fighter [arrowhead=vee, label=" Who/Target"];
+  Fighter -> Musician [arrowhead=vee, label=" 0..1"];
+  Fighter -> Enemy [arrowhead=vee, label=" 0..1"];
+  RunState -> Musician [arrowhead=vee, label=" Roster 0..*"];
+
+  {rank=same; BattleScreen; SaveFile;}
+  {rank=same; TurnBattle; RunState;}
+}

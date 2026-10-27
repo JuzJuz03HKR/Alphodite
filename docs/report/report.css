@@ -1,0 +1,202 @@
+/* TACET 4'33 data structures report. Printed by build.js (Chromium) to A4.
+   Needs the Sarabun font installed (Google Fonts, OFL). */
+:root {
+  --ink: #111111;
+  --mid: #555555;
+  --line: #bbbbbb;
+  --soft: #f2f2f2;
+  --code: #f6f6f4;
+}
+@page { size: A4; margin: 22mm 20mm 20mm 25mm; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body {
+  font-family: 'Sarabun', sans-serif;
+  font-size: 11pt;
+  line-height: 1.55;
+  color: var(--ink);
+  margin: 0;
+  background: #ffffff;
+}
+p { margin: 0 0 2.6mm; text-align: justify; text-indent: 8mm; }
+/* Chromium draws the Thai marks of a page's first line at the foot of the page before.
+   Keeping each text block's painting inside its own box stops it. */
+p, h1, h2, figcaption, caption, td, th, pre { contain: paint; }
+p.ref { text-indent: -10mm; padding-left: 10mm; text-align: left; }
+code {
+  font-family: 'DejaVu Sans Mono', 'Sarabun', monospace;
+  font-size: 9pt;
+  background: var(--soft);
+  padding: 0 1mm;
+  border-radius: 1mm;
+}
+
+/* chapters */
+.chapter { break-before: page; }
+.chapter.refs { break-before: auto; margin-top: 8mm; }
+.chapter.refs p.ref { font-size: 9.6pt; line-height: 1.4; margin-bottom: 1.6mm; }
+.chapter.refs h1 { font-size: 16pt; }
+h1 {
+  font-size: 20pt;
+  line-height: 1.3;
+  margin: 0 0 6mm;
+  padding-bottom: 3mm;
+  border-bottom: 1.4pt solid var(--ink);
+}
+h1 .chno {
+  display: block;
+  font-size: 11pt;
+  font-weight: 600;
+  letter-spacing: 0.5pt;
+  color: var(--mid);
+}
+h2 {
+  font-size: 13.5pt;
+  margin: 5mm 0 2mm;
+  break-after: avoid;
+}
+h1 + h2 { margin-top: 0; }
+
+/* code */
+pre.cs {
+  font-family: 'DejaVu Sans Mono', 'Sarabun', monospace;
+  font-size: 8pt;
+  line-height: 1.4;
+  background: var(--code);
+  border: 0.6pt solid #dddddd;
+  border-left: 2.4pt solid var(--ink);
+  padding: 2.4mm 3mm 2.4mm 3.4mm;
+  margin: 2mm 0 3.4mm;
+  white-space: pre-wrap;
+  break-inside: avoid;
+  position: relative;
+}
+pre.cs::before {
+  content: attr(data-file);
+  display: block;
+  font-family: 'Sarabun', sans-serif;
+  font-size: 8pt;
+  font-weight: 600;
+  color: var(--mid);
+  margin-bottom: 1mm;
+}
+pre.cs.plan { border-left: 2.4pt dashed var(--ink); background: #fbfbfb; }
+pre.cs .c { color: #707070; font-style: italic; }
+pre.cs .k { color: #000000; font-weight: bold; }
+pre.cs .s { color: #4a4a4a; }
+
+/* status tags */
+.tag {
+  display: inline-block;
+  font-size: 8.5pt;
+  font-weight: 600;
+  line-height: 1.4;
+  padding: 0 1.8mm;
+  border-radius: 1mm;
+  border: 0.8pt solid var(--ink);
+  vertical-align: middle;
+  text-indent: 0;
+}
+.tag.on { background: var(--ink); color: #ffffff; }
+.tag.plan { border-style: dashed; background: #ffffff; color: var(--ink); }
+h1 .tag { font-size: 10pt; margin-left: 2mm; vertical-align: 3pt; }
+
+/* figures and tables */
+figure.fig { margin: 3mm 0 4mm; text-align: center; break-inside: avoid; }
+figure.fig img { display: block; margin: 0 auto; max-width: 100%; }
+figcaption { font-size: 9.5pt; color: var(--mid); margin-top: 2mm; line-height: 1.45; }
+table.tbl { width: 100%; border-collapse: collapse; font-size: 9.6pt; line-height: 1.4; margin: 2mm 0 4mm; break-inside: avoid; }
+table.tbl caption { caption-side: top; font-size: 9.5pt; color: var(--mid); text-align: left; margin-bottom: 1.5mm; }
+table.tbl th { background: #e6e6e6; text-align: left; font-weight: 600; }
+table.tbl th, table.tbl td { border: 0.6pt solid var(--line); padding: 1.1mm 2mm; vertical-align: top; }
+table.tbl.small { font-size: 9.2pt; }
+
+/* array / list drawings made with boxes */
+.arr { display: inline-block; text-align: left; margin-bottom: 3mm; }
+.arr.tight { margin-top: 2mm; margin-bottom: 0; }
+.arrlabel { font-family: 'DejaVu Sans Mono', monospace; font-size: 8.5pt; margin-bottom: 1mm; }
+.cells { display: flex; }
+.cell {
+  border: 0.8pt solid var(--ink);
+  margin-left: -0.8pt;
+  min-width: 15mm;
+  padding: 0.6mm 1.4mm 0.8mm;
+  font-size: 9pt;
+  text-align: center;
+  line-height: 1.3;
+}
+.cell i { display: block; font-style: normal; font-size: 7.5pt; color: var(--mid); }
+.cell.hi { background: #d9d9d9; font-weight: 600; }
+.flow { display: flex; justify-content: center; align-items: center; gap: 2mm; font-size: 9pt; flex-wrap: wrap; }
+.flow .box { border: 0.8pt solid var(--ink); border-radius: 1.2mm; padding: 1mm 2.4mm; background: #ffffff; }
+.flow .mono { font-family: 'DejaVu Sans Mono', monospace; font-size: 8.5pt; background: var(--soft); }
+.flow .arrow { color: var(--mid); font-size: 8.5pt; }
+
+.pool { display: flex; justify-content: center; }
+.slot {
+  width: 13mm; height: 11mm;
+  border: 0.8pt solid var(--ink);
+  margin-left: -0.8pt;
+  font-size: 9pt;
+  line-height: 1.15;
+  padding-top: 1.4mm;
+  box-sizing: border-box;
+}
+.slot small { font-size: 7.5pt; }
+.slot.on { background: #333333; color: #ffffff; }
+.slot.dots { border-style: dashed; padding-top: 3mm; }
+.poolnote { font-size: 9pt; margin-top: 2mm; }
+
+.steps, .lists { display: inline-block; text-align: left; }
+.srow, .lrow { display: flex; align-items: center; gap: 1.4mm; margin: 1.2mm 0; font-size: 9pt; }
+.sl { width: 24mm; color: var(--mid); font-size: 8.5pt; }
+.sl2 { width: 16mm; margin-left: 4mm; color: var(--mid); font-size: 8.5pt; }
+.snote { color: var(--mid); font-size: 8.5pt; margin-left: 2mm; }
+.pill {
+  border: 0.8pt solid var(--ink);
+  border-radius: 1.2mm;
+  padding: 0.3mm 2mm;
+  background: #ffffff;
+  white-space: nowrap;
+}
+.pill i { font-style: normal; font-size: 7.5pt; color: var(--mid); margin-right: 0.8mm; }
+.pill.dark { background: #333333; color: #ffffff; }
+.pill.band { background: #e3e3e3; }
+.pill.hl { background: #d0d0d0; font-weight: 600; }
+
+/* front matter: cover, preface, contents are fixed A4 pages */
+.front { font-size: 12pt; }
+.page {
+  width: 210mm; height: 297mm;
+  box-sizing: border-box;
+  padding: 22mm 20mm 20mm 25mm;
+  position: relative;
+  break-after: page;
+  overflow: hidden;
+}
+.page:last-child { break-after: auto; }
+.pageno { position: absolute; bottom: 9mm; left: 0; right: 0; text-align: center; font-size: 10pt; color: var(--mid); }
+
+.cover { text-align: center; padding-top: 38mm; }
+.cover .en { font-size: 24pt; font-weight: 700; line-height: 1.25; margin-bottom: 4mm; }
+.cover .th { font-size: 16pt; font-weight: 600; margin-bottom: 2mm; }
+.cover .game { font-size: 13pt; color: var(--mid); margin-bottom: 26mm; }
+.cover .rule { width: 40mm; border-top: 1.4pt solid var(--ink); margin: 0 auto 22mm; }
+.cover .label { font-size: 11pt; color: var(--mid); margin-bottom: 3mm; }
+.cover .team { font-size: 15pt; font-weight: 700; margin-bottom: 6mm; }
+.cover table.members { margin: 0 auto 18mm; border-collapse: collapse; font-size: 12pt; }
+.cover table.members td { padding: 1.2mm 3mm; text-align: left; }
+.cover .blank { display: inline-block; border-bottom: 0.8pt dotted var(--ink); }
+.cover .course { font-size: 12pt; line-height: 2.1; }
+
+.preface h1, .toc h1 { text-align: center; border-bottom: none; padding-bottom: 0; margin-bottom: 8mm; }
+.preface p { text-indent: 12mm; line-height: 1.8; }
+.preface .sign { text-align: right; margin-top: 12mm; line-height: 1.8; text-indent: 0; }
+
+.toc table { width: 100%; border-collapse: collapse; font-size: 11.5pt; }
+.toc td { padding: 0.9mm 0; vertical-align: bottom; }
+.toc td.num { text-align: right; width: 12mm; }
+.toc tr.ch td { font-weight: 700; padding-top: 3mm; }
+.toc tr.sec td.title { padding-left: 9mm; }
+.toc td.title span.lead { display: flex; align-items: baseline; }
+.toc td.title span.lead::after { content: ""; flex: 1; border-bottom: 0.8pt dotted #888888; margin: 0 1.5mm; transform: translateY(-1mm); }
+.toc .listhead td { font-weight: 700; padding-top: 6mm; }

@@ -1,0 +1,32 @@
+digraph Route {
+  graph [rankdir=LR, fontname="Sarabun", nodesep=0.22, ranksep=0.55, bgcolor="transparent"];
+  node  [fontname="Sarabun", fontsize=9, shape=circle, width=0.4, fixedsize=true, style="filled", fillcolor="white", color="#222222"];
+  edge  [color="#555555", arrowsize=0.5];
+
+  // the map RouteMap.Build(8, new Random(3)) makes in the report's sketch
+  // Battle E, Event ?, Shop $, Elite !, Rest R, Boss B ; grey dashed = BFS cannot reach it from the player
+  s1a [label="!"]; s1b [label="R", penwidth=2.6, fillcolor="#cfcfcf"];
+  s2a [label="$", style="filled,dashed", fillcolor="#f5f5f5", fontcolor="#aaaaaa", color="#aaaaaa"]; s2b [label="E"];
+  s3a [label="R", style="filled,dashed", fillcolor="#f5f5f5", fontcolor="#aaaaaa", color="#aaaaaa"]; s3b [label="?"];
+  s4a [label="$", style="filled,dashed", fillcolor="#f5f5f5", fontcolor="#aaaaaa", color="#aaaaaa"]; s4b [label="R"]; s4c [label="!"];
+  s5a [label="E"]; s5b [label="R"];
+  s6a [label="R"]; s6b [label="!"];
+  s7a [label="?"]; s7b [label="$"]; s7c [label="$"];
+  boss [label="B", width=0.55, fillcolor="#222222", fontcolor="white"];
+
+  { rank=same; s1a; s1b; }
+  { rank=same; s2a; s2b; }
+  { rank=same; s3a; s3b; }
+  { rank=same; s4a; s4b; s4c; }
+  { rank=same; s5a; s5b; }
+  { rank=same; s6a; s6b; }
+  { rank=same; s7a; s7b; s7c; }
+
+  s1a -> s2a; s1a -> s2b; s1b -> s2b;
+  s2a -> s3a [style=dashed, color="#aaaaaa"]; s2b -> s3b;
+  s3a -> s4a [style=dashed, color="#aaaaaa"]; s3a -> s4b [style=dashed, color="#aaaaaa"]; s3b -> s4b; s3b -> s4c;
+  s4a -> s5a [style=dashed, color="#aaaaaa"]; s4b -> s5a; s4b -> s5b; s4c -> s5b;
+  s5a -> s6a; s5a -> s6b; s5b -> s6b;
+  s6a -> s7a; s6a -> s7b; s6b -> s7b; s6b -> s7c;
+  s7a -> boss; s7b -> boss; s7c -> boss;
+}
