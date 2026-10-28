@@ -1,0 +1,563 @@
+using System;
+using System.Collections.Generic;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Tacetno433.Battle;
+using Tacetno433.Core;
+using Tacetno433.Data;
+
+namespace Tacetno433.Screens
+{
+    //BattleScreen Stage (Beta1, 28 Oct) : how the fight looks. The player is the conductor, standing behind the
+    //band and looking past them at TACET (first person, like Chaos Zero Nightmare).
+    //   FRONT     the musician the conductor points at stands big on the left, seen from behind, one at a time :
+    //             the one selected while the bar is written, the one playing while it plays, the one TACET aims
+    //             at when it attacks. A new one slides in (SWAP).
+    //   THE BAND  everyone on the field as a row of cards under the bar strip (until the user's face GUI)
+    //   TACET     the enemies further off on the right, standing on the floor, the front one nearest
+    //   THE DARK  TACET's rift leans with the floor and stands where the balance of life puts it (RIFT).
+    //             A hit throws it back and it springs to its place again.
+    //   LAYERS    the era's backdrop (far, middle), the stage the band stands on, a dark front layer. Each layer
+    //             follows the camera less the further away it is (PARALLAX), so a small camera move reads as depth.
+    //   LIGHT     a dark stage lit by lights : a stage light on the front musician, the rift's glow, a flash at each hit
+    //   FOCUS     while a ring is up the world goes dark, grey and soft behind it and moves slowly (QTE FOCUS)
+    //Every picture is an empty frame until the team's art exists (docs/BATTLE_ART_PLAN.md : pixel art drawn x2).
+    //The rules never read anything here, this file only looks at the battle (Battle/TurnBattle.cs).
+    public partial class BattleScreen
+    {
+        //Stage Layout : 1 pixel of the art is 2 pixels here (PIXEL x2)
+        private const int Horizon = 300;                    // where the floor meets the far wall
+        private const int LayerW = 1408;                    // a backdrop layer, 704 x 360 at x2 : 64 to spare on each side for the camera
+        private static readonly Rectangle foreBox = new Rectangle(40, 188, 320, 512);   // the musician in front, 160 x 256 at x2, feet at 700
+        private const int ChipX = 24;                       // THE BAND : the row of cards under the bar strip
+        private const int ChipY = 66;
+        private const int ChipW = 150;
+        private const int ChipH = 50;
+        private const int ChipStep = 156;
+
+        //Enemy Feet : where each enemy stands for 1 to 4 enemies, the front one first. The floor goes away up to the right.
+        private static readonly Vector2[][] enemyFeet =
+        {
+            new Vector2[] { new Vector2(900f, 528f) },
+            new Vector2[] { new Vector2(820f, 528f), new Vector2(1070f, 470f) },
+            new Vector2[] { new Vector2(795f, 532f), new Vector2(995f, 482f), new Vector2(1160f, 442f) },
+            new Vector2[] { new Vector2(770f, 536f), new Vector2(915f, 496f), new Vector2(1050f, 462f), new Vector2(1180f, 432f) },
+        };
+
+        //Stage State
+        private Fighter fore;              // FRONT : the musician standing in front
+        private Fighter foreNext;          // SWAP : who comes in at the middle of the swap
+        private float swap;                // SWAP : 0 = settled, 0..1 while one slides out and the next slides in
+        private float worldTime;           // the world's own clock, slower in the QTE FOCUS
+        private float focus;               // QTE FOCUS 0..1
+        private float rift = -1f;          // RIFT : where TACET's rift crosses the horizon (-1 = not placed yet)
+        private float riftSpeed;           // RIFT : its spring
+        private float riftRipple;          // RIFT : the shudder of the last hit
+        private float riftRippleY;
+        private Vector2 kick;              // the camera's nudge after a hit
+        private int era;                   // which era's backdrop
+        private string[] layerName = new string[0];   // LAYERS : the words in the empty frames, made once
+
+        //Stage Lights : short flashes of light where something lands, kept in a fixed pool (no garbage)
+        private struct StageLight
+        {
+            public Vector2 At;
+            public float Radius;
+            public float Power;
+            public float Life;
+            public float Length;
+        }
+        private StageLight[] stageLights = new StageLight[16];
+
+        //Art : each fighter's pictures and animation clock (Core/FrameArt.cs). No files yet = an empty frame.
+        private class Art
+        {
+            public FrameSet Set;
+            public FramePlayer Player;
+            public bool Busy;          // a once-only animation (attack, hurt, enter ...) is on, idle waits for it to end
+        }
+        private Dictionary<Fighter, Art> arts = new Dictionary<Fighter, Art>();
+        private Texture2D[] layerArt = new Texture2D[4];   // LAYERS : far, middle, stage floor, front (null = empty frame)
+        private static readonly string[] layerFile = { "_far", "_mid", "_stage", "_front" };
+        private static readonly string[] musicianAnims = { "idle", "attack", "enter", "skill", "parry", "hurt", "ko", "exit", "victory" };
+        private static readonly string[] enemyAnims = { "idle", "attack", "hurt", "death" };
+
+        //Stage Load : called from Arrange, once the battle exists
+        private void LoadStage()
+        {
+            era = run != null ? run.Era : 0;
+            string key = EraList.All[Math.Max(0, Math.Min(EraList.All.Length - 1, era))].Name;
+            layerName = new string[]
+            {
+                "FAR  " + key + "  704 x 360",
+                "STAGE FLOOR  704 x 360",
+                "FRONT MUSICIAN  BACK VIEW  160 x 256",
+            };
+            fore = null;
+            foreNext = null;
+            swap = 0f;
+            rift = -1f;
+            riftSpeed = 0f;
+            focus = 0f;
+
+            //LAYERS : the era's pictures, if the team has made them (Content/Art/Battle/Stages/<era>_far.png ...)
+            string eraKey = ArtBank.Key(key);
+            for (int i = 0; i < layerArt.Length; i++) layerArt[i] = FrameArt.Picture(Game.GraphicsDevice, "Stages", eraKey + layerFile[i]);
+
+            arts.Clear();
+            for (int i = 0; i < battle.Party.Count; i++) ArtOf(battle.Party[i]);
+            for (int i = 0; i < battle.Enemies.Count; i++) ArtOf(battle.Enemies[i]);
+        }
+
+        //Art Of : a fighter's pictures, found the first time they are needed (a musician CALLED in later too)
+        private Art ArtOf(Fighter f)
+        {
+            Art art;
+            if (arts.TryGetValue(f, out art)) return art;
+            art = new Art();
+            art.Set = f.IsEnemy ? FrameArt.Load(Game.GraphicsDevice, "Enemies", ArtBank.Key(f.Name), enemyAnims)
+                                : FrameArt.Load(Game.GraphicsDevice, "Musicians", ArtBank.Key(f.Name), musicianAnims);
+            if (art.Set != null) art.Player.Play(art.Set.Find("idle"), true);
+            arts[f] = art;
+            return art;
+        }
+
+        //Play Art : start one of a fighter's animations (nothing happens when it has no such animation yet)
+        private void PlayArt(Fighter f, string name)
+        {
+            if (f == null) return;
+            Art art = ArtOf(f);
+            if (art.Set == null) return;
+            FrameAnim anim = art.Set.Find(name);
+            if (anim == null) return;
+            art.Player.Play(anim, true);
+            art.Busy = !anim.Loop;
+        }
+
+        //Update Arts : every clock moves on. When a once-only animation ends, idle comes back (KO and death hold)
+        private void UpdateArts(float dt)
+        {
+            foreach (KeyValuePair<Fighter, Art> pair in arts)
+            {
+                Art art = pair.Value;
+                if (art.Set == null) continue;
+                art.Player.Update(dt);
+                if (art.Busy && art.Player.Done && !pair.Key.Down) art.Busy = false;
+                if (!art.Busy) art.Player.Play(art.Set.Find("idle"), false);
+            }
+        }
+
+        //======================================================================================
+        //Stage Update
+        //======================================================================================
+
+        //Update Stage : frozen = the hit stop is on (the world holds still, the FOCUS still moves)
+        private void UpdateStage(float dt, bool frozen)
+        {
+            float want = view == View.Swipe ? 1f : 0f;
+            focus = MoveTowards(focus, want, dt * BattleRules.StageFocusSpeed);
+            if (frozen) return;
+
+            float worldDt = dt * MathHelper.Lerp(1f, BattleRules.StageFocusSlow, focus);
+            worldTime += worldDt;
+            UpdateArts(worldDt);
+
+            //SWAP : the musician pointed at walks in. A change in the middle of a swap just changes who comes in.
+            Fighter pointed = Pointed();
+            if (fore == null) fore = pointed;
+            else if (pointed != null && pointed != fore && swap <= 0f)
+            {
+                foreNext = pointed;
+                swap = 0.0001f;
+            }
+            else if (swap > 0f && pointed != null) foreNext = pointed;
+
+            if (swap > 0f)
+            {
+                float before = swap;
+                swap += dt / BattleRules.StageSwapTime;
+                if (before < 0.5f && swap >= 0.5f && foreNext != null)
+                {
+                    fore = foreNext;
+                    PlayArt(fore, "enter");
+                }
+                if (swap >= 1f) swap = 0f;
+            }
+
+            //RIFT : a spring towards where the balance of life puts it
+            float target = RiftTarget();
+            if (rift < 0f) rift = target;
+            float pull = (target - rift) * 16f - riftSpeed * 6f;
+            riftSpeed += pull * worldDt;
+            rift += riftSpeed * worldDt;
+            if (riftRipple > 0f) riftRipple = Math.Max(0f, riftRipple - worldDt * 1.8f);
+
+            //Camera : the nudge of a hit dies away quickly
+            kick *= (float)Math.Pow(0.0015, worldDt);
+
+            for (int i = 0; i < stageLights.Length; i++)
+                if (stageLights[i].Life > 0f) stageLights[i].Life -= worldDt;
+        }
+
+        private static float MoveTowards(float from, float to, float step)
+        {
+            if (from < to) return Math.Min(to, from + step);
+            return Math.Max(to, from - step);
+        }
+
+        //Pointed : who the conductor is pointing at right now
+        private Fighter Pointed()
+        {
+            if ((view == View.Plan || view == View.Target) && selected != null && !selected.IsEnemy) return selected;
+            if (view == View.Strike && striker != null && !striker.IsEnemy) return striker;
+
+            Fighter now = battle.Current;
+            if (now != null)
+            {
+                if (!now.IsEnemy) return now;
+                Fighter aimed = now.IntentTarget;
+                if (aimed != null && !aimed.IsEnemy && !aimed.Down) return aimed;     // TACET's turn : the one it aims at
+            }
+            if (fore != null && !fore.Down) return fore;
+            for (int i = 0; i < battle.Party.Count; i++)
+                if (!battle.Party[i].Down) return battle.Party[i];
+            return battle.Party.Count > 0 ? battle.Party[0] : null;
+        }
+
+        //RIFT Target : 0 = TACET beaten, 1 = the band beaten, taken from the life each side has left
+        private float RiftTarget()
+        {
+            float band = 0f, bandMax = 0f, foe = 0f, foeMax = 0f;
+            for (int i = 0; i < battle.Party.Count; i++)
+            {
+                band += Math.Max(0, battle.Party[i].Hp);
+                bandMax += battle.Party[i].MaxHp;
+            }
+            for (int i = 0; i < battle.Enemies.Count; i++)
+            {
+                foe += Math.Max(0, battle.Enemies[i].Hp);
+                foeMax += battle.Enemies[i].MaxHp;
+            }
+            float b = bandMax > 0f ? band / bandMax : 0f;
+            float e = foeMax > 0f ? foe / foeMax : 0f;
+            float share = (e + 0.001f) / (b + e + 0.002f);
+            return MathHelper.Lerp(BattleRules.StageRiftBeaten, BattleRules.StageRiftWinning, share);
+        }
+
+        //Danger : how close the band is to losing, 0..1 (the rift frays more)
+        private float Danger()
+        {
+            float span = BattleRules.StageRiftBeaten - BattleRules.StageRiftWinning;
+            return MathHelper.Clamp((BattleRules.StageRiftBeaten - rift) / span * 1.4f - 0.6f, 0f, 1f);
+        }
+
+        //Rift At : where the rift is on screen row y (without its little waves)
+        private float RiftAt(float y)
+        {
+            return rift + BattleRules.StageRiftSlant * (y - Horizon);
+        }
+
+        //Stage Hit : a hit lands at a point. The rift is thrown (towards TACET when the band hits), the camera
+        //nudges towards it and a light flashes there.
+        private void StageHit(Vector2 at, bool bandHits, float power)
+        {
+            riftSpeed += (bandHits ? 1f : -1f) * BattleRules.StageRiftKick * power;
+            riftRipple = Math.Min(1f, riftRipple + 0.5f * power);
+            riftRippleY = at.Y;
+
+            Vector2 middle = new Vector2(TacetGame.ScreenW / 2f, TacetGame.ScreenH / 2f);
+            Vector2 toward = at - middle;
+            if (toward.LengthSquared() > 1f) toward.Normalize();
+            kick += toward * BattleRules.StageKick * power;
+
+            AddStageLight(at, 150f + 90f * power, BattleRules.StageHitLight * power, BattleRules.StageHitLightTime);
+        }
+
+        private void AddStageLight(Vector2 at, float radius, float power, float length)
+        {
+            int slot = 0;
+            for (int i = 1; i < stageLights.Length; i++)
+                if (stageLights[i].Life < stageLights[slot].Life) slot = i;           // the pool is full : reuse the one nearest its end
+            stageLights[slot].At = at;
+            stageLights[slot].Radius = radius;
+            stageLights[slot].Power = power;
+            stageLights[slot].Life = length;
+            stageLights[slot].Length = length;
+        }
+
+        //======================================================================================
+        //Boxes
+        //======================================================================================
+
+        //Chip Box : a card in THE BAND row
+        private static Rectangle ChipBox(int slot)
+        {
+            return new Rectangle(ChipX + slot * ChipStep, ChipY, ChipW, ChipH);
+        }
+
+        //Enemy Feet : where one enemy stands
+        private Vector2 EnemyFeetOf(int slot)
+        {
+            int count = Math.Max(1, battle.Enemies.Count);
+            Vector2[] row = enemyFeet[Math.Min(count, enemyFeet.Length) - 1];
+            if (slot < row.Length) return row[slot];
+            return row[row.Length - 1] + new Vector2(80f * (slot - row.Length + 1), -24f * (slot - row.Length + 1));   // more than four
+        }
+
+        //Enemy Size : 112 x 128, 144 x 160 or 224 x 224 pixels of art (BATTLE_ART_PLAN), x2 on screen
+        private static Point EnemySize(Fighter f)
+        {
+            if (f.Enemy.Kind == EnemyKind.Boss) return new Point(448, 448);
+            if (f.Enemy.Kind == EnemyKind.Elite) return new Point(288, 320);
+            return new Point(224, 256);
+        }
+
+        //Enemy Box : where an enemy stands, feet on the floor
+        private Rectangle EnemyBox(int slot)
+        {
+            Fighter f = battle.Enemies[slot];
+            Vector2 feet = EnemyFeetOf(slot);
+            Point size = EnemySize(f);
+            return new Rectangle((int)(feet.X - size.X / 2f), (int)(feet.Y - size.Y), size.X, size.Y);
+        }
+
+        //======================================================================================
+        //Stage Draw : into the pictures of Core/PostChain.cs, before the frame
+        //======================================================================================
+
+        public override void PreDraw(SpriteBatch sb)
+        {
+            if (battle == null) return;
+            GraphicsDevice device = Game.GraphicsDevice;
+            PostChain.Ensure(device);
+
+            Vector2 cam = Camera();
+
+            PostChain.BeginScene(device);
+            DrawWorld(sb, cam);
+
+            PostChain.BeginLights(device, sb, BattleRules.StageAmbient);
+            DrawStageLights(sb, cam);
+            PostChain.EndLights(sb);
+
+            PostChain.BeginGlow(device, sb, Layer(cam, 3));
+            effects.DrawBlows(sb);
+            effects.DrawSparks(sb);
+            effects.DrawShards(sb);
+            effects.DrawHits(sb);
+            effects.DrawSlashes(sb);
+            effects.DrawFlares(sb);
+            PostChain.EndGlow(sb);
+
+            PostChain.Finish(device, sb, time, focus, BattleRules.StageBloomThreshold, BattleRules.StageBloomStrength,
+                             BattleRules.StageVignette, BattleRules.StageGrain);
+        }
+
+        //Camera : a slow breath, the nudge of the last hit, and the shake
+        private Vector2 Camera()
+        {
+            float drift = BattleRules.StageDriftAmount;
+            Vector2 cam = new Vector2((float)Math.Sin(worldTime * 0.37f) * drift, (float)Math.Sin(worldTime * 0.53f + 1.3f) * drift * 0.5f);
+            cam += kick;
+            if (shake > 0f)
+            {
+                float amount = shake * shake * 10f;
+                cam += new Vector2((float)Math.Sin(time * 91f) * amount, (float)Math.Cos(time * 73f) * amount);
+            }
+            return cam;
+        }
+
+        //Layer : the camera for one layer. PARALLAX : 0 far, 1 middle, 2 stage floor, 3 fighters, 4 front
+        //ADVANCED PART : SpriteBatch takes a matrix that moves everything drawn in that batch. Moving a far layer
+        //less than a near one is all it takes for the eye to see depth.
+        private static Matrix Layer(Vector2 cam, int depth)
+        {
+            float f = BattleRules.StageParallax[depth];
+            return Matrix.CreateTranslation(-cam.X * f, -cam.Y * f, 0f);
+        }
+
+        private void DrawWorld(SpriteBatch sb, Vector2 cam)
+        {
+            int left = (TacetGame.ScreenW - LayerW) / 2;
+
+            //Far : the era's backdrop above the horizon (an empty frame until the art comes), then the middle layer
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, Layer(cam, 0));
+            if (layerArt[0] != null) DrawLayerArt(sb, layerArt[0], left);
+            else
+            {
+                Gfx.Rect(sb, left, 0, LayerW, Horizon, Palette.Stage);
+                ArtSlot.Draw(sb, new Rectangle(left + 64, 40, LayerW - 128, Horizon - 60), Palette.Paper, 0.6f);
+                Gfx.TextSpaced(sb, Game.Font, layerName[0], left + 470, Horizon - 46, Palette.LineGrey * 0.7f, TextSize.Label, 2f);
+            }
+            sb.End();
+            if (layerArt[1] != null)
+            {
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, Layer(cam, 1));
+                DrawLayerArt(sb, layerArt[1], left);
+                sb.End();
+            }
+
+            //Stage Floor : the boards the band stands on, running away to the horizon. Until the art comes, a few
+            //faint lines show the floor's slope so the depth can be judged.
+            if (layerArt[2] != null)
+            {
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, Layer(cam, 2));
+                DrawLayerArt(sb, layerArt[2], left);
+                sb.End();
+            }
+            else
+            {
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, null, null, null, Layer(cam, 2));
+                Gfx.Rect(sb, left, Horizon, LayerW, TacetGame.ScreenH - Horizon, Palette.StageDeep);
+                DrawFloorGuide(sb, left);
+                Gfx.TextSpaced(sb, Game.Font, layerName[1], left + 470, Horizon + 10, Palette.LineGrey * 0.6f, TextSize.Label, 2f);
+                sb.End();
+            }
+
+            //The Dark : TACET's rift, leaning with the floor
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, null, null, null, Layer(cam, 2));
+            TacetField.DrawSlanted(sb, rift, BattleRules.StageRiftSlant, Horizon, worldTime, Danger(), riftRipple, riftRippleY);
+            sb.End();
+
+            //Fighters : enemies back to front, then the musician in front
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, Layer(cam, 3));
+            for (int i = battle.Enemies.Count - 1; i >= 0; i--) DrawEnemy(sb, battle.Enemies[i]);
+            DrawFront(sb);
+            sb.End();
+
+            //Front : dark shapes nearest the camera (a curtain's edge, a light rig), only when the art exists
+            if (layerArt[3] != null)
+            {
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, Layer(cam, 4));
+                DrawLayerArt(sb, layerArt[3], left);
+                sb.End();
+            }
+        }
+
+        //Layer Art : one backdrop picture at PIXEL x2, its left edge at left (64 pixels off screen for the camera)
+        private static void DrawLayerArt(SpriteBatch sb, Texture2D art, int left)
+        {
+            sb.Draw(art, new Rectangle(left, 0, art.Width * 2, art.Height * 2), Color.White);
+        }
+
+        //Floor Guide : lines from the horizon, the way boards of a stage run, and a few across. Faint, a guide only.
+        private void DrawFloorGuide(SpriteBatch sb, int left)
+        {
+            Vector2 vanish = new Vector2(760f, Horizon - 140f);
+            Color line = Palette.LineGrey * 0.16f;
+            for (int i = -8; i <= 16; i++)
+            {
+                float x = 640f + i * 150f;
+                Vector2 bottom = new Vector2(x, TacetGame.ScreenH);
+                float t = (Horizon - vanish.Y) / (bottom.Y - vanish.Y);
+                Vector2 top = Vector2.Lerp(vanish, bottom, t);
+                Gfx.Line(sb, top, bottom, line, 1f);
+            }
+            float y = Horizon;
+            float gap = 10f;
+            while (y < TacetGame.ScreenH)
+            {
+                Gfx.Line(sb, left, y, left + LayerW, y, line, 1f);
+                y += gap;
+                gap *= 1.45f;
+            }
+        }
+
+        //Enemy : its shadow, its picture (darker the further back and the deeper in the dark), its flash
+        private void DrawEnemy(SpriteBatch sb, Fighter f)
+        {
+            Rectangle r = DrawBox(f);
+            float depth = 1f - BattleRules.StageDepthDim * f.Slot;
+            float edge = RiftAt(r.Bottom);
+            float dark = MathHelper.Clamp((r.Center.X - edge) / 160f, 0f, 1f);
+            float shade = MathHelper.Clamp(depth * MathHelper.Lerp(1f, 0.5f, dark), 0.2f, 1f);
+            float a = f.Down ? 0.2f : 1f;
+
+            Gfx.DrawGlowBox(sb, new Rectangle(r.Center.X - r.Width / 2, r.Bottom - 22, r.Width, 44), Color.Black * (0.6f * a));
+            Art art = ArtOf(f);
+            if (art.Set != null) art.Player.Draw(sb, art.Set, new Vector2(r.Center.X, r.Bottom), 2, new Color(shade, shade, shade) * a);
+            else ArtSlot.Draw(sb, r, Palette.Paper * shade, a);
+            if (f.Staggered) Gfx.RectOutline(sb, r, Palette.Highlight * (0.5f + 0.5f * (float)Math.Sin(time * 8f)), 3);
+
+            Look look;
+            if (looks.TryGetValue(f, out look) && look.Flash > 0f) Gfx.Rect(sb, r, Palette.Paper * (0.55f * look.Flash));
+        }
+
+        //Front : the musician the conductor points at, big, from behind (an empty frame until the art comes)
+        private void DrawFront(SpriteBatch sb)
+        {
+            if (fore == null) return;
+            Rectangle r = DrawBox(fore);
+            float a = SwapAlpha() * (fore.Down ? 0.35f : 1f);
+
+            Gfx.DrawGlowBox(sb, new Rectangle(r.X - 20, r.Bottom - 30, r.Width + 40, 60), Color.Black * (0.7f * a));
+            Art art = ArtOf(fore);
+            if (art.Set != null) art.Player.Draw(sb, art.Set, new Vector2(r.Center.X, r.Bottom), 2, Color.White * a);
+            else
+            {
+                ArtSlot.Draw(sb, r, Palette.Paper, a);
+                Gfx.TextSpaced(sb, Game.Font, layerName[2], r.X + 14, r.Y + 12, Palette.LineGrey * (0.8f * a), TextSize.Tiny, 1f);
+                Gfx.TextSpaced(sb, Game.BigFont, fore.Name, r.X + 14, r.Y + 34, Palette.Paper * (0.5f * a), TextSize.Small, 3f);
+            }
+
+            Look look;
+            if (looks.TryGetValue(fore, out look) && look.Flash > 0f) Gfx.Rect(sb, r, Palette.Paper * (0.5f * look.Flash * a));
+        }
+
+        //Swap Offset : the musician in front slides out to the left, the next slides in from the left
+        private float SwapOffset()
+        {
+            if (swap <= 0f) return 0f;
+            float slide = BattleRules.StageSwapSlide;
+            if (swap < 0.5f)
+            {
+                float p = swap / 0.5f;
+                return -slide * p * p;                    // out : speeding up
+            }
+            float q = 1f - (swap - 0.5f) / 0.5f;
+            return -slide * q * q;                        // in : slowing down
+        }
+
+        private float SwapAlpha()
+        {
+            if (swap <= 0f) return 1f;
+            return swap < 0.5f ? 1f - swap / 0.5f : (swap - 0.5f) / 0.5f;
+        }
+
+        //Stage Lights : into the light map (at half size, see PostChain.LightScale)
+        private void DrawStageLights(SpriteBatch sb, Vector2 cam)
+        {
+            Vector2 near = cam * BattleRules.StageParallax[3];
+            Vector2 floor = cam * BattleRules.StageParallax[2];
+
+            //Stage Light : from above onto the musician in front, and its pool on the boards
+            Rectangle f = foreBox;
+            float spot = BattleRules.StageSpot * (fore != null ? SwapAlpha() * 0.5f + 0.5f : 0.5f);
+            Gfx.DrawGlowBox(sb, new Rectangle(f.X - 120 - (int)near.X, f.Y - 120 - (int)near.Y, f.Width + 240, f.Height + 160), Color.White * spot);
+            Gfx.DrawGlowBox(sb, new Rectangle(f.X - 160 - (int)floor.X, f.Bottom - 70 - (int)floor.Y, f.Width + 320, 140), Color.White * (spot * 0.8f));
+
+            //Rift Glow : the white of the crack lights what stands near it
+            for (int y = 0; y <= TacetGame.ScreenH; y += 48)
+                Gfx.DrawGlow(sb, RiftAt(y) - floor.X, y - floor.Y, 120f, Color.White * BattleRules.StageRiftLight);
+
+            //Foot Lights : each enemy stands in a pool of light, so it can be seen coming out of the dark
+            for (int i = 0; i < battle.Enemies.Count; i++)
+            {
+                Fighter e = battle.Enemies[i];
+                if (e.Down) continue;
+                Rectangle r = EnemyBox(i);
+                float power = BattleRules.StageFootLight * (1f - BattleRules.StageDepthDim * i);
+                Gfx.DrawGlowBox(sb, new Rectangle(r.X - 30 - (int)near.X, r.Y + r.Height / 3 - (int)near.Y, r.Width + 60, r.Height), Color.White * power);
+            }
+
+            //Hits : a flash of light where something landed
+            for (int i = 0; i < stageLights.Length; i++)
+            {
+                StageLight l = stageLights[i];
+                if (l.Life <= 0f) continue;
+                float left = l.Life / l.Length;
+                Gfx.DrawGlow(sb, l.At.X - near.X, l.At.Y - near.Y, l.Radius, Color.White * (l.Power * left * left));
+            }
+        }
+    }
+}

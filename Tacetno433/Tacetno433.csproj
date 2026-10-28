@@ -22,6 +22,10 @@
       <LogicalName>Icon.bmp</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
+  <!-- Beta1 : the battle page's pixel art is read straight from these files (Core/FrameArt.cs), no Content.mgcb entry needed -->
+  <ItemGroup>
+    <None Include="Content\Art\Battle\**\*.png;Content\Art\Battle\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.*" />
     <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.*" />

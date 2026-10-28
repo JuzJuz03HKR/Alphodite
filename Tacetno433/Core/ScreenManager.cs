@@ -57,6 +57,10 @@ namespace Tacetno433.Core
             get { return false; }
         }
 
+        //Screen Pre Draw (Beta1) : called every frame before anything is drawn on the screen, for a page that
+        //draws into its own pictures first (render targets, see Core/PostChain.cs). Draw then shows them.
+        public virtual void PreDraw(SpriteBatch sb) { }
+
         //Screen Draw
         public abstract void Draw(SpriteBatch sb);
     }
@@ -136,6 +140,12 @@ namespace Tacetno433.Core
             if (fadingOut) return;
 
             if (current != null) current.Update(dt);
+        }
+
+        //Screen Pre Draw : the active screen's own pictures, before the frame starts
+        public void PreDraw(SpriteBatch sb)
+        {
+            if (current != null) current.PreDraw(sb);
         }
 
         //Screen Draw : the active screen, then the cover on top while it is moving

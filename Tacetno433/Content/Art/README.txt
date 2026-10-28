@@ -1,6 +1,10 @@
 ART FOLDER
 ==========
 
+BETA1 BATTLE PAGE (28 Oct) : the new battle art goes in Content/Art/Battle (Musicians, Enemies, Stages).
+Those files are read straight from the folder (Core/FrameArt.cs), so they need NO entry in Content.mgcb :
+drop them in and Rebuild. Sizes, names and animations : docs/BATTLE_ART_PLAN.md
+
 Pictures go in here. Nothing in this folder is needed for the game to run: every slot shows
 an EMPTY BOX (a faint frame with four corner marks) until its picture exists. The box sits
 exactly where the picture will go, at the size it will be drawn.

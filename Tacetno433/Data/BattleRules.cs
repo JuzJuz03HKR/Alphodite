@@ -231,6 +231,31 @@
         public static float TurnHoldStill = 260f;         // pixels per second the baton may drift and still count as still
         public static float TurnRollTime = 1.2f;          // how long a ROLL note lasts
 
+        //Stage Feel (Beta1) : how the battle page looks and moves, the conductor's view from behind the band
+        //(docs/BATTLE_SCENE_2_3D_CHANGE.md). Only Screens/BattleScreen.Stage.cs reads these, the rules never do.
+        public static float StageSwapTime = 0.26f;        // the musician pointed at slides out and the next slides in (seconds)
+        public static float StageSwapSlide = 300f;        //   how far they slide (pixels)
+        public static float StageAmbient = 0.34f;         // LIGHT MAP everywhere (0.5 = lit normally) : the stage is dark, lights do the rest
+        public static float StageSpot = 0.42f;            //   the stage light on the musician in front
+        public static float StageFootLight = 0.2f;        //   the pool of light each enemy stands in (like Chaos Zero Nightmare)
+        public static float StageRiftLight = 0.30f;       //   the white glow along TACET's rift
+        public static float StageHitLight = 0.55f;        //   a hit lights up where it lands, for a moment
+        public static float StageHitLightTime = 0.35f;    //   how long that lasts (seconds)
+        public static float StageBloomThreshold = 0.58f;  // BLOOM : how bright before it glows
+        public static float StageBloomStrength = 0.75f;   //         how strong the glow is
+        public static float StageVignette = 0.85f;        // VIGNETTE : dark corners
+        public static float StageGrain = 0.035f;          // film grain
+        public static float StageFocusSpeed = 7f;         // QTE FOCUS : how fast the world dims when a ring comes up
+        public static float StageFocusSlow = 0.3f;        //   the world behind moves this fast meanwhile (1 = normal)
+        public static float StageRiftSlant = 0.42f;       // TACET's rift leans with the floor : pixels right for each pixel down
+        public static float StageRiftWinning = 520f;      //   where it stands at the horizon when TACET has all its life and the band none
+        public static float StageRiftBeaten = 1250f;      //   and the other way round
+        public static float StageRiftKick = 260f;         //   a hit throws it this fast (pixels a second), then it springs back
+        public static float StageDriftAmount = 5f;        // the camera breathes this many pixels
+        public static float StageKick = 9f;               // a hit nudges the camera this many pixels toward it
+        public static float[] StageParallax = { 0.18f, 0.4f, 0.75f, 1f, 1.25f };   // far, mid, stage floor, fighters, front : how much each layer follows the camera
+        public static float StageDepthDim = 0.16f;        // each enemy further back is this much darker
+
         //Battle Shape
         public const int BeatsPerRound = 8;       // sub-turns in one round
         public const int MaxRounds = 3;           // after this, whoever is ahead wins

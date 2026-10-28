@@ -24,13 +24,22 @@ namespace Tacetno433.Core
         //The duel uses this when a wave of sound lands on the border.
         public static void Draw(SpriteBatch sb, float edgeX, float time, float intensity, float ripple, float rippleY)
         {
+            DrawSlanted(sb, edgeX, 0f, 0f, time, intensity, ripple, rippleY);
+        }
+
+        //TACET Draw Slanted (Beta1) : the same rift leaning with the stage floor of the battle page. slant is how many
+        //pixels the edge moves right for every pixel down, measured from row slantY (where the edge is at edgeX).
+        //A positive slant leans the top to the left, like a line on the floor seen from behind the band : the far
+        //part of the stage is deeper in the dark than the near part.
+        public static void DrawSlanted(SpriteBatch sb, float edgeX, float slant, float slantY, float time, float intensity, float ripple, float rippleY)
+        {
             //Flicker Step : the torn edge redraws itself about fourteen times a second
             int step = (int)(time * 14f);
             float blend = time * 14f - step;
 
             for (int y = 0; y < TacetGame.ScreenH; y += 2)
             {
-                float x = EdgeAt(y, edgeX, time, intensity, ripple, rippleY);
+                float x = EdgeAt(y, edgeX, slant, slantY, time, intensity, ripple, rippleY);
                 int row = y / 2;
 
                 //Tear : how far the white seam reaches into the dark on this row. Chunks of rows
@@ -66,7 +75,7 @@ namespace Tacetno433.Core
             {
                 float y = 70f + i * 150f + (float)Math.Sin(time * 0.7f + i * 2.1f) * 40f;
                 float pulse = (float)Math.Sin(time * (1.3f + i * 0.4f) + i * 1.7f) * 0.5f + 0.5f;
-                float x = EdgeAt(y, edgeX, time, intensity, ripple, rippleY);
+                float x = EdgeAt(y, edgeX, slant, slantY, time, intensity, ripple, rippleY);
                 Gfx.DrawGlow(sb, x + 6f, y, 40f + pulse * (40f + intensity * 60f), Palette.Highlight * (0.25f + 0.35f * pulse));
             }
 
@@ -76,7 +85,7 @@ namespace Tacetno433.Core
             {
                 float life = (time * (0.45f + (i % 4) * 0.12f) + i * 0.37f) % 1f;
                 float y0 = Hash(i, 999) * TacetGame.ScreenH;
-                float x0 = EdgeAt(y0, edgeX, time, intensity, ripple, rippleY);
+                float x0 = EdgeAt(y0, edgeX, slant, slantY, time, intensity, ripple, rippleY);
                 float side = i % 3 == 0 ? -1f : 1f;                  // most drift into the dark
                 float x = x0 + side * life * (50f + (i % 5) * 18f);
                 float y = y0 - life * 30f;
@@ -87,7 +96,7 @@ namespace Tacetno433.Core
         }
 
         //Edge At : where the seam sits on row y. Two slow waves, plus the ripple of a hit.
-        private static float EdgeAt(float y, float edgeX, float time, float intensity, float ripple, float rippleY)
+        private static float EdgeAt(float y, float edgeX, float slant, float slantY, float time, float intensity, float ripple, float rippleY)
         {
             //The closer to losing, the tighter and faster the wave gets
             float amplitude = 8f + intensity * 20f;
@@ -96,7 +105,7 @@ namespace Tacetno433.Core
 
             float wave1 = (float)Math.Sin(y * tightness + time * speed) * amplitude;
             float wave2 = (float)Math.Sin(y * 0.011f - time * speed * 0.7f) * amplitude * 0.8f;
-            float x = edgeX + wave1 + wave2;
+            float x = edgeX + wave1 + wave2 + slant * (y - slantY);
 
             //Ripple : a shudder running away from the point the sound hit, dying out
             //the further up and down the line it gets

@@ -18,6 +18,8 @@ disable-model-invocation: true
    - `dotnet --list-sdks` ต้องมี 8.0 ถ้าไม่มี : `apt-get install -y dotnet-sdk-8.0` (ตัวติดตั้งของ Microsoft ถูกบล็อก)
    - ฟอนต์ `/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf` และ `/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf` ถ้าไม่มี : `apt-get install -y fonts-liberation fonts-dejavu-core`
    - ถ้าจะรันเกม (shots, simulate, audit, savecheck) ต้องมี `xvfb-run` ถ้าไม่มี : `apt-get install -y xvfb`
+   - **shader (.fx, Beta1 28 ต.ค.)** : ถ้า `Content.mgcb` มีไฟล์ .fx ต้องตั้ง Wine ก่อน : `bash .claude/skills/build/shader_setup.sh <scratchpad>/shader` แล้ว `export MGFXC_WINE_PATH=<scratchpad>/shader/winemonogame` ก่อน `dotnet build`
+     (เว็บ Microsoft กับ Mozilla ถูกบล็อก สคริปต์นี้เอา `d3dcompiler_47.dll` ตัวจริงจากแพ็กเกจ `cef.redist.x64` บน NuGet และใช้ `fxcshim.c` แทน `fxccs.dll` ของ MonoGame · ผลคอมไพล์เหมือนบน Windows เพราะใช้ DLL ตัวเดียวกัน)
 2. **ทำสำเนา** ไปที่ `<scratchpad>/build/` (ลบสำเนาเก่าก่อน) คัดลอก `Tacetno433.sln` และโฟลเดอร์ `Tacetno433/` โดยไม่เอา `bin/` กับ `obj/`
 3. **ปรับสำเนา**
    - `Tacetno433/Tacetno433.csproj` : `net9.0` เป็น `net8.0`

@@ -53,6 +53,17 @@ namespace Tacetno433
         private int frameCount;
         private float frameTimer;
         private int shownFps;
+
+        //Frame Cost (F3, Beta1) : measured while the debug line is on, shown once a second
+        private System.Diagnostics.Stopwatch updateWatch = new System.Diagnostics.Stopwatch();
+        private System.Diagnostics.Stopwatch drawWatch = new System.Diagnostics.Stopwatch();
+        private double updateMsSum;
+        private double drawMsSum;
+        private float shownUpdateMs;
+        private float shownDrawMs;
+        private long shownCalls;
+        private long shownSprites;
+        private long shownTargets;
         private float shownMemory;
 
         //Focus : whether the window was in front last frame, to notice alt tab
@@ -107,6 +118,9 @@ namespace Tacetno433
             BigFont = Content.Load<SpriteFont>("BigFont");
             StoryFont = Content.Load<SpriteFont>("StoryFont");
             LogoFont = Content.Load<SpriteFont>("LogoFont");
+
+            //Shaders (Beta1) : Content/Effects. Missing or unreadable ones leave Fx.Ready false and pages draw plainly.
+            Fx.Load(Content);
 
             //Font Safety : the fonts only contain plain English characters. Without this,
             //printing anything else (a stray symbol, Thai text) throws and kills the game.
@@ -202,6 +216,7 @@ namespace Tacetno433
         protected override void Update(GameTime gameTime)
         {
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            if (showDebug) updateWatch.Restart();
 
             Input.Update();
             if (DebugShots.Active) DebugShots.FakeMouse(dt);
@@ -226,6 +241,7 @@ namespace Tacetno433
                 else Screens.Update(dt);
             }
             Ornament.UpdateGrain(dt);
+            if (showDebug) updateMsSum += updateWatch.Elapsed.TotalMilliseconds;
             UpdateDebug(dt);
 
             base.Update(gameTime);
@@ -251,6 +267,10 @@ namespace Tacetno433
                 shownFps = frameCount;
                 //false means "do not force a collection", we only want to read the number
                 shownMemory = GC.GetTotalMemory(false) / 1048576f;
+                shownUpdateMs = (float)(updateMsSum / System.Math.Max(1, frameCount));
+                shownDrawMs = (float)(drawMsSum / System.Math.Max(1, frameCount));
+                updateMsSum = 0;
+                drawMsSum = 0;
                 frameCount = 0;
                 frameTimer = 0f;
             }
@@ -258,6 +278,12 @@ namespace Tacetno433
 
         protected override void Draw(GameTime gameTime)
         {
+            //Frame Timer (F3) : how long drawing takes, read in the debug line
+            if (showDebug) drawWatch.Restart();
+
+            //Pre Draw (Beta1) : a page that builds its picture in layers does it first (see Core/PostChain.cs)
+            Screens.PreDraw(spriteBatch);
+
             //Developer Capture : the tool has its own picture to draw into
             GraphicsDevice.SetRenderTarget(DebugShots.Active ? DebugShots.Target : screen);
 
@@ -280,8 +306,15 @@ namespace Tacetno433
                             + "   SFX " + SoundBank.LoadedSfx + "   MUSIC " + SoundBank.LoadedMusic
                             + "   PHRASE " + SoundBank.LoadedPhrase + "   INSTR " + SoundBank.LoadedInstruments
                             + "   HAND " + HandArt.LoadedPoses + "   ART " + ArtBank.Loaded + "   PIXEL " + CharacterArt.Loaded;
-                Gfx.Rect(spriteBatch, 0, 0, 860, 24, Color.Black * 0.8f);
+                //Optimize (Beta1) : the cost of a frame. DRAW = draw calls last frame, GC = collections so far (gen 0 / 1 / 2),
+                //FX = whether the shaders loaded. Watch these before and after adding an effect.
+                string cost = "UPDATE " + shownUpdateMs.ToString("0.00") + " ms   DRAW " + shownDrawMs.ToString("0.00") + " ms   CALLS " + shownCalls
+                            + "   SPRITES " + shownSprites + "   TARGETS " + shownTargets
+                            + "   GC " + GC.CollectionCount(0) + " / " + GC.CollectionCount(1) + " / " + GC.CollectionCount(2)
+                            + "   FX " + (Fx.Ready ? "ON" : "OFF");
+                Gfx.Rect(spriteBatch, 0, 0, 980, 46, Color.Black * 0.8f);
                 Gfx.Text(spriteBatch, Font, line, 8, 3, Palette.Highlight, TextSize.Body);
+                Gfx.Text(spriteBatch, Font, cost, 8, 25, Palette.Highlight, TextSize.Body);
             }
 
             spriteBatch.End();
@@ -301,6 +334,16 @@ namespace Tacetno433
             }
 
             base.Draw(gameTime);
+
+            //Frame Cost : what the card was asked to do this frame (MonoGame counts it for us)
+            if (showDebug)
+            {
+                drawMsSum += drawWatch.Elapsed.TotalMilliseconds;
+                GraphicsMetrics metrics = GraphicsDevice.Metrics;
+                shownCalls = metrics.DrawCount;
+                shownSprites = metrics.SpriteCount;
+                shownTargets = metrics.TargetCount;
+            }
         }
     }
 }

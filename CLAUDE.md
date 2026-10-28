@@ -16,6 +16,8 @@
   QTE = ชั้นทึบแยกออกมาแต่ยังเห็นข้างหลัง · cut-in SIGNATURE แบบเดิม · VFX ผสม (แสงหมอกฟุ้ง ประกายเป็น pixel) ใส่ให้สุด + ตัวเลือกลดแสงวาบ · กราฟิกขั้นสูงก่อน ตั้งค่ากราฟิกทีหลัง · Tutorial ทีหลัง
 - **shader (28 ต.ค.)** : MonoGame 3.8.5 DesktopGL ทางการ (ผู้ใช้เลือก) = vertex + pixel shader รุ่น 3.0 ไม่มี compute/geometry · งานแบบ compute ทำผ่าน render target (pixel shader สลับภาพสองใบ) หรือ CPU + instancing · compute จริงรอ MonoGame 4.x ·
   คอมไพล์ .fx ต้องใช้ DirectX : บน Windows ได้ปกติ ในแชท cloud เว็บ Microsoft ถูกบล็อก (GitHub กับ NuGet ใช้ได้) ดูสถานะใน `RESUME_PROMPT.md`
+- **B1 กับ B2 รอบแรกเสร็จ (28 ต.ค.)** : ต้นแบบฉากใหม่ในเกม (กรอบว่าง) · `Core/Fx.cs` `Core/PostChain.cs` (SCENE LIGHT GLOW แล้ว bloom FOCUS vignette) `Core/FrameArt.cs` (อ่านภาพ PNG/Aseprite ตรงจาก `Content/Art/Battle`) `Screens/BattleScreen.Stage.cs` ·
+  shader `Content/Effects/Post.fx` `Sprite.fx` · ตัวเลข `BattleRules` หัวข้อ Stage Feel · F3 บรรทัดสองบอกเวลาต่อเฟรม draw call GC · **ถ้าจะแคปหน้าต่อสู้ในแชท cloud ต้องรัน `.claude/skills/build/shader_setup.sh` ก่อน** · รายละเอียด `BATTLE_SCENE_2_3D_CHANGE.md` ข้อ 11
 - **อนาคต (ผู้ใช้บอก 28 ต.ค.)** : นักดนตรีเหลือ 3–5 คน เปลี่ยนวิธีเลือกนักดนตรี เน้น roguelike ที่ทีมโหดขึ้นเรื่อยๆ และจะแก้ระบบต่อสู้เยอะ → แยกโค้ดภาพออกจากกติกา (`TurnBattle` ไม่มีโค้ดวาด) · ต้องการตัวอย่าง VFX ให้ถามผู้ใช้ทันที ห้ามเดา
 
 ## 0. ALPHA 7 (18 ต.ค.) : เกมเปลี่ยนเป็น turn-based roguelike (ประวัติ ยังใช้อ้างอิงระบบต่อสู้)
