@@ -28,7 +28,7 @@
 | หลุม TACET บนหน้าอื่น | `TacetVoid.PlaceOnPage` (shader `Void.fx` ค่า `Fine`) |
 | ปุ่มแบบผสม (รายการเมนู ปุ่มคำสั่ง ตัวเลข แถบหมึก กล่องคีย์) | `Core/Ui.cs` (`MenuItem` `Command` `Number` `InkBar` `KeyBox`) + จังหวะ `Core/UiMotion.cs` |
 | เส้นคั่นวงกลม วงแหวนมีขีด | `Core/Ornament.cs` (`OrbitRule` `TickRing`) |
-| เปลี่ยนหน้าปกติ (แผ่นเฉียงหลายชั้น) / ช่วงสำคัญ (วงแหวนกวาด LIGHT DARK CLOSE) | `Core/SlantWipe.cs` / `Core/RingSweep.cs` เรียกด้วย `ScreenManager.SweepNext` หรือ `EntersWithSweep` ของหน้า |
+| เปลี่ยนหน้าปกติ (แผ่นเฉียงหลายชั้น คำในแผ่นดำ `Word`) / ช่วงสำคัญ (วงแหวนกวาด LIGHT DARK CLOSE) / ม่าน (เข้าออกหน้าเลือกวาทยากร) | `Core/SlantWipe.cs` / `Core/RingSweep.cs` เรียกด้วย `ScreenManager.SweepNext` หรือ `EntersWithSweep` ของหน้า / `Core/Curtain.cs` (`UsesCurtain`) |
 | ฟอนต์ (OFL) | `Content/Fonts/` + `.spritefont` 4 ไฟล์ |
 | หน้า Title / Result และ Defeat | `Screens/TitleScreen.cs` / `Screens/ResultScreen.cs` |
 | ภาพทดสอบ | `--shots titlereveal resultquiet wipe sweep sweepdark sweepclose` และ `result@3,result@30` (ชื่อซ้ำได้ ภาพชื่อ `ชื่อ_เฟรม`) |
