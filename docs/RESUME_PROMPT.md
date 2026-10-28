@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| (ว่าง) | | |
+| 28 ต.ค. 13:43 (UTC+7) | Battle Scene 2+3D change : คุยต่อ ตอบคำถามข้อ 6 แล้วทำต้นแบบกรอบว่างกับคลื่นเอียง | `docs/BATTLE_SCENE_2_3D_CHANGE.md`, `Screens/BattleScreen.cs` (Draw และตำแหน่งตัวละคร), `Core/TacetField.cs`, `Data/BattleRules.cs` (Turn Feel) |
 
 ---
 
