@@ -21,7 +21,6 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 28 ต.ค. 13:43 (UTC+7) | Beta1 : ฉากต่อสู้ใหม่ (B1 B2 เสร็จ · รอบ 4 ความมืดใหม่ VFX ตอนตี QTE กลางจอ transition ช้าลง ข้อ 4–10) | `Screens/BattleScreen*.cs`, `Core/` (PostChain Fx FrameArt และไฟล์ VFX ใหม่), `Core/TacetField.cs`, `Core/ScreenManager.cs`, `Data/BattleRules.cs` (Stage Feel), `Content/Effects/` (shader), `docs/BATTLE_*` |
 
 ---
 
@@ -61,6 +60,15 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 ---
 
 ## สถานะล่าสุด (28 ต.ค.)
+
+**28 ต.ค. (ล่าสุด) : /update ปิดแชท Beta1 รอบ 4–6 ผู้ใช้ : "คิดว่าตอนนี้การนำเสนอโอเคแล้ว แต่อาจจะต้องมีการ improve หน้าจอทั้งหมดขึ้นอีกหนึ่งระดับ"** (คำต่อคำ `USER_BRIEFS.md` 13.4)
+✅ แชทนี้ทำ (ทั้งหมดอยู่บน GitHub `Beta1`) : ความมืดหลุมดำ (`TacetVoid` `Void.fx`) · VFX ตอนตี (`HitFx`) สีของตัวละคร ทอง/แดง · QTE กลางจอ · transition ช้าและนุ่ม · cut-in SIGNATURE · ปัด CLASH · ตัวเลข pixel · ศัตรูสลายเข้าหลุม · ลำแสง · LESS FLASHING · impact frame แบบหน้ามังงะ + ซูม + เบลอ · LIGHTNING สีฟ้าเรืองแสงของ THE UNHEARING · แผนที่โค้ดใหม่ `HANDOFF.md` ข้อ 0.0
+✅ ผู้ใช้ตอบแล้ว : ความมืดถูกทาง น่ากลัว · transition พอดี · การนำเสนอของฉากต่อสู้โอเคแล้ว
+⚠️ ยังเปิดอยู่ : **PLAYTEST SIGNATURE 1 แต้ม** (`BattleRules.PlaytestSignatureNeed` = 1 ต้องตั้งกลับ 0 เมื่อผู้ใช้ลองเสร็จ) · สีนักดนตรีแบ่งชั่วคราว (สาย+ตี ทอง เป่า แดง) · SIGNATURE ของวาทยากรอื่นยังเป็น CROSS สีขาว · สกิลนักดนตรียังไม่มีหน้าตาตามชื่อ · ยังไม่มีอาร์ตจริง ไม่มีเสียง · ตัวเลขที่เปลี่ยนในรอบนี้เป็นตัวเลขภาพและจังหวะ ไม่ใช่บาลานซ์ (`TACET_Balance.xlsx` ไม่ต้องแก้)
+**งานถัดไป (แชทใหม่ คุยก่อน)** : ยกระดับทุกหน้าจออีกหนึ่งขั้นให้เข้ากับฉากต่อสู้ใหม่ · ตอนนี้มีแค่หน้าต่อสู้ที่เป็นแบบ Beta1 หน้าอื่นยังเป็นหน้าตา Alpha7 ·
+หน้าที่มี (`Tacetno433/Screens/`) : Title, Chapter, EraChoice, ConductorSelect + ConductorDetail, BandName, Band, Route (แผนที่), Recruit, MotifReward, Event, Shop, Rest, Archive, Result, CurtainCall, Settings, Guide (HOW TO PLAY), Tutorial + Practice, PauseMenu (+ DuelScreen เก่าที่ปิดอยู่) ·
+เครื่องมือที่ใช้ซ้ำได้ : `PostChain` (bloom vignette grain), `TacetVoid` (ความมืด), `HitFx` (ประกาย ไฟ), `PixelDigits`, `FrameArt` · ภาพหน้าจอเดิม `docs/screenshots/` ชื่อหน้าที่แคปได้ `PROJECT_STATUS.md` ข้อ 11 ·
+แนะนำให้แชทใหม่ : แคปทุกหน้า (ต้องรัน `.claude/skills/build/shader_setup.sh` ก่อนถ้าเป็นเครื่องใหม่) ดูเทียบกับหน้าต่อสู้ แล้วเสนอแผนยกระดับทีละหน้าพร้อมลำดับให้ผู้ใช้เลือก (ผู้ใช้จะ "มาคุยกันก่อน") ห้ามเดาตัวอย่าง UI ให้ถามผู้ใช้หรือขอภาพอ้างอิง (interfaceingame.com ที่ผู้ใช้แนะนำ)
 
 **28 ต.ค. (ล่าสุด) : รอบ 6 impact frame แรงขึ้น นานขึ้น + LIGHTNING ของ THE UNHEARING** (คำต่อคำ `USER_BRIEFS.md` 13.3 · รายละเอียด `BATTLE_SCENE_2_3D_CHANGE.md` ข้อ 14)
 ✅ impact frame : กลับสี → แวบขาว → กลับสีอีกครั้ง → จาง + ซูมกระแทก + เบลอพุ่งเข้าจุดโดน + โลกหยุดค้าง · กลับสีแบบหน้ามังงะ (พื้นขาว ของสว่างเป็นเส้นดำ) · ครั้งเดียวต่อ SIGNATURE

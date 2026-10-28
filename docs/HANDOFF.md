@@ -2,6 +2,24 @@
 
 > **18 ต.ค. : Alpha 7** เกมกำลังเปลี่ยนเป็น turn-based roguelike (branch `Alpha7`) · โครงโค้ดใหม่ที่วางไว้อยู่ข้อ 9 ของ [`ALPHA7_DESIGN.md`](ALPHA7_DESIGN.md) · แผนที่โค้ดตั้งแต่ข้อ 1 ลงไปเป็นของเกม rhythm รอบ 15
 
+## 0.0 แผนที่โค้ด Beta1 (ฉากต่อสู้ใหม่ + VFX, 28 ต.ค. รอบ 1–6)
+
+ภาพของหน้าต่อสู้แยกจากกติกาทั้งหมด (`Battle/TurnBattle.cs` ไม่มีโค้ดวาด) · เอกสาร `BATTLE_SCENE_2_3D_CHANGE.md` ข้อ 9–14 · ตัวเลขใน `BattleRules` หัวข้อ Stage Feel, Stage Void, Hit Feel, Turn Feel
+
+| อยากแก้อะไร | ไปไฟล์ไหน |
+|---|---|
+| ชั้นของภาพ (BACK SCENE LIGHT GLOW FINAL) bloom, QTE FOCUS, ENGULF, IMPACT FRAME (กลับสี แวบขาว ซูม เบลอ), vignette, grain | `Core/PostChain.cs` + `Content/Effects/Post.fx` |
+| โหลด shader, noise ที่ทำบน CPU | `Core/Fx.cs` (Post, Sprite, Void, `Fx.Noise`) |
+| ความมืดของ TACET : หลุมดำหลังศัตรู ความมืดบนพื้น ขอบคลื่นเสียง เงาสะท้อน รอยแตก เศษ คลื่นกระแทก | `Core/TacetVoid.cs` + `Content/Effects/Void.fx` (ไม่มี shader ใช้คลื่นเอียงเดิม `TacetField.DrawSlanted`) |
+| VFX ตอนตี : SLASH SHOT SMASH CROSS INK LIGHTNING, สีของตัวละคร (ทอง ประกาย / แดง ไฟ), ปัด CLASH, ศัตรูตาย PULL, focus lines | `Core/HitFx.cs` (สไตล์ต่อกลุ่มเครื่องดนตรี `BattleScreen.StyleOf`, สีต่อคน `Musician.Spot` + `Palette.Spot*`, SIGNATURE `SignatureStyle` / `SignatureColors`) |
+| ตัวเลขดาเมจแบบ pixel | `Core/PixelDigits.cs` · ป๊อปอัป `Screens/BattleScreen.Show.cs` (`SpawnNumber`) |
+| ฉาก กล้อง parallax ไฟ นักดนตรีตัวหน้า สลับคน ศัตรูยืน ลำแสง | `Screens/BattleScreen.Stage.cs` |
+| cut-in SIGNATURE, แสงของวง QTE (วาดทับหลังโลกถูกหรี่) | `Screens/BattleScreen.Show.cs` |
+| อ่านภาพ animation ของทีมอาร์ต (PNG / Aseprite) | `Core/FrameArt.cs` · โฟลเดอร์ `Content/Art/Battle/` · แผนอาร์ต `BATTLE_ART_PLAN.md` |
+| LESS FLASHING | `Core/Settings.cs` `ReduceFlashing` · หน้า `Screens/SettingsScreen.cs` แถว 07 · `BattleRules.LessFlash` |
+| PLAYTEST (SIGNATURE 1 แต้ม) | `BattleRules.PlaytestSignatureNeed` (0 = ค่าจริง) |
+| ภาพทดสอบ | `--shots battle battlewin battlelose battleslash battleshot battlesmash battlecross battleink battlegold battlefire battlecutin battlekill battlebolt battleboltsoft battleimpact` (`BattleScreen.ShowForPicture`) |
+
 ## 0. แผนที่โค้ด Alpha 7 (การต่อสู้แบบผลัดตา, อัปเดต 24 ต.ค. ขั้น 1–15)
 
 ตัวสลับ : `Data/BattleRules.cs` `TurnBattleOn` (true = ผลัดตา, false = กลับไปดวลเดิมทั้งเกม)
