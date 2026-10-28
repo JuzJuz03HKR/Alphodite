@@ -21,7 +21,6 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 28 ต.ค. | Beta1 ยกระดับหน้าจอ รอบตัวอย่าง (`SCREENS_LEVEL_UP.md` ข้อ 9 : ภาพอ้างอิง ฟอนต์ ชั้นกลาง + Title + Result และ Defeat) | `Tacetno433/Core/` (Ui SlantWipe PostChain TacetVoid ScreenManager และไฟล์ motion ใหม่) · `TacetGame.cs` · `Screens/TitleScreen.cs` `ResultScreen.cs` · `Content/Fonts/` + `Content/*.spritefont` · `Data/BattleRules.cs` (หัวข้อ UI Feel) · `docs/` |
 
 ---
 
@@ -63,12 +62,13 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 
 ## สถานะล่าสุด (28 ต.ค.)
 
-**28 ต.ค. (ล่าสุด) : แชท "Battle Scene 2+3D presentation 3" เริ่ม `SCREENS_LEVEL_UP.md` ข้อ 9 ทำข้อ 1–4 แล้ว ยังไม่ได้เขียนโค้ด**
-✅ build ใน cloud 0/0 (เครื่องใหม่ : `apt-get update` แล้วลง dotnet-sdk-8.0 + `shader_setup.sh`) · แคปทุกหน้า 31 ภาพเก็บไว้เทียบ (อยู่ใน scratchpad ของแชท ไม่ commit)
-✅ ภาพอ้างอิงใน Drive ดูแล้ว 5 จาก 8 (menu1 3 4 5 8) สรุปสิ่งที่เห็น จังหวะจากวิดีโอ และสเปกร่าง 7 ข้อใน `SCREENS_LEVEL_UP.md` 3.3 กับ 3.4 · menu2 6 7 ไฟล์เล็ก ได้เป็น base64 ในแชท เปิดไม่ได้ ขอผู้ใช้แนบในแชท
-✅ ภาพเทียบฟอนต์ 3 ชุด (ใส่ในเกมจริงแล้วแคป + ภาพภาษาไทย) ส่งให้ผู้ใช้แล้ว รายละเอียดและใบอนุญาต `SCREENS_LEVEL_UP.md` 4.1 · แนะนำ ก. EB Garamond + Barlow Semi Condensed (ไทย Taviraj + Bai Jamjuree)
-⚠️ รอผู้ใช้ : ยืนยันสเปก 3.4 (แถบหมึกขอบขาด, วงแหวนกวาดใช้กับช่วงสำคัญ) · เลือกฟอนต์ ก ข ค · แนบ menu2 6 7 · Context7 key ยังผิด (`Invalid API key ... 'ctx7sk'`)
-**งานถัดไป** : ได้คำตอบแล้วทำ `SCREENS_LEVEL_UP.md` ข้อ 9 ข้อ 5 (ชั้นกลาง + Title + Result และ Defeat) แล้ว build 0/0 turncheck savecheck แคปเทียบ ให้ผู้ใช้ Rebuild
+**28 ต.ค. (ล่าสุด) : แชท "Battle Scene 2+3D presentation 3" ทำ `SCREENS_LEVEL_UP.md` ข้อ 9 ข้อ 1–4 เสร็จ ผู้ใช้ตอบครบ ยังไม่ได้เขียนโค้ด** (คำต่อคำ `USER_BRIEFS.md` 13.6)
+✅ build ใน cloud 0/0 (เครื่องใหม่ : `apt-get update` แล้วลง dotnet-sdk-8.0 + `shader_setup.sh`) · แคปทุกหน้า 31 ภาพไว้ใน scratchpad (หายไปกับเครื่อง แชทใหม่ต้องแคปใหม่)
+✅ ภาพอ้างอิงดูครบ 8 ไฟล์ (menu2 6 7 ผู้ใช้แนบในแชท) คำบรรยายและสเปกอยู่ `SCREENS_LEVEL_UP.md` 3.3 กับ 3.4
+✅ ผู้ใช้เลือก : ฟอนต์ **ข.** Cormorant Garamond + Saira Semi Condensed (ไทย Trirong + Chakra Petch) · ปุ่ม**แบบผสม**ตัวอย่างหลายภาพ Claude ทำเวอร์ชันแรก (3.4 ข้อ 1) · วงแหวนกวาด**เฉพาะช่วงสำคัญ**
+✅ Context7 : อ่านโค้ดของ Context7 แล้ว ข้อความ `should start with 'ctx7sk'` ขึ้นกับทุก key ที่ถูกปฏิเสธ (HTTP 401) ลองเรียกผ่าน proxy แล้ว key ที่เก็บไว้ถูกปฏิเสธจริง วิธีแก้บอกผู้ใช้แล้ว (CLAUDE.md ข้อ 0) · `/system` ลองเรียกจริงทุกแชทแล้ว
+⚠️ PLAYTEST SIGNATURE ยังเป็น 1 (ผู้ใช้สั่งคงไว้)
+**งานถัดไป (แชทใหม่)** : `/system` แล้วทำ `SCREENS_LEVEL_UP.md` ข้อ 9 : เตรียม build ใหม่ → แคปก่อนแก้ → ข้อ 5 ชั้นกลาง (ฟอนต์ ข. ใน `Content/Fonts/` ข้อ 4.1, เลนส์ `PostChain` ทุกหน้า, `TacetVoid` แทน `Hollow`/`TacetField`, ชุดปุ่มแบบผสม + motion, วงแหวนกวาด) + Title + Result และ Defeat → build 0/0 turncheck savecheck แคปเทียบ → ผู้ใช้ Rebuild
 
 **28 ต.ค. (ล่าสุด) : คุยแผนยกระดับทุกหน้าจอ ผู้ใช้ตัดสินครบ 5 ข้อ ยังไม่ได้เขียนโค้ด** (คำต่อคำ `USER_BRIEFS.md` 13.5 · แผนเต็ม `docs/SCREENS_LEVEL_UP.md`)
 ✅ build ใน cloud 0/0 แคปทุกหน้า สรุปสิ่งที่เห็น 8 ข้อ (แผนข้อ 2) : มีแค่หน้าต่อสู้ที่ผ่าน `PostChain` · ความมืด TACET 3 แบบปนกัน (`TacetVoid` / `Hollow` / `TacetField`) · chibi ยังอยู่ BandName Band CurtainCall Recruit · สีตัวละครมีแค่หน้าต่อสู้ · กรอบภาพว่างเยอะ · ยังไม่มีจังหวะ UI ร่วม · เต็มจอแล้วเบลอ (`TacetGame.cs` บรรทัด 331 ยืด 1280×720 ด้วย LinearClamp) · ฟอนต์ Palatino/Bahnschrift ของ Windows ห้ามแจกถ้าจะขาย

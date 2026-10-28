@@ -203,7 +203,7 @@ Claude เสนอว่าทำภาพโครงร่างกรอบ�
 
 ### 9.6 เรื่องอื่นจากรอบนี้
 
-- Context7 : ผู้ใช้ใส่ key ใน Network secrets แล้ว ระบบส่ง key ไปถึง แต่ Context7 ตอบ `Invalid API key. Please check your API key. API keys should start with 'ctx7sk' prefix.` ต้องแก้ช่อง Value ให้มีแค่ key ที่ขึ้นต้น `ctx7sk` (ไม่มีคำว่า Bearer นำหน้า) แล้วเปิดแชทใหม่ ถ้าใช้ได้แล้วให้แก้ CLAUDE.md ข้อ 0 (เครื่องมือ AI) ให้จดวิธี Network secrets แทนวิธีเดิม
+- Context7 : ผู้ใช้ใส่ key ใน Network secrets แล้ว ระบบส่ง key ไปถึง แต่ Context7 ตอบ `Invalid API key. Please check your API key. API keys should start with 'ctx7sk' prefix.` ต้องแก้ช่อง Value ให้มีแค่ key ที่ขึ้นต้น `ctx7sk` (ไม่มีคำว่า Bearer นำหน้า) แล้วเปิดแชทใหม่ ถ้าใช้ได้แล้วให้แก้ CLAUDE.md ข้อ 0 (เครื่องมือ AI) ให้จดวิธี Network secrets แทนวิธีเดิม (แก้ความเข้าใจ 28 ต.ค. : ข้อความนี้ขึ้นกับทุก key ที่ Context7 ปฏิเสธ ไม่ได้แปลว่ารูปแบบผิด วิธีแก้ที่ถูกอยู่ CLAUDE.md ข้อ 0)
 - เครื่อง cloud รอบนี้เปิดเว็บนอกด้วย WebFetch ไม่ได้ (live2d.com prydwen.gg) แต่ WebSearch ใช้ได้
 - Live2D ไม่มีชุดสำหรับ MonoGame มีแค่ตัวพอร์ต C# ของชุมชน (Live2DCSharpSDK ใช้ OpenTK) ส่วน Spine มีชุด MonoGame ทางการแต่ต้องมี license Spine ผู้ใช้เลือก pixel แล้ว เก็บไว้อ้างอิง
 
