@@ -221,9 +221,9 @@
         public static float TurnNoteGap = 0.55f;          // between the notes of one enemy attack
         public static float TurnPause = 0.8f;             // after a turn, before the next one starts
         public static float TurnHitStop = 0.075f;         // the band and TACET freeze for a moment on a PERFECT
-        public static float TurnStrikeTime = 0.42f;       // ONE BAR : how long an ATTACK's lunge takes, there and back
-        public static float TurnStrikeImpact = 0.16f;     //           when in it the hit lands
-        public static float TurnStrikeStop = 0.07f;       //           the freeze when it lands
+        public static float TurnStrikeTime = 0.62f;       // ONE BAR : how long an ATTACK's lunge takes, there and back (Beta1 : slower, smoother)
+        public static float TurnStrikeImpact = 0.24f;     //           when in it the hit lands
+        public static float TurnStrikeStop = 0.08f;       //           the freeze when it lands
         public static float TurnKillStop = 0.18f;         //           the freeze when an enemy falls silent
         public static float TurnEndTime = 2.2f;           // the win or lose banner stays this long
         public static float TurnSparkGap = 0.3f;          // a spark comes this soon after the note before it
@@ -233,8 +233,8 @@
 
         //Stage Feel (Beta1) : how the battle page looks and moves, the conductor's view from behind the band
         //(docs/BATTLE_SCENE_2_3D_CHANGE.md). Only Screens/BattleScreen.Stage.cs reads these, the rules never do.
-        public static float StageSwapTime = 0.26f;        // the musician pointed at slides out and the next slides in (seconds)
-        public static float StageSwapSlide = 300f;        //   how far they slide (pixels)
+        public static float StageSwapTime = 0.5f;         // the musician pointed at slides out and the next slides in (seconds, round 4 : slower)
+        public static float StageSwapSlide = 240f;        //   how far they slide (pixels)
         public static float StageAmbient = 0.34f;         // LIGHT MAP everywhere (0.5 = lit normally) : the stage is dark, lights do the rest
         public static float StageSpot = 0.42f;            //   the stage light on the musician in front
         public static float StageFootLight = 0.2f;        //   the pool of light each enemy stands in (like Chaos Zero Nightmare)
@@ -245,7 +245,7 @@
         public static float StageBloomStrength = 0.75f;   //         how strong the glow is
         public static float StageVignette = 0.85f;        // VIGNETTE : dark corners
         public static float StageGrain = 0.035f;          // film grain
-        public static float StageFocusSpeed = 7f;         // QTE FOCUS : how fast the world dims when a ring comes up
+        public static float StageFocusSpeed = 3.4f;       // QTE FOCUS : how fast the world dims when a ring comes up (round 4 : slower, eased)
         public static float StageFocusSlow = 0.3f;        //   the world behind moves this fast meanwhile (1 = normal)
         public static float StageRiftSlant = 0.42f;       // NO SHADERS : TACET's old rift leans with the floor, pixels right for each pixel down
         public static float StageRiftWinning = 520f;      //   where it stands at the horizon when TACET has all its life and the band none
@@ -254,6 +254,13 @@
         public static float StageKick = 9f;               // a hit nudges the camera this many pixels toward it
         public static float[] StageParallax = { 0.18f, 0.4f, 0.75f, 1f, 1.25f };   // far, mid, stage floor, fighters, front : how much each layer follows the camera
         public static float StageDepthDim = 0.16f;        // each enemy further back is this much darker
+
+        //Hit Feel (Beta1 round 4) : what a blow looks like where it lands (Core/HitFx.cs). Nothing flies : the musician
+        //strikes and the light happens on the enemy. Strings SLASH, winds SHOT, percussion SMASH, the SIGNATURE CROSS.
+        public static float HitSize = 105f;               // the size of a blow's light (pixels), more for a stronger blow
+        public static float HitCrossLength = 1500f;       // CROSS : how far the SIGNATURE's two cuts reach each way
+        public static float HitImpactTime = 0.06f;        // IMPACT FRAME : how long the world stays turned over (seconds)
+        public static float LessFlash = 0.45f;            // LESS FLASHING (settings) : flashes and shaking are this strong
 
         //Stage Void (Beta1 round 4) : TACET's dark, a black hole behind the enemies pouring over the floor towards the camera
         //(Core/TacetVoid.cs, Content/Effects/Void.fx). SHARE 0 = TACET beaten, 1 = the band beaten.

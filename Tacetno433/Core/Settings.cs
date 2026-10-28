@@ -28,6 +28,10 @@ namespace Tacetno433.Core
         //remembered for next time (29 Sep). false is NORMAL.
         public static bool Maestro;
 
+        //Less Flashing (Beta1) : for players who find flashes hard to look at. The battle drops the IMPACT FRAME
+        //and turns its flashes and shaking down (BattleRules.LessFlash).
+        public static bool ReduceFlashing;
+
         //Stroke Timing : seconds taken off every stroke before it is judged in a duel.
         //Every hand, mouse and screen is a little late in its own way. A player whose strokes
         //are always judged late moves this up, and the duel meets them where they are.

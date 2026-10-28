@@ -98,11 +98,11 @@ namespace Tacetno433.Core
         }
 
         //Finish : SCENE and LIGHT MAP into FINAL. focus 0..1 is the QTE FOCUS, engulf 0..1 how far TACET's dark
-        //has crept in from the screen's edges (ENGULF).
-        public static void Finish(GraphicsDevice device, SpriteBatch sb, float time, float focus, float engulf,
+        //has crept in from the screen's edges (ENGULF), impact 1 turns the picture over for the IMPACT FRAME.
+        public static void Finish(GraphicsDevice device, SpriteBatch sb, float time, float focus, float engulf, float impact,
                                   float bloomThreshold, float bloomStrength, float vignette, float grain)
         {
-            if (Fx.Ready) FinishWithShaders(device, sb, time, focus, engulf, bloomThreshold, bloomStrength, vignette, grain);
+            if (Fx.Ready) FinishWithShaders(device, sb, time, focus, engulf, impact, bloomThreshold, bloomStrength, vignette, grain);
             else FinishPlain(device, sb, focus);
             device.SetRenderTarget(null);
 
@@ -114,7 +114,7 @@ namespace Tacetno433.Core
         }
 
         //Finish With Shaders : Down, Blur across, Blur down, Blur across again wider, Blur down, Composite
-        private static void FinishWithShaders(GraphicsDevice device, SpriteBatch sb, float time, float focus, float engulf,
+        private static void FinishWithShaders(GraphicsDevice device, SpriteBatch sb, float time, float focus, float engulf, float impact,
                                               float bloomThreshold, float bloomStrength, float vignette, float grain)
         {
             Effect post = Fx.Post;
@@ -149,6 +149,7 @@ namespace Tacetno433.Core
             post.Parameters["Grain"].SetValue(grain);
             post.Parameters["Time"].SetValue(time);
             post.Parameters["Engulf"].SetValue(MathHelper.Clamp(engulf, 0f, 1f));
+            post.Parameters["Impact"].SetValue(MathHelper.Clamp(impact, 0f, 1f));
             post.Parameters["NoiseTexture"].SetValue(Fx.Noise);
             sb.Begin(SpriteSortMode.Immediate, BlendState.Opaque, SamplerState.LinearClamp, null, null, post);
             device.SamplerStates[1] = SamplerState.LinearClamp;

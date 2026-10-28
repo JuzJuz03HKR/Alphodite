@@ -8,7 +8,8 @@
 //   Down     : SCENE x LIGHT + GLOW, shrunk to a quarter of the screen (cheap to blur)
 //   Blur     : a soft smear along one direction, run twice (across, then down)
 //   Composite: SCENE x LIGHT + GLOW, plus the soft glow (BLOOM) taken from the blurred copy, then the QTE FOCUS,
-//              TACET's dark creeping in from the edges (ENGULF), the dark corners (VIGNETTE) and the film grain
+//              TACET's dark creeping in from the edges (ENGULF), the dark corners (VIGNETTE), the IMPACT FRAME of a
+//              big blow and the film grain
 //
 // LIGHT x 2 : the light map is stored at half strength so it can go above 1. 0.5 in the picture
 // means "lit normally", 1.0 means "twice as bright" (a hit flash).
@@ -70,6 +71,7 @@ float Vignette;         //             how dark the corners get
 float Grain;            //             film grain strength
 float Time;             //             keeps the grain moving
 float Engulf;           //             ENGULF : 0 = nothing, 1 = TACET's dark has crept far in from the edges
+float Impact;           //             IMPACT FRAME : 1 = the picture turned over for a frame or two
 
 struct VertexShaderOutput
 {
@@ -147,6 +149,11 @@ float4 CompositePS(VertexShaderOutput input) : COLOR0
     float2 d = (input.UV - 0.5) * float2(1.25, 1.0);
     float v = saturate(1.0 - dot(d, d) * Vignette * (1.0 + Focus * 1.5));
     c *= v;
+
+    //IMPACT FRAME : the moment of a big blow, like an anime frame : what was dark turns white, what was lit turns black
+    float lum = Luma(saturate(c));
+    float turned = 1.0 - step(0.16, lum);
+    c = lerp(c, float3(turned, turned, turned), Impact);
 
     //Grain : a little moving noise so the flat greys feel like film
     float n = Hash(floor(input.UV * float2(640.0, 360.0)) + floor(Time * 24.0) * 7.31) - 0.5;

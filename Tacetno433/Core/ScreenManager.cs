@@ -82,7 +82,8 @@ namespace Tacetno433.Core
         private bool curtain;            // this change uses the stage curtain
         private bool wave;               // this change uses TACET's wave, otherwise the slant wipe
         private float time;              // keeps the wave's torn edge moving
-        private const float FadeSpeed = 2.2f;   // each half of a change takes 1 / FadeSpeed seconds (round 15 : 3 felt too fast, it flickered)
+        private const float FadeSpeed = 1.7f;   // each half of a change takes 1 / FadeSpeed seconds (round 15 : 3 felt too fast, it flickered ;
+                                                // Beta1 round 4 : 2.2 still felt fast, the user asked for slower and smoother)
 
         public ScreenManager(TacetGame game)
         {

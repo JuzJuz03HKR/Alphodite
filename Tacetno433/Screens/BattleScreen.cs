@@ -36,7 +36,7 @@ namespace Tacetno433.Screens
 
         //Layout
         private const float HitX = 640f;
-        private const float HitY = 270f;
+        private const float HitY = 360f;          // Beta1 round 4 : the ring sits in the middle of the screen (the user asked)
         private const float NoteGrow = 1.6f;      // a note on the hit point, this much bigger than in the duel
         private const float RingStart = 160f;     // the ring starts this wide
         private const float RingMark = 52f;       // and meets the note here
@@ -336,6 +336,7 @@ namespace Tacetno433.Screens
             }
 
             UpdateStage(dt, hitStop > 0f);
+            hits.Update(dt, hitStop > 0f);
             gesture.Update(dt, view == View.Swipe && Input.MouseDown());
             baton.Update(dt, gesture.Held);
 
@@ -631,6 +632,8 @@ namespace Tacetno433.Screens
         private void StartStrike(BarMove move)
         {
             striker = battle.Current;
+            hitBy = striker;
+            hitSignature = false;
             PlayArt(striker, "attack");
             strikeMove = move;
             strikeTarget = battle.CanTarget(move.Target) ? move.Target : battle.FocusTarget();
@@ -649,11 +652,9 @@ namespace Tacetno433.Screens
             if (!struck && strikeTime >= BattleRules.TurnStrikeImpact)
             {
                 struck = true;
-                Rectangle from = DrawBox(striker);
+                //Nothing flies across : the blow's light happens on the enemy (HitFx, from ShowEvents)
                 Rectangle to = BoxOf(strikeTarget);
                 battle.Attack(strikeTarget);
-                effects.SpawnBlow(from.Right - 40, from.Y + 140, to.Center.X, to.Center.Y, 0.75f);
-                effects.SpawnSlash(new Vector2(to.Center.X - 40f, to.Center.Y - 30f), new Vector2(to.Center.X + 40f, to.Center.Y + 30f), 0.9f);
                 StageHit(new Vector2(to.Center.X, to.Center.Y), true, 0.8f);
                 hitStop = Math.Max(hitStop, BattleRules.TurnStrikeStop);
                 shake = Math.Max(shake, 0.35f);
@@ -681,6 +682,8 @@ namespace Tacetno433.Screens
             notes.Clear();
             for (int i = 0; i < s.Notes.Length; i++) AddNote(s.Notes[i].Kind, s.Notes[i].Way, s.Notes[i].Size);
             BeginSwipe(SwipeFor.Skill);
+            hitBy = battle.Current;
+            hitSignature = false;
             PlayArt(battle.Current, "skill");
         }
 
@@ -690,12 +693,16 @@ namespace Tacetno433.Screens
             notes.Clear();
             for (int i = 0; i < TurnBattle.SignatureShape.Length; i++) AddNote(NoteKind.Swipe, TurnBattle.SignatureShape[i], -1);
             BeginSwipe(SwipeFor.Signature);
+            hitBy = null;
+            hitSignature = true;
         }
 
         //Parry : the enemy's notes fly in one by one
         private void StartParry()
         {
             Fighter enemy = battle.Current;
+            hitBy = enemy;
+            hitSignature = false;
             PlayArt(enemy, "attack");
             PlayArt(enemy.IntentTarget, "parry");
             notes.Clear();
@@ -995,9 +1002,12 @@ namespace Tacetno433.Screens
                     }
                     StageHit(new Vector2(x, box.Center.Y), e.Who.IsEnemy, 0.4f + Math.Min(0.6f, e.Amount / 30f));
                     if (!e.Who.Down) PlayArt(e.Who, "hurt");
+
+                    //The blow's light : the striker's style on an enemy, TACET's INK on a musician (Core/HitFx.cs)
+                    HitStyle style = !e.Who.IsEnemy ? HitStyle.Ink : (hitSignature ? HitStyle.Cross : StyleOf(hitBy));
+                    hits.Hit(style, DrawBox(e.Who), 0.4f + Math.Min(0.8f, e.Amount / 25f), Color.White);
                     if (e.Who.IsEnemy)
                     {
-                        effects.SpawnSparks(x, box.Center.Y, 8 + Math.Min(12, e.Amount / 2), 0f);
                         if (barPlaying)
                         {
                             barHits++;
@@ -1080,14 +1090,39 @@ namespace Tacetno433.Screens
                 r.X += (int)SwapOffset();
                 if (view == View.Strike && f == striker)
                 {
-                    float p = MathHelper.Clamp(strikeTime / BattleRules.TurnStrikeTime, 0f, 1f);
-                    float lunge = (float)Math.Sin(p * Math.PI);
-                    r.X += (int)(lunge * 110f);
-                    r.Y -= (int)(lunge * 14f);
+                    float lunge = Lunge(MathHelper.Clamp(strikeTime / BattleRules.TurnStrikeTime, 0f, 1f));
+                    r.X += (int)(lunge * 120f);
+                    r.Y -= (int)(Math.Max(0f, lunge) * 14f);
                 }
                 r.Y += (int)(Math.Sin(worldTime * 2.2f) * 2f);                  // breathing, one pixel of the art
             }
             return r;
+        }
+
+        //Lunge (Beta1 round 4) : an ATTACK's move, smoother and with weight. A small pull back (ANTICIPATION), a fast dash
+        //that arrives as the hit lands, a moment held there, then an eased walk back. p is 0..1 of TurnStrikeTime,
+        //the answer is how far forward (1 = all the way, below 0 = pulled back).
+        private static float Lunge(float p)
+        {
+            float hit = BattleRules.TurnStrikeImpact / BattleRules.TurnStrikeTime;
+            float wind = hit * 0.45f;
+            if (p < wind) return -0.15f * Smooth(p / wind);
+            if (p < hit)
+            {
+                float t = (p - wind) / (hit - wind);
+                float u = 1f - t;
+                return MathHelper.Lerp(-0.15f, 1f, 1f - u * u * u);
+            }
+            float hold = hit + 0.14f;
+            if (p < hold) return 1f;
+            return 1f - Smooth((p - hold) / (1f - hold));
+        }
+
+        //Smooth : 0..1 eased at both ends (smoothstep)
+        private static float Smooth(float t)
+        {
+            t = MathHelper.Clamp(t, 0f, 1f);
+            return t * t * (3f - 2f * t);
         }
 
         //Bench Box : a long BENCH makes the chips narrower, so the row never runs under the SIGNATURE and
@@ -1268,6 +1303,16 @@ namespace Tacetno433.Screens
                 battle.Party[0].Guard = true;
                 battle.Events.Clear();
             }
+            else if (name == "battleslash" || name == "battleshot" || name == "battlesmash" || name == "battlecross" || name == "battleink")
+            {
+                //Beta1 round 4 : one blow of each style on the front enemy (or the front musician for INK), for pictures
+                HitStyle style = name == "battleslash" ? HitStyle.Slash : name == "battleshot" ? HitStyle.Shot
+                               : name == "battlesmash" ? HitStyle.Smash : name == "battlecross" ? HitStyle.Cross : HitStyle.Ink;
+                Fighter at = style == HitStyle.Ink ? battle.Party[0] : battle.Enemies[0];
+                if (style == HitStyle.Ink) fore = at;
+                hits.Hit(style, BoxOf(at), 1f, Color.White);
+                StageHit(BoxOf(at).Center.ToVector2(), style != HitStyle.Ink, 1f);
+            }
             else if (name == "battlewin" || name == "battlelose")
             {
                 //Beta1 round 4 : TACET's dark when one side is nearly beaten (battlewin = TACET is, battlelose = the band is)
@@ -1312,6 +1357,8 @@ namespace Tacetno433.Screens
             //QTE FOCUS : the world behind is already dark, grey and soft (PostChain), the ring and the notes come on top
             if (swiping)
             {
+                //QTE LAYER : a soft dark pool behind the ring, so the ring reads on any picture
+                Gfx.DrawGlow(sb, HitX, HitY, 340f, Color.Black * (0.6f * FocusEased));
                 DrawHitPoint(sb);
                 if (swipeFor == SwipeFor.Parry) DrawParryNotes(sb);
                 else DrawPlayNotes(sb);
@@ -1449,7 +1496,7 @@ namespace Tacetno433.Screens
                 Rectangle r = BoxOf(f);
                 Rectangle plate = EnemyPlate(r);
                 float a = f.Down ? 0.35f : 1f;
-                if (view == View.Swipe && battle.Current != f) a *= 0.35f;                 // QTE FOCUS : only the one attacking stays bright
+                if (battle.Current != f) a *= MathHelper.Lerp(1f, 0.35f, FocusEased);     // QTE FOCUS : only the one attacking stays bright
 
                 if (aiming && hover == f)
                     Gfx.RectOutline(sb, new Rectangle(r.X - 5, r.Y - 5, r.Width + 10, r.Height + 10), Palette.Accent, 2);
@@ -1598,8 +1645,9 @@ namespace Tacetno433.Screens
 
         private void DrawHitPoint(SpriteBatch sb)
         {
-            Gfx.Circle(sb, HitX, HitY, NoteGlyph.WellRadius, Palette.Void * 0.85f);
-            Gfx.CircleOutline(sb, HitX, HitY, NoteGlyph.WellRadius, Palette.Paper * 0.3f, 2f);
+            float a = FocusEased;
+            Gfx.Circle(sb, HitX, HitY, NoteGlyph.WellRadius, Palette.Void * (0.85f * a));
+            Gfx.CircleOutline(sb, HitX, HitY, NoteGlyph.WellRadius, Palette.Paper * (0.3f * a), 2f);
         }
 
         //Ring Progress : 0 when a note's ring appears, 1 when it is due

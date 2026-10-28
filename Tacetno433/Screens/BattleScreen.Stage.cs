@@ -51,6 +51,9 @@ namespace Tacetno433.Screens
         private float worldTime;           // the world's own clock, slower in the QTE FOCUS
         private float focus;               // QTE FOCUS 0..1
         private readonly TacetVoid dark = new TacetVoid();   // THE DARK
+        private readonly HitFx hits = new HitFx();           // what a blow looks like where it lands (Core/HitFx.cs)
+        private Fighter hitBy;             // who threw the blows being shown (their style), null = the conductor
+        private bool hitSignature;         // the blows being shown are the SIGNATURE's (CROSS)
         private Vector2 stageCam;          // the camera of the frame being drawn
         private Vector2 kick;              // the camera's nudge after a hit
         private int era;                   // which era's backdrop
@@ -155,7 +158,7 @@ namespace Tacetno433.Screens
             focus = MoveTowards(focus, want, dt * BattleRules.StageFocusSpeed);
             if (frozen) return;
 
-            float worldDt = dt * MathHelper.Lerp(1f, BattleRules.StageFocusSlow, focus);
+            float worldDt = dt * MathHelper.Lerp(1f, BattleRules.StageFocusSlow, FocusEased);
             worldTime += worldDt;
             UpdateArts(worldDt);
 
@@ -189,6 +192,12 @@ namespace Tacetno433.Screens
 
             for (int i = 0; i < stageLights.Length; i++)
                 if (stageLights[i].Life > 0f) stageLights[i].Life -= worldDt;
+        }
+
+        //Focus Eased : the QTE FOCUS eased in and out, so the world dims and comes back softly
+        private float FocusEased
+        {
+            get { return focus * focus * (3f - 2f * focus); }
         }
 
         private static float MoveTowards(float from, float to, float step)
@@ -235,6 +244,22 @@ namespace Tacetno433.Screens
             return (e + 0.001f) / (b + e + 0.002f);
         }
 
+        //Style Of : how a musician's blows look, by their instrument's family. Strings cut (SLASH), winds blast (SHOT),
+        //percussion strikes from above (SMASH). The enemies' blows on the band are TACET's INK.
+        private static HitStyle StyleOf(Fighter f)
+        {
+            if (f == null || f.IsEnemy || f.Musician == null) return HitStyle.Shot;
+            if (f.Musician.Family == Family.String) return HitStyle.Slash;
+            if (f.Musician.Family == Family.Percussion) return HitStyle.Smash;
+            return HitStyle.Shot;
+        }
+
+        //Flashing : how strong flashes and shaking are, turned down by LESS FLASHING on the settings page
+        private static float Flashing
+        {
+            get { return Settings.ReduceFlashing ? BattleRules.LessFlash : 1f; }
+        }
+
         //Stage Hit : a hit lands at a point (where the fighters stand). The dark is thrown (back when the band hits),
         //a shock wave runs out, the camera nudges towards it and a light flashes there.
         private void StageHit(Vector2 at, bool bandHits, float power)
@@ -256,7 +281,7 @@ namespace Tacetno433.Screens
                 if (stageLights[i].Life < stageLights[slot].Life) slot = i;           // the pool is full : reuse the one nearest its end
             stageLights[slot].At = at;
             stageLights[slot].Radius = radius;
-            stageLights[slot].Power = power;
+            stageLights[slot].Power = power * Flashing;
             stageLights[slot].Life = length;
             stageLights[slot].Length = length;
         }
@@ -334,9 +359,10 @@ namespace Tacetno433.Screens
             effects.DrawHits(sb);
             effects.DrawSlashes(sb);
             effects.DrawFlares(sb);
+            hits.DrawGlow(sb);
             sb.End();
 
-            PostChain.Finish(device, sb, time, focus, dark.Engulf, BattleRules.StageBloomThreshold, BattleRules.StageBloomStrength,
+            PostChain.Finish(device, sb, time, FocusEased, dark.Engulf, hits.Impact, BattleRules.StageBloomThreshold, BattleRules.StageBloomStrength,
                              BattleRules.StageVignette, BattleRules.StageGrain);
         }
 
@@ -348,7 +374,7 @@ namespace Tacetno433.Screens
             cam += kick;
             if (shake > 0f)
             {
-                float amount = shake * shake * 10f;
+                float amount = shake * shake * 10f * Flashing;
                 cam += new Vector2((float)Math.Sin(time * 91f) * amount, (float)Math.Cos(time * 73f) * amount);
             }
             return cam;
@@ -418,6 +444,7 @@ namespace Tacetno433.Screens
             sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, Layer(cam, 3));
             for (int i = battle.Enemies.Count - 1; i >= 0; i--) DrawEnemy(sb, battle.Enemies[i]);
             DrawFront(sb);
+            hits.DrawScene(sb);
             sb.End();
 
             //Front : dark shapes nearest the camera (a curtain's edge, a light rig), only when the art exists
@@ -474,7 +501,7 @@ namespace Tacetno433.Screens
             if (f.Staggered) Gfx.RectOutline(sb, r, Palette.Highlight * (0.5f + 0.5f * (float)Math.Sin(time * 8f)), 3);
 
             Look look;
-            if (looks.TryGetValue(f, out look) && look.Flash > 0f) Gfx.Rect(sb, r, Palette.Paper * (0.55f * look.Flash));
+            if (looks.TryGetValue(f, out look) && look.Flash > 0f) Gfx.Rect(sb, r, Palette.Paper * (0.55f * look.Flash * Flashing));
         }
 
         //Front : the musician the conductor points at, big, from behind (an empty frame until the art comes)
@@ -495,27 +522,23 @@ namespace Tacetno433.Screens
             }
 
             Look look;
-            if (looks.TryGetValue(fore, out look) && look.Flash > 0f) Gfx.Rect(sb, r, Palette.Paper * (0.5f * look.Flash * a));
+            if (looks.TryGetValue(fore, out look) && look.Flash > 0f) Gfx.Rect(sb, r, Palette.Paper * (0.5f * look.Flash * a * Flashing));
         }
 
-        //Swap Offset : the musician in front slides out to the left, the next slides in from the left
+        //Swap Offset : the musician in front slides out to the left, the next slides in from the left.
+        //Eased at both ends (Beta1 round 4 : the user found the old one too quick and hard).
         private float SwapOffset()
         {
             if (swap <= 0f) return 0f;
             float slide = BattleRules.StageSwapSlide;
-            if (swap < 0.5f)
-            {
-                float p = swap / 0.5f;
-                return -slide * p * p;                    // out : speeding up
-            }
-            float q = 1f - (swap - 0.5f) / 0.5f;
-            return -slide * q * q;                        // in : slowing down
+            if (swap < 0.5f) return -slide * Smooth(swap / 0.5f);            // out
+            return -slide * (1f - Smooth((swap - 0.5f) / 0.5f));             // in
         }
 
         private float SwapAlpha()
         {
             if (swap <= 0f) return 1f;
-            return swap < 0.5f ? 1f - swap / 0.5f : (swap - 0.5f) / 0.5f;
+            return swap < 0.5f ? 1f - Smooth(swap / 0.5f) : Smooth((swap - 0.5f) / 0.5f);
         }
 
         //Stage Lights : into the light map (at half size, see PostChain.LightScale)

@@ -106,6 +106,7 @@ namespace Tacetno433.Data
             lines.Add("fullscreen=" + (Settings.Fullscreen ? 1 : 0));
             lines.Add("timing=" + Number(Settings.TimingOffset));
             lines.Add("maestro=" + (Settings.Maestro ? 1 : 0));
+            lines.Add("lessflash=" + (Settings.ReduceFlashing ? 1 : 0));
             Write(SettingsPath, lines);
         }
 
@@ -145,6 +146,7 @@ namespace Tacetno433.Data
             Settings.Fullscreen = GetInt(v, "fullscreen", 0) == 1;
             Settings.SetTiming(GetFloat(v, "timing", 0f));
             Settings.Maestro = GetInt(v, "maestro", 0) == 1;
+            Settings.ReduceFlashing = GetInt(v, "lessflash", 0) == 1;
         }
 
         //Run Save : everything RunState needs to carry on. A fight in progress is not written,
