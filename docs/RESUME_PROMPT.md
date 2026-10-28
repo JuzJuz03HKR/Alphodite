@@ -21,6 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
+| 28 ต.ค. 17:53 UTC | เต็มจอภาพคม : วาดทั้งเกมที่ความละเอียดจอจริง (`SCREENS_LEVEL_UP.md` 4.7) | `TacetGame.cs` `Core/PostChain.cs` `Core/Fx.cs` `Core/Gfx.cs` `Core/ScreenManager.cs` `Core/SlantWipe.cs` `Core/TacetVoid.cs` `Core/CharacterArt.cs` `Core/DebugShots.cs` `Core/Input.cs` `Screens/BattleScreen.*.cs` `Screens/DuelScreen.cs` `Content/Effects/*.fx` `Content/*.spritefont` `Data/BattleRules.cs` + เอกสาร |
 
 ---
 
