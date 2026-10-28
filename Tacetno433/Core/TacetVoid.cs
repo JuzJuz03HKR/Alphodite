@@ -247,6 +247,7 @@ namespace Tacetno433.Core
                 sb.End();
                 device.Textures[1] = null;
             }
+            else return;                                   // the old rift has its own light, and no hole to crack
 
             sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.PointClamp);
             DrawCracks(sb);
@@ -335,6 +336,7 @@ namespace Tacetno433.Core
         //bright = the few that shine (into the GLOW), otherwise the dark chunks (into the SCENE).
         public void DrawDebris(SpriteBatch sb, bool bright)
         {
+            if (!Fx.VoidReady) return;                     // no hole without the shader
             int count = BattleRules.StageVoidDebris;
             for (int i = 0; i < count; i++)
             {

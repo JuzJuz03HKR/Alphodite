@@ -19,7 +19,8 @@
 - **B1 กับ B2 รอบแรกเสร็จ (28 ต.ค.)** : ต้นแบบฉากใหม่ในเกม (กรอบว่าง) · `Core/Fx.cs` `Core/PostChain.cs` (SCENE LIGHT GLOW แล้ว bloom FOCUS vignette) `Core/FrameArt.cs` (อ่านภาพ PNG/Aseprite ตรงจาก `Content/Art/Battle`) `Screens/BattleScreen.Stage.cs` ·
   shader `Content/Effects/Post.fx` `Sprite.fx` · ตัวเลข `BattleRules` หัวข้อ Stage Feel · F3 บรรทัดสองบอกเวลาต่อเฟรม draw call GC · **ถ้าจะแคปหน้าต่อสู้ในแชท cloud ต้องรัน `.claude/skills/build/shader_setup.sh` ก่อน** · รายละเอียด `BATTLE_SCENE_2_3D_CHANGE.md` ข้อ 11
 - **รอบ 4 (28 ต.ค.) ผู้ใช้ลองบน Windows แล้ว (ลื่น การวางตัวโอเค) สั่งทำยาว "ลองทำออกมายาวๆก่อนเลย แล้วค่อยมาแก้ไปทีละจุด"** : ความมืดกลืนมาจากด้านหน้าฝั่งศัตรู (หลุมดำ มิติแตก ขาวดำเทา) · VFX ตอนตีเกิดที่ตัวศัตรู · QTE กลางจอ · transition ช้าและนุ่มขึ้น · ข้อ 4–10 Claude ลองทำก่อน ·
-  แผนและลำดับงาน `BATTLE_SCENE_2_3D_CHANGE.md` ข้อ 12 · ภาพตัวอย่างอยู่ Google Drive ของผู้ใช้ (ห้าม commit ภาพหรือลิงก์ เพราะ repo สาธารณะ) · ยังไม่ได้เริ่มโค้ดรอบนี้
+  แผนและลำดับงาน `BATTLE_SCENE_2_3D_CHANGE.md` ข้อ 12 · ภาพตัวอย่างอยู่ Google Drive ของผู้ใช้ (ห้าม commit ภาพหรือลิงก์ เพราะ repo สาธารณะ) ·
+  **ทำครบแล้ว (ตารางข้อ 12.8)** : `Core/TacetVoid.cs` + `Content/Effects/Void.fx` (ความมืด) · `Core/HitFx.cs` (VFX ตอนตี) · `Core/PixelDigits.cs` (ตัวเลข) · `Screens/BattleScreen.Show.cs` (cut-in, แสงของวง QTE) · LESS FLASHING ใน Settings · ตัวเลขใน `BattleRules` หัวข้อ Stage Void, Hit Feel · รอผู้ใช้ดูบน Windows
 - **อนาคต (ผู้ใช้บอก 28 ต.ค.)** : นักดนตรีเหลือ 3–5 คน เปลี่ยนวิธีเลือกนักดนตรี เน้น roguelike ที่ทีมโหดขึ้นเรื่อยๆ และจะแก้ระบบต่อสู้เยอะ → แยกโค้ดภาพออกจากกติกา (`TurnBattle` ไม่มีโค้ดวาด) · ต้องการตัวอย่าง VFX ให้ถามผู้ใช้ทันที ห้ามเดา
 
 ## 0. ALPHA 7 (18 ต.ค.) : เกมเปลี่ยนเป็น turn-based roguelike (ประวัติ ยังใช้อ้างอิงระบบต่อสู้)

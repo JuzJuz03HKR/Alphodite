@@ -1369,7 +1369,7 @@ namespace Tacetno433.Screens
             DrawBand(sb, planning);
             DrawEnemyPlates(sb);
             DrawBarStrip(sb, planning);
-            if (!swiping && view != View.Over) DrawIntent(sb, planning);
+            if (view != View.Over) DrawIntent(sb, planning, 1f - FocusEased);     // fades out as a ring comes up (round 4)
 
             //QTE FOCUS : the world behind is already dark, grey and soft (PostChain), the ring and the notes come on top
             if (swiping)
@@ -1559,8 +1559,9 @@ namespace Tacetno433.Screens
         //Enemy Intent : over its head, how hard each note hits and the notes themselves, the way and the size
         //of each, so a player can read the whole attack before it comes (like Slay the Spire).
         //CADENZA : a boss's big move says so above it. In the plan, the enemy under the pointer draws a line to its target.
-        private void DrawIntent(SpriteBatch sb, bool planning)
+        private void DrawIntent(SpriteBatch sb, bool planning, float ia)
         {
+            if (ia <= 0.01f) return;
             for (int i = 0; i < battle.Enemies.Count; i++)
             {
                 Fighter f = battle.Enemies[i];
@@ -1571,7 +1572,7 @@ namespace Tacetno433.Screens
                 //LULLABY : this turn it rests
                 if (f.IntentRest)
                 {
-                    Gfx.TextSpacedCentered(sb, Game.Font, "REST", r.Center.X, cy - 6, Palette.Paper, TextSize.Body, 3f);
+                    Gfx.TextSpacedCentered(sb, Game.Font, "REST", r.Center.X, cy - 6, Palette.Paper * ia, TextSize.Body, 3f);
                     continue;
                 }
                 if (f.IntentNotes.Length == 0) continue;
@@ -1580,18 +1581,18 @@ namespace Tacetno433.Screens
                 const float NumberRoom = 42f;                                          // the number, then room for a left pointer
                 float row = f.IntentNotes.Length * NoteStep;
                 float left = r.Center.X - (NumberRoom + row) / 2f;
-                Gfx.Text(sb, Game.BigFont, NumberText.Get(f.IntentNotes[0]), left, cy - 16, Palette.Highlight, TextSize.Small);
+                Gfx.Text(sb, Game.BigFont, NumberText.Get(f.IntentNotes[0]), left, cy - 16, Palette.Highlight * ia, TextSize.Small);
                 for (int n = 0; n < f.IntentNotes.Length; n++)
-                    NoteGlyph.Note(sb, Game.BigFont, left + NumberRoom + NoteStep * (n + 0.5f), cy, f.IntentShown[n], f.IntentWays[n], 0.46f, time, 1f);
+                    NoteGlyph.Note(sb, Game.BigFont, left + NumberRoom + NoteStep * (n + 0.5f), cy, f.IntentShown[n], f.IntentWays[n], 0.46f, time, ia);
                 if (f.IntentCadenza || f.IntentAll)
-                    Gfx.TextSpacedCentered(sb, Game.Font, f.IntentAll ? "EVERYONE" : "CADENZA", r.Center.X, cy - 40, Palette.Highlight * (0.7f + 0.3f * (float)Math.Sin(time * 6f)), TextSize.Label, 3f);
+                    Gfx.TextSpacedCentered(sb, Game.Font, f.IntentAll ? "EVERYONE" : "CADENZA", r.Center.X, cy - 40, Palette.Highlight * (ia * (0.7f + 0.3f * (float)Math.Sin(time * 6f))), TextSize.Label, 3f);
                 if (f.Staggered)
-                    Gfx.Line(sb, left - 6, cy, left + NumberRoom + 6f + row, cy, Palette.Highlight, 2f);   // OFF-BEAT : it loses its next turn, this move waits for the one after
+                    Gfx.Line(sb, left - 6, cy, left + NumberRoom + 6f + row, cy, Palette.Highlight * ia, 2f);   // OFF-BEAT : it loses its next turn, this move waits for the one after
 
                 if (planning && hover == f && f.IntentTarget != null)
                 {
                     Vector2 to = AimPoint(f.IntentTarget);
-                    Gfx.Line(sb, r.Center.X, cy + 14, to.X, to.Y, Palette.Accent * 0.6f, 2f);
+                    Gfx.Line(sb, r.Center.X, cy + 14, to.X, to.Y, Palette.Accent * (0.6f * ia), 2f);
                 }
             }
         }
