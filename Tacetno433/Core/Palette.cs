@@ -41,6 +41,10 @@ namespace Tacetno433.Core
         public static Color SpotRed = new Color(255, 48, 30);
         public static Color SpotRedHot = new Color(255, 160, 60);
 
+        //Lightning Blue (round 6, the user asked) : THE UNHEARING's LIGHTNING glows blue. The glow, then its hot core.
+        public static Color LightningBlue = new Color(40, 170, 255);
+        public static Color LightningBlueHot = new Color(170, 230, 255);
+
         //Accent : THE ONE COLOUR SWITCH.
         //Selected things, the combo counter and warnings use this. It is white while the game
         //is greyscale. Change these two lines (for example to a deep red) and every accent follows.

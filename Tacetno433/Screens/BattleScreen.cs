@@ -1018,10 +1018,10 @@ namespace Tacetno433.Screens
                 {
                     //The striker's colours : a musician's own colour on an enemy (round 4 : the number too),
                     //white for the SIGNATURE, TACET's INK on a musician
-                    HitColors colors = e.Who.IsEnemy && !hitSignature ? SpotOf(hitBy) : HitColors.Plain;
+                    HitColors colors = !e.Who.IsEnemy ? HitColors.Plain : (hitSignature ? SignatureColors() : SpotOf(hitBy));
 
                     //A hit : a pixel number (bigger for a big hit), the fighter flashes and is knocked back
-                    Color number = e.Who.IsEnemy ? (hitSignature ? Palette.Highlight : colors.Tint) : Palette.PaperDim;
+                    Color number = e.Who.IsEnemy ? colors.Tint : Palette.PaperDim;
                     SpawnNumber(new Vector2(x, y), e.Amount, false, e.Amount >= BattleRules.TurnBigHit || hitSignature, number);
                     if (look != null)
                     {
@@ -1037,7 +1037,7 @@ namespace Tacetno433.Screens
                     float power = 0.4f + Math.Min(0.8f, e.Amount / 25f);
                     if (style == HitStyle.Lightning)
                     {
-                        if (bolts == 0) AddStageLight(new Vector2(TacetGame.ScreenW / 2f, 300f), 1100f, BattleRules.HitBoltFlash, 0.4f, Color.White);
+                        if (bolts == 0) AddStageLight(new Vector2(TacetGame.ScreenW / 2f, 300f), 1100f, BattleRules.HitBoltFlash, 0.4f, Color.Lerp(Color.White, colors.Tint, 0.6f));
                         hits.HitLater(style, DrawBox(e.Who), power, colors, BattleRules.HitBoltStagger * bolts);
                         bolts++;
                     }
@@ -1373,11 +1373,11 @@ namespace Tacetno433.Screens
                 for (int i = 0; i < battle.Enemies.Count; i++)
                 {
                     Rectangle box = BoxOf(battle.Enemies[i]);
-                    if (name == "battlebolt") hits.HitLater(HitStyle.Lightning, box, 1f, HitColors.Plain, BattleRules.HitBoltStagger * i);
+                    if (name == "battlebolt") hits.HitLater(HitStyle.Lightning, box, 1f, SignatureColors(), BattleRules.HitBoltStagger * i);
                     else if (i == 0) hits.Hit(HitStyle.Cross, box, 1f, HitColors.Plain);
-                    SpawnNumber(new Vector2(box.Center.X, box.Y - 34), 14, false, true, Palette.Highlight);
+                    SpawnNumber(new Vector2(box.Center.X, box.Y - 34), 14, false, true, SignatureColors().Tint);
                 }
-                AddStageLight(new Vector2(TacetGame.ScreenW / 2f, 300f), 1100f, BattleRules.HitBoltFlash, 0.4f, Color.White);
+                AddStageLight(new Vector2(TacetGame.ScreenW / 2f, 300f), 1100f, BattleRules.HitBoltFlash, 0.4f, Color.Lerp(Color.White, SignatureColors().Tint, 0.6f));
                 hitStop = BattleRules.HitImpactHold;
             }
             else if (name == "battlewin" || name == "battlelose")

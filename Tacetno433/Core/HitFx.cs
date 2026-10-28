@@ -970,14 +970,16 @@ namespace Tacetno433.Core
             return k > 0f ? 0.65f * k * k : 0f;
         }
 
-        //Draw Channel : one jagged line of lightning, glow under a hot middle under a white core
+        //Draw Channel : one jagged line of lightning, a wide faint halo under a glow under a hot middle under a white core
+        //(round 6 : the halo makes the blue glow, the user asked for glowing blue lightning)
         private static void DrawChannel(SpriteBatch sb, Vector2[] points, int count, Color tint, Color hot, float lit, float width)
         {
             for (int i = 0; i < count - 1; i++)
             {
                 Vector2 a = Snap(points[i]);
                 Vector2 b = Snap(points[i + 1]);
-                Gfx.Line(sb, a, b, tint * (0.22f * lit), 16f * width);
+                Gfx.Line(sb, a, b, tint * (0.08f * lit), 36f * width);
+                Gfx.Line(sb, a, b, tint * (0.28f * lit), 16f * width);
                 Gfx.Line(sb, a, b, hot * (0.75f * lit), 6f * width);
                 Gfx.Line(sb, a, b, Color.White * lit, Math.Max(2f, 2f * width));
             }

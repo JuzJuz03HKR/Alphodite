@@ -413,6 +413,8 @@ build 0 error 0 warning · turncheck 113/113 · savecheck 25/25 · ลองแ�
   SIGNATURE หนึ่งครั้งเล่นลำดับนี้ครั้งเดียว ถึงจะโดนหลายตัว · LESS FLASHING เหลือแค่ซูมกับเบลอครึ่งเดียว ไม่มีกลับสีและแวบขาว
 - **LIGHTNING (THE UNHEARING)** : ฟ้าผ่าจากเหนือจอลงศัตรูทีละตัวห่างกัน 0.08 วินาที เส้นสายฟ้าหยักทุกขนาด (midpoint displacement) มีกิ่ง 3 กิ่ง ผ่าแล้วดับแล้วผ่าซ้ำเส้นเดิม 3 ครั้งแบบฟ้าจริง แล้วค่อยเรืองจาง ·
   ตรงที่ผ่ามีหนามแสง ดาว วงที่พื้น เศษ และไฟฟ้าเส้นเล็กๆ วิ่งรอบตัว 0.6 วินาที · ครั้งแรกเวทีทั้งเวทีสว่างวาบ (LIGHT MAP) · SIGNATURE ของวาทยากรอื่นยังเป็น CROSS ไปก่อน (`BattleScreen.SignatureStyle`)
+- **สีฟ้าเรืองแสง (ผู้ใช้ขอ "ขอปรับให้ฟ้าผ่าเป็นสีฟ้าเรืองแสง")** : `Palette.LightningBlue` (40,170,255) กับแกน `LightningBlueHot` (170,230,255) · สายฟ้ามีแสงฟุ้งกว้างสีฟ้าอีกชั้น ·
+  แสงแตก วงที่พื้น ไฟฟ้าวิ่ง ตัวเลขดาเมจ และแสงวาบบนเวที เป็นสีฟ้าทั้งหมด (`BattleScreen.SignatureColors`) · ตอนกลับสี (impact frame) ยังเป็นขาวดำแบบหน้ามังงะ
 - ตอนสกิลหรือ SIGNATURE จบ ชั้น QTE คืนเกือบทันที (เดิมค่อยๆ จาง แสงของการตีเลยโดนหรี่ตาม)
 - โค้ด : `Core/HitFx.cs` (Bolt, Make Channel, HitLater, ลำดับ impact) · `Content/Effects/Post.fx` (Flash, Blur, Center) · `Core/PostChain.cs` (`ImpactLook`) · ซูมใน `BattleScreen.Draw`
 - แคปดูได้ `--shots battlebolt@1` (หน้าตอนกลับสี) `battleboltsoft@1` `battleboltsoft@2` (เห็นสายฟ้าเองแบบไม่กลับสี) `battleimpact@1` (CROSS)

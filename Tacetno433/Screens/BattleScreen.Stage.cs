@@ -251,6 +251,14 @@ namespace Tacetno433.Screens
             return hits.ImpactAt - stageCam * BattleRules.StageParallax[3];
         }
 
+        //Signature Colours : the conductor's SIGNATURE in its own colours. THE UNHEARING's LIGHTNING glows blue (round 6),
+        //the others are white until the user gives them a colour.
+        private HitColors SignatureColors()
+        {
+            if (battle.Kit == TurnKit.Beethoven) return new HitColors(Palette.LightningBlue, Palette.LightningBlueHot, HitFlair.None);
+            return HitColors.Plain;
+        }
+
         //Signature Style : how the conductor's SIGNATURE lands. LIGHTNING strikes from the sky (THE UNHEARING, round 6),
         //the others cut a CROSS until they get their own.
         private HitStyle SignatureStyle()
