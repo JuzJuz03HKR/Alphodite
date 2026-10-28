@@ -15,7 +15,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 - **คำสั่งเสริม** : `/build` คอมไพล์ในแชท cloud (ต่อท้าย `shots duel,band` `simulate` `audit` `savecheck` ได้) · `/rules` ตรวจโค้ดกับกติกาที่อาจารย์ตรวจ · `/note` จดข้อความของผู้ใช้คำต่อคำทันที
 - ไฟล์คำสั่งอยู่ `.claude/skills/<ชื่อคำสั่ง>/SKILL.md` ถ้าคำสั่งไม่ขึ้นในแชท ให้ใช้ prompt A ข้างล่างแทน
 
-**27 ต.ค. งานรายงาน (ไม่แตะโค้ดเกม)** : `docs/report/TACET_DataStructures_Report1.pdf` "A report of data structures used in game development 1" ภาษาไทย 19 หน้า (ปก คำนำ สารบัญ บท 1-7 บรรณานุกรม) อิง Alpha7 · หน้าปกเว้นช่องชื่อสมาชิก รหัส วิชา อาจารย์ ให้ทีมกรอก · แผนที่ผู้ใช้เลือก : heap/PriorityQueue ลำดับเทิร์น, decision tree เลือกเป้าหมายศัตรู, แผนที่กราฟ DAG + BFS (ยังไม่ได้อยู่ในเกม) · แก้เนื้อหา `docs/report/report.html` / `front.html` แล้ว build `NODE_PATH=$(npm root -g) node docs/report/build.js` (ต้องมีฟอนต์ Sarabun, pypdf, graphviz ถ้าแก้ `diagrams/*.dot`) · โค้ดร่างทดสอบที่ `docs/report/sketch_test` (`dotnet run`) · เรื่องฉากต่อสู้ 3D/2.5D + คลื่นความมืด (คุย 27 ต.ค.) ยังรอผู้ใช้ตอบ 5 ข้อ (`USER_BRIEFS.md` ท้ายไฟล์)
+**27 ต.ค. งานรายงาน (ไม่แตะโค้ดเกม)** : `docs/report/TACET_DataStructures_Report1.pdf` "A report of data structures used in game development 1" ภาษาไทย 19 หน้า (ปก คำนำ สารบัญ บท 1-7 บรรณานุกรม) อิง Alpha7 · หน้าปกเว้นช่องชื่อสมาชิก รหัส วิชา อาจารย์ ให้ทีมกรอก · แผนที่ผู้ใช้เลือก : heap/PriorityQueue ลำดับเทิร์น, decision tree เลือกเป้าหมายศัตรู, แผนที่กราฟ DAG + BFS (ยังไม่ได้อยู่ในเกม) · แก้เนื้อหา `docs/report/report.html` / `front.html` แล้ว build `NODE_PATH=$(npm root -g) node docs/report/build.js` (ต้องมีฟอนต์ Sarabun, pypdf, graphviz ถ้าแก้ `diagrams/*.dot`) · โค้ดร่างทดสอบที่ `docs/report/sketch_test` (`dotnet run`) · เรื่องฉากต่อสู้ ดูหัวข้อ "Battle Scene 2+3D change" ใต้สถานะล่าสุด
 
 ## แชทที่กำลังทำงาน (ใช้กับ /system /update /sync)
 
@@ -62,7 +62,12 @@ commit/push ขึ้น Alpha7 เมื่อฉันสั่ง ยัง�
 
 ---
 
-## สถานะล่าสุด (24 ต.ค.)
+## สถานะล่าสุด (28 ต.ค.)
+
+**28 ต.ค. : Battle Scene 2+3D change (คุยแล้ว ยังไม่ตัดสินใจ ผู้ใช้จะไปทำต่อที่โน้ตบุ๊กอีกเครื่อง)** เปลี่ยนฉากต่อสู้ผลัดตาให้ดูมีมิติแบบ 2D หลอกตาเป็น 3D และใช้คลื่นความมืดแสดงว่าสองฝ่ายดันกันไปมา รวมทุกอย่างไว้ที่ `docs/BATTLE_SCENE_2_3D_CHANGE.md`
+✅ ค้นข้อมูล MonoGame 3D แล้ว เสนอมุมกล้อง ก. ข. ค. และคลื่น 3 แบบ Claude แนะนำ ก. เวทีเฉียงมุมข้าง + คลื่นดันจากขวาเอียงตามพื้น
+⚠️ ยังไม่ได้แก้โค้ด รอผู้ใช้ตอบ 5 ข้อ (ข้อ 6 ของเอกสาร) ภาพอ้างอิง 4 ภาพไม่ได้อยู่ใน repo เพราะ repo เป็น public ถ้าต้องดูให้ขอผู้ใช้แนบใหม่ คำว่า "CUT IN ที่มีอยู่แล้ว" ที่ตอบไป 27 ต.ค. ไม่ตรง แก้ไว้ในเอกสารข้อ 4 แล้ว
+**งานถัดไป** : ผู้ใช้ตอบครบแล้ว ทำต้นแบบเป็นกรอบว่างใน `Screens/BattleScreen.cs` (`Draw` และตำแหน่งตัวละคร) กับขอบคลื่นเอียงจาก `Core/TacetField.cs` แล้วแคป `--shots battle` ให้ผู้ใช้ดูก่อนลงมือจริง
 
 **24 ต.ค. : ขั้น 15 ที่นั่ง + ไฟต์ยาวขึ้น + ความสมเหตุสมผล เสร็จ** (ผู้ใช้ : หน้า BAND เลือก 3 แต่ไฟต์มี 2, ATTACK แรงเกิน ไฟต์จบไว, อยากให้เลือกท่าอื่นสำคัญขึ้น, ปรับความสมเหตุสมผล) รายละเอียด `ALPHA7_DESIGN.md` ข้อ 5.20
 ✅ รันเริ่มที่นั่ง 2 (FULL STAGE 3, EXTRA SEAT ขายอีกครั้ง) ใครนั่งบนเวทีหน้า BAND เริ่มไฟต์ทุกคน · ATTACK 0.55 เท่า + ลม 2 ต่อ ATTACK · เลือดศัตรู x1.6 / 2.1 / 2.7 · โน้ต 1.85 · ATTACK ทำดาเมจ 68 → 36% · ไฟต์ยาวขึ้นราว 1.45 เท่า · ชนะทั้งรัน STRONG 53 → 57% MAESTRO EXPERT 77 → 75% วาทยากร 52–61% ·
