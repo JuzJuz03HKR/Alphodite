@@ -63,6 +63,13 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 
 ## สถานะล่าสุด (28 ต.ค.)
 
+**28 ต.ค. (ล่าสุด) : แชท "Battle Scene 2+3D presentation 3" เริ่ม `SCREENS_LEVEL_UP.md` ข้อ 9 ทำข้อ 1–4 แล้ว ยังไม่ได้เขียนโค้ด**
+✅ build ใน cloud 0/0 (เครื่องใหม่ : `apt-get update` แล้วลง dotnet-sdk-8.0 + `shader_setup.sh`) · แคปทุกหน้า 31 ภาพเก็บไว้เทียบ (อยู่ใน scratchpad ของแชท ไม่ commit)
+✅ ภาพอ้างอิงใน Drive ดูแล้ว 5 จาก 8 (menu1 3 4 5 8) สรุปสิ่งที่เห็น จังหวะจากวิดีโอ และสเปกร่าง 7 ข้อใน `SCREENS_LEVEL_UP.md` 3.3 กับ 3.4 · menu2 6 7 ไฟล์เล็ก ได้เป็น base64 ในแชท เปิดไม่ได้ ขอผู้ใช้แนบในแชท
+✅ ภาพเทียบฟอนต์ 3 ชุด (ใส่ในเกมจริงแล้วแคป + ภาพภาษาไทย) ส่งให้ผู้ใช้แล้ว รายละเอียดและใบอนุญาต `SCREENS_LEVEL_UP.md` 4.1 · แนะนำ ก. EB Garamond + Barlow Semi Condensed (ไทย Taviraj + Bai Jamjuree)
+⚠️ รอผู้ใช้ : ยืนยันสเปก 3.4 (แถบหมึกขอบขาด, วงแหวนกวาดใช้กับช่วงสำคัญ) · เลือกฟอนต์ ก ข ค · แนบ menu2 6 7 · Context7 key ยังผิด (`Invalid API key ... 'ctx7sk'`)
+**งานถัดไป** : ได้คำตอบแล้วทำ `SCREENS_LEVEL_UP.md` ข้อ 9 ข้อ 5 (ชั้นกลาง + Title + Result และ Defeat) แล้ว build 0/0 turncheck savecheck แคปเทียบ ให้ผู้ใช้ Rebuild
+
 **28 ต.ค. (ล่าสุด) : คุยแผนยกระดับทุกหน้าจอ ผู้ใช้ตัดสินครบ 5 ข้อ ยังไม่ได้เขียนโค้ด** (คำต่อคำ `USER_BRIEFS.md` 13.5 · แผนเต็ม `docs/SCREENS_LEVEL_UP.md`)
 ✅ build ใน cloud 0/0 แคปทุกหน้า สรุปสิ่งที่เห็น 8 ข้อ (แผนข้อ 2) : มีแค่หน้าต่อสู้ที่ผ่าน `PostChain` · ความมืด TACET 3 แบบปนกัน (`TacetVoid` / `Hollow` / `TacetField`) · chibi ยังอยู่ BandName Band CurtainCall Recruit · สีตัวละครมีแค่หน้าต่อสู้ · กรอบภาพว่างเยอะ · ยังไม่มีจังหวะ UI ร่วม · เต็มจอแล้วเบลอ (`TacetGame.cs` บรรทัด 331 ยืด 1280×720 ด้วย LinearClamp) · ฟอนต์ Palatino/Bahnschrift ของ Windows ห้ามแจกถ้าจะขาย
 ✅ ผู้ใช้ตัดสิน : ทิศทาง **แบบผสม** (โครงตามหน้าต่อสู้ + เปลี่ยนหน้าและการเลือกจัดจ้านแบบ Persona 5 ZZZ Limbus) · รอบแรก = **ชั้นกลาง + Title + Result เป็นตัวอย่าง** ให้ Rebuild ดูก่อน · ฟอนต์ **OFL มีตัวไทยคู่กัน** Claude ทำภาพเทียบ 3 คู่ให้เลือก · ภาพหน้าตัวละครใน UI **เป็น pixel** · **PLAYTEST SIGNATURE คงไว้ 1** ห้ามแก้จนผู้ใช้บอก
