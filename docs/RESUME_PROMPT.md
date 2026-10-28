@@ -21,6 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
+| 28 ต.ค. | Beta1 ยกระดับหน้าจอ รอบตัวอย่าง (`SCREENS_LEVEL_UP.md` ข้อ 9 : ภาพอ้างอิง ฟอนต์ ชั้นกลาง + Title + Result และ Defeat) | `Tacetno433/Core/` (Ui SlantWipe PostChain TacetVoid ScreenManager และไฟล์ motion ใหม่) · `TacetGame.cs` · `Screens/TitleScreen.cs` `ResultScreen.cs` · `Content/Fonts/` + `Content/*.spritefont` · `Data/BattleRules.cs` (หัวข้อ UI Feel) · `docs/` |
 
 ---
 
