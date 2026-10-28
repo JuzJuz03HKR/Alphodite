@@ -61,6 +61,12 @@ namespace Tacetno433.Core
         //draws into its own pictures first (render targets, see Core/PostChain.cs). Draw then shows them.
         public virtual void PreDraw(SpriteBatch sb) { }
 
+        //Shows Grain : the film grain laid over every page. A page with its own grain (the battle, Post.fx) turns it off.
+        public virtual bool ShowsGrain
+        {
+            get { return true; }
+        }
+
         //Screen Draw
         public abstract void Draw(SpriteBatch sb);
     }
@@ -141,6 +147,12 @@ namespace Tacetno433.Core
             if (fadingOut) return;
 
             if (current != null) current.Update(dt);
+        }
+
+        //Shows Grain : whether the page on screen wants the film grain over it
+        public bool ShowsGrain
+        {
+            get { return current == null || current.ShowsGrain; }
         }
 
         //Screen Pre Draw : the active screen's own pictures, before the frame starts

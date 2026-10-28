@@ -224,8 +224,10 @@ float4 VoidGlowPS(VertexShaderOutput input) : COLOR0
     g += mirror * step(e, -level) * onFloor * fade * 0.32;
 
     //STIPPLE : grains of light thrown around the rim, thicker close to it, like an engraving
+    //(strictly below the threshold : where there is no halo there is no grain at all. A step that also let an exact 0
+    //through made white specks all over the screen, round 4)
     float halo = saturate(1.0 - outside / (Radius * 0.6)) * step(0.0, outside);
-    float grain = step(Rand(floor(p * 0.5) + floor(Time * 10.0) * 0.731), halo * halo * 0.2);
+    float grain = 1.0 - step(halo * halo * 0.2, Rand(floor(p * 0.5) + floor(Time * 10.0) * 0.731));
     g += grain * 0.6;
 
     //SHOCK WAVE : the ring of a hit

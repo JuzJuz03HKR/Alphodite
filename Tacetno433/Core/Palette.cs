@@ -33,6 +33,14 @@ namespace Tacetno433.Core
         //Focus Tone : the brightest thing on screen, use it sparingly
         public static Color Highlight = new Color(255, 255, 255);
 
+        //Spot Colours (Beta1 round 4) : a musician's own colour, for their VFX and their damage numbers (SpotLook in
+        //Data/Musician.cs). The user picks each character's colour when the art is done. For now the two looks the
+        //user asked to try : GOLD with golden sparkles and RED with flames. Hot is the bright core of a blow.
+        public static Color SpotGold = new Color(255, 186, 52);
+        public static Color SpotGoldHot = new Color(255, 236, 160);
+        public static Color SpotRed = new Color(255, 48, 30);
+        public static Color SpotRedHot = new Color(255, 160, 60);
+
         //Accent : THE ONE COLOUR SWITCH.
         //Selected things, the combo counter and warnings use this. It is white while the game
         //is greyscale. Change these two lines (for example to a deep red) and every accent follows.

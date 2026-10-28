@@ -226,6 +226,8 @@
         public static float TurnStrikeStop = 0.08f;       //           the freeze when it lands
         public static float TurnNumberTime = 1.0f;        // a damage number stays this long (Beta1 round 4, pixel numbers)
         public static int TurnBigHit = 18;                //   from this much damage it is drawn bigger
+        public static float TurnNumberCell = 4.5f;        //   one cell of a digit (5 x 7 cells) in pixels (round 4 : 25% smaller, was 6)
+        public static float TurnNumberBigCell = 6f;       //   the same for a big hit (was 8)
         public static float TurnDissolveTime = 1.0f;      // an enemy SILENCED dissolves into TACET's hole in this long
         public static float TurnCutInTime = 1.3f;         // the SIGNATURE's CUT-IN, before its strokes (Beta1 round 4, the old duel's picture)
         public static float TurnKillStop = 0.18f;         //           the freeze when an enemy falls silent
@@ -243,14 +245,14 @@
         public static float StageSpot = 0.42f;            //   the stage light on the musician in front
         public static float StageFootLight = 0.2f;        //   the pool of light each enemy stands in (like Chaos Zero Nightmare)
         public static float StageShaft = 0.1f;            //   the shaft of light from above on the musician in front (GLOW, round 4)
-        public static int StageDust = 36;                 //   specks of dust turning in it
+        public static int StageDust = 0;                  //   specks of dust turning in it (round 4 : none, the user found white specks cluttered)
         public static float StageFloorLight = 0.16f;      //   the house lights on the floor near the band, so TACET's dark can be seen eating it
         public static float StageHitLight = 0.55f;        //   a hit lights up where it lands, for a moment
         public static float StageHitLightTime = 0.35f;    //   how long that lasts (seconds)
         public static float StageBloomThreshold = 0.58f;  // BLOOM : how bright before it glows
         public static float StageBloomStrength = 0.75f;   //         how strong the glow is
         public static float StageVignette = 0.85f;        // VIGNETTE : dark corners
-        public static float StageGrain = 0.035f;          // film grain
+        public static float StageGrain = 0.02f;           // film grain (round 4 : softer, the user found specks cluttered)
         public static float StageFocusSpeed = 3.4f;       // QTE FOCUS : how fast the world dims when a ring comes up (round 4 : slower, eased)
         public static float StageFocusSlow = 0.3f;        //   the world behind moves this fast meanwhile (1 = normal)
         public static float StageRiftSlant = 0.42f;       // NO SHADERS : TACET's old rift leans with the floor, pixels right for each pixel down

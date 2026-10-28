@@ -5,7 +5,8 @@ using Microsoft.Xna.Framework.Graphics;
 namespace Tacetno433.Core
 {
     //PixelDigits (Beta1 round 4) : numbers drawn as pixel art, chunky digits with a dark outline, the way the user's
-    //references show damage (big blocky numbers over the enemy). A digit is 5 x 7 cells and a cell is a few pixels.
+    //references show damage (big blocky numbers over the enemy). A digit is 5 x 7 cells and a cell is a few pixels
+    //(it may be a fraction : each edge is rounded to a whole pixel).
     //Only the digits, + and -, so no string is ever made while drawing : the number is taken apart with sums.
     //ADVANCED PART (small) : each digit's filled cells are kept as RUNS (a row, where the stretch starts, how long it
     //is), worked out once from the little pictures below. A digit is then a handful of rectangles, not thirty five.
@@ -87,8 +88,8 @@ namespace Tacetno433.Core
 
             float advance = (Cols + 1) * cell;
             float width = (count + (sign ? 1 : 0)) * advance - cell;
-            float left = (float)Math.Floor((cx - width / 2f) * 0.5f) * 2f;          // on the art's 2 x 2 grid
-            float top = (float)Math.Floor((cy - Rows * cell / 2f) * 0.5f) * 2f;
+            float left = (float)Math.Round(cx - width / 2f);
+            float top = (float)Math.Round(cy - Rows * cell / 2f);
             float grow = Math.Max(2f, (float)Math.Floor(cell * 0.5f));
 
             for (int pass = 0; pass < 2; pass++)
@@ -111,11 +112,16 @@ namespace Tacetno433.Core
 
         private static void DrawGlyph(SpriteBatch sb, int glyph, float x, float y, float cell, Color color, float grow)
         {
+            //Every edge lands on a whole pixel, so a cell of 4.5 is drawn 4 or 5 pixels wide and stays sharp
             Run[] list = runs[glyph];
             for (int k = 0; k < list.Length; k++)
             {
                 Run r = list[k];
-                Gfx.Rect(sb, x + r.From * cell - grow, y + r.Row * cell - grow, r.Length * cell + grow * 2f, cell + grow * 2f, color);
+                float x0 = (float)Math.Round(x + r.From * cell);
+                float x1 = (float)Math.Round(x + (r.From + r.Length) * cell);
+                float y0 = (float)Math.Round(y + r.Row * cell);
+                float y1 = (float)Math.Round(y + (r.Row + 1) * cell);
+                Gfx.Rect(sb, x0 - grow, y0 - grow, x1 - x0 + grow * 2f, y1 - y0 + grow * 2f, color);
             }
         }
     }

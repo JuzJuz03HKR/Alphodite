@@ -67,6 +67,7 @@ namespace Tacetno433.Screens
             public float Power;
             public float Life;
             public float Length;
+            public Color Tint;         // round 4 : a blow lights the enemy in the striker's colour
         }
         private StageLight[] stageLights = new StageLight[16];
 
@@ -260,9 +261,24 @@ namespace Tacetno433.Screens
             get { return Settings.ReduceFlashing ? BattleRules.LessFlash : 1f; }
         }
 
+        //Spot Of : a musician's colours for their blows (Palette spot colours, SpotLook in Data/Musician.cs).
+        //The conductor's SIGNATURE and TACET are white for now.
+        private static HitColors SpotOf(Fighter f)
+        {
+            if (f == null || f.IsEnemy || f.Musician == null) return HitColors.Plain;
+            if (f.Musician.Spot == SpotLook.Red) return new HitColors(Palette.SpotRed, Palette.SpotRedHot, HitFlair.Flame);
+            return new HitColors(Palette.SpotGold, Palette.SpotGoldHot, HitFlair.Sparkle);
+        }
+
         //Stage Hit : a hit lands at a point (where the fighters stand). The dark is thrown (back when the band hits),
         //a shock wave runs out, the camera nudges towards it and a light flashes there.
         private void StageHit(Vector2 at, bool bandHits, float power)
+        {
+            StageHit(at, bandHits, power, Color.White);
+        }
+
+        //Stage Hit In Colour : the flash of light takes the striker's colour (half way to white, so it still reads as light)
+        private void StageHit(Vector2 at, bool bandHits, float power, Color light)
         {
             dark.Hit(at - Camera() * BattleRules.StageParallax[3], bandHits, power);
 
@@ -271,10 +287,10 @@ namespace Tacetno433.Screens
             if (toward.LengthSquared() > 1f) toward.Normalize();
             kick += toward * BattleRules.StageKick * power;
 
-            AddStageLight(at, 150f + 90f * power, BattleRules.StageHitLight * power, BattleRules.StageHitLightTime);
+            AddStageLight(at, 150f + 90f * power, BattleRules.StageHitLight * power, BattleRules.StageHitLightTime, Color.Lerp(Color.White, light, 0.5f));
         }
 
-        private void AddStageLight(Vector2 at, float radius, float power, float length)
+        private void AddStageLight(Vector2 at, float radius, float power, float length, Color tint)
         {
             int slot = 0;
             for (int i = 1; i < stageLights.Length; i++)
@@ -284,6 +300,7 @@ namespace Tacetno433.Screens
             stageLights[slot].Power = power * Flashing;
             stageLights[slot].Life = length;
             stageLights[slot].Length = length;
+            stageLights[slot].Tint = tint;
         }
 
         //======================================================================================
@@ -661,7 +678,7 @@ namespace Tacetno433.Screens
                 StageLight l = stageLights[i];
                 if (l.Life <= 0f) continue;
                 float left = l.Life / l.Length;
-                Gfx.DrawGlow(sb, l.At.X - near.X, l.At.Y - near.Y, l.Radius, Color.White * (l.Power * left * left));
+                Gfx.DrawGlow(sb, l.At.X - near.X, l.At.Y - near.Y, l.Radius, l.Tint * (l.Power * left * left));
             }
         }
     }

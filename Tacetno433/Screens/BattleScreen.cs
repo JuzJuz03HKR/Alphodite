@@ -186,6 +186,12 @@ namespace Tacetno433.Screens
         }
 
         //Can Pause : not in PRACTICE, where ESC leaves like on every tutorial page
+        //Shows Grain : the battle has its own film grain (Post.fx), the page-wide specks only cluttered it (round 4)
+        public override bool ShowsGrain
+        {
+            get { return false; }
+        }
+
         public override bool CanPause
         {
             get { return !practice && (battle == null || (battle.Step != TurnStep.Won && battle.Step != TurnStep.Lost)); }   // no pause once it is decided
@@ -903,7 +909,8 @@ namespace Tacetno433.Screens
                 battle.ParryNote(next, grade);
                 judgeWord = grade == Grade.Perfect ? "PARRY" : (grade == Grade.Good ? "GOOD" : "MISS");
                 if (grade == Grade.Perfect) qteEffects.SpawnSparks(HitX, HitY, 10, 1f);
-                if (grade == Grade.Perfect || grade == Grade.Good) qteHits.Clash(new Vector2(HitX, HitY), grade == Grade.Perfect && rightSize, Color.White);   // the parry's clash
+                if (grade == Grade.Perfect || grade == Grade.Good)                       // the parry's clash, in the colours of the one who parried
+                    qteHits.Clash(new Vector2(HitX, HitY), grade == Grade.Perfect && rightSize, SpotOf(battle.Current != null ? battle.Current.IntentTarget : null));
                 ShowEvents();
             }
             else
@@ -1005,19 +1012,24 @@ namespace Tacetno433.Screens
 
                 if (e.Kind == TurnEventKind.Damage)
                 {
+                    //The striker's colours : a musician's own colour on an enemy (round 4 : the number too),
+                    //white for the SIGNATURE, TACET's INK on a musician
+                    HitColors colors = e.Who.IsEnemy && !hitSignature ? SpotOf(hitBy) : HitColors.Plain;
+
                     //A hit : a pixel number (bigger for a big hit), the fighter flashes and is knocked back
-                    SpawnNumber(new Vector2(x, y), e.Amount, false, e.Amount >= BattleRules.TurnBigHit || hitSignature, e.Who.IsEnemy ? Palette.Highlight : Palette.PaperDim);
+                    Color number = e.Who.IsEnemy ? (hitSignature ? Palette.Highlight : colors.Tint) : Palette.PaperDim;
+                    SpawnNumber(new Vector2(x, y), e.Amount, false, e.Amount >= BattleRules.TurnBigHit || hitSignature, number);
                     if (look != null)
                     {
                         look.Flash = 1f;
                         look.Knock = 1f;
                     }
-                    StageHit(new Vector2(x, box.Center.Y), e.Who.IsEnemy, 0.4f + Math.Min(0.6f, e.Amount / 30f));
+                    StageHit(new Vector2(x, box.Center.Y), e.Who.IsEnemy, 0.4f + Math.Min(0.6f, e.Amount / 30f), colors.Tint);
                     if (!e.Who.Down) PlayArt(e.Who, "hurt");
 
                     //The blow's light : the striker's style on an enemy, TACET's INK on a musician (Core/HitFx.cs)
                     HitStyle style = !e.Who.IsEnemy ? HitStyle.Ink : (hitSignature ? HitStyle.Cross : StyleOf(hitBy));
-                    hits.Hit(style, DrawBox(e.Who), 0.4f + Math.Min(0.8f, e.Amount / 25f), Color.White);
+                    hits.Hit(style, DrawBox(e.Who), 0.4f + Math.Min(0.8f, e.Amount / 25f), colors);
                     if (e.Who.IsEnemy)
                     {
                         if (barPlaying)
@@ -1320,15 +1332,21 @@ namespace Tacetno433.Screens
                 battle.Party[0].Guard = true;
                 battle.Events.Clear();
             }
-            else if (name == "battleslash" || name == "battleshot" || name == "battlesmash" || name == "battlecross" || name == "battleink")
+            else if (name == "battleslash" || name == "battleshot" || name == "battlesmash" || name == "battlecross" || name == "battleink"
+                     || name == "battlegold" || name == "battlefire")
             {
-                //Beta1 round 4 : one blow of each style on the front enemy (or the front musician for INK), for pictures
-                HitStyle style = name == "battleslash" ? HitStyle.Slash : name == "battleshot" ? HitStyle.Shot
+                //Beta1 round 4 : one blow of each style on the front enemy (or the front musician for INK), for pictures.
+                //battlegold = a SLASH in GOLD with its sparkles, battlefire = a SHOT in RED with its flames.
+                HitStyle style = name == "battleslash" || name == "battlegold" ? HitStyle.Slash : name == "battleshot" || name == "battlefire" ? HitStyle.Shot
                                : name == "battlesmash" ? HitStyle.Smash : name == "battlecross" ? HitStyle.Cross : HitStyle.Ink;
+                HitColors colors = name == "battlegold" ? new HitColors(Palette.SpotGold, Palette.SpotGoldHot, HitFlair.Sparkle)
+                                 : name == "battlefire" ? new HitColors(Palette.SpotRed, Palette.SpotRedHot, HitFlair.Flame) : HitColors.Plain;
                 Fighter at = style == HitStyle.Ink ? battle.Party[0] : battle.Enemies[0];
                 if (style == HitStyle.Ink) fore = at;
-                hits.Hit(style, BoxOf(at), 1f, Color.White);
-                StageHit(BoxOf(at).Center.ToVector2(), style != HitStyle.Ink, 1f);
+                Rectangle box = BoxOf(at);
+                hits.Hit(style, box, 1f, colors);
+                StageHit(box.Center.ToVector2(), style != HitStyle.Ink, 1f, colors.Tint);
+                if (style != HitStyle.Ink) SpawnNumber(new Vector2(box.Center.X, box.Y - 34), 24, false, true, name == "battlegold" || name == "battlefire" ? colors.Tint : Palette.Highlight);
             }
             else if (name == "battlewin" || name == "battlelose")
             {

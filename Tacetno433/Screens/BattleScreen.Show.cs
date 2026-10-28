@@ -12,8 +12,8 @@ namespace Tacetno433.Screens
     //               QTE FOCUS has dimmed it, so they always shine
     //   CUT-IN      the SIGNATURE starts with the conductor's picture sliding across on a slanted band, the same
     //               as the old duel (the user asked for it to stay), then the strokes begin
-    //   NUMBERS     damage as chunky pixel numbers with a dark outline (Core/PixelDigits.cs). They pop in too big,
-    //               settle, shudder for a moment, rise and fade. A big hit is bigger.
+    //   NUMBERS     damage as chunky pixel numbers with a dark outline (Core/PixelDigits.cs), in the striker's colour.
+    //               They pop in too big, settle, shudder for a moment, rise and fade. A big hit is bigger.
     public partial class BattleScreen
     {
         //Number : one damage or heal number over a fighter
@@ -52,8 +52,7 @@ namespace Tacetno433.Screens
                 float rise = 34f * (1f - (1f - t / life) * (1f - t / life));
                 float shudder = t < 0.14f ? (float)Math.Sin(t * 130f) * 3f * (1f - t / 0.14f) : 0f;
                 float a = t > life - 0.25f ? (life - t) / 0.25f : 1f;
-                float cell = (n.Big ? 8f : 6f) * scale;
-                cell = Math.Max(2f, (float)Math.Floor(cell * 0.5f) * 2f);            // whole pixels of the art
+                float cell = (n.Big ? BattleRules.TurnNumberBigCell : BattleRules.TurnNumberCell) * scale;
                 PixelDigits.Draw(sb, n.Value, n.Plus, n.At.X + shudder, n.At.Y - rise, cell, n.Tint * a, Color.Black * (0.9f * a));
             }
         }

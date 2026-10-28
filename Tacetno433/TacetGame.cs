@@ -296,7 +296,7 @@ namespace Tacetno433
             if (Pause.Open) Pause.Draw(spriteBatch);
 
             //Grain : one layer of film grain over every page, so flat greys feel like print
-            Ornament.Grain(spriteBatch);
+            if (Screens.ShowsGrain) Ornament.Grain(spriteBatch);
 
             if (showDebug)
             {
