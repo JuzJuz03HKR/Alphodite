@@ -21,7 +21,6 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 28 ต.ค. | Beta1 คุยแผนยกระดับทุกหน้าจอ (ยังไม่แตะโค้ด จนกว่าผู้ใช้เลือกแผน) | `docs/` (แผน) · ต่อไปอาจเป็น `Tacetno433/Screens/*` ยกเว้น `BattleScreen*` |
 
 ---
 
@@ -37,6 +36,7 @@ Beta1 คือการทำเกมให้สุดเหมือนเ�
 1. CLAUDE.md ที่ราก repo (หัวข้อ 00 กับ 0 สำคัญที่สุด)
 2. docs/RESUME_PROMPT.md หัวข้อ "สถานะล่าสุด"
 3. docs/BATTLE_SCENE_2_3D_CHANGE.md ข้อ 9 ขึ้นไป และ docs/BATTLE_ART_PLAN.md
+4. docs/SCREENS_LEVEL_UP.md (งานยกระดับทุกหน้าจอให้เข้ากับฉากต่อสู้ใหม่ เริ่มที่ข้อ 9)
 เอกสารอื่นอ่านเมื่องานต้องใช้
 
 แล้วเช็กให้ฉัน
@@ -54,13 +54,20 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 
 ```text
 ทำงานต่อเกม TACET 4'33 บน branch Beta1 (ฉากต่อสู้ใหม่ ทำให้สุด)
-อ่าน CLAUDE.md หัวข้อ 00 กับ 0 และ docs/RESUME_PROMPT.md หัวข้อ "สถานะล่าสุด" แล้วทำงานที่ค้างอยู่ต่อ
+อ่าน CLAUDE.md หัวข้อ 00 กับ 0 และ docs/RESUME_PROMPT.md หัวข้อ "สถานะล่าสุด" (งานยกระดับหน้าจอดู docs/SCREENS_LEVEL_UP.md) แล้วทำงานที่ค้างอยู่ต่อ
 เช็ก git ก่อนว่ามีไฟล์ค้าง commit ไหม ถ้าไม่แน่ใจว่างานไหนค้าง ให้ถามฉันก่อน
 ```
 
 ---
 
 ## สถานะล่าสุด (28 ต.ค.)
+
+**28 ต.ค. (ล่าสุด) : คุยแผนยกระดับทุกหน้าจอ ผู้ใช้ตัดสินครบ 5 ข้อ ยังไม่ได้เขียนโค้ด** (คำต่อคำ `USER_BRIEFS.md` 13.5 · แผนเต็ม `docs/SCREENS_LEVEL_UP.md`)
+✅ build ใน cloud 0/0 แคปทุกหน้า สรุปสิ่งที่เห็น 8 ข้อ (แผนข้อ 2) : มีแค่หน้าต่อสู้ที่ผ่าน `PostChain` · ความมืด TACET 3 แบบปนกัน (`TacetVoid` / `Hollow` / `TacetField`) · chibi ยังอยู่ BandName Band CurtainCall Recruit · สีตัวละครมีแค่หน้าต่อสู้ · กรอบภาพว่างเยอะ · ยังไม่มีจังหวะ UI ร่วม · เต็มจอแล้วเบลอ (`TacetGame.cs` บรรทัด 331 ยืด 1280×720 ด้วย LinearClamp) · ฟอนต์ Palatino/Bahnschrift ของ Windows ห้ามแจกถ้าจะขาย
+✅ ผู้ใช้ตัดสิน : ทิศทาง **แบบผสม** (โครงตามหน้าต่อสู้ + เปลี่ยนหน้าและการเลือกจัดจ้านแบบ Persona 5 ZZZ Limbus) · รอบแรก = **ชั้นกลาง + Title + Result เป็นตัวอย่าง** ให้ Rebuild ดูก่อน · ฟอนต์ **OFL มีตัวไทยคู่กัน** Claude ทำภาพเทียบ 3 คู่ให้เลือก · ภาพหน้าตัวละครใน UI **เป็น pixel** · **PLAYTEST SIGNATURE คงไว้ 1** ห้ามแก้จนผู้ใช้บอก
+✅ ภาพอ้างอิงใหม่ : Google Drive "TACET Game REF" > "ทิศทางหน้าตาของทุกหน้า (เดี๋ยวจะหามาให้เพิ่มอีก)" `game menu1–8.jpg` (menu4 เป็น `.mp4` แตกภาพด้วย ffmpeg) **ยังไม่ได้ดู** ผู้ใช้จะหามาเพิ่ม
+⚠️ ยังเปิด : แถบการ์ดของวง (ผู้ใช้ยังไม่เล่า) · chibi เดิมเอาออกเลยหรือรอภาพหน้า pixel · รูปแบบแผนที่ตัดสินตอนคุยระบบใหม่ · Context7 key ยังผิด (`Invalid API key ... 'ctx7sk'` ผู้ใช้ต้องแก้ช่อง Value ใน Network secrets) · เครื่อง cloud ใหม่ต้อง `apt-get update` ก่อนลง dotnet-sdk-8.0
+**งานถัดไป (แชทใหม่)** : ทำตาม `SCREENS_LEVEL_UP.md` ข้อ 9 : เตรียม build + `shader_setup.sh` → แคปทุกหน้าไว้เทียบ → ดูภาพอ้างอิงใน Drive สรุปสเปก (รูปทรง เวลา easing) ให้ผู้ใช้ยืนยัน → ภาพเทียบฟอนต์ 3 คู่ (Python PIL, TTF จาก github.com/google/fonts) ให้ผู้ใช้เลือก → ชั้นกลาง (ฟอนต์ใน `Content/Fonts/`, `ScreenManager` ใช้ `PostChain` ทุกหน้า, `TacetVoid` แทน `Hollow`/`TacetField`, `Core/Ui.cs` + ไฟล์ motion ใหม่, ตัวเลขใน `BattleRules` หัวข้อ UI Feel) + `TitleScreen` + `ResultScreen` → build 0/0 turncheck savecheck แคปเทียบ แล้วให้ผู้ใช้ Rebuild
 
 **28 ต.ค. (ล่าสุด) : /update ปิดแชท Beta1 รอบ 4–6 ผู้ใช้ : "คิดว่าตอนนี้การนำเสนอโอเคแล้ว แต่อาจจะต้องมีการ improve หน้าจอทั้งหมดขึ้นอีกหนึ่งระดับ"** (คำต่อคำ `USER_BRIEFS.md` 13.4)
 ✅ แชทนี้ทำ (ทั้งหมดอยู่บน GitHub `Beta1`) : ความมืดหลุมดำ (`TacetVoid` `Void.fx`) · VFX ตอนตี (`HitFx`) สีของตัวละคร ทอง/แดง · QTE กลางจอ · transition ช้าและนุ่ม · cut-in SIGNATURE · ปัด CLASH · ตัวเลข pixel · ศัตรูสลายเข้าหลุม · ลำแสง · LESS FLASHING · impact frame แบบหน้ามังงะ + ซูม + เบลอ · LIGHTNING สีฟ้าเรืองแสงของ THE UNHEARING · แผนที่โค้ดใหม่ `HANDOFF.md` ข้อ 0.0
