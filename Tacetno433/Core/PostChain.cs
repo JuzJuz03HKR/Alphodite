@@ -97,9 +97,18 @@ namespace Tacetno433.Core
             sb.End();
         }
 
+        //Impact Look : the IMPACT FRAME's steps for Post.fx (Core/HitFx.cs works them out)
+        public struct ImpactLook
+        {
+            public float Turn;        // 1 = the picture turned over
+            public float Flash;       // the white, 0..1
+            public float Blur;        // the smear towards the blow, 0..1
+            public Vector2 Center;    // where the blow landed, 0..1 of the screen
+        }
+
         //Finish : SCENE and LIGHT MAP into FINAL. focus 0..1 is the QTE FOCUS, engulf 0..1 how far TACET's dark
-        //has crept in from the screen's edges (ENGULF), impact 1 turns the picture over for the IMPACT FRAME.
-        public static void Finish(GraphicsDevice device, SpriteBatch sb, float time, float focus, float engulf, float impact,
+        //has crept in from the screen's edges (ENGULF), impact the IMPACT FRAME.
+        public static void Finish(GraphicsDevice device, SpriteBatch sb, float time, float focus, float engulf, ImpactLook impact,
                                   float bloomThreshold, float bloomStrength, float vignette, float grain)
         {
             if (Fx.Ready) FinishWithShaders(device, sb, time, focus, engulf, impact, bloomThreshold, bloomStrength, vignette, grain);
@@ -114,7 +123,7 @@ namespace Tacetno433.Core
         }
 
         //Finish With Shaders : Down, Blur across, Blur down, Blur across again wider, Blur down, Composite
-        private static void FinishWithShaders(GraphicsDevice device, SpriteBatch sb, float time, float focus, float engulf, float impact,
+        private static void FinishWithShaders(GraphicsDevice device, SpriteBatch sb, float time, float focus, float engulf, ImpactLook impact,
                                               float bloomThreshold, float bloomStrength, float vignette, float grain)
         {
             Effect post = Fx.Post;
@@ -149,7 +158,10 @@ namespace Tacetno433.Core
             post.Parameters["Grain"].SetValue(grain);
             post.Parameters["Time"].SetValue(time);
             post.Parameters["Engulf"].SetValue(MathHelper.Clamp(engulf, 0f, 1f));
-            post.Parameters["Impact"].SetValue(MathHelper.Clamp(impact, 0f, 1f));
+            post.Parameters["Impact"].SetValue(MathHelper.Clamp(impact.Turn, 0f, 1f));
+            post.Parameters["Flash"].SetValue(MathHelper.Clamp(impact.Flash, 0f, 1f));
+            post.Parameters["Blur"].SetValue(MathHelper.Clamp(impact.Blur, 0f, 1f));
+            post.Parameters["Center"].SetValue(impact.Center);
             post.Parameters["NoiseTexture"].SetValue(Fx.Noise);
             sb.Begin(SpriteSortMode.Immediate, BlendState.Opaque, SamplerState.LinearClamp, null, null, post);
             device.SamplerStates[1] = SamplerState.LinearClamp;

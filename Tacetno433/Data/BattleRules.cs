@@ -270,7 +270,14 @@
         //strikes and the light happens on the enemy. Strings SLASH, winds SHOT, percussion SMASH, the SIGNATURE CROSS.
         public static float HitSize = 105f;               // the size of a blow's light (pixels), more for a stronger blow
         public static float HitCrossLength = 1500f;       // CROSS : how far the SIGNATURE's two cuts reach each way
-        public static float HitImpactTime = 0.06f;        // IMPACT FRAME : how long the world stays turned over (seconds)
+        public static float HitImpactTurn = 0.07f;        // IMPACT FRAME (round 6 : more impact, a little longer) : the world turned over (seconds)
+        public static float HitImpactFlash = 0.05f;       //   then a frame of white
+        public static float HitImpactTurn2 = 0.06f;       //   then turned over again
+        public static float HitImpactSettle = 0.38f;      //   then the white fades, the camera eases back and the smear clears
+        public static float HitImpactHold = 0.18f;        //   the world holds still (hit stop) through the turns and the flash
+        public static float HitImpactZoom = 0.06f;        //   the camera punches in this much (6%)
+        public static float HitBoltStagger = 0.08f;       // LIGHTNING : one enemy after another, this far apart (seconds)
+        public static float HitBoltFlash = 0.7f;          //   the whole stage lights up when it strikes (LIGHT MAP)
         public static float LessFlash = 0.45f;            // LESS FLASHING (settings) : flashes and shaking are this strong
 
         //Stage Void (Beta1 round 4) : TACET's dark, a black hole behind the enemies pouring over the floor towards the camera

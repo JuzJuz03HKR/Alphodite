@@ -6,7 +6,7 @@ using Tacetno433.Data;
 namespace Tacetno433.Core
 {
     //Hit Style : how a blow looks where it lands (HitFx)
-    public enum HitStyle { Slash, Shot, Smash, Cross, Ink }
+    public enum HitStyle { Slash, Shot, Smash, Cross, Ink, Lightning }
 
     //Hit Flair : what a musician's own colour adds to every blow (round 4, the user asked) :
     //SPARKLE = golden twinkles and glitter, FLAME = tongues of fire and embers
@@ -35,11 +35,15 @@ namespace Tacetno433.Core
     //   SHOT    winds : sharp spikes burst out of one point, a round glow, a ring, sparks sprayed the way the blow went
     //   SMASH   percussion : a heavy blow from above, a ring on the floor, shards of glass thrown up and falling
     //   CROSS   the SIGNATURE : two cuts across the whole screen crossing on the enemy, a four pointed star where they cross
+    //   LIGHTNING  THE UNHEARING's SIGNATURE (round 6) : a bolt from the sky onto every enemy, one after another, striking
+    //           again along the same channel, small arcs crawling where it struck
     //   INK     TACET's blow on a musician : white cracks and a ring, dark drops falling
     //   PULL    an enemy SILENCED : specks of it are drawn off into TACET's hole
     //   STAR    a four pointed twinkle, for a perfect note or a big moment
     //   FOCUS   lines rushing in to the point of a big blow, like a comic
-    //   IMPACT  a frame or two of the world turned over, black and white (IMPACT FRAME, Post.fx)
+    //   IMPACT  a big blow's moment (IMPACT FRAME, Post.fx) : the world turned over black and white, a frame of white,
+    //           turned over again, then the white fades while the camera punches in and the world is smeared towards
+    //           the blow (round 6 : the user asked for more impact and a little longer)
     //Every blow is in the striker's colours (Hit Colors) : the glow in its colour, the core hot, and its FLAIR on top,
     //golden SPARKLES or FLAMES. Everything is lines, squares and the soft Glow texture, drawn into the GLOW layer so it
     //shines and blooms (the INK drops go into the SCENE). Every piece sits on the art's 2 x 2 grid (PIXEL x2) and the
@@ -115,6 +119,36 @@ namespace Tacetno433.Core
             public Color Tint, Hot;
         }
 
+        //Bolt : one stroke of LIGHTNING. The channel is jagged (MIDPOINT DISPLACEMENT, see Make Channel) with a few
+        //branches. It strikes, goes out, strikes again along the same channel (RE-STRIKES, real lightning does this),
+        //then fades as an afterglow.
+        private const int BoltPoints = 33;          // 2^5 + 1 : the channel is halved five times
+        private const int BranchPoints = 9;         // 2^3 + 1
+        private const int Branches = 3;
+        private const float BoltLife = 0.6f;
+        private struct Bolt
+        {
+            public bool On;
+            public Vector2[] Main;
+            public Vector2[][] Branch;
+            public Vector2 At;         // where it struck
+            public float Age, Size;
+            public int Seed;
+            public Color Tint, Hot;
+        }
+        private readonly Bolt[] bolts = new Bolt[8];
+
+        //Pending : a blow waiting a moment before it lands (the LIGHTNING strikes one enemy after another)
+        private struct Pending
+        {
+            public bool On;
+            public HitStyle Style;
+            public Rectangle Box;
+            public float Power, Wait;
+            public HitColors Colors;
+        }
+        private readonly Pending[] pending = new Pending[8];
+
         private readonly Stroke[] strokes = new Stroke[32];
         private readonly Burst[] bursts = new Burst[16];
         private readonly Ring[] rings = new Ring[16];
@@ -127,11 +161,80 @@ namespace Tacetno433.Core
         private Vector2 focusAt;
         private float focusAge = 99f;
 
-        //IMPACT FRAME : how long the world stays turned over
-        private float impactLeft;
+        //IMPACT FRAME : its clock and where the blow landed (in the fighters' layer, like every blow here)
+        private float impactAge = 99f;
+        private Vector2 impactAt;
+
+        //The steps, from BattleRules : TURN, FLASH, TURN again, then SETTLE
+        private static float TurnEnd { get { return BattleRules.HitImpactTurn; } }
+        private static float FlashEnd { get { return TurnEnd + BattleRules.HitImpactFlash; } }
+        private static float SecondEnd { get { return FlashEnd + BattleRules.HitImpactTurn2; } }
+        private static float ImpactEnd { get { return SecondEnd + BattleRules.HitImpactSettle; } }
+
+        //Impact : 1 while the world is turned over (none with LESS FLASHING)
         public float Impact
         {
-            get { return impactLeft > 0f ? 1f : 0f; }
+            get
+            {
+                if (Settings.ReduceFlashing) return 0f;
+                float t = impactAge;
+                return t < TurnEnd || (t >= FlashEnd && t < SecondEnd) ? 1f : 0f;
+            }
+        }
+
+        //Impact Flash : the frame of white between the two turns, then a white glare fading while it settles
+        public float ImpactFlash
+        {
+            get
+            {
+                if (Settings.ReduceFlashing) return 0f;
+                float t = impactAge;
+                if (t >= TurnEnd && t < FlashEnd) return 1f;
+                if (t >= SecondEnd && t < ImpactEnd)
+                {
+                    float k = 1f - (t - SecondEnd) / BattleRules.HitImpactSettle;
+                    return 0.6f * k * k;
+                }
+                return 0f;
+            }
+        }
+
+        //Impact Blur : the world smeared towards the blow, strongest at once and easing away (half with LESS FLASHING)
+        public float ImpactBlur
+        {
+            get
+            {
+                if (impactAge >= ImpactEnd) return 0f;
+                float k = 1f - impactAge / ImpactEnd;
+                return k * k * (Settings.ReduceFlashing ? 0.5f : 1f);
+            }
+        }
+
+        //Impact Zoom : the camera punches in at once and eases back out (0..1, BattleRules.HitImpactZoom says how far)
+        public float ImpactZoom
+        {
+            get
+            {
+                if (impactAge >= ImpactEnd) return 0f;
+                float k = 1f - impactAge / ImpactEnd;
+                return k * k * k * (Settings.ReduceFlashing ? 0.5f : 1f);
+            }
+        }
+
+        //Impact At : where the blow landed, in the fighters' layer
+        public Vector2 ImpactAt
+        {
+            get { return impactAt; }
+        }
+
+        public HitFx()
+        {
+            for (int i = 0; i < bolts.Length; i++)
+            {
+                bolts[i].Main = new Vector2[BoltPoints];
+                bolts[i].Branch = new Vector2[Branches][];
+                for (int k = 0; k < Branches; k++) bolts[i].Branch[k] = new Vector2[BranchPoints];
+            }
         }
 
         //Stroke Times : draw on, hold, wipe off (seconds)
@@ -202,7 +305,23 @@ namespace Tacetno433.Core
                 Throw(at, -wayB, 16, 700f, Streak, c);
                 Throw(at, new Vector2(0f, -1f), 14, 420f, Shard, c);
                 Focus(at);
-                ImpactFrame();
+                ImpactFrame(at);
+            }
+            else if (style == HitStyle.Lightning)
+            {
+                //LIGHTNING : a bolt from the sky onto the enemy, the ground lit and ringing where it lands
+                Vector2 feet = new Vector2(box.Center.X, box.Bottom - 6f);
+                Vector2 struck = new Vector2(box.Center.X, box.Y + box.Height * 0.3f);
+                Strike(struck, box.Width * 0.5f, c);
+                AddBurst(struck, size * 1.4f, -MathHelper.PiOver2, 1.6f, 20, 5f, 0.36f, c);
+                Star(struck, size * 1.9f, c);
+                AddRing(feet, size * 2.3f, 0.24f, 4f, 0.5f, c.Tint);
+                AddRing(feet, size * 1.3f, 0.24f, 2f, 0.36f, c.Hot);
+                Throw(struck, new Vector2(0f, 1f), 18, 560f, Streak, c);
+                Throw(feet, new Vector2(0f, -1f), 18, 360f, Spark, c);
+                Throw(struck, new Vector2(0f, -1f), 10, 420f, Shard, c);
+                ImpactFrame(struck);
+                return;
             }
             else
             {
@@ -281,11 +400,80 @@ namespace Tacetno433.Core
             focusAge = 0f;
         }
 
-        //Impact Frame : the world turns over for a frame or two (none when the player asked for less flashing)
-        public void ImpactFrame()
+        //Impact Frame : the IMPACT FRAME starts, round the blow at (with LESS FLASHING only the softer punch and smear)
+        public void ImpactFrame(Vector2 at)
         {
-            if (Settings.ReduceFlashing) return;
-            impactLeft = BattleRules.HitImpactTime;
+            if (impactAge < SecondEnd) return;            // one is already turning : the next bolt of the same SIGNATURE joins it
+            impactAge = 0f;
+            impactAt = at;
+        }
+
+        //Hit Later : the same as Hit, wait seconds from now (the LIGHTNING strikes the enemies one after another)
+        public void HitLater(HitStyle style, Rectangle box, float power, HitColors c, float wait)
+        {
+            if (wait <= 0f)
+            {
+                Hit(style, box, power, c);
+                return;
+            }
+            int slot = 0;
+            for (int i = 0; i < pending.Length; i++)
+                if (!pending[i].On) { slot = i; break; }
+            pending[slot] = new Pending { On = true, Style = style, Box = box, Power = power, Wait = wait, Colors = c };
+        }
+
+        //Strike : a new bolt from above the screen down to at. size is how wide the arcs crawl round it.
+        private void Strike(Vector2 at, float size, HitColors c)
+        {
+            int slot = 0;
+            for (int i = 0; i < bolts.Length; i++)
+                if (!bolts[i].On) { slot = i; break; }
+
+            //The channel : from high above, a little to one side, down to the enemy
+            Vector2 top = new Vector2(at.X + ((float)random.NextDouble() - 0.5f) * 260f, -80f);
+            MakeChannel(bolts[slot].Main, BoltPoints, top, at, 0.55f);
+
+            //Branches : off the upper two thirds of the channel, angled down and away, shorter and fainter
+            for (int k = 0; k < Branches; k++)
+            {
+                int from = 6 + random.Next(16);
+                Vector2 along = bolts[slot].Main[from + 1] - bolts[slot].Main[from - 1];
+                float angle = (float)Math.Atan2(along.Y, along.X) + (random.Next(2) == 0 ? -1f : 1f) * (0.45f + 0.45f * (float)random.NextDouble());
+                float reach = 50f + 110f * (float)random.NextDouble();
+                Vector2 end = bolts[slot].Main[from] + new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)) * reach;
+                MakeChannel(bolts[slot].Branch[k], BranchPoints, bolts[slot].Main[from], end, 0.6f);
+            }
+
+            bolts[slot].On = true;
+            bolts[slot].At = at;
+            bolts[slot].Age = 0f;
+            bolts[slot].Size = size;
+            bolts[slot].Seed = random.Next(1000);
+            bolts[slot].Tint = c.Tint;
+            bolts[slot].Hot = c.Hot;
+        }
+
+        //Make Channel : a jagged line from from to to, count = 2^n + 1 points.
+        //ADVANCED PART : MIDPOINT DISPLACEMENT. Start with the two ends. Put a point half way between every pair and push
+        //it sideways by a random amount that is a share (rough) of that pair's distance. Do it again on the halves, and
+        //again... Each round the pushes get smaller with the pieces, so the line is jagged at every size, like lightning.
+        private void MakeChannel(Vector2[] points, int count, Vector2 from, Vector2 to, float rough)
+        {
+            int last = count - 1;
+            points[0] = from;
+            points[last] = to;
+            for (int size = last; size >= 2; size /= 2)
+            {
+                for (int i = 0; i + size <= last; i += size)
+                {
+                    Vector2 a = points[i];
+                    Vector2 b = points[i + size];
+                    Vector2 d = b - a;
+                    float length = d.Length();
+                    Vector2 side = length > 0.01f ? new Vector2(-d.Y, d.X) / length : Vector2.Zero;
+                    points[i + size / 2] = (a + b) * 0.5f + side * ((float)random.NextDouble() - 0.5f) * length * rough;
+                }
+            }
         }
 
         //======================================================================================
@@ -413,8 +601,24 @@ namespace Tacetno433.Core
         //the fire hold still.
         public void Update(float dt, bool frozen)
         {
-            if (impactLeft > 0f) impactLeft -= dt;
+            impactAge += dt;
             focusAge += dt;
+
+            //Pending blows land when their wait is over (the clock runs through the hit stop, they are part of it)
+            for (int i = 0; i < pending.Length; i++)
+            {
+                if (!pending[i].On) continue;
+                pending[i].Wait -= dt;
+                if (pending[i].Wait > 0f) continue;
+                pending[i].On = false;
+                Hit(pending[i].Style, pending[i].Box, pending[i].Power, pending[i].Colors);
+            }
+            for (int i = 0; i < bolts.Length; i++)
+            {
+                if (!bolts[i].On) continue;
+                bolts[i].Age += dt;
+                if (bolts[i].Age > BoltLife) bolts[i].On = false;
+            }
 
             for (int i = 0; i < strokes.Length; i++)
             {
@@ -503,8 +707,10 @@ namespace Tacetno433.Core
             for (int i = 0; i < bits.Length; i++) bits[i].On = false;
             for (int i = 0; i < twinkles.Length; i++) twinkles[i].On = false;
             for (int i = 0; i < flames.Length; i++) flames[i].On = false;
+            for (int i = 0; i < bolts.Length; i++) bolts[i].On = false;
+            for (int i = 0; i < pending.Length; i++) pending[i].On = false;
             focusAge = 99f;
-            impactLeft = 0f;
+            impactAge = 99f;
         }
 
         //======================================================================================
@@ -519,6 +725,7 @@ namespace Tacetno433.Core
             for (int i = 0; i < rings.Length; i++) if (rings[i].On) DrawRing(sb, rings[i]);
             for (int i = 0; i < bursts.Length; i++) if (bursts[i].On) DrawBurst(sb, bursts[i]);
             for (int i = 0; i < strokes.Length; i++) if (strokes[i].On && strokes[i].Age > 0f) DrawStroke(sb, strokes[i]);
+            for (int i = 0; i < bolts.Length; i++) if (bolts[i].On) DrawBolt(sb, bolts[i]);
             for (int i = 0; i < twinkles.Length; i++) if (twinkles[i].On && twinkles[i].Age >= 0f) DrawTwinkle(sb, twinkles[i]);
             for (int i = 0; i < bits.Length; i++) if (bits[i].On && bits[i].Kind != Ink) DrawBit(sb, bits[i]);
         }
@@ -721,6 +928,59 @@ namespace Tacetno433.Core
             if (t < 0.2f) return Color.Lerp(new Color(255, 248, 220), hot, t / 0.2f);
             if (t < 0.55f) return Color.Lerp(hot, tint, (t - 0.2f) / 0.35f);
             return Color.Lerp(tint, Color.Black, MathHelper.Clamp((t - 0.55f) / 0.45f, 0f, 1f));
+        }
+
+        //Draw Bolt : the channel and its branches, each as a wide dim glow, a hot middle and a white core, lit by
+        //Bolt Light. Small arcs crawl round where it struck, jumping twenty times a second.
+        private static void DrawBolt(SpriteBatch sb, Bolt b)
+        {
+            float lit = BoltLight(b.Age);
+            if (lit > 0.01f)
+            {
+                DrawChannel(sb, b.Main, BoltPoints, b.Tint, b.Hot, lit, 1f);
+                for (int k = 0; k < Branches; k++) DrawChannel(sb, b.Branch[k], BranchPoints, b.Tint, b.Hot, lit * 0.75f, 0.5f);
+            }
+
+            //Arcs : stateless, so nothing has to be stored : the hash of the bolt and the tick gives each zigzag
+            if (b.Age < 0.05f) return;
+            float fade = 1f - b.Age / BoltLife;
+            int tick = (int)(b.Age * 20f);
+            for (int k = 0; k < 4; k++)
+            {
+                Vector2 p = b.At + new Vector2((Hash(b.Seed + k, tick) - 0.5f) * b.Size * 1.8f, (Hash(b.Seed + k * 7, tick + 3) - 0.2f) * b.Size * 2.4f);
+                for (int s = 0; s < 4; s++)
+                {
+                    float a = Hash(b.Seed + k * 13 + s, tick) * MathHelper.TwoPi;
+                    Vector2 q = p + new Vector2((float)Math.Cos(a), (float)Math.Sin(a)) * 12f;
+                    Gfx.Line(sb, Snap(p), Snap(q), b.Hot * (0.9f * fade), 2f);
+                    p = q;
+                }
+            }
+        }
+
+        //Bolt Light : strike, out, strike again, out, a last strike, then the afterglow fading
+        private static float BoltLight(float t)
+        {
+            if (t < 0.06f) return 1f;
+            if (t < 0.09f) return 0.12f;
+            if (t < 0.15f) return 1f;
+            if (t < 0.18f) return 0.18f;
+            if (t < 0.24f) return 0.9f;
+            float k = 1f - (t - 0.24f) / 0.3f;
+            return k > 0f ? 0.65f * k * k : 0f;
+        }
+
+        //Draw Channel : one jagged line of lightning, glow under a hot middle under a white core
+        private static void DrawChannel(SpriteBatch sb, Vector2[] points, int count, Color tint, Color hot, float lit, float width)
+        {
+            for (int i = 0; i < count - 1; i++)
+            {
+                Vector2 a = Snap(points[i]);
+                Vector2 b = Snap(points[i + 1]);
+                Gfx.Line(sb, a, b, tint * (0.22f * lit), 16f * width);
+                Gfx.Line(sb, a, b, hot * (0.75f * lit), 6f * width);
+                Gfx.Line(sb, a, b, Color.White * lit, Math.Max(2f, 2f * width));
+            }
         }
 
         //Draw Focus : thin lines from far out rushing in towards the point, gone in a moment

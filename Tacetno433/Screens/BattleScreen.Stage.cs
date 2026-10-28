@@ -245,6 +245,19 @@ namespace Tacetno433.Screens
             return (e + 0.001f) / (b + e + 0.002f);
         }
 
+        //Impact On Screen : where the IMPACT FRAME's blow landed, on the screen (blows live in the fighters' layer)
+        private Vector2 ImpactOnScreen()
+        {
+            return hits.ImpactAt - stageCam * BattleRules.StageParallax[3];
+        }
+
+        //Signature Style : how the conductor's SIGNATURE lands. LIGHTNING strikes from the sky (THE UNHEARING, round 6),
+        //the others cut a CROSS until they get their own.
+        private HitStyle SignatureStyle()
+        {
+            return battle.Kit == TurnKit.Beethoven ? HitStyle.Lightning : HitStyle.Cross;
+        }
+
         //Style Of : how a musician's blows look, by their instrument's family. Strings cut (SLASH), winds blast (SHOT),
         //percussion strikes from above (SMASH). The enemies' blows on the band are TACET's INK.
         private static HitStyle StyleOf(Fighter f)
@@ -380,7 +393,12 @@ namespace Tacetno433.Screens
             DrawMood(sb);
             sb.End();
 
-            PostChain.Finish(device, sb, time, FocusEased, dark.Engulf, hits.Impact, BattleRules.StageBloomThreshold, BattleRules.StageBloomStrength,
+            PostChain.ImpactLook impact;
+            impact.Turn = hits.Impact;
+            impact.Flash = hits.ImpactFlash;
+            impact.Blur = hits.ImpactBlur;
+            impact.Center = ImpactOnScreen() / new Vector2(TacetGame.ScreenW, TacetGame.ScreenH);
+            PostChain.Finish(device, sb, time, FocusEased, dark.Engulf, impact, BattleRules.StageBloomThreshold, BattleRules.StageBloomStrength,
                              BattleRules.StageVignette, BattleRules.StageGrain);
         }
 

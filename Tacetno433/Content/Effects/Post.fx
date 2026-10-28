@@ -72,6 +72,9 @@ float Grain;            //             film grain strength
 float Time;             //             keeps the grain moving
 float Engulf;           //             ENGULF : 0 = nothing, 1 = TACET's dark has crept far in from the edges
 float Impact;           //             IMPACT FRAME : 1 = the picture turned over for a frame or two
+float Flash;            //             IMPACT FRAME : the frame of white, then its glare fading (0..1)
+float Blur;             //             IMPACT FRAME : the world smeared towards the blow (ZOOM BLUR, 0..1)
+float2 Center;          //             IMPACT FRAME : where the blow landed (0..1 of the screen)
 
 struct VertexShaderOutput
 {
@@ -145,15 +148,30 @@ float4 CompositePS(VertexShaderOutput input) : COLOR0
     c = lerp(c, float3(0.0, 0.0, 0.0), swallowed);
     c += saturate(1.0 - abs(fromEdge - reach) * 450.0) * step(0.001, Engulf) * 0.9;
 
+    //ZOOM BLUR : for a moment after a big blow the world is smeared towards where it landed. The blurred copy is
+    //read six times along the line to the blow and the picture leans towards that average.
+    [branch] if (Blur > 0.001)
+    {
+        float2 toward = (Center - input.UV) * Blur * 0.2;
+        float3 smear = float3(0.0, 0.0, 0.0);
+        [unroll] for (int i = 1; i <= 6; i++)
+            smear += tex2Dlod(SoftSampler, float4(input.UV + toward * (i / 6.0), 0.0, 0.0)).rgb;
+        c = lerp(c, smear / 6.0 * 1.35, Blur * 0.65);
+    }
+
     //VIGNETTE : darker towards the corners, more so in FOCUS
     float2 d = (input.UV - 0.5) * float2(1.25, 1.0);
     float v = saturate(1.0 - dot(d, d) * Vignette * (1.0 + Focus * 1.5));
     c *= v;
 
-    //IMPACT FRAME : the moment of a big blow, like an anime frame : what was dark turns white, what was lit turns black
-    float lum = Luma(saturate(c));
-    float turned = 1.0 - step(0.16, lum);
+    //IMPACT FRAME : the moment of a big blow, like a manga panel : white paper, and black where something bright was
+    //(the lightning, the cuts, the hole's rim, the lines of the fighters). It reads the world before its lights
+    //and bloom, or the flash of the blow itself would turn into one big black shape (round 6).
+    //Between the two turns a frame of white, and its glare fading after (Flash).
+    float ink = Luma(saturate(scene * 0.6 + glow));
+    float turned = 1.0 - step(0.32, ink);
     c = lerp(c, float3(turned, turned, turned), Impact);
+    c = lerp(c, float3(1.0, 1.0, 1.0), Flash * 0.85);
 
     //Grain : a little moving noise so the flat greys feel like film
     float n = Hash(floor(input.UV * float2(640.0, 360.0)) + floor(Time * 24.0) * 7.31) - 0.5;

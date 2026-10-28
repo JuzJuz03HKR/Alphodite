@@ -926,6 +926,9 @@ namespace Tacetno433.Screens
 
         private void FinishSwipe()
         {
+            //QTE FOCUS : let the world come back at once, so the blow's light is not dimmed by a fading ring (round 6)
+            if (swipeFor != SwipeFor.Parry) focus = Math.Min(focus, 0.3f);
+
             if (swipeFor == SwipeFor.Skill)
             {
                 if (practice) Learn(Lesson.Skill);
@@ -969,6 +972,7 @@ namespace Tacetno433.Screens
         private void ShowEvents()
         {
             popStack.Clear();
+            int bolts = 0;                                                                 // LIGHTNING : strikes so far
             for (int i = 0; i < battle.Events.Count; i++)
             {
                 TurnEvent e = battle.Events[i];
@@ -1027,9 +1031,20 @@ namespace Tacetno433.Screens
                     StageHit(new Vector2(x, box.Center.Y), e.Who.IsEnemy, 0.4f + Math.Min(0.6f, e.Amount / 30f), colors.Tint);
                     if (!e.Who.Down) PlayArt(e.Who, "hurt");
 
-                    //The blow's light : the striker's style on an enemy, TACET's INK on a musician (Core/HitFx.cs)
-                    HitStyle style = !e.Who.IsEnemy ? HitStyle.Ink : (hitSignature ? HitStyle.Cross : StyleOf(hitBy));
-                    hits.Hit(style, DrawBox(e.Who), 0.4f + Math.Min(0.8f, e.Amount / 25f), colors);
+                    //The blow's light : the striker's style on an enemy, TACET's INK on a musician (Core/HitFx.cs).
+                    //LIGHTNING strikes the enemies one after another, the first lights the whole stage.
+                    HitStyle style = !e.Who.IsEnemy ? HitStyle.Ink : (hitSignature ? SignatureStyle() : StyleOf(hitBy));
+                    float power = 0.4f + Math.Min(0.8f, e.Amount / 25f);
+                    if (style == HitStyle.Lightning)
+                    {
+                        if (bolts == 0) AddStageLight(new Vector2(TacetGame.ScreenW / 2f, 300f), 1100f, BattleRules.HitBoltFlash, 0.4f, Color.White);
+                        hits.HitLater(style, DrawBox(e.Who), power, colors, BattleRules.HitBoltStagger * bolts);
+                        bolts++;
+                    }
+                    else hits.Hit(style, DrawBox(e.Who), power, colors);
+
+                    //IMPACT FRAME : the world holds still through the turns and the flash
+                    if (hitSignature) hitStop = Math.Max(hitStop, BattleRules.HitImpactHold);
                     if (e.Who.IsEnemy)
                     {
                         if (barPlaying)
@@ -1348,6 +1363,23 @@ namespace Tacetno433.Screens
                 StageHit(box.Center.ToVector2(), style != HitStyle.Ink, 1f, colors.Tint);
                 if (style != HitStyle.Ink) SpawnNumber(new Vector2(box.Center.X, box.Y - 34), 24, false, true, name == "battlegold" || name == "battlefire" ? colors.Tint : Palette.Highlight);
             }
+            else if (name == "battlebolt" || name == "battleimpact" || name == "battleboltsoft")
+            {
+                if (name == "battleboltsoft") Settings.ReduceFlashing = true;                 // the bolt itself, without the turns
+                if (name == "battleboltsoft") name = "battlebolt";
+                //Beta1 round 6 : THE UNHEARING's LIGHTNING on every enemy (battlebolt), or a CROSS (battleimpact), as if the
+                //SIGNATURE had just landed
+                battle.Kit = name == "battlebolt" ? TurnKit.Beethoven : TurnKit.Mozart;
+                for (int i = 0; i < battle.Enemies.Count; i++)
+                {
+                    Rectangle box = BoxOf(battle.Enemies[i]);
+                    if (name == "battlebolt") hits.HitLater(HitStyle.Lightning, box, 1f, HitColors.Plain, BattleRules.HitBoltStagger * i);
+                    else if (i == 0) hits.Hit(HitStyle.Cross, box, 1f, HitColors.Plain);
+                    SpawnNumber(new Vector2(box.Center.X, box.Y - 34), 14, false, true, Palette.Highlight);
+                }
+                AddStageLight(new Vector2(TacetGame.ScreenW / 2f, 300f), 1100f, BattleRules.HitBoltFlash, 0.4f, Color.White);
+                hitStop = BattleRules.HitImpactHold;
+            }
             else if (name == "battlewin" || name == "battlelose")
             {
                 //Beta1 round 4 : TACET's dark when one side is nearly beaten (battlewin = TACET is, battlelose = the band is)
@@ -1374,8 +1406,14 @@ namespace Tacetno433.Screens
             bool swiping = view == View.Swipe;
             bool planning = view == View.Plan || view == View.Target;
 
-            //The World : finished before the frame (BattleScreen.Stage.cs PreDraw, Core/PostChain.cs)
-            if (PostChain.Final != null) sb.Draw(PostChain.Final, Vector2.Zero, Color.White);
+            //The World : finished before the frame (BattleScreen.Stage.cs PreDraw, Core/PostChain.cs). The IMPACT FRAME
+            //punches the camera in round the blow for a moment.
+            if (PostChain.Final != null)
+            {
+                float zoom = 1f + hits.ImpactZoom * BattleRules.HitImpactZoom;
+                Vector2 at = ImpactOnScreen();
+                sb.Draw(PostChain.Final, at, null, Color.White, 0f, at, zoom, SpriteEffects.None, 0f);
+            }
             else Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.StageDeep);
 
             //Panel : a dark band along the bottom, fading in from above, so the musician in front stands into it
