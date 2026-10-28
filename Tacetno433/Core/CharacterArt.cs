@@ -151,14 +151,14 @@ namespace Tacetno433.Core
         {
             sb.End();
             sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp,
-                     null, null, null, transform);
+                     null, null, null, transform * Sharp.Transform);
         }
 
         public static void EndPixels(SpriteBatch sb, Matrix transform)
         {
             sb.End();
             sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp,
-                     null, null, null, transform);
+                     null, null, null, transform * Sharp.Transform);
         }
     }
 

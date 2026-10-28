@@ -204,6 +204,11 @@ namespace Tacetno433.Core
         public static void Grain(SpriteBatch sb)
         {
             int size = Gfx.Noise.Width;
+            if (Sharp.Scale != 1f)
+            {
+                GrainSharp(sb, size);
+                return;
+            }
 
             //Tiles start one tile early so the shifted second layer still covers the edges
             for (int y = -grainShiftY - size; y < TacetGame.ScreenH; y += size)
@@ -212,6 +217,22 @@ namespace Tacetno433.Core
                 {
                     sb.Draw(Gfx.Noise, new Rectangle(x, y, size, size), Color.White * 0.05f);
                     sb.Draw(Gfx.Noise, new Rectangle(x + 97, y + 53, size, size), Color.Black * 0.07f);
+                }
+            }
+        }
+
+        //Grain Sharp (SHARP SCREEN) : the same tiles with one speck per real pixel, the way the grain sits in the window.
+        //Stretched with the page they would turn into soft blobs.
+        private static void GrainSharp(SpriteBatch sb, int size)
+        {
+            float dot = Sharp.Dot;
+            float tile = size * dot;
+            for (float y = (-grainShiftY - size) * dot; y < TacetGame.ScreenH; y += tile)
+            {
+                for (float x = (-grainShiftX - size) * dot; x < TacetGame.ScreenW; x += tile)
+                {
+                    sb.Draw(Gfx.Noise, new Vector2(x, y), null, Color.White * 0.05f, 0f, Vector2.Zero, dot, SpriteEffects.None, 0f);
+                    sb.Draw(Gfx.Noise, new Vector2(x + 97f * dot, y + 53f * dot), null, Color.Black * 0.07f, 0f, Vector2.Zero, dot, SpriteEffects.None, 0f);
                 }
             }
         }

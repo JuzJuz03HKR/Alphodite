@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<XnaContent xmlns:Graphics="Microsoft.Xna.Framework.Content.Pipeline.Graphics">
+  <!-- SHARP SCREEN (Core/SharpText.cs) : MainFont made three times as big, for full screen on a big monitor.
+       The same font file and letters as MainFont.spritefont. The game measures and places letters with MainFont
+       and only draws them with this copy, so change the two together (only the Size here). -->
+  <Asset Type="Graphics:FontDescription">
+    <FontName>Fonts/SairaSemiCondensed-Medium.ttf</FontName>
+    <Size>54</Size>
+    <Spacing>3</Spacing>
+    <UseKerning>true</UseKerning>
+    <Style>Regular</Style>
+    <CharacterRegions>
+      <CharacterRegion>
+        <Start>&#32;</Start>
+        <End>&#126;</End>
+      </CharacterRegion>
+    </CharacterRegions>
+  </Asset>
+</XnaContent>

@@ -29,9 +29,11 @@
 | ปุ่มแบบผสม (รายการเมนู ปุ่มคำสั่ง ตัวเลข แถบหมึก กล่องคีย์) | `Core/Ui.cs` (`MenuItem` `Command` `Number` `InkBar` `KeyBox`) + จังหวะ `Core/UiMotion.cs` |
 | เส้นคั่นวงกลม วงแหวนมีขีด | `Core/Ornament.cs` (`OrbitRule` `TickRing`) |
 | เปลี่ยนหน้าปกติ (แผ่นเฉียงหลายชั้น คำในแผ่นดำ `Word`) / ช่วงสำคัญ (วงแหวนกวาด LIGHT DARK CLOSE) / ม่าน (เข้าออกหน้าเลือกวาทยากร) | `Core/SlantWipe.cs` / `Core/RingSweep.cs` เรียกด้วย `ScreenManager.SweepNext` หรือ `EntersWithSweep` ของหน้า / `Core/Curtain.cs` (`UsesCurtain`) |
-| ฟอนต์ (OFL) | `Content/Fonts/` + `.spritefont` 4 ไฟล์ |
+| ฟอนต์ (OFL) | `Content/Fonts/` + `.spritefont` 4 ไฟล์ และชุดใหญ่ของแต่ละตัว `*_15x` `*_2x` `*_3x` (12 ไฟล์ แก้ขนาดฟอนต์ต้องแก้ทั้งชุด) |
+| เต็มจอภาพคม (SHARP SCREEN) : วาดที่ความละเอียดจอจริง ทุกหน้ายังใช้ตำแหน่ง 1280×720 ผ่าน `Sharp.Transform` (**ทุก `SpriteBatch.Begin` ที่วาดลงหน้าต้องใส่**) ตัวหนังสือจากฟอนต์ชุดใหญ่ เส้นและรูปทรงลงพิกเซลจริง | `Core/Sharp.cs` (`Scale` `Dot` `Snap` `Edge` `MaxScale`) + `Core/SharpText.cs` + `Core/Gfx.cs` + `TacetGame.UpdateView/SetSharp` · `SCREENS_LEVEL_UP.md` ข้อ 11 |
 | หน้า Title / Result และ Defeat | `Screens/TitleScreen.cs` / `Screens/ResultScreen.cs` |
 | ภาพทดสอบ | `--shots titlereveal resultquiet wipe sweep sweepdark sweepclose` และ `result@3,result@30` (ชื่อซ้ำได้ ภาพชื่อ `ชื่อ_เฟรม`) |
+| ภาพทดสอบเต็มจอ / เทียบก่อนหลัง | `--scale 1.5` (1920×1080, 2 = 2560×1440, 3 = 4K) · `--steady` (1/60 วินาทีต่อภาพ ล็อกการสุ่มของรัน รันซ้ำได้ภาพเดิมทุกพิกเซล) |
 
 ## 0. แผนที่โค้ด Alpha 7 (การต่อสู้แบบผลัดตา, อัปเดต 24 ต.ค. ขั้น 1–15)
 

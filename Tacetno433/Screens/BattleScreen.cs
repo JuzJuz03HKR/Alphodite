@@ -1431,7 +1431,7 @@ namespace Tacetno433.Screens
             {
                 float zoom = 1f + hits.ImpactZoom * BattleRules.HitImpactZoom;
                 Vector2 at = ImpactOnScreen();
-                sb.Draw(PostChain.Final, at, null, Color.White, 0f, at, zoom, SpriteEffects.None, 0f);
+                PostChain.ShowFinal(sb, at, zoom, Color.White);
             }
             else Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.StageDeep);
 

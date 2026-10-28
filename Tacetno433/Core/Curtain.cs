@@ -37,12 +37,14 @@ namespace Tacetno433.Core
         //Drape : one side. fromRight says which way the drape is pulled in.
         private static void DrawDrape(SpriteBatch sb, int x, int width, bool fromRight)
         {
-            for (int i = 0; i < width; i += Stripe)
+            //SHARP SCREEN : stripes 4 real pixels wide on any screen, so the folds stay smooth in full screen
+            float stripe = Stripe * Sharp.Dot;
+            for (float i = 0; i < width; i += stripe)
             {
                 float distance = fromRight ? i : width - i;         // from the leading edge
                 float fold = (float)Math.Sin(distance * FoldSize) * 0.5f + 0.5f;
                 Color c = Color.Lerp(Palette.CurtainDark, Palette.Curtain, fold);
-                Gfx.Rect(sb, x + i, 0, Stripe, TacetGame.ScreenH, c);
+                Gfx.Rect(sb, x + i, 0, stripe, TacetGame.ScreenH, c);
             }
 
             //Leading Edge : a thin line of light where the drape meets the stage

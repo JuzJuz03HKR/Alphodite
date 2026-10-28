@@ -61,15 +61,20 @@ namespace Tacetno433.Core
         //Spark : a thin four point star, built from rows (the tall point) and columns (the wide one)
         public static void Spark(SpriteBatch sb, float cx, float cy, float size, Color color)
         {
-            for (int y = -(int)size; y <= (int)size; y++)
+            //SHARP SCREEN : rows and columns one real pixel thick (Sharp.Dot), so the points stay fine in full screen
+            float dot = Sharp.Dot;
+            int steps = (int)(size * Sharp.Scale);
+            for (int k = -steps; k <= steps; k++)
             {
+                float y = k * dot;
                 float half = (size - Math.Abs(y)) * 0.28f;
-                Gfx.Rect(sb, cx - half, cy + y, half * 2f + 1f, 1, color);
+                Gfx.Rect(sb, cx - half, cy + y, half * 2f + dot, dot, color);
             }
-            for (int x = -(int)size; x <= (int)size; x++)
+            for (int k = -steps; k <= steps; k++)
             {
+                float x = k * dot;
                 float half = (size - Math.Abs(x)) * 0.28f;
-                Gfx.Rect(sb, cx + x, cy - half, 1, half * 2f + 1f, color);
+                Gfx.Rect(sb, cx + x, cy - half, dot, half * 2f + dot, color);
             }
             Gfx.DrawGlow(sb, cx, cy, size * 0.8f, color);
         }

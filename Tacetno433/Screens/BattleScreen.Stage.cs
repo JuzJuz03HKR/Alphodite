@@ -427,10 +427,13 @@ namespace Tacetno433.Screens
         //Layer : the camera for one layer. PARALLAX : 0 far, 1 middle, 2 stage floor, 3 fighters, 4 front
         //ADVANCED PART : SpriteBatch takes a matrix that moves everything drawn in that batch. Moving a far layer
         //less than a near one is all it takes for the eye to see depth.
+        //SHARP SCREEN : the camera moves in game pixels, then Sharp.Transform makes them real ones. On a bigger screen the
+        //move is put on a whole real pixel, so the words and frames on the layer stay crisp while it drifts.
         private static Matrix Layer(Vector2 cam, int depth)
         {
             float f = BattleRules.StageParallax[depth];
-            return Matrix.CreateTranslation(-cam.X * f, -cam.Y * f, 0f);
+            if (Sharp.Scale == 1f) return Matrix.CreateTranslation(-cam.X * f, -cam.Y * f, 0f);
+            return Matrix.CreateTranslation(Sharp.Snap(-cam.X * f), Sharp.Snap(-cam.Y * f), 0f) * Sharp.Transform;
         }
 
         //Draw Backdrop : into BACK, the far and middle layers and the stage floor
@@ -480,7 +483,7 @@ namespace Tacetno433.Screens
         {
             int left = (TacetGame.ScreenW - LayerW) / 2;
 
-            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, Sharp.Transform);
             dark.DrawDebris(sb, false);
             sb.End();
 

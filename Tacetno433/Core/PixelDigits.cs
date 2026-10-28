@@ -88,8 +88,8 @@ namespace Tacetno433.Core
 
             float advance = (Cols + 1) * cell;
             float width = (count + (sign ? 1 : 0)) * advance - cell;
-            float left = (float)Math.Round(cx - width / 2f);
-            float top = (float)Math.Round(cy - Rows * cell / 2f);
+            float left = Sharp.Snap(cx - width / 2f);
+            float top = Sharp.Snap(cy - Rows * cell / 2f);
             float grow = Math.Max(2f, (float)Math.Floor(cell * 0.5f));
 
             for (int pass = 0; pass < 2; pass++)
@@ -113,14 +113,15 @@ namespace Tacetno433.Core
         private static void DrawGlyph(SpriteBatch sb, int glyph, float x, float y, float cell, Color color, float grow)
         {
             //Every edge lands on a whole pixel, so a cell of 4.5 is drawn 4 or 5 pixels wide and stays sharp
+            //(a whole REAL pixel, SHARP SCREEN : Sharp.Snap is Math.Round in the window)
             Run[] list = runs[glyph];
             for (int k = 0; k < list.Length; k++)
             {
                 Run r = list[k];
-                float x0 = (float)Math.Round(x + r.From * cell);
-                float x1 = (float)Math.Round(x + (r.From + r.Length) * cell);
-                float y0 = (float)Math.Round(y + r.Row * cell);
-                float y1 = (float)Math.Round(y + (r.Row + 1) * cell);
+                float x0 = Sharp.Snap(x + r.From * cell);
+                float x1 = Sharp.Snap(x + (r.From + r.Length) * cell);
+                float y0 = Sharp.Snap(y + r.Row * cell);
+                float y1 = Sharp.Snap(y + (r.Row + 1) * cell);
                 Gfx.Rect(sb, x0 - grow, y0 - grow, x1 - x0 + grow * 2f, y1 - y0 + grow * 2f, color);
             }
         }

@@ -23,11 +23,13 @@
     #define PS_SHADERMODEL ps_4_0_level_9_3
 #endif
 
+// SHARP SCREEN (Core/Sharp.cs) : on a screen bigger than the page, SCENE and GLOW are as big as the screen and keep
+// smaller copies of themselves (MIPMAPS). MipFilter Linear lets Down read between two copies (Lod 0.58 at 1.5).
 Texture2D SpriteTexture;
 sampler2D SceneSampler : register(s0) = sampler_state
 {
     Texture = <SpriteTexture>;
-    MinFilter = Linear; MagFilter = Linear; MipFilter = Point;
+    MinFilter = Linear; MagFilter = Linear; MipFilter = Linear;
     AddressU = Clamp; AddressV = Clamp;
 };
 
@@ -51,7 +53,7 @@ Texture2D GlowTexture;
 sampler2D GlowSampler : register(s3) = sampler_state
 {
     Texture = <GlowTexture>;
-    MinFilter = Linear; MagFilter = Linear; MipFilter = Point;
+    MinFilter = Linear; MagFilter = Linear; MipFilter = Linear;
     AddressU = Clamp; AddressV = Clamp;
 };
 
@@ -75,6 +77,7 @@ float Impact;           //             IMPACT FRAME : 1 = the picture turned ove
 float Flash;            //             IMPACT FRAME : the frame of white, then its glare fading (0..1)
 float Blur;             //             IMPACT FRAME : the world smeared towards the blow (ZOOM BLUR, 0..1)
 float2 Center;          //             IMPACT FRAME : where the blow landed (0..1 of the screen)
+float Lod;              // Down : which copy of SCENE and GLOW is the page's own size (0 in the 1280 x 720 window)
 
 struct VertexShaderOutput
 {
@@ -94,12 +97,13 @@ float Hash(float2 p)
     return frac(sin(dot(p, float2(12.9898, 78.233))) * 43758.5453);
 }
 
-//Down : the lit world, a quarter of the size
+//Down : the lit world, a quarter of the size. SCENE and GLOW are read from their copy the page's size (Lod), so on every
+//screen the glow is made from the same picture.
 float4 DownPS(VertexShaderOutput input) : COLOR0
 {
-    float3 scene = tex2D(SceneSampler, input.UV).rgb;
+    float3 scene = tex2Dlod(SceneSampler, float4(input.UV, 0.0, Lod)).rgb;
     float3 light = tex2D(LightSampler, input.UV).rgb * 2.0;
-    float3 glow = tex2D(GlowSampler, input.UV).rgb;
+    float3 glow = tex2Dlod(GlowSampler, float4(input.UV, 0.0, Lod)).rgb;
     return float4(scene * light + glow, 1.0);
 }
 
@@ -121,10 +125,10 @@ float4 BlurPS(VertexShaderOutput input) : COLOR0
 //Composite : the finished picture of the world
 float4 CompositePS(VertexShaderOutput input) : COLOR0
 {
-    float3 scene = tex2D(SceneSampler, input.UV).rgb;
+    float3 scene = tex2Dlod(SceneSampler, float4(input.UV, 0.0, 0.0)).rgb;      // the full size copy, pixel for pixel
     float3 light = tex2D(LightSampler, input.UV).rgb * 2.0;
     float3 soft = tex2D(SoftSampler, input.UV).rgb;
-    float3 glow = tex2D(GlowSampler, input.UV).rgb;
+    float3 glow = tex2Dlod(GlowSampler, float4(input.UV, 0.0, 0.0)).rgb;
 
     float3 lit = scene * light + glow;
 

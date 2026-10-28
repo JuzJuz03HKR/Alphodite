@@ -21,7 +21,6 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 28 ต.ค. 17:53 UTC | เต็มจอภาพคม : วาดทั้งเกมที่ความละเอียดจอจริง (`SCREENS_LEVEL_UP.md` 4.7) | `TacetGame.cs` `Core/PostChain.cs` `Core/Fx.cs` `Core/Gfx.cs` `Core/ScreenManager.cs` `Core/SlantWipe.cs` `Core/TacetVoid.cs` `Core/CharacterArt.cs` `Core/DebugShots.cs` `Core/Input.cs` `Screens/BattleScreen.*.cs` `Screens/DuelScreen.cs` `Content/Effects/*.fx` `Content/*.spritefont` `Data/BattleRules.cs` + เอกสาร |
 
 ---
 
@@ -62,6 +61,12 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 ---
 
 ## สถานะล่าสุด (28 ต.ค.)
+
+**28 ต.ค. (ล่าสุด) : เต็มจอภาพคม (SHARP SCREEN) เสร็จ รอผู้ใช้ Rebuild ดู** ผู้ใช้สั่งตอนเปิดแชท "ปรับให้ full screen แล้วภาพชัดไปเลย ไม่ต้องเป็นภาพที่ขยายให้แตกเป็นพิกเซลแล้ว" (คำต่อคำ `USER_BRIEFS.md` 13.8 · รายละเอียด `SCREENS_LEVEL_UP.md` ข้อ 11)
+✅ ทั้งเกมวาดที่ความละเอียดจอจริง (เดิมวาด 1280×720 แล้วยืดจนเบลอ) ตำแหน่งในโค้ดยังเป็น 1280×720 ผ่าน `Sharp.Transform` (`Core/Sharp.cs`) · ฟอนต์ชุดใหญ่ 1.5 2 3 เท่า 12 ไฟล์ (`Core/SharpText.cs` วางตัวอักษรตามฟอนต์เดิมเป๊ะ) · `Gfx` กล่อง เส้น วงกลม เพชร ปุ่มเฉียง ลงพิกเซลจริง · `PostChain` ภาพเต็มจอขนาดจริง bloom อ่าน mipmap ขนาดหน้า (`Post.fx` `Lod`) · SlantWipe Curtain grain PixelDigits กล้องฉากต่อสู้ · F3 บอก `VIEW`
+✅ build 0/0 · turncheck 113/113 · savecheck 25/25 · หน้าต่าง 1280×720 ภาพตรงกับก่อนแก้ทุกพิกเซล 34/34 หน้า (practice สุ่มเอง) · แคป 1.5 2 3 เท่า และ 1366×768 ครบทุกหน้า · ไม่มี shader ไม่พัง · เครื่องมือแคปใหม่ `--scale` `--steady`
+⚠️ ยังไม่ได้ดูบน Windows (เปิดปิดเต็มจอระหว่างเล่น ทดสอบในแชท cloud ไม่ได้) · pixel art กับเอฟเฟกต์สไตล์ pixel (ความมืด วงแหวนกวาด ตัวเลข ฝุ่น) ยังเป็นบล็อก 2 game pixel แต่คม **ถามผู้ใช้แล้ว รอคำตอบว่าอยากให้เนียนไหม** · chibi เดิมยังนุ่ม (จะเปลี่ยนเป็นภาพหน้า pixel ตาม 4.6) · PLAYTEST SIGNATURE ยังเป็น 1
+**งานถัดไป** : ผู้ใช้ Rebuild แล้วเปิดเต็มจอดู 4 ข้อใน `SCREENS_LEVEL_UP.md` 11.5 · แล้วกลับไปงานค้างของรายการถัดไป (ม่านเปิดแบบผ้าจริง `Core/Curtain.cs` ถามตัวอย่างก่อน, คำในแผ่นเฉียงตามหน้า รอยืนยัน, รอบ 1 ของตารางข้อ 5)
 
 **28 ต.ค. (ล่าสุด) : /update ปิดแชทรอบตัวอย่างหน้าจอ ผู้ใช้ดูบน Windows แล้ว : "ตอนนี้ทุกอย่างถือว่าดีมากๆ ทุกอย่างนิ่ง เสถียร และไหลลื่น"** (คำต่อคำ `USER_BRIEFS.md` 13.7)
 ✅ รอบตัวอย่าง (ชั้นกลาง + Title + Result และ Defeat, `SCREENS_LEVEL_UP.md` ข้อ 10) ผ่าน · F3 ของผู้ใช้บนหน้าต่อสู้ : FPS 60, UPDATE 0.10 ms, DRAW 1.55 ms, CALLS 91, SPRITES 1570, TARGETS 13, GC 1/1/1, FX ON (เหลือที่ว่างอีกเยอะ)

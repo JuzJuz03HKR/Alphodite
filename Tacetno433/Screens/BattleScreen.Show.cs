@@ -78,7 +78,7 @@ namespace Tacetno433.Screens
         private void DrawQteLight(SpriteBatch sb)
         {
             sb.End();
-            sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearClamp);
+            sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearClamp, null, null, null, Sharp.Transform);
             qteEffects.DrawHits(sb);
             qteEffects.DrawShards(sb);
             qteEffects.DrawSparks(sb);
@@ -86,7 +86,7 @@ namespace Tacetno433.Screens
             qteEffects.DrawFlares(sb);
             qteHits.DrawGlow(sb);
             sb.End();
-            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp);
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, null, null, null, Sharp.Transform);
         }
 
         //Cut-In Conductor : whose picture the CUT-IN shows (PRACTICE has no run, it borrows THE UNHEARING's)

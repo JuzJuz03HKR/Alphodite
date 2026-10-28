@@ -26,18 +26,30 @@ namespace Tacetno433.Core
         public static bool Active;
         public static RenderTarget2D Target;
 
+        //Scale (SHARP SCREEN) : "--scale 1.5" takes the pictures at 1920 x 1080, the way full screen draws on such a
+        //monitor (2 = 2560 x 1440, 3 = 4K). Without it the pictures are 1280 x 720.
+        public static float Scale = 1f;
+
         private static string[] names = new string[0];
         private static int[] waits = new int[0];
         private static string outDir = "";
         private static int index;
         private static int frames;
 
+        //Steady : "--steady" moves the game exactly 1/60 of a second every frame and fixes the run's dice, so two runs of
+        //the tool give the same pictures (to compare before and after a change). Without it the pages move by the clock,
+        //and a slow cloud machine runs several updates between two pictures.
+        public static bool Steady;
+
         //Args Parse : called from Program before the game is made
         public static void Parse(string[] args)
         {
+            for (int i = 0; i < args.Length; i++)
+                if (args[i] == "--steady") Steady = true;
             for (int i = 0; i < args.Length - 1; i++)
             {
                 if (args[i] == "--out") outDir = args[i + 1];
+                if (args[i] == "--scale") Scale = float.Parse(args[i + 1], System.Globalization.CultureInfo.InvariantCulture);
 
                 if (args[i] == "--shots")
                 {
@@ -90,7 +102,7 @@ namespace Tacetno433.Core
         //Shots Begin : called from LoadContent instead of opening the title page
         public static void Begin(TacetGame game)
         {
-            Target = new RenderTarget2D(game.GraphicsDevice, TacetGame.ScreenW, TacetGame.ScreenH);
+            Target = new RenderTarget2D(game.GraphicsDevice, Sharp.Width, Sharp.Height);
             Directory.CreateDirectory(outDir);
 
             //Balance Check : no pictures, just play many fights and write a report
@@ -664,7 +676,7 @@ namespace Tacetno433.Core
             if (Array.IndexOf(names, file) != Array.LastIndexOf(names, file)) file += "_" + waits[index];
             string path = Path.Combine(outDir, file + ".png");
             using (FileStream stream = File.Create(path))
-                Target.SaveAsPng(stream, TacetGame.ScreenW, TacetGame.ScreenH);
+                Target.SaveAsPng(stream, Target.Width, Target.Height);
 
             index++;
             frames = 0;

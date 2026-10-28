@@ -28,8 +28,9 @@ namespace Tacetno433
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
 
-        //Game Picture : the whole game is drawn into this 1280 x 720 picture, then the
-        //picture is put on the window at whatever size the window happens to be.
+        //Game Picture : the whole game is drawn into this picture, then the picture is put on the window.
+        //SHARP SCREEN (Beta1, Core/Sharp.cs) : the picture is the size it is shown at (1280 x 720 in the window, the
+        //monitor's own size in full screen), so it is never stretched. Every page still draws in 1280 x 720 game pixels.
         private RenderTarget2D screen;
         private Rectangle view;
 
@@ -94,6 +95,7 @@ namespace Tacetno433
 
             //Developer Capture : keep the window out of the way while pictures are taken
             if (DebugShots.Active) Window.Position = new Point(-3000, -3000);
+            if (DebugShots.Active && DebugShots.Steady) IsFixedTimeStep = false;     // one update per picture, see Steady
 
             base.Initialize();   // this calls LoadContent
         }
@@ -101,7 +103,6 @@ namespace Tacetno433
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            screen = new RenderTarget2D(GraphicsDevice, ScreenW, ScreenH);
             Window.ClientSizeChanged += delegate { UpdateView(); };
             UpdateView();
             Gfx.Init(GraphicsDevice);
@@ -129,6 +130,13 @@ namespace Tacetno433
             BigFont.DefaultCharacter = '?';
             StoryFont.DefaultCharacter = '?';
             LogoFont.DefaultCharacter = '?';
+
+            //Sharp Letters (SHARP SCREEN) : each font's bigger copies for big screens, see Core/SharpText.cs
+            SharpText.Add(Font, "MainFont");
+            SharpText.Add(BigFont, "BigFont");
+            SharpText.Add(StoryFont, "StoryFont");
+            SharpText.Add(LogoFont, "LogoFont");
+            SharpText.Choose(Services, Content.RootDirectory, Sharp.Scale);
 
             //Shared UI Pieces : hand the fonts over once
             Ui.Font = Font;
@@ -171,6 +179,7 @@ namespace Tacetno433
         //Full Screen : switched on and off by the settings page.
         //Full screen here means a borderless window the size of the desktop. The monitor
         //keeps its own resolution, so other programs are left alone and alt tab is instant.
+        //The game is then drawn at that resolution too (SHARP SCREEN, UpdateView sets it).
         public void ApplyFullscreen()
         {
             if (Settings.Fullscreen)
@@ -190,8 +199,8 @@ namespace Tacetno433
             UpdateView();
         }
 
-        //View : where the 1280 x 720 picture sits inside the real window. It keeps its shape
-        //and is centred, so a wider screen gets black bars at the sides instead of stretching.
+        //View : where the picture sits inside the real window. It keeps its shape and is centred,
+        //so a wider screen gets black bars at the sides instead of stretching.
         private void UpdateView()
         {
             int w = GraphicsDevice.PresentationParameters.BackBufferWidth;
@@ -211,11 +220,29 @@ namespace Tacetno433
             float my = client.Height > 0 ? client.Height / (float)h : 1f;
             Input.SetView(new Rectangle((int)(view.X * mx), (int)(view.Y * my),
                                         (int)(view.Width * mx), (int)(view.Height * my)));
+
+            //SHARP SCREEN : the picture is drawn at the size it is shown. The capture tool keeps its own size (--scale).
+            SetSharp(DebugShots.Active ? DebugShots.Scale : scale);
+        }
+
+        //Set Sharp : the page's real size changed (or is set for the first time). The game picture, the fonts' bigger
+        //copies and the battle's pictures (PostChain.Ensure, on their next use) follow it.
+        private void SetSharp(float scale)
+        {
+            Sharp.Set(scale);
+            if (screen == null || screen.Width != Sharp.Width || screen.Height != Sharp.Height)
+            {
+                GraphicsDevice.Textures[0] = null;
+                if (screen != null) screen.Dispose();
+                screen = new RenderTarget2D(GraphicsDevice, Sharp.Width, Sharp.Height);
+            }
+            SharpText.Choose(Services, Content.RootDirectory, Sharp.Scale);
         }
 
         protected override void Update(GameTime gameTime)
         {
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            if (DebugShots.Active && DebugShots.Steady) dt = 1f / 60f;
             if (showDebug) updateWatch.Restart();
 
             Input.Update();
@@ -290,8 +317,9 @@ namespace Tacetno433
 
             GraphicsDevice.Clear(Palette.Void);
 
-            //LinearClamp smooths the fonts when they are drawn smaller than they were built
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp);
+            //LinearClamp smooths the fonts when they are drawn smaller than they were built.
+            //Sharp.Transform turns the pages' game pixels into the picture's real pixels (SHARP SCREEN).
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, null, null, null, Sharp.Transform);
 
             Screens.Draw(spriteBatch);
             if (Pause.Open) Pause.Draw(spriteBatch);
@@ -306,7 +334,8 @@ namespace Tacetno433
                 string line = "FPS " + shownFps + "   MEM " + shownMemory.ToString("0.0") + " MB"
                             + "   SFX " + SoundBank.LoadedSfx + "   MUSIC " + SoundBank.LoadedMusic
                             + "   PHRASE " + SoundBank.LoadedPhrase + "   INSTR " + SoundBank.LoadedInstruments
-                            + "   HAND " + HandArt.LoadedPoses + "   ART " + ArtBank.Loaded + "   PIXEL " + CharacterArt.Loaded;
+                            + "   HAND " + HandArt.LoadedPoses + "   ART " + ArtBank.Loaded + "   PIXEL " + CharacterArt.Loaded
+                            + "   VIEW " + Sharp.Width + " x " + Sharp.Height;           // SHARP SCREEN : the real size the page is drawn at
                 //Optimize (Beta1) : the cost of a frame. DRAW = draw calls last frame, GC = collections so far (gen 0 / 1 / 2),
                 //FX = whether the shaders loaded. Watch these before and after adding an effect.
                 string cost = "UPDATE " + shownUpdateMs.ToString("0.00") + " ms   DRAW " + shownDrawMs.ToString("0.00") + " ms   CALLS " + shownCalls
@@ -327,9 +356,12 @@ namespace Tacetno433
             }
             else
             {
-                //Window Fit : black around the picture, then the picture itself
+                //Window Fit : black around the picture, then the picture itself. It is already the size of the view, so
+                //its pixels land one on one (PointClamp copies them as they are). Only a screen past Sharp.MaxScale
+                //stretches it, smoothly.
                 GraphicsDevice.Clear(Color.Black);
-                spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Opaque, SamplerState.LinearClamp);
+                bool fits = screen.Width == view.Width && screen.Height == view.Height;
+                spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Opaque, fits ? SamplerState.PointClamp : SamplerState.LinearClamp);
                 spriteBatch.Draw(screen, view, Color.White);
                 spriteBatch.End();
             }

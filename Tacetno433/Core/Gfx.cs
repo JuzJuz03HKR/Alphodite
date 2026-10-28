@@ -71,14 +71,31 @@ namespace Tacetno433.Core
         }
 
         //Draw Rect : filled box
+        //SHARP SCREEN (Beta1) : on a screen bigger than the page (Sharp.Scale above 1) the edges land on whole real pixels,
+        //and a hairline (thinner than a pixel and a half) is always the same number of real pixels thick wherever it sits,
+        //so the two sides of a frame match. In the 1280 x 720 window it is the plain box it always was.
         public static void Rect(SpriteBatch sb, float x, float y, float w, float h, Color color)
         {
-            sb.Draw(Pixel, new Rectangle((int)x, (int)y, (int)w, (int)h), color);
+            if (Sharp.Scale == 1f)
+            {
+                sb.Draw(Pixel, new Rectangle((int)x, (int)y, (int)w, (int)h), color);
+                return;
+            }
+            if (w <= 0f || h <= 0f) return;
+            float x0 = Sharp.Edge(x);
+            float y0 = Sharp.Edge(y);
+            float x1 = w < 1.5f ? x0 + Sharp.Edge(w) : Sharp.Edge(x + w);
+            float y1 = h < 1.5f ? y0 + Sharp.Edge(h) : Sharp.Edge(y + h);
+            if (x1 <= x0 || y1 <= y0) return;
+            float dot = Sharp.Dot;
+            sb.Draw(Pixel, new Vector2(x0 * dot, y0 * dot), null, color, 0f, Vector2.Zero,
+                    new Vector2((x1 - x0) * dot, (y1 - y0) * dot), SpriteEffects.None, 0f);
         }
 
         public static void Rect(SpriteBatch sb, Rectangle r, Color color)
         {
-            sb.Draw(Pixel, r, color);
+            if (Sharp.Scale == 1f) sb.Draw(Pixel, r, color);
+            else Rect(sb, r.X, r.Y, r.Width, r.Height, color);
         }
 
         //Draw Rect Outline : hollow box made of 4 thin boxes
@@ -91,12 +108,21 @@ namespace Tacetno433.Core
         }
 
         //Draw Line : a stretched and rotated pixel between two points
+        //SHARP SCREEN : on a bigger screen the thickness is a whole number of real pixels, so a straight line is the same
+        //thickness wherever it sits (a line one game pixel thick is two real pixels at 1.5, three at 3). A line thinner
+        //than one real pixel is drawn one pixel thick and fainter by as much, so it weighs what it did.
         public static void Line(SpriteBatch sb, Vector2 a, Vector2 b, Color color, float thickness)
         {
             Vector2 diff = b - a;
             float length = diff.Length();
-            if (length < 0.5f) return;
+            if (length < 0.5f * Sharp.Dot || thickness <= 0f) return;
             float angle = (float)Math.Atan2(diff.Y, diff.X);
+            if (Sharp.Scale != 1f)
+            {
+                float real = thickness * Sharp.Scale;
+                if (real < 1f) color *= real;
+                thickness = Math.Max(1f, Sharp.Edge(thickness)) * Sharp.Dot;
+            }
             sb.Draw(Pixel, a, null, color, angle, new Vector2(0f, 0.5f),
                     new Vector2(length, thickness), SpriteEffects.None, 0f);
         }
@@ -108,21 +134,35 @@ namespace Tacetno433.Core
         }
 
         //Draw Circle : filled circle built from horizontal lines
+        //SHARP SCREEN : this shape and the others built from rows (Capsule, Pill, Arrow, Triangle, Diamond, SlantBox) use
+        //rows one real pixel tall (Sharp.Dot), so their edges are as smooth as the screen allows. In the window Dot is 1,
+        //the rows are the game pixels they always were.
         public static void Circle(SpriteBatch sb, float cx, float cy, float radius, Color color)
         {
-            for (int y = -(int)radius; y <= (int)radius; y++)
+            float dot = Sharp.Dot;
+            int rows = (int)(radius * Sharp.Scale);
+            for (int k = -rows; k <= rows; k++)
             {
+                float y = k * dot;
                 float inside = radius * radius - y * y;
                 if (inside < 0f) continue;
-                int half = (int)Math.Sqrt(inside);
-                Rect(sb, cx - half, cy + y, half * 2 + 1, 1, color);
+                float half = (int)(Math.Sqrt(inside) * Sharp.Scale) * dot;
+                Rect(sb, cx - half, cy + y, half * 2f + dot, dot, color);
             }
+        }
+
+        //Pieces (SHARP SCREEN) : how many straight pieces a curve of this length needs. In the window it is the number the
+        //shape always used, on a bigger screen more, so no piece is longer than about 6 real pixels and no corner shows.
+        private static int Pieces(int inWindow, float length)
+        {
+            if (Sharp.Scale == 1f) return inWindow;
+            return (int)MathHelper.Clamp(length * Sharp.Scale / 6f, inWindow, 1024f);
         }
 
         //Draw Circle Outline : a ring, built from short straight segments
         public static void CircleOutline(SpriteBatch sb, float cx, float cy, float radius, Color color, float thickness)
         {
-            int segments = 36;
+            int segments = Pieces(36, radius * MathHelper.TwoPi);
             Vector2 previous = new Vector2(cx + radius, cy);
 
             for (int i = 1; i <= segments; i++)
@@ -146,7 +186,7 @@ namespace Tacetno433.Core
         //rx is half the width, ry half the height.
         public static void EllipseOutline(SpriteBatch sb, float cx, float cy, float rx, float ry, Color color, float thickness)
         {
-            int segments = 32;
+            int segments = Pieces(32, Math.Max(rx, ry) * MathHelper.TwoPi);
             Vector2 previous = new Vector2(cx + rx, cy);
 
             for (int i = 1; i <= segments; i++)
@@ -168,6 +208,7 @@ namespace Tacetno433.Core
         //Draw Arc (pieces) : the same with as many straight pieces as asked, for long arcs (Beta1 screens)
         public static void Arc(SpriteBatch sb, float cx, float cy, float radius, float fromAngle, float toAngle, Color color, float thickness, int segments)
         {
+            segments = Pieces(segments, radius * Math.Abs(toAngle - fromAngle));
             Vector2 previous = new Vector2(cx + (float)Math.Cos(fromAngle) * radius, cy + (float)Math.Sin(fromAngle) * radius);
 
             for (int i = 1; i <= segments; i++)
@@ -188,16 +229,17 @@ namespace Tacetno433.Core
             //otherwise the two drift half a pixel apart and a sliver shows
             float cx = r.X + r.Width / 2f;
             float radius = r.Width / 2f;
-            int caps = (int)radius;
+            float dot = Sharp.Dot;
+            int caps = (int)(radius * Sharp.Scale);                                   // rows in each cap (real pixels)
 
             for (int y = 0; y < caps; y++)
             {
-                float dy = caps - y;
-                int half = (int)Math.Sqrt(Math.Max(0f, radius * radius - dy * dy));
-                Rect(sb, cx - half, r.Y + y, half * 2 + 1, 1, color);                 // top cap row
-                Rect(sb, cx - half, r.Bottom - 1 - y, half * 2 + 1, 1, color);        // bottom cap row
+                float dy = (caps - y) * dot;
+                float half = (int)(Math.Sqrt(Math.Max(0f, radius * radius - dy * dy)) * Sharp.Scale) * dot;
+                Rect(sb, cx - half, r.Y + y * dot, half * 2f + dot, dot, color);                 // top cap row
+                Rect(sb, cx - half, r.Bottom - dot - y * dot, half * 2f + dot, dot, color);      // bottom cap row
             }
-            Rect(sb, cx - radius, r.Y + caps, radius * 2f + 1f, r.Height - caps * 2, color);
+            Rect(sb, cx - radius, r.Y + caps * dot, radius * 2f + dot, r.Height - caps * dot * 2f, color);
         }
 
         //Draw Capsule Outline : same shape, only the edge. The side lines sit centred on the
@@ -220,12 +262,15 @@ namespace Tacetno433.Core
             float radius = r.Height / 2f;
             float straight = r.Width - radius * 2f;
             if (straight < 0f) straight = 0f;
+            float dot = Sharp.Dot;
+            int rows = (int)(r.Height * Sharp.Scale);
 
-            for (int y = 0; y < r.Height; y++)
+            for (int k = 0; k < rows; k++)
             {
-                float dy = y + 0.5f - radius;
+                float y = k * dot;
+                float dy = y + 0.5f * dot - radius;
                 float half = (float)Math.Sqrt(Math.Max(0f, radius * radius - dy * dy));
-                Rect(sb, r.X + radius - half, r.Y + y, straight + half * 2f, 1, color);
+                Rect(sb, r.X + radius - half, r.Y + y, straight + half * 2f, dot, color);
             }
         }
 
@@ -241,7 +286,14 @@ namespace Tacetno433.Core
         //Draw Glow : one soft round light. Use this instead of stacking rectangles.
         public static void DrawGlow(SpriteBatch sb, float cx, float cy, float radius, Color color)
         {
-            sb.Draw(Glow, new Rectangle((int)(cx - radius), (int)(cy - radius), (int)(radius * 2f), (int)(radius * 2f)), color);
+            if (Sharp.Scale == 1f)
+            {
+                sb.Draw(Glow, new Rectangle((int)(cx - radius), (int)(cy - radius), (int)(radius * 2f), (int)(radius * 2f)), color);
+                return;
+            }
+            //SHARP SCREEN : placed to the real pixel (not the game pixel), so a slow glow glides instead of stepping
+            if (radius <= 0f) return;
+            sb.Draw(Glow, new Vector2(cx - radius, cy - radius), null, color, 0f, Vector2.Zero, radius * 2f / Glow.Width, SpriteEffects.None, 0f);
         }
 
         //Draw Glow Box : the same soft light squashed into a rectangle, for wide halos
@@ -253,32 +305,41 @@ namespace Tacetno433.Core
         //Draw Arrow : solid triangle, used for the left/right gallery buttons
         public static void Arrow(SpriteBatch sb, float cx, float cy, float size, bool pointRight, Color color)
         {
-            for (int i = 0; i <= (int)size; i++)
+            float dot = Sharp.Dot;
+            int columns = (int)(size * Sharp.Scale);
+            for (int k = 0; k <= columns; k++)
             {
+                float i = k * dot;
                 float half = size - i;
                 float x = pointRight ? cx - size / 2f + i : cx + size / 2f - i;
-                Rect(sb, x, cy - half, 1, half * 2 + 1, color);
+                Rect(sb, x, cy - half, dot, half * 2f + dot, color);
             }
         }
 
         //Draw Triangle : solid triangle pointing up or down, used for boost and ease marks
         public static void Triangle(SpriteBatch sb, float cx, float cy, float size, bool pointUp, Color color)
         {
-            for (int i = 0; i <= (int)size; i++)
+            float dot = Sharp.Dot;
+            int rows = (int)(size * Sharp.Scale);
+            for (int k = 0; k <= rows; k++)
             {
+                float i = k * dot;
                 float half = size - i;
                 float y = pointUp ? cy + size / 2f - i : cy - size / 2f + i;
-                Rect(sb, cx - half, y, half * 2 + 1, 1, color);
+                Rect(sb, cx - half, y, half * 2f + dot, dot, color);
             }
         }
 
         //Draw Diamond : a square turned on its corner, the game's main ornament
         public static void Diamond(SpriteBatch sb, float cx, float cy, float size, Color color)
         {
-            for (int y = -(int)size; y <= (int)size; y++)
+            float dot = Sharp.Dot;
+            int rows = (int)(size * Sharp.Scale);
+            for (int k = -rows; k <= rows; k++)
             {
+                float y = k * dot;
                 float half = size - Math.Abs(y);
-                Rect(sb, cx - half, cy + y, half * 2f + 1f, 1, color);
+                Rect(sb, cx - half, cy + y, half * 2f + dot, dot, color);
             }
         }
 
@@ -295,10 +356,13 @@ namespace Tacetno433.Core
         //slant is how many pixels the top edge is pushed right compared to the bottom.
         public static void SlantBox(SpriteBatch sb, Rectangle r, int slant, Color color)
         {
-            for (int y = 0; y < r.Height; y++)
+            float dot = Sharp.Dot;
+            int rows = (int)(r.Height * Sharp.Scale);
+            for (int k = 0; k < rows; k++)
             {
-                float shift = slant * (1f - (float)y / r.Height);
-                Rect(sb, r.X + shift, r.Y + y, r.Width - slant, 1, color);
+                float y = k * dot;
+                float shift = slant * (1f - y / r.Height);
+                Rect(sb, r.X + shift, r.Y + y, r.Width - slant, dot, color);
             }
         }
 
@@ -356,25 +420,33 @@ namespace Tacetno433.Core
             return result + "...";
         }
 
+        //Whole : where a line of text starts, on a whole pixel so the letters are not smeared. In the window that is a
+        //whole game pixel, as it always was. On a bigger screen it is a whole REAL pixel (SHARP SCREEN), which is finer,
+        //so spaced out letters keep even gaps.
+        private static float Whole(float v)
+        {
+            return Sharp.Scale == 1f ? (int)v : Sharp.Snap(v);
+        }
+
         //Draw Text : normal top-left text
         public static void Text(SpriteBatch sb, SpriteFont font, string s, float x, float y, Color color, float scale)
         {
-            sb.DrawString(font, s, new Vector2((int)x, (int)y), color, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
+            SharpText.Draw(sb, font, s, new Vector2(Whole(x), Whole(y)), color, 0f, Vector2.Zero, scale);
         }
 
         //Draw Text Centered : text centred on a point
         public static void TextCentered(SpriteBatch sb, SpriteFont font, string s, float cx, float cy, Color color, float scale)
         {
             Vector2 size = font.MeasureString(s) * scale;
-            sb.DrawString(font, s, new Vector2((int)(cx - size.X / 2f), (int)(cy - size.Y / 2f)),
-                          color, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
+            SharpText.Draw(sb, font, s, new Vector2(Whole(cx - size.X / 2f), Whole(cy - size.Y / 2f)),
+                           color, 0f, Vector2.Zero, scale);
         }
 
         //Draw Text Right : text ending at a point
         public static void TextRight(SpriteBatch sb, SpriteFont font, string s, float rightX, float y, Color color, float scale)
         {
             Vector2 size = font.MeasureString(s) * scale;
-            sb.DrawString(font, s, new Vector2((int)(rightX - size.X), (int)y), color, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
+            SharpText.Draw(sb, font, s, new Vector2(Whole(rightX - size.X), Whole(y)), color, 0f, Vector2.Zero, scale);
         }
 
         //Text Width : how wide a line will be
@@ -429,7 +501,7 @@ namespace Tacetno433.Core
             {
                 string letter = LetterOf(s[i]);
                 Vector2 at = new Vector2(x, cy) + along * run;
-                sb.DrawString(font, letter, at, color, angle, origin, scale, SpriteEffects.None, 0f);
+                SharpText.Draw(sb, font, letter, at, color, angle, origin, scale);
                 run += font.MeasureString(letter).X * scale + tracking;
             }
         }
@@ -438,7 +510,7 @@ namespace Tacetno433.Core
         //x is the RIGHT edge of the column, because the letters hang to the left of it.
         public static void TextVertical(SpriteBatch sb, SpriteFont font, string s, float x, float y, Color color, float scale)
         {
-            sb.DrawString(font, s, new Vector2((int)x, (int)y), color, MathHelper.PiOver2, Vector2.Zero, scale, SpriteEffects.None, 0f);
+            SharpText.Draw(sb, font, s, new Vector2(Whole(x), Whole(y)), color, MathHelper.PiOver2, Vector2.Zero, scale);
         }
 
         private static string LetterOf(char c)

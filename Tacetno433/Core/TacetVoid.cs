@@ -259,14 +259,14 @@ namespace Tacetno433.Core
             //On A Page : the old black sun where the hole is
             if (onPage)
             {
-                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp);
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, null, null, null, Sharp.Transform);
                 Hollow.Eclipse(sb, Hole.X, Hole.Y, Radius, time * 0.2f, 1f);
                 sb.End();
                 return;
             }
 
             float edgeX = MathHelper.Lerp(BattleRules.StageRiftBeaten, BattleRules.StageRiftWinning, MathHelper.Clamp(Share, -0.1f, 1.1f));
-            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp);
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, null, null, null, Sharp.Transform);
             TacetField.DrawSlanted(sb, edgeX, BattleRules.StageRiftSlant, horizon, time, Danger, WaveStrength(), waveAt.Y);
             sb.End();
         }
@@ -287,7 +287,7 @@ namespace Tacetno433.Core
             }
             else return;                                   // the old rift has its own light, and no hole to crack
 
-            sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.PointClamp);
+            sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.PointClamp, null, null, null, Sharp.Transform);
             DrawCracks(sb);
             DrawDebris(sb, true);
             sb.End();

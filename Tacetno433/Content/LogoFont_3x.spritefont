@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<XnaContent xmlns:Graphics="Microsoft.Xna.Framework.Content.Pipeline.Graphics">
+  <!-- SHARP SCREEN (Core/SharpText.cs) : LogoFont made three times as big, for full screen on a big monitor.
+       The same font file and letters as LogoFont.spritefont. The game measures and places letters with LogoFont
+       and only draws them with this copy, so change the two together (only the Size here). -->
+  <Asset Type="Graphics:FontDescription">
+    <FontName>Fonts/CormorantGaramond-SemiBold.ttf</FontName>
+    <Size>240</Size>
+    <Spacing>12</Spacing>
+    <UseKerning>true</UseKerning>
+    <Style>Regular</Style>
+    <CharacterRegions>
+      <CharacterRegion>
+        <Start>&#32;</Start>
+        <End>&#126;</End>
+      </CharacterRegion>
+    </CharacterRegions>
+  </Asset>
+</XnaContent>

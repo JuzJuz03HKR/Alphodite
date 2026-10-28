@@ -1393,7 +1393,7 @@ namespace Tacetno433.Screens
                 world = Matrix.CreateTranslation((float)Math.Sin(time * 91f) * amount, (float)Math.Cos(time * 73f) * amount, 0f);
             }
             sb.End();
-            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, null, null, null, world);
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, null, null, null, world * Sharp.Transform);
 
             //World : see DuelScreen.Stage.cs
             DrawStageSide(sb);
@@ -1419,7 +1419,7 @@ namespace Tacetno433.Screens
             HandArt.Draw(sb, hand.Pose, hand.Frame, handBox, Palette.Ink, 1f);    // THE ART SLOT
 
             sb.End();
-            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp);
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, null, null, null, Sharp.Transform);
 
             //Low Breath : the edges close in with the beat, see DuelScreen.Hud.cs
             DrawLowBreath(sb);

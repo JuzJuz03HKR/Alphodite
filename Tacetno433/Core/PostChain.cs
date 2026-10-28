@@ -6,22 +6,27 @@ namespace Tacetno433.Core
 {
     //PostChain : the battle picture is drawn in layers, then finished in passes (Beta1).
     //
-    //   BACK       1280 x 720  the era's backdrop and the stage floor alone, so TACET's dark can bend them (Void.fx)
-    //   SCENE      1280 x 720  the world : BACK through TACET's dark, the enemies, the musician
-    //   LIGHT MAP   640 x 360  the lights : a dim grey everywhere, brighter where a light shines, kept at
-    //                          half strength so a flash can go above normal (LIGHT x 2, see Post.fx)
-    //   GLOW       1280 x 720  effects that give off their own light (sparks, slashes, flares) : added after the
-    //                          lights, so the dark never dims them, and they feed the BLOOM
-    //   SOFT        320 x 180  the lit world shrunk and blurred : the glow (BLOOM) and the QTE FOCUS come from it
-    //   FINAL      1280 x 720  SCENE x LIGHT + GLOW + BLOOM, then FOCUS, ENGULF, VIGNETTE and grain
+    //   BACK       the screen   the era's backdrop and the stage floor alone, so TACET's dark can bend them (Void.fx)
+    //   SCENE      the screen   the world : BACK through TACET's dark, the enemies, the musician
+    //   LIGHT MAP   640 x 360   the lights : a dim grey everywhere, brighter where a light shines, kept at
+    //                           half strength so a flash can go above normal (LIGHT x 2, see Post.fx)
+    //   GLOW       the screen   effects that give off their own light (sparks, slashes, flares) : added after the
+    //                           lights, so the dark never dims them, and they feed the BLOOM
+    //   SOFT        320 x 180   the lit world shrunk and blurred : the glow (BLOOM) and the QTE FOCUS come from it
+    //   FINAL      the screen   SCENE x LIGHT + GLOW + BLOOM, then FOCUS, ENGULF, VIGNETTE and grain
+    //
+    //"The screen" is the real size the page is shown at (SHARP SCREEN, Core/Sharp.cs) : 1280 x 720 in the window,
+    //1920 x 1080 full screen on such a monitor. Everything is drawn into it in game pixels through Sharp.Transform.
+    //The light map and the soft pictures stay the same size on every screen : they are soft anyway, and keeping them
+    //small keeps the glow exactly as wide as it was tuned, and cheap.
     //
     //The battle draws SCENE, LIGHT MAP and GLOW in its PreDraw, calls Finish, then draws FINAL in its Draw with the
     //words and buttons on top. Every other page goes through DrawPage (Beta1 screens, ScreenManager does it) :
     //the same layers, so every page gets a stage light, bloom and vignette (THE LENS). Without shaders (Fx.Ready false)
     //the same picture is put together with blend states only : no glow and no blur, the rest looks the same.
     //
-    //Optimize : the big pictures are made once and kept. Blur and glow work at a quarter of the screen,
-    //which is sixteen times fewer pixels than the full size.
+    //Optimize : the big pictures are made once and kept (made again only when the screen changes size). Blur and glow
+    //work at 320 x 180, sixteen times fewer pixels than the window and up to a hundred and forty times fewer than 4K.
     public static class PostChain
     {
         public const int W = TacetGame.ScreenW;
@@ -35,21 +40,43 @@ namespace Tacetno433.Core
         private static RenderTarget2D softA;
         private static RenderTarget2D softB;
 
-        //Light Scale : the light map is half the size of the screen, so lights are drawn through this
+        //Light Scale : the light map is half the size of the page, so lights are drawn through this
         public static readonly Matrix LightScale = Matrix.CreateScale(0.5f);
 
-        //Ensure : make the pictures the first time they are needed (or after the card lost them)
+        //Ensure : make the pictures the first time they are needed, after the card lost them, or when the screen
+        //changed size (full screen on or off)
         public static void Ensure(GraphicsDevice device)
         {
-            if (Scene != null && !Scene.IsDisposed && Scene.GraphicsDevice == device) return;
+            if (Scene != null && !Scene.IsDisposed && Scene.GraphicsDevice == device
+                && Scene.Width == Sharp.Width && Scene.Height == Sharp.Height) return;
 
-            Back = new RenderTarget2D(device, W, H);
-            Scene = new RenderTarget2D(device, W, H);
+            for (int i = 0; i < 5; i++) device.Textures[i] = null;      // nothing still plugged in when the old ones go
+            Release();
+            int w = Sharp.Width;
+            int h = Sharp.Height;
+
+            //SHARP SCREEN : on a screen bigger than the page, SCENE and GLOW keep smaller copies of themselves (MIPMAPS, the
+            //card makes them each frame), so the Down pass can read them at the page's own 1280 x 720 (see Down)
+            bool shrinks = Sharp.Scale > 1f;
+            Back = new RenderTarget2D(device, w, h);
+            Scene = new RenderTarget2D(device, w, h, shrinks, SurfaceFormat.Color, DepthFormat.None);
             Light = new RenderTarget2D(device, W / 2, H / 2);
-            Glow = new RenderTarget2D(device, W, H);
-            Final = new RenderTarget2D(device, W, H);
+            Glow = new RenderTarget2D(device, w, h, shrinks, SurfaceFormat.Color, DepthFormat.None);
+            Final = new RenderTarget2D(device, w, h);
             softA = new RenderTarget2D(device, W / 4, H / 4);
             softB = new RenderTarget2D(device, W / 4, H / 4);
+        }
+
+        //Release : give the pictures back to the card (before making them at a new size)
+        private static void Release()
+        {
+            if (Back != null) Back.Dispose();
+            if (Scene != null) Scene.Dispose();
+            if (Light != null) Light.Dispose();
+            if (Glow != null) Glow.Dispose();
+            if (Final != null) Final.Dispose();
+            if (softA != null) softA.Dispose();
+            if (softB != null) softB.Dispose();
         }
 
         //Begin Back : the backdrop and the floor, before TACET's dark is laid over them
@@ -84,7 +111,7 @@ namespace Tacetno433.Core
         public static void BeginGlow(GraphicsDevice device, SpriteBatch sb, Matrix camera)
         {
             BeginGlowTarget(device);
-            sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearClamp, null, null, null, camera);
+            sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearClamp, null, null, null, camera * Sharp.Transform);
         }
 
         //Begin Glow Target : only the target, for a page that draws its glow in several batches
@@ -144,14 +171,14 @@ namespace Tacetno433.Core
             if (dark != null)
             {
                 BeginBack(device);
-                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp);
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, null, null, null, Sharp.Transform);
                 page.DrawBack(sb);
                 sb.End();
             }
 
             BeginScene(device);
             if (dark != null) dark.DrawScene(device, sb, Back);
-            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp);
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, null, null, null, Sharp.Transform);
             if (page.HasWorld) page.DrawWorld(sb);
             else page.Draw(sb);
             sb.End();
@@ -163,7 +190,7 @@ namespace Tacetno433.Core
 
             BeginGlowTarget(device);
             if (dark != null) dark.DrawGlow(device, sb, Back);
-            sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearClamp);
+            sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearClamp, null, null, null, Sharp.Transform);
             page.DrawGlow(sb);
             sb.End();
 
@@ -186,10 +213,16 @@ namespace Tacetno433.Core
         {
             if (Final == null) return;
             Color tint = new Color(up, up, up, 1f);
-            if (look.Zoom > 0f)
-                sb.Draw(Final, look.ZoomAt, null, tint, 0f, look.ZoomAt, 1f + look.Zoom, SpriteEffects.None, 0f);
-            else
-                sb.Draw(Final, Vector2.Zero, tint);
+            if (look.Zoom > 0f) ShowFinal(sb, look.ZoomAt, 1f + look.Zoom, tint);
+            else ShowFinal(sb, Vector2.Zero, 1f, tint);
+        }
+
+        //Show Final : FINAL onto the frame, pushed in by zoom round the point at (game pixels, 1 = no push).
+        //SHARP SCREEN : FINAL is as big as the real screen and the frame's batch turns game pixels into real ones, so it
+        //is drawn at one Dot per pixel of FINAL : its own pixels land one on one, nothing is stretched.
+        public static void ShowFinal(SpriteBatch sb, Vector2 at, float zoom, Color tint)
+        {
+            sb.Draw(Final, at, null, tint, 0f, at * Sharp.Scale, zoom * Sharp.Dot, SpriteEffects.None, 0f);
         }
 
         //Finish : SCENE and LIGHT MAP into FINAL. focus 0..1 is the QTE FOCUS, engulf 0..1 how far TACET's dark
@@ -214,11 +247,16 @@ namespace Tacetno433.Core
         {
             Effect post = Fx.Post;
 
-            //Down : SCENE x LIGHT at a quarter size
+            //Down : SCENE x LIGHT at a quarter of the page.
+            //SHARP SCREEN : on a bigger screen SCENE and GLOW are read from their copy the page's size (Lod, the MIPMAP
+            //level : log2 of Sharp.Scale, 0.58 at 1.5, 1 at 2), so the glow is made from the same picture as in the window
+            //and looks the same, instead of from a few scattered pixels of a much bigger one (which would flicker).
             device.SetRenderTarget(softA);
             post.CurrentTechnique = post.Techniques["Down"];
             post.Parameters["LightTexture"].SetValue(Light);
             post.Parameters["GlowTexture"].SetValue(Glow);
+            EffectParameter lod = post.Parameters["Lod"];
+            if (lod != null) lod.SetValue(Sharp.Scale > 1f ? (float)System.Math.Log(Sharp.Scale, 2.0) : 0f);
             sb.Begin(SpriteSortMode.Immediate, BlendState.Opaque, SamplerState.LinearClamp, null, null, post);
             device.SamplerStates[1] = SamplerState.LinearClamp;
             device.SamplerStates[3] = SamplerState.LinearClamp;
@@ -280,7 +318,7 @@ namespace Tacetno433.Core
             sb.End();
 
             sb.Begin(SpriteSortMode.Deferred, Fx.Multiply2X, SamplerState.LinearClamp);
-            sb.Draw(Light, new Rectangle(0, 0, W, H), Color.White);
+            sb.Draw(Light, new Rectangle(0, 0, Final.Width, Final.Height), Color.White);
             sb.End();
 
             sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearClamp);
@@ -289,7 +327,7 @@ namespace Tacetno433.Core
 
             if (focus > 0f)
             {
-                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp);
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, null, null, null, Sharp.Transform);
                 Gfx.Rect(sb, 0, 0, W, H, Palette.Void * (0.62f * MathHelper.Clamp(focus, 0f, 1f)));
                 sb.End();
             }

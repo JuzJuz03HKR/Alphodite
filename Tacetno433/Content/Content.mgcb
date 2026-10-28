@@ -41,6 +41,90 @@
 /processorParam:TextureFormat=Color
 /build:LogoFont.spritefont
 
+#begin MainFont_15x.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Color
+/build:MainFont_15x.spritefont
+
+#begin MainFont_2x.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Color
+/build:MainFont_2x.spritefont
+
+#begin MainFont_3x.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Color
+/build:MainFont_3x.spritefont
+
+#begin BigFont_15x.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Color
+/build:BigFont_15x.spritefont
+
+#begin BigFont_2x.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Color
+/build:BigFont_2x.spritefont
+
+#begin BigFont_3x.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Color
+/build:BigFont_3x.spritefont
+
+#begin StoryFont_15x.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Color
+/build:StoryFont_15x.spritefont
+
+#begin StoryFont_2x.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Color
+/build:StoryFont_2x.spritefont
+
+#begin StoryFont_3x.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Color
+/build:StoryFont_3x.spritefont
+
+#begin LogoFont_15x.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Color
+/build:LogoFont_15x.spritefont
+
+#begin LogoFont_2x.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Color
+/build:LogoFont_2x.spritefont
+
+#begin LogoFont_3x.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Color
+/build:LogoFont_3x.spritefont
+
 #begin Art/Conductors/gallery_the_unhearing.png
 /importer:TextureImporter
 /processor:TextureProcessor

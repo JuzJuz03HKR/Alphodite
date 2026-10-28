@@ -87,7 +87,7 @@ namespace Tacetno433.Data
         public string RosterLabel = "";
         public string MotifsLabel = "";
 
-        private Random random = new Random();
+        private Random random = DebugShots.Steady ? new Random(433) : new Random();     // the capture tool's --steady fixes the dice
         private SpriteFont font;
         private float wrapWidth;
 

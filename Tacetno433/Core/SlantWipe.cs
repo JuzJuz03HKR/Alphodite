@@ -15,7 +15,7 @@ namespace Tacetno433.Core
     public static class SlantWipe
     {
         private const float Lean = 240f;          // how far the top of the edge runs ahead of the bottom
-        private const int Strip = 2;              // the bands are drawn in strips this many pixels tall
+        private const int Strip = 2;              // the bands are drawn in strips this many pixels tall (real pixels, SHARP SCREEN)
         private const float WhiteBand = 18f;      // the white band (pixels)
         private const float GreyBand = 64f;       // the grey band next to the black
         private const float Spread = 46f;         // the white pulls away from the grey this far in the middle of the sweep
@@ -43,20 +43,22 @@ namespace Tacetno433.Core
 
             //Bands : going, the black is left of the edge with the grey and the white in front of it.
             //Showing, the black is right of the edge with the grey and the white trailing behind it.
-            for (int y = 0; y < h; y += Strip)
+            //SHARP SCREEN : the strips are 2 real pixels tall on any screen, so the slanted edge stays a clean line
+            float strip = Strip * Sharp.Dot;
+            for (float y = 0; y < h; y += strip)
             {
-                float x = edge + Lean * (1f - y / (float)h);
+                float x = edge + Lean * (1f - y / h);
                 if (going)
                 {
-                    Gfx.Rect(sb, 0, y, x, Strip, Palette.Void);
-                    Gfx.Rect(sb, x, y, GreyBand, Strip, Palette.LineGrey);
-                    Gfx.Rect(sb, x + GreyBand + apart, y, WhiteBand, Strip, Palette.Paper);
+                    Gfx.Rect(sb, 0, y, x, strip, Palette.Void);
+                    Gfx.Rect(sb, x, y, GreyBand, strip, Palette.LineGrey);
+                    Gfx.Rect(sb, x + GreyBand + apart, y, WhiteBand, strip, Palette.Paper);
                 }
                 else
                 {
-                    Gfx.Rect(sb, x, y, w - x, Strip, Palette.Void);
-                    Gfx.Rect(sb, x - GreyBand, y, GreyBand, Strip, Palette.LineGrey);
-                    Gfx.Rect(sb, x - GreyBand - apart - WhiteBand, y, WhiteBand, Strip, Palette.Paper);
+                    Gfx.Rect(sb, x, y, w - x, strip, Palette.Void);
+                    Gfx.Rect(sb, x - GreyBand, y, GreyBand, strip, Palette.LineGrey);
+                    Gfx.Rect(sb, x - GreyBand - apart - WhiteBand, y, WhiteBand, strip, Palette.Paper);
                 }
             }
 
@@ -83,15 +85,17 @@ namespace Tacetno433.Core
             right = Math.Max(0, Math.Min(w, right));
             if (right - left < 4) return;
 
+            //The scissor box is in the picture's real pixels (SHARP SCREEN), the words in game pixels as always
             GraphicsDevice device = sb.GraphicsDevice;
             Rectangle before = device.ScissorRectangle;
             sb.End();
-            device.ScissorRectangle = new Rectangle(left, (int)y, right - left, (int)tall);
-            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, null, clip);
+            float s = Sharp.Scale;
+            device.ScissorRectangle = new Rectangle((int)(left * s), (int)(y * s), (int)((right - left) * s), (int)(tall * s));
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, null, clip, null, Sharp.Transform);
             Gfx.TextSpaced(sb, Ui.LogoFont, word, x, y, Palette.Stage, TextSize.Logo, 26f);
             sb.End();
             device.ScissorRectangle = before;
-            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp);
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, null, null, null, Sharp.Transform);
         }
     }
 }

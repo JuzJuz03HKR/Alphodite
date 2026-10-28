@@ -31,6 +31,7 @@ disable-model-invocation: true
    xvfb-run -a -s "-screen 0 1280x720x24" env LIBGL_ALWAYS_SOFTWARE=1 SDL_AUDIODRIVER=dummy dotnet Tacetno433.dll --shots <สิ่งที่สั่ง> --out <โฟลเดอร์ผล>
    ```
    - `shots` : ชื่อหน้าคั่นด้วยจุลภาค เช่น `duel@150,band` (รายชื่อหน้าอยู่คอมเมนต์ `Page Open` ใน `Core/DebugShots.cs` ชุดแคปทุกหน้าอยู่ `docs/SCREENS_LEVEL_UP.md` ข้อ 2) แล้วเปิดดูภาพที่ได้ ขอหน้าเดียวกันหลายเฟรมได้ (`result@3,result@30` ได้ `result_3.png` `result_30.png`)
+   - **เต็มจอ (SHARP SCREEN 28 ต.ค.)** : ต่อท้าย `--scale 1.5` ได้ภาพ 1920×1080 แบบที่เต็มจอวาดจริง (2 = 2560×1440, 3 = 4K) · `--steady` ทำให้รันซ้ำได้ภาพเดิมทุกพิกเซล (เทียบก่อนกับหลังแก้ด้วยรายชื่อหน้าชุดเดียวกัน)
    - `simulate` ผลอยู่ `simulate.txt` · `audit` ผลอยู่ `audit.txt` (**ลบไฟล์ผลเก่าก่อนรันทุกครั้ง**) · `savecheck` ทดสอบเซฟ/โหลด
    - ผลจำลองแกว่ง ±5 ถึง 8% ถ้าจะเทียบก่อนกับหลัง ให้รันหลายรอบแล้วเฉลี่ย
    - ห้ามใช้ `pkill -f` กับคำที่อยู่ในคำสั่งของตัวเอง (จะฆ่า shell ตัวเอง)
