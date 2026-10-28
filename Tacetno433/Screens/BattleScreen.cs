@@ -1268,6 +1268,13 @@ namespace Tacetno433.Screens
                 battle.Party[0].Guard = true;
                 battle.Events.Clear();
             }
+            else if (name == "battlewin" || name == "battlelose")
+            {
+                //Beta1 round 4 : TACET's dark when one side is nearly beaten (battlewin = TACET is, battlelose = the band is)
+                List<Fighter> low = name == "battlewin" ? battle.Enemies : battle.Party;
+                for (int i = 0; i < low.Count; i++) low[i].Hp = Math.Max(1, low[i].MaxHp / 8);
+                battle.Events.Clear();
+            }
             else if (name == "practiceskill" || name == "practicecall" || name == "practicesig")
             {
                 Learn(Lesson.Play);                                                     // PRACTICE

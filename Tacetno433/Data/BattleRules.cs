@@ -238,7 +238,7 @@
         public static float StageAmbient = 0.34f;         // LIGHT MAP everywhere (0.5 = lit normally) : the stage is dark, lights do the rest
         public static float StageSpot = 0.42f;            //   the stage light on the musician in front
         public static float StageFootLight = 0.2f;        //   the pool of light each enemy stands in (like Chaos Zero Nightmare)
-        public static float StageRiftLight = 0.30f;       //   the white glow along TACET's rift
+        public static float StageFloorLight = 0.16f;      //   the house lights on the floor near the band, so TACET's dark can be seen eating it
         public static float StageHitLight = 0.55f;        //   a hit lights up where it lands, for a moment
         public static float StageHitLightTime = 0.35f;    //   how long that lasts (seconds)
         public static float StageBloomThreshold = 0.58f;  // BLOOM : how bright before it glows
@@ -247,14 +247,36 @@
         public static float StageGrain = 0.035f;          // film grain
         public static float StageFocusSpeed = 7f;         // QTE FOCUS : how fast the world dims when a ring comes up
         public static float StageFocusSlow = 0.3f;        //   the world behind moves this fast meanwhile (1 = normal)
-        public static float StageRiftSlant = 0.42f;       // TACET's rift leans with the floor : pixels right for each pixel down
+        public static float StageRiftSlant = 0.42f;       // NO SHADERS : TACET's old rift leans with the floor, pixels right for each pixel down
         public static float StageRiftWinning = 520f;      //   where it stands at the horizon when TACET has all its life and the band none
         public static float StageRiftBeaten = 1250f;      //   and the other way round
-        public static float StageRiftKick = 260f;         //   a hit throws it this fast (pixels a second), then it springs back
         public static float StageDriftAmount = 5f;        // the camera breathes this many pixels
         public static float StageKick = 9f;               // a hit nudges the camera this many pixels toward it
         public static float[] StageParallax = { 0.18f, 0.4f, 0.75f, 1f, 1.25f };   // far, mid, stage floor, fighters, front : how much each layer follows the camera
         public static float StageDepthDim = 0.16f;        // each enemy further back is this much darker
+
+        //Stage Void (Beta1 round 4) : TACET's dark, a black hole behind the enemies pouring over the floor towards the camera
+        //(Core/TacetVoid.cs, Content/Effects/Void.fx). SHARE 0 = TACET beaten, 1 = the band beaten.
+        public static float StageVoidX = 990f;            // HOLE : its middle on the screen, behind the enemies
+        public static float StageVoidY = 240f;
+        public static float StageVoidParallax = 0.5f;     //   it follows the camera this much (between the middle layer and the floor)
+        public static float StageVoidRadiusMin = 60f;     //   its size at SHARE 0 ...
+        public static float StageVoidRadiusMax = 170f;    //   ... and at SHARE 1
+        public static float StagePoolWideMin = 300f;      // POOL : the dark on the floor, how far it reaches across at SHARE 0 ...
+        public static float StagePoolWideMax = 1300f;     //   ... and at SHARE 1
+        public static float StagePoolDeepMin = 70f;       //   how far it comes towards the camera at SHARE 0 ...
+        public static float StagePoolDeepMax = 440f;      //   ... and at SHARE 1 (past the bottom of the screen)
+        public static float StageVoidSpike = 14f;         //   the waveform on its edge (pixels)
+        public static float StageVoidSpikeDanger = 30f;   //   this much taller when the band is close to losing
+        public static float StageVoidSwirl = 0.9f;        // LENSING : how far the world turns at the rim (radians)
+        public static float StageVoidKick = 0.36f;        // a hit throws the SHARE this fast, then it springs back
+        public static float StageVoidLight = 0.32f;       // LIGHT MAP : the hole lights what stands in front of it
+        public static float StageVoidSeamLight = 0.16f;   //   and the seam lights the floor
+        public static float StageVoidWaveSpeed = 950f;    // SHOCK WAVE : how fast the ring of a hit runs out (pixels a second)
+        public static float StageVoidWaveTime = 0.55f;    //   how long it lasts (seconds)
+        public static float StageVoidCracks = 2.5f;       // CRACKS a second when calm (up to twice as many in danger)
+        public static int StageVoidDebris = 34;           // DEBRIS : bits of the stage turning around the hole
+        public static float StageVoidEngulfFrom = 0.62f;  // ENGULF : past this SHARE the dark creeps in from the screen's edges
 
         //Battle Shape
         public const int BeatsPerRound = 8;       // sub-turns in one round

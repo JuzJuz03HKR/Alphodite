@@ -680,7 +680,7 @@ namespace Tacetno433.Core
         //       crossing recruit bandname route pause band (or view) duelbargain dueltrait duelmute duelmirror
         //       duel duelcombo duelboss duelcutin duelpause dueldouble dueltremolo duelfermata duelfire duelrepeat finale
         //       result defeat reward shop shopleave event eventchair rest curtain curtainwin
-        //       battle battleswing battleskill battleparry battlestatus (Alpha 7, use a few frames, e.g. battleswing@2)
+        //       battle battleswing battleskill battleparry battlestatus (Alpha 7, use a few frames, e.g. battleswing@2) battlewin battlelose (Beta1, TACET's dark)
         //       practice practiceskill practicesig (Alpha 7, the tutorial's practice fight, e.g. practice@60)
         private static void Open(TacetGame game, string name)
         {

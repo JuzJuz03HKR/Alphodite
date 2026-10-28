@@ -120,7 +120,7 @@ namespace Tacetno433
             LogoFont = Content.Load<SpriteFont>("LogoFont");
 
             //Shaders (Beta1) : Content/Effects. Missing or unreadable ones leave Fx.Ready false and pages draw plainly.
-            Fx.Load(Content);
+            Fx.Load(Content, GraphicsDevice);
 
             //Font Safety : the fonts only contain plain English characters. Without this,
             //printing anything else (a stray symbol, Thai text) throws and kills the game.

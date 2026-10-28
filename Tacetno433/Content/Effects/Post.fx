@@ -8,7 +8,7 @@
 //   Down     : SCENE x LIGHT + GLOW, shrunk to a quarter of the screen (cheap to blur)
 //   Blur     : a soft smear along one direction, run twice (across, then down)
 //   Composite: SCENE x LIGHT + GLOW, plus the soft glow (BLOOM) taken from the blurred copy, then the QTE FOCUS,
-//              the dark corners (VIGNETTE) and the film grain
+//              TACET's dark creeping in from the edges (ENGULF), the dark corners (VIGNETTE) and the film grain
 //
 // LIGHT x 2 : the light map is stored at half strength so it can go above 1. 0.5 in the picture
 // means "lit normally", 1.0 means "twice as bright" (a hit flash).
@@ -54,6 +54,14 @@ sampler2D GlowSampler : register(s3) = sampler_state
     AddressU = Clamp; AddressV = Clamp;
 };
 
+Texture2D NoiseTexture;
+sampler2D NoiseSampler : register(s4) = sampler_state
+{
+    Texture = <NoiseTexture>;
+    MinFilter = Linear; MagFilter = Linear; MipFilter = Point;
+    AddressU = Wrap; AddressV = Wrap;
+};
+
 float2 Step;            // Blur : one pixel of the source, along the blur's direction (in UV)
 float BloomThreshold;   // Composite : how bright a pixel must be before it glows
 float BloomStrength;    //             how strong the glow is
@@ -61,6 +69,7 @@ float Focus;            //             QTE FOCUS : 0 = normal, 1 = the world dar
 float Vignette;         //             how dark the corners get
 float Grain;            //             film grain strength
 float Time;             //             keeps the grain moving
+float Engulf;           //             ENGULF : 0 = nothing, 1 = TACET's dark has crept far in from the edges
 
 struct VertexShaderOutput
 {
@@ -121,6 +130,18 @@ float4 CompositePS(VertexShaderOutput input) : COLOR0
     //QTE FOCUS : the world behind the ring goes soft, grey and dark, but stays readable
     float grey = Luma(soft) * 0.55;
     c = lerp(c, float3(grey, grey, grey), Focus * 0.85);
+
+    //ENGULF : when TACET is winning its dark creeps in from the bottom and the right, ragged, with a white seam.
+    //fromEdge is how far this pixel is from those edges, reach how far the dark has come here.
+    float2 eu = floor(input.UV * float2(640.0, 360.0)) / float2(640.0, 360.0);
+    float fromEdge = min((1.0 - eu.y) * 1.25, (1.0 - eu.x) * 1.9);
+    float ragged = tex2Dlod(NoiseSampler, float4(eu.x * 1.7 + Time * 0.01, eu.y * 1.7 - Time * 0.03, 0.0, 0.0)).r;
+    float reach = Engulf * 0.42 * (0.55 + 0.9 * ragged);
+    float swallowed = step(fromEdge, reach);
+    float nearSeam = saturate(1.0 - (fromEdge - reach) * 30.0) * (1.0 - swallowed);
+    c *= 1.0 - nearSeam * 0.5 * step(0.001, Engulf);
+    c = lerp(c, float3(0.0, 0.0, 0.0), swallowed);
+    c += saturate(1.0 - abs(fromEdge - reach) * 450.0) * step(0.001, Engulf) * 0.9;
 
     //VIGNETTE : darker towards the corners, more so in FOCUS
     float2 d = (input.UV - 0.5) * float2(1.25, 1.0);

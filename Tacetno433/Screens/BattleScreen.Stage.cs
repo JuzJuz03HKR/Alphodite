@@ -15,8 +15,8 @@ namespace Tacetno433.Screens
     //             at when it attacks. A new one slides in (SWAP).
     //   THE BAND  everyone on the field as a row of cards under the bar strip (until the user's face GUI)
     //   TACET     the enemies further off on the right, standing on the floor, the front one nearest
-    //   THE DARK  TACET's rift leans with the floor and stands where the balance of life puts it (RIFT).
-    //             A hit throws it back and it springs to its place again.
+    //   THE DARK  a black hole behind the enemies pours TACET's dark over the floor towards the camera, as far as the
+    //             balance of life lets it (Core/TacetVoid.cs). A hit throws it and it springs back to its place.
     //   LAYERS    the era's backdrop (far, middle), the stage the band stands on, a dark front layer. Each layer
     //             follows the camera less the further away it is (PARALLAX), so a small camera move reads as depth.
     //   LIGHT     a dark stage lit by lights : a stage light on the front musician, the rift's glow, a flash at each hit
@@ -50,10 +50,8 @@ namespace Tacetno433.Screens
         private float swap;                // SWAP : 0 = settled, 0..1 while one slides out and the next slides in
         private float worldTime;           // the world's own clock, slower in the QTE FOCUS
         private float focus;               // QTE FOCUS 0..1
-        private float rift = -1f;          // RIFT : where TACET's rift crosses the horizon (-1 = not placed yet)
-        private float riftSpeed;           // RIFT : its spring
-        private float riftRipple;          // RIFT : the shudder of the last hit
-        private float riftRippleY;
+        private readonly TacetVoid dark = new TacetVoid();   // THE DARK
+        private Vector2 stageCam;          // the camera of the frame being drawn
         private Vector2 kick;              // the camera's nudge after a hit
         private int era;                   // which era's backdrop
         private string[] layerName = new string[0];   // LAYERS : the words in the empty frames, made once
@@ -96,8 +94,7 @@ namespace Tacetno433.Screens
             fore = null;
             foreNext = null;
             swap = 0f;
-            rift = -1f;
-            riftSpeed = 0f;
+            dark.Reset();
             focus = 0f;
 
             //LAYERS : the era's pictures, if the team has made them (Content/Art/Battle/Stages/<era>_far.png ...)
@@ -184,13 +181,8 @@ namespace Tacetno433.Screens
                 if (swap >= 1f) swap = 0f;
             }
 
-            //RIFT : a spring towards where the balance of life puts it
-            float target = RiftTarget();
-            if (rift < 0f) rift = target;
-            float pull = (target - rift) * 16f - riftSpeed * 6f;
-            riftSpeed += pull * worldDt;
-            rift += riftSpeed * worldDt;
-            if (riftRipple > 0f) riftRipple = Math.Max(0f, riftRipple - worldDt * 1.8f);
+            //THE DARK : a spring towards where the balance of life puts it
+            dark.Update(worldDt, DarkShare());
 
             //Camera : the nudge of a hit dies away quickly
             kick *= (float)Math.Pow(0.0015, worldDt);
@@ -224,8 +216,8 @@ namespace Tacetno433.Screens
             return battle.Party.Count > 0 ? battle.Party[0] : null;
         }
 
-        //RIFT Target : 0 = TACET beaten, 1 = the band beaten, taken from the life each side has left
-        private float RiftTarget()
+        //Dark Share : 0 = TACET beaten, 1 = the band beaten, taken from the life each side has left
+        private float DarkShare()
         {
             float band = 0f, bandMax = 0f, foe = 0f, foeMax = 0f;
             for (int i = 0; i < battle.Party.Count; i++)
@@ -240,30 +232,14 @@ namespace Tacetno433.Screens
             }
             float b = bandMax > 0f ? band / bandMax : 0f;
             float e = foeMax > 0f ? foe / foeMax : 0f;
-            float share = (e + 0.001f) / (b + e + 0.002f);
-            return MathHelper.Lerp(BattleRules.StageRiftBeaten, BattleRules.StageRiftWinning, share);
+            return (e + 0.001f) / (b + e + 0.002f);
         }
 
-        //Danger : how close the band is to losing, 0..1 (the rift frays more)
-        private float Danger()
-        {
-            float span = BattleRules.StageRiftBeaten - BattleRules.StageRiftWinning;
-            return MathHelper.Clamp((BattleRules.StageRiftBeaten - rift) / span * 1.4f - 0.6f, 0f, 1f);
-        }
-
-        //Rift At : where the rift is on screen row y (without its little waves)
-        private float RiftAt(float y)
-        {
-            return rift + BattleRules.StageRiftSlant * (y - Horizon);
-        }
-
-        //Stage Hit : a hit lands at a point. The rift is thrown (towards TACET when the band hits), the camera
-        //nudges towards it and a light flashes there.
+        //Stage Hit : a hit lands at a point (where the fighters stand). The dark is thrown (back when the band hits),
+        //a shock wave runs out, the camera nudges towards it and a light flashes there.
         private void StageHit(Vector2 at, bool bandHits, float power)
         {
-            riftSpeed += (bandHits ? 1f : -1f) * BattleRules.StageRiftKick * power;
-            riftRipple = Math.Min(1f, riftRipple + 0.5f * power);
-            riftRippleY = at.Y;
+            dark.Hit(at - Camera() * BattleRules.StageParallax[3], bandHits, power);
 
             Vector2 middle = new Vector2(TacetGame.ScreenW / 2f, TacetGame.ScreenH / 2f);
             Vector2 toward = at - middle;
@@ -332,24 +308,35 @@ namespace Tacetno433.Screens
             PostChain.Ensure(device);
 
             Vector2 cam = Camera();
+            stageCam = cam;
+            dark.Place(cam, Horizon);
 
+            //BACK : the era's backdrop and the floor, alone
+            PostChain.BeginBack(device);
+            DrawBackdrop(sb, cam);
+
+            //SCENE : BACK seen through TACET's dark, then the fighters in front of it
             PostChain.BeginScene(device);
-            DrawWorld(sb, cam);
+            dark.DrawScene(device, sb, PostChain.Back);
+            DrawFighters(sb, cam);
 
             PostChain.BeginLights(device, sb, BattleRules.StageAmbient);
             DrawStageLights(sb, cam);
             PostChain.EndLights(sb);
 
-            PostChain.BeginGlow(device, sb, Layer(cam, 3));
+            //GLOW : the light of the dark, then the effects of the blows
+            PostChain.BeginGlowTarget(device);
+            dark.DrawGlow(device, sb, PostChain.Back);
+            sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearClamp, null, null, null, Layer(cam, 3));
             effects.DrawBlows(sb);
             effects.DrawSparks(sb);
             effects.DrawShards(sb);
             effects.DrawHits(sb);
             effects.DrawSlashes(sb);
             effects.DrawFlares(sb);
-            PostChain.EndGlow(sb);
+            sb.End();
 
-            PostChain.Finish(device, sb, time, focus, BattleRules.StageBloomThreshold, BattleRules.StageBloomStrength,
+            PostChain.Finish(device, sb, time, focus, dark.Engulf, BattleRules.StageBloomThreshold, BattleRules.StageBloomStrength,
                              BattleRules.StageVignette, BattleRules.StageGrain);
         }
 
@@ -376,7 +363,8 @@ namespace Tacetno433.Screens
             return Matrix.CreateTranslation(-cam.X * f, -cam.Y * f, 0f);
         }
 
-        private void DrawWorld(SpriteBatch sb, Vector2 cam)
+        //Draw Backdrop : into BACK, the far and middle layers and the stage floor
+        private void DrawBackdrop(SpriteBatch sb, Vector2 cam)
         {
             int left = (TacetGame.ScreenW - LayerW) / 2;
 
@@ -408,15 +396,22 @@ namespace Tacetno433.Screens
             else
             {
                 sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, null, null, null, Layer(cam, 2));
-                Gfx.Rect(sb, left, Horizon, LayerW, TacetGame.ScreenH - Horizon, Palette.StageDeep);
+                Gfx.Rect(sb, left, Horizon, LayerW, TacetGame.ScreenH - Horizon, Palette.Stage);
                 DrawFloorGuide(sb, left);
                 Gfx.TextSpaced(sb, Game.Font, layerName[1], left + 470, Horizon + 10, Palette.LineGrey * 0.6f, TextSize.Label, 2f);
                 sb.End();
             }
 
-            //The Dark : TACET's rift, leaning with the floor
-            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, null, null, null, Layer(cam, 2));
-            TacetField.DrawSlanted(sb, rift, BattleRules.StageRiftSlant, Horizon, worldTime, Danger(), riftRipple, riftRippleY);
+        }
+
+        //Draw Fighters : into the SCENE after the dark. The bits turning around the hole, the enemies back to front,
+        //the musician in front, then the front layer.
+        private void DrawFighters(SpriteBatch sb, Vector2 cam)
+        {
+            int left = (TacetGame.ScreenW - LayerW) / 2;
+
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
+            dark.DrawDebris(sb, false);
             sb.End();
 
             //Fighters : enemies back to front, then the musician in front
@@ -444,7 +439,7 @@ namespace Tacetno433.Screens
         private void DrawFloorGuide(SpriteBatch sb, int left)
         {
             Vector2 vanish = new Vector2(760f, Horizon - 140f);
-            Color line = Palette.LineGrey * 0.16f;
+            Color line = Palette.LineGrey * 0.22f;
             for (int i = -8; i <= 16; i++)
             {
                 float x = 640f + i * 150f;
@@ -468,9 +463,8 @@ namespace Tacetno433.Screens
         {
             Rectangle r = DrawBox(f);
             float depth = 1f - BattleRules.StageDepthDim * f.Slot;
-            float edge = RiftAt(r.Bottom);
-            float dark = MathHelper.Clamp((r.Center.X - edge) / 160f, 0f, 1f);
-            float shade = MathHelper.Clamp(depth * MathHelper.Lerp(1f, 0.5f, dark), 0.2f, 1f);
+            float deep = dark.InDark(new Vector2(r.Center.X, r.Bottom) - stageCam * BattleRules.StageParallax[3]);
+            float shade = MathHelper.Clamp(depth * MathHelper.Lerp(1f, 0.55f, deep), 0.2f, 1f);
             float a = f.Down ? 0.2f : 1f;
 
             Gfx.DrawGlowBox(sb, new Rectangle(r.Center.X - r.Width / 2, r.Bottom - 22, r.Width, 44), Color.Black * (0.6f * a));
@@ -536,9 +530,11 @@ namespace Tacetno433.Screens
             Gfx.DrawGlowBox(sb, new Rectangle(f.X - 120 - (int)near.X, f.Y - 120 - (int)near.Y, f.Width + 240, f.Height + 160), Color.White * spot);
             Gfx.DrawGlowBox(sb, new Rectangle(f.X - 160 - (int)floor.X, f.Bottom - 70 - (int)floor.Y, f.Width + 320, 140), Color.White * (spot * 0.8f));
 
-            //Rift Glow : the white of the crack lights what stands near it
-            for (int y = 0; y <= TacetGame.ScreenH; y += 48)
-                Gfx.DrawGlow(sb, RiftAt(y) - floor.X, y - floor.Y, 120f, Color.White * BattleRules.StageRiftLight);
+            //House Lights : the floor near the band is lit, so TACET's dark can be seen eating the light as it comes
+            Gfx.DrawGlowBox(sb, new Rectangle(-300 - (int)floor.X, Horizon + 60 - (int)floor.Y, TacetGame.ScreenW + 600, 760), Color.White * BattleRules.StageFloorLight);
+
+            //The Dark : the hole lights what stands in front of it, the seam lights the floor
+            dark.DrawLights(sb);
 
             //Foot Lights : each enemy stands in a pool of light, so it can be seen coming out of the dark
             for (int i = 0; i < battle.Enemies.Count; i++)

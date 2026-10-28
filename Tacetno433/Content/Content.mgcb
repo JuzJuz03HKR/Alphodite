@@ -228,3 +228,9 @@
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
 /build:Effects/Sprite.fx
+
+#begin Effects/Void.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Effects/Void.fx

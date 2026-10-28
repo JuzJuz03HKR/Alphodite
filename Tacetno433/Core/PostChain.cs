@@ -5,13 +5,14 @@ namespace Tacetno433.Core
 {
     //PostChain : the battle picture is drawn in layers, then finished in passes (Beta1).
     //
-    //   SCENE      1280 x 720  the world : the era's backdrop, the stage, TACET's dark, the enemies, the musician
+    //   BACK       1280 x 720  the era's backdrop and the stage floor alone, so TACET's dark can bend them (Void.fx)
+    //   SCENE      1280 x 720  the world : BACK through TACET's dark, the enemies, the musician
     //   LIGHT MAP   640 x 360  the lights : a dim grey everywhere, brighter where a light shines, kept at
     //                          half strength so a flash can go above normal (LIGHT x 2, see Post.fx)
     //   GLOW       1280 x 720  effects that give off their own light (sparks, slashes, flares) : added after the
     //                          lights, so the dark never dims them, and they feed the BLOOM
     //   SOFT        320 x 180  the lit world shrunk and blurred : the glow (BLOOM) and the QTE FOCUS come from it
-    //   FINAL      1280 x 720  SCENE x LIGHT + GLOW + BLOOM, then FOCUS, VIGNETTE and grain
+    //   FINAL      1280 x 720  SCENE x LIGHT + GLOW + BLOOM, then FOCUS, ENGULF, VIGNETTE and grain
     //
     //A page draws SCENE, LIGHT MAP and GLOW in its PreDraw, calls Finish, then draws FINAL in its Draw with the
     //words and buttons on top. Without shaders (Fx.Ready false) the same picture is put together with
@@ -24,6 +25,7 @@ namespace Tacetno433.Core
         public const int W = TacetGame.ScreenW;
         public const int H = TacetGame.ScreenH;
 
+        public static RenderTarget2D Back;
         public static RenderTarget2D Scene;
         public static RenderTarget2D Light;
         public static RenderTarget2D Glow;
@@ -39,12 +41,20 @@ namespace Tacetno433.Core
         {
             if (Scene != null && !Scene.IsDisposed && Scene.GraphicsDevice == device) return;
 
+            Back = new RenderTarget2D(device, W, H);
             Scene = new RenderTarget2D(device, W, H);
             Light = new RenderTarget2D(device, W / 2, H / 2);
             Glow = new RenderTarget2D(device, W, H);
             Final = new RenderTarget2D(device, W, H);
             softA = new RenderTarget2D(device, W / 4, H / 4);
             softB = new RenderTarget2D(device, W / 4, H / 4);
+        }
+
+        //Begin Back : the backdrop and the floor, before TACET's dark is laid over them
+        public static void BeginBack(GraphicsDevice device)
+        {
+            device.SetRenderTarget(Back);
+            device.Clear(Palette.Void);
         }
 
         //Begin Scene : everything drawn until the page sets another target lands in SCENE
@@ -71,9 +81,15 @@ namespace Tacetno433.Core
         //Begin Glow : black, then effects added on top (premultiplied colours add up like light)
         public static void BeginGlow(GraphicsDevice device, SpriteBatch sb, Matrix camera)
         {
+            BeginGlowTarget(device);
+            sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearClamp, null, null, null, camera);
+        }
+
+        //Begin Glow Target : only the target, for a page that draws its glow in several batches
+        public static void BeginGlowTarget(GraphicsDevice device)
+        {
             device.SetRenderTarget(Glow);
             device.Clear(Color.Black);
-            sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearClamp, null, null, null, camera);
         }
 
         public static void EndGlow(SpriteBatch sb)
@@ -81,11 +97,12 @@ namespace Tacetno433.Core
             sb.End();
         }
 
-        //Finish : SCENE and LIGHT MAP into FINAL. focus 0..1 is the QTE FOCUS.
-        public static void Finish(GraphicsDevice device, SpriteBatch sb, float time, float focus,
+        //Finish : SCENE and LIGHT MAP into FINAL. focus 0..1 is the QTE FOCUS, engulf 0..1 how far TACET's dark
+        //has crept in from the screen's edges (ENGULF).
+        public static void Finish(GraphicsDevice device, SpriteBatch sb, float time, float focus, float engulf,
                                   float bloomThreshold, float bloomStrength, float vignette, float grain)
         {
-            if (Fx.Ready) FinishWithShaders(device, sb, time, focus, bloomThreshold, bloomStrength, vignette, grain);
+            if (Fx.Ready) FinishWithShaders(device, sb, time, focus, engulf, bloomThreshold, bloomStrength, vignette, grain);
             else FinishPlain(device, sb, focus);
             device.SetRenderTarget(null);
 
@@ -93,10 +110,11 @@ namespace Tacetno433.Core
             device.Textures[1] = null;
             device.Textures[2] = null;
             device.Textures[3] = null;
+            device.Textures[4] = null;
         }
 
         //Finish With Shaders : Down, Blur across, Blur down, Blur across again wider, Blur down, Composite
-        private static void FinishWithShaders(GraphicsDevice device, SpriteBatch sb, float time, float focus,
+        private static void FinishWithShaders(GraphicsDevice device, SpriteBatch sb, float time, float focus, float engulf,
                                               float bloomThreshold, float bloomStrength, float vignette, float grain)
         {
             Effect post = Fx.Post;
@@ -130,10 +148,13 @@ namespace Tacetno433.Core
             post.Parameters["Vignette"].SetValue(vignette);
             post.Parameters["Grain"].SetValue(grain);
             post.Parameters["Time"].SetValue(time);
+            post.Parameters["Engulf"].SetValue(MathHelper.Clamp(engulf, 0f, 1f));
+            post.Parameters["NoiseTexture"].SetValue(Fx.Noise);
             sb.Begin(SpriteSortMode.Immediate, BlendState.Opaque, SamplerState.LinearClamp, null, null, post);
             device.SamplerStates[1] = SamplerState.LinearClamp;
             device.SamplerStates[2] = SamplerState.LinearClamp;
             device.SamplerStates[3] = SamplerState.LinearClamp;
+            device.SamplerStates[4] = SamplerState.LinearWrap;
             sb.Draw(Scene, Vector2.Zero, Color.White);
             sb.End();
         }
