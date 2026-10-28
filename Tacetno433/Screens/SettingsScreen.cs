@@ -27,6 +27,12 @@ namespace Tacetno433.Screens
             get { return false; }
         }
 
+        //Wipe Word : the page's name in the wipe on the way here (WIPE WORD)
+        public override string WipeWord
+        {
+            get { return "SETTINGS"; }
+        }
+
         //Setting Rows
         private const int RowMaster = 0;
         private const int RowSfx = 1;

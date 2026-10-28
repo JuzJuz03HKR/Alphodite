@@ -33,6 +33,12 @@ namespace Tacetno433.Screens
             isFloorOpening = floorOpening;
         }
 
+        //Wipe Word : the page's name in the wipe on the way here (WIPE WORD), short for its question at the top
+        public override string WipeWord
+        {
+            get { return isFloorOpening ? "WHERE NEXT" : "THE CROSSING"; }
+        }
+
         public override void Load()
         {
             BuildOffer();

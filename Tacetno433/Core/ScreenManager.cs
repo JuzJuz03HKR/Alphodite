@@ -72,8 +72,19 @@ namespace Tacetno433.Core
             get { return new Vector2(TacetGame.ScreenW / 2f, TacetGame.ScreenH / 2f); }
         }
 
+        //Wipe Word (Beta1 screens) : the page's name, run big and dim through the black of the SLANT WIPE on the way to
+        //this page (the user's pick, 28 Oct : the name of the page you are going to, TACET 4'33 only on the way back to
+        //the title). A name of two words or more is split at its last space into two lines that cross, like TACET and
+        //4'33. null = no words. It is read once, when the change starts (ScreenManager.Change), and the page's Game is
+        //already set by then, so a page may pick its name from the run.
+        public virtual string WipeWord
+        {
+            get { return null; }
+        }
+
         //Screen Pre Draw (Beta1) : called every frame before anything is drawn on the screen, for a page that
-        //draws into its own pictures first (render targets, see Core/PostChain.cs, OwnLens). Draw then shows them.
+        //draws into its own pictures first (render targets : the battle's layers, see Core/PostChain.cs and OwnLens, or the
+        //reward page's cards, Core/Card3D.cs). Draw then shows them.
         public virtual void PreDraw(SpriteBatch sb) { }
 
         //======================================================================================
@@ -133,7 +144,8 @@ namespace Tacetno433.Core
     //   CURTAIN  going to or from the conductor select page, the stage curtain (Core/Curtain.cs)
     //   WAVE     the old duel and the curtain call, TACET's silence washing over the page and pulling back
     //            (Core/SilenceWave.cs)
-    //   WIPE     every other page, slanted bands of white, grey and black (Core/SlantWipe.cs)
+    //   WIPE     every other page, slanted bands of white, grey and black, the name of the next page running through
+    //            the black (Core/SlantWipe.cs, GameScreen.WipeWord)
     //Every page but the battle is drawn through THE LENS (Core/PostChain.cs DrawPage) : a stage light, bloom and
     //vignette, and it comes up from black as it opens (ENTER).
     public class ScreenManager
@@ -181,6 +193,8 @@ namespace Tacetno433.Core
         public void Change(GameScreen screen)
         {
             waiting = screen;
+            waiting.Game = game;                // WIPE WORD : the name may come from the run
+            SlantWipe.SetWord(waiting.WipeWord);
             fadingOut = true;
             sweep = sweepNext;
             sweepFrom = sweepNextFrom;
@@ -191,8 +205,10 @@ namespace Tacetno433.Core
                 sweepFrom = screen.SweepFrom;
             }
             bool plain = sweep == RingSweep.Kind.None;
+            bool curtainShowing = curtain && fade > 0f;
             curtain = plain && (screen.UsesCurtain || (current != null && current.UsesCurtain));
             wave = plain && !curtain && screen.EntersWithWave;
+            if (curtain && !curtainShowing) Curtain.Begin(fade);      // REAL CLOTH : a curtain already moving carries on as it is
         }
 
         //Screen Change Now : swap with no fade (used for the very first screen). A cover still on its way is dropped.
@@ -248,6 +264,7 @@ namespace Tacetno433.Core
                 fade -= dt * FadeSpeed;
                 if (fade < 0f) fade = 0f;
             }
+            if (curtain && (fadingOut || fade > 0f)) Curtain.Update(dt, fade);     // REAL CLOTH : the drapes move in Update
 
             //Input Lock : while the screen is fading out the old page must stop updating.
             //Otherwise a second key press during the fade would run its action twice, for
@@ -268,8 +285,8 @@ namespace Tacetno433.Core
         public void PreDraw(SpriteBatch sb)
         {
             if (current == null) return;
-            if (current.OwnLens) current.PreDraw(sb);
-            else PostChain.DrawPage(game.GraphicsDevice, sb, current, time);
+            current.PreDraw(sb);
+            if (!current.OwnLens) PostChain.DrawPage(game.GraphicsDevice, sb, current, time);
         }
 
         //Screen Draw : the active screen, then the cover on top while it is moving

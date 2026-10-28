@@ -61,6 +61,7 @@ namespace Tacetno433.Core
         public static Color FrameGoldDark = new Color(62, 62, 66);
         public static Color Curtain = new Color(54, 54, 58);
         public static Color CurtainDark = new Color(22, 22, 25);
+        public static Color CurtainLight = new Color(94, 94, 100);      // the fold of the stage curtain that turns to the light (Core/Curtain.cs)
         public static Color CanvasDark = new Color(24, 24, 27);
 
         //Character Tones : each conductor gets its own brightness so they stay

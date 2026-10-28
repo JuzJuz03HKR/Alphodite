@@ -33,6 +33,14 @@ namespace Tacetno433.Screens
         private string floorLabel = "";
         private float time;
 
+        //Wipe Word : the movement's number runs through the wipe, and the card itself shows its name (WIPE WORD)
+        private static readonly string[] wipeWords = { "MOVEMENT I", "MOVEMENT II", "MOVEMENT III" };
+
+        public override string WipeWord
+        {
+            get { return Game.CurrentRun == null ? null : wipeWords[Math.Max(1, Math.Min(Game.CurrentRun.Floor, wipeWords.Length)) - 1]; }
+        }
+
         public override void Load()
         {
             int floor = Math.Max(1, Math.Min(Game.CurrentRun.Floor, numerals.Length));

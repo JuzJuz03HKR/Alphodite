@@ -1573,6 +1573,7 @@ Tacetno433.exe --shots title,battle,result --out C:\pictures --scale 1.5 --stead
 ```
 (Beta1 28 ต.ค., SHARP SCREEN) `--scale 1.5` แคปแบบที่เต็มจอวาดจริงบนจอ 1920×1080 (2 = 2560×1440, 3 = 4K, ไม่ใส่ = 1280×720) ·
 `--steady` เกมเดิน 1/60 วินาทีต่อภาพ และการสุ่มของรันถูกล็อก รันซ้ำได้ภาพเดิมทุกพิกเซล ใช้เทียบก่อนกับหลังแก้ (ใช้รายชื่อหน้าชุดเดียวกัน เพราะเมาส์จำลองเดินต่อข้ามหน้า, หน้า `practice` ยังสุ่มต่างกันทุกรอบ)
+(Beta1 29 ต.ค.) แคปใหม่ : `wipeshop wiperest wipeevent wipereward wipechapter wipeband wipesettings` แผ่นเฉียงไปหน้านั้นพร้อมชื่อหน้า (`@41` = แผ่นดำปิดเต็มจอ) · `wipegallery` ม่านผ้าจริงไปหน้าเลือกวาทยากร (`@24` กำลังปิด `@40` ปิดสนิท `@60` กำลังเปิด) · `rewardtilt` การ์ดใบกลางเอียงตามเมาส์ · `rewardpick` กด Enter ที่เฟรม 72 (การ์ดที่เลือกเด้ง ใบอื่นคว่ำ) · `shopbuy` คลิกซื้อ Motif แรกที่เฟรม 30 (`@44` กำลังบินขึ้น) ผ่าน `Input.PretendClick` · ชื่อทั้งหมดอยู่คอมเมนต์ `Page Open` ใน `Core/DebugShots.cs`
 
 ```bash
 Tacetno433.exe --shots audit --out C:\temp

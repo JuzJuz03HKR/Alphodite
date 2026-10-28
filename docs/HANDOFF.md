@@ -20,7 +20,7 @@
 | PLAYTEST (SIGNATURE 1 แต้ม) | `BattleRules.PlaytestSignatureNeed` (0 = ค่าจริง) |
 | ภาพทดสอบ | `--shots battle battlewin battlelose battleslash battleshot battlesmash battlecross battleink battlegold battlefire battlecutin battlekill battlebolt battleboltsoft battleimpact` (`BattleScreen.ShowForPicture`) |
 
-**ยกระดับทุกหน้าจอ (28 ต.ค. รอบตัวอย่าง)** · เอกสาร `SCREENS_LEVEL_UP.md` ข้อ 10 · ตัวเลขใน `BattleRules` หัวข้อ UI Feel
+**ยกระดับทุกหน้าจอ (28 ต.ค. รอบตัวอย่าง, 29 ต.ค. คำในแผ่นเฉียง ม่านผ้าจริง รอบ 1)** · เอกสาร `SCREENS_LEVEL_UP.md` ข้อ 10 13 14 · ตัวเลขใน `BattleRules` หัวข้อ UI Feel
 
 | อยากแก้อะไร | ไปไฟล์ไหน |
 |---|---|
@@ -28,11 +28,15 @@
 | หลุม TACET บนหน้าอื่น | `TacetVoid.PlaceOnPage` (shader `Void.fx` ค่า `Fine`) |
 | ปุ่มแบบผสม (รายการเมนู ปุ่มคำสั่ง ตัวเลข แถบหมึก กล่องคีย์) | `Core/Ui.cs` (`MenuItem` `Command` `Number` `InkBar` `KeyBox`) + จังหวะ `Core/UiMotion.cs` |
 | เส้นคั่นวงกลม วงแหวนมีขีด | `Core/Ornament.cs` (`OrbitRule` `TickRing`) |
-| เปลี่ยนหน้าปกติ (แผ่นเฉียงหลายชั้น คำในแผ่นดำ `Word`) / ช่วงสำคัญ (วงแหวนกวาด LIGHT DARK CLOSE) / ม่าน (เข้าออกหน้าเลือกวาทยากร) | `Core/SlantWipe.cs` / `Core/RingSweep.cs` เรียกด้วย `ScreenManager.SweepNext` หรือ `EntersWithSweep` ของหน้า / `Core/Curtain.cs` (`UsesCurtain`) |
+| เปลี่ยนหน้าปกติ (แผ่นเฉียงหลายชั้น คำในแผ่นดำ = ชื่อหน้าที่กำลังไป) / ช่วงสำคัญ (วงแหวนกวาด LIGHT DARK CLOSE) / ม่าน (เข้าออกหน้าเลือกวาทยากร) | `Core/SlantWipe.cs` (`SetWord`) + คำของแต่ละหน้า `GameScreen.WipeWord` (WIPE WORD) / `Core/RingSweep.cs` เรียกด้วย `ScreenManager.SweepNext` หรือ `EntersWithSweep` ของหน้า / `Core/Curtain.cs` (`UsesCurtain`) |
+| ม่านผ้าจริง (REAL CLOTH, 29 ต.ค.) : จีบบนราว ADVANCED PART position based dynamics, ชายผ้าแกว่ง (HEM), ตาข่ายสามเหลี่ยม | `Core/Curtain.cs` (`Begin` `Update` `Draw`) เรียกจาก `ScreenManager.Change/Update` · ตัวเลข `BattleRules.UiCurtain*` · สี `Palette.CurtainLight` |
+| การ์ด 3D แบบ Balatro (พลิก เอียงตามเมาส์ แถบแสง) : วาดหน้าการ์ดลงภาพใน `PreDraw` แล้วโชว์เป็นสี่เหลี่ยมใน 3D ใน `Draw` | `Core/Card3D.cs` (`Picture` `BeginPicture` `Batch` `Draw` `AddLight`) · ใช้ที่ `Screens/MotifRewardScreen.cs` · หน้าการ์ด `MotifArt.CardFace` `CardBack` · ตัวเลข `BattleRules.UiCard*` `UiRarityLight` |
+| หน้ารอบ 1 (29 ต.ค.) : Reward (THE SPOILS) / Shop (THE ARCHIVIST, ของที่ซื้อบินขึ้นแถบบน FLY UP, ข้อความคนขายเขียนทีละบรรทัด) / Event (แสงเย็นวูบ) / Rest (โคมหายใจ) | `Screens/MotifRewardScreen.cs` / `ShopScreen.cs` (ปลายทาง `RunHud.BadgeCentre` `LifeAt` `SeatsAt` `BandAt`, ซ่อนตราที่ยังบินอยู่ `RunHud.Arriving`) / `EventScreen.cs` (`Falter`) / `RestScreen.cs` (`Breath`) |
+| แผนอาร์ตของหน้าจอ | `docs/UI_ART_PLAN.md` |
 | ฟอนต์ (OFL) | `Content/Fonts/` + `.spritefont` 4 ไฟล์ และชุดใหญ่ของแต่ละตัว `*_15x` `*_2x` `*_3x` (12 ไฟล์ แก้ขนาดฟอนต์ต้องแก้ทั้งชุด) |
 | เต็มจอภาพคม (SHARP SCREEN) : วาดที่ความละเอียดจอจริง ทุกหน้ายังใช้ตำแหน่ง 1280×720 ผ่าน `Sharp.Transform` (**ทุก `SpriteBatch.Begin` ที่วาดลงหน้าต้องใส่**) ตัวหนังสือจากฟอนต์ชุดใหญ่ เส้นและรูปทรงลงพิกเซลจริง | `Core/Sharp.cs` (`Scale` `Dot` `Snap` `Edge` `MaxScale`) + `Core/SharpText.cs` + `Core/Gfx.cs` + `TacetGame.UpdateView/SetSharp` · `SCREENS_LEVEL_UP.md` ข้อ 11 |
 | หน้า Title / Result และ Defeat | `Screens/TitleScreen.cs` / `Screens/ResultScreen.cs` |
-| ภาพทดสอบ | `--shots titlereveal resultquiet wipe sweep sweepdark sweepclose` และ `result@3,result@30` (ชื่อซ้ำได้ ภาพชื่อ `ชื่อ_เฟรม`) |
+| ภาพทดสอบ | `--shots titlereveal resultquiet wipe sweep sweepdark sweepclose` และ `result@3,result@30` (ชื่อซ้ำได้ ภาพชื่อ `ชื่อ_เฟรม`) · 29 ต.ค. : `wipeshop wiperest wipeevent wipereward wipechapter wipeband wipesettings` (แผ่นเฉียงไปหน้านั้น) `wipegallery` (ม่าน) `rewardpick rewardtilt shopbuy` |
 | ภาพทดสอบเต็มจอ / เทียบก่อนหลัง | `--scale 1.5` (1920×1080, 2 = 2560×1440, 3 = 4K) · `--steady` (1/60 วินาทีต่อภาพ ล็อกการสุ่มของรัน รันซ้ำได้ภาพเดิมทุกพิกเซล) |
 
 ## 0. แผนที่โค้ด Alpha 7 (การต่อสู้แบบผลัดตา, อัปเดต 24 ต.ค. ขั้น 1–15)

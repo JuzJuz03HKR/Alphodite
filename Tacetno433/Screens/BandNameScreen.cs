@@ -22,6 +22,12 @@ namespace Tacetno433.Screens
         private string name = "";
         private float time;
 
+        //Wipe Word : the page's name in the wipe on the way here (WIPE WORD)
+        public override string WipeWord
+        {
+            get { return "NAME YOUR ENSEMBLE"; }
+        }
+
         //Text Input Hook : MonoGame reports every typed character through this event.
         //It is the proper way to read typing, because it already understands the
         //keyboard layout, shift, and key repeat. Reading raw key states instead would

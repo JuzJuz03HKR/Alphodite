@@ -31,6 +31,12 @@ namespace Tacetno433.Screens
             get { return false; }
         }
 
+        //Wipe Word : the game's own name runs through the wipe only on the way back here (WIPE WORD)
+        public override string WipeWord
+        {
+            get { return "TACET 4'33"; }
+        }
+
         //Has World : the score, the rings and the logo are lit, the menu lies on top (THE LENS)
         public override bool HasWorld
         {

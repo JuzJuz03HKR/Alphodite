@@ -1,5 +1,6 @@
 using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Tacetno433.Core
 {
@@ -53,6 +54,13 @@ namespace Tacetno433.Core
         public static float Edge(float v)
         {
             return (float)Math.Floor(v * Scale + 0.5f);
+        }
+
+        //Begin : the frame's sprite batch begun again as TacetGame begins it, for a page or a cover that stepped out of it
+        //to draw something of its own (the cards of Core/Card3D.cs, the cloth of Core/Curtain.cs)
+        public static void Begin(SpriteBatch sb)
+        {
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, null, null, null, Transform);
         }
     }
 }

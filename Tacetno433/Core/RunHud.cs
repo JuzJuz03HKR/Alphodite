@@ -20,6 +20,15 @@ namespace Tacetno433.Core
 
         private static int hoverMotif = -1;
 
+        //Arriving (Beta1 round 1) : this many of the newest motif badges are not drawn yet, they are still flying up from
+        //the shop shelf (ShopScreen). The page that sets it puts it back to 0 when it leaves.
+        public static int Arriving;
+
+        //Chip Places : where the top bar shows LIFE, SEATS and the band's name, for something flying into them
+        public static readonly Vector2 LifeAt = new Vector2(925f, 39f);
+        public static readonly Vector2 SeatsAt = new Vector2(1040f, 40f);
+        public static readonly Vector2 BandAt = new Vector2(110f, 22f);
+
         //Top Bar
         public static void DrawTop(SpriteBatch sb, RunState run, string title)
         {
@@ -66,7 +75,7 @@ namespace Tacetno433.Core
         }
 
         //Badge Centre : motif i, counted from the right edge
-        private static Vector2 BadgeCentre(int i)
+        public static Vector2 BadgeCentre(int i)
         {
             return new Vector2(TacetGame.ScreenW - 34 - i * BadgeGap, TopH + 24);
         }
@@ -75,7 +84,7 @@ namespace Tacetno433.Core
         private static void DrawBadges(SpriteBatch sb, RunState run)
         {
             hoverMotif = -1;
-            for (int i = 0; i < run.Motifs.Count; i++)
+            for (int i = 0; i < run.Motifs.Count - Arriving; i++)
             {
                 Vector2 c = BadgeCentre(i);
                 Rectangle hit = new Rectangle((int)(c.X - BadgeSize), (int)(c.Y - BadgeSize), (int)(BadgeSize * 2), (int)(BadgeSize * 2));

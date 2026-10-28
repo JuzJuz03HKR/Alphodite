@@ -35,6 +35,17 @@ namespace Tacetno433.Screens
             afterBattle = fromBattle;
         }
 
+        //Wipe Word : the page's heading in the wipe on the way here, none when nobody joins (WIPE WORD)
+        public override string WipeWord
+        {
+            get
+            {
+                int count = Game.CurrentRun == null ? 0 : Game.CurrentRun.JustJoined.Count;
+                if (count == 0) return null;
+                return count == 1 ? "A MUSICIAN JOINS" : "THE ENSEMBLE GATHERS";
+            }
+        }
+
         public override void Load()
         {
             if (Game.CurrentRun.JustJoined.Count > 0)

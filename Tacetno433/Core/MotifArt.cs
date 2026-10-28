@@ -8,8 +8,9 @@ namespace Tacetno433.Core
     //
     //PLACEHOLDER. Each motif is its two initials inside a diamond (round 15, it was a notation
     //mark). When motif icons are painted, Badge becomes one sb.Draw of the icon into the same square.
-    //   Badge -> the small icon (top bar, shop shelf)
-    //   Card  -> the tall card on the reward page
+    //   Badge     -> the small icon (top bar, shop shelf)
+    //   CardFace  -> the tall card on the reward page, drawn into a picture that turns in 3D (Core/Card3D.cs)
+    //   CardBack  -> the back every motif card shares
     public static class MotifArt
     {
         //Badge : a diamond frame with the initials inside. Rarer motifs get more frame lines.
@@ -30,13 +31,29 @@ namespace Tacetno433.Core
             Gfx.TextCentered(sb, Ui.BigFont, m.Initials, cx, cy - 2 * s, color, TextSize.Small * s * 1.05f);
         }
 
-        //Card : the tall reward card. hover lifts it and lights the frame.
-        public static void Card(SpriteBatch sb, Rectangle r, Motif m, bool hover, float alpha, float time)
+        //Card Back (Beta1 screens) : the back every motif card shares, seen while a card flips (Core/Card3D.cs). A ring
+        //with ticks like the QTE ring and TACET's hole, nothing that says which motif it is.
+        public static void CardBack(SpriteBatch sb, Rectangle r, float alpha, float time)
         {
-            if (hover) r.Y -= 8;
+            Gfx.Rect(sb, r, Palette.Panel * alpha);
+            Gfx.DrawGlowBox(sb, new Rectangle(r.X - 30, r.Y + r.Height / 4, r.Width + 60, r.Height / 2), Palette.Paper * (0.05f * alpha));
+            Ornament.DoubleFrame(sb, r, Palette.LineGrey * alpha);
+            Rectangle inner = r;
+            inner.Inflate(-18, -18);
+            Ornament.CornerBrackets(sb, inner, 14, Palette.PaperDim * alpha, 1);
 
+            float cx = r.Center.X;
+            float cy = r.Center.Y;
+            Ornament.TickRing(sb, cx, cy, 54f, 40, time * 0.2f, 1f, Palette.PaperDim * alpha);
+            Gfx.CircleOutline(sb, cx, cy, 30f, Palette.LineGrey * alpha, 1.5f);
+            Gfx.Diamond(sb, cx, cy, 6f, Palette.Paper * alpha);
+            Gfx.TextSpacedCentered(sb, Ui.Font, "MOTIF", cx, r.Bottom - 46, Palette.LineGrey * alpha, TextSize.Tiny, 4f);
+        }
+
+        //Card Face : the tall reward card, without a shadow (the page puts it on the floor). hover lights the frame.
+        public static void CardFace(SpriteBatch sb, Rectangle r, Motif m, bool hover, float alpha, float time)
+        {
             //Card Body
-            Gfx.Rect(sb, new Rectangle(r.X + 6, r.Y + 8, r.Width, r.Height), Color.Black * (0.5f * alpha));
             Gfx.Rect(sb, r, Palette.Panel * alpha);
             Gfx.DrawGlowBox(sb, new Rectangle(r.X - 30, r.Y + 20, r.Width + 60, r.Height / 2), Palette.Paper * ((hover ? 0.12f : 0.05f) * alpha));
             Ornament.DoubleFrame(sb, r, (hover ? Palette.Highlight : Palette.LineGrey) * alpha);

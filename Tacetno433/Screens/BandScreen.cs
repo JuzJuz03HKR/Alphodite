@@ -70,6 +70,12 @@ namespace Tacetno433.Screens
         private string[] sideBeats = { "", "", "" };   // "BEATS 2  6" for each side, CUE
         private bool[] sectionEmpty = new bool[3];
 
+        //Wipe Word : the page's name in the wipe on the way here (WIPE WORD)
+        public override string WipeWord
+        {
+            get { return "THE BAND"; }
+        }
+
         public override void Load()
         {
             RunState run = Game.CurrentRun;

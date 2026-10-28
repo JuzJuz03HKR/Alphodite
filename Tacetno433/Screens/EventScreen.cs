@@ -16,6 +16,9 @@ namespace Tacetno433.Screens
     //   RESULT   what happened, what was gained or lost, and a button to carry on
     //
     //The events themselves are written in Data/GameEvent.cs.
+    //Beta1 screens round 1 (29 Oct, docs/SCREENS_LEVEL_UP.md 14) : UNKNOWN PATH. A cold, narrow light falls on the
+    //painting and now and then it falters, like a bulb about to go, and the rest of the room is dark. The story comes in
+    //piece by piece, and the choices light up like the menus when pointed at.
     public class EventScreen : GameScreen
     {
         private enum Phase { Read, Pick, Rolling, Result }
@@ -43,6 +46,13 @@ namespace Tacetno433.Screens
         {
             get { return phase == Phase.Pick; }
         }
+
+        //Wipe Word : the path's name in the wipe on the way here, the story itself waits for the page (WIPE WORD)
+        public override string WipeWord
+        {
+            get { return "UNKNOWN PATH"; }
+        }
+
         private int hoverChoice = -1;
         private int chosen = -1;
         private int hoverCard = -1;
@@ -62,6 +72,11 @@ namespace Tacetno433.Screens
         private float phaseTimer;
         private float time;
 
+        //Motion (Beta1 round 1) : the choices and buttons point like the menus (Core/UiMotion.cs)
+        private UiMotion[] choiceMotion = { new UiMotion(), new UiMotion(), new UiMotion(), new UiMotion() };
+        private UiMotion continueMotion = new UiMotion();
+        private UiMotion cancelMotion = new UiMotion();
+
         public override void Load()
         {
             RunState run = Game.CurrentRun;
@@ -72,6 +87,11 @@ namespace Tacetno433.Screens
             phase = Phase.Read;
             SoundBank.Play(Sfx.PageTurn);
             SoundBank.PlayMusic(Music.Event);
+
+            //The Lens : the darkest room of the three, the painting's light carries it (DrawLights)
+            Lens.Ambient = 0.3f;
+            Lens.SpotPower = 0f;
+            Lens.Vignette = 0.7f;
         }
 
         private Rectangle ChoiceRect(int i)
@@ -100,6 +120,10 @@ namespace Tacetno433.Screens
             time += dt;
             phaseTimer += dt;
             RunState run = Game.CurrentRun;
+            for (int i = 0; i < choiceMotion.Length; i++)
+                choiceMotion[i].Update(dt, phase == Phase.Read && i < ev.Choices.Length && Input.MouseOver(ChoiceRect(i)) && CanTake(ev.Choices[i]));
+            continueMotion.Update(dt, phase == Phase.Result && Input.MouseOver(continueButton));
+            cancelMotion.Update(dt, phase == Phase.Pick && Input.MouseOver(cancelButton));
 
             if (phase == Phase.Read)
             {
@@ -179,6 +203,7 @@ namespace Tacetno433.Screens
             }
 
             chosen = index;
+            choiceMotion[index].Press();
             SoundBank.Play(Sfx.UiConfirm);
 
             if (c.Check)
@@ -300,12 +325,72 @@ namespace Tacetno433.Screens
             RunFlow.NextStage(Game);
         }
 
+        //======================================================================================
+        //The World (THE LENS) : a dark room, one cold light on the painting
+        //======================================================================================
+
+        public override bool HasWorld
+        {
+            get { return true; }
+        }
+
+        public override bool ShowsGrain
+        {
+            get { return false; }
+        }
+
+        //Falter : the cold light's strength this moment, mostly steady, now and then it dips twice like a bulb about to go
+        private float Falter()
+        {
+            float beat = time % 4.3f;
+            float dip = beat > 3.6f && beat < 3.75f ? 0.55f : (beat > 3.85f && beat < 3.92f ? 0.7f : 1f);
+            return dip * (0.97f + 0.03f * (float)Math.Sin(time * 23f));
+        }
+
+        //World : the event painting, or an empty slot for it, in a double frame, on a dark floor.
+        //ARTWORK : Content/Art/Events/event_<title>.png, see ArtBank.
+        public override void DrawWorld(SpriteBatch sb)
+        {
+            float e = UiMotion.Between(time, 0f, 0.6f);
+            Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.StageDeep);
+            Gfx.DrawGlowBox(sb, new Rectangle(-200, -260, TacetGame.ScreenW + 400, 820), Palette.Paper * 0.04f);
+
+            Gfx.Rect(sb, artBox, Palette.CanvasDark * e);
+            Rectangle picture = artBox;
+            picture.Inflate(-10, -10);
+            ArtBank.DrawOrSlot(sb, ArtBank.EventOf(ev), picture, Palette.Paper, e);
+            Ornament.FadeUp(sb, new Rectangle(artBox.X, artBox.Bottom - 80, artBox.Width, 80), 0.9f * e);
+            Ornament.DoubleFrame(sb, artBox, Palette.PaperDim * e);
+        }
+
+        //Lights : the cold light from above on the painting (it falters, see Falter), and a dim one where the words are
+        public override void DrawLights(SpriteBatch sb)
+        {
+            float up = UiMotion.EaseInOut(MathHelper.Clamp(time / 0.9f, 0f, 1f)) * Falter();
+            Gfx.DrawGlow(sb, artBox.Center.X, artBox.Y + 170f, 330f, Color.White * (0.66f * up));
+            Gfx.DrawGlowBox(sb, new Rectangle(artBox.X + 60, -120, artBox.Width - 120, artBox.Bottom + 40), Color.White * (0.36f * up));
+            Gfx.DrawGlow(sb, TextX + ChoiceW / 2f, 330f, 460f, Color.White * 0.22f);
+        }
+
+        //Glow : the cold light's narrow beam
+        public override void DrawGlow(SpriteBatch sb)
+        {
+            float a = 0.26f * UiMotion.EaseInOut(MathHelper.Clamp(time / 0.9f, 0f, 1f)) * Falter();
+            Gfx.DrawGlowBox(sb, new Rectangle(artBox.X + 110, -300, artBox.Width - 220, artBox.Bottom + 200), Color.White * a);
+        }
+
+        //======================================================================================
+        //The Words (crisp on top)
+        //======================================================================================
+
         public override void Draw(SpriteBatch sb)
         {
             RunState run = Game.CurrentRun;
 
-            SceneBackdrop.Draw(sb, time);
-            DrawIllustration(sb, run);
+            //Place : the painting's caption
+            float e = UiMotion.Between(time, 0.2f, BattleRules.UiEnterTime);
+            Gfx.TextSpaced(sb, Game.Font, ev.Place, artBox.X + 20, artBox.Bottom - 30, Palette.Paper * e, TextSize.Label, 3f);
+
             DrawText(sb, run);
 
             if (phase == Phase.Read) DrawChoices(sb, run);
@@ -317,48 +402,50 @@ namespace Tacetno433.Screens
             RunHud.DrawTips(sb, run);
         }
 
-        //Illustration : the event painting, or an empty slot for it, in a double frame.
-        //ARTWORK : Content/Art/Events/event_<title>.png, see ArtBank.
-        private void DrawIllustration(SpriteBatch sb, RunState run)
-        {
-            Gfx.Rect(sb, artBox, Palette.CanvasDark);
-            Rectangle picture = artBox;
-            picture.Inflate(-10, -10);
-            ArtBank.DrawOrSlot(sb, ArtBank.EventOf(ev), picture, Palette.Paper, 1f);
-
-            Ornament.FadeUp(sb, new Rectangle(artBox.X, artBox.Bottom - 80, artBox.Width, 80), 0.9f);
-            Ornament.DoubleFrame(sb, artBox, Palette.PaperDim);
-            Gfx.TextSpaced(sb, Game.Font, ev.Place, artBox.X + 20, artBox.Bottom - 30, Palette.Paper, TextSize.Label, 3f);
-        }
-
-        //Text : where we are, the title, and the story
+        //Text : where we are, the title, and the story, coming in one after another
         private void DrawText(SpriteBatch sb, RunState run)
         {
-            Gfx.TextSpaced(sb, Game.Font, stageLine, TextX, 116, Palette.LineGrey, TextSize.Tiny, 3f);
-            Gfx.Text(sb, Game.BigFont, ev.Title, TextX, 134, Palette.Highlight, TextSize.Title);
-            Ornament.Rule(sb, TextX, 186, ChoiceW, Palette.LineGrey);
-            Gfx.Text(sb, Game.StoryFont, ev.TextWrapped, TextX, 204, Palette.Paper, TextSize.Story);
+            float a = UiMotion.Between(time, 0.1f, BattleRules.UiEnterTime);
+            float b = UiMotion.Between(time, 0.1f + BattleRules.UiEnterStagger, BattleRules.UiEnterTime);
+            float c = UiMotion.Between(time, 0.1f + BattleRules.UiEnterStagger * 3f, BattleRules.UiEnterTime);
+            float slide = BattleRules.UiEnterSlide;
+            Gfx.TextSpaced(sb, Game.Font, stageLine, TextX + (1f - a) * slide, 116, Palette.LineGrey * a, TextSize.Tiny, 3f);
+            Gfx.Text(sb, Game.BigFont, ev.Title, TextX + (1f - b) * slide, 134, Palette.Highlight * b, TextSize.Title);
+            Ornament.Rule(sb, TextX, 186, ChoiceW * b, Palette.LineGrey * b);
+            Gfx.Text(sb, Game.StoryFont, ev.TextWrapped, TextX, 204 + (1f - c) * 10f, Palette.Paper * c, TextSize.Story);
         }
 
-        //Choices : one blade per choice, with its hint tag on the right
+        //Choices : one slanted plate per choice. Pointed at, a white ink plate shoots out under it with a grey one behind
+        //(like the menus), the words turn black and it steps forward. Its hint tag on the right, its key on the left.
         private void DrawChoices(SpriteBatch sb, RunState run)
         {
-            Gfx.TextSpaced(sb, Game.Font, "WHAT DO YOU DO", TextX, ChoiceY - 24, Palette.PaperDim, TextSize.Tiny, 4f);
+            float head = UiMotion.Between(time, 0.45f, BattleRules.UiEnterTime);
+            Gfx.TextSpaced(sb, Game.Font, "WHAT DO YOU DO", TextX, ChoiceY - 24, Palette.PaperDim * head, TextSize.Tiny, 4f);
 
             for (int i = 0; i < ev.Choices.Length; i++)
             {
                 EventChoice c = ev.Choices[i];
+                float enter = UiMotion.Between(time, 0.5f + i * BattleRules.UiEnterStagger, BattleRules.UiEnterTime);
+                if (enter <= 0f) continue;
                 Rectangle r = ChoiceRect(i);
                 bool can = CanTake(c);
-                bool over = i == hoverChoice && can;
-                float a = can ? 1f : 0.4f;
+                float a = (can ? 1f : 0.4f) * enter;
+                float e = can ? choiceMotion[i].Shown : 0f;
+                float s = choiceMotion[i].Scale;
+                r.X += (int)(6f * e + (1f - enter) * BattleRules.UiEnterSlide * 1.5f);
 
-                if (over) r.X += 6;
-                Gfx.SlantBox(sb, r, Ui.Slant, (over ? Palette.Paper : Palette.Panel) * a);
-                if (!over) Gfx.SlantOutline(sb, r, Ui.Slant, Palette.LineGrey * a, 1f);
+                Gfx.SlantBox(sb, r, Ui.Slant, Palette.Panel * a);
+                if (e < 1f) Gfx.SlantOutline(sb, r, Ui.Slant, Palette.LineGrey * ((1f - e) * a), 1f);
+                if (e > 0f)
+                {
+                    float h = r.Height * s;
+                    float y = r.Center.Y - h / 2f;
+                    Ui.InkBar(sb, r.X + BattleRules.UiShadow, y + BattleRules.UiShadow, r.Width * e, h, Ui.Slant, Palette.LineGrey * (0.55f * a), i * 5 + 2, 1f);
+                    Ui.InkBar(sb, r.X, y, r.Width * e, h, Ui.Slant, Palette.Paper * a, i * 5, 1f);
+                }
 
-                Color text = over ? Palette.Ink : Palette.Paper;
-                Gfx.Text(sb, Game.BigFont, numerals[i], r.X + 24, r.Y + 10, (over ? Palette.InkSoft : Palette.PaperDim) * a, TextSize.Small);
+                Color text = Color.Lerp(Palette.Paper, Palette.Ink, e);
+                Gfx.Text(sb, Game.BigFont, numerals[i], r.X + 24, r.Y + 10, Color.Lerp(Palette.PaperDim, Palette.InkSoft, e) * a, TextSize.Small);
                 Gfx.Text(sb, Game.StoryFont, c.Text, r.X + 70, r.Y + 15, text * a, TextSize.Story);
 
                 if (c.HintLabel.Length > 0)
@@ -367,62 +454,65 @@ namespace Tacetno433.Screens
                     Ui.Tag(sb, c.HintLabel, r.Right - Ui.Slant - tw - 14, r.Y + 18, c.Check, a);
                 }
 
-                Ui.KeyChipRight(sb, NumberText.Get(i + 1), r.X - 8, r.Center.Y, Palette.LineGrey * a);
+                Ui.KeyChipRight(sb, NumberText.Get(i + 1), ChoiceRect(i).X - 8, r.Center.Y, Palette.LineGrey * a);
+                if (choiceMotion[i].Flash > 0f) Gfx.DrawGlow(sb, r.Center.X, r.Center.Y, r.Width * 0.6f, Color.White * (0.5f * choiceMotion[i].Flash));
             }
         }
 
         //Pick : who takes the check. Every card shows that musician's chance.
         private void DrawPick(SpriteBatch sb, RunState run)
         {
-            float slide = Math.Min(1f, phaseTimer * 5f);
+            float slide = UiMotion.EaseOut(Math.Min(1f, phaseTimer * 4f));
             Rectangle panel = pickPanel;
             panel.Y += (int)((1f - slide) * 60f);
 
-            Gfx.Rect(sb, panel, Palette.Void * 0.95f);
-            Gfx.Rect(sb, panel.X, panel.Y, panel.Width, 1, Palette.PaperDim);
-            Gfx.TextCentered(sb, Game.BigFont, "Who takes it on?", 640, panel.Y + 26, Palette.Paper, TextSize.Subtitle);
-            Gfx.TextSpacedCentered(sb, Game.Font, ev.Choices[chosen].HintLabel, 640, panel.Y + 50, Palette.PaperDim, TextSize.Tiny, 3f);
+            Gfx.Rect(sb, panel, Palette.Void * (0.95f * slide));
+            Gfx.Rect(sb, panel.X, panel.Y, panel.Width, 1, Palette.PaperDim * slide);
+            Gfx.TextCentered(sb, Game.BigFont, "Who takes it on?", 640, panel.Y + 26, Palette.Paper * slide, TextSize.Subtitle);
+            Gfx.TextSpacedCentered(sb, Game.Font, ev.Choices[chosen].HintLabel, 640, panel.Y + 50, Palette.PaperDim * slide, TextSize.Tiny, 3f);
 
             for (int i = 0; i < run.Roster.Count && i < cardChances.Length; i++)
             {
                 Rectangle card = CardRect(i);
-                card.Y += (int)((1f - slide) * 60f);
+                float k = UiMotion.Between(phaseTimer, i * 0.03f, 0.25f);
+                card.Y += (int)((1f - k) * 50f);
                 Musician m = run.Roster[i];
                 MusicianArt.Card(sb, card, m, run, i == hoverCard, false, "");
 
                 //Chance Band : the percent in large type along the bottom of the card
                 Rectangle band = new Rectangle(card.X, card.Bottom + 4, card.Width, 26);
                 bool over = i == hoverCard;
-                Gfx.Rect(sb, band, over ? Palette.Paper : Palette.Stage);
+                Gfx.Rect(sb, band, (over ? Palette.Paper : Palette.Stage) * k);
                 Gfx.TextCentered(sb, Game.BigFont, NumberText.Get(cardChances[i]), band.Center.X - 8, band.Center.Y - 2,
-                                 over ? Palette.Ink : Palette.Highlight, TextSize.Small);
-                Gfx.Text(sb, Game.Font, "%", band.Center.X + 12, band.Y + 5, over ? Palette.InkSoft : Palette.PaperDim, TextSize.Label);
+                                 (over ? Palette.Ink : Palette.Highlight) * k, TextSize.Small);
+                Gfx.Text(sb, Game.Font, "%", band.Center.X + 12, band.Y + 5, (over ? Palette.InkSoft : Palette.PaperDim) * k, TextSize.Label);
             }
 
-            Ui.Button(sb, cancelButton, "BACK", "ESC", false);
+            Ui.Command(sb, cancelButton, "BACK", "ESC", cancelMotion, slide, false);
         }
 
-        //Rolling : a spinning ring and a flickering number
+        //Rolling : a ring with ticks turning, and a flickering number that stops on the roll
         private void DrawRolling(SpriteBatch sb)
         {
             float cx = 900;
             float cy = 480;
             float t = phaseTimer / RollTime;
+            float a = Math.Min(1f, phaseTimer * 6f);
 
-            Gfx.Rect(sb, TextX - 20, 330, ChoiceW + 40, 300, Palette.Void * 0.6f);
-            Ornament.Rays(sb, cx, cy, 70, 110, 12, time * 6f, Palette.Paper * 0.4f);
-            Gfx.CircleOutline(sb, cx, cy, 64, Palette.Paper, 2f);
+            Gfx.Rect(sb, TextX - 20, 330, ChoiceW + 40, 300, Palette.Void * (0.6f * a));
+            Ornament.TickRing(sb, cx, cy, 70f, 60, time * 3f * (1f - t * 0.8f), Math.Min(1f, phaseTimer * 3f), Palette.Paper * (0.7f * a));
+            Gfx.CircleOutline(sb, cx, cy, 58, Palette.Paper * a, 2f);
 
             int shown = t < 0.85f ? Game.CurrentRun.Rng.Next(100) : roll;
-            Gfx.TextCentered(sb, Game.LogoFont, NumberText.Get(shown), cx, cy - 6, Palette.Highlight, TextSize.Banner * 0.7f);
-            Gfx.TextSpacedCentered(sb, Game.Font, "NEEDS UNDER", cx, cy + 90, Palette.LineGrey, TextSize.Tiny, 3f);
-            Gfx.TextCentered(sb, Game.BigFont, NumberText.Get(chance), cx, cy + 118, Palette.Paper, TextSize.Subtitle);
+            Gfx.TextCentered(sb, Game.LogoFont, NumberText.Get(shown), cx, cy - 6, Palette.Highlight * a, TextSize.Banner * 0.7f);
+            Gfx.TextSpacedCentered(sb, Game.Font, "NEEDS UNDER", cx, cy + 90, Palette.LineGrey * a, TextSize.Tiny, 3f);
+            Gfx.TextCentered(sb, Game.BigFont, NumberText.Get(chance), cx, cy + 118, Palette.Paper * a, TextSize.Subtitle);
         }
 
         //Result : the outcome text, the change it made, and the way on
         private void DrawResult(SpriteBatch sb)
         {
-            float a = Math.Min(1f, phaseTimer * 3f);
+            float a = UiMotion.EaseOut(Math.Min(1f, phaseTimer * 3f));
             int y = 340;
 
             Gfx.Rect(sb, TextX - 20, y - 10, ChoiceW + 40, 270, Palette.Void * (0.6f * a));
@@ -438,15 +528,17 @@ namespace Tacetno433.Screens
             y += 70;
 
             //Reward Line : a badge for a motif, a diamond for everything else
-            Ornament.Rule(sb, TextX, y, ChoiceW, Palette.LineGrey * a);
-            if (gotMotif != null) MotifArt.Badge(sb, gotMotif, TextX + 22, y + 44, 20, a);
-            else Gfx.Diamond(sb, TextX + 22, y + 44, 8, Palette.Paper * a);
-            Gfx.Text(sb, Game.BigFont, rewardLabel, TextX + 56, y + 26, Palette.Highlight * a, TextSize.Small);
+            float line = UiMotion.Between(phaseTimer, 0.15f, BattleRules.UiEnterTime);
+            Ornament.Rule(sb, TextX, y, ChoiceW * line, Palette.LineGrey * a);
+            if (gotMotif != null) MotifArt.Badge(sb, gotMotif, TextX + 22, y + 44, 20, line);
+            else Gfx.Diamond(sb, TextX + 22, y + 44, 8, Palette.Paper * line);
+            Gfx.Text(sb, Game.BigFont, rewardLabel, TextX + 56 + (1f - line) * 14f, y + 26, Palette.Highlight * line, TextSize.Small);
             if (gotMotif != null)
-                Gfx.Text(sb, Game.StoryFont, gotMotif.TipWrapped, TextX + 56, y + 62, Palette.PaperDim * a, TextSize.StorySmall);
+                Gfx.Text(sb, Game.StoryFont, gotMotif.TipWrapped, TextX + 56, y + 62, Palette.PaperDim * line, TextSize.StorySmall);
 
             string label = startFight ? "FACE IT" : "CONTINUE";
-            Ui.Button(sb, continueButton, label, "ENTER", true, phaseTimer > 0.4f, a);
+            float button = UiMotion.Between(phaseTimer, 0.3f, BattleRules.UiEnterTime);
+            Ui.Command(sb, continueButton, label, "ENTER", continueMotion, button, false);
         }
     }
 }

@@ -75,8 +75,12 @@ namespace Tacetno433.Core
         //Mouse Clicked : true only on the frame the button goes down
         public static bool MouseClicked()
         {
-            return mouseNow.LeftButton == ButtonState.Pressed && mouseOld.LeftButton == ButtonState.Released;
+            return PretendClick || (mouseNow.LeftButton == ButtonState.Pressed && mouseOld.LeftButton == ButtonState.Released);
         }
+
+        //Pretend Click : DEVELOPER TOOL ONLY. DebugShots sets it for a single frame, so a picture can show what a click
+        //does (buying in the shop). Nothing in the game ever sets it.
+        public static bool PretendClick;
 
         //Mouse Released : true only on the frame the button comes back up (end of a drag)
         public static bool MouseReleased()

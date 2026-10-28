@@ -40,6 +40,12 @@ namespace Tacetno433.Screens
             get { return false; }
         }
 
+        //Wipe Word : the page's name in the wipe on the way here (WIPE WORD)
+        public override string WipeWord
+        {
+            get { return "TUTORIAL"; }
+        }
+
         //Lesson Kind : what the player has to do in a lesson
         private enum Kind { Hold, Pattern, Size, Timing, Loudness, Breath, Roll, Fermata, Spark, Finish }
 

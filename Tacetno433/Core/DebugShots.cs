@@ -81,10 +81,12 @@ namespace Tacetno433.Core
             mouseClock += dt;
             Input.PretendHeld = true;
 
-            //Still Hand : the fermata picture needs the baton held still
-            if (index < names.Length && names[index] == "duelfermata")
+            //Still Hand : the fermata picture needs the baton held still, and a few Beta1 round 1 pictures need the pointer
+            //resting on one thing (rewardtilt : the middle card, shopbuy : the first motif on the shelf)
+            string shot = index < names.Length ? names[index] : "";
+            if (shot == "duelfermata" || shot == "rewardtilt" || shot == "shopbuy")
             {
-                Input.MousePos = new Vector2(760f, 470f);
+                Input.MousePos = shot == "duelfermata" ? new Vector2(760f, 470f) : (shot == "rewardtilt" ? new Vector2(730f, 460f) : new Vector2(980f, 400f));
                 return;
             }
             int leg = (int)(mouseClock / 0.7f) % 4;
@@ -651,6 +653,9 @@ namespace Tacetno433.Core
 
             //Pretend Keys : a few pages need one key pressed shortly before their picture
             Input.PretendPress = Keys.None;
+            Input.PretendClick = false;
+            if (names[index] == "rewardpick" && frames == 72) Input.PretendPress = Keys.Enter;            // Beta1 round 1 : the picked card
+            if (names[index] == "shopbuy" && frames == 30) Input.PretendClick = true;                     //   a motif bought, on its way up
             if (names[index] == "duelcutin" && frames == waits[index] - 22) Input.PretendPress = Keys.Space;
             if ((names[index] == "duelpause" || names[index] == "pause") && frames == waits[index] - 30) Input.PretendPress = Keys.Escape;
             if (names[index] == "titlequit" && frames == waits[index] - 10) Input.PretendPress = Keys.Escape;
@@ -666,7 +671,7 @@ namespace Tacetno433.Core
                 if (names[index] == "sweep") game.Screens.SweepNext(new Vector2(640f, 360f), RingSweep.Kind.Light);
                 if (names[index] == "sweepdark") game.Screens.SweepNext(new Vector2(BattleRules.StageVoidX, BattleRules.StageVoidY), RingSweep.Kind.Dark);
                 if (names[index] == "sweepclose") game.Screens.SweepNext(new Vector2(200f, 444f), RingSweep.Kind.Close);
-                game.Screens.Change(new TitleScreen());
+                game.Screens.Change(WipeTarget(names[index]));
             }
 
             if (frames < waits[index]) return;
@@ -688,6 +693,21 @@ namespace Tacetno433.Core
             Open(game, names[index]);
         }
 
+        //Wipe Target (Beta1 screens) : the page a "wipe..." picture changes to, so the wipe shows that page's name (WIPE WORD).
+        //wipe goes back to the title (TACET 4'33), wipegallery to the conductor select page through the stage curtain.
+        private static GameScreen WipeTarget(string name)
+        {
+            if (name == "wipeshop") return new ShopScreen();
+            if (name == "wiperest") return new RestScreen();
+            if (name == "wipeevent") return new EventScreen();
+            if (name == "wipereward") return new MotifRewardScreen(false);
+            if (name == "wipechapter") return new ChapterScreen();
+            if (name == "wipeband") return new BandScreen();
+            if (name == "wipesettings") return new SettingsScreen();
+            if (name == "wipegallery") return new ConductorSelectScreen();
+            return new TitleScreen();
+        }
+
         //Conductor Shot : "detail3", "duelc3" or "duels3", a page name and one digit (not "duelcombo")
         private static bool IsConductorShot(string name, string page)
         {
@@ -706,10 +726,13 @@ namespace Tacetno433.Core
         //       crossing recruit bandname route pause band (or view) duelbargain dueltrait duelmute duelmirror
         //       duel duelcombo duelboss duelcutin duelpause dueldouble dueltremolo duelfermata duelfire duelrepeat finale
         //       result defeat reward shop shopleave event eventchair rest curtain curtainwin
+        //       rewardpick rewardtilt shopbuy (Beta1 round 1 : a card picked, the pointed card leaning, a motif bought, e.g. rewardpick@80)
         //       battle battleswing battleskill battleparry battlestatus (Alpha 7, use a few frames, e.g. battleswing@2) battlewin battlelose (Beta1, TACET's dark) battleslash battleshot battlesmash battlecross battleink (Beta1, one blow, e.g. battleslash@4) battlecutin battlekill battlebolt battleboltsoft battleimpact (Beta1 round 6)
         //       practice practiceskill practicesig (Alpha 7, the tutorial's practice fight, e.g. practice@60)
         //       titlereveal resultquiet (Beta1 screens : the first opening of the game, e.g. titlereveal@40 ; a won fight with LESS FLASHING)
         //       wipe sweep sweepdark sweepclose (Beta1 screens : a page change on its way, from the route to the title, e.g. wipe@30)
+        //       wipeshop wiperest wipeevent wipereward wipechapter wipeband wipesettings (Beta1 screens : the wipe to that page,
+        //       with its name, e.g. wipeshop@41) wipegallery (the stage curtain on its way to the conductor select page, e.g. wipegallery@30)
         private static void Open(TacetGame game, string name)
         {
             RunState run = SampleRun(game, name);
@@ -739,8 +762,8 @@ namespace Tacetno433.Core
             if (name.StartsWith("battle")) screen = new BattleScreen();                // Alpha 7 : battle battleswing battleskill battleparry battlestatus
             if (name.StartsWith("practice")) screen = new BattleScreen(true);          // Alpha 7 step 9 : practice practiceskill practicesig
             if (name == "result" || name == "defeat" || name == "resultquiet") screen = new ResultScreen();
-            if (name == "reward") screen = new MotifRewardScreen(false);
-            if (name == "shop" || name == "shopleave") screen = new ShopScreen();
+            if (name == "reward" || name == "rewardpick" || name == "rewardtilt") screen = new MotifRewardScreen(false);
+            if (name == "shop" || name == "shopleave" || name == "shopbuy") screen = new ShopScreen();
             if (name.StartsWith("event")) screen = new EventScreen();
             if (name == "rest") screen = new RestScreen();
             if (name == "curtain" || name == "curtainwin") screen = new CurtainCallScreen(name == "curtainwin");

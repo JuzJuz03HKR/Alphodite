@@ -336,6 +336,27 @@
         public static float ResultBurstAt = 0.34f;        // RESULT : a win opens on the last blow's IMPACT FRAME, then TACET's hole bursts at this time
         public static float ResultDarkTime = 2.2f;        //   a loss : TACET's dark creeps in from the edges over this long
         public static float ResultEngulf = 0.45f;         //   and this far (ENGULF)
+        public static float UiCurtainReach = 0.86f;       // CURTAIN (29 Oct, real cloth, Core/Curtain.cs) : the drapes travel in this share of each half
+                                                          //   of the change, then hang closed while the page changes (the change takes as long as before)
+        public static int UiCurtainPleats = 20;           //   pleats on each drape
+        public static float UiCurtainSlack = 2.5f;        //   pleats packed at the side of the stage sit this close (pixels)
+        public static float UiCurtainGive = 0.35f;        //   how hard tight cloth pulls the pleat behind, each try (1 = a stiff rope, less = it stretches and snaps after)
+        public static float UiCurtainDrag = 3.5f;         //   the rail slows a sliding pleat by this much a second
+        public static float UiCurtainEven = 0.12f;        //   EVEN : how far a pleat drifts toward the middle of its neighbours each try, so a push spreads
+                                                          //   along the drape (0 = only the pleat it touches moves)
+        public static float UiCurtainSwing = 1.5f;        //   HEM : the hem swings this many times a second
+        public static float UiCurtainSwingDamp = 0.22f;   //   and calms this fast (0 = forever, 1 = no swing back)
+        public static float UiCurtainSwingPull = 0.003f;  //   a pull throws the hem back this far for every pixel a second squared (seconds squared)
+        public static float UiCurtainSwingMost = 70f;     //   the hem never swings out further than this (pixels)
+        public static float UiCurtainFold = 0.6f;         //   SHADE : how deep the folds look when the cloth is tight (1 = as deep as packed)
+        public static float UiCardFlipAt = 0.25f;         // REWARD (round 1, Core/Card3D.cs) : the first card starts to flip up this long after the page opens
+        public static float UiCardFlipGap = 0.14f;        //   each next card this much later (seconds)
+        public static float UiCardFlipTime = 0.55f;       //   one flip takes this long, going a little past and back
+        public static float UiCardTilt = 14f;             //   a pointed card leans toward the mouse up to this many degrees (Balatro)
+        public static float UiCardFollow = 12f;           //   and follows it this fast (bigger = snappier)
+        public static float UiCardLift = 1.05f;           //   and grows this much
+        public static float UiCardShine = 0.2f;           //   the band of light that slides over a leaning card (0 = none)
+        public static float[] UiRarityLight = { 0.18f, 0.3f, 0.46f };   //   the stage light on a card, common / rare / treasured
 
         //Battle Shape
         public const int BeatsPerRound = 8;       // sub-turns in one round

@@ -35,6 +35,12 @@ namespace Tacetno433.Screens
             get { return false; }
         }
 
+        //Wipe Word : the page's name in the wipe on the way here (WIPE WORD)
+        public override string WipeWord
+        {
+            get { return "THE ARCHIVE"; }
+        }
+
         public override void Load()
         {
             for (int i = 0; i < Archive.All.Length; i++)

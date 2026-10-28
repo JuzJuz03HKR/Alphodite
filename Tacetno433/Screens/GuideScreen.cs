@@ -26,6 +26,12 @@ namespace Tacetno433.Screens
             get { return false; }
         }
 
+        //Wipe Word : the page's name in the wipe on the way here (WIPE WORD)
+        public override string WipeWord
+        {
+            get { return "HOW TO PLAY"; }
+        }
+
         //Guide Text : THE PLACE TO EDIT HOW TO PLAY. A few short lines a page.
         //Where the two games differ : turnBattle ? the turn battle's words : the old duel's (BattleRules.TurnBattleOn).
         private static bool turnBattle = BattleRules.TurnBattleOn;

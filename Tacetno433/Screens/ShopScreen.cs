@@ -21,6 +21,10 @@ namespace Tacetno433.Screens
     //                 their part, before paying, so the band can be built on purpose
     //   three motifs, rolled when the shop opens
     //Leaving asks first, because the shelves are gone once the band walks out.
+    //Beta1 screens round 1 (29 Oct, docs/SCREENS_LEVEL_UP.md 14) : THE ARCHIVIST stands in a stage light, the rest of the
+    //room is dark. The wares come in one after another and light up like the menus when pointed at. What the band buys
+    //flies up into the top bar (a motif to its badge, a seat to SEATS, tuning to LIFE, a player to the band's name), and
+    //the keeper's words are written out line by line.
     public class ShopScreen : GameScreen
     {
         //Leave Box : "are you sure?" before walking out
@@ -30,6 +34,12 @@ namespace Tacetno433.Screens
         public override bool UsesEscape
         {
             get { return confirm.Open; }
+        }
+
+        //Wipe Word : the keeper's name runs through the wipe on the way here (WIPE WORD, the user's pick)
+        public override string WipeWord
+        {
+            get { return KeeperName; }
         }
 
         //Shop Text : THE PLACE TO EDIT WHAT THE SHOPKEEPER SAYS
@@ -76,9 +86,28 @@ namespace Tacetno433.Screens
         private int lastHover = -1;
         private string line = "";
         private string lineWrapped = "";
+        private string[] lineRows = new string[0];  // the keeper's line, one string per row, made by Say for the writing out
         private float lineAge;
         private int thanksIndex;
         private float time;
+
+        //Motion (Beta1 round 1) : the rows and the button point like the menus (Core/UiMotion.cs)
+        private UiMotion[] rowMotion = new UiMotion[RowCount];
+        private UiMotion leaveMotion = new UiMotion();
+
+        //FLY UP : what was just bought, on its way from the shelf to the top bar
+        private const float FlyTime = 0.6f;
+        private int flyRow = -1;                // the ware flying, -1 for none
+        private Motif flyMotif;                 // the motif it is, for its badge
+        private Vector2 flyFrom;
+        private Vector2 flyTo;
+        private float flyAge;
+        private float landAge = 99f;            // seconds since it landed, for the ring where it lands
+        private Vector2 landAt;
+
+        //Light : the keeper's stage light (KEEPER) and the softer one over the wares
+        private static readonly Vector2 KeeperLight = new Vector2(360f, 250f);
+        private const float WriteSpeed = 900f;  // the keeper's words are written out this many pixels a second
 
         public override void Load()
         {
@@ -120,6 +149,20 @@ namespace Tacetno433.Screens
             RefreshPrices();
             Say(greetings[run.Rng.Next(greetings.Length)]);
             SoundBank.PlayMusic(Music.Shop);
+
+            for (int r = 0; r < RowCount; r++) rowMotion[r] = new UiMotion();
+            RunHud.Arriving = 0;
+
+            //The Lens : a dark room, the light is the keeper's (DrawLights)
+            Lens.Ambient = 0.34f;
+            Lens.SpotPower = 0f;
+            Lens.Vignette = 0.6f;
+        }
+
+        //Leave : nothing left flying into the top bar
+        public override void Leave()
+        {
+            RunHud.Arriving = 0;
         }
 
         //Prices : the seat gets dearer after each purchase, so the labels are rebuilt then
@@ -146,6 +189,7 @@ namespace Tacetno433.Screens
             if (text == line) return;
             line = text;
             lineWrapped = Gfx.WrapText(Game.StoryFont, text, dialogueBox.Width - 60, TextSize.Story);
+            lineRows = lineWrapped.Split('\n');
             lineAge = 0f;
         }
 
@@ -158,10 +202,13 @@ namespace Tacetno433.Screens
         {
             time += dt;
             lineAge += dt;
+            UpdateFly(dt);
 
             //Leaving : only once the player has said yes
             if (confirm.Open)
             {
+                for (int r = 0; r < RowCount; r++) rowMotion[r].Update(dt, false);
+                leaveMotion.Update(dt, false);
                 if (confirm.Update(dt) == 1) RunFlow.NextStage(Game);
                 return;
             }
@@ -170,6 +217,8 @@ namespace Tacetno433.Screens
             hoverRow = -1;
             for (int r = 0; r < RowCount; r++)
                 if (Input.MouseOver(RowRect(r))) hoverRow = r;
+            for (int r = 0; r < RowCount; r++) rowMotion[r].Update(dt, r == hoverRow && !Gone(r));
+            leaveMotion.Update(dt, Input.MouseOver(leaveButton));
 
             if (hoverRow != lastHover)
             {
@@ -181,7 +230,48 @@ namespace Tacetno433.Screens
             if (Input.MouseClicked() && hoverRow >= 0) Buy(hoverRow);
 
             if (Input.KeyPressed(Keys.Enter) || Input.ClickedOn(leaveButton))
+            {
+                leaveMotion.Press();
                 confirm.Show("LEAVE THE SHOP?", "Whatever stays on the shelves is gone once the band walks out.", "LEAVE", "STAY");
+            }
+        }
+
+        //Gone : sold out, or a seat the band cannot buy any more of on this floor
+        private bool Gone(int row)
+        {
+            return sold[row] || (row == SeatRow && !Game.CurrentRun.SeatForSale);
+        }
+
+        //Fly : what was bought leaves its shelf for the top bar. A motif's badge is not drawn up there until it lands.
+        private void Fly(int row, Vector2 to)
+        {
+            Rectangle r = RowRect(row);
+            flyRow = row;
+            flyMotif = row >= FirstMotifRow ? motifs[row - FirstMotifRow] : null;
+            flyFrom = new Vector2(r.X + 46, r.Center.Y);
+            flyTo = to;
+            flyAge = 0f;
+            RunHud.Arriving = flyMotif != null ? 1 : 0;
+        }
+
+        private void UpdateFly(float dt)
+        {
+            landAge += dt;
+            if (flyRow < 0) return;
+            flyAge += dt;
+            if (flyAge < FlyTime) return;
+            landAt = flyTo;
+            landAge = 0f;
+            flyRow = -1;
+            RunHud.Arriving = 0;
+        }
+
+        //Fly Point : where the flying ware is at 0..1 of its way, along a curve that rises over the shelf first
+        private Vector2 FlyPoint(float t)
+        {
+            Vector2 bend = new Vector2((flyFrom.X + flyTo.X) / 2f, Math.Min(flyFrom.Y, flyTo.Y) - 120f);
+            float u = 1f - t;
+            return u * u * flyFrom + 2f * u * t * bend + t * t * flyTo;
         }
 
         //Buy : check, pay, then hand the thing over
@@ -202,12 +292,14 @@ namespace Tacetno433.Screens
                 run.AddSeat();
                 if (!run.SeatForSale) sold[row] = true;
                 Say(thanks[thanksIndex++ % thanks.Length]);
+                Fly(row, RunHud.SeatsAt);
             }
             else if (row == TuningRow)
             {
                 run.ChangeStamina((int)(run.MaxStamina * BattleRules.TuningRecover));
                 sold[row] = true;
                 Say(thanks[thanksIndex++ % thanks.Length]);
+                Fly(row, RunHud.LifeAt);
             }
             else if (row == HireRow)
             {
@@ -222,6 +314,7 @@ namespace Tacetno433.Screens
                 sold[row] = true;
                 bool seated = run.Formation.SeatOf(m) >= 0;
                 Say(m.Name + " packs up an instrument and joins you." + (seated ? " A seat was free." : " They wait on the bench."));
+                Fly(row, RunHud.BandAt);
             }
             else
             {
@@ -229,6 +322,7 @@ namespace Tacetno433.Screens
                 sold[row] = true;
                 SoundBank.Play(Sfx.MotifGet);
                 Say(thanks[thanksIndex++ % thanks.Length]);
+                Fly(row, RunHud.BadgeCentre(run.Motifs.Count - 1));
             }
 
             run.RefreshLabels();
@@ -242,80 +336,134 @@ namespace Tacetno433.Screens
             SoundBank.Play(Sfx.UiDenied);
         }
 
+        //======================================================================================
+        //The World (THE LENS) : the keeper's room, lit from above
+        //======================================================================================
+
+        public override bool HasWorld
+        {
+            get { return true; }
+        }
+
+        public override bool ShowsGrain
+        {
+            get { return false; }
+        }
+
+        //World : the shop painting with the keeper in it, or the empty slot where it goes, on a dark floor.
+        //ARTWORK : Content/Art/Places/shop.png (the shopkeeper is part of the picture), see ArtBank.
+        public override void DrawWorld(SpriteBatch sb)
+        {
+            float e = UiMotion.Between(time, 0f, 0.6f);
+            Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.StageDeep);
+            Gfx.DrawGlowBox(sb, new Rectangle(-120, 500, 960, 300), Palette.Paper * 0.05f);
+            ArtBank.DrawOrSlot(sb, ArtBank.Shop, new Rectangle(24, 80, 672, 470), Palette.Paper, e);
+        }
+
+        //Lights : KEEPER, a stage light from above on the keeper that comes up as the page opens and breathes a little,
+        //a softer one on the wares, and the pointed ware lit
+        public override void DrawLights(SpriteBatch sb)
+        {
+            float up = UiMotion.EaseInOut(MathHelper.Clamp(time / 0.8f, 0f, 1f));
+            float breathe = 1f + 0.04f * (float)Math.Sin(time * 1.3f);
+            Gfx.DrawGlowBox(sb, new Rectangle(140, -80, 440, 720), Color.White * (0.4f * up));
+            Gfx.DrawGlow(sb, KeeperLight.X, KeeperLight.Y, 380f, Color.White * (0.62f * up * breathe));
+            Gfx.DrawGlow(sb, waresBox.Center.X, waresBox.Center.Y, 440f, Color.White * 0.3f);
+            if (hoverRow >= 0 && !Gone(hoverRow))
+            {
+                Rectangle r = RowRect(hoverRow);
+                Gfx.DrawGlow(sb, r.Center.X, r.Center.Y, 240f, Color.White * (0.3f * rowMotion[hoverRow].Shown));
+            }
+        }
+
+        //Glow : the beam of the keeper's light, a wide dim shaft with a brighter core (like the battle's, DrawMood)
+        public override void DrawGlow(SpriteBatch sb)
+        {
+            float a = 0.3f * UiMotion.EaseInOut(MathHelper.Clamp(time / 0.8f, 0f, 1f));
+            Gfx.DrawGlowBox(sb, new Rectangle(140, -300, 440, 860), Color.White * (a * 0.6f));
+            Gfx.DrawGlowBox(sb, new Rectangle(250, -240, 220, 740), Color.White * a);
+        }
+
+        //======================================================================================
+        //The Words (crisp on top)
+        //======================================================================================
+
         public override void Draw(SpriteBatch sb)
         {
             RunState run = Game.CurrentRun;
 
-            DrawInterior(sb);
             DrawWares(sb, run);
             DrawDialogue(sb);
 
-            Ui.Button(sb, leaveButton, "LEAVE THE SHOP", "ENTER", true);
-            Gfx.TextSpacedRight(sb, Game.Font, "CLICK A WARE TO BUY IT", leaveButton.Right, leaveButton.Y - 22, Palette.LineGrey, TextSize.Tiny, 2f);
+            float button = UiMotion.Between(time, 0.55f, BattleRules.UiEnterTime);
+            Ui.Command(sb, leaveButton, "LEAVE THE SHOP", "ENTER", leaveMotion, button, false);
+            Gfx.TextSpacedRight(sb, Game.Font, "CLICK A WARE TO BUY IT", leaveButton.Right, leaveButton.Y - 22, Palette.LineGrey * button, TextSize.Tiny, 2f);
 
             RunHud.DrawTop(sb, run, "SHOP");
+            DrawFly(sb);
             RunHud.DrawTips(sb, run);
             confirm.Draw(sb);
         }
 
-        //Interior : the shop painting, or an empty slot where it goes.
-        //ARTWORK : Content/Art/Places/shop.png (the shopkeeper is part of the picture), see ArtBank.
-        private void DrawInterior(SpriteBatch sb)
-        {
-            Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.StageDeep);
-            ArtBank.DrawOrSlot(sb, ArtBank.Shop, new Rectangle(24, 80, 672, 470), Palette.Paper, 1f);
-            Ornament.Vignette(sb, 60, 0.6f);
-        }
-
-        //Wares : one row per item, with its price and a SOLD band when gone
+        //Wares : one row per item, coming in one after another. Pointed at, an ink plate shoots out under it like the
+        //menus (Ui.InkBar) and its words turn black. Its price, and a SOLD band when it is gone.
         private void DrawWares(SpriteBatch sb, RunState run)
         {
-            Ui.Panel(sb, waresBox, 1f);
-            Ui.Header(sb, "", "Wares", waresBox.X + 20, waresBox.Y + 8, waresBox.Width - 40, 1f);
+            float panel = UiMotion.Between(time, 0.1f, BattleRules.UiEnterTime);
+            Rectangle box = waresBox;
+            box.X += (int)((1f - panel) * BattleRules.UiEnterSlide);
+            Ui.Panel(sb, box, panel);
+            Ui.Header(sb, "", "Wares", box.X + 20, box.Y + 8, box.Width - 40, panel);
 
             for (int r = 0; r < RowCount; r++)
             {
+                float a = UiMotion.Between(time, 0.18f + r * BattleRules.UiEnterStagger, BattleRules.UiEnterTime);
+                if (a <= 0f) continue;
                 Rectangle row = RowRect(r);
                 row.Inflate(-12, 0);
-                bool over = r == hoverRow;
-                bool gone = sold[r] || (r == SeatRow && !run.SeatForSale);
-                float a = gone ? 0.35f : 1f;
+                row.X += (int)((1f - a) * BattleRules.UiEnterSlide * 1.5f);
+                bool gone = Gone(r);
+                float dim = (gone ? 0.35f : 1f) * a;
+                float e = gone ? 0f : rowMotion[r].Shown;
 
-                Gfx.Rect(sb, row, (over && !gone ? Palette.Stage : Palette.Void * 0.4f));
-                if (over && !gone) Gfx.Rect(sb, row.X, row.Y, 3, row.Height, Palette.Accent);
+                Gfx.Rect(sb, row, Palette.Void * (0.4f * a));
+                if (e > 0f)
+                {
+                    Ui.InkBar(sb, row.X + BattleRules.UiShadow, row.Y + BattleRules.UiShadow, row.Width * e, row.Height, 10f, Palette.LineGrey * (0.5f * a), r * 7 + 3, 1f);
+                    Ui.InkBar(sb, row.X, row.Y, row.Width * e, row.Height, 10f, Palette.Paper * a, r * 7, 1f);
+                }
+                Color ink = Color.Lerp(Palette.Paper, Palette.Ink, e);
+                Color soft = Color.Lerp(Palette.LineGrey, Palette.InkSoft, e);
 
-                //Icon
-                float ix = row.X + 34;
-                float iy = row.Center.Y;
-                DrawWareIcon(sb, r, ix, iy, a);
+                //Icon : not on the shelf while it is flying up
+                if (r != flyRow) DrawWareIcon(sb, r, row.X + 34, row.Center.Y, dim, ink);
 
                 //Name and Note
-                Gfx.Text(sb, Game.BigFont, names[r], row.X + 70, row.Y + 4, Palette.Paper * a, TextSize.Small);
+                Gfx.Text(sb, Game.BigFont, names[r], row.X + 70, row.Y + 4, ink * dim, TextSize.Small);
                 string kind = r >= FirstMotifRow && r - FirstMotifRow < motifs.Length ? motifs[r - FirstMotifRow].RarityLabel : "SERVICE";
-                Gfx.TextSpaced(sb, Game.Font, kind, row.X + 72, row.Y + 38, Palette.LineGrey * a, TextSize.Tiny, 2f);
+                Gfx.TextSpaced(sb, Game.Font, kind, row.X + 72, row.Y + 38, soft * dim, TextSize.Tiny, 2f);
 
                 //Price : a diamond and the number, dimmed when you cannot afford it
                 if (!gone)
                 {
                     bool afford = run.Shards >= PriceOf(r);
-                    Color priceColor = afford ? Palette.Highlight : Palette.LineGrey;
-                    Gfx.Diamond(sb, row.Right - 70, row.Center.Y, 5, priceColor);
-                    Gfx.Text(sb, Game.BigFont, priceLabels[r], row.Right - 58, row.Center.Y - 16, priceColor, TextSize.Small);
+                    Color priceColor = Color.Lerp(afford ? Palette.Highlight : Palette.LineGrey, Palette.Ink, e);
+                    Gfx.Diamond(sb, row.Right - 70, row.Center.Y, 5, priceColor * a);
+                    Gfx.Text(sb, Game.BigFont, priceLabels[r], row.Right - 58, row.Center.Y - 16, priceColor * a, TextSize.Small);
                 }
-
-                if (gone)
+                else
                 {
-                    Gfx.Rect(sb, row.X, row.Center.Y, row.Width, 1, Palette.LineGrey * 0.6f);
-                    Ui.Tag(sb, "SOLD", row.Right - 70, row.Center.Y - 9, true, 0.8f);
+                    Gfx.Rect(sb, row.X, row.Center.Y, row.Width, 1, Palette.LineGrey * (0.6f * a));
+                    Ui.Tag(sb, "SOLD", row.Right - 70, row.Center.Y - 9, true, 0.8f * a);
                 }
             }
         }
 
         //Ware Icons : a word for a seat and for tuning, the new player's side arrow, or the motif's
         //badge (round 15 : plain words, the drawn chair and tuning fork were hard to read)
-        private void DrawWareIcon(SpriteBatch sb, int row, float x, float y, float a)
+        private void DrawWareIcon(SpriteBatch sb, int row, float x, float y, float a, Color ink)
         {
-            Color c = Palette.Paper * a;
+            Color c = ink * a;
             if (row == SeatRow) Gfx.TextSpacedCentered(sb, Game.Font, "SEAT", x, y - 7, c, TextSize.Tiny, 2f);
             else if (row == TuningRow) Gfx.TextSpacedCentered(sb, Game.Font, "TUNE", x, y - 7, c, TextSize.Tiny, 2f);
             else if (row == HireRow)
@@ -329,19 +477,81 @@ namespace Tacetno433.Screens
             }
         }
 
-        //Dialogue : the name tag and what the shopkeeper is saying, fading in when it changes
+        //Fly Draw : FLY UP, the ware rising off its shelf, growing on the way up and shrinking into its place, with a
+        //short trail behind it. Where it lands, a ring goes out. Drawn over the top bar.
+        private void DrawFly(SpriteBatch sb)
+        {
+            if (flyRow >= 0)
+            {
+                float t = MathHelper.Clamp(flyAge / FlyTime, 0f, 1f);
+                for (int k = 4; k >= 0; k--)
+                {
+                    float behind = MathHelper.Clamp(t - k * 0.045f, 0f, 1f);
+                    Vector2 at = FlyPoint(UiMotion.EaseInOut(behind));
+                    float size = (1f + 0.45f * (float)Math.Sin(behind * MathHelper.Pi)) * (1f - 0.25f * behind);
+                    float alpha = k == 0 ? 1f : 0.3f * (1f - k / 5f);
+                    if (k == 0) Gfx.DrawGlow(sb, at.X, at.Y, 46f * size, Palette.Paper * 0.35f);
+                    if (flyMotif != null) MotifArt.Badge(sb, flyMotif, at.X, at.Y, 22f * size, alpha);
+                    else DrawWareIcon(sb, flyRow, at.X, at.Y, alpha, Palette.Paper);
+                }
+            }
+            if (landAge < 0.45f)
+            {
+                float k = landAge / 0.45f;
+                Gfx.CircleOutline(sb, landAt.X, landAt.Y, 10f + 36f * UiMotion.EaseOut(k), Palette.Paper * (0.9f * (1f - k)), 1.5f);
+                Gfx.DrawGlow(sb, landAt.X, landAt.Y, 30f + 30f * k, Palette.Paper * (0.35f * (1f - k)));
+            }
+        }
+
+        //Dialogue : the name tag and what the keeper is saying, written out row by row. Each row being written is shown
+        //through a box that widens (a scissor box, in real pixels), with a small bright pen mark at its end.
+        private static readonly RasterizerState clip = new RasterizerState { ScissorTestEnable = true };
+
         private void DrawDialogue(SpriteBatch sb)
         {
-            Gfx.Rect(sb, dialogueBox, Palette.Void * 0.92f);
-            Ornament.DoubleFrame(sb, dialogueBox, Palette.PaperDim);
-            Ui.Tag(sb, KeeperName, dialogueBox.X + 24, dialogueBox.Y - 9, true, 1f);
+            float a = UiMotion.Between(time, 0.3f, BattleRules.UiEnterTime);
+            Rectangle box = dialogueBox;
+            box.Y += (int)((1f - a) * BattleRules.UiEnterSlide);
+            Gfx.Rect(sb, box, Palette.Void * (0.92f * a));
+            Ornament.DoubleFrame(sb, box, Palette.PaperDim * a);
+            Ui.Tag(sb, KeeperName, box.X + 24, box.Y - 9, true, a);
 
-            float a = Math.Min(1f, lineAge * 4f);
-            Gfx.Text(sb, Game.StoryFont, lineWrapped, dialogueBox.X + 30, dialogueBox.Y + 26 + (1f - a) * 6f, Palette.Paper * a, TextSize.Story);
+            float written = (lineAge - 0.05f) * WriteSpeed;
+            float rowH = Game.StoryFont.LineSpacing * TextSize.Story;
+            float x = box.X + 30;
+            float y = box.Y + 26;
+            GraphicsDevice device = sb.GraphicsDevice;
+            float s = Sharp.Scale;
+            for (int k = 0; k < lineRows.Length; k++)
+            {
+                float rowW = Gfx.TextWidth(Game.StoryFont, lineRows[k], TextSize.Story) + 12f;
+                float show = Math.Min(written, rowW);
+                written -= rowW;
+                if (show <= 0f) break;
+                float ry = y + k * rowH;
+                if (show >= rowW)
+                {
+                    Gfx.Text(sb, Game.StoryFont, lineRows[k], x, ry, Palette.Paper * a, TextSize.Story);
+                    continue;
+                }
 
-            //Next Mark : the little bouncing triangle every dialogue box has
-            float bob = (float)Math.Sin(time * 5f) * 3f;
-            Gfx.Triangle(sb, dialogueBox.Right - 26, dialogueBox.Bottom - 20 + bob, 6, false, Palette.Paper);
+                Rectangle before = device.ScissorRectangle;
+                sb.End();
+                device.ScissorRectangle = new Rectangle((int)(x * s), (int)((ry - 6f) * s), (int)(show * s), (int)((rowH + 12f) * s));
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, null, clip, null, Sharp.Transform);
+                Gfx.Text(sb, Game.StoryFont, lineRows[k], x, ry, Palette.Paper * a, TextSize.Story);
+                sb.End();
+                device.ScissorRectangle = before;
+                Sharp.Begin(sb);
+                Gfx.Rect(sb, x + show, ry + 3f, 2f, rowH - 4f, Palette.Paper * (0.7f * a));
+            }
+
+            //Next Mark : the little bouncing triangle every dialogue box has, once every word is out
+            if (written >= 0f)
+            {
+                float bob = (float)Math.Sin(time * 5f) * 3f;
+                Gfx.Triangle(sb, box.Right - 26, box.Bottom - 20 + bob, 6, false, Palette.Paper * a);
+            }
         }
     }
 }

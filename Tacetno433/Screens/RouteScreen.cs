@@ -49,6 +49,12 @@ namespace Tacetno433.Screens
         private Vector2 lastMouse;
         private string benchLabel = "";               // "2 ON THE BENCH" over the band button, made in Load
 
+        //Wipe Word : the page's name in the wipe on the way here (WIPE WORD, the user's pick)
+        public override string WipeWord
+        {
+            get { return "THE ROAD"; }
+        }
+
         public override void Load()
         {
             if (Game.CurrentRun == null) return;
