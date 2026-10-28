@@ -402,3 +402,6 @@ build 0 error 0 warning · turncheck 113/113 · savecheck 25/25 · ลองแ�
 - แคปดูได้ `--shots battlegold@2 battlefire@2` (ภาพเดียวกับที่ใช้ตรวจ)
 
 รอผู้ใช้ : ลอง impact frame ตอน SIGNATURE · บอกว่าใครควรเป็นสีไหน (หรือสีจริงของแต่ละตัวเมื่ออาร์ตเสร็จ)
+
+**PLAYTEST (ผู้ใช้สั่ง "ปรับ signature move เป็น 1 แต้ม ฉันจะได้ลองใช้")** : `BattleRules.PlaytestSignatureNeed = 1` ทำให้ SIGNATURE ใช้ PERFECT ครั้งเดียว (ทุกวาทยากร มี CON BRIO หรือไม่ก็ตาม) หน้าเลือกวาทยากรก็บอก 1 ·
+ค่าจริงยังเป็น `TurnSignatureNeed` 6 (CON BRIO 4) · turncheck กับ turnsim ใช้ค่าจริงเสมอ · **ลองเสร็จแล้วตั้งกลับเป็น 0**

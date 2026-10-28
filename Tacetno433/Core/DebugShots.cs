@@ -121,6 +121,7 @@ namespace Tacetno433.Core
             //Turn Sim (Alpha 7) : the turn battle's balance check (DebugShots.TurnSim.cs)
             if (names[0] == "turnsim")
             {
+                BattleRules.PlaytestSignatureNeed = 0;                                 // PLAYTEST : the balance is the real one
                 TurnSim();
                 game.Exit();
                 return;
@@ -129,6 +130,7 @@ namespace Tacetno433.Core
             //Turn Check (Alpha 7) : scripted turn battles, one PASS or FAIL line per rule (DebugShots.Turn.cs)
             if (names[0] == "turncheck")
             {
+                BattleRules.PlaytestSignatureNeed = 0;                                 // PLAYTEST : the rules are checked as they really are
                 TurnCheck(game);
                 game.Exit();
                 return;

@@ -1493,7 +1493,11 @@ namespace Tacetno433.Battle
         //Signature Need : PERFECTs to fill the gauge (CON BRIO needs fewer)
         public int SignatureNeed
         {
-            get { return Has(MotifId.ConBrio) ? BattleRules.TurnConBrioNeed : BattleRules.TurnSignatureNeed; }   // CON BRIO
+            get
+            {
+                if (BattleRules.PlaytestSignatureNeed > 0) return BattleRules.PlaytestSignatureNeed;                // PLAYTEST
+                return Has(MotifId.ConBrio) ? BattleRules.TurnConBrioNeed : BattleRules.TurnSignatureNeed;          // CON BRIO
+            }
         }
 
         //Signature Shape : the 4/4 pattern a conductor beats, down, left, right, up (any size)

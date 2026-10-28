@@ -147,6 +147,9 @@
         //a skill note or a parry). Full, SPACE plays the 4/4 shape : down, left, right, up, any size.
         //How well the four strokes land sets how strong it is (the average of their swipe scale).
         public static int TurnSignatureNeed = 6;
+        //PLAYTEST (Beta1, the user asked 28 Oct, to try the SIGNATURE and its CUT-IN often) : above 0, the SIGNATURE needs
+        //only this many PERFECTs, CON BRIO or not. Set it back to 0 for the real cost. turncheck and turnsim always use the real one.
+        public static int PlaytestSignatureNeed = 1;
         public static float TurnBeethovenMost = 0.5f;  // THE UNHEARING's PASSIVE : up to this much harder as the band's life runs out
         public static int TurnBoltDamage = 14;         // LIGHTNING : damage to every enemy at full strength (x1)
         public static int TurnMozartRun = 3;           // THE SHADOWLESS's PASSIVE : this many PERFECTs in a row give 1 breath

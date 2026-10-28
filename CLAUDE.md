@@ -22,7 +22,8 @@
   แผนและลำดับงาน `BATTLE_SCENE_2_3D_CHANGE.md` ข้อ 12 · ภาพตัวอย่างอยู่ Google Drive ของผู้ใช้ (ห้าม commit ภาพหรือลิงก์ เพราะ repo สาธารณะ) ·
   **ทำครบแล้ว (ตารางข้อ 12.8)** : `Core/TacetVoid.cs` + `Content/Effects/Void.fx` (ความมืด) · `Core/HitFx.cs` (VFX ตอนตี) · `Core/PixelDigits.cs` (ตัวเลข) · `Screens/BattleScreen.Show.cs` (cut-in, แสงของวง QTE) · LESS FLASHING ใน Settings · ตัวเลขใน `BattleRules` หัวข้อ Stage Void, Hit Feel
 - **รอบ 5 (28 ต.ค.)** : ผู้ใช้ชอบความมืด transition พอดี · VFX ใช้สีของตัวละคร : `Musician.Spot` ทอง (ดาวประกาย กากเพชร) หรือแดง (เปลวไฟ ลูกไฟ) สีอยู่ `Palette.SpotGold/SpotRed` แบ่งชั่วคราว สาย+ตี ทอง เป่า แดง ·
-  ตัวเลขดาเมจสีเดียวกับคนตีและเล็กลง 25% · **ผู้ใช้ไม่ชอบจุดขาวรกฉาก** (แก้บั๊ก `Void.fx` ปิด film grain บนหน้าต่อสู้ เอาฝุ่นออก) · รายละเอียด `BATTLE_SCENE_2_3D_CHANGE.md` ข้อ 13
+  ตัวเลขดาเมจสีเดียวกับคนตีและเล็กลง 25% · **ผู้ใช้ไม่ชอบจุดขาวรกฉาก** (แก้บั๊ก `Void.fx` ปิด film grain บนหน้าต่อสู้ เอาฝุ่นออก) · รายละเอียด `BATTLE_SCENE_2_3D_CHANGE.md` ข้อ 13 ·
+  **PLAYTEST เปิดอยู่ : SIGNATURE ใช้ 1 PERFECT (`BattleRules.PlaytestSignatureNeed` = 1 ผู้ใช้สั่งเพื่อลอง) ลองเสร็จแล้วต้องตั้งกลับเป็น 0** (ค่าจริง `TurnSignatureNeed` 6)
 - **อนาคต (ผู้ใช้บอก 28 ต.ค.)** : นักดนตรีเหลือ 3–5 คน เปลี่ยนวิธีเลือกนักดนตรี เน้น roguelike ที่ทีมโหดขึ้นเรื่อยๆ และจะแก้ระบบต่อสู้เยอะ → แยกโค้ดภาพออกจากกติกา (`TurnBattle` ไม่มีโค้ดวาด) · ต้องการตัวอย่าง VFX ให้ถามผู้ใช้ทันที ห้ามเดา
 
 ## 0. ALPHA 7 (18 ต.ค.) : เกมเปลี่ยนเป็น turn-based roguelike (ประวัติ ยังใช้อ้างอิงระบบต่อสู้)

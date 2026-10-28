@@ -343,7 +343,8 @@ namespace Tacetno433.Screens
             if (BattleRules.TurnBattleOn)
             {
                 Gfx.TextSpaced(sb, Game.Font, "NEEDS", RightX, ny + 5, Palette.LineGrey * a, TextSize.Tiny, 2f);
-                Gfx.Text(sb, Game.Font, NumberText.Get(BattleRules.TurnSignatureNeed), RightX + 70, ny, Palette.Paper * a, TextSize.Body);
+                int need = BattleRules.PlaytestSignatureNeed > 0 ? BattleRules.PlaytestSignatureNeed : BattleRules.TurnSignatureNeed;   // PLAYTEST
+                Gfx.Text(sb, Game.Font, NumberText.Get(need), RightX + 70, ny, Palette.Paper * a, TextSize.Body);
                 Gfx.TextSpaced(sb, Game.Font, "PERFECT", RightX + 92, ny + 5, Palette.Paper * a, TextSize.Tiny, 2f);
                 Gfx.TextSpaced(sb, Game.Font, "PERFECT HITS AND BLOCKS FILL IT", RightX, ny + 32, Palette.LineGrey * a, TextSize.Tiny, 2f);
                 return;
