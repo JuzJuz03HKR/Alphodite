@@ -15,6 +15,7 @@ namespace Tacetno433.Core
     //   SMASH   percussion : a heavy blow from above, a ring on the floor, shards of glass thrown up and falling
     //   CROSS   the SIGNATURE : two cuts across the whole screen crossing on the enemy, a four pointed star where they cross
     //   INK     TACET's blow on a musician : white cracks and a ring, dark drops falling
+    //   PULL    an enemy SILENCED : specks of it are drawn off into TACET's hole
     //   STAR    a four pointed twinkle, for a perfect note or a big moment
     //   FOCUS   lines rushing in to the point of a big blow, like a comic
     //   IMPACT  a frame or two of the world turned over, black and white (IMPACT FRAME, Post.fx)
@@ -61,13 +62,13 @@ namespace Tacetno433.Core
         }
 
         //Bit : one small piece. SPARK a square that falls, STREAK a line along its way, SHARD a sliver of glass that
-        //turns and glints, INK a dark drop (drawn into the SCENE)
-        private const byte Spark = 0, Streak = 1, Shard = 2, Ink = 3;
+        //turns and glints, INK a dark drop (drawn into the SCENE), PULL a speck drawn towards Target
+        private const byte Spark = 0, Streak = 1, Shard = 2, Ink = 3, Pull = 4;
         private struct Bit
         {
             public bool On;
             public byte Kind;
-            public Vector2 At, Speed;
+            public Vector2 At, Speed, Target;
             public float Life, Length, Size, Spin, Turn;
             public Color Tint;
         }
@@ -163,6 +164,52 @@ namespace Tacetno433.Core
                 AddRing(at, size * 0.9f, 1f, 3f, 0.3f, Color.White);
                 AddBurst(at, size * 0.7f, 0f, 1f, 10, 2f, 0.2f, Color.White);
                 Throw(at, new Vector2(0f, -1f), 16, 380f, Ink, Color.White);
+            }
+        }
+
+        //Clash : a parry meets TACET's note at the ring. perfect = the blow is turned away whole (a star, spikes, a ring
+        //and sparks all round), otherwise a smaller burst.
+        public void Clash(Vector2 at, bool perfect, Color tint)
+        {
+            float size = BattleRules.HitSize;
+            if (perfect)
+            {
+                Star(at, size * 1.5f, tint);
+                AddBurst(at, size * 0.9f, 0f, 1f, 16, 4f, 0.24f, tint);
+                AddRing(at, size * 1.2f, 1f, 3f, 0.32f, tint);
+                for (int k = 0; k < 4; k++) Throw(at, new Vector2((float)Math.Cos(k * MathHelper.PiOver2), (float)Math.Sin(k * MathHelper.PiOver2)), 5, 520f, Streak, tint);
+            }
+            else
+            {
+                AddBurst(at, size * 0.5f, 0f, 1f, 10, 3f, 0.18f, tint);
+                AddRing(at, size * 0.7f, 1f, 2f, 0.24f, tint);
+            }
+        }
+
+        //Silence : an enemy SILENCED. Specks of it lift off all over its box and are drawn into the hole at target,
+        //faster as they go, with a ring and a star where it stood.
+        public void Silence(Rectangle box, Vector2 target)
+        {
+            Vector2 middle = new Vector2(box.Center.X, box.Center.Y);
+            Star(middle, BattleRules.HitSize * 1.6f, Color.White);
+            AddRing(middle, BattleRules.HitSize * 1.4f, 1f, 3f, 0.45f, Color.White);
+            for (int i = 0; i < 44; i++)
+            {
+                int slot = Free(bits);
+                Vector2 at = new Vector2(box.X + (float)random.NextDouble() * box.Width, box.Y + (float)random.NextDouble() * box.Height);
+                Vector2 away = at - middle;
+                bits[slot] = new Bit
+                {
+                    On = true,
+                    Kind = Pull,
+                    At = at,
+                    Speed = away * (1.5f + 2f * (float)random.NextDouble()) + new Vector2(0f, -60f),
+                    Target = target,
+                    Life = 1.1f + 0.7f * (float)random.NextDouble(),
+                    Size = 2f,
+                    Tint = Color.White,
+                };
+                bits[slot].Length = bits[slot].Life;
             }
         }
 
@@ -286,6 +333,21 @@ namespace Tacetno433.Core
                 if (bits[i].Life <= 0f)
                 {
                     bits[i].On = false;
+                    continue;
+                }
+                if (bits[i].Kind == Pull)
+                {
+                    //PULL : drawn towards the hole harder and harder, gone when it gets there
+                    Vector2 to = bits[i].Target - bits[i].At;
+                    float far = to.Length();
+                    if (far < 16f)
+                    {
+                        bits[i].On = false;
+                        continue;
+                    }
+                    bits[i].Speed += to / far * (900f + 2400f * (1f - bits[i].Life / bits[i].Length)) * dt;
+                    bits[i].Speed *= (float)Math.Pow(0.3, dt);
+                    bits[i].At += bits[i].Speed * dt;
                     continue;
                 }
                 bits[i].At += bits[i].Speed * dt;
@@ -437,6 +499,12 @@ namespace Tacetno433.Core
             float a = Math.Min(1f, b.Life / (b.Length * 0.5f));
             Vector2 p = Snap(b.At);
             if (b.Kind == Spark) Gfx.Rect(sb, p.X, p.Y, 2f, 2f, b.Tint * a);
+            else if (b.Kind == Pull)
+            {
+                Vector2 back = b.At - b.Speed * 0.02f;
+                Gfx.Line(sb, Snap(back), p, b.Tint * (0.5f * a), 1f);
+                Gfx.Rect(sb, p.X, p.Y, 2f, 2f, b.Tint * a);
+            }
             else if (b.Kind == Streak)
             {
                 Vector2 back = b.At - b.Speed * 0.035f;

@@ -224,6 +224,10 @@
         public static float TurnStrikeTime = 0.62f;       // ONE BAR : how long an ATTACK's lunge takes, there and back (Beta1 : slower, smoother)
         public static float TurnStrikeImpact = 0.24f;     //           when in it the hit lands
         public static float TurnStrikeStop = 0.08f;       //           the freeze when it lands
+        public static float TurnNumberTime = 1.0f;        // a damage number stays this long (Beta1 round 4, pixel numbers)
+        public static int TurnBigHit = 18;                //   from this much damage it is drawn bigger
+        public static float TurnDissolveTime = 1.0f;      // an enemy SILENCED dissolves into TACET's hole in this long
+        public static float TurnCutInTime = 1.3f;         // the SIGNATURE's CUT-IN, before its strokes (Beta1 round 4, the old duel's picture)
         public static float TurnKillStop = 0.18f;         //           the freeze when an enemy falls silent
         public static float TurnEndTime = 2.2f;           // the win or lose banner stays this long
         public static float TurnSparkGap = 0.3f;          // a spark comes this soon after the note before it
@@ -238,6 +242,8 @@
         public static float StageAmbient = 0.34f;         // LIGHT MAP everywhere (0.5 = lit normally) : the stage is dark, lights do the rest
         public static float StageSpot = 0.42f;            //   the stage light on the musician in front
         public static float StageFootLight = 0.2f;        //   the pool of light each enemy stands in (like Chaos Zero Nightmare)
+        public static float StageShaft = 0.1f;            //   the shaft of light from above on the musician in front (GLOW, round 4)
+        public static int StageDust = 36;                 //   specks of dust turning in it
         public static float StageFloorLight = 0.16f;      //   the house lights on the floor near the band, so TACET's dark can be seen eating it
         public static float StageHitLight = 0.55f;        //   a hit lights up where it lands, for a moment
         public static float StageHitLightTime = 0.35f;    //   how long that lasts (seconds)

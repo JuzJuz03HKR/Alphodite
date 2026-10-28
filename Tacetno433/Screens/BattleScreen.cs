@@ -97,6 +97,7 @@ namespace Tacetno433.Screens
         {
             public float Flash;
             public float Knock;
+            public float Gone;         // SILENCED : 0 = standing, 0..1 while it dissolves into the hole, 1 = gone
         }
         private Dictionary<Fighter, Look> looks = new Dictionary<Fighter, Look>();
 
@@ -332,11 +333,13 @@ namespace Tacetno433.Screens
                 {
                     look.Flash = Math.Max(0f, look.Flash - dt * 5f);
                     look.Knock = Math.Max(0f, look.Knock - dt * 6f);
+                    if (look.Gone > 0f && look.Gone < 1f) look.Gone = Math.Min(1f, look.Gone + dt / BattleRules.TurnDissolveTime);
                 }
             }
 
             UpdateStage(dt, hitStop > 0f);
             hits.Update(dt, hitStop > 0f);
+            UpdateShow(dt);
             gesture.Update(dt, view == View.Swipe && Input.MouseDown());
             baton.Update(dt, gesture.Held);
 
@@ -693,6 +696,7 @@ namespace Tacetno433.Screens
             notes.Clear();
             for (int i = 0; i < TurnBattle.SignatureShape.Length; i++) AddNote(NoteKind.Swipe, TurnBattle.SignatureShape[i], -1);
             BeginSwipe(SwipeFor.Signature);
+            cutIn = BattleRules.TurnCutInTime;                                         // CUT-IN first (BattleScreen.Show.cs)
             hitBy = null;
             hitSignature = true;
         }
@@ -766,6 +770,14 @@ namespace Tacetno433.Screens
 
         private void UpdateSwipe(float dt)
         {
+            //CUT-IN : the SIGNATURE's picture first. The ring waits, and any movement meanwhile never counts.
+            if (cutIn > 0f)
+            {
+                cutIn -= dt;
+                if (cutIn <= 0f) gesture.Clear();
+                return;
+            }
+
             clock += dt;
             float now = clock - Settings.TimingOffset;
 
@@ -809,7 +821,7 @@ namespace Tacetno433.Screens
 
                 if (swipeFor == SwipeFor.Parry && grade == Grade.Perfect && !rightSize) grade = Grade.Good;   // the wrong size only half blocks
 
-                effects.SpawnSlash(gesture.From, gesture.To, grade == Grade.Perfect ? 1f : 0.55f);
+                qteEffects.SpawnSlash(gesture.From, gesture.To, grade == Grade.Perfect ? 1f : 0.55f);
 
                 //HOLD : a held note that landed waits for the hold before it counts
                 if (n.Kind == NoteKind.Hold && (grade == Grade.Perfect || grade == Grade.Good))
@@ -860,7 +872,7 @@ namespace Tacetno433.Screens
             {
                 shakes++;
                 baton.Whip(gesture.Direction);
-                effects.SpawnSparks(HitX, HitY, 2, 1f);
+                qteEffects.SpawnSparks(HitX, HitY, 2, 1f);
             }
             if (now >= n.Due + BattleRules.TurnRollTime)
             {
@@ -875,14 +887,14 @@ namespace Tacetno433.Screens
         {
             missKept = false;
             results[next] = new NoteResult(grade, rightSize, hold);
-            effects.SpawnHit(HitX, HitY, grade);
+            qteEffects.SpawnHit(HitX, HitY, grade);
             judgeLife = 1f;
 
             bool perfect = grade == Grade.Perfect && rightSize;
             if (perfect)
             {
                 perfects++;
-                effects.SpawnShatter(HitX, HitY, RingMark);
+                qteEffects.SpawnShatter(HitX, HitY, RingMark);
                 hitStop = BattleRules.TurnHitStop;
             }
 
@@ -890,7 +902,8 @@ namespace Tacetno433.Screens
             {
                 battle.ParryNote(next, grade);
                 judgeWord = grade == Grade.Perfect ? "PARRY" : (grade == Grade.Good ? "GOOD" : "MISS");
-                if (grade == Grade.Perfect) effects.SpawnSparks(HitX, HitY, 10, 1f);
+                if (grade == Grade.Perfect) qteEffects.SpawnSparks(HitX, HitY, 10, 1f);
+                if (grade == Grade.Perfect || grade == Grade.Good) qteHits.Clash(new Vector2(HitX, HitY), grade == Grade.Perfect && rightSize, Color.White);   // the parry's clash
                 ShowEvents();
             }
             else
@@ -919,7 +932,7 @@ namespace Tacetno433.Screens
                 battle.UseSignature(results);
                 judgeWord = signatureName;
                 judgeLife = 1.6f;
-                effects.SpawnFlare(HitX, HitY, 1f);
+                qteEffects.SpawnFlare(HitX, HitY, 1f);
                 shake = 0.8f;
             }
             else
@@ -986,15 +999,14 @@ namespace Tacetno433.Screens
                 int stack;
                 popStack.TryGetValue(e.Who, out stack);
                 popStack[e.Who] = stack + 1;
-                float y = box.Y - 34 - stack * 26;
+                float y = box.Y - 34 - stack * 34;
                 float x = box.Center.X;
-                if (!e.Who.IsEnemy && e.Who != fore) y = box.Bottom + 18 + stack * 26;      // THE BAND row : under the card
+                if (!e.Who.IsEnemy && e.Who != fore) y = box.Bottom + 22 + stack * 34;      // THE BAND row : under the card
 
                 if (e.Kind == TurnEventKind.Damage)
                 {
-                    //A hit : the number grows with the damage, the fighter flashes and is knocked back
-                    float size = 1f + Math.Min(1f, e.Amount / 25f) * 0.7f;
-                    effects.SpawnPop(x, y, NumberText.Get(e.Amount), e.Who.IsEnemy ? Palette.Highlight : Palette.Paper, size);
+                    //A hit : a pixel number (bigger for a big hit), the fighter flashes and is knocked back
+                    SpawnNumber(new Vector2(x, y), e.Amount, false, e.Amount >= BattleRules.TurnBigHit || hitSignature, e.Who.IsEnemy ? Palette.Highlight : Palette.PaperDim);
                     if (look != null)
                     {
                         look.Flash = 1f;
@@ -1025,6 +1037,8 @@ namespace Tacetno433.Screens
                     //Silenced : the biggest moment of a bar, so the biggest feedback
                     if (e.Who.IsEnemy)
                     {
+                        if (look != null) look.Gone = 0.0001f;                                  // SILENCED : it starts to dissolve
+                        hits.Silence(DrawBox(e.Who), dark.Hole + stageCam * BattleRules.StageParallax[3]);
                         effects.SpawnShatter(box.Center.X, box.Center.Y, 70f);
                         effects.SpawnFlare(box.Center.X, box.Center.Y, 1f);
                         effects.SpawnSparks(box.Center.X, box.Center.Y, 30, 0f);
@@ -1041,7 +1055,7 @@ namespace Tacetno433.Screens
                     effects.SpawnSparks(box.Center.X, box.Bottom, 20, 0f);
                     effects.SpawnPop(x, y, "CALLED", Palette.Highlight, 1f);
                 }
-                else if (e.Kind == TurnEventKind.Heal) effects.SpawnPop(x, y, "+" + NumberText.Get(e.Amount), Palette.Highlight, 1f);
+                else if (e.Kind == TurnEventKind.Heal) SpawnNumber(new Vector2(x, y), e.Amount, true, false, Palette.Highlight);
                 else if (e.Kind == TurnEventKind.Dissonance) effects.SpawnPop(x, y, "DISSONANCE", Palette.PaperDim, 0.6f);
                 else if (e.Kind == TurnEventKind.Crescendo) effects.SpawnPop(x, y, "CRESCENDO", Palette.Paper, 0.6f);
                 else if (e.Kind == TurnEventKind.Mute) effects.SpawnPop(x, y, "MUTE", Palette.PaperDim, 0.7f);
@@ -1236,8 +1250,10 @@ namespace Tacetno433.Screens
                 Select(NextUnwritten(battle.Party[0]));
                 RefreshPreview();
             }
-            else if (name == "battleswing" || name == "battlestrike")
+            else if (name == "battleswing" || name == "battlestrike" || name == "battlekill")
             {
+                if (name == "battlekill")                                               // Beta1 round 4 : the blow SILENCES
+                    for (int i = 0; i < battle.Enemies.Count; i++) battle.Enemies[i].Hp = 1;
                 battle.PlayBar();
                 NextStep();
                 strikeTime = BattleRules.TurnStrikeImpact * 0.9f;
@@ -1253,13 +1269,14 @@ namespace Tacetno433.Screens
                 NextStep();
                 clock = RingTime * 0.6f;
             }
-            else if (name == "battlesig")
+            else if (name == "battlesig" || name == "battlecutin")
             {
                 battle.Kit = TurnKit.Beethoven;
                 signatureName = "LIGHTNING";
                 battle.Signature = battle.SignatureNeed;
                 StartSignature();
                 clock = RingTime * 0.6f;
+                cutIn = name == "battlecutin" ? BattleRules.TurnCutInTime * 0.55f : 0f;  // CUT-IN : half way, or already over
             }
             else if (name == "battleparry")
             {
@@ -1363,8 +1380,10 @@ namespace Tacetno433.Screens
                 if (swipeFor == SwipeFor.Parry) DrawParryNotes(sb);
                 else DrawPlayNotes(sb);
             }
+            DrawQteLight(sb);
 
             effects.DrawPops(sb, Game.Font);
+            DrawNumbers(sb);
 
             if (judgeLife > 0f)
                 Gfx.TextSpacedCentered(sb, Game.BigFont, judgeWord, HitX, HitY + 110f, Palette.Highlight * Math.Min(1f, judgeLife * 2f), TextSize.Subtitle, 3f);
@@ -1382,8 +1401,12 @@ namespace Tacetno433.Screens
 
             if (swiping)
             {
-                DrawRuler(sb);
-                baton.Draw(sb, gesture);
+                if (cutIn > 0f) DrawCutIn(sb);
+                else
+                {
+                    DrawRuler(sb);
+                    baton.Draw(sb, gesture);
+                }
             }
         }
 
@@ -1495,7 +1518,7 @@ namespace Tacetno433.Screens
                 Fighter f = battle.Enemies[i];
                 Rectangle r = BoxOf(f);
                 Rectangle plate = EnemyPlate(r);
-                float a = f.Down ? 0.35f : 1f;
+                float a = f.Down ? 0.35f * (1f - GoneOf(f)) : 1f;                     // SILENCED : the plate goes with it
                 if (battle.Current != f) a *= MathHelper.Lerp(1f, 0.35f, FocusEased);     // QTE FOCUS : only the one attacking stays bright
 
                 if (aiming && hover == f)

@@ -34,7 +34,8 @@ namespace Tacetno433.Screens
         private const int RowLanguage = 3;
         private const int RowFull = 4;
         private const int RowTiming = 5;
-        private const int RowCount = 6;
+        private const int RowFlash = 6;                     // LESS FLASHING (Beta1 round 4)
+        private const int RowCount = 7;
 
         //Settings Layout
         private const int PanelX = 80;
@@ -43,15 +44,15 @@ namespace Tacetno433.Screens
         private const int PanelH = 440;
         private const int RowX = 96;
         private const int RowY = 164;
-        private const int RowStep = 68;
+        private const int RowStep = 58;                     // Beta1 : seven rows now (LESS FLASHING), a little closer
         private const int RowW = 668;
-        private const int RowH = 56;
+        private const int RowH = 50;
         private const int TrackX = 430;
         private const int TrackW = 260;
         private const int ValueRight = 762;
         private const int HelpWrap = 340;
 
-        private static string[] rowIndex = { "01", "02", "03", "04", "05", "06" };
+        private static string[] rowIndex = { "01", "02", "03", "04", "05", "06", "07" };
         private static string[] rowNames =
         {
             "MASTER VOLUME",
@@ -59,7 +60,8 @@ namespace Tacetno433.Screens
             "MUSIC",
             "LANGUAGE",
             "FULL SCREEN",
-            "STROKE TIMING"
+            "STROKE TIMING",
+            "LESS FLASHING"
         };
 
         //Row Help : the sentence shown on the right for whichever row is chosen
@@ -72,7 +74,8 @@ namespace Tacetno433.Screens
             "Fills the whole monitor without changing its resolution, so other programs are left where they are and alt tab is instant. The picture keeps its shape and black bars fill whatever is left over.",
             BattleRules.TurnBattleOn
                 ? "If your strokes feel on time but the game calls them late, move this to the right. Early, to the left. Press ENTER or TEST and the game measures it for you."
-                : "If your strokes feel right on the beat but the duel calls them late, move this to the right. Early, to the left. Press ENTER or TEST and the game measures it for you."
+                : "If your strokes feel right on the beat but the duel calls them late, move this to the right. Early, to the left. Press ENTER or TEST and the game measures it for you.",
+            "Turns down the white flashes and the shaking of big hits, and leaves out the frame where the picture turns black and white. For anyone who finds flashing light hard to look at."
         };
         private static string savedNote =
             "Options are saved the moment you leave this page, and come back the next time the game starts.";
@@ -89,6 +92,7 @@ namespace Tacetno433.Screens
         private Rectangle[] grabs = new Rectangle[3];       // the easier area the mouse can grab
         private Rectangle[] langBoxes = new Rectangle[2];
         private Rectangle fullBox;
+        private Rectangle flashBox;                         // LESS FLASHING's tick box
         private Rectangle timingTrack;
         private Rectangle timingGrab;
         private Rectangle testChip;
@@ -150,6 +154,7 @@ namespace Tacetno433.Screens
             langBoxes[0] = new Rectangle(TrackX, lang - 17, 122, 34);
             langBoxes[1] = new Rectangle(TrackX + 134, lang - 17, 122, 34);
             fullBox = new Rectangle(TrackX, rowBoxes[RowFull].Center.Y - 13, 26, 26);
+            flashBox = new Rectangle(TrackX, rowBoxes[RowFlash].Center.Y - 13, 26, 26);
 
             int timing = rowBoxes[RowTiming].Center.Y;
             timingTrack = new Rectangle(TrackX, timing - 8, 160, 16);
@@ -330,6 +335,7 @@ namespace Tacetno433.Screens
                 if (Input.MouseOver(langBoxes[0])) { selected = RowLanguage; SetLanguage(0); }
                 if (Input.MouseOver(langBoxes[1])) { selected = RowLanguage; SetLanguage(1); }
                 if (Input.MouseOver(fullBox)) { selected = RowFull; SetFullscreen(!Settings.Fullscreen); }
+                if (Input.MouseOver(flashBox)) { selected = RowFlash; SetFlashing(!Settings.ReduceFlashing); }
                 if (Input.MouseOver(timingGrab)) { dragging = RowTiming; selected = RowTiming; }
                 if (Input.MouseOver(testChip)) { StartTest(); return; }
             }
@@ -354,6 +360,7 @@ namespace Tacetno433.Screens
             if (row <= RowMusic) SetVolume(row, VolumeOf(row) + dir * 0.05f);
             else if (row == RowLanguage) SetLanguage(dir < 0 ? 0 : 1);
             else if (row == RowTiming) Settings.SetTiming(Settings.TimingOffset + dir * Settings.TimingStep);
+            else if (row == RowFlash) SetFlashing(dir > 0);
             else SetFullscreen(dir > 0);
         }
 
@@ -362,6 +369,7 @@ namespace Tacetno433.Screens
         {
             if (row == RowLanguage) SetLanguage(Settings.Language == 0 ? 1 : 0);
             else if (row == RowFull) SetFullscreen(!Settings.Fullscreen);
+            else if (row == RowFlash) SetFlashing(!Settings.ReduceFlashing);
             else if (row == RowTiming) StartTest();
         }
 
@@ -398,6 +406,14 @@ namespace Tacetno433.Screens
         {
             if (Settings.Language == id) return;
             Settings.Language = id;
+            SoundBank.Play(Sfx.UiConfirm);
+        }
+
+        //Set Flashing : LESS FLASHING on or off (the battle reads Settings.ReduceFlashing)
+        private void SetFlashing(bool on)
+        {
+            if (Settings.ReduceFlashing == on) return;
+            Settings.ReduceFlashing = on;
             SoundBank.Play(Sfx.UiConfirm);
         }
 
@@ -473,6 +489,7 @@ namespace Tacetno433.Screens
             if (i <= RowMusic) DrawVolumeRow(sb, i, on, a);
             else if (i == RowLanguage) DrawLanguageRow(sb, on, a);
             else if (i == RowFull) DrawFullscreenRow(sb, on, a);
+            else if (i == RowFlash) DrawFlashRow(sb, on, a);
             else DrawTimingRow(sb, on, a);
         }
 
@@ -544,6 +561,15 @@ namespace Tacetno433.Screens
             Ui.CheckBox(sb, fullBox, Settings.Fullscreen, hot, a);
             Gfx.TextSpaced(sb, Game.Font, Settings.Fullscreen ? "ON" : "OFF", fullBox.Right + 16, fullBox.Y + 4, (on ? Palette.Paper : Palette.PaperDim) * a, TextSize.Body, 2f);
             Gfx.TextSpacedRight(sb, Game.Font, "BORDERLESS  WINDOW", ValueRight, fullBox.Y + 7, Palette.LineGrey * a, TextSize.Tiny, 2f);
+        }
+
+        //Less Flashing Row : a tick box and the word beside it, like FULL SCREEN
+        private void DrawFlashRow(SpriteBatch sb, bool on, float a)
+        {
+            bool hot = on || Input.MouseOver(flashBox);
+            Ui.CheckBox(sb, flashBox, Settings.ReduceFlashing, hot, a);
+            Gfx.TextSpaced(sb, Game.Font, Settings.ReduceFlashing ? "ON" : "OFF", flashBox.Right + 16, flashBox.Y + 4, (on ? Palette.Paper : Palette.PaperDim) * a, TextSize.Body, 2f);
+            Gfx.TextSpacedRight(sb, Game.Font, "SOFTER  HITS", ValueRight, flashBox.Y + 7, Palette.LineGrey * a, TextSize.Tiny, 2f);
         }
 
         //Chip : a small slanted blade, used for the language choice

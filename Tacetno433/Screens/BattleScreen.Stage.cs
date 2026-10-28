@@ -360,6 +360,7 @@ namespace Tacetno433.Screens
             effects.DrawSlashes(sb);
             effects.DrawFlares(sb);
             hits.DrawGlow(sb);
+            DrawMood(sb);
             sb.End();
 
             PostChain.Finish(device, sb, time, FocusEased, dark.Engulf, hits.Impact, BattleRules.StageBloomThreshold, BattleRules.StageBloomStrength,
@@ -440,9 +441,20 @@ namespace Tacetno433.Screens
             dark.DrawDebris(sb, false);
             sb.End();
 
-            //Fighters : enemies back to front, then the musician in front
+            //Fighters : enemies back to front, then the musician in front. One SILENCED with its art is dissolved by
+            //the shader in a batch of its own.
             sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, Layer(cam, 3));
-            for (int i = battle.Enemies.Count - 1; i >= 0; i--) DrawEnemy(sb, battle.Enemies[i]);
+            for (int i = battle.Enemies.Count - 1; i >= 0; i--)
+            {
+                Fighter e = battle.Enemies[i];
+                if (DissolvesWithShader(e))
+                {
+                    sb.End();
+                    DrawDissolve(sb, e, cam);
+                    sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, Layer(cam, 3));
+                }
+                else DrawEnemy(sb, e);
+            }
             DrawFront(sb);
             hits.DrawScene(sb);
             sb.End();
@@ -485,14 +497,56 @@ namespace Tacetno433.Screens
             }
         }
 
-        //Enemy : its shadow, its picture (darker the further back and the deeper in the dark), its flash
+        //Gone Of : how far a SILENCED enemy has dissolved (0 standing, 1 gone)
+        private float GoneOf(Fighter f)
+        {
+            Look look;
+            if (!f.Down) return 0f;
+            if (!looks.TryGetValue(f, out look) || look.Gone <= 0f) return 1f;      // down before this page saw it
+            return look.Gone;
+        }
+
+        private bool DissolvesWithShader(Fighter f)
+        {
+            float gone = GoneOf(f);
+            return Fx.Ready && gone > 0f && gone < 1f && ArtOf(f).Set != null;
+        }
+
+        //Dissolve : SILENCED with its art. Sprite.fx eats the picture away from noise with a white rim.
+        private void DrawDissolve(SpriteBatch sb, Fighter f, Vector2 cam)
+        {
+            Art art = ArtOf(f);
+            Rectangle r = DrawBox(f);
+            Effect e = Fx.Sprite;
+            e.CurrentTechnique = e.Techniques["Dissolve"];
+            e.Parameters["Amount"].SetValue(GoneOf(f));
+            e.Parameters["RimColor"].SetValue(Color.White.ToVector4());
+            e.Parameters["NoiseScale"].SetValue(18f);
+            sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, e, Layer(cam, 3));
+            art.Player.Draw(sb, art.Set, new Vector2(r.Center.X, r.Bottom), 2, Color.White);
+            sb.End();
+        }
+
+        //Enemy : its shadow, its picture (darker the further back and the deeper in the dark), its flash.
+        //SILENCED (no art yet) : the frame is drawn towards the hole, shrinking and fading, while its specks fly off.
         private void DrawEnemy(SpriteBatch sb, Fighter f)
         {
+            float gone = GoneOf(f);
+            if (gone >= 1f) return;
             Rectangle r = DrawBox(f);
             float depth = 1f - BattleRules.StageDepthDim * f.Slot;
             float deep = dark.InDark(new Vector2(r.Center.X, r.Bottom) - stageCam * BattleRules.StageParallax[3]);
             float shade = MathHelper.Clamp(depth * MathHelper.Lerp(1f, 0.55f, deep), 0.2f, 1f);
-            float a = f.Down ? 0.2f : 1f;
+            float a = 1f;
+            if (gone > 0f)
+            {
+                Vector2 hole = dark.Hole + stageCam * BattleRules.StageParallax[3];
+                float pull = gone * gone;
+                Vector2 middle = Vector2.Lerp(new Vector2(r.Center.X, r.Center.Y), hole, pull * 0.35f);
+                float size = 1f - 0.45f * pull;
+                r = new Rectangle((int)(middle.X - r.Width * size / 2f), (int)(middle.Y - r.Height * size / 2f), (int)(r.Width * size), (int)(r.Height * size));
+                a = 1f - gone;
+            }
 
             Gfx.DrawGlowBox(sb, new Rectangle(r.Center.X - r.Width / 2, r.Bottom - 22, r.Width, 44), Color.Black * (0.6f * a));
             Art art = ArtOf(f);
@@ -539,6 +593,38 @@ namespace Tacetno433.Screens
         {
             if (swap <= 0f) return 1f;
             return swap < 0.5f ? 1f - Smooth(swap / 0.5f) : Smooth((swap - 0.5f) / 0.5f);
+        }
+
+        //Mood (Beta1 round 4) : a shaft of light from above onto the musician in front, with dust turning in it.
+        //Into the GLOW, with the fighters' camera.
+        private void DrawMood(SpriteBatch sb)
+        {
+            Rectangle f = foreBox;
+            float a = BattleRules.StageShaft * (fore != null ? SwapAlpha() * 0.5f + 0.5f : 0.5f);
+
+            //Shaft : a wide dim light stretched tall, and a narrow brighter core inside it
+            Gfx.DrawGlowBox(sb, new Rectangle(f.X - 10, -260, f.Width + 20, f.Y + 520), Color.White * (a * 0.6f));
+            Gfx.DrawGlowBox(sb, new Rectangle(f.X + 70, -200, f.Width - 140, f.Y + 420), Color.White * a);
+
+            //Dust : specks drifting slowly down and sideways through the shaft, twinkling
+            float span = f.Y + 300f;
+            for (int i = 0; i < BattleRules.StageDust; i++)
+            {
+                float h1 = Hash01(i, 21);
+                float h2 = Hash01(i, 22);
+                float h3 = Hash01(i, 23);
+                float x = f.X + 30f + h1 * (f.Width - 60f) + (float)Math.Sin(worldTime * (0.3f + h2) + i) * 12f;
+                float y = (h2 * span + worldTime * (6f + 10f * h3)) % span - 40f;
+                float twinkle = 0.5f + 0.5f * (float)Math.Sin(worldTime * (1.5f + 2f * h3) + i * 1.7f);
+                Gfx.Rect(sb, (float)Math.Floor(x * 0.5f) * 2f, (float)Math.Floor(y * 0.5f) * 2f, 2f, 2f, Color.White * (0.35f * twinkle));
+            }
+        }
+
+        //Hash 01 : a steady random 0..1 from two whole numbers (the same trick as TacetField)
+        private static float Hash01(int a, int b)
+        {
+            float h = (float)Math.Sin(a * 12.9898f + b * 78.233f) * 43758.547f;
+            return h - (float)Math.Floor(h);
         }
 
         //Stage Lights : into the light map (at half size, see PostChain.LightScale)
