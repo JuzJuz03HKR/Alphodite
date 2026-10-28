@@ -21,6 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
+| 29 ต.ค. 05:02 (เวลาไทย) | `SCREENS_LEVEL_UP.md` ข้อ 12 : คำในแผ่นเฉียงตามหน้า → ม่านผ้าจริง → รอบ 1 (Reward Shop Event Rest) + `UI_ART_PLAN.md` | `Core/SlantWipe.cs` `Core/ScreenManager.cs` `Core/Curtain.cs` `Core/Ui.cs` `Core/UiMotion.cs` `Core/DebugShots.cs` `Data/BattleRules.cs` `Screens/` (หน้าที่ตั้งคำ + MotifReward Shop Event Rest) `docs/` |
 
 ---
 
