@@ -21,7 +21,6 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 28 ต.ค. 16:44 UTC | `SCREENS_LEVEL_UP.md` ข้อ 9 ข้อ 5 : ชั้นกลาง (ฟอนต์ ข. เลนส์ `PostChain` ทุกหน้า `TacetVoid` ชุดปุ่ม motion วงแหวนกวาด) + Title + Result และ Defeat | `Content/Fonts/` `Content/*.spritefont` `Content/Content.mgcb` `Content/Effects/*.fx` `Core/ScreenManager.cs` `Core/PostChain.cs` `Core/Fx.cs` `Core/TacetVoid.cs` `Core/Ui.cs` `Core/UiMotion.cs` (ใหม่) `Core/SlantWipe.cs` `Core/Ornament.cs` `Core/Palette.cs` `Core/DebugShots.cs` `Screens/TitleScreen.cs` `Screens/ResultScreen.cs` `Data/BattleRules.cs` `TacetGame.cs` เอกสาร `SCREENS_LEVEL_UP.md` `HANDOFF.md` `.claude/skills/build/SKILL.md` |
 
 ---
 
@@ -37,7 +36,7 @@ Beta1 คือการทำเกมให้สุดเหมือนเ�
 1. CLAUDE.md ที่ราก repo (หัวข้อ 00 กับ 0 สำคัญที่สุด)
 2. docs/RESUME_PROMPT.md หัวข้อ "สถานะล่าสุด"
 3. docs/BATTLE_SCENE_2_3D_CHANGE.md ข้อ 9 ขึ้นไป และ docs/BATTLE_ART_PLAN.md
-4. docs/SCREENS_LEVEL_UP.md (งานยกระดับทุกหน้าจอให้เข้ากับฉากต่อสู้ใหม่ เริ่มที่ข้อ 9)
+4. docs/SCREENS_LEVEL_UP.md (งานยกระดับทุกหน้าจอให้เข้ากับฉากต่อสู้ใหม่ รอบตัวอย่างที่ทำแล้วอยู่ข้อ 10)
 เอกสารอื่นอ่านเมื่องานต้องใช้
 
 แล้วเช็กให้ฉัน
@@ -62,6 +61,14 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 ---
 
 ## สถานะล่าสุด (28 ต.ค.)
+
+**28 ต.ค. (ล่าสุด) : ทำ `SCREENS_LEVEL_UP.md` ข้อ 9 ข้อ 5 และ 6 เสร็จ = รอบตัวอย่างของการยกระดับหน้าจอ รอผู้ใช้ Rebuild ดู** (รายละเอียดทั้งหมด `SCREENS_LEVEL_UP.md` ข้อ 10)
+✅ ฟอนต์ ข. อยู่ในโปรเจกต์แล้ว `Content/Fonts/` (Cormorant Garamond SemiBold สำหรับโลโก้และหัวข้อ, Bold สำหรับประโยคเพราะ SemiBold บางเกิน, Saira Semi Condensed Medium สำหรับป้ายและปุ่ม) พร้อมใบอนุญาต OFL · build ใน cloud ไม่ต้องสลับฟอนต์แล้ว
+✅ ชั้นกลาง : เลนส์ทุกหน้า (`ScreenManager` + `PostChain.DrawPage`, หน้าเก่าได้สปอตกลางจอ bloom vignette เอง) · เข้าหน้าสว่างจากดำ 0.3 วินาที · `TacetVoid.PlaceOnPage` (หลุมเดียวกับหน้าต่อสู้บนหน้าไหนก็ได้) · ชุดปุ่มแบบผสม `Ui.MenuItem` `Ui.Command` `Ui.Number` + `Core/UiMotion.cs` · `SlantWipe` แผ่นขาว เทา ดำ ตัดเฉียง + คำ TACET 4'33 · วงแหวนกวาด `Core/RingSweep.cs` (LIGHT เริ่มรันและชนะ, DARK เข้าต่อสู้, CLOSE แพ้) · ตัวเลขใน `BattleRules` หัวข้อ UI Feel
+✅ Title : หลุมจริงทางขวา วงแหวนขีด เมนูเกาะวงแหวนใหญ่ บรรทัดโน้ตถูกหลุมดูดโค้ง เปิดเกมครั้งแรกมีลำดับเปิดตัว · Result ชนะ : เริ่มจากภาพกลับสีแบบมังงะ หลุมแตก กระดาษสว่าง เลขนับขึ้น แรงค์กระแทก · Defeat : ความมืดท่วมพื้นและกลืนจากขอบ
+✅ build 0/0 · turncheck 113/113 · savecheck 25/25 · ลองไม่มี shader ไม่พัง · LESS FLASHING (`resultquiet`) · แคปทุกหน้าเทียบก่อนหลังแล้ว (ภาพอยู่ scratchpad หายไปกับเครื่อง)
+⚠️ ยังไม่ทำ (ตั้งใจเลื่อน) : 4.5 สีตัวละครใน UI, 4.6 กรอบภาพหน้า pixel, 4.7 ภาพคมบนจอใหญ่, หน้าอื่นตามตารางข้อ 5 · จังหวะในภาพ cloud ไม่ตรงของจริง · F3 ต้องดูบน Windows · PLAYTEST SIGNATURE ยังเป็น 1 (ผู้ใช้สั่งคงไว้)
+**งานถัดไป** : ผู้ใช้ Rebuild แล้วดู 6 ข้อใน `SCREENS_LEVEL_UP.md` 10.9 บอกว่าจะแก้ตรงไหน · จากนั้นรอบ 1 (Reward Shop Event Rest + แผนอาร์ตหน้าจอ `UI_ART_PLAN.md`) หรือ 4.7 ภาพคมบนจอใหญ่ ตามที่ผู้ใช้เลือก
 
 **28 ต.ค. (ล่าสุด) : แชท "Battle Scene 2+3D presentation 3" ทำ `SCREENS_LEVEL_UP.md` ข้อ 9 ข้อ 1–4 เสร็จ ผู้ใช้ตอบครบ ยังไม่ได้เขียนโค้ด** (คำต่อคำ `USER_BRIEFS.md` 13.6)
 ✅ build ใน cloud 0/0 (เครื่องใหม่ : `apt-get update` แล้วลง dotnet-sdk-8.0 + `shader_setup.sh`) · แคปทุกหน้า 31 ภาพไว้ใน scratchpad (หายไปกับเครื่อง แชทใหม่ต้องแคปใหม่)

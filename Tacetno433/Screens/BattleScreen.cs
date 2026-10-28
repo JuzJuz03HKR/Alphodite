@@ -192,14 +192,28 @@ namespace Tacetno433.Screens
             get { return false; }
         }
 
+        //Own Lens : the battle builds and finishes its own picture (BattleScreen.Stage.cs PreDraw), the other pages are put
+        //through the lens by ScreenManager (Beta1 screens)
+        public override bool OwnLens
+        {
+            get { return true; }
+        }
+
         public override bool CanPause
         {
             get { return !practice && (battle == null || (battle.Step != TurnStep.Won && battle.Step != TurnStep.Lost)); }   // no pause once it is decided
         }
 
-        public override bool EntersWithWave
+        //Enters With Sweep (Beta1 screens) : every way into a fight (the route, an event's elite, the practice) opens with
+        //TACET's dark ring from where its hole hangs (Core/RingSweep.cs, the moments that matter)
+        public override RingSweep.Kind EntersWithSweep
         {
-            get { return true; }
+            get { return RingSweep.Kind.Dark; }
+        }
+
+        public override Vector2 SweepFrom
+        {
+            get { return new Vector2(BattleRules.StageVoidX, BattleRules.StageVoidY); }
         }
 
         public override void Load()
@@ -1203,6 +1217,11 @@ namespace Tacetno433.Screens
             record.PerfectCount = perfects;
             record.BestCombo = battle.BestRun;
             record.Line = record.PlayerWon ? BattleRules.LineLimit : -BattleRules.LineLimit;
+
+            //RING SWEEP (Beta1 screens) : a win breaks out in light from TACET's hole, a loss lets the dark close in on the
+            //musician in front
+            if (record.PlayerWon) Game.Screens.SweepNext(dark.Hole, RingSweep.Kind.Light);
+            else Game.Screens.SweepNext(new Vector2(foreBox.Center.X, foreBox.Center.Y - 60), RingSweep.Kind.Close);
             Game.Screens.Change(new ResultScreen());
             view = View.Pause;
             viewTime = -999f;                     // nothing more happens while the page fades

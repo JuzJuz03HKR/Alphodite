@@ -648,9 +648,21 @@ namespace Tacetno433.Core
             if (names[index] == "guide4" && (frames == 10 || frames == 20 || frames == 30)) Input.PretendPress = Keys.Right;
             if (names[index] == "guide5" && (frames == 10 || frames == 20 || frames == 30 || frames == 40)) Input.PretendPress = Keys.Right;
 
+            //Page Changes (Beta1 screens) : a change starts a few frames in, so the picture shows the cover on its way
+            if (frames == 6 && (names[index].StartsWith("wipe") || names[index].StartsWith("sweep")))
+            {
+                if (names[index] == "sweep") game.Screens.SweepNext(new Vector2(640f, 360f), RingSweep.Kind.Light);
+                if (names[index] == "sweepdark") game.Screens.SweepNext(new Vector2(BattleRules.StageVoidX, BattleRules.StageVoidY), RingSweep.Kind.Dark);
+                if (names[index] == "sweepclose") game.Screens.SweepNext(new Vector2(200f, 444f), RingSweep.Kind.Close);
+                game.Screens.Change(new TitleScreen());
+            }
+
             if (frames < waits[index]) return;
 
-            string path = Path.Combine(outDir, names[index] + ".png");
+            //File Name : the page's name, and the frame too when the same page is asked for more than once (title@8,title@40)
+            string file = names[index];
+            if (Array.IndexOf(names, file) != Array.LastIndexOf(names, file)) file += "_" + waits[index];
+            string path = Path.Combine(outDir, file + ".png");
             using (FileStream stream = File.Create(path))
                 Target.SaveAsPng(stream, TacetGame.ScreenW, TacetGame.ScreenH);
 
@@ -684,12 +696,16 @@ namespace Tacetno433.Core
         //       result defeat reward shop shopleave event eventchair rest curtain curtainwin
         //       battle battleswing battleskill battleparry battlestatus (Alpha 7, use a few frames, e.g. battleswing@2) battlewin battlelose (Beta1, TACET's dark) battleslash battleshot battlesmash battlecross battleink (Beta1, one blow, e.g. battleslash@4) battlecutin battlekill battlebolt battleboltsoft battleimpact (Beta1 round 6)
         //       practice practiceskill practicesig (Alpha 7, the tutorial's practice fight, e.g. practice@60)
+        //       titlereveal resultquiet (Beta1 screens : the first opening of the game, e.g. titlereveal@40 ; a won fight with LESS FLASHING)
+        //       wipe sweep sweepdark sweepclose (Beta1 screens : a page change on its way, from the route to the title, e.g. wipe@30)
         private static void Open(TacetGame game, string name)
         {
             RunState run = SampleRun(game, name);
             game.CurrentRun = run;
             game.Pause.Open = false;
             SaveFile.PretendRun = name == "titlecontinue";
+            TitleScreen.FirstOpen = name == "titlereveal";                                // Beta1 screens : only this picture plays the opening
+            Settings.ReduceFlashing = name.EndsWith("quiet");                             // Beta1 screens : resultquiet, LESS FLASHING on
 
             GameScreen screen = new TitleScreen();
             if (name.StartsWith("guide")) screen = new GuideScreen();
@@ -704,13 +720,13 @@ namespace Tacetno433.Core
             if (name == "crossing") screen = new EraChoiceScreen(false);
             if (name == "recruit") screen = new RecruitScreen();
             if (name == "bandname") screen = new BandNameScreen();
-            if (name == "route" || name == "pause") screen = new RouteScreen();
+            if (name == "route" || name == "pause" || name.StartsWith("wipe") || name.StartsWith("sweep")) screen = new RouteScreen();
             if (name == "view" || name == "band") screen = new BandScreen();
             if (name.StartsWith("duel") || name == "finale") screen = new DuelScreen();
             if (name == "archive") screen = new ArchiveScreen();                          // Alpha 7 step 7
             if (name.StartsWith("battle")) screen = new BattleScreen();                // Alpha 7 : battle battleswing battleskill battleparry battlestatus
             if (name.StartsWith("practice")) screen = new BattleScreen(true);          // Alpha 7 step 9 : practice practiceskill practicesig
-            if (name == "result" || name == "defeat") screen = new ResultScreen();
+            if (name == "result" || name == "defeat" || name == "resultquiet") screen = new ResultScreen();
             if (name == "reward") screen = new MotifRewardScreen(false);
             if (name == "shop" || name == "shopleave") screen = new ShopScreen();
             if (name.StartsWith("event")) screen = new EventScreen();
@@ -897,11 +913,11 @@ namespace Tacetno433.Core
                 if (run.Conductor.Perk == ConductorPerk.CloserLouder) run.ChangeStamina(-45);
             }
 
-            if (name == "result" || name == "defeat")
+            if (name == "result" || name == "defeat" || name == "resultquiet")
             {
                 run.Battle.Finished = true;
-                run.Battle.PlayerWon = name == "result";
-                run.Battle.Line = name == "result" ? 64f : -100f;
+                run.Battle.PlayerWon = name != "defeat";
+                run.Battle.Line = name != "defeat" ? 64f : -100f;
                 run.Battle.PerfectCount = 3;
 
                 //Performance Sheet : two rounds and a half of made up beats

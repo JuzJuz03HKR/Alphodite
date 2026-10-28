@@ -20,6 +20,19 @@
 | PLAYTEST (SIGNATURE 1 แต้ม) | `BattleRules.PlaytestSignatureNeed` (0 = ค่าจริง) |
 | ภาพทดสอบ | `--shots battle battlewin battlelose battleslash battleshot battlesmash battlecross battleink battlegold battlefire battlecutin battlekill battlebolt battleboltsoft battleimpact` (`BattleScreen.ShowForPicture`) |
 
+**ยกระดับทุกหน้าจอ (28 ต.ค. รอบตัวอย่าง)** · เอกสาร `SCREENS_LEVEL_UP.md` ข้อ 10 · ตัวเลขใน `BattleRules` หัวข้อ UI Feel
+
+| อยากแก้อะไร | ไปไฟล์ไหน |
+|---|---|
+| เลนส์ของทุกหน้า (แสงสปอต bloom vignette สว่างจากดำตอนเข้า) และหน้าไหนวาดเอง (`OwnLens` `HasWorld` `DrawWorld` `DrawLights` `DrawGlow` `Lens` `Dark`) | `Core/ScreenManager.cs` + `Core/PostChain.cs` (`DrawPage` `PageLook` `ShowPage`) |
+| หลุม TACET บนหน้าอื่น | `TacetVoid.PlaceOnPage` (shader `Void.fx` ค่า `Fine`) |
+| ปุ่มแบบผสม (รายการเมนู ปุ่มคำสั่ง ตัวเลข แถบหมึก กล่องคีย์) | `Core/Ui.cs` (`MenuItem` `Command` `Number` `InkBar` `KeyBox`) + จังหวะ `Core/UiMotion.cs` |
+| เส้นคั่นวงกลม วงแหวนมีขีด | `Core/Ornament.cs` (`OrbitRule` `TickRing`) |
+| เปลี่ยนหน้าปกติ (แผ่นเฉียงหลายชั้น) / ช่วงสำคัญ (วงแหวนกวาด LIGHT DARK CLOSE) | `Core/SlantWipe.cs` / `Core/RingSweep.cs` เรียกด้วย `ScreenManager.SweepNext` หรือ `EntersWithSweep` ของหน้า |
+| ฟอนต์ (OFL) | `Content/Fonts/` + `.spritefont` 4 ไฟล์ |
+| หน้า Title / Result และ Defeat | `Screens/TitleScreen.cs` / `Screens/ResultScreen.cs` |
+| ภาพทดสอบ | `--shots titlereveal resultquiet wipe sweep sweepdark sweepclose` และ `result@3,result@30` (ชื่อซ้ำได้ ภาพชื่อ `ชื่อ_เฟรม`) |
+
 ## 0. แผนที่โค้ด Alpha 7 (การต่อสู้แบบผลัดตา, อัปเดต 24 ต.ค. ขั้น 1–15)
 
 ตัวสลับ : `Data/BattleRules.cs` `TurnBattleOn` (true = ผลัดตา, false = กลับไปดวลเดิมทั้งเกม)

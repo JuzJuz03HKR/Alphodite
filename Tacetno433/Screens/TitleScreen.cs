@@ -10,19 +10,35 @@ namespace Tacetno433.Screens
 {
     //TitleScreen : the first page of the game.
     //
-    //The left side is a written score with a playhead running across it. When the
-    //playhead reaches a note the note flashes, which is exactly what the sequencer does
-    //during a duel, so the title page teaches the core idea before the player presses
-    //anything. The staff runs off to the right and gets swallowed by TACET.
-    //
-    //Under the logo sit the slanted menu blades, and a small notice strip at the
-    //bottom cycles through play tips, the way a launcher shows news.
+    //Beta1 screens (28 Oct, docs/SCREENS_LEVEL_UP.md 3.4.8) : TACET's hole hangs on the right, the same dark as the
+    //battle (Core/TacetVoid.cs), and a big thin ring round it runs down the left of the page. The menu sits on that ring,
+    //so the lines step to the right as they go down : the menu orbits the silence. A smaller ring with ticks turns close
+    //round the hole (the star map of menu4).
+    //The left side is still a written score with a playhead running across it. When the playhead reaches a note the
+    //note flashes, which is what the sequencer does during a duel. The staff runs off to the right and bends into TACET.
+    //The page is drawn in two parts (THE LENS, see ScreenManager) : the world (score, rings, logo) is lit by a few stage
+    //lights and glows, the words and the menu lie crisp on top of it.
+    //The first time the game opens, the hole opens, the rings draw themselves, then the logo and the menu come in one
+    //piece after another (TitleReveal, any key or click skips it). Coming back later, only the menu comes in.
+    //A small notice strip at the bottom cycles through play tips, the way a launcher shows news.
     //When a run is saved, CONTINUE sits on top and says where the run was left.
     //Quitting, and starting over a saved run, both ask first.
     public class TitleScreen : GameScreen
     {
         //Can Pause : a menu page outside the run, ESC here means going back
         public override bool CanPause
+        {
+            get { return false; }
+        }
+
+        //Has World : the score, the rings and the logo are lit, the menu lies on top (THE LENS)
+        public override bool HasWorld
+        {
+            get { return true; }
+        }
+
+        //Shows Grain : no specks over the words (the user found white specks cluttered, docs/SCREENS_LEVEL_UP.md 3.5)
+        public override bool ShowsGrain
         {
             get { return false; }
         }
@@ -37,8 +53,11 @@ namespace Tacetno433.Screens
         private const int ItemArchive = 6;      // Alpha 7 : the after-run upgrades
         private static string[] allItems = { "CONTINUE", "NEW RUN", "TUTORIAL", "HOW TO PLAY", "SETTINGS", "QUIT", "ARCHIVE" };
         private static string[] allIndex = { "01", "02", "03", "04", "05", "06", "07" };
+        private const string EnterKey = "ENTER";
         private int[] menu;                 // which items are on the menu, top to bottom
         private Rectangle[] menuBoxes;
+        private Vector2[] itemAt;           // each line's circle, sitting on the big ring
+        private UiMotion[] motion;          // each line's ink bar, ring and press (Core/UiMotion.cs)
         private int selected;
         private string continueNote = "";   // where the saved run was left
         private ConfirmBox askBox = new ConfirmBox();
@@ -88,15 +107,21 @@ namespace Tacetno433.Screens
         private static string[] tips = BattleRules.TurnBattleOn ? turnTips : duelTips;
         private const float TipTime = 6f;
 
-        //Title Layout : up to six blades between the hook line and the tip strip
-        private const int MenuX = 96;
-        private const int MenuY = 350;
-        private int MenuStep = 44;          // a little tighter with seven lines (Alpha 7 : ARCHIVE), see Load
-        private const int MenuW = 400;
-        private int MenuH = 40;
-        private const int NoticeY = 616;
+        //Title Layout : the logo top left, the menu down the big ring, the notice strip at the bottom
+        private const float LogoX = 78f;
+        private const float LogoY = 124f;
+        private const float MenuTop = 372f;     // the first line's middle
+        private int menuStep = 40;              // a little tighter with seven lines (Alpha 7 : ARCHIVE), see Load
+        private const int NoticeY = 618;
+        private const float InnerRing = 2.5f;   // the ring with ticks, this many times the hole's size
 
-        //Staff Layout : five lines, sixteen pixels apart, so half a step is eight pixels
+        //Title Lens : how the page is lit (the battle's numbers are in BattleRules, Stage Feel)
+        private const float TitleAmbient = 0.3f;     // a dark stage ...
+        private const float LogoLight = 0.62f;       // ... a light on the logo, so it reads white and glows ...
+        private const float ChosenLight = 0.42f;     // ... one that follows the chosen line ...
+        private const float HouseLight = 0.3f;       // ... and a wide soft one over the left half (power p adds p x p, PostChain.SpotLight)
+
+        //Staff Layout : five lines, twelve pixels apart, so half a step is six pixels
         private const int StaffTop = 70;
         private const int StaffGap = 12;
         private const int StaffLeft = 80;
@@ -108,11 +133,22 @@ namespace Tacetno433.Screens
         private int[] noteStep = { 0, 1, 3, 4, 6, 7, 8, 10, 11, 13, 14, 16, 17, 19, 20 };
         private int[] notePitch = { 6, 4, 5, 3, 4, 2, 5, 3, 1, 4, 2, 5, 3, 4, 2 };
 
+        //Opening : the first time the game opens the whole page reveals itself (BattleRules.TitleReveal)
+        public static bool FirstOpen = true;
+        private const float LaterStart = 0.9f;  // a later visit starts the opening here : the logo is up, the menu comes in
+        private float clock;                    // seconds into the opening
+        private bool revealing;                 // the first opening is playing, a key or a click skips it
+        private bool opened;                    // the hole has thrown its first shock wave
+
+        //Logo : TACET letter by letter, each letter's place measured once (Load)
+        private static string[] logoLetters = { "T", "A", "C", "E", "T" };
+        private float[] logoX = new float[5];
+
         //Title Animation
         private float time;
         private float playhead = StaffLeft;
-        private float selectSlide;          // eases the white blade toward the chosen row
         private Vector2 lastMouse;
+        private Vector2 spot;                   // the light on the chosen line, easing after it
 
         public override void Load()
         {
@@ -127,26 +163,91 @@ namespace Tacetno433.Screens
             continueNote = saved ? SaveFile.RunSummary() : "";
             selected = 0;
 
-            //Menu Boxes : one clickable box per line, built once
-            MenuStep = menu.Length > 6 ? 38 : 44;     // seven lines still clear the NOTE strip
-            MenuH = menu.Length > 6 ? 36 : 40;
+            //Menu Places : each line's circle sits on the big ring, so the lines step right as they go down.
+            //The clickable box, the motion of each line, all built once.
+            menuStep = menu.Length > 6 ? 36 : 40;     // seven lines still clear the NOTE strip
             menuBoxes = new Rectangle[menu.Length];
+            itemAt = new Vector2[menu.Length];
+            motion = new UiMotion[menu.Length];
             for (int i = 0; i < menu.Length; i++)
-                menuBoxes[i] = new Rectangle(MenuX, MenuY + i * MenuStep, MenuW, MenuH);
+            {
+                float y = MenuTop + i * menuStep;
+                itemAt[i] = new Vector2(OrbitX(y), y);
+                menuBoxes[i] = new Rectangle((int)itemAt[i].X - 44, (int)(y - menuStep / 2f), 470, menuStep);
+                motion[i] = new UiMotion();
+            }
 
-            selectSlide = selected;
+            //Logo Letters : where each letter starts inside the word, so the letters can come in one by one
+            for (int i = 0; i < logoLetters.Length; i++)
+                logoX[i] = Game.LogoFont.MeasureString("TACET".Substring(0, i)).X * TextSize.Logo;
+
+            //TACET : the hole on the right, and the page's light
+            Dark = new TacetVoid();
+            Lens.Ambient = TitleAmbient;
+            Lens.BloomThreshold = 0.66f;
+            Lens.BloomStrength = 0.6f;
+            Lens.Vignette = 0.6f;
+
+            //Opening : the whole of it the first time, only the menu coming in after that
+            revealing = FirstOpen;
+            clock = FirstOpen ? 0f : LaterStart;
+            opened = !FirstOpen;
+            FirstOpen = false;
+
+            spot = itemAt[selected];
             lastMouse = Input.MousePos;
             SoundBank.PlayMusic(Music.Title);
+        }
+
+        //Orbit X : where the big ring round the hole crosses the row y, on its left side
+        private static float OrbitX(float y)
+        {
+            float dy = y - BattleRules.TitleHoleY;
+            float r = BattleRules.TitleOrbit;
+            return BattleRules.TitleHoleX - (float)Math.Sqrt(Math.Max(0f, r * r - dy * dy));
+        }
+
+        //Item In : how far menu line i has come in (ENTER), the lines one after another
+        private float ItemIn(int i)
+        {
+            return UiMotion.Between(clock, LaterStart + i * BattleRules.UiEnterStagger, BattleRules.UiEnterTime);
         }
 
         public override void Update(float dt)
         {
             time += dt;
+            clock += dt;
             int before = selected;
 
             //Playhead Sweep : runs left to right, then vanishes into TACET and starts over
             playhead += dt * 170f;
-            if (playhead > 1180f) playhead = StaffLeft;
+            if (playhead > TacetGame.ScreenW) playhead = StaffLeft;
+
+            //TACET : calm, breathing slowly. The first time the hole opens, overshooting a little, and throws a shock wave.
+            Vector2 hole = new Vector2(BattleRules.TitleHoleX, BattleRules.TitleHoleY);
+            float open = UiMotion.EaseBack(MathHelper.Clamp(clock / 0.5f, 0f, 1f));
+            float breath = 1f + 0.04f * (float)Math.Sin(time * 0.8f);
+            Dark.Update(dt, 0.3f);
+            Dark.PlaceOnPage(hole, BattleRules.TitleHoleRadius * open * breath, 0f, 0f, 0f);
+            if (!opened && clock > 0.12f)
+            {
+                opened = true;
+                Dark.Hit(hole + new Vector2(-1f, 0f), true, 0.8f);
+            }
+            spot += (itemAt[selected] - spot) * Math.Min(1f, dt * 10f);
+
+            //Opening : a key or a click skips the rest of the first opening, and is not taken as a choice
+            if (revealing)
+            {
+                if (clock >= BattleRules.TitleReveal) revealing = false;
+                else if (Input.MouseClicked() || Input.KeyPressed(Keys.Enter) || Input.KeyPressed(Keys.Space) || Input.KeyPressed(Keys.Escape))
+                {
+                    clock = BattleRules.TitleReveal;
+                    revealing = false;
+                    return;
+                }
+                else if (clock < LaterStart) return;               // nothing to choose yet
+            }
 
             //Asking : while the box is open nothing else on the page moves
             if (askBox.Open)
@@ -172,14 +273,21 @@ namespace Tacetno433.Screens
             }
 
             if (selected != before) SoundBank.Play(Sfx.UiMove);
-            selectSlide += (selected - selectSlide) * Math.Min(1f, dt * 14f);
+
+            //POINT : the chosen line's ink bar shoots out once the line is in, the others pull theirs back
+            for (int i = 0; i < motion.Length; i++)
+                motion[i].Update(dt, i == selected && ItemIn(i) > 0.5f);
 
             //Menu Confirm
             bool confirm = Input.KeyPressed(Keys.Enter) || Input.KeyPressed(Keys.Space);
             for (int i = 0; i < menuBoxes.Length; i++)
                 if (Input.ClickedOn(menuBoxes[i])) { selected = i; confirm = true; }
 
-            if (confirm) Choose(menu[selected]);
+            if (confirm)
+            {
+                motion[selected].Press();
+                Choose(menu[selected]);
+            }
 
             if (Input.KeyPressed(Keys.Escape)) Choose(ItemQuit);
         }
@@ -213,6 +321,8 @@ namespace Tacetno433.Screens
 
             if (item == ItemContinue)
             {
+                //RING SWEEP : carrying on a run is one of the moments that matter, the light opens from the line's circle
+                Game.Screens.SweepNext(itemAt[selected], RingSweep.Kind.Light);
                 if (!RunFlow.Continue(Game))
                 {
                     //Broken Save : a file from another version, or damaged. Start clean.
@@ -238,44 +348,52 @@ namespace Tacetno433.Screens
                 Game.Exit();
         }
 
-        public override void Draw(SpriteBatch sb)
-        {
-            DrawBackground(sb);
-            DrawScore(sb);
+        //======================================================================================
+        //The World : lit and glowing (THE LENS)
+        //======================================================================================
 
-            //TACET : the silence sits at the right, breathing slowly, eating the end of the score
-            float edge = 860f + (float)Math.Sin(time * 0.5f) * 25f;
-            TacetField.Draw(sb, edge, time, 0.15f);
-            DrawDarkSide(sb, edge);
-
-            DrawLogo(sb);
-            DrawMenu(sb);
-            DrawNotice(sb);
-            DrawFooter(sb);
-            askBox.Draw(sb);
-        }
-
-        //Background : dark stage with a soft pool of light, and darker edges
-        private void DrawBackground(SpriteBatch sb)
+        //Back : what TACET's hole bends. The dark stage, the margins of a printed programme, and the score.
+        public override void DrawBack(SpriteBatch sb)
         {
             Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.StageDeep);
-            Gfx.DrawGlowBox(sb, new Rectangle(-300, -200, 1300, 900), Palette.Paper * 0.08f);
-            Gfx.DrawGlow(sb, 300, 250, 260, Palette.Paper * 0.05f);
+            Gfx.DrawGlowBox(sb, new Rectangle(-300, -200, 1300, 900), Palette.Paper * 0.06f);
+            Gfx.DrawGlow(sb, 300, 250, 300, Palette.Paper * 0.05f);
 
             //Page Rules : thin lines like the margins of a printed programme
             Gfx.Rect(sb, 60, 30, 1, TacetGame.ScreenH - 60, Palette.Paper * 0.08f);
             Gfx.Rect(sb, 60, 30, 760, 1, Palette.Paper * 0.08f);
-            Gfx.TextSpaced(sb, Game.Font, "ALPHODITE", 80, 38, Palette.LineGrey, TextSize.Tiny, 4f);
-            Gfx.TextSpaced(sb, Game.Font, BattleRules.TurnBattleOn ? "A BAND AGAINST SILENCE" : "A DUEL AGAINST SILENCE", 470, 38, Palette.LineGrey, TextSize.Tiny, 4f);
-            Ornament.Crosses(sb, 740, 44, 4, 1, 16, Palette.LineGrey);
 
-            Ornament.Vignette(sb, 60, 0.55f);
+            DrawScore(sb);
+        }
+
+        //World : the rings round the hole, the dark bits it pulls in, and the logo
+        public override void DrawWorld(SpriteBatch sb)
+        {
+            Dark.DrawDebris(sb, false);
+            DrawRings(sb);
+            DrawLogo(sb);
+        }
+
+        //Lights : a dark stage with a light on the logo and one following the chosen line (TACET adds its own)
+        public override void DrawLights(SpriteBatch sb)
+        {
+            float up = UiMotion.Between(clock, 0f, 0.6f);
+            Gfx.DrawGlowBox(sb, new Rectangle(-260, -120, 1060, 960), Color.White * (HouseLight * up));
+            Gfx.DrawGlow(sb, 260, 190, 520, Color.White * (LogoLight * up));
+            Gfx.DrawGlow(sb, spot.X + 140, spot.Y, 260, Color.White * (ChosenLight * ItemIn(selected)));
+        }
+
+        //Glow : a halo under the chosen line's circle, so it seems to light the ring it sits on
+        public override void DrawGlow(SpriteBatch sb)
+        {
+            float e = motion[selected].Shown * ItemIn(selected);
+            if (e > 0f) Gfx.DrawGlow(sb, itemAt[selected].X, itemAt[selected].Y, 30f, Color.White * (0.5f * e));
         }
 
         //Score : the staff, the written notes, and the playhead running across them
         private void DrawScore(SpriteBatch sb)
         {
-            //Staff Lines : run all the way to the right edge so TACET can eat the end of them
+            //Staff Lines : run all the way to the right edge, into TACET's hole
             Ornament.Stave(sb, StaffLeft, StaffTop, TacetGame.ScreenW - StaffLeft, StaffGap, Palette.LineGrey * 0.7f);
 
             //Bar Lines : a stroke every four slots, so it reads as real notation
@@ -311,99 +429,152 @@ namespace Tacetno433.Screens
             }
         }
 
-        //Dark Side : writing inside TACET's black, the poster side of the page
-        private void DrawDarkSide(SpriteBatch sb, float edge)
+        //Rings : the ring with ticks turning close round the hole, the big ring the menu sits on, and a faint one between.
+        //The first time they draw themselves round.
+        private void DrawRings(SpriteBatch sb)
         {
-            //Black Sun : TACET's eclipse hanging in its own dark, with holes of silence drifting up
-            Hollow.Eclipse(sb, 1050f, 330f, 108f, time * 0.2f, 1f);
-            for (int i = 0; i < 10; i++)
+            float hx = BattleRules.TitleHoleX;
+            float hy = BattleRules.TitleHoleY;
+
+            //Inner Ring : starts from the top and goes round
+            float inner = UiMotion.Between(clock, 0.15f, 0.6f);
+            Ornament.TickRing(sb, hx, hy, BattleRules.TitleHoleRadius * InnerRing, 72, time * 0.03f, inner, Palette.Paper * 0.35f);
+
+            //Middle Ring : faint, so the eye joins the hole to the menu
+            float orbit = UiMotion.Between(clock, 0.25f, 0.7f);
+            if (orbit > 0f) Gfx.Ring(sb, hx, hy, BattleRules.TitleOrbit * 0.56f, Palette.Paper * (0.06f * orbit), 1f);
+
+            //Big Ring : only its left side is on the screen, drawn from the top down
+            float r = BattleRules.TitleOrbit;
+            float top = MathHelper.Pi + (float)Math.Asin(MathHelper.Clamp((hy + 10f) / r, -1f, 1f));
+            float bottom = MathHelper.Pi - (float)Math.Asin(MathHelper.Clamp((TacetGame.ScreenH + 10f - hy) / r, -1f, 1f));
+            float end = top - (top - bottom) * orbit;
+            if (orbit <= 0f) return;
+            Gfx.Arc(sb, hx, hy, r, top, end, Palette.Paper * 0.28f, 1f, (int)(r * (top - end) / 6f) + 1);
+
+            //Ticks : out from the big ring, every fifth one longer, like a dial
+            const float tick = 0.021f;                              // about 1.2 degrees apart
+            int count = (int)((top - end) / tick);
+            for (int i = 0; i <= count; i++)
             {
-                float x = 930f + (i * 67) % 260;
-                float y = 720f - ((i * 131) % 700 + time * (14f + i % 4 * 6f)) % 720f;
-                if (i % 3 == 0) Hollow.Ring(sb, x, y, 5f + i % 3 * 3f, 1.5f, 0.45f);
-                else Gfx.DrawGlow(sb, x, y, 7f, Palette.Paper * 0.25f);
+                float angle = top - i * tick;
+                float cos = (float)Math.Cos(angle);
+                float sin = (float)Math.Sin(angle);
+                float length = i % 5 == 0 ? 9f : 4f;
+                Gfx.Line(sb, hx + cos * (r + 2f), hy + sin * (r + 2f), hx + cos * (r + 2f + length), hy + sin * (r + 2f + length),
+                         Palette.Paper * (i % 5 == 0 ? 0.3f : 0.16f), 1f);
             }
-
-            Gfx.TextVertical(sb, Game.Font, "SILENCE  IS  ALSO  A  SOUND", 1236, 90, Palette.PaperDim * 0.8f, TextSize.Label);
-            Gfx.Rect(sb, 1222, 76, 1, 480, Palette.LineGrey * 0.4f);
-
-            Gfx.TextRight(sb, Game.BigFont, "No.433", 1190, 600, Palette.Paper * 0.8f, TextSize.Subtitle);
-            Ornament.Barcode(sb, 1060, 646, 130, 22, Palette.PaperDim * 0.6f);
-            Gfx.TextSpacedRight(sb, Game.Font, "FOUR MINUTES  THIRTY THREE SECONDS", 1190, 676, Palette.LineGrey, TextSize.Tiny, 2f);
-
         }
 
-        //Logo : game name, subtitle and the hook line
+        //Logo : the game name letter by letter, then 4'33 between its two lines
         private void DrawLogo(SpriteBatch sb)
         {
-            Gfx.Text(sb, Game.LogoFont, "TACET", 82, 128, Palette.Void, TextSize.Logo);      // drop shadow
-            Gfx.Text(sb, Game.LogoFont, "TACET", 78, 124, Palette.Paper, TextSize.Logo);
+            for (int i = 0; i < logoLetters.Length; i++)
+            {
+                float a = UiMotion.Between(clock, 0.35f + i * 0.07f, 0.35f);
+                if (a <= 0f) continue;
+                float y = LogoY + (1f - a) * 14f;
+                Gfx.Text(sb, Game.LogoFont, logoLetters[i], LogoX + 4f + logoX[i], y + 4f, Palette.Void * a, TextSize.Logo);   // drop shadow
+                Gfx.Text(sb, Game.LogoFont, logoLetters[i], LogoX + logoX[i], y, Palette.Paper * a, TextSize.Logo);
+            }
 
-            float y = 248;
-            Gfx.Rect(sb, 84, y + 16, 60, 1, Palette.PaperDim);
-            Gfx.TextSpaced(sb, Game.BigFont, "4'33", 156, y, Palette.Paper, TextSize.Subtitle, 8f);
-            Gfx.Rect(sb, 262, y + 16, 180, 1, Palette.PaperDim);
-            Gfx.Diamond(sb, 446, y + 16, 3, Palette.PaperDim);
-
-            Gfx.Text(sb, Game.StoryFont, "You do not play the notes.", 86, 296, Palette.Highlight, TextSize.Story);
-            Gfx.Text(sb, Game.StoryFont, "You lead the band that does.", 86, 318, Palette.PaperDim, TextSize.Story);
+            //4'33 : the two lines grow out from it
+            float line = UiMotion.Between(clock, 0.75f, 0.4f);
+            if (line <= 0f) return;
+            float ly = 248f;
+            Gfx.Rect(sb, 144f - 60f * line, ly + 16f, 60f * line, 1, Palette.PaperDim * line);
+            Gfx.TextSpaced(sb, Game.BigFont, "4'33", 156, ly, Palette.Paper * line, TextSize.Subtitle, 8f);
+            Gfx.Rect(sb, 262f, ly + 16f, 180f * line, 1, Palette.PaperDim * line);
+            Gfx.CircleOutline(sb, 262f + 180f * line + 5f, ly + 16f, 3f, Palette.PaperDim * line, 1f);
         }
 
-        //Menu : slanted blades, the chosen one turns solid white
+        //======================================================================================
+        //The Words : crisp on top of the world
+        //======================================================================================
+
+        public override void Draw(SpriteBatch sb)
+        {
+            DrawHeader(sb);
+            DrawMenu(sb);
+            DrawNotice(sb);
+            DrawSide(sb);
+            DrawFooter(sb);
+            askBox.Draw(sb);
+        }
+
+        //Header : the company at the top, and the hook line under the logo
+        private void DrawHeader(SpriteBatch sb)
+        {
+            float a = UiMotion.Between(clock, 1.2f, 0.4f);
+            Gfx.TextSpaced(sb, Game.Font, "ALPHODITE", 80, 38, Palette.LineGrey * a, TextSize.Tiny, 4f);
+            Gfx.TextSpaced(sb, Game.Font, BattleRules.TurnBattleOn ? "A BAND AGAINST SILENCE" : "A DUEL AGAINST SILENCE", 470, 38, Palette.LineGrey * a, TextSize.Tiny, 4f);
+            Ornament.Crosses(sb, 740, 44, 4, 1, 16, Palette.LineGrey * a);
+
+            float hook = UiMotion.Between(clock, 0.85f, 0.4f);
+            Gfx.Text(sb, Game.StoryFont, "You do not play the notes.", 86, 296, Palette.Highlight * hook, TextSize.Story);
+            Gfx.Text(sb, Game.StoryFont, "You lead the band that does.", 86, 318, Palette.PaperDim * hook, TextSize.Story);
+        }
+
+        //Menu : the lines on the big ring, sliding down it into place one after another
         private void DrawMenu(SpriteBatch sb)
         {
-            //Chosen Blade : slides between rows instead of jumping
-            int bladeY = (int)(MenuY + selectSlide * MenuStep);
-            Rectangle blade = new Rectangle(MenuX - 16, bladeY, MenuW, MenuH);
-            Gfx.SlantBox(sb, new Rectangle(blade.X + 6, blade.Y + 6, blade.Width, blade.Height), Ui.Slant, Color.Black * 0.5f);
-            Gfx.SlantBox(sb, blade, Ui.Slant, Palette.Paper);
-            Gfx.Rect(sb, blade.Right, blade.Center.Y, 300, 1, Palette.Paper * 0.35f);
-
             for (int i = 0; i < menu.Length; i++)
             {
-                Rectangle box = menuBoxes[i];
-                float closeness = 1f - Math.Min(1f, Math.Abs(selectSlide - i));
-                Color textColor = Color.Lerp(Palette.PaperDim, Palette.Ink, closeness);
+                float a = ItemIn(i);
+                if (a <= 0f) continue;
+                float y = itemAt[i].Y - (1f - a) * 30f;
+                Vector2 at = new Vector2(OrbitX(y), y);
+                float end = Ui.MenuItem(sb, at, allIndex[i], allItems[menu[i]], EnterKey, motion[i], a);
 
-                Gfx.Text(sb, Game.Font, allIndex[i], box.X + 8, box.Y + 13, Color.Lerp(Palette.LineGrey, Palette.InkSoft, closeness), TextSize.Label);
-                Gfx.TextSpaced(sb, Game.BigFont, allItems[menu[i]], box.X + 48 + closeness * 8f, box.Y + 3, textColor, TextSize.Small, 3f);
-
-                //Continue Note : who, which floor, which stage, beside the blade
+                //Continue Note : who, which floor, which stage, beside the line
                 if (menu[i] == ItemContinue)
-                    Gfx.TextSpaced(sb, Game.Font, continueNote, box.Right + 20, box.Y + 4, Palette.PaperDim, TextSize.Tiny, 2f);
-
-                if (i == selected)
-                {
-                    float bob = (float)Math.Sin(time * 6f) * 2f;
-                    Gfx.Diamond(sb, box.X - 32 + bob, box.Center.Y, 5, Palette.Accent);
-                }
+                    Gfx.TextSpaced(sb, Game.Font, continueNote, end + 18f, y - 7f, Palette.PaperDim * a, TextSize.Tiny, 2f);
             }
         }
 
         //Notice : the news strip, one tip at a time, fading between them
         private void DrawNotice(SpriteBatch sb)
         {
+            float shown = UiMotion.Between(clock, 1.2f, 0.4f);
+            if (shown <= 0f) return;
             int index = (int)(time / TipTime) % tips.Length;
             float phase = (time % TipTime) / TipTime;
             float a = phase < 0.1f ? phase / 0.1f : (phase > 0.9f ? (1f - phase) / 0.1f : 1f);
 
             Rectangle strip = new Rectangle(80, NoticeY, 720, 38);
-            Gfx.Rect(sb, strip, Palette.Void * 0.6f);
-            Gfx.Rect(sb, strip.X, strip.Y, 3, strip.Height, Palette.Paper);
-            Ui.Tag(sb, "NOTE", strip.X + 16, strip.Y + 10, true, 1f);
-            Gfx.Text(sb, Game.StoryFont, tips[index], strip.X + 78, strip.Y + 9, Palette.Paper * a, TextSize.StorySmall);
+            Gfx.Rect(sb, strip, Palette.Void * (0.6f * shown));
+            Gfx.Rect(sb, strip.X, strip.Y, strip.Width, 1, Palette.LineGrey * (0.6f * shown));
+            Gfx.CircleOutline(sb, strip.X, strip.Y, 3f, Palette.Paper * shown, 1f);
+            Ui.Tag(sb, "NOTE", strip.X + 14, strip.Y + 10, true, shown);
+            Gfx.Text(sb, Game.StoryFont, tips[index], strip.X + 76, strip.Y + 9, Palette.Paper * (a * shown), TextSize.StorySmall);
 
-            //Tip Dots : which tip out of how many
+            //Tip Dots : which tip out of how many, the one on show a ring round a dot
             for (int i = 0; i < tips.Length; i++)
-                Gfx.Diamond(sb, strip.Right - 16 - (tips.Length - 1 - i) * 12, strip.Center.Y, i == index ? 3 : 2,
-                            i == index ? Palette.Paper : Palette.LineGrey);
+            {
+                float x = strip.Right - 16 - (tips.Length - 1 - i) * 12;
+                Gfx.Rect(sb, x - 1f, strip.Center.Y - 1f, 2f, 2f, (i == index ? Palette.Paper : Palette.LineGrey) * shown);
+                if (i == index) Gfx.CircleOutline(sb, x, strip.Center.Y, 4f, Palette.Paper * shown, 1f);
+            }
+        }
+
+        //Side : writing down the right edge and under TACET, the poster side of the page
+        private void DrawSide(SpriteBatch sb)
+        {
+            float a = UiMotion.Between(clock, 1.2f, 0.4f);
+            Gfx.TextVertical(sb, Game.Font, "SILENCE  IS  ALSO  A  SOUND", 1236, 90, Palette.PaperDim * (0.8f * a), TextSize.Label);
+            Gfx.Rect(sb, 1222, 76, 1, 480, Palette.LineGrey * (0.4f * a));
+
+            Gfx.TextRight(sb, Game.BigFont, "No.433", 1190, 600, Palette.Paper * (0.8f * a), TextSize.Subtitle);
+            Ornament.Barcode(sb, 1060, 646, 130, 22, Palette.PaperDim * (0.6f * a));
+            Gfx.TextSpacedRight(sb, Game.Font, "FOUR MINUTES  THIRTY THREE SECONDS", 1190, 676, Palette.LineGrey * a, TextSize.Tiny, 2f);
         }
 
         //Footer : controls and build tag
         private void DrawFooter(SpriteBatch sb)
         {
-            Gfx.TextSpaced(sb, Game.Font, "ARROWS OR MOUSE  /  ENTER TO CONFIRM  /  ESC TO QUIT", 82, 668, Palette.LineGrey, TextSize.Tiny, 2f);
-            Gfx.TextSpaced(sb, Game.Font, "PROTOTYPE BUILD", 82, 688, Palette.LineGrey * 0.7f, TextSize.Tiny, 2f);
+            float a = UiMotion.Between(clock, 1.2f, 0.4f);
+            Gfx.TextSpaced(sb, Game.Font, "ARROWS OR MOUSE  /  ENTER TO CONFIRM  /  ESC TO QUIT", 82, 668, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            Gfx.TextSpaced(sb, Game.Font, "BETA BUILD", 82, 688, Palette.LineGrey * (0.7f * a), TextSize.Tiny, 2f);
         }
     }
 }

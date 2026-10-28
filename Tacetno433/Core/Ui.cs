@@ -1,10 +1,19 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Tacetno433.Data;
 
 namespace Tacetno433.Core
 {
     //Ui : the shared pieces every page is built from, so all pages look like one game.
     //
+    //Beta1 screens (28 Oct, docs/SCREENS_LEVEL_UP.md 3.4.1), moved by Core/UiMotion.cs :
+    //   MenuItem    one line of a menu : number, circle on the page's line, word, the ink bar when pointed at
+    //   Command     CONTINUE / BACK / NEXT : a slanted plate that turns white and tears like ink when pointed at
+    //   Number      a number that matters, big and blocky, counting up over a thin line (menu7)
+    //   InkBar      the slanted bar with a torn front end both of them use
+    //   KeyBox      the key that does the job, a small filled box
+    //Before Beta1 (pages not lifted yet) :
     //   Button      a slanted blade, solid for the main action, outlined for the rest
     //   Tag         a small label in a box
     //   KeyChip     the keyboard key that also does the job
@@ -28,6 +37,193 @@ namespace Tacetno433.Core
 
         //Button Slant : how far every button leans
         public const int Slant = 14;
+
+        //======================================================================================
+        //Beta1 screens : the mixed buttons, moved by Core/UiMotion.cs
+        //======================================================================================
+
+        private const float TearDepth = 12f;      // INK BAR : how far back its torn end reaches (pixels)
+        private const float ItemHeight = 30f;     // MENU ITEM : the ink bar's height
+        private const float ItemSlant = 10f;      //   and its lean
+
+        //Ink Bar : a slanted bar whose front end is torn like a stroke of ink (menu1). It shoots out under a pointed menu
+        //line, and it is the face of a pointed button. Drawn in rows two pixels tall (PIXEL x2) : the top leans forward by
+        //slant pixels like the blades, and each row stops at its own place at the front. tear 0..1 is how ragged
+        //(0 = a clean slanted box), seed fixes the tear so it never flickers.
+        public static void InkBar(SpriteBatch sb, float x, float y, float length, float height, float slant, Color color, int seed, float tear)
+        {
+            if (length < 2f) return;
+            int rows = Math.Max(1, (int)(height / 2f));
+            float depth = Math.Min(TearDepth, length * 0.5f) * tear;
+            for (int i = 0; i < rows; i++)
+            {
+                float lean = slant * (1f - (i + 0.5f) / rows);
+                float from = x + lean;
+                float to = x + length + lean - depth * Hash(seed, i);
+                if (to > from) Gfx.Rect(sb, from, y + i * 2f, to - from, 2f, color);
+            }
+
+            //Specks : drops of ink flung past the torn end, once the bar is most of the way out
+            float specks = MathHelper.Clamp((length - 40f) / 40f, 0f, 1f) * tear;
+            if (specks <= 0f) return;
+            for (int k = 0; k < 4; k++)
+            {
+                float a = Hash(seed + 31, k);
+                float b = Hash(seed + 57, k);
+                float size = a > 0.55f ? 4f : 2f;
+                float sx = (float)Math.Floor((x + length + 2f + a * 16f) * 0.5f) * 2f;
+                float sy = (float)Math.Floor((y + 2f + b * (height - 6f)) * 0.5f) * 2f;
+                Gfx.Rect(sb, sx, sy, size, size, color * specks);
+            }
+        }
+
+        //Key Box : the key that does the job, a small filled box (menu7). Returns how wide it was.
+        public static float KeyBox(SpriteBatch sb, string key, float x, float cy, Color fill, Color ink, float alpha)
+        {
+            float w = Gfx.TextWidth(Font, key, TextSize.Tiny) + 12f;
+            Rectangle box = new Rectangle((int)x, (int)(cy - 9f), (int)w, 18);
+            Gfx.Rect(sb, box, fill * alpha);
+            Gfx.TextCentered(sb, Font, key, box.Center.X, box.Center.Y, ink * alpha, TextSize.Tiny);
+            return w;
+        }
+
+        //Menu Item : one line of a menu (title, pause, settings). A small grey number, a hollow circle that sits on the
+        //page's line, a thin leader, then the word. Pointed at : the ink bar shoots out of the circle under the word, the
+        //word turns black, grows and leans (UiHoverScale, UiHoverTilt), a grey bar sits behind (UiShadow, Persona 5), the
+        //circle fills and sends out one ring (menu4), and the key that does it waits at the end of the bar (menu7).
+        //Pressed : squashed, bounced, a flash. at is the circle. Returns where the bar ends, for a note beside it.
+        public static float MenuItem(SpriteBatch sb, Vector2 at, string index, string name, string key, UiMotion m, float alpha)
+        {
+            float e = m.Shown;
+            float s = m.Scale;
+            float cx = at.X;
+            float cy = at.Y;
+            int seed = index.Length > 0 ? index[index.Length - 1] * 7 : 7;
+
+            //Measures : the word grows when pointed at and squashes when pressed
+            float scale = TextSize.Heading * (1f + (BattleRules.UiHoverScale - 1f) * e) * s;
+            const float tracking = 2.5f;
+            float wordX = cx + 28f;
+            float wordW = Gfx.SpacedWidth(Font, name, scale, tracking);
+            float keyW = key.Length > 0 ? Gfx.TextWidth(Font, key, TextSize.Tiny) + 12f : 0f;
+            float barX = cx + 6f;
+            float full = wordX - barX + wordW + 16f + (keyW > 0f ? keyW + 12f : 0f);
+            float barH = ItemHeight * s;
+
+            //Bar : the grey one behind, then the white one, shooting out together
+            if (e > 0f)
+            {
+                float length = full * e;
+                InkBar(sb, barX + BattleRules.UiShadow, cy - barH / 2f + BattleRules.UiShadow, length, barH, ItemSlant, Palette.LineGrey * (0.5f * alpha), seed + 3, 1f);
+                InkBar(sb, barX, cy - barH / 2f, length, barH, ItemSlant, Palette.Paper * alpha, seed, 1f);
+            }
+
+            //Number and leader
+            Gfx.TextRight(sb, Font, index, cx - 14f, cy - Font.LineSpacing * TextSize.Label / 2f, Color.Lerp(Palette.LineGrey, Palette.Paper, e) * alpha, TextSize.Label);
+            if (e < 1f) Gfx.Rect(sb, cx + 8f, cy, 14f, 1f, Palette.LineGrey * ((1f - e) * alpha));
+
+            //Circle : hollow, filling white as it is pointed at, then one thin ring goes out
+            Gfx.CircleOutline(sb, cx, cy, 5f, Color.Lerp(Palette.LineGrey, Palette.Paper, e) * alpha, 1.5f);
+            if (e > 0f) Gfx.Circle(sb, cx, cy, 3.5f * e, Palette.Paper * (e * alpha));
+            float ring = m.Ring;
+            if (ring < 1f) Gfx.CircleOutline(sb, cx, cy, 5f + 22f * ring, Palette.Paper * ((1f - ring) * 0.8f * alpha), 1.5f);
+
+            //Word : black on the bar, leaning a little
+            float tilt = MathHelper.ToRadians(-BattleRules.UiHoverTilt) * e;
+            Color word = Color.Lerp(Palette.PaperDim, Palette.Ink, e);
+            Gfx.TextSpacedTurned(sb, Font, name, wordX, cy, word * alpha, scale, tracking, tilt);
+
+            //Key : waits at the end of the bar once it is out
+            float keyA = MathHelper.Clamp((e - 0.6f) / 0.4f, 0f, 1f);
+            if (keyW > 0f && keyA > 0f) KeyBox(sb, key, wordX + wordW + 16f, cy, Palette.Ink, Palette.Paper, keyA * alpha);
+
+            //Flash : the press
+            float flash = m.Flash;
+            if (flash > 0f) Gfx.DrawGlow(sb, wordX + wordW / 2f, cy, wordW * 0.7f + 50f, Color.White * (0.55f * flash * alpha));
+
+            return barX + full;
+        }
+
+        //Command : CONTINUE, CURTAIN CALL, BACK, NEXT. A slanted plate, dark with a thin bright edge and a bright key box
+        //(menu7). Pointed at : it turns white, its front torn like ink, a grey plate behind (Persona 5), and it steps
+        //forward a little. Pressed : squashed, bounced, a flash. onPaper : on a bright page the plate stays black, the
+        //strongest thing there, and pointing tears it and puts the grey plate behind.
+        public static void Command(SpriteBatch sb, Rectangle box, string label, string key, UiMotion m, float alpha, bool onPaper)
+        {
+            float e = m.Shown;
+            float s = m.Scale * (1f + 0.03f * e);
+            float w = box.Width * s;
+            float h = box.Height * s;
+            float x = box.Center.X - w / 2f + 6f * e;
+            float y = box.Center.Y - h / 2f;
+            int seed = label.Length > 0 ? label[0] * 3 : 11;
+
+            Color face = onPaper ? Palette.Ink : Color.Lerp(Palette.Panel, Palette.Highlight, e);
+            Color word = onPaper ? Palette.Paper : Color.Lerp(Palette.Paper, Palette.Ink, e);
+
+            //Plate : the grey one behind when pointed at, the face (clean at rest, torn when pointed at), the thin edge at rest
+            if (e > 0f) InkBar(sb, x + BattleRules.UiShadow, y + BattleRules.UiShadow, w, h, Slant, Palette.LineGrey * (0.6f * e * alpha), seed + 5, e);
+            InkBar(sb, x, y, w, h, Slant, face * ((onPaper ? 1f : 0.92f + 0.08f * e) * alpha), seed, e);
+            if (e < 1f) Gfx.SlantOutline(sb, new Rectangle((int)x, (int)y, (int)w, (int)h), Slant, (onPaper ? Palette.Ink : Palette.Paper * 0.7f) * ((1f - e) * alpha), 1f);
+
+            //Key Box : bright on the dark plate, dark on the white one
+            float right = x + w - Slant - 10f;
+            if (key.Length > 0)
+            {
+                float keyW = Gfx.TextWidth(Font, key, TextSize.Tiny) + 12f;
+                right -= keyW;
+                Color keyFill = onPaper ? Palette.Paper : Color.Lerp(Palette.Paper, Palette.Ink, e);
+                Color keyInk = onPaper ? Palette.Ink : Color.Lerp(Palette.Ink, Palette.Paper, e);
+                KeyBox(sb, key, right, y + h / 2f, keyFill, keyInk, alpha);
+                right -= 10f;
+            }
+
+            //Label : centred between the slanted left end and the key box, smaller if it would not fit
+            float left = x + Slant + 10f;
+            float scale = TextSize.Heading * s;
+            float width = Gfx.SpacedWidth(Font, label, scale, 1.5f);
+            if (width > right - left)
+            {
+                scale = TextSize.Body * s;
+                width = Gfx.SpacedWidth(Font, label, scale, 1.5f);
+            }
+            Gfx.TextSpaced(sb, Font, label, (left + right) / 2f - width / 2f, y + h / 2f - Font.LineSpacing * scale / 2f, word * alpha, scale, 1.5f);
+
+            //Mark : a circle before the plate, filling and sending out a ring when pointed at
+            float mx = x - 16f;
+            float my = y + h / 2f;
+            Color markColor = onPaper ? Palette.Ink : Palette.Paper;
+            Gfx.CircleOutline(sb, mx, my, 5f, markColor * ((0.35f + 0.65f * e) * alpha), 1.5f);
+            if (e > 0f) Gfx.Circle(sb, mx, my, 3.5f * e, markColor * (e * alpha));
+            if (m.Ring < 1f) Gfx.CircleOutline(sb, mx, my, 5f + 22f * m.Ring, markColor * ((1f - m.Ring) * 0.8f * alpha), 1.5f);
+
+            //Flash : the press
+            if (m.Flash > 0f) Gfx.DrawGlow(sb, x + w / 2f, y + h / 2f, w * 0.75f, Color.White * (0.6f * m.Flash * alpha));
+        }
+
+        //Number : a number that matters (menu7). A small spaced label on the left, the number big and blocky on the
+        //right (PixelDigits), and a thin line under them that fills as the number counts up, a small circle riding its end.
+        //shown is the number this frame (UiMotion.Count), fill 0..1 how far the count has gone. Row height about 44.
+        public static void Number(SpriteBatch sb, string label, int shown, bool sign, float x, float y, float width, float fill, Color ink, Color soft, float alpha)
+        {
+            Gfx.TextSpaced(sb, Font, label, x, y + 8f, soft * alpha, TextSize.Label, 3f);
+            const float cell = 4f;
+            float numberW = PixelDigits.Width(shown, sign, cell);
+            PixelDigits.Draw(sb, shown, sign, x + width - numberW / 2f, y + 14f, cell, ink * alpha, Color.Transparent);
+
+            float lineY = y + 36f;
+            float to = width * MathHelper.Clamp(fill, 0f, 1f);
+            Gfx.Rect(sb, x, lineY, width, 1f, soft * (0.4f * alpha));
+            Gfx.Rect(sb, x, lineY - 1f, to, 2f, ink * (0.85f * alpha));
+            Gfx.CircleOutline(sb, x + to, lineY, 3f, ink * alpha, 1f);
+        }
+
+        //Hash : a steady random 0..1 from two whole numbers (the sine trick of TacetField)
+        private static float Hash(int a, int b)
+        {
+            float h = (float)Math.Sin(a * 12.9898f + b * 78.233f) * 43758.547f;
+            return h - (float)Math.Floor(h);
+        }
 
         //Button : returns nothing, pages test the click themselves with Input.ClickedOn(box)
         public static void Button(SpriteBatch sb, Rectangle box, string label, string key, bool primary, bool enabled, float alpha)

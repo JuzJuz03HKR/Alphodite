@@ -5,11 +5,12 @@ namespace Tacetno433.Core
     //Every screen picks a size from this list instead of writing its own number, so the
     //hierarchy stays the same everywhere: the player always knows a Heading is a heading.
     //
-    //The game has four fonts, all built from fonts that ship with Windows:
-    //   Game.LogoFont   Palatino, very large   the logo and the big result words
-    //   Game.BigFont    Palatino               names and page titles
-    //   Game.StoryFont  Palatino, small        sentences: stories, captions, dialogue
-    //   Game.Font       Bahnschrift            numbers, labels, buttons
+    //The game has four fonts, built from the free (OFL) font files in Content/Fonts (Beta1, 28 Oct : they
+    //replaced Palatino and Bahnschrift, which ship with Windows and may not be given away with a game):
+    //   Game.LogoFont   Cormorant Garamond SemiBold, very large   the logo and the big result words
+    //   Game.BigFont    Cormorant Garamond SemiBold               names and page titles
+    //   Game.StoryFont  Cormorant Garamond Bold, small            sentences: stories, captions, dialogue
+    //   Game.Font       Saira Semi Condensed Medium               numbers, labels, buttons
     //
     //Each font is built LARGER than it is shown and drawn scaled down, which keeps the
     //letters sharp. Scaling a font up past 1 makes it blurry, so none of these go above 1.

@@ -16,15 +16,27 @@ namespace Tacetno433.Screens
     //       is updated. Then a motif choice may follow.
     //LOSS : the run is over. The curtain call page sums it up.
     //
-    //Beside the numbers sits THE PERFORMANCE : every beat of the fight in a small grid, one row
+    //Beta1 screens (28 Oct, docs/SCREENS_LEVEL_UP.md 4.3 and table 5) :
+    //   WIN   the page opens on the last blow's IMPACT FRAME (white paper, everything bright inked black), the look the
+    //         fight ended on. TACET's hole cracks all round, and at ResultBurstAt it bursts : a frame of white, the camera
+    //         punches in, and the page is bright paper with ink thrown out from where the hole was (a burst of light, drawn
+    //         the way a manga draws one). Then the numbers count up one after another and the rank slams down.
+    //   LOSS  TACET's dark floods the stage floor and creeps in from the edges of the screen (ENGULF) while the band's
+    //         light goes out. The words stay crisp on top of it.
+    //LESS FLASHING : a win opens straight on the bright page, no turned frame, no white, no punch.
+    //A key or a click while the page is still coming in jumps to the end of it, the next one carries on.
+    //
+    //Beside the numbers of the old rhythm duel sits THE PERFORMANCE : every beat of the fight in a small grid, one row
     //per round. A filled box is a beat the band won, an empty one a beat TACET took. The arrow is
     //the stroke, bigger for a BOOST and smaller for an EASE, and a small diamond marks a PERFECT.
     //It is not there to be studied, just to look back at what was played.
     public class ResultScreen : GameScreen
     {
         private Rectangle continueButton = new Rectangle(490, 630, 300, 52);
+        private UiMotion continueMotion = new UiMotion();
         private const int LedgerX = 110;
         private const int LedgerW = 440;
+        private const int RowsY = 262;
         private const int SheetX = 660;
         private const int SheetY = 262;
         private const int CellW = 50;
@@ -45,12 +57,33 @@ namespace Tacetno433.Screens
         private string enemyLine = "";
         private string rank = "";
         private string[] statNames = new string[5];
-        private string[] statValues = new string[5];
+        private string[] statValues = new string[5];     // LOSS : the ledger's words
+        private int[] statNumbers = new int[5];          // WIN : the numbers that count up
+        private bool[] statSigned = new bool[5];
         private int statCount;
         private string footnote = "";
 
+        //Page Timing (seconds since the page opened). A win waits for the burst, a loss starts at once.
         private float time;
-        private float enter;
+        private float start;              // when the words begin to come in
+        private float ready;              // when everything is in and the button answers
+        private const float RowGap = 0.09f;
+
+        //WIN : the burst of TACET's hole (BattleRules.ResultBurstAt)
+        private bool burst;               // it has burst : the page is bright paper from here on
+        private bool cracked;
+        private bool quiet;               // LESS FLASHING
+        private Vector2 holeAt;
+        private static readonly Vector2[] shardWay = new Vector2[14];
+        private static readonly float[] shardFar = new float[14];
+        private const float BurstTime = 0.7f;      // the ink thrown out lasts this long
+        private const float RankSlam = 0.32f;      // the rank's slam takes this long
+
+        //LOSS : TACET's hole a little right of where it hung in the fight, so SILENCED stays clear of its rim,
+        //and the light on the band that goes out
+        private const float DefeatHoleX = 1060f;
+        private const float BandLightX = 250f;
+        private const float BandLightY = 520f;
 
         public override void Load()
         {
@@ -60,9 +93,41 @@ namespace Tacetno433.Screens
             won = battle.PlayerWon;
             enemyLine = battle.EnemyTitle;
             rank = battle.Rank();
+            quiet = Settings.ReduceFlashing;
+            holeAt = new Vector2(BattleRules.StageVoidX, BattleRules.StageVoidY);
 
             if (won) ApplyWin(run, battle);
             else PrepareLoss(run, battle);
+
+            //Burst Pieces : where each bit of ink flies, the same every time (the sine hash, like TacetField)
+            for (int i = 0; i < shardWay.Length; i++)
+            {
+                float angle = MathHelper.TwoPi * (i + Hash(i, 3) * 0.7f) / shardWay.Length;
+                shardWay[i] = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
+                shardFar[i] = 160f + 300f * Hash(i, 7);
+            }
+
+            //Look : a win starts on the battle's dark stage seen through the IMPACT FRAME, a loss on the dark stage itself
+            Dark = new TacetVoid();
+            if (won)
+            {
+                start = quiet ? 0.1f : BattleRules.ResultBurstAt + 0.1f;
+                Lens.Ambient = 0.36f;
+                Lens.Vignette = 0.8f;
+                Lens.Impact.Turn = quiet ? 0f : 1f;
+                Lens.Impact.Center = holeAt / new Vector2(TacetGame.ScreenW, TacetGame.ScreenH);
+                if (quiet) Burst();
+                ready = start + 0.35f + statCount * RowGap + 0.7f;
+            }
+            else
+            {
+                start = 0.2f;
+                Lens.Ambient = 0.34f;
+                Lens.BloomThreshold = BattleRules.StageBloomThreshold;
+                Lens.BloomStrength = BattleRules.StageBloomStrength;
+                Lens.Vignette = BattleRules.StageVignette;
+                ready = start + 0.25f + statCount * RowGap + 0.45f;
+            }
         }
 
         //Win Rewards : handed out exactly once, here
@@ -101,12 +166,13 @@ namespace Tacetno433.Screens
                 recruited = false;
             }
 
-            statNames[0] = BattleRules.TurnBattleOn ? "PERFECTS" : "PERFECT BEATS";    statValues[0] = NumberText.Get(battle.PerfectCount);   // TURN BATTLE : no beats or combo
-            statNames[1] = BattleRules.TurnBattleOn ? "BEST STREAK" : "BEST COMBO";    statValues[1] = NumberText.Get(battle.BestCombo);
-            statNames[2] = "FINAL LINE";       statValues[2] = NumberText.Signed((int)battle.Line);
-            if (BattleRules.TurnBattleOn) { statNames[2] = "BARS"; statValues[2] = NumberText.Get(run.LastRounds); }   // TURN BATTLE
-            statNames[3] = BattleRules.LifeWord + " BACK";     statValues[3] = NumberText.Signed(recovered);
-            statNames[4] = "SHARDS";           statValues[4] = NumberText.Signed(shards);
+            //Numbers : TURN BATTLE has no beats or combo, it counts PERFECTs, the best streak and the bars
+            SetNumber(0, BattleRules.TurnBattleOn ? "PERFECTS" : "PERFECT BEATS", battle.PerfectCount, false);
+            SetNumber(1, BattleRules.TurnBattleOn ? "BEST STREAK" : "BEST COMBO", battle.BestCombo, false);
+            if (BattleRules.TurnBattleOn) SetNumber(2, "BARS", run.LastRounds, false);
+            else SetNumber(2, "FINAL LINE", (int)battle.Line, true);
+            SetNumber(3, BattleRules.LifeWord + " BACK", recovered, true);
+            SetNumber(4, "SHARDS", shards, true);
             statCount = 5;
 
             footnote = "";
@@ -117,6 +183,13 @@ namespace Tacetno433.Screens
 
             SoundBank.Play(Sfx.Victory);
             SoundBank.PlayMusic(Music.Victory);
+        }
+
+        private void SetNumber(int i, string name, int value, bool signed)
+        {
+            statNames[i] = name;
+            statNumbers[i] = value;
+            statSigned[i] = signed;
         }
 
         //Loss Summary : how far the run got
@@ -143,18 +216,94 @@ namespace Tacetno433.Screens
             SoundBank.PlayMusic(Music.Defeat);
         }
 
+        //======================================================================================
+        //Update
+        //======================================================================================
+
         public override void Update(float dt)
         {
             time += dt;
-            enter += dt * 1.5f;
-            if (enter > 1f) enter = 1f;
-            if (enter < 1f) return;
+            if (won) UpdateWin(dt);
+            else UpdateLoss(dt);
+            continueMotion.Update(dt, time >= ready && Input.MouseOver(continueButton));
+
+            //Hurry : a key or a click while the page comes in jumps to the end of it
+            bool press = Input.KeyPressed(Keys.Enter) || Input.KeyPressed(Keys.Space) || Input.MouseClicked();
+            if (time < ready)
+            {
+                if (press) time = ready;
+                return;
+            }
 
             if (Input.KeyPressed(Keys.Enter) || Input.KeyPressed(Keys.Space) || Input.ClickedOn(continueButton))
             {
+                continueMotion.Press();
                 SoundBank.Play(Sfx.UiConfirm);
                 Continue();
             }
+        }
+
+        //Update Win : the turned frame, the cracks, the burst, then the camera settles
+        private void UpdateWin(float dt)
+        {
+            if (!burst)
+            {
+                Dark.Update(dt, 0.05f);
+                Dark.PlaceOnPage(holeAt, BattleRules.StageVoidRadiusMin, BattleRules.StageVoidY + 60f, BattleRules.StagePoolWideMin, BattleRules.StagePoolDeepMin);
+                if (!cracked && time > 0.08f)
+                {
+                    cracked = true;
+                    Dark.CrackAll(12, 1.8f);
+                }
+                if (time >= BattleRules.ResultBurstAt) Burst();
+                return;
+            }
+
+            //After The Burst : the white fades, the camera eases back, the smear clears (like the battle's IMPACT FRAME)
+            float since = time - BattleRules.ResultBurstAt;
+            float settle = MathHelper.Clamp(since / BattleRules.HitImpactSettle, 0f, 1f);
+            if (quiet) settle = 1f;
+            Lens.Impact.Flash = (1f - settle) * (1f - settle);
+            Lens.Impact.Blur = (1f - settle) * 0.6f;
+            Lens.Zoom = BattleRules.HitImpactZoom * (1f - UiMotion.EaseOut(settle));
+
+            //RANK : the slam punches the camera once more, a little
+            float slam = (time - RankAt) / RankSlam;
+            if (!quiet && slam > 0f && slam < 1f)
+            {
+                Lens.Zoom += 0.025f * (1f - slam) * (1f - slam);
+                Lens.ZoomAt = RankCenter;
+            }
+        }
+
+        //Burst : TACET's hole is gone, the page turns to bright paper
+        private void Burst()
+        {
+            burst = true;
+            Dark = null;
+            Lens.Impact.Turn = 0f;
+            Lens.Ambient = 0.5f;
+            Lens.SpotPower = 0f;
+            Lens.BloomThreshold = 0.97f;
+            Lens.BloomStrength = 0.2f;
+            Lens.Vignette = 0.45f;
+            Lens.ZoomAt = holeAt;
+        }
+
+        //Update Loss : the dark floods the floor and creeps in from the edges
+        private void UpdateLoss(float dt)
+        {
+            float grow = UiMotion.EaseInOut(MathHelper.Clamp(time / BattleRules.ResultDarkTime, 0f, 1f));
+            float share = MathHelper.Lerp(0.78f, 1.02f, grow);
+            Dark.Update(dt, share);
+            float s = MathHelper.Clamp(Dark.Share, 0f, 1.1f);
+            Dark.PlaceOnPage(new Vector2(DefeatHoleX, BattleRules.StageVoidY - 10f),
+                             MathHelper.Lerp(BattleRules.StageVoidRadiusMin, BattleRules.StageVoidRadiusMax, s),
+                             BattleRules.StageVoidY + 60f,
+                             MathHelper.Lerp(BattleRules.StagePoolWideMin, BattleRules.StagePoolWideMax, s),
+                             MathHelper.Lerp(BattleRules.StagePoolDeepMin, BattleRules.StagePoolDeepMax, s));
+            float creep = UiMotion.EaseInOut(MathHelper.Clamp((time - 0.4f) / BattleRules.ResultDarkTime, 0f, 1f));
+            Lens.Engulf = BattleRules.ResultEngulf * creep;
         }
 
         //Continue : reward choice first, then whoever joined, then the next stage
@@ -172,6 +321,219 @@ namespace Tacetno433.Screens
                 Game.Screens.Change(new RecruitScreen(true));
             else
                 RunFlow.NextStage(Game);
+        }
+
+        //Timeline : when each piece of the page comes in (seconds)
+        private float RowAt(int i)
+        {
+            return start + 0.35f + i * RowGap;
+        }
+
+        private float RankAt
+        {
+            get { return start + 0.35f + statCount * RowGap + 0.15f; }
+        }
+
+        private static readonly Vector2 RankCenter = new Vector2(1050f, 548f);
+
+        //======================================================================================
+        //The World (THE LENS)
+        //======================================================================================
+
+        public override bool HasWorld
+        {
+            get { return true; }
+        }
+
+        public override bool ShowsGrain
+        {
+            get { return false; }
+        }
+
+        //Back : the dark stage TACET's dark lies on. Before a win's burst, and all through a loss.
+        public override void DrawBack(SpriteBatch sb)
+        {
+            int w = TacetGame.ScreenW;
+            int h = TacetGame.ScreenH;
+            float floor = BattleRules.StageVoidY + 60f;
+            Gfx.Rect(sb, 0, 0, w, h, Palette.StageDeep);
+            Gfx.DrawGlowBox(sb, new Rectangle(-200, -260, w + 400, (int)floor + 320), Palette.Paper * 0.05f);
+
+            //Floor : boards getting lighter towards the band, and lines running away to the far wall
+            for (int i = 0; i < 12; i++)
+            {
+                float y = floor + i * (h - floor) / 12f;
+                Gfx.Rect(sb, 0, y, w, (h - floor) / 12f + 1f, Palette.Stage * (0.25f + i * 0.05f));
+            }
+            Gfx.Rect(sb, 0, floor, w, 1, Palette.Paper * 0.12f);
+            for (int i = -6; i <= 6; i++)
+                Gfx.Line(sb, w / 2f + i * 70f, floor, w / 2f + i * 260f, h, Palette.Paper * 0.05f, 1f);
+        }
+
+        //World : a win's page after the burst (paper, rays, the thrown ink), or the bits TACET pulls in
+        public override void DrawWorld(SpriteBatch sb)
+        {
+            if (!won || !burst)
+            {
+                if (Dark != null) Dark.DrawDebris(sb, false);
+                return;
+            }
+
+            int w = TacetGame.ScreenW;
+            int h = TacetGame.ScreenH;
+            Gfx.Rect(sb, 0, 0, w, h, Palette.StageLight);
+            Gfx.DrawGlow(sb, w / 2f, 200f, 560f, Color.White * 0.8f);
+            Ornament.Rays(sb, holeAt.X, holeAt.Y, 120f, 1500f, 36, time * 0.03f, Palette.Ink * 0.05f);
+            DrawBurst(sb);
+        }
+
+        //Burst : where the hole was, a ring of ink racing out, lines of speed, and bits of ink flung away
+        private void DrawBurst(SpriteBatch sb)
+        {
+            float k = (time - BattleRules.ResultBurstAt) / BurstTime;
+            if (quiet) k = (time - start) / BurstTime;
+            if (k < 0f || k >= 1f) return;
+            float out1 = UiMotion.EaseOut(k);
+            float fade = 1f - k;
+
+            Gfx.Ring(sb, holeAt.X, holeAt.Y, 40f + 900f * out1, Palette.Ink * (0.8f * fade), 1f + 3f * fade);
+
+            for (int i = 0; i < 40; i++)
+            {
+                float angle = MathHelper.TwoPi * (i + Hash(i, 11) * 0.8f) / 40f;
+                Vector2 way = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
+                float inner = 70f + 520f * out1 * (0.6f + 0.4f * Hash(i, 5));
+                float length = (60f + 220f * Hash(i, 9)) * fade;
+                Gfx.Line(sb, holeAt + way * inner, holeAt + way * (inner + length), Palette.Ink * (0.55f * fade), 1f + (i % 3 == 0 ? 1f : 0f));
+            }
+
+            for (int i = 0; i < shardWay.Length; i++)
+            {
+                Vector2 at = holeAt + shardWay[i] * shardFar[i] * out1;
+                Gfx.Diamond(sb, (float)Math.Floor(at.X * 0.5f) * 2f, (float)Math.Floor(at.Y * 0.5f) * 2f, 2f + 5f * fade, Palette.Ink * fade);
+            }
+        }
+
+        //Lights : a loss lets the band's light flicker and go out. A win's paper is lit as it is (Burst).
+        public override void DrawLights(SpriteBatch sb)
+        {
+            if (won)
+            {
+                if (!burst) Gfx.DrawGlowBox(sb, new Rectangle(-200, 200, TacetGame.ScreenW + 400, 700), Color.White * 0.3f);
+                return;
+            }
+            float out1 = MathHelper.Clamp(time / 1.6f, 0f, 1f);
+            float flicker = Hash((int)(time * 14f), 1) > 0.75f ? 0.55f : 1f;
+            float power = MathHelper.Lerp(0.6f, 0.15f, out1) * (out1 < 1f ? flicker : 1f);
+            Gfx.DrawGlow(sb, BandLightX, BandLightY, 420f, Color.White * power);
+            Gfx.DrawGlowBox(sb, new Rectangle(-200, 260, TacetGame.ScreenW + 400, 600), Color.White * (0.3f * (1f - out1 * 0.5f)));
+        }
+
+        //======================================================================================
+        //The Words (crisp on top)
+        //======================================================================================
+
+        public override void Draw(SpriteBatch sb)
+        {
+            //Before the burst the page is only the IMPACT FRAME, no words yet
+            if (won && !burst) return;
+
+            float cx = TacetGame.ScreenW / 2f;
+            Color ink = won ? Palette.Ink : Palette.Paper;
+            Color soft = won ? Palette.InkSoft : Palette.PaperDim;
+
+            //Title
+            float head = UiMotion.Between(time, start, 0.35f);
+            Gfx.TextSpacedCentered(sb, Game.Font, "BATTLE RESULT", cx, 34, soft * head, TextSize.Label, 6f);
+            string title = won ? "VICTORY" : "SILENCED";
+            float grow = 1f + 0.12f * (1f - head);
+            Gfx.TextCentered(sb, Game.LogoFont, title, cx, 130 - (1f - head) * (won ? 0f : 24f), ink * head, TextSize.Logo * 0.9f * Math.Min(grow, 1f / 0.9f));
+            float line = UiMotion.Between(time, start + 0.1f, 0.35f);
+            Gfx.TextSpacedCentered(sb, Game.Font, enemyLine, cx, 200, soft * line, TextSize.Label, 4f);
+            Ornament.OrbitRule(sb, cx, 230, 200f * line, soft * line);
+
+            if (!BattleRules.TurnBattleOn) DrawSheet(sb, Game.CurrentRun.Battle, ink, soft, won, line);   // the turn battle has no beats to show
+
+            if (won) DrawNumbers(sb, ink, soft);
+            else DrawLedger(sb, ink, soft);
+
+            //Rank : a letter in a diamond, slammed down under the performance
+            if (won) DrawRank(sb, soft);
+
+            //Footnote : plain spaced words between two rings on the bright page, a tag on the dark one
+            float noteA = UiMotion.Between(time, RowAt(statCount), 0.35f);
+            if (footnote.Length > 0 && noteA > 0f)
+            {
+                float fy = RowsY + statCount * (won ? 58 : 52) + (won ? 8 : 16);
+                if (won)
+                {
+                    float w = Gfx.SpacedWidth(Game.Font, footnote, TextSize.Label, 3f);
+                    Gfx.TextSpacedCentered(sb, Game.Font, footnote, LedgerX + LedgerW / 2f, fy, ink * noteA, TextSize.Label, 3f);
+                    Gfx.CircleOutline(sb, LedgerX + LedgerW / 2f - w / 2f - 16, fy + 8, 3f, ink * noteA, 1f);
+                    Gfx.CircleOutline(sb, LedgerX + LedgerW / 2f + w / 2f + 16, fy + 8, 3f, ink * noteA, 1f);
+                }
+                else
+                {
+                    //Lost : centred under the ledger, clear of THE PERFORMANCE legend on the right
+                    Ui.Tag(sb, footnote, LedgerX + (LedgerW - Ui.TagWidth(footnote)) / 2f, fy, true, noteA);
+                }
+            }
+
+            //Continue Button : black on the bright page, the dark plate with its bright edge on the dark one
+            float button = UiMotion.Between(time, ready - 0.3f, 0.3f);
+            Ui.Command(sb, continueButton, won ? "CONTINUE" : "CURTAIN CALL", "ENTER", continueMotion, button, won);
+        }
+
+        //Numbers : a win's rows, each counting up over its thin line (menu7), one after another
+        private void DrawNumbers(SpriteBatch sb, Color ink, Color soft)
+        {
+            for (int i = 0; i < statCount; i++)
+            {
+                float a = UiMotion.Between(time, RowAt(i), BattleRules.UiEnterTime);
+                if (a <= 0f) continue;
+                int shown = UiMotion.Count(statNumbers[i], time, RowAt(i));
+                float fill = MathHelper.Clamp((time - RowAt(i)) / BattleRules.UiCountTime, 0f, 1f);
+                float x = LedgerX - (1f - a) * BattleRules.UiEnterSlide;
+                Ui.Number(sb, statNames[i], shown, statSigned[i], x, RowsY + i * 58, LedgerW, UiMotion.EaseOut(fill), ink, soft, a);
+            }
+        }
+
+        //Ledger : a loss's rows with dotted leaders, sliding in one after the other
+        private void DrawLedger(SpriteBatch sb, Color ink, Color soft)
+        {
+            for (int i = 0; i < statCount; i++)
+            {
+                float rowE = UiMotion.Between(time, RowAt(i), BattleRules.UiEnterTime);
+                if (rowE <= 0f) continue;
+                int y = RowsY + i * 52;
+                Gfx.CircleOutline(sb, LedgerX + 4, y + 12, 3f, soft * rowE, 1f);
+                Gfx.TextSpaced(sb, Game.Font, statNames[i], LedgerX + 18 - (1f - rowE) * BattleRules.UiEnterSlide, y + 4, soft * rowE, TextSize.Label, 3f);
+                float valueW = Gfx.TextWidth(Game.BigFont, statValues[i], TextSize.Subtitle);
+                for (int d = LedgerX + 200; d < LedgerX + LedgerW - valueW - 14; d += 8)
+                    Gfx.Rect(sb, d, y + 16, 2, 1, soft * (0.6f * rowE));
+                Gfx.TextRight(sb, Game.BigFont, statValues[i], LedgerX + LedgerW, y - 6, ink * rowE, TextSize.Subtitle);
+            }
+        }
+
+        //Rank : big and turned at first, slammed down into place (EaseBack), a ring of ink knocked out of it
+        private void DrawRank(SpriteBatch sb, Color soft)
+        {
+            float k = MathHelper.Clamp((time - RankAt) / RankSlam, 0f, 1f);
+            if (time < RankAt) return;
+            float land = UiMotion.EaseBack(k);
+            float size = 66f * (2.2f - 1.2f * land);
+            float rx = RankCenter.X;
+            float ry = RankCenter.Y;
+            float a = Math.Min(1f, k * 3f);
+            Gfx.Diamond(sb, rx, ry, size, Palette.Ink * a);
+            Gfx.DiamondOutline(sb, rx, ry, size + 10f, Palette.Ink * (0.5f * a), 1f);
+            Gfx.TextCentered(sb, Game.LogoFont, rank, rx, ry - 4, Palette.Paper * a, TextSize.Banner * 0.9f * Math.Min(1f, size / 66f));
+            Gfx.TextSpacedCentered(sb, Game.Font, "RANK", rx - 110, ry - 6, soft * a, TextSize.Tiny, 4f);
+
+            //Knock : the ring of ink as it lands
+            float knock = (time - RankAt - RankSlam * 0.6f) / 0.4f;
+            if (knock > 0f && knock < 1f)
+                Gfx.Ring(sb, rx, ry, 70f + 140f * UiMotion.EaseOut(knock), Palette.Ink * (0.6f * (1f - knock)), 2f);
         }
 
         //Sheet : the whole fight at a glance, one row of eight beats per round
@@ -243,10 +605,10 @@ namespace Tacetno433.Screens
                 return;
             }
 
-            bool won = mark.Push > 0;
-            if (won) Gfx.Rect(sb, cell, ink * (0.9f * a));
-            Gfx.RectOutline(sb, cell, ink * ((won ? 0.9f : 0.45f) * a), 1);
-            Color stroke = won ? back * a : ink * (0.8f * a);
+            bool beatWon = mark.Push > 0;
+            if (beatWon) Gfx.Rect(sb, cell, ink * (0.9f * a));
+            Gfx.RectOutline(sb, cell, ink * ((beatWon ? 0.9f : 0.45f) * a), 1);
+            Color stroke = beatWon ? back * a : ink * (0.8f * a);
 
             if (mark.Grade == Grade.Hesitate)
             {
@@ -295,85 +657,11 @@ namespace Tacetno433.Screens
             else Gfx.Arrow(sb, c.X, c.Y, 7, way == Flick.Right, color);
         }
 
-        public override void Draw(SpriteBatch sb)
+        //Hash : a steady random 0..1 from two whole numbers (the sine trick of TacetField)
+        private static float Hash(int a, int b)
         {
-            float e = enter * enter * (3f - 2f * enter);
-            float cx = TacetGame.ScreenW / 2f;
-
-            //Background : a win floods the stage with light, a loss lets TACET take it all
-            Color ink;
-            Color soft;
-            if (won)
-            {
-                Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.StageLight);
-                Gfx.DrawGlow(sb, cx, 200f, 560f, Color.White * 0.8f);
-                Ornament.Rays(sb, cx, 170f, 120f, 700f, 36, time * 0.03f, Palette.Ink * 0.05f);
-                TacetField.Draw(sb, 1180f + (1f - e) * -300f, time, 0.1f);
-                ink = Palette.Ink;
-                soft = Palette.InkSoft;
-            }
-            else
-            {
-                Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.StageLight);
-                TacetField.Draw(sb, 360f - e * 300f, time, 1f);
-                ink = Palette.Paper;
-                soft = Palette.PaperDim;
-            }
-
-            //Title
-            Gfx.TextSpacedCentered(sb, Game.Font, "BATTLE RESULT", cx, 34, soft * e, TextSize.Label, 6f);
-            string title = won ? "VICTORY" : "SILENCED";
-            Gfx.TextCentered(sb, Game.LogoFont, title, cx, 130 - (1f - e) * 30f, ink * e, TextSize.Logo * 0.9f);
-            Gfx.TextSpacedCentered(sb, Game.Font, enemyLine, cx, 200, soft * e, TextSize.Label, 4f);
-            Ornament.Divider(sb, cx, 230, 200, soft * e);
-
-            if (!BattleRules.TurnBattleOn) DrawSheet(sb, Game.CurrentRun.Battle, ink, soft, won, e);   // the turn battle has no beats to show
-
-            //Rank : a letter in a diamond, under the performance
-            if (won)
-            {
-                float rx = 1050;
-                float ry = 548;
-                float spin = (1f - e) * 40f;
-                Gfx.Diamond(sb, rx, ry, 66 + spin, Palette.Ink * e);
-                Gfx.DiamondOutline(sb, rx, ry, 76 + spin, Palette.Ink * (0.5f * e), 1f);
-                Gfx.TextCentered(sb, Game.LogoFont, rank, rx, ry - 4, Palette.Paper * e, TextSize.Banner * 0.9f);
-                Gfx.TextSpacedCentered(sb, Game.Font, "RANK", rx - 110, ry - 6, soft * e, TextSize.Tiny, 4f);
-            }
-
-            //Ledger : rows with dotted leaders, sliding in one after the other
-            for (int i = 0; i < statCount; i++)
-            {
-                float rowE = MathHelper.Clamp(e * 2f - i * 0.25f, 0f, 1f);
-                int y = 262 + i * 52;
-                Gfx.Diamond(sb, LedgerX + 4, y + 12, 3, soft * rowE);
-                Gfx.TextSpaced(sb, Game.Font, statNames[i], LedgerX + 18 - (1f - rowE) * 20f, y + 4, soft * rowE, TextSize.Label, 3f);
-                float valueW = Gfx.TextWidth(Game.BigFont, statValues[i], TextSize.Subtitle);
-                for (int d = LedgerX + 200; d < LedgerX + LedgerW - valueW - 14; d += 8)
-                    Gfx.Rect(sb, d, y + 16, 2, 1, soft * (0.6f * rowE));
-                Gfx.TextRight(sb, Game.BigFont, statValues[i], LedgerX + LedgerW, y - 6, ink * rowE, TextSize.Subtitle);
-            }
-
-            //Footnote : a tag on the dark page, plain spaced words between diamonds on the bright one
-            if (footnote.Length > 0)
-            {
-                float fy = 262 + statCount * 52 + 16;
-                if (won)
-                {
-                    float w = Gfx.SpacedWidth(Game.Font, footnote, TextSize.Label, 3f);
-                    Gfx.TextSpacedCentered(sb, Game.Font, footnote, cx, fy, ink * e, TextSize.Label, 3f);
-                    Gfx.Diamond(sb, cx - w / 2f - 16, fy + 8, 4, ink * e);
-                    Gfx.Diamond(sb, cx + w / 2f + 16, fy + 8, 4, ink * e);
-                }
-                else
-                {
-                    //Lost : centred under the ledger, clear of THE PERFORMANCE legend on the right
-                    Ui.Tag(sb, footnote, LedgerX + (LedgerW - Ui.TagWidth(footnote)) / 2f, fy, true, e);
-                }
-            }
-
-            //Continue Button : dark on the bright page, light on the dark one
-            Ui.Button(sb, continueButton, won ? "CONTINUE" : "CURTAIN CALL", "ENTER", !won, enter >= 1f, e);
+            float h = (float)Math.Sin(a * 12.9898f + b * 78.233f) * 43758.547f;
+            return h - (float)Math.Floor(h);
         }
     }
 }

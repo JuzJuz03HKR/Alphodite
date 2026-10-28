@@ -147,6 +147,7 @@ namespace Tacetno433.Screens
             Game.CurrentRun.Start(c, Game.StoryFont, RouteNodeInfo.CaptionWrapWidth);
             Game.CurrentRun.Maestro = Settings.Maestro;                                  // MAESTRO MODE
             SoundBank.Play(Sfx.UiConfirm);
+            Game.Screens.SweepNext(chooseButton.Center.ToVector2(), RingSweep.Kind.Light);     // RING SWEEP : the run begins
             Game.Screens.Change(new ChapterScreen());
         }
 

@@ -1,5 +1,6 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Tacetno433.Data;
 
 namespace Tacetno433.Core
 {
@@ -14,9 +15,10 @@ namespace Tacetno433.Core
     //   SOFT        320 x 180  the lit world shrunk and blurred : the glow (BLOOM) and the QTE FOCUS come from it
     //   FINAL      1280 x 720  SCENE x LIGHT + GLOW + BLOOM, then FOCUS, ENGULF, VIGNETTE and grain
     //
-    //A page draws SCENE, LIGHT MAP and GLOW in its PreDraw, calls Finish, then draws FINAL in its Draw with the
-    //words and buttons on top. Without shaders (Fx.Ready false) the same picture is put together with
-    //blend states only : no glow and no blur, the rest looks the same.
+    //The battle draws SCENE, LIGHT MAP and GLOW in its PreDraw, calls Finish, then draws FINAL in its Draw with the
+    //words and buttons on top. Every other page goes through DrawPage (Beta1 screens, ScreenManager does it) :
+    //the same layers, so every page gets a stage light, bloom and vignette (THE LENS). Without shaders (Fx.Ready false)
+    //the same picture is put together with blend states only : no glow and no blur, the rest looks the same.
     //
     //Optimize : the big pictures are made once and kept. Blur and glow work at a quarter of the screen,
     //which is sixteen times fewer pixels than the full size.
@@ -104,6 +106,90 @@ namespace Tacetno433.Core
             public float Flash;       // the white, 0..1
             public float Blur;        // the smear towards the blow, 0..1
             public Vector2 Center;    // where the blow landed, 0..1 of the screen
+        }
+
+        //======================================================================================
+        //THE LENS (Beta1 screens) : every page but the battle
+        //======================================================================================
+
+        //Page Look : how one page's picture is finished. Every page has its own (GameScreen.Lens) and may change it
+        //while it runs. The numbers start from BattleRules, UI Feel.
+        public class PageLook
+        {
+            public float Ambient = BattleRules.UiAmbient;               // the LIGHT MAP everywhere (0.5 = as drawn)
+            public Vector2 Spot = new Vector2(W / 2f, H / 2f);          // a soft stage light on what matters
+            public float SpotRadius = BattleRules.UiSpotRadius;
+            public float SpotPower = BattleRules.UiSpot;
+            public float BloomThreshold = BattleRules.UiBloomThreshold;
+            public float BloomStrength = BattleRules.UiBloomStrength;
+            public float Vignette = BattleRules.UiVignette;
+            public float Focus;                                         // the world dark, grey and soft (like the QTE FOCUS)
+            public float Engulf;                                        // TACET's dark crept in from the edges (ENGULF)
+            public ImpactLook Impact;                                   // the IMPACT FRAME look (a won fight's result opens on it)
+            public float Zoom;                                          // the camera punched in this much (0.06 = 6%) ...
+            public Vector2 ZoomAt = new Vector2(W / 2f, H / 2f);        // ... around this point
+        }
+
+        //Draw Page : the page's picture into FINAL, before the frame. The same layers as the battle :
+        //   BACK    page.DrawBack, only when the page has TACET's dark (page.Dark), which bends it
+        //   SCENE   the dark, then page.DrawWorld (a page with a world) or the whole page.Draw (every other page)
+        //   LIGHT   page.DrawLights (a soft spot unless the page lights itself), then the dark's own light
+        //   GLOW    the dark's light, then page.DrawGlow
+        public static void DrawPage(GraphicsDevice device, SpriteBatch sb, GameScreen page, float time)
+        {
+            Ensure(device);
+            PageLook look = page.Lens;
+            TacetVoid dark = page.Dark;
+
+            if (dark != null)
+            {
+                BeginBack(device);
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp);
+                page.DrawBack(sb);
+                sb.End();
+            }
+
+            BeginScene(device);
+            if (dark != null) dark.DrawScene(device, sb, Back);
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp);
+            if (page.HasWorld) page.DrawWorld(sb);
+            else page.Draw(sb);
+            sb.End();
+
+            BeginLights(device, sb, look.Ambient);
+            page.DrawLights(sb);
+            if (dark != null) dark.DrawLights(sb);
+            EndLights(sb);
+
+            BeginGlowTarget(device);
+            if (dark != null) dark.DrawGlow(device, sb, Back);
+            sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearClamp);
+            page.DrawGlow(sb);
+            sb.End();
+
+            Finish(device, sb, time, look.Focus, look.Engulf, look.Impact, look.BloomThreshold, look.BloomStrength, look.Vignette, 0f);
+        }
+
+        //Spot Light : the plain stage light of a page, into the LIGHT MAP (GameScreen.DrawLights calls it).
+        //ADVANCED PART (small) : the light map is drawn with BlendState.Additive, which multiplies a colour by its own alpha
+        //before adding it. The glow picture is white with alpha (premultiplied), so a light of power p adds about p x p at
+        //its middle : 0.3 adds 0.09, 0.6 adds 0.36. The battle's lights were tuned by eye the same way.
+        public static void SpotLight(SpriteBatch sb, PageLook look)
+        {
+            if (look.SpotPower <= 0f) return;
+            Gfx.DrawGlow(sb, look.Spot.X, look.Spot.Y, look.SpotRadius, Color.White * look.SpotPower);
+        }
+
+        //Show Page : FINAL onto the frame. up 0..1 is how far the page has come up from black (ENTER), and the camera
+        //punch (PageLook.Zoom) pushes in round its point.
+        public static void ShowPage(SpriteBatch sb, PageLook look, float up)
+        {
+            if (Final == null) return;
+            Color tint = new Color(up, up, up, 1f);
+            if (look.Zoom > 0f)
+                sb.Draw(Final, look.ZoomAt, null, tint, 0f, look.ZoomAt, 1f + look.Zoom, SpriteEffects.None, 0f);
+            else
+                sb.Draw(Final, Vector2.Zero, tint);
         }
 
         //Finish : SCENE and LIGHT MAP into FINAL. focus 0..1 is the QTE FOCUS, engulf 0..1 how far TACET's dark

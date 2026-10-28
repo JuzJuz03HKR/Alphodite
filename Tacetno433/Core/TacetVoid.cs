@@ -17,6 +17,9 @@ namespace Tacetno433.Core
     //   ENGULF   past a point the dark creeps in from the edges of the screen                               (Post.fx)
     //Without shaders the old leaning rift (TacetField.DrawSlanted) stands in, the rest of the battle is the same.
     //Every number is in Data/BattleRules.cs, Stage Void.
+    //ON A PAGE (Beta1 screens) : the other pages place the same dark where they want it (PlaceOnPage) : the title keeps
+    //the hole on its right, a lost fight lets it flood the floor. One look of TACET for the whole game
+    //(docs/SCREENS_LEVEL_UP.md 4.3). Without shaders a page gets the old black sun (Hollow.Eclipse) instead.
     public class TacetVoid
     {
         //SHARE : where the dark stands, on a spring
@@ -32,6 +35,11 @@ namespace Tacetno433.Core
         private float horizon;
         private float time;
         private float pulse;               // a hit makes the hole and the waveform jump, then it dies away
+
+        //ON A PAGE : placed by PlaceOnPage instead of the battle's Place
+        private bool onPage;
+        private bool hasPool = true;       // false : only the hole, no dark on the floor (the title)
+        private const float NoFloor = 100000f;   // the floor's line far below the screen, so the shader finds no pool
 
         //SHOCK WAVE : the ring of the last hit
         private Vector2 waveAt;
@@ -53,7 +61,7 @@ namespace Tacetno433.Core
         private float crackClock;
 
         //Shader Settings : the shader's numbers, found once by name
-        private EffectParameter pNoise, pScreen, pHole, pRadius, pPoolBase, pPoolSize, pSpike, pSwirl, pDanger, pTime, pWave;
+        private EffectParameter pNoise, pScreen, pHole, pRadius, pPoolBase, pPoolSize, pSpike, pSwirl, pDanger, pTime, pWave, pFine;
 
         public TacetVoid()
         {
@@ -110,9 +118,16 @@ namespace Tacetno433.Core
             if (crackClock <= 0f)
             {
                 crackClock += 0.5f + (float)random.NextDouble();
-                if (random.Next(3) == 0) SpawnCrack(false, PoolBase.X + ((float)random.NextDouble() * 2f - 1f) * PoolSize.X * 0.8f, 1f);
+                if (hasPool && random.Next(3) == 0) SpawnCrack(false, PoolBase.X + ((float)random.NextDouble() * 2f - 1f) * PoolSize.X * 0.8f, 1f);
                 else SpawnCrack(true, (float)(random.NextDouble() * MathHelper.TwoPi), 1f);
             }
+        }
+
+        //Crack All : the rim breaks all round at once, count lines (a won fight's result, as the hole bursts)
+        public void CrackAll(int count, float size)
+        {
+            for (int i = 0; i < count; i++)
+                SpawnCrack(true, MathHelper.TwoPi * (i + (float)random.NextDouble() * 0.6f) / count, size);
         }
 
         //Hit : a blow lands at a point on the screen. The band's blows throw the dark back, TACET's throw it forward.
@@ -188,6 +203,20 @@ namespace Tacetno433.Core
             spike = BattleRules.StageVoidSpike + BattleRules.StageVoidSpikeDanger * Danger + 26f * pulse;
         }
 
+        //Place On Page : a page outside the battle puts the dark where it wants it, in screen pixels.
+        //poolDeep 0 = no dark on the floor, only the hole. floorY is the line where the page's floor starts.
+        public void PlaceOnPage(Vector2 hole, float radius, float floorY, float poolWide, float poolDeep)
+        {
+            onPage = true;
+            hasPool = poolDeep > 0f;
+            horizon = floorY;
+            Hole = hole;
+            Radius = Math.Max(1f, radius * (1f + 0.12f * pulse));
+            PoolBase = new Vector2(hole.X, hasPool ? floorY : NoFloor);
+            PoolSize = new Vector2(Math.Max(1f, poolWide), Math.Max(1f, poolDeep));
+            spike = BattleRules.StageVoidSpike + BattleRules.StageVoidSpikeDanger * Danger + 26f * pulse;
+        }
+
         //Pool Edge At : the row where the pool ends at column x, without its waveform (the same ellipse as Void.fx)
         public float PoolEdgeAt(float x)
         {
@@ -226,6 +255,15 @@ namespace Tacetno433.Core
             sb.Begin(SpriteSortMode.Deferred, BlendState.Opaque, SamplerState.PointClamp);
             sb.Draw(back, Vector2.Zero, Color.White);
             sb.End();
+
+            //On A Page : the old black sun where the hole is
+            if (onPage)
+            {
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp);
+                Hollow.Eclipse(sb, Hole.X, Hole.Y, Radius, time * 0.2f, 1f);
+                sb.End();
+                return;
+            }
 
             float edgeX = MathHelper.Lerp(BattleRules.StageRiftBeaten, BattleRules.StageRiftWinning, MathHelper.Clamp(Share, -0.1f, 1.1f));
             sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp);
@@ -271,6 +309,7 @@ namespace Tacetno433.Core
                 pDanger = e.Parameters["Danger"];
                 pTime = e.Parameters["Time"];
                 pWave = e.Parameters["Wave"];
+                pFine = e.Parameters["Fine"];
             }
             pNoise.SetValue(Fx.Noise);
             pScreen.SetValue(new Vector2(TacetGame.ScreenW, TacetGame.ScreenH));
@@ -283,6 +322,7 @@ namespace Tacetno433.Core
             pDanger.SetValue(Danger);
             pTime.SetValue(time);
             pWave.SetValue(new Vector4(waveAt.X, waveAt.Y, waveAge * BattleRules.StageVoidWaveSpeed, WaveStrength()));
+            if (pFine != null) pFine.SetValue(onPage ? 1f : 0f);
         }
 
         //Wave Strength : the shock wave fades as it runs out
@@ -296,6 +336,7 @@ namespace Tacetno433.Core
         public void DrawLights(SpriteBatch sb)
         {
             Gfx.DrawGlow(sb, Hole.X, Hole.Y, Radius * 2.8f, Color.White * (BattleRules.StageVoidLight * (1f + 0.6f * pulse)));
+            if (!hasPool) return;
             float from = Math.Max(-40f, PoolBase.X - PoolSize.X);
             float to = Math.Min(TacetGame.ScreenW + 40f, PoolBase.X + PoolSize.X);
             for (float x = from; x <= to; x += 90f)

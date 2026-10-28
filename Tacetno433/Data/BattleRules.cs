@@ -303,6 +303,40 @@
         public static int StageVoidDebris = 34;           // DEBRIS : bits of the stage turning around the hole
         public static float StageVoidEngulfFrom = 0.62f;  // ENGULF : past this SHARE the dark creeps in from the screen's edges
 
+        //UI Feel (Beta1 screens, 28 Oct) : how every page other than the battle looks and moves (docs/SCREENS_LEVEL_UP.md 3.4
+        //and 4). The lens is Core/PostChain.cs (PageLook), the buttons Core/Ui.cs, the timing Core/UiMotion.cs, the page changes
+        //Core/SlantWipe.cs and Core/RingSweep.cs. None of these are balance, the rules never read them.
+        public static float UiAmbient = 0.47f;            // LENS : the light everywhere on a page (0.5 = as drawn)
+        public static float UiSpot = 0.32f;               //   a soft stage light on the middle of the page, or on what the page points at
+                                                          //   (a light of power p adds about p x p at its middle, see PostChain.SpotLight)
+        public static float UiSpotRadius = 900f;          //   how wide it is (pixels)
+        public static float UiBloomThreshold = 0.8f;      //   BLOOM : only the brightest things glow (white words, the hole's rim)
+        public static float UiBloomStrength = 0.3f;       //   and gently
+        public static float UiVignette = 0.4f;            //   VIGNETTE : softer than the battle (0.85), words sit in the corners
+        public static float UiLightsUp = 0.3f;            // ENTER : a new page comes up from black this fast (seconds, menu4)
+        public static float UiEnterStagger = 0.06f;       //   then its pieces come in one after another, each this much later
+        public static float UiEnterTime = 0.35f;          //   and each takes this long, slowing to a stop (ease out)
+        public static float UiEnterSlide = 26f;           //   coming this far (pixels)
+        public static float UiHoverTime = 0.12f;          // POINT : the ink bar shoots out under a menu line (seconds, ease out)
+        public static float UiHoverScale = 1.06f;         //   the word grows this much
+        public static float UiHoverTilt = 2f;             //   and leans this many degrees
+        public static float UiShadow = 6f;                //   the grey bar behind sits this far off (pixels, like Persona 5)
+        public static float UiRingTime = 0.25f;           //   the thin ring a lit circle sends out (seconds, menu4)
+        public static float UiPressSquash = 0.92f;        // PRESS : squashed to this size ...
+        public static float UiPressDown = 0.06f;          //   ... this fast (seconds)
+        public static float UiPressBack = 0.12f;          //   then bounces back in this long
+        public static float UiPressFlash = 0.08f;         //   with a flash of white this long (none with LESS FLASHING)
+        public static float UiCountTime = 0.7f;           // COUNT UP : a number counts up from 0 in this long
+        public static float SweepGlowEdge = 13f;          // RING SWEEP : the bright edge of the ring, about 1% of the screen (menu4)
+        public static float TitleHoleX = 1000f;           // TITLE : TACET's hole on the right of the title page
+        public static float TitleHoleY = 300f;
+        public static float TitleHoleRadius = 92f;
+        public static float TitleOrbit = 860f;            //   the big thin ring round the hole that the menu sits on (pixels)
+        public static float TitleReveal = 1.6f;           //   the first opening of the game : the hole opens, the rings draw, the logo and menu come in
+        public static float ResultBurstAt = 0.34f;        // RESULT : a win opens on the last blow's IMPACT FRAME, then TACET's hole bursts at this time
+        public static float ResultDarkTime = 2.2f;        //   a loss : TACET's dark creeps in from the edges over this long
+        public static float ResultEngulf = 0.45f;         //   and this far (ENGULF)
+
         //Battle Shape
         public const int BeatsPerRound = 8;       // sub-turns in one round
         public const int MaxRounds = 3;           // after this, whoever is ahead wins

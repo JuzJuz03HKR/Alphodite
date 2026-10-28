@@ -1,5 +1,6 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Tacetno433.Data;
 
 namespace Tacetno433.Core
 {
@@ -57,9 +58,63 @@ namespace Tacetno433.Core
             get { return false; }
         }
 
+        //Screen Enters With Sweep (Beta1 screens) : the RING SWEEP this page is always entered with (the fight : TACET's
+        //dark opening from where its hole will hang), None for the covers above. It wins over a SweepNext, which can ask
+        //for a ring on any other change.
+        public virtual RingSweep.Kind EntersWithSweep
+        {
+            get { return RingSweep.Kind.None; }
+        }
+
+        //Sweep From : where that ring opens from (screen pixels)
+        public virtual Vector2 SweepFrom
+        {
+            get { return new Vector2(TacetGame.ScreenW / 2f, TacetGame.ScreenH / 2f); }
+        }
+
         //Screen Pre Draw (Beta1) : called every frame before anything is drawn on the screen, for a page that
-        //draws into its own pictures first (render targets, see Core/PostChain.cs). Draw then shows them.
+        //draws into its own pictures first (render targets, see Core/PostChain.cs, OwnLens). Draw then shows them.
         public virtual void PreDraw(SpriteBatch sb) { }
+
+        //======================================================================================
+        //THE LENS (Beta1 screens) : how ScreenManager draws a page, see PostChain.DrawPage
+        //======================================================================================
+
+        //Own Lens : true for the page that builds and finishes its own picture in PreDraw (the battle)
+        public virtual bool OwnLens
+        {
+            get { return false; }
+        }
+
+        //Lens : how this page's picture is finished (its light, bloom, vignette ...). A page may change it while it runs.
+        public PostChain.PageLook Lens = new PostChain.PageLook();
+
+        //Dark : TACET's dark on this page (Core/TacetVoid.cs), or null. A page that has one places it in its Update.
+        public TacetVoid Dark;
+
+        //Has World : true for a page split in two. DrawWorld is the stage : it is lit, it glows, the vignette darkens
+        //its corners. Draw is then only the words and buttons, laid crisp on top. A page that says false goes through
+        //the lens whole (a soft stage light, bloom and vignette).
+        public virtual bool HasWorld
+        {
+            get { return false; }
+        }
+
+        //Draw Back : what TACET's dark bends, only used when the page has Dark
+        public virtual void DrawBack(SpriteBatch sb) { }
+
+        //Draw World : the stage of a page with a world
+        public virtual void DrawWorld(SpriteBatch sb) { }
+
+        //Draw Lights : into the LIGHT MAP. It is half the size of the screen but drawn through PostChain.LightScale,
+        //so positions are screen pixels as everywhere else. The plain light is one soft spot (Lens.Spot).
+        public virtual void DrawLights(SpriteBatch sb)
+        {
+            PostChain.SpotLight(sb, Lens);
+        }
+
+        //Draw Glow : effects that give off their own light. They are added, so they never darken, and they bloom.
+        public virtual void DrawGlow(SpriteBatch sb) { }
 
         //Shows Grain : the film grain laid over every page. A page with its own grain (the battle, Post.fx) turns it off.
         public virtual bool ShowsGrain
@@ -72,11 +127,15 @@ namespace Tacetno433.Core
     }
 
     //ScreenManager : holds the screen we are on, and covers the screen while swapping to another.
-    //Three covers (round 15) :
+    //Four covers (round 15, Beta1) :
+    //   SWEEP    the moments that matter (a run begins, into and out of a fight, a win) : a ring opens from a point
+    //            and floods the screen, or TACET's dark closes in (Core/RingSweep.cs). Asked for with SweepNext.
     //   CURTAIN  going to or from the conductor select page, the stage curtain (Core/Curtain.cs)
-    //   WAVE     going into a duel or the curtain call, TACET's silence washing over the page
-    //            and pulling back (Core/SilenceWave.cs), so it still means "the fight begins"
-    //   WIPE     every other page, a quick slanted black band (Core/SlantWipe.cs)
+    //   WAVE     the old duel and the curtain call, TACET's silence washing over the page and pulling back
+    //            (Core/SilenceWave.cs)
+    //   WIPE     every other page, slanted bands of white, grey and black (Core/SlantWipe.cs)
+    //Every page but the battle is drawn through THE LENS (Core/PostChain.cs DrawPage) : a stage light, bloom and
+    //vignette, and it comes up from black as it opens (ENTER).
     public class ScreenManager
     {
         private TacetGame game;
@@ -91,6 +150,16 @@ namespace Tacetno433.Core
         private const float FadeSpeed = 1.7f;   // each half of a change takes 1 / FadeSpeed seconds (round 15 : 3 felt too fast, it flickered ;
                                                 // Beta1 round 4 : 2.2 still felt fast, the user asked for slower and smoother)
 
+        //RING SWEEP (Beta1 screens) : asked for by SweepNext, used by the next Change
+        private RingSweep.Kind sweep;          // this change's ring, None = one of the other covers
+        private Vector2 sweepFrom;
+        private RingSweep.Kind sweepNext;
+        private Vector2 sweepNextFrom;
+
+        //ENTER (Beta1 screens) : a new page comes up from black (menu4). Not under a RING SWEEP, which fades off it by itself.
+        private float pageTime;          // seconds since the page on show was loaded
+        private bool upFromBlack = true;
+
         public ScreenManager(TacetGame game)
         {
             this.game = game;
@@ -101,36 +170,75 @@ namespace Tacetno433.Core
         //Busy : a fade is under way, so the page on show is about to change or has just changed
         public bool Busy { get { return fadingOut || fade > 0f; } }
 
+        //Sweep Next : the next Change uses the RING SWEEP from this point (screen pixels)
+        public void SweepNext(Vector2 from, RingSweep.Kind kind)
+        {
+            sweepNextFrom = from;
+            sweepNext = kind;
+        }
+
         //Screen Change : cover the page, swap, uncover the new one
         public void Change(GameScreen screen)
         {
             waiting = screen;
             fadingOut = true;
-            curtain = screen.UsesCurtain || (current != null && current.UsesCurtain);
-            wave = !curtain && screen.EntersWithWave;
+            sweep = sweepNext;
+            sweepFrom = sweepNextFrom;
+            sweepNext = RingSweep.Kind.None;
+            if (screen.EntersWithSweep != RingSweep.Kind.None)          // a fight is always entered through TACET's dark
+            {
+                sweep = screen.EntersWithSweep;
+                sweepFrom = screen.SweepFrom;
+            }
+            bool plain = sweep == RingSweep.Kind.None;
+            curtain = plain && (screen.UsesCurtain || (current != null && current.UsesCurtain));
+            wave = plain && !curtain && screen.EntersWithWave;
         }
 
-        //Screen Change Now : swap with no fade (used for the very first screen)
+        //Screen Change Now : swap with no fade (used for the very first screen). A cover still on its way is dropped.
         public void ChangeNow(GameScreen screen)
+        {
+            fade = 0f;
+            fadingOut = false;
+            waiting = null;
+            Swap(screen);
+        }
+
+        //Swap : the page changes, under a cover or straight away
+        private void Swap(GameScreen screen)
         {
             if (current != null) current.Leave();
 
             current = screen;
             current.Game = game;
+            pageTime = 0f;
+            upFromBlack = sweep == RingSweep.Kind.None || fade <= 0f;     // a ring fades off the new page by itself
             current.Load();
+        }
+
+        //Lights Up : 0..1, how far the page on show has come up from black (ENTER), eased to a soft stop
+        private float LightsUp
+        {
+            get
+            {
+                if (!upFromBlack) return 1f;
+                float t = MathHelper.Clamp(pageTime / BattleRules.UiLightsUp, 0f, 1f);
+                return UiMotion.EaseOut(t);
+            }
         }
 
         //Screen Update : run the cover, then update the active screen
         public void Update(float dt)
         {
             time += dt;
+            pageTime += dt;
             if (fadingOut)
             {
                 fade += dt * FadeSpeed;
                 if (fade >= 1f)
                 {
                     fade = 1f;
-                    ChangeNow(waiting);
+                    Swap(waiting);
                     waiting = null;
                     fadingOut = false;
                 }
@@ -155,19 +263,31 @@ namespace Tacetno433.Core
             get { return current == null || current.ShowsGrain; }
         }
 
-        //Screen Pre Draw : the active screen's own pictures, before the frame starts
+        //Screen Pre Draw : the page's picture, before the frame starts. The battle builds its own,
+        //every other page goes through THE LENS.
         public void PreDraw(SpriteBatch sb)
         {
-            if (current != null) current.PreDraw(sb);
+            if (current == null) return;
+            if (current.OwnLens) current.PreDraw(sb);
+            else PostChain.DrawPage(game.GraphicsDevice, sb, current, time);
         }
 
         //Screen Draw : the active screen, then the cover on top while it is moving
         public void Draw(SpriteBatch sb)
         {
-            if (current != null) current.Draw(sb);
+            if (current != null)
+            {
+                if (current.OwnLens) current.Draw(sb);
+                else
+                {
+                    PostChain.ShowPage(sb, current.Lens, LightsUp);
+                    if (current.HasWorld) current.Draw(sb);       // the words and buttons, crisp on top
+                }
+            }
             if (fade <= 0f) return;
 
-            if (curtain) Curtain.Draw(sb, fade);
+            if (sweep != RingSweep.Kind.None) RingSweep.Draw(sb, fade, fadingOut, sweepFrom, sweep, time);
+            else if (curtain) Curtain.Draw(sb, fade);
             else if (wave) SilenceWave.Draw(sb, fade, time);
             else SlantWipe.Draw(sb, fade, fadingOut);
         }

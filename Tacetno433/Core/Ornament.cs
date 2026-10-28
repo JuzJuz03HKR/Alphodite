@@ -47,6 +47,41 @@ namespace Tacetno433.Core
             Gfx.Diamond(sb, cx + halfWidth + 5, y, 2, color);
         }
 
+        //Orbit Rule (Beta1 screens) : the separator of the lifted pages (menu3). A thin line with a hollow circle in the
+        //middle, small dots half way out and tiny rings at the ends, so it belongs with the rings of TACET's hole and the QTE.
+        public static void OrbitRule(SpriteBatch sb, float cx, float y, float halfWidth, Color color)
+        {
+            Gfx.Rect(sb, cx - halfWidth, y, halfWidth - 9f, 1, color);
+            Gfx.Rect(sb, cx + 9f, y, halfWidth - 9f, 1, color);
+            Gfx.CircleOutline(sb, cx, y, 6f, color, 1f);
+            Gfx.Rect(sb, cx - 1f, y - 1f, 2f, 2f, color);
+            Gfx.Rect(sb, cx - halfWidth * 0.5f - 2f, y - 2f, 4f, 4f, color);
+            Gfx.Rect(sb, cx + halfWidth * 0.5f - 2f, y - 2f, 4f, 4f, color);
+            Gfx.CircleOutline(sb, cx - halfWidth - 4f, y, 3f, color, 1f);
+            Gfx.CircleOutline(sb, cx + halfWidth + 4f, y, 3f, color, 1f);
+        }
+
+        //Tick Ring (Beta1 screens) : a thin ring with ticks pointing out, every fifth one longer (menu4's emblem ring).
+        //drawn 0..1 is how much of it is there yet, going round from the top. turn turns the ticks slowly.
+        public static void TickRing(SpriteBatch sb, float cx, float cy, float radius, int ticks, float turn, float drawn, Color color)
+        {
+            if (drawn <= 0f) return;
+            float start = -MathHelper.PiOver2;
+            int pieces = (int)MathHelper.Clamp(radius * MathHelper.TwoPi * drawn / 6f, 4f, 256f);
+            Gfx.Arc(sb, cx, cy, radius, start, start + MathHelper.TwoPi * drawn, color, 1f, pieces);
+
+            int shown = (int)(ticks * drawn);
+            for (int i = 0; i < shown; i++)
+            {
+                float angle = start + turn + MathHelper.TwoPi * i / ticks;
+                float cos = (float)Math.Cos(angle);
+                float sin = (float)Math.Sin(angle);
+                float length = i % 5 == 0 ? 9f : 4f;
+                Gfx.Line(sb, cx + cos * (radius + 2f), cy + sin * (radius + 2f), cx + cos * (radius + 2f + length), cy + sin * (radius + 2f + length),
+                         color * (i % 5 == 0 ? 1f : 0.6f), 1f);
+            }
+        }
+
         //Rule With Diamond : a heading underline that ends in a small diamond
         public static void Rule(SpriteBatch sb, float x, float y, float width, Color color)
         {

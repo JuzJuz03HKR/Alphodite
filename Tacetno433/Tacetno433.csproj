@@ -26,6 +26,10 @@
   <ItemGroup>
     <None Include="Content\Art\Battle\**\*.png;Content\Art\Battle\**\*.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
+  <!-- Beta1 screens : the fonts are free (SIL Open Font License), their licence texts travel with the game -->
+  <ItemGroup>
+    <None Include="Content\Fonts\OFL-*.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.*" />
     <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.*" />

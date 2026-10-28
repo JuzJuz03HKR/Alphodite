@@ -241,6 +241,7 @@ namespace Tacetno433
                 else Screens.Update(dt);
             }
             Ornament.UpdateGrain(dt);
+            if (DebugShots.Active) Input.PretendPress = Keys.None;     // a pretend key lasts one update, even when a slow frame runs several
             if (showDebug) updateMsSum += updateWatch.Elapsed.TotalMilliseconds;
             UpdateDebug(dt);
 

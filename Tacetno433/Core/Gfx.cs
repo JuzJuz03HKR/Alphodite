@@ -134,6 +134,14 @@ namespace Tacetno433.Core
             }
         }
 
+        //Draw Ring (Beta1 screens) : a circle outline for big circles. CircleOutline's 36 straight pieces show as corners
+        //on a ring as big as the screen, so here the pieces are about 6 pixels long whatever the size (24 to 256 of them).
+        public static void Ring(SpriteBatch sb, float cx, float cy, float radius, Color color, float thickness)
+        {
+            int segments = (int)MathHelper.Clamp(radius * MathHelper.TwoPi / 6f, 24f, 256f);
+            Arc(sb, cx, cy, radius, 0f, MathHelper.TwoPi, color, thickness, segments);
+        }
+
         //Draw Ellipse Outline : a ring squashed flat, like a ripple seen on the floor.
         //rx is half the width, ry half the height.
         public static void EllipseOutline(SpriteBatch sb, float cx, float cy, float rx, float ry, Color color, float thickness)
@@ -154,7 +162,12 @@ namespace Tacetno433.Core
         //Angles are in radians, 0 points right. Eight segments is plenty for a short arc.
         public static void Arc(SpriteBatch sb, float cx, float cy, float radius, float fromAngle, float toAngle, Color color, float thickness)
         {
-            int segments = 8;
+            Arc(sb, cx, cy, radius, fromAngle, toAngle, color, thickness, 8);
+        }
+
+        //Draw Arc (pieces) : the same with as many straight pieces as asked, for long arcs (Beta1 screens)
+        public static void Arc(SpriteBatch sb, float cx, float cy, float radius, float fromAngle, float toAngle, Color color, float thickness, int segments)
+        {
             Vector2 previous = new Vector2(cx + (float)Math.Cos(fromAngle) * radius, cy + (float)Math.Sin(fromAngle) * radius);
 
             for (int i = 1; i <= segments; i++)
@@ -403,6 +416,22 @@ namespace Tacetno433.Core
         public static void TextSpacedRight(SpriteBatch sb, SpriteFont font, string s, float rightX, float y, Color color, float scale, float tracking)
         {
             TextSpaced(sb, font, s, rightX - SpacedWidth(font, s, scale, tracking), y, color, scale, tracking);
+        }
+
+        //Draw Spaced Text Turned (Beta1 screens) : spaced text leaning by angle (radians), the letters following the
+        //turned line. (x, cy) is the left end of the line at the middle of the letters, which stays put as it turns.
+        public static void TextSpacedTurned(SpriteBatch sb, SpriteFont font, string s, float x, float cy, Color color, float scale, float tracking, float angle)
+        {
+            Vector2 along = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
+            Vector2 origin = new Vector2(0f, font.LineSpacing / 2f);
+            float run = 0f;
+            for (int i = 0; i < s.Length; i++)
+            {
+                string letter = LetterOf(s[i]);
+                Vector2 at = new Vector2(x, cy) + along * run;
+                sb.DrawString(font, letter, at, color, angle, origin, scale, SpriteEffects.None, 0f);
+                run += font.MeasureString(letter).X * scale + tracking;
+            }
         }
 
         //Draw Vertical Text : turned a quarter turn so it reads from top to bottom.

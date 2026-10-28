@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <XnaContent xmlns:Graphics="Microsoft.Xna.Framework.Content.Pipeline.Graphics">
+  <!-- Saira Semi Condensed Medium (OFL, Fonts/OFL-SairaSemiCondensed.txt), the sans chosen for Beta1 (28 Oct, set B).
+       Reserved Font Name "Saira" : use the file as it is, a changed file must be renamed. -->
   <Asset Type="Graphics:FontDescription">
-    <FontName>Bahnschrift</FontName>
+    <FontName>Fonts/SairaSemiCondensed-Medium.ttf</FontName>
     <Size>18</Size>
     <Spacing>1</Spacing>
     <UseKerning>true</UseKerning>

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using Tacetno433.Audio;
 using Tacetno433.Core;
 using Tacetno433.Data;
@@ -19,7 +20,10 @@ namespace Tacetno433.Screens
             run.Advance();
 
             if (run.RunComplete)
+            {
+                game.Screens.SweepNext(new Vector2(TacetGame.ScreenW / 2f, TacetGame.ScreenH / 2f), RingSweep.Kind.Light);   // RING SWEEP : the run is won
                 game.Screens.Change(new CurtainCallScreen(true));
+            }
             else if (run.AtFloorOpening)
                 game.Screens.Change(new ChapterScreen());    // a new floor opens with its movement card
             else

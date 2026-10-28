@@ -26,7 +26,8 @@
   **PLAYTEST เปิดอยู่ : SIGNATURE ใช้ 1 PERFECT (`BattleRules.PlaytestSignatureNeed` = 1 ผู้ใช้สั่งเพื่อลอง) ลองเสร็จแล้วต้องตั้งกลับเป็น 0** (ค่าจริง `TurnSignatureNeed` 6) · ผู้ใช้สั่งอีกครั้ง (28 ต.ค. รอบคุยหน้าจอ) คงไว้ 1 ไปก่อน ห้ามแก้จนผู้ใช้บอก
 - **รอบ 6 (28 ต.ค.)** : impact frame เป็นลำดับ กลับสี แวบขาว กลับสี แล้วจาง + ซูมกระแทก + เบลอ (ตัวเลข Hit Feel) กลับสีแบบหน้ามังงะ · ผู้ใช้อยากให้ **สกิลมีหน้าตาตามชื่อ** เริ่มที่ LIGHTNING ของ THE UNHEARING (ฟ้าผ่าจากฟ้า `HitStyle.Lightning`) · ที่เหลือยังเป็น CROSS · รายละเอียด `BATTLE_SCENE_2_3D_CHANGE.md` ข้อ 14
 - **ปิดแชทรอบ 4–6 (28 ต.ค.)** : ผู้ใช้บอกการนำเสนอของฉากต่อสู้โอเคแล้ว **ขั้นต่อไปอยากยกระดับทุกหน้าจออีกหนึ่งขั้น** (จะคุยในแชทใหม่ก่อน) · มีแค่หน้าต่อสู้ที่เป็นแบบ Beta1 · แผนที่โค้ด Beta1 อยู่ `HANDOFF.md` ข้อ 0.0 · งานถัดไปละเอียดใน `RESUME_PROMPT.md`
-- **ยกระดับทุกหน้าจอ (28 ต.ค. คุยแล้ว ยังไม่เขียนโค้ด)** : แผนเต็ม `docs/SCREENS_LEVEL_UP.md` (แชทใหม่เริ่มที่ข้อ 9 ข้อ 5) · ผู้ใช้เลือก : ทิศทาง**แบบผสม** (โครงตามหน้าต่อสู้ แต่การเปลี่ยนหน้าและการเลือกจัดจ้านแบบ Persona 5 ZZZ Limbus โดยไม่เร็วขึ้น) · รอบแรก = **ชั้นกลาง + Title + Result เป็นตัวอย่าง** ให้ Rebuild ดูก่อน ·
+- **ยกระดับทุกหน้าจอ รอบตัวอย่างเสร็จ (28 ต.ค.) รอผู้ใช้ Rebuild ดู** : ชั้นกลาง (ฟอนต์ OFL ใน `Content/Fonts/` · เลนส์ `PostChain.DrawPage` ทุกหน้า · `TacetVoid.PlaceOnPage` · `Core/UiMotion.cs` + `Ui.MenuItem/Command/Number` · `SlantWipe` หลายชั้น · `Core/RingSweep.cs`) + Title + Result และ Defeat · สรุปและสิ่งที่ให้ผู้ใช้ดู `SCREENS_LEVEL_UP.md` ข้อ 10 · ถัดไปรอบ 1 ของตารางข้อ 5 ·
+  แผนเต็ม `docs/SCREENS_LEVEL_UP.md` · ผู้ใช้เลือก : ทิศทาง**แบบผสม** (โครงตามหน้าต่อสู้ แต่การเปลี่ยนหน้าและการเลือกจัดจ้านแบบ Persona 5 ZZZ Limbus โดยไม่เร็วขึ้น) · รอบแรก = **ชั้นกลาง + Title + Result เป็นตัวอย่าง** ให้ Rebuild ดูก่อน ·
   ฟอนต์เปลี่ยนเป็น OFL (Palatino กับ Bahnschrift ของ Windows ห้ามแจกถ้าจะขาย) ผู้ใช้เลือก **Cormorant Garamond + Saira Semi Condensed** (ไทย Trirong + Chakra Petch) · ปุ่ม**แบบผสม**ตามภาพอ้างอิง Claude ทำเวอร์ชันแรก (สเปก 3.4) · วงแหวนกวาดใช้เฉพาะช่วงสำคัญ · ภาพหน้าตัวละครใน UI **เป็น pixel** ·
   ภาพอ้างอิงอยู่ Google Drive โฟลเดอร์ "ทิศทางหน้าตาของทุกหน้า" ดูครบ 8 ไฟล์แล้ว (menu2 6 7 ผู้ใช้แนบในแชท บรรยายไว้ข้อ 3.3) ห้าม commit ภาพหรือลิงก์
 - **อนาคต (ผู้ใช้บอก 28 ต.ค.)** : นักดนตรีเหลือ 3–5 คน เปลี่ยนวิธีเลือกนักดนตรี เน้น roguelike ที่ทีมโหดขึ้นเรื่อยๆ และจะแก้ระบบต่อสู้เยอะ → แยกโค้ดภาพออกจากกติกา (`TurnBattle` ไม่มีโค้ดวาด) · ต้องการตัวอย่าง VFX ให้ถามผู้ใช้ทันที ห้ามเดา
@@ -108,13 +109,12 @@
 
 ## 5. build และทดสอบ
 - ปกติ : เปิด `Tacetno433.sln` ใน Visual Studio กด F5 · ต้องได้ **0 error 0 warning**
-- ฟอนต์อ้าง `C:/Windows/Fonts/pala.ttf` แบบ path เต็ม ในเครื่องที่ไม่ใช่ Windows (เช่นแชท cloud) ขั้น build Content อาจไม่ผ่าน
-  ถ้าเป็นแบบนั้น ให้ดูว่า **C# คอมไพล์ผ่านไหม** (error ขึ้นต้น `CS`) แล้วบอกผู้ใช้ตรงๆ ว่าต้อง build/เล่นทดสอบบนเครื่อง Windows
+- ฟอนต์ (Beta1 28 ต.ค.) เป็นไฟล์ OFL ใน `Tacetno433/Content/Fonts/` (Cormorant Garamond + Saira Semi Condensed) build ได้ทุกเครื่องเหมือนกัน
+  ถ้าขั้น build Content ไม่ผ่าน ให้ดูว่า **C# คอมไพล์ผ่านไหม** (error ขึ้นต้น `CS`) แล้วบอกผู้ใช้ตรงๆ ว่าต้อง build/เล่นทดสอบบนเครื่อง Windows
 - **ในแชท cloud (Linux) ทำได้แล้ว (รอบ 7)** : ตัวติดตั้ง .NET จาก Microsoft ถูกบล็อก แต่ `apt-get install dotnet-sdk-8.0` ได้ →
-  คัดลอกโปรเจกต์ไปโฟลเดอร์ชั่วคราว (ห้ามแก้ใน repo) · เปลี่ยน `net9.0` → `net8.0` · เปลี่ยน `pala.ttf` / `Bahnschrift` ใน `.spritefont` เป็นไฟล์ฟอนต์ Linux
-  (`/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf`, `/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf`) · `dotnet build` ·
+  คัดลอกโปรเจกต์ไปโฟลเดอร์ชั่วคราว (ห้ามแก้ใน repo) · เปลี่ยน `net9.0` → `net8.0` (ฟอนต์ไม่ต้องสลับแล้ว) · shader ต้องรัน `.claude/skills/build/shader_setup.sh` ก่อน · `dotnet build` ·
   รันด้วย `xvfb-run -a -s "-screen 0 1280x720x24" env LIBGL_ALWAYS_SOFTWARE=1 SDL_AUDIODRIVER=dummy dotnet Tacetno433.dll --shots ...` ·
-  ภาพที่ได้ใช้ฟอนต์ต่างจากของจริง (ความกว้างตัวอักษรไม่เท่า) ห้ามเอาไปแทนภาพใน `docs/screenshots/` · ยังต้องให้ผู้ใช้ Rebuild และเล่นจริงบน Windows
+  ภาพที่ได้ใช้ฟอนต์เดียวกับของจริงแล้ว แต่จังหวะเวลาไม่ตรง ห้ามเอาไปแทนภาพใน `docs/screenshots/` จนกว่าผู้ใช้ดูบน Windows แล้วโอเค · ยังต้องให้ผู้ใช้ Rebuild และเล่นจริงบน Windows
 - เครื่องมือทดสอบ `Core/DebugShots.cs` (ต้องมีจอ/การ์ดจอ ใน cloud ใช้จอเสมือนตามข้อบน) :
   `Tacetno433.exe --shots duel@150,band --out <โฟลเดอร์>` แคปหน้าจอ ·
   `--shots simulate --out <โฟลเดอร์>` จำลองบาลานซ์ลง `simulate.txt` · `--shots audit --out <โฟลเดอร์>` ตรวจสมดุลแยกคอนดักเตอร์/Motif/ศัตรู/ยุค ลง `audit.txt` ·

@@ -51,6 +51,10 @@ float Swirl;        // LENSING : how far the world turns around the hole at its 
 float Danger;       // 0..1 how close the band is to losing : wilder and brighter
 float Time;
 float4 Wave;        // SHOCK WAVE : x, y (pixels), its radius now (pixels), strength 0..1
+float Fine;         // 0 = the battle : the backdrop is pixel art drawn x2, read once per block of 2 x 2
+                    // 1 = another page (Beta1 screens) : the backdrop has lines one pixel thin, so every screen pixel reads
+                    //     its own spot, moved as far as its block bends (a block's middle falls between two pixels,
+                    //     which broke thin lines into dashes)
 
 struct VertexShaderOutput
 {
@@ -130,7 +134,8 @@ float4 VoidPS(VertexShaderOutput input) : COLOR0
     float ring = saturate(1.0 - abs(wd - Wave.z) / 24.0);
     q += w / wd * ring * ring * 16.0 * Wave.w;
 
-    float3 col = tex2D(BackSampler, q / Screen).rgb;
+    float2 own = input.UV * Screen + (q - p);
+    float3 col = tex2D(BackSampler, lerp(q, own, Fine) / Screen).rgb;
 
     //THE POOL : the floor goes black from under the hole to its edge, slow currents flowing towards the camera
     float edge = PoolEdge(p.x);
