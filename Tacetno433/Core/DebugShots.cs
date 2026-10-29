@@ -387,13 +387,13 @@ namespace Tacetno433.Core
             }
 
             //Settings : change them, save, scramble, load, compare, then put the defaults back
-            Settings.Master = 0.35f; Settings.Sfx = 0.6f; Settings.Music = 0.1f; Settings.Language = 1; Settings.SetTiming(0.045f); Settings.Maestro = true;
+            Settings.Master = 0.35f; Settings.Sfx = 0.6f; Settings.Music = 0.1f; Settings.Language = 1; Settings.SetTiming(0.045f); Settings.Maestro = true; Settings.ClearFight = true;
             SaveFile.SaveSettings();
-            Settings.Master = 1f; Settings.Sfx = 1f; Settings.Music = 1f; Settings.Language = 0; Settings.SetTiming(0f); Settings.Maestro = false;
+            Settings.Master = 1f; Settings.Sfx = 1f; Settings.Music = 1f; Settings.Language = 0; Settings.SetTiming(0f); Settings.Maestro = false; Settings.ClearFight = false;
             SaveFile.LoadSettings();
-            report += Same("settings", "0.35/0.6/0.1/1/" + Settings.TimingLabel(0.045f) + "/True",
-                           Settings.Master + "/" + Settings.Sfx + "/" + Settings.Music + "/" + Settings.Language + "/" + Settings.TimingLabel(Settings.TimingOffset) + "/" + Settings.Maestro);
-            Settings.Master = 0.8f; Settings.Sfx = 0.8f; Settings.Music = 0.55f; Settings.Language = 0; Settings.SetTiming(0f); Settings.Maestro = false;
+            report += Same("settings", "0.35/0.6/0.1/1/" + Settings.TimingLabel(0.045f) + "/True/True",
+                           Settings.Master + "/" + Settings.Sfx + "/" + Settings.Music + "/" + Settings.Language + "/" + Settings.TimingLabel(Settings.TimingOffset) + "/" + Settings.Maestro + "/" + Settings.ClearFight);
+            Settings.Master = 0.8f; Settings.Sfx = 0.8f; Settings.Music = 0.55f; Settings.Language = 0; Settings.SetTiming(0f); Settings.Maestro = false; Settings.ClearFight = false;
 
             //KEEPSAKE (Alpha 7) : CONTINUE keeps exactly the saved motifs, it does not roll the keepsake again
             int keptKeepsake = Archive.All[Archive.Keepsake].Level;
@@ -832,6 +832,8 @@ namespace Tacetno433.Core
         //       inside, coming back, the painting carried in, the next profile, e.g. gallerywalk@50 galleryback@10 detailcarry@12 detailswap@40)
         private static void Open(TacetGame game, string name)
         {
+            Settings.ClearFight = name.EndsWith("clear");                                 // Beta1 step 6 : the same picture with CLEAR FIGHT on (battleclear, battleparryclear)
+            if (Settings.ClearFight) name = name.Substring(0, name.Length - 5);
             RunState run = SampleRun(game, name);
             game.CurrentRun = run;
             game.Pause.Open = false;

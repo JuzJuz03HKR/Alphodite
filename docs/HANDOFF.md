@@ -17,6 +17,7 @@
 | cut-in SIGNATURE, แสงของวง QTE (วาดทับหลังโลกถูกหรี่) | `Screens/BattleScreen.Show.cs` |
 | อ่านภาพ animation ของทีมอาร์ต (PNG / Aseprite) | `Core/FrameArt.cs` · โฟลเดอร์ `Content/Art/Battle/` · แผนอาร์ต `BATTLE_ART_PLAN.md` |
 | LESS FLASHING | `Core/Settings.cs` `ReduceFlashing` · หน้า `Screens/SettingsScreen.cs` แถว 07 · `BattleRules.LessFlash` |
+| CLEAR FIGHT (หน้าต่อสู้อ่านง่าย 29 ต.ค.) | `Core/Settings.cs` `ClearFight` เซฟ `clearfight=` · หน้า `Screens/SettingsScreen.cs` แถว 08 · วาดใน `Screens/BattleScreen.cs` (ค้น `CLEAR FIGHT` : `DrawClearPlate` `DrawAimedAt` `DrawIntent` `DrawBand` `DrawBottom`) · ตัวเลข `BattleRules.ClearFocusDim` `ClearFocusPool` `ClearPlate` |
 | PLAYTEST (SIGNATURE 1 แต้ม) | `BattleRules.PlaytestSignatureNeed` (0 = ค่าจริง) |
 | ภาพทดสอบ | `--shots battle battlewin battlelose battleslash battleshot battlesmash battlecross battleink battlegold battlefire battlecutin battlekill battlebolt battleboltsoft battleimpact` (`BattleScreen.ShowForPicture`) |
 

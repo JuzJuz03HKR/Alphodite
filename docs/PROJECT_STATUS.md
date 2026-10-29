@@ -1568,6 +1568,7 @@ duels0 – duels4 (ดวลขณะ SIGNATURE ของคนนั้นท�
 (บางหน้าให้เครื่องมือแกล้งกดปุ่มก่อนแคป ผ่าน `Input.PretendPress` เช่น Esc ของ `pause`/`duelpause`/`titlequit`, Enter ของ `shopleave` ·
 `dueldouble`/`dueltremolo`/`finale`/`calibrate` กระโดดไปจังหวะนั้นเลยผ่าน hook สำหรับถ่ายภาพ)
 Beta1 รอบ 3 (29 ต.ค.) : `pausesettings@150` (Settings ที่เมนูหยุดยืม) `pauseask@120` (กล่องถามก่อนกลับ Title) `battlepause` (เมนูหยุดทับหน้าต่อสู้) เปิดผ่าน `PauseMenu.OpenSettings` / `AskReturn` ไม่ขึ้นกับเมาส์จำลอง
+CLEAR FIGHT (29 ต.ค.) : ชื่อหน้าใดก็ได้เติม `clear` ท้าย = ภาพเดียวกันแต่เปิด `Settings.ClearFight` เช่น `battleclear` `battleparryclear@8` `battlefullclear`
 
 ```bash
 Tacetno433.exe --shots title,battle,result --out C:\pictures --scale 1.5 --steady

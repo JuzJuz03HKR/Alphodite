@@ -279,6 +279,9 @@
         public static float HitBoltStagger = 0.08f;       // LIGHTNING : one enemy after another, this far apart (seconds)
         public static float HitBoltFlash = 0.7f;          //   the whole stage lights up when it strikes (LIGHT MAP)
         public static float LessFlash = 0.45f;            // LESS FLASHING (settings) : flashes and shaking are this strong
+        public static float ClearFocusDim = 0.35f;        // CLEAR FIGHT (settings) : while a ring is up the whole picture goes this much darker
+        public static float ClearFocusPool = 0.8f;        //   and the dark pool behind the ring is this deep (0.6 without CLEAR FIGHT)
+        public static float ClearPlate = 0.9f;            //   the plates behind names, life and attacks are this solid (0.6 without)
 
         //Stage Void (Beta1 round 4) : TACET's dark, a black hole behind the enemies pouring over the floor towards the camera
         //(Core/TacetVoid.cs, Content/Effects/Void.fx). SHARE 0 = TACET beaten, 1 = the band beaten.

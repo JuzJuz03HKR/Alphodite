@@ -10,8 +10,8 @@ namespace Tacetno433.Screens
 {
     //SettingsScreen : the options page, opened from the title menu or from the pause menu.
     //
-    //Seven rows: three volume sliders, the language choice, full screen, the stroke timing and
-    //LESS FLASHING. Up and down pick a row, left and right change it, and the mouse can drag
+    //Eight rows: three volume sliders, the language choice, full screen, the stroke timing,
+    //LESS FLASHING and CLEAR FIGHT. Up and down pick a row, left and right change it, and the mouse can drag
     //the sliders or click the words. The column on the right explains whichever row is chosen.
     //
     //STROKE TIMING has a test: a flash (and a tick) every beat, the player strokes on each one,
@@ -47,12 +47,13 @@ namespace Tacetno433.Screens
         private const int RowFull = 4;
         private const int RowTiming = 5;
         private const int RowFlash = 6;                     // LESS FLASHING (Beta1 round 4)
-        private const int RowCount = 7;
+        private const int RowClear = 7;                     // CLEAR FIGHT (Beta1 step 6, BETA1_DIRECTION 3.6)
+        private const int RowCount = 8;
 
         //Settings Layout
         private const int SpineX = 262;                     // the thin line the rows hang on, each row's circle sits on it
         private const int RowY = 92;                        // the top of the first row
-        private const int RowStep = 64;
+        private const int RowStep = 60;
         private const int RowH = 56;
         private const int RowLeft = 200;                    // the row's box for the mouse, from here ...
         private const int RowRight = 900;                   // ... to here
@@ -64,7 +65,7 @@ namespace Tacetno433.Screens
         private static readonly Vector2 Hole = new Vector2(1085f, 96f);
         private const float HoleRadius = 30f;
 
-        private static string[] rowIndex = { "01", "02", "03", "04", "05", "06", "07" };
+        private static string[] rowIndex = { "01", "02", "03", "04", "05", "06", "07", "08" };
         private static string[] rowNames =
         {
             "MASTER VOLUME",
@@ -73,7 +74,8 @@ namespace Tacetno433.Screens
             "LANGUAGE",
             "FULL SCREEN",
             "STROKE TIMING",
-            "LESS FLASHING"
+            "LESS FLASHING",
+            "CLEAR FIGHT"
         };
         private static string[] offOn = { "OFF", "ON" };
 
@@ -88,7 +90,8 @@ namespace Tacetno433.Screens
             BattleRules.TurnBattleOn
                 ? "If your strokes feel on time but the game calls them late, move this to the right. Early, to the left. Press ENTER or TEST and the game measures it for you."
                 : "If your strokes feel right on the beat but the duel calls them late, move this to the right. Early, to the left. Press ENTER or TEST and the game measures it for you.",
-            "Turns down the white flashes and the shaking of big hits, and leaves out the frame where the picture turns black and white. For anyone who finds flashing light hard to look at."
+            "Turns down the white flashes and the shaking of big hits, and leaves out the frame where the picture turns black and white. For anyone who finds flashing light hard to look at.",
+            "A fight that is easier to read : bigger numbers, a solid plate behind every name and attack, each attack says who it is for, and the rest goes darker while you swing. The rules stay the same. Turn it on and off to compare."
         };
         private static string savedNote =
             "Options are saved the moment you leave this page, and come back the next time the game starts.";
@@ -106,6 +109,7 @@ namespace Tacetno433.Screens
         private Rectangle[] langBoxes = new Rectangle[2];
         private Rectangle[] fullBoxes = new Rectangle[2];   // FULL SCREEN : OFF, ON
         private Rectangle[] flashBoxes = new Rectangle[2];  // LESS FLASHING : OFF, ON
+        private Rectangle[] clearBoxes = new Rectangle[2];  // CLEAR FIGHT : OFF, ON
         private Rectangle timingTrack;
         private Rectangle timingGrab;
         private Rectangle testChip;
@@ -180,6 +184,7 @@ namespace Tacetno433.Screens
             {
                 fullBoxes[k] = new Rectangle(TrackX + k * 88, rowBoxes[RowFull].Center.Y - 16, 76, 32);
                 flashBoxes[k] = new Rectangle(TrackX + k * 88, rowBoxes[RowFlash].Center.Y - 16, 76, 32);
+                clearBoxes[k] = new Rectangle(TrackX + k * 88, rowBoxes[RowClear].Center.Y - 16, 76, 32);
             }
 
             int timing = rowBoxes[RowTiming].Center.Y;
@@ -400,6 +405,7 @@ namespace Tacetno433.Screens
                     if (Input.MouseOver(langBoxes[k])) { selected = RowLanguage; SetLanguage(k); }
                     if (Input.MouseOver(fullBoxes[k])) { selected = RowFull; SetFullscreen(k == 1); }
                     if (Input.MouseOver(flashBoxes[k])) { selected = RowFlash; SetFlashing(k == 1); }
+                    if (Input.MouseOver(clearBoxes[k])) { selected = RowClear; SetClear(k == 1); }
                 }
                 if (Input.MouseOver(timingGrab)) { dragging = RowTiming; selected = RowTiming; }
                 if (Input.MouseOver(testChip)) { StartTest(); return; }
@@ -426,6 +432,7 @@ namespace Tacetno433.Screens
             else if (row == RowLanguage) SetLanguage(dir < 0 ? 0 : 1);
             else if (row == RowTiming) Settings.SetTiming(Settings.TimingOffset + dir * Settings.TimingStep);
             else if (row == RowFlash) SetFlashing(dir > 0);
+            else if (row == RowClear) SetClear(dir > 0);
             else SetFullscreen(dir > 0);
         }
 
@@ -435,6 +442,7 @@ namespace Tacetno433.Screens
             if (row == RowLanguage) SetLanguage(Settings.Language == 0 ? 1 : 0);
             else if (row == RowFull) SetFullscreen(!Settings.Fullscreen);
             else if (row == RowFlash) SetFlashing(!Settings.ReduceFlashing);
+            else if (row == RowClear) SetClear(!Settings.ClearFight);
             else if (row == RowTiming) StartTest();
             if (row >= RowLanguage) rowMotion[row].Press();
         }
@@ -480,6 +488,14 @@ namespace Tacetno433.Screens
         {
             if (Settings.ReduceFlashing == on) return;
             Settings.ReduceFlashing = on;
+            SoundBank.Play(Sfx.UiConfirm);
+        }
+
+        //Set Clear : CLEAR FIGHT on or off (the battle reads Settings.ClearFight)
+        private void SetClear(bool on)
+        {
+            if (Settings.ClearFight == on) return;
+            Settings.ClearFight = on;
             SoundBank.Play(Sfx.UiConfirm);
         }
 
@@ -603,6 +619,7 @@ namespace Tacetno433.Screens
             else if (i == RowLanguage) DrawLanguageRow(sb, on, a);
             else if (i == RowFull) DrawSwitchRow(sb, fullBoxes, Settings.Fullscreen, "BORDERLESS  WINDOW", 21, on, a);
             else if (i == RowFlash) DrawSwitchRow(sb, flashBoxes, Settings.ReduceFlashing, "SOFTER  HITS", 33, on, a);
+            else if (i == RowClear) DrawSwitchRow(sb, clearBoxes, Settings.ClearFight, "BIGGER  NUMBERS", 57, on, a);
             else DrawTimingRow(sb, on, a);
         }
 

@@ -32,6 +32,12 @@ namespace Tacetno433.Core
         //and turns its flashes and shaking down (BattleRules.LessFlash).
         public static bool ReduceFlashing;
 
+        //Clear Fight (Beta1, docs/BETA1_DIRECTION.md 3.6) : a fight that is easier to read. Bigger numbers in plain upright
+        //figures, a solid plate behind every name and every attack, each attack names who it is aimed at, and the picture
+        //goes darker round the ring while a swing is on. Only how the fight is drawn changes, never its rules. Off by
+        //default, so it can be turned on and off to compare (CLEAR FIGHT on the settings page).
+        public static bool ClearFight;
+
         //Stroke Timing : seconds taken off every stroke before it is judged in a duel.
         //Every hand, mouse and screen is a little late in its own way. A player whose strokes
         //are always judged late moves this up, and the duel meets them where they are.
