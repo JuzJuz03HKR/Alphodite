@@ -150,10 +150,11 @@ namespace Tacetno433.Core
             }
             report += Same("breath top", BattleRules.TurnBreathMax.ToString(), b.Breath.ToString());
 
-            //SKILLS (step 4) : two for each musician, every cost 2 to 4, every skill has notes
+            //SKILLS (step 4) : two for each musician, every cost 2 to 4, every skill has notes,
+            //and every skill's kind fits what it does (SKILL KIND, Beta1), so its colour never lies
             bool skillsOk = SkillList.All.Length == MusicianList.All.Length * 2;
             for (int i = 0; i < SkillList.All.Length && skillsOk; i++)
-                skillsOk = SkillList.All[i].Cost >= 2 && SkillList.All[i].Cost <= 4 && SkillList.All[i].Notes.Length > 0;
+                skillsOk = SkillList.All[i].Cost >= 2 && SkillList.All[i].Cost <= 4 && SkillList.All[i].Notes.Length > 0 && KindFits(SkillList.All[i]);
             report += Same("skills", "18 True", SkillList.All.Length + " " + skillsOk);
 
             //Reserved : a skill written into the bar holds its BREATH, so QUANTZ's SOFT AIR (2) cannot be written with 1 left
@@ -542,6 +543,16 @@ namespace Tacetno433.Core
         {
             for (int i = 0; i < 20 && b.Step != TurnStep.EnemyTurn && b.Step != TurnStep.Won && b.Step != TurnStep.Lost; i++)
                 Step(b, Grade.Good);
+        }
+
+        //Kind Fits : SKILL KIND (Beta1). Only an ATTACK aims at the enemies, a HEAL gives life, a DEFEND guards or draws the
+        //blows, a BOOST gives CRESCENDO or BREATH.
+        private static bool KindFits(Skill s)
+        {
+            if (s.Kind == SkillKind.Attack || s.HitsEnemy) return s.Kind == SkillKind.Attack && s.HitsEnemy;
+            if (s.Kind == SkillKind.Heal) return s.Heal > 0;
+            if (s.Kind == SkillKind.Defend) return s.Guard || s.Taunt;
+            return s.Crescendo > 0 || s.Breath > 0;
         }
 
         //Sturdy : a band of one gets lots of life, so the enemy's turns never end a check before it is done

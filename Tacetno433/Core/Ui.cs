@@ -400,6 +400,15 @@ namespace Tacetno433.Core
         //Button : returns nothing, pages test the click themselves with Input.ClickedOn(box)
         public static void Button(SpriteBatch sb, Rectangle box, string label, string key, bool primary, bool enabled, float alpha)
         {
+            Button(sb, box, label, key, primary, enabled, alpha, Color.Transparent);
+        }
+
+        //Button (a skill's) : kind is the colour of the skill's kind (Palette.Kind), a band along the slanted left edge
+        //that leans with the button (SKILL KIND, Beta1 29 Oct). Color.Transparent draws no band.
+        private const int KindBand = 6;           // SKILL KIND : the band's width (pixels)
+
+        public static void Button(SpriteBatch sb, Rectangle box, string label, string key, bool primary, bool enabled, float alpha, Color kind)
+        {
             bool over = enabled && Input.MouseOver(box);
             float a = enabled ? alpha : alpha * 0.35f;
 
@@ -420,6 +429,9 @@ namespace Tacetno433.Core
                 Gfx.SlantOutline(sb, r, Slant, (over ? Palette.Highlight : Palette.LineGrey) * a, 1f);
                 text = (over ? Palette.Highlight : Palette.Paper) * a;
             }
+
+            //SKILL KIND : the kind's colour along the slanted left edge, on the face
+            if (kind.A > 0) Gfx.SlantBox(sb, new Rectangle(r.X, r.Y, Slant + KindBand, r.Height), Slant, kind * a);
 
             //Label Area : between the slanted left edge and the key chip, if there is one
             float left = r.X + Slant + 8;

@@ -1,5 +1,6 @@
 using System;
 using Microsoft.Xna.Framework;
+using Tacetno433.Data;
 
 namespace Tacetno433.Core
 {
@@ -67,6 +68,31 @@ namespace Tacetno433.Core
             float g = 0.5f + 0.5f * (float)Math.Cos(turn - 2.0944f);
             float b = 0.5f + 0.5f * (float)Math.Cos(turn + 2.0944f);
             return new Color(r, g, b);
+        }
+
+        //Skill Kind Colours (Beta1, 29 Oct, SKILL KIND in Data/Skill.cs) : what a skill is for, seen at once. The user's
+        //colour rule (docs/USER_BRIEFS.md 13.29) : the world and TACET stay black, white and grey, the band's side may be vivid.
+        //These four live on the interface only (the skill's button, later its icon, its aim ring and the mark on a friend).
+        //The light of a blow stays the musician's own colour (Spot Colours above). The usual colours of most games, so a first
+        //time player guesses right, the user said try them in the game (BETA1_DIRECTION 11.11). Kept apart from the Spot
+        //Colours : ATTACK is a crimson (the musician's RED is an orange flame), BOOST a lemon gold (GOLD is an orange gold),
+        //DEFEND a pale glass blue (LIGHTNING is a deep blue). HEAL is far lighter than ATTACK, so the two still differ for
+        //players who mix up red and green.
+        public static Color KindAttack = new Color(236, 46, 70);       // red, a blade
+        public static Color KindDefend = new Color(120, 218, 255);     // sky blue glass, a shield
+        public static Color KindHeal = new Color(96, 232, 140);        // green, life
+        public static Color KindBoost = new Color(255, 216, 70);       // gold, a lift
+
+        //Kind : the colour of a skill's kind
+        public static Color Kind(SkillKind kind)
+        {
+            switch (kind)
+            {
+                case SkillKind.Defend: return KindDefend;
+                case SkillKind.Heal: return KindHeal;
+                case SkillKind.Boost: return KindBoost;
+                default: return KindAttack;
+            }
         }
 
         //Accent : THE ONE COLOUR SWITCH.

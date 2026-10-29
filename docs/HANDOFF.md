@@ -76,7 +76,7 @@
 | ศัตรูหลายตัวในรัน (PACKS) และเซฟ | `RunState.BeginBattle` `PackEscorts` · `BattleState.Pack` · `SaveFile` (`pack=`) · `EnemyList.PickOther` |
 | หน้าต่อสู้ (เขียนห้อง ม้านั่ง ATTACK พุ่งตี game feel วงแหวน QTE แถบห้อง ป้ายสถานะ ไฟต์ฝึก PRACTICE) | `Screens/BattleScreen.cs` |
 | ตัวเลขบาลานซ์ทุกตัว | `Data/BattleRules.cs` หัวข้อ TURN BATTLE (บนสุด) และ Turn Feel |
-| สกิลนักดนตรี 18 สกิล (2 ต่อคน ตามลำดับ `MusicianList`) | `Data/Skill.cs` |
+| สกิลนักดนตรี 18 สกิล (2 ต่อคน ตามลำดับ `MusicianList`) · ชนิดสกิล SKILL KIND (โจมตี ป้องกัน ฮีล เสริม Beta1) | `Data/Skill.cs` (`SkillKind` `Skill.Kind`) · สีของชนิด `Core/Palette.cs` (`Palette.Kind`) |
 | ความสามารถติดตัวนักดนตรีในโหมดผลัดตา | ข้อความ `Data/Musician.cs` `TurnTraitText` · ผล `TurnBattle.cs` (ค้นชื่อความสามารถ) |
 | วาทยากร 6 คน (PASSIVE / SIGNATURE) และคนที่โชว์ในแกลเลอรี | `Data/Conductor.cs` (`TurnKit`, `Turn*` text, `ConductorList.Shown`) · ผลอยู่ `TurnBattle.cs` (`UseSignature`, `Judge`, `CanUse`) |
 | ศัตรู 9 ตัว (เลือด ความเร็ว ท่อนโจมตี กลไก) + ศัตรูฝึก | `Data/Enemy.cs` (`TurnHp` `TurnSpeed` `Phrases` `TurnTraitText` `TurnPower` · `EnemyList.Practice`) |

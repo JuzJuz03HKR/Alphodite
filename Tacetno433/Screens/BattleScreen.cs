@@ -2024,7 +2024,8 @@ namespace Tacetno433.Screens
                         Skill s = commandSkill[k];
                         bool usable = k == 0 || battle.CanPlanSkill(selected, s);
                         bool lit = (move != null && move.Skill == s) || (view == View.Target && pending == s);
-                        Ui.Button(sb, commandBox[k], k == 0 ? WordAttack : s.Name, commandKey[k], lit, usable, 1f);
+                        Color kind = Palette.Kind(k == 0 ? SkillKind.Attack : s.Kind);                 // SKILL KIND : ATTACK is an attack
+                        Ui.Button(sb, commandBox[k], k == 0 ? WordAttack : s.Name, commandKey[k], lit, usable, 1f, kind);
                         if (k > 0) Ui.Pips(sb, commandBox[k].X + 26, commandBox[k].Bottom - 9, s.Cost, s.Cost, 4f, 11f, usable ? 1f : 0.35f);
                     }
                 }
