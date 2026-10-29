@@ -68,7 +68,14 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 ✅ ข้อ 1 วาทยากร 3 คน + Gallery + Detail : `SCREENS_LEVEL_UP.md` ข้อ 16 (แผง 3 แผ่นเอียงตัดจากภาพขนาดจริง ชี้แล้วตั้งตรงสีไล่ขึ้น ก้าวเข้าภาพแบบส่งภาพต่อกัน `ScreenManager.Cut` โปรไฟล์ภาพกลางจอ หน้าใกล้ 224×224) สีวาทยากร `Conductor.Spot` (แดงของ UNHEARING มาจากภาพของเขา ม่วงกับเขียวอมฟ้าเป็นสีชั่วคราว) build 0/0 turncheck 113/113 savecheck ผ่าน หน้าอื่นภาพเหมือนเดิม
 ✅ ข้อ 2 แผนที่ทั้งชั้นแบบวงซ้อน : `SCREENS_LEVEL_UP.md` ข้อ 17 (`Data/FloorMap.cs` DAG แบบ STAIRCASE + BFS เซฟ `map=` `mappath=` หน้าแผนที่วงซ้อนรอบหลุม การ์ดด้านข้าง กล้องพุ่ง) savecheck ข้อใหม่ผ่าน หน้าอื่นภาพเหมือนเดิม
 ✅ ข้อ 3 หน้าจัดวงแบบเสา + Recruit : `SCREENS_LEVEL_UP.md` ข้อ 18 (`Core/BandColumn.cs` `Core/UiArt.cs` อ่าน `Content/Art/Ui/` ลากสลับลำดับ `RunState.Order` เซฟ `order=` ฉากต่อสู้เอาคนแรกยืนหน้า ค่าเริ่มต้นเหมือนเดิม) การ์ดใต้เสายังเป็นแบบแรก รอไอเดียแถบการ์ดของผู้ใช้
-**ถัดไปในแชทนี้** : ข้อ 4 (Chapter CurtainCall BandName Archive แล้ว Settings Pause HOW TO PLAY) แล้วข้อ 6 ข้อ 5 (เอายุคออก) ต้องถามผู้ใช้ก่อนว่านักดนตรีคนไหนอยู่
+✅ ข้อ 4 ครึ่งแรก (รอบ 2 ที่เหลือ) : `SCREENS_LEVEL_UP.md` ข้อ 19 (Chapter หลุมจริง ชื่อโผล่จากขอบหลุม / CurtainCall ม่านผ้าจริง วงยืนโค้งเป็นเสา ตัวเลขนับขึ้น / BandName เสาเล็ก / Archive หัวข้อตั้ง menu1 ECHOES เลขใหญ่) build 0/0 turncheck 113/113 savecheck ผ่าน หน้าอื่นภาพเหมือนเดิม
+ผู้ใช้สั่ง (คำต่อคำ `USER_BRIEFS.md` 13.14) "บันทึกข้อมูลและอัพเดทเรียบร้อยก็ compact session แล้วทำต่อได้เลย" = ทำต่อหลัง compact ไม่ต้องรอ
+**ถัดไปในแชทนี้ (ทำต่อทันทีหลัง compact ตามลำดับ)** :
+1. ข้อ 4 ครึ่งหลัง รอบ 3 : `Screens/SettingsScreen.cs` (BOM) `Screens/PauseMenu.cs` `Screens/GuideScreen.cs` (BOM) ใช้หัวข้อตั้งบนแถบขาวสูงด้านซ้าย (menu1 แบบหน้า Archive `DrawTitleBar`) รายการเป็น `Ui.MenuItem` หรือแถวแบบ Archive (แถบหมึกตอนชี้) ปุ่ม `Ui.Command` เอา `TacetField` คลื่นขาวด้านขวาของ Settings ออก หลุม TACET นิ่งจางๆ (`Dark = new TacetVoid()` + `PlaceOnPage`) ห้ามเปลี่ยนตรรกะของตั้งค่า Pause วาดทับหน้าเดิม (ไม่ใช่ GameScreen ดู `TacetGame` ว่าวาดยังไง)
+2. ข้อ 6 หน้าต่อสู้อ่านง่าย (`BETA1_DIRECTION.md` 3.6) ทำเป็นตัวเลือกใน Settings เทียบก่อนหลังได้ ห้ามเปลี่ยนกติกา
+3. ข้อ 5 เอายุคออก : ถามผู้ใช้ก่อนเขียนโค้ด (นักดนตรีคนไหนอยู่ 3 ถึง 5 คน MALI CHAI NUAN ของยุคไทยอยู่ไหม) แล้วทำตาม `BETA1_DIRECTION.md` 2 และ 3.3 ระวังเซฟ `era=` และลำดับรายการ
+4. ทุกข้อจบ : อัปเดต `SCREENS_LEVEL_UP.md` (ข้อใหม่ 20 21) `BETA1_DIRECTION.md` ข้อ 5 `HANDOFF.md` ไฟล์นี้ แล้ว commit/push ขึ้น `Beta1` ตอนจบแชทเอาแถวของแชทนี้ออกจากตาราง "แชทที่กำลังทำงาน"
+เครื่องมือในแชทนี้ (scratchpad ของแชท ถ้าหายให้ทำใหม่ตาม `/build`) : `b.sh <ชื่อสำเนา>` build สำเนา Linux, `shots.sh <สำเนา> <โฟลเดอร์> <หน้า> [--steady --scale 1.5]`, `cmp.py <ก่อน> <หลัง>` เทียบทุกพิกเซล ภาพก่อนแก้ทั้งชุดอยู่ `shots_base/` (รายชื่อ `list_all.txt`) เช็ก BOM ของไฟล์ที่แก้ทุกครั้ง (Write ทับไฟล์ BOM แล้วต้องใส่ BOM กลับ)
 
 **29 ต.ค. (ล่าสุด) : /update ปิดแชทคำในแผ่นเฉียง ม่านผ้าจริง รอบ 1 ผู้ใช้วางทิศทางเกมใหม่ : roguelike เต็มตัว** (คำต่อคำ `USER_BRIEFS.md` 13.12 13.13 รวมไว้ที่ `docs/BETA1_DIRECTION.md`)
 ✅ งานของแชทนี้อยู่บน GitHub ครบ (`7dfc781` โค้ด ตามด้วย commit เอกสาร) ผู้ใช้ดูแล้วบอก "ค่อนข้างโอเคแล้ว" ตาราง "แชทที่กำลังทำงาน" ว่าง
