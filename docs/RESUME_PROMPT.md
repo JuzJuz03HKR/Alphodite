@@ -21,7 +21,6 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 29 ต.ค. (แชทตวัดไม้ใหม่) | ทำ `BETA1_DIRECTION.md` 8.8 ข้อ 5 ระบบตวัดไม้ใหม่ (ผู้ใช้ "ลองทำออกมาก่อนได้" `USER_BRIEFS.md` 13.23 ถึง 13.25) : เอาขนาด f mf p ออก ตวัดแล้วตัวละครตีทันทีทีละโน้ต กล้องซูม เอียง สั่น ตามการตวัด · **เวอร์ชันแรกเสร็จ อยู่บน GitHub แล้ว รอผู้ใช้ Rebuild รีวิว (แชทนี้ยังทำต่อ)** | `TurnBattle` `BattleScreen*` `NoteGlyph` `Baton` `HitFx` `GestureReader` กล้องใหม่ใน `Core/` `Skill` `BattleRules` `Conductor` `Musician` `Motif` `Enemy` `TutorialScreen*` `GuideScreen` `DebugShots.Turn*` และเอกสาร |
 
 ---
 
@@ -63,6 +62,15 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 ---
 
 ## สถานะล่าสุด (29 ต.ค.)
+
+**29 ต.ค. ดึก (ล่าสุด) : /update ปิดแชทตวัดไม้ใหม่ ผู้ใช้ : "ตอนนี้ทุกอย่างโอเค ยังไม่ต้องแก้อะไร" จะเปิดแชทใหม่ทำงานต่อ** (คำต่อคำ `USER_BRIEFS.md` 13.26)
+✅ งานอยู่บน GitHub ครบ (commit `c520320` และ commit ปิดแชทนี้) ตาราง "แชทที่กำลังทำงาน" ว่าง
+✅ ระบบตวัดไม้ใหม่ `BETA1_DIRECTION.md` ข้อ 10 ผู้ใช้บอกว่าโอเคทั้งหมด ยังไม่ต้องแก้ ทั้งกฎเดียว ตวัดแล้วตีทันที กล้องขยับตามไม้ (การซูมยังไม่ลด) และค่าที่ไอริสตัดสินเอง 10.5
+⚠️ PLAYTEST SIGNATURE ยัง 1 (`BattleRules.PlaytestSignatureNeed`) · Fanny แรงขึ้นในตัวจำลอง (STRONG 55 เปอร์เซ็นต์ Bach กับ Beethoven 49) ยังไม่ปรับ รอเรื่อง balance · ภาพจาก cloud ห้ามแทน `docs/screenshots/`
+**งานถัดไป (แชทใหม่ เปิดด้วย /system แล้วถามผู้ใช้ว่าจะทำเรื่องไหน)** :
+1. balance กับ gameplay ให้สนุก (ผู้ใช้บอกว่าตอนนี้ง่าย "ชิวๆ") : ตัวเลข `Data/BattleRules.cs` (`TurnNoteDamage` `TurnFloorLife` `TurnEnemyHp` ฯลฯ) วัดด้วย `--shots turnsim` หลาย seed (`TACET_SIM_SEED`) และแยกวาทยากรด้วย `TACET_SIM_KIT=Bach` หรือ `Fanny` แก้แล้วอัปเดต `docs/TACET_Balance.xlsx` ด้วย `python3 docs/turn_balance_tabs.py <turnsim.txt>` · "มาคุยกันก่อน" เสนอทางเลือกพร้อมคำแนะนำ ห้ามลดความยากโดยไม่ถาม
+2. VFX อาวุธขั้นสูงให้ชัด : `Core/HitFx.cs` `Hit(... tier)` ขนาด `BattleRules.HitTierSize` ที่เรียกอยู่ `Screens/BattleScreen.cs` ค้น `WEAPON TIERS` ภาพทดสอบ `--shots battletier@4` · ขอตัวอย่าง VFX จากผู้ใช้ก่อน ห้ามเดา
+3. ถ้าผู้ใช้อยากปรับกล้องทีหลัง : ตัวเลข `BattleRules` หัวข้อ Camera Feel (`CamNoteZoom` `CamZoomMost` `CamKick` `CamTilt` `CamShake` `CamFinishPunch`) โค้ด `Core/StageCamera.cs` กับหัวข้อ ACTION ใน `Screens/BattleScreen.Stage.cs` ภาพ `--shots battlecombo@6 battlefinish@8 battleroll battlehold`
 
 **29 ต.ค. คืน (ล่าสุด) : แชทตวัดไม้ใหม่ ทำ `BETA1_DIRECTION.md` 8.8 ข้อ 5 เวอร์ชันแรกเสร็จ รอผู้ใช้ Rebuild รีวิว** (คำต่อคำ `USER_BRIEFS.md` 13.23 ถึง 13.25 รายละเอียด `BETA1_DIRECTION.md` ข้อ 10)
 ✅ กฎเดียว (ONE RULE) : เอาขนาด f mf p ออกทั้งเกม โน้ต = ลูกศรใหญ่ในวง + วงแหวน (คำ HOLD SHAKE AGAIN ใต้โน้ตพิเศษ) ใช้ทั้งสกิล การปัด SIGNATURE · โน้ตค้างแค่กดค้าง
