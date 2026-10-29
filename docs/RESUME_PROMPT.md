@@ -21,7 +21,6 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 29 ต.ค. 20:30 | ทำ `BETA1_DIRECTION.md` 8.8 ข้อ 1 ถึง 4 เสร็จแล้ว (ทีม 3 คน เอา CALL ออก ร้าน REROLL เงินตามอันดับ อาวุธขั้น I II III ห้อง LUTHIER TREASURE รางวัลบอส) รอผู้ใช้ Rebuild แล้วคุย 8.8 ข้อ 5 (ตวัดไม้) | หน้าใหม่ `Screens/TeamPickScreen.cs` `Screens/LuthierScreen.cs` และไฟล์ตาม 8.7 (`TurnBattle` `BattleScreen*` `BandScreen` `Formation` `ResultScreen` `RouteScreen` `ShopScreen` `MotifRewardScreen` `ChapterScreen` `RunFlow` `RunState` `SaveFile` `BattleRules` `Archive` `Motif` `Enemy` `GameEvent` `FloorMap` `RouteNode` `Musician` `MusicianArt` `HitFx` `MotifArt` `ArtBank` `DebugShots*`) และเอกสาร |
 
 ---
 
@@ -64,13 +63,28 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 
 ## สถานะล่าสุด (29 ต.ค.)
 
-**29 ต.ค. ค่ำ (ล่าสุด) : ผู้ใช้ตอบ `BETA1_DIRECTION.md` 8.2 "เอาตามนั้น" ทุกข้อ + Rebuild งานแชทก่อนแล้ว "โอเคมากๆ ... ตอนนี้เหลือสิ่งที่ต้องทำหลักๆคือเกมเพลย์ที่สนุก"** (คำต่อคำ `USER_BRIEFS.md` 13.20 13.21 รายละเอียด `BETA1_DIRECTION.md` ข้อ 9)
+**29 ต.ค. คืน (ล่าสุด) : /update ปิดแชท "ทีม 3 คน ร้านใหม่ อาวุธขั้น" ผู้ใช้ Rebuild ลองเล่นแล้ว จะเปิดแชทใหม่คุยต่อ** (คำต่อคำ `USER_BRIEFS.md` 13.22)
+✅ งานอยู่บน GitHub ครบ (commit ปิดแชทนี้) ตาราง "แชทที่กำลังทำงาน" ว่าง
+✅ `BETA1_DIRECTION.md` 8.8 ข้อ 1 ถึง 4 ผู้ใช้ลองแล้ว "ตอนนี้ยังไม่ต้องแก้อะไร" (รายละเอียดข้อ 9 commit `0787013` `ec74d9b`)
+✅ **ความยาก : ผู้ใช้เล่นแล้ว "ชิวๆ" ยังไม่ปรับ** จะลงลึกทีเดียวตอนปรับ balance กับ gameplay ให้สนุก (ค่าตอนนี้ เลือดนักดนตรี x1.5 อาวุธขั้นละ +2 MAESTRO 1.3 ตัวจำลอง NORMAL STRONG 45–50%)
+⚠️ **จดไว้แก้ทีหลัง (ผู้ใช้สั่ง) : VFX ตอนตีของอาวุธขั้นสูงยังไม่ชัด เห็นความต่างนิดเดียว** · โค้ด `Core/HitFx.cs` `Hit(... tier)` (ขั้น I เส้นพุ่งเพิ่ม ขั้น II วงแหวนสีตัวละคร ขั้น III ดาวกับวงร้อน) ขนาด `BattleRules.HitTierSize` 0.12 ต่อขั้น ที่เรียกอยู่ `Screens/BattleScreen.cs` ค้น `WEAPON TIERS` ภาพทดสอบ `--shots battletier@4` ·
+แนวทางที่จะเสนอ : แต่ละขั้นต้องต่างกันจนเห็นจากไกล (ขนาด สี ความยาวเวลา hit stop การสั่น แสงฟุ้ง ตัวเลขดาเมจ) ตามกติกาให้ขอตัวอย่าง VFX จากผู้ใช้ก่อน ห้ามเดา
+⚠️ PLAYTEST SIGNATURE ยัง 1 (`BattleRules.PlaytestSignatureNeed`) · อาร์ตที่ต้องเพิ่ม `Art/Places/luthier.png` 520×470 `Art/Route/route_luthier.png` `route_treasure.png` (`ASSET_LIST.md` ข้อ 8 9) · ภาพจาก cloud ห้ามแทน `docs/screenshots/`
+**งานถัดไป (แชทใหม่ ผู้ใช้จะคุยต่อ เปิดด้วย /system)** :
+1. ถามผู้ใช้ว่าจะคุยเรื่องไหนก่อน เรื่องที่ค้างอยู่ :
+   ก. 8.8 ข้อ 5 ระบบตวัดไม้ (รวมขนาด f mf p) ผู้ใช้มองว่ายุ่งยาก ต้อง "มาคุยกันก่อน" เสนอทางเลือกพร้อมคำแนะนำ (หลัก : เข้าใจทันที กดแล้วเห็นผลชัดแบบ CZN) ·
+      โค้ด : `Screens/BattleScreen.cs` (`QteNote` และการตวัด) `Battle/TurnBattle.cs` (`IntentSizes` LOCKED TEMPO `Shows Size`) `Core/Baton.cs` (`SizeOf`) `Core/NoteGlyph.cs` · ไฟต์ฝึก `Screens/TutorialScreen.Practice.cs` HOW TO PLAY `Screens/GuideScreen.cs`
+   ข. ปรับ balance กับ gameplay ให้สนุก (ผู้ใช้บอกว่าตอนนี้ง่าย) ตัวเลข `Data/BattleRules.cs` ตัวจำลอง `--shots turnsim` แก้แล้วอัปเดต `docs/TACET_Balance.xlsx` (`docs/turn_balance_tabs.py`)
+   ค. VFX อาวุธขั้นสูงให้ชัด (ข้อ ⚠️ ด้านบน)
+2. ทำตามที่ผู้ใช้เลือก จบก้อนแล้วบันทึกเอกสาร + commit/push ก่อน compact (`USER_BRIEFS.md` 13.21)
+
+**29 ต.ค. ค่ำ : ผู้ใช้ตอบ `BETA1_DIRECTION.md` 8.2 "เอาตามนั้น" ทุกข้อ + Rebuild งานแชทก่อนแล้ว "โอเคมากๆ ... ตอนนี้เหลือสิ่งที่ต้องทำหลักๆคือเกมเพลย์ที่สนุก"** (คำต่อคำ `USER_BRIEFS.md` 13.20 13.21 รายละเอียด `BETA1_DIRECTION.md` ข้อ 9)
 ✅ **8.8 ข้อ 1 ถึง 4 เสร็จ** (ก้อนแรก commit `0787013` ก้อนสอง commit ถัดไป) :
 หน้า THE AUDITION เลือกทีม 3 จาก 5 (`Screens/TeamPickScreen.cs`) · เอา CALL ม้านั่ง ที่นั่ง HIRE ออก (ENTRANCE GREEN ROOM THE CUE THE DAMPER ARCHIVE FIRST CHAIR เหตุการณ์ 3 อันเปลี่ยนผล) · ร้านใหม่ 4 ช่อง + REROLL (`PlaceSeed` กันรีสุ่มฟรี) · เงินคูณตามอันดับ S x2 A x1.5 B x1.25 หน้า Result 6 แถว · ไฟต์ธรรมดาได้แค่เงิน · หน้าวง 3 เสาลากสลับ ·
 อาวุธขั้น I II III ขั้นละ +2 พลัง ชื่ออาวุธตามขั้น · ห้อง LUTHIER (`Screens/LuthierScreen.cs` อัปฟรี 1 คน) TREASURE (MOTIF ฟรี) · บอสเลือก REFORGE หรือ MOTIF TREASURED · VFX ตอนตีโตตามขั้น (`HitFx` tier)
 ✅ **ความยากชดเชยแล้วให้ใกล้ของเดิม** (ไม่ได้ลด) : เลือดนักดนตรี x1.5 อาวุธขั้นละ 2 MAESTRO 1.3 → NORMAL STRONG 45–50% (เดิม 38–48) EXPERT 99 MAESTRO EXPERT 68–71 (เดิม 64–74) · ไม่ชดเชยจะเหลือ STRONG 2–5% (ข้อ 9.6)
 ✅ build 0/0 · turncheck 112/112 · savecheck 32/32 · แคป 13 หน้าดูแล้ว · `TACET_Balance.xlsx` อัปเดตแล้ว
-⚠️ ผู้ใช้ยังไม่ได้ Rebuild ดูงานนี้ (สิ่งที่ให้ลอง `BETA1_DIRECTION.md` 9.8) · PLAYTEST SIGNATURE ยัง 1 · ภาพจาก cloud ห้ามแทน `docs/screenshots/`
+(ผู้ใช้ Rebuild ลองแล้ว ผลอยู่รายการบน) · PLAYTEST SIGNATURE ยัง 1 · ภาพจาก cloud ห้ามแทน `docs/screenshots/`
 **งานถัดไป** : รอผลผู้ใช้ Rebuild (ความยาก VFX ตามขั้น หน้าใหม่) แล้วคุย 8.8 ข้อ 5 ทำระบบตวัดไม้ (f mf p) ให้ง่ายแบบ CZN (มาคุยกันก่อน เสนอทางเลือก) · อาร์ตที่ต้องเพิ่ม `Art/Places/luthier.png` 520×470 `Art/Route/route_luthier.png` `route_treasure.png` (`ASSET_LIST.md` ข้อ 8 9)
 
 **29 ต.ค. ดึก (แชทก่อน) : /update ปิดแชทภาพ Character Design PNG ผู้ใช้เลือกทิศทางใหม่ (คำต่อคำ `USER_BRIEFS.md` 13.19) ยังไม่ได้เขียนโค้ดของทิศทางนี้ ผู้ใช้จะเปิดแชทใหม่**

@@ -51,7 +51,9 @@
   **ทีม 3 คนตายตัวทั้งรัน** เลือกที่หน้า THE AUDITION (`Screens/TeamPickScreen.cs` `RunState.PickBand` `BattleRules.BandSize`) · **ไม่มี CALL ม้านั่ง ที่นั่ง HIRE แล้ว** (`RecruitScreen` ลบแล้ว ของที่ผูกกับ CALL เปลี่ยนผลในช่องเดิม เซฟเก่าโหลดได้ `RunState.KeepBand`) ·
   ร้าน 4 ช่อง + REROLL แพงขึ้นทีละครั้ง (`Screens/ShopScreen.cs` ลูกเต๋า `RunState.PlaceSeed`) · เงินคูณตาม RANK S x2 A x1.5 B x1.25 (`BattleState.RankScore` ครึ่ง PERFECT ครึ่งเลือดที่เหลือ) · ไฟต์ธรรมดาได้แค่เงิน ELITE BOSS เลือก MOTIF ·
   อาวุธขั้น I II III (`Musician.Rehearsed` ขั้นละ +2 พลัง `WeaponNow`) · ห้องใหม่ LUTHIER (`Screens/LuthierScreen.cs`) TREASURE (`MotifRewardScreen.Kind.Treasure`) `NodeType` 7 8 · บอสเลือก REFORGE หรือ MOTIF TREASURED · VFX ตอนตีโตตามขั้น (`HitFx` tier) ·
-  **ความยากชดเชยให้เท่าเดิม (ไม่ได้ลด)** เลือดนักดนตรี x1.5 MAESTRO 1.3 ตัวจำลอง NORMAL STRONG 45–50% · **ถัดไป : รอผู้ใช้ Rebuild แล้วคุย 8.8 ข้อ 5 ระบบตวัดไม้ (มาคุยกันก่อน)** · งานถัดไปเรียงไว้ `RESUME_PROMPT.md` สถานะล่าสุด
+  **ความยากชดเชยให้เท่าเดิม (ไม่ได้ลด)** เลือดนักดนตรี x1.5 MAESTRO 1.3 ตัวจำลอง NORMAL STRONG 45–50% ·
+  **ผู้ใช้ Rebuild ลองแล้ว (คำต่อคำ `USER_BRIEFS.md` 13.22)** : ยังไม่ต้องแก้อะไร · ความยากตอนนี้ "ชิวๆ" **ยังไม่ปรับ** จะลงลึกตอนปรับ balance กับ gameplay ให้สนุก · **VFX อาวุธขั้นสูง (`HitFx` tier) ยังไม่ชัด ต้องแก้ทีหลัง** ·
+  ถัดไป : ผู้ใช้เลือกหัวข้อในแชทใหม่ (ตวัดไม้ 8.8 ข้อ 5 ต้องมาคุยกันก่อน / balance กับ gameplay / VFX ขั้นอาวุธ) · งานถัดไปเรียงไว้ `RESUME_PROMPT.md` สถานะล่าสุด
 
 ## 0. ALPHA 7 (18 ต.ค.) : เกมเปลี่ยนเป็น turn-based roguelike (ประวัติ ยังใช้อ้างอิงระบบต่อสู้)
 
