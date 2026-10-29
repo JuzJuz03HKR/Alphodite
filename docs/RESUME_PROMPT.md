@@ -21,6 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
+| 29 ต.ค. 15:43 (เวลาไทย) | ผู้ใช้เลือกนักดนตรีชุดที่เสนอ (ไวโอลิน PAGANINI) ให้เปลี่ยน FELIX เป็น ??? น้องอยู่ขวา : ใส่นักดนตรี 5 คน ซ่อน MALI CHAI NUAN BORIS แล้วเอายุคออก | `Data/Musician.cs` `Data/Conductor.cs` `Data/Era.cs` `Data/RunState.cs` `Data/SaveFile.cs` `Data/Enemy*.cs` `Data/BattleRules.cs` `Battle/TurnBattle.cs` `Screens/` (EraChoice Chapter Recruit Band Route Battle Shop Event Archive CurtainCall) `Core/DebugShots*.cs` `Core/ArtBank.cs` `docs/` |
 
 ---
 
