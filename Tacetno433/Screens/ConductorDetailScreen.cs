@@ -10,14 +10,16 @@ namespace Tacetno433.Screens
 {
     //ConductorDetailScreen : we stepped inside the painting. A character profile page.
     //
-    //Layout, left to right:
-    //   LEFT   who they are: name, epithet, role, stats as diamonds, face and story
-    //   CENTRE the conductor standing in the scene, with arrows to the next and last profile
-    //   RIGHT  how they play: the PASSIVE (always on) and the SIGNATURE (SPACE), and what each does
-    //
-    //The background is not a picture, it is drawn from maths every frame: parallax
-    //pillars for depth, sine ribbons for the music, a backlight behind the figure,
-    //a vignette and two letterbox bars to make it read like a shot from a film.
+    //Beta1 screens round 2 (29 Oct, docs/SCREENS_LEVEL_UP.md 16), left to right :
+    //   LEFT     who they are : the name, their line, the face close up (face_<name>.png, 224 x 224, drawn at its size),
+    //            their role and the real composer, and who they were
+    //   CENTRE   the painting itself. The gallery hands it over where its panel stood (SHARED PICTURE, ScreenManager.Cut)
+    //            and it is carried to the middle of the shot at the size it was painted, the room coming up around it :
+    //            a backlight in the conductor's colour (Conductor.Spot), sound ribbons, a stave for a horizon
+    //   RIGHT    how they play : the PASSIVE (always on) and the SIGNATURE (SPACE)
+    //   BOTTOM   BACK, the arrows to the next and the last profile either side of TAKE THE BATON, and the mode
+    //The arrows slide one painting out and the next in. BACK carries the painting back to its panel in the gallery.
+    //Two black bars top and bottom make it read like a shot from a film.
     public class ConductorDetailScreen : GameScreen
     {
         //Can Pause : a menu page outside the run, ESC here means going back
@@ -29,42 +31,55 @@ namespace Tacetno433.Screens
         //Detail Layout : move these to reposition the page
         private const int LetterboxH = 40;
         private const int LeftX = 70;
+        private const int LeftW = 380;
         private const int RightX = 842;
         private const int RightW = 380;
-        private Rectangle figureBox = new Rectangle(480, 70, 320, 530);
-        private const int StoryWrap = 250;             // the story sits beside the face, narrower than the dossier
-        private Rectangle faceBox = new Rectangle(70, 392, 112, 112);
+        private const int FaceSize = 224;              // the face as it was drawn (docs/UI_ART_PLAN.md 2.3)
+        private static readonly Rectangle paintBox = new Rectangle(TacetGame.ScreenW / 2 - ConductorSelectScreen.PaintW / 2, 96,
+                                                                   ConductorSelectScreen.PaintW, ConductorSelectScreen.PaintH);
+        private Rectangle faceBox = new Rectangle(LeftX, 174, FaceSize, FaceSize);
         private Rectangle chooseButton = new Rectangle(486, 614, 308, 50);
         private Rectangle backButton = new Rectangle(70, 616, 170, 46);
-        private Rectangle lastButton = new Rectangle(424, 614, 50, 50);   // the arrows either side of TAKE THE BATON
-        private Rectangle nextButton = new Rectangle(806, 614, 50, 50);
+        private Rectangle lastButton = new Rectangle(400, 614, 50, 50);    // the arrows either side of TAKE THE BATON
+        private Rectangle nextButton = new Rectangle(830, 614, 50, 50);
         private Rectangle modeBox = new Rectangle(976, 612, 234, 38);      // NORMAL or MAESTRO, MAESTRO MODE
 
         //Detail Data
         private int index;
         private Conductor c;
-        private Rectangle sourceRect;      // where the painting sat on the gallery page
-        private string profileLabel = "";  // built once in Load, never while drawing
+        private string profileLabel = "";  // built in Prepare, never while drawing
         private string epithetWrapped = "";
         private string storyWrapped = "";
-        private string seatsLabel = "";
+        private string basedOnWrapped = "";
         private float nameScale;
 
         //Detail State
-        private float enter;               // 0 = just walked in, 1 = fully arrived
-        private float swap = 1f;           // the words fade in again after the arrows switch profile
-        private float time;
+        private enum Phase { Arrive, Look, Leave }
+        private Phase phase = Phase.Arrive;
+        private float time;                // seconds on this page
+        private float leaveTime;
+        private float swap = 99f;          // seconds since the arrows changed the profile
+        private int swapFrom = -1;         // the conductor whose painting slides out
+        private int swapWay;               // +1 the next one came in from the right, -1 from the left
+        private UiMotion chooseMotion = new UiMotion();
+        private UiMotion backMotion = new UiMotion();
+        private UiMotion lastMotion = new UiMotion();
+        private UiMotion nextMotion = new UiMotion();
 
-        public ConductorDetailScreen(int index, Rectangle sourceRect)
+        public ConductorDetailScreen(int index)
         {
-            this.index = index;
-            this.sourceRect = sourceRect;
-            this.c = ConductorList.Shown[index];
+            this.index = Math.Max(0, Math.Min(ConductorList.Shown.Length - 1, index));
+            this.c = ConductorList.Shown[this.index];
         }
 
         public override void Load()
         {
             Prepare();
+
+            //The Lens : the painting is lit as drawn (the gallery hands it over in the same light), the corners like a stage
+            Lens.Ambient = 0.5f;
+            Lens.SpotPower = 0f;
+            Lens.Vignette = 0.5f;
         }
 
         //Prepare : the labels for the conductor on show, built here so Draw never joins strings.
@@ -72,32 +87,52 @@ namespace Tacetno433.Screens
         private void Prepare()
         {
             profileLabel = "CONDUCTOR PROFILE   /   " + c.IndexLabel;
-            epithetWrapped = Gfx.WrapText(Game.StoryFont, c.Epithet, 370, TextSize.Story);
-            storyWrapped = Gfx.WrapText(Game.StoryFont, c.Story, StoryWrap, TextSize.Story);
-            int seats = c.Perk == ConductorPerk.EveryRoadHome ? 2 : 3;
-            seatsLabel = seats.ToString();
+            epithetWrapped = Gfx.WrapText(Game.StoryFont, c.Epithet, LeftW, TextSize.Story);
+            storyWrapped = Gfx.WrapText(Game.StoryFont, c.Story, LeftW, TextSize.Story);
+            basedOnWrapped = Gfx.WrapText(Game.StoryFont, c.BasedOn, LeftW - FaceSize - 22, TextSize.Story);
 
-            //Name Fit : long names shrink so they never run into the figure
+            //Name Fit : long names shrink so they never run into the painting
             nameScale = TextSize.Hero;
             float width = Gfx.TextWidth(Game.BigFont, c.Name, nameScale);
-            if (width > 380f) nameScale *= 380f / width;
+            if (width > LeftW) nameScale *= LeftW / width;
         }
 
         public override void Update(float dt)
         {
             time += dt;
-            swap = Math.Min(1f, swap + dt * 4f);
+            swap += dt;
 
-            //Enter Animation : fly into the painting, no input until we land
-            enter += dt * 2.0f;
-            if (enter > 1f) enter = 1f;
-            if (enter < 1f) return;
+            //Motion : TAKE THE BATON is the page's main action, so it stands pointed at (white) unless another button is
+            bool look = phase == Phase.Look;
+            bool elsewhere = Input.MouseOver(backButton) || Input.MouseOver(lastButton) || Input.MouseOver(nextButton) || Input.MouseOver(modeBox);
+            chooseMotion.Update(dt, look && !elsewhere);
+            backMotion.Update(dt, look && Input.MouseOver(backButton));
+            lastMotion.Update(dt, look && index > 0 && Input.MouseOver(lastButton));
+            nextMotion.Update(dt, look && index < ConductorList.Shown.Length - 1 && Input.MouseOver(nextButton));
 
-            //Detail Back : leave the painting and stand in front of it again
+            //Arrive : the painting is carried in, no input until it lands
+            if (phase == Phase.Arrive)
+            {
+                if (time >= BattleRules.UiProfileCarry) phase = Phase.Look;
+                return;
+            }
+
+            //Leave : the painting is carried back to its panel, then the gallery takes it (SHARED PICTURE)
+            if (phase == Phase.Leave)
+            {
+                leaveTime += dt;
+                if (leaveTime >= BattleRules.UiProfileCarry) Game.Screens.Cut(new ConductorSelectScreen(index, true));
+                return;
+            }
+
+            //Detail Back : step out of the painting
             if (Input.KeyPressed(Keys.Escape) || Input.ClickedOn(backButton))
             {
+                backMotion.Press();
                 SoundBank.Play(Sfx.UiBack);
-                Game.Screens.Change(new ConductorSelectScreen(index));
+                phase = Phase.Leave;
+                leaveTime = 0f;
+                return;
             }
 
             //Detail Switch : the arrows (or left and right) turn to the next profile without leaving
@@ -121,7 +156,7 @@ namespace Tacetno433.Screens
         }
 
         //Detail Switch : show the conductor one step along, stopping at the ends like the gallery.
-        //The figure stays where it stands and the words fade in again.
+        //The painting slides out and the next one slides in, the words fade in again.
         private void Switch(int direction)
         {
             int next = index + direction;
@@ -131,10 +166,12 @@ namespace Tacetno433.Screens
                 return;
             }
 
+            (direction > 0 ? nextMotion : lastMotion).Press();
+            swapFrom = index;
+            swapWay = direction;
+            swap = 0f;
             index = next;
             c = ConductorList.Shown[index];
-            sourceRect = figureBox;
-            swap = 0f;
             Prepare();
             SoundBank.Play(Sfx.UiMove);
         }
@@ -142,6 +179,8 @@ namespace Tacetno433.Screens
         //Detail Confirm : remember the class and move on to the run
         private void Confirm()
         {
+            chooseMotion.Press();
+
             //Run Begin : build a fresh run and hand the player their first choice of era
             Game.CurrentRun = new RunState();
             Game.CurrentRun.Start(c, Game.StoryFont, RouteNodeInfo.CaptionWrapWidth);
@@ -151,241 +190,314 @@ namespace Tacetno433.Screens
             Game.Screens.Change(new ChapterScreen());
         }
 
-        public override void Draw(SpriteBatch sb)
+        //======================================================================================
+        //Timing
+        //======================================================================================
+
+        //Room : 0..1, how far the room around the painting is there. It comes up as the painting is carried in, and goes
+        //back to black as it is carried out (at 0 the gallery shows the very same picture).
+        private float Room()
         {
-            //Enter Easing : slow at both ends so the zoom feels like stepping in
-            float e = enter * enter * (3f - 2f * enter);
+            float up = UiMotion.EaseOut(MathHelper.Clamp((time - 0.05f) / BattleRules.UiProfileCarry, 0f, 1f));
+            if (phase == Phase.Leave) up *= 1f - UiMotion.EaseInOut(Left());
+            return up;
+        }
 
-            //Panels only appear once we are most of the way in
-            float alpha = (enter - 0.55f) / 0.45f;
-            if (alpha < 0f) alpha = 0f;
-            if (alpha > 1f) alpha = 1f;
-            alpha *= swap;
+        //Left : 0..1 through the carry back to the gallery
+        private float Left()
+        {
+            return MathHelper.Clamp(leaveTime / BattleRules.UiProfileCarry, 0f, 1f);
+        }
 
-            DrawScene(sb, e);
+        //Words : the page's words and buttons, one piece after another once the painting is on its way. They leave first,
+        //and fade in again after the arrows (Arrived alone is how far they have slid in).
+        private float Words(float start)
+        {
+            return Arrived(start) * Math.Min(1f, 0.25f + swap * 4f);
+        }
 
-            //Figure : slides and grows from where the painting was into the middle of the shot
-            Rectangle figure = LerpRect(sourceRect, figureBox, e);
-            PortraitBox.DrawFigure(sb, figure, c, 1f);
+        private float Arrived(float start)
+        {
+            float a = UiMotion.Between(time, 0.22f + start, BattleRules.UiEnterTime);
+            if (phase == Phase.Leave) a *= 1f - MathHelper.Clamp(leaveTime / (BattleRules.UiProfileCarry * 0.5f), 0f, 1f);
+            return a;
+        }
 
-            if (alpha > 0f)
+        //Painting At : where the painting of the conductor on show is this frame. Carried in from its gallery panel, carried
+        //back to it, or slid in by the arrows. The size never changes, only the place.
+        private Rectangle PaintingAt()
+        {
+            Rectangle home = ConductorSelectScreen.PaintingRect(index);
+            if (phase == Phase.Leave) return Lerp(paintBox, home, UiMotion.EaseInOut(Left()));
+            Rectangle r = Lerp(home, paintBox, UiMotion.EaseInOut(MathHelper.Clamp(time / BattleRules.UiProfileCarry, 0f, 1f)));
+            if (swapFrom >= 0 && swap < BattleRules.UiProfileSwap)
+                r.X += (int)Math.Round((1f - UiMotion.EaseOut(swap / BattleRules.UiProfileSwap)) * 140f * swapWay);
+            return r;
+        }
+
+        //Rect Lerp : blend two rectangles of the same size, kept on whole pixels so the pixel art stays sharp
+        private static Rectangle Lerp(Rectangle a, Rectangle b, float t)
+        {
+            return new Rectangle((int)Math.Round(MathHelper.Lerp(a.X, b.X, t)), (int)Math.Round(MathHelper.Lerp(a.Y, b.Y, t)), a.Width, a.Height);
+        }
+
+        //======================================================================================
+        //The World (THE LENS) : the room behind the painting, and the painting
+        //======================================================================================
+
+        public override bool HasWorld
+        {
+            get { return true; }
+        }
+
+        public override bool ShowsGrain
+        {
+            get { return false; }
+        }
+
+        public override void DrawWorld(SpriteBatch sb)
+        {
+            float room = Room();
+            Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.Void);
+            if (room > 0f) DrawScene(sb, room);
+
+            //Painting : the one sliding out first, then the one on show
+            if (swapFrom >= 0 && swap < BattleRules.UiProfileSwap)
             {
-                DrawLeftColumn(sb, alpha);
-                DrawRightColumn(sb, alpha);
-                Ui.Button(sb, chooseButton, "TAKE THE BATON", "ENTER", true, true, alpha);
-                Ui.Button(sb, backButton, "BACK", "ESC", false, true, alpha);
-                Ui.ModeSwitch(sb, modeBox, Settings.Maestro, Input.MouseOver(modeBox), alpha);
-                DrawArrow(sb, lastButton, false, index > 0, alpha);
-                DrawArrow(sb, nextButton, true, index < ConductorList.Shown.Length - 1, alpha);
+                float t = UiMotion.EaseOut(swap / BattleRules.UiProfileSwap);
+                Rectangle away = paintBox;
+                away.X -= (int)Math.Round(t * 140f * swapWay);
+                DrawPainting(sb, ConductorList.Shown[swapFrom], away, 1f - t, room);
             }
-
-            DrawLetterbox(sb);
+            float come = swapFrom >= 0 ? Math.Min(1f, swap / BattleRules.UiProfileSwap) : 1f;
+            DrawPainting(sb, c, PaintingAt(), come, room);
         }
 
-        //Rect Lerp : blend two rectangles, used by the enter animation
-        private Rectangle LerpRect(Rectangle a, Rectangle b, float t)
+        //Painting : the conductor's painting at the size it was painted, or the empty slot that waits for it
+        private static void DrawPainting(SpriteBatch sb, Conductor who, Rectangle r, float alpha, float room)
         {
-            return new Rectangle(
-                (int)MathHelper.Lerp(a.X, b.X, t),
-                (int)MathHelper.Lerp(a.Y, b.Y, t),
-                (int)MathHelper.Lerp(a.Width, b.Width, t),
-                (int)MathHelper.Lerp(a.Height, b.Height, t));
+            Texture2D art = ArtBank.GalleryOf(who);
+            if (art != null) sb.Draw(art, new Vector2(r.X + (r.Width - art.Width) / 2, r.Y), Color.White * alpha);
+            else ArtSlot.Draw(sb, r, Palette.Paper, alpha * room);
         }
 
-        //Scene : the space behind the character, built in layers from far to near
+        //Scene : the space behind the painting, built in layers from far to near, all of it fading with the room
         private void DrawScene(SpriteBatch sb, float e)
         {
-            //Layer 1 : flat dark ground, about seventy percent of the shot stays this dark
+            //Layer 1 : the dark ground
             Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.StageDeep * e);
 
-            //Layer 2 : parallax pillars. Three sets drifting at different speeds is enough
-            //to read as depth, because the near ones move faster than the far ones.
+            //Layer 2 : parallax pillars. Three sets drifting at different speeds is enough to read as depth.
             for (int layer = 0; layer < 3; layer++)
             {
                 float spacing = 300f - layer * 90f;
-                float speed = 5f + layer * 9f;
-                float drift = (time * speed) % spacing;
-                float width = 4f - layer;
-                float bright = (0.025f + layer * 0.018f) * e;
-
+                float drift = (time * (5f + layer * 9f)) % spacing;
+                float bright = (0.022f + layer * 0.015f) * e;
                 for (float x = -spacing + drift; x < TacetGame.ScreenW; x += spacing)
-                    Gfx.Rect(sb, x, 0, width, TacetGame.ScreenH, Palette.Paper * bright);
+                    Gfx.Rect(sb, x, 0, 4f - layer, TacetGame.ScreenH, Palette.Paper * bright);
             }
 
-            //Layer 3 : staff horizon. Five lines the figure stands on, so the UI keeps
-            //being made out of notation instead of generic boxes.
-            Ornament.Stave(sb, 0, 560, TacetGame.ScreenW, 9, Palette.Paper * (0.12f * e));
+            //Layer 3 : the stave the painting stands on, notation instead of a plain floor line
+            Ornament.Stave(sb, 0, 548, TacetGame.ScreenW, 9, Palette.Paper * (0.11f * e));
 
-            //Layer 4 : sound ribbons. Sine waves crossing the frame, music made visible.
+            //Layer 4 : sound ribbons, sine waves crossing the shot, music made visible
             for (int r = 0; r < 3; r++)
             {
                 float baseY = 210f + r * 130f;
                 float amplitude = 34f + r * 22f;
                 float frequency = 0.0055f + r * 0.0018f;
                 float speed = 0.55f + r * 0.22f;
-                float alpha = (0.10f - r * 0.025f) * e;
-
-                Vector2 previous = new Vector2(0f, baseY);
+                float alpha = (0.09f - r * 0.022f) * e;
+                Vector2 previous = new Vector2(0f, baseY + (float)Math.Sin(time * speed) * amplitude);
                 for (int x = 12; x <= TacetGame.ScreenW; x += 12)
                 {
-                    float y = baseY + (float)Math.Sin(x * frequency + time * speed) * amplitude;
-                    Vector2 now = new Vector2(x, y);
+                    Vector2 now = new Vector2(x, baseY + (float)Math.Sin(x * frequency + time * speed) * amplitude);
                     Gfx.Line(sb, previous, now, Palette.Paper * alpha, 2f);
                     previous = now;
                 }
             }
 
-            //Layer 5 : backlight. One bright pool right behind the figure so its
-            //silhouette reads instantly, which is the whole point of the dark base.
-            Gfx.DrawGlow(sb, 640, 330, 340, Palette.Paper * (0.16f * e));
-            Gfx.DrawGlow(sb, 640, 280, 170, Palette.Paper * (0.10f * e));
-            Ornament.Rays(sb, 640, 250, 180, 420, 24, time * 0.02f, Palette.Paper * (0.035f * e));
+            //Layer 5 : the backlight, a pale pool behind the painting with the conductor's colour in it, so the painting
+            //stands out from the dark
+            Gfx.DrawGlow(sb, 640, 300, 360, Palette.Paper * (0.13f * e));
+            Gfx.DrawGlow(sb, 640, 330, 240, c.Spot * (0.16f * e));
+            Ornament.Rays(sb, 640, 250, 190, 430, 24, time * 0.02f, Palette.Paper * (0.03f * e));
 
-            //Layer 6 : dust drifting upward, one glow each
-            for (int i = 0; i < 20; i++)
-            {
-                float seed = i * 41.3f;
-                float x = (float)((Math.Sin(seed) * 0.5 + 0.5) * TacetGame.ScreenW);
-                float y = TacetGame.ScreenH - ((time * (10f + (i % 4) * 5f) + seed * 11f) % (TacetGame.ScreenH + 100f));
-                float sway = (float)Math.Sin(time * 0.7f + seed) * 12f;
-                Gfx.DrawGlow(sb, x + sway, y, 4f, Palette.Paper * (0.30f * e));
-            }
-
-            //Layer 7 : shade behind the two text columns so the words stay readable
+            //Layer 6 : shade behind the two text columns so the words stay readable
             Gfx.DrawGlowBox(sb, new Rectangle(-260, 0, 800, TacetGame.ScreenH), Color.Black * (0.55f * e));
             Gfx.DrawGlowBox(sb, new Rectangle(760, 0, 800, TacetGame.ScreenH), Color.Black * (0.55f * e));
-            Ornament.Vignette(sb, 60, 0.6f * e);
+        }
+
+        //Lights : the room's light only (Lens.Ambient), so the painting looks as it was drawn
+        public override void DrawLights(SpriteBatch sb)
+        {
+        }
+
+        //Glow : the conductor's colour glowing at the foot of the painting
+        public override void DrawGlow(SpriteBatch sb)
+        {
+            float e = Room() * Math.Min(1f, 0.25f + swap * 4f);
+            if (e <= 0f) return;
+            Rectangle r = PaintingAt();
+            Gfx.DrawGlowBox(sb, new Rectangle(r.X - 70, r.Bottom - 70, r.Width + 140, 130), c.Spot * (0.45f * e));
+        }
+
+        //======================================================================================
+        //The Words (crisp on top)
+        //======================================================================================
+
+        public override void Draw(SpriteBatch sb)
+        {
+            DrawLeftColumn(sb);
+            DrawRightColumn(sb);
+
+            //Under the painting : the signature's marking, as it would be written in a score
+            float mark = Words(0.2f);
+            Gfx.TextCentered(sb, Game.StoryFont, c.SignatureMark, TacetGame.ScreenW / 2f, 576, Palette.PaperDim * mark, TextSize.Story);
+
+            //Buttons
+            float low = Words(0.3f);
+            Ui.Command(sb, chooseButton, "TAKE THE BATON", "ENTER", chooseMotion, low, false);
+            Ui.Command(sb, backButton, "BACK", "ESC", backMotion, low, false);
+            DrawArrow(sb, lastButton, false, index > 0, lastMotion, low);
+            DrawArrow(sb, nextButton, true, index < ConductorList.Shown.Length - 1, nextMotion, low);
+            Ui.ModeSwitch(sb, modeBox, Settings.Maestro, Input.MouseOver(modeBox), low);
+
+            DrawLetterbox(sb);
         }
 
         //Letterbox : two black bars, the cheapest way to make a screen feel like a film shot
         private void DrawLetterbox(SpriteBatch sb)
         {
+            float a = Words(0f);
             Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, LetterboxH, Palette.Void);
             Gfx.Rect(sb, 0, TacetGame.ScreenH - LetterboxH, TacetGame.ScreenW, LetterboxH, Palette.Void);
-            Gfx.Rect(sb, 0, LetterboxH, TacetGame.ScreenW, 1, Palette.LineGrey * 0.45f);
-            Gfx.Rect(sb, 0, TacetGame.ScreenH - LetterboxH - 1, TacetGame.ScreenW, 1, Palette.LineGrey * 0.45f);
+            Gfx.Rect(sb, 0, LetterboxH, TacetGame.ScreenW, 1, Palette.LineGrey * (0.45f * a));
+            Gfx.Rect(sb, 0, TacetGame.ScreenH - LetterboxH - 1, TacetGame.ScreenW, 1, Palette.LineGrey * (0.45f * a));
 
-            Gfx.TextSpaced(sb, Game.Font, profileLabel, LeftX, 14, Palette.LineGrey, TextSize.Tiny, 3f);
-            Gfx.TextSpacedRight(sb, Game.Font, "TACET  4'33", TacetGame.ScreenW - LeftX, 14, Palette.LineGrey, TextSize.Tiny, 3f);
-            Ornament.Crosses(sb, TacetGame.ScreenW - 180, TacetGame.ScreenH - 20, 5, 1, 14, Palette.LineGrey);
+            Gfx.TextSpaced(sb, Game.Font, profileLabel, LeftX, 14, Palette.LineGrey * a, TextSize.Tiny, 3f);
+            Gfx.TextSpacedRight(sb, Game.Font, "TACET  4'33", TacetGame.ScreenW - LeftX, 14, Palette.LineGrey * a, TextSize.Tiny, 3f);
+            Ornament.Crosses(sb, TacetGame.ScreenW - 180, TacetGame.ScreenH - 20, 5, 1, 14, Palette.LineGrey * a);
         }
 
-        //Left Column : the character sheet, then the face and the story beside it
-        private void DrawLeftColumn(SpriteBatch sb, float a)
+        //Left Column : the name and line, the face close up with the record beside it, and who they were
+        private void DrawLeftColumn(SpriteBatch sb)
         {
-            int y = 62;
+            float a = Words(0f);
+            float b = Words(0.06f);
+            float d = Words(0.12f);
+            float f = Words(0.18f);
+            float slide = BattleRules.UiEnterSlide;
 
-            //Name and Epithet
-            Gfx.Text(sb, Game.BigFont, c.Name, LeftX, y, Palette.Highlight * a, nameScale);
-            Gfx.Text(sb, Game.StoryFont, epithetWrapped, LeftX + 2, y + 58, Palette.PaperDim * a, TextSize.Story);
-            Ornament.Rule(sb, LeftX, y + 112, 380, Palette.LineGrey * a);
+            //Name and Line
+            Gfx.Text(sb, Game.BigFont, c.Name, LeftX - (1f - Arrived(0f)) * slide, 54, Palette.Highlight * a, nameScale);
+            Gfx.Text(sb, Game.StoryFont, epithetWrapped, LeftX + 2 - (1f - Arrived(0.06f)) * slide, 108, Palette.PaperDim * b, TextSize.Story);
+            Gfx.Rect(sb, LeftX, 160, LeftW * Arrived(0.06f), 1, Palette.LineGrey * b);
+            Gfx.Circle(sb, LeftX, 160, 3f, c.Spot * b);
 
-            //Stat Rows : label on the left, value on the right, like a record card
-            int rowY = y + 130;
-            DrawRow(sb, "ROLE", rowY, a);
-            Gfx.TextSpaced(sb, Game.Font, c.Role, LeftX + 130, rowY - 3, Palette.Paper * a, TextSize.Body, 2f);
+            //Face : the close up, as it was drawn, or the empty slot that waits for it
+            Rectangle face = faceBox;
+            face.X -= (int)Math.Round((1f - Arrived(0.12f)) * slide);
+            Gfx.Rect(sb, face, Palette.CanvasDark * d);
+            ArtBank.DrawOrSlot(sb, ArtBank.FaceOf(c), face, Palette.Paper, d);
+            Ornament.CornerBrackets(sb, new Rectangle(face.X - 4, face.Y - 4, face.Width + 8, face.Height + 8), 12, Palette.PaperDim * d, 1);
 
-            //BREATH, PUSH and SEATS are the old duel's numbers, the turn battle has none of them (Alpha 7)
-            if (!BattleRules.TurnBattleOn)
-            {
-                rowY += 36;
-                DrawRow(sb, "BREATH", rowY, a);
-                Ui.Pips(sb, LeftX + 136, rowY + 6, c.Stamina, 10, 5, 15, a);
-                Gfx.TextRight(sb, Game.Font, c.StaminaLabel, LeftX + 380, rowY - 3, Palette.Paper * a, TextSize.Body);
+            //Record : beside the face, a label over each value like a record card
+            float rx = faceBox.Right + 22;
+            float rw = LeftX + LeftW - rx;
+            DrawRecord(sb, "ROLE", rx, faceBox.Y + 4, rw, d);
+            Gfx.TextSpaced(sb, Game.Font, c.Role, rx, faceBox.Y + 24, Palette.Paper * d, TextSize.Body, 2f);
+            DrawRecord(sb, "BASED ON", rx, faceBox.Y + 74, rw, d);
+            Gfx.Text(sb, Game.StoryFont, basedOnWrapped, rx, faceBox.Y + 92, Palette.Paper * d, TextSize.Story);
 
-                rowY += 36;
-                DrawRow(sb, "PUSH", rowY, a);
-                Ui.Pips(sb, LeftX + 136, rowY + 6, c.PushPower, 10, 5, 15, a);
-                Gfx.TextRight(sb, Game.Font, c.PushLabel, LeftX + 380, rowY - 3, Palette.Paper * a, TextSize.Body);
-
-                rowY += 36;
-                DrawRow(sb, "SEATS", rowY, a);
-                Gfx.Text(sb, Game.Font, seatsLabel, LeftX + 136, rowY - 3, Palette.Paper * a, TextSize.Body);
-            }
-
-            rowY += 36;
-            DrawRow(sb, "BASED ON", rowY, a);
-            Gfx.Text(sb, Game.StoryFont, c.BasedOn, LeftX + 130, rowY - 5, Palette.Paper * a, TextSize.Story);
-
-            //Face : the head shot in a viewfinder, and who they were beside it
-            PortraitBox.DrawFaceIcon(sb, faceBox, c, a);
-            int sx = faceBox.Right + 18;
-            Gfx.TextSpaced(sb, Game.Font, "WHO THEY WERE", sx, faceBox.Y, Palette.LineGrey * a, TextSize.Tiny, 3f);
-            Gfx.Text(sb, Game.StoryFont, storyWrapped, sx, faceBox.Y + 20, Palette.PaperDim * a, TextSize.Story);
+            //Who They Were
+            Gfx.TextSpaced(sb, Game.Font, "WHO THEY WERE", LeftX, faceBox.Bottom + 18, Palette.LineGrey * f, TextSize.Tiny, 3f);
+            Gfx.Text(sb, Game.StoryFont, storyWrapped, LeftX, faceBox.Bottom + 38, Palette.PaperDim * f, TextSize.Story);
         }
 
-        private void DrawRow(SpriteBatch sb, string label, int y, float a)
+        //Record : a small spaced label with a thin line under it
+        private static void DrawRecord(SpriteBatch sb, string label, float x, float y, float width, float a)
         {
-            Gfx.Diamond(sb, LeftX + 3, y + 7, 3, Palette.PaperDim * a);
-            Gfx.TextSpaced(sb, Game.Font, label, LeftX + 14, y, Palette.PaperDim * a, TextSize.Label, 2f);
-            Gfx.Rect(sb, LeftX, y + 24, 380, 1, Palette.LineGrey * (0.35f * a));
+            Gfx.TextSpaced(sb, Ui.Font, label, x, y, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            Gfx.Rect(sb, x, y + 16, width, 1, Palette.LineGrey * (0.35f * a));
         }
 
-        //Right Column : how they play. The PASSIVE is always on, the SIGNATURE is what SPACE lets
-        //loose once the recipe is full (round 13 : every conductor has their own).
-        private void DrawRightColumn(SpriteBatch sb, float a)
+        //Right Column : how they play. The PASSIVE is always on, the SIGNATURE is what SPACE lets loose once the gauge is full.
+        private void DrawRightColumn(SpriteBatch sb)
         {
+            float a = Words(0.04f);
+            float b = Words(0.1f);
+            float d = Words(0.16f);
+            float slide = BattleRules.UiEnterSlide;
+
             //Section 1 : Passive
-            int y = 64;
-            DrawRibbon(sb, "PASSIVE  /  ALWAYS ON", "I", y, a);
-            Gfx.Text(sb, Game.BigFont, c.MechanicName, RightX, y + 38, Palette.Highlight * a, TextSize.Subtitle);
-            Gfx.Text(sb, Game.StoryFont, c.MechanicWrapped, RightX, y + 76, Palette.Paper * a, TextSize.Story);
+            int y = 62;
+            float sx = RightX + (1f - Arrived(0.04f)) * slide;
+            DrawSection(sb, "I", "PASSIVE  /  ALWAYS ON", sx, y, a);
+            Gfx.Text(sb, Game.BigFont, c.MechanicName, sx, y + 40, Palette.Highlight * a, TextSize.Subtitle);
+            Gfx.Text(sb, Game.StoryFont, c.MechanicWrapped, sx, y + 76, Palette.Paper * a, TextSize.Story);
 
-            //Section 2 : Signature, with the key that lets it loose and the recipe it needs
-            y = 272;
-            DrawRibbon(sb, "SIGNATURE", "II", y, a);
-            Ui.KeyChipRight(sb, "SPACE", RightX + RightW - 58, y + 14, Palette.Paper * a);
-            Gfx.Text(sb, Game.StoryFont, c.SignatureMark, RightX, y + 36, Palette.PaperDim * a, TextSize.Story);
-            Gfx.Text(sb, Game.BigFont, c.SignatureName, RightX, y + 58, Palette.Highlight * a, TextSize.Subtitle);
-            Gfx.Text(sb, Game.StoryFont, c.SignatureWrapped, RightX, y + 96, Palette.Paper * a, TextSize.Story);
+            //Section 2 : Signature, with the key that lets it loose. Their own move, so their own colour.
+            y = 262;
+            sx = RightX + (1f - Arrived(0.1f)) * slide;
+            DrawSection(sb, "II", "SIGNATURE", sx, y, b);
+            Ui.KeyBox(sb, "SPACE", sx + RightW - 70, y + 13, Palette.Paper, Palette.Ink, b);
+            Gfx.Text(sb, Game.BigFont, c.SignatureName, sx, y + 40, Color.Lerp(Palette.Highlight, c.Spot, 0.75f) * b, TextSize.Subtitle);
+            Gfx.Text(sb, Game.StoryFont, c.SignatureWrapped, sx, y + 76, Palette.Paper * b, TextSize.Story);
 
             //Turn Battle : the gauge fills with PERFECTs, the same for every conductor (Alpha 7)
-            int ny = y + 190;
+            int ny = y + 178;
+            sx = RightX + (1f - Arrived(0.16f)) * slide;
             if (BattleRules.TurnBattleOn)
             {
-                Gfx.TextSpaced(sb, Game.Font, "NEEDS", RightX, ny + 5, Palette.LineGrey * a, TextSize.Tiny, 2f);
+                Gfx.TextSpaced(sb, Game.Font, "NEEDS", sx, ny + 5, Palette.LineGrey * d, TextSize.Tiny, 2f);
                 int need = BattleRules.PlaytestSignatureNeed > 0 ? BattleRules.PlaytestSignatureNeed : BattleRules.TurnSignatureNeed;   // PLAYTEST
-                Gfx.Text(sb, Game.Font, NumberText.Get(need), RightX + 70, ny, Palette.Paper * a, TextSize.Body);
-                Gfx.TextSpaced(sb, Game.Font, "PERFECT", RightX + 92, ny + 5, Palette.Paper * a, TextSize.Tiny, 2f);
-                Gfx.TextSpaced(sb, Game.Font, "PERFECT HITS AND BLOCKS FILL IT", RightX, ny + 32, Palette.LineGrey * a, TextSize.Tiny, 2f);
+                Gfx.Text(sb, Game.Font, NumberText.Get(need), sx + 70, ny, Palette.Paper * d, TextSize.Body);
+                Gfx.TextSpaced(sb, Game.Font, "PERFECT", sx + 92, ny + 5, Palette.Paper * d, TextSize.Tiny, 2f);
+                Gfx.TextSpaced(sb, Game.Font, "PERFECT HITS AND BLOCKS FILL IT", sx, ny + 32, Palette.LineGrey * d, TextSize.Tiny, 2f);
                 return;
             }
 
-            //Recipe : NEEDS, then a number and the section's name for each family it asks for
-            Gfx.TextSpaced(sb, Game.Font, "NEEDS", RightX, ny + 5, Palette.LineGrey * a, TextSize.Tiny, 2f);
-            float rx = RightX + 70;
+            //Recipe : NEEDS, then a number and the section's name for each family it asks for (the old duel)
+            Gfx.TextSpaced(sb, Game.Font, "NEEDS", sx, ny + 5, Palette.LineGrey * d, TextSize.Tiny, 2f);
+            float rx = sx + 70;
             for (int f = 0; f < c.Recipe.Length; f++)
             {
                 if (c.Recipe[f] <= 0) continue;
-                Gfx.Text(sb, Game.Font, NumberText.Get(c.Recipe[f]), rx, ny, Palette.Paper * a, TextSize.Body);
+                Gfx.Text(sb, Game.Font, NumberText.Get(c.Recipe[f]), rx, ny, Palette.Paper * d, TextSize.Body);
                 string section = StageLayout.Rows[StageLayout.SectionOf((Family)f)].Name;
-                Gfx.TextSpaced(sb, Game.Font, section, rx + 22, ny + 5, Palette.Paper * a, TextSize.Tiny, 2f);
+                Gfx.TextSpaced(sb, Game.Font, section, rx + 22, ny + 5, Palette.Paper * d, TextSize.Tiny, 2f);
                 rx += 22 + Gfx.TextWidth(Game.Font, section, TextSize.Tiny) + section.Length * 2f + 26;
             }
             //Where the notes come from : PERFECT beats, and GOOD ones too for BY THE BOOK
             string from = c.Perk == ConductorPerk.ByTheBook ? "NOTES FROM PERFECT OR GOOD BEATS" : "NOTES FROM PERFECT BEATS";
-            Gfx.TextSpaced(sb, Game.Font, from, RightX, ny + 32, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            Gfx.TextSpaced(sb, Game.Font, from, sx, ny + 32, Palette.LineGrey * d, TextSize.Tiny, 2f);
         }
 
-        //Arrow : a diamond with an arrow inside, for the next and the last profile. Dim at the ends.
-        private void DrawArrow(SpriteBatch sb, Rectangle box, bool pointRight, bool enabled, float a)
+        //Section : a roman numeral, the section's name in spaced capitals, and a thin rule with a circle on it (menu3)
+        private void DrawSection(SpriteBatch sb, string numeral, string title, float x, int y, float a)
         {
-            Color color = Palette.LineGrey * 0.5f;
-            if (enabled) color = Input.MouseOver(box) ? Palette.Highlight : Palette.Paper;
-            Gfx.Diamond(sb, box.Center.X, box.Center.Y, 24, Palette.Void * (0.8f * a));
-            Gfx.DiamondOutline(sb, box.Center.X, box.Center.Y, 24, color * a, 1.5f);
-            Gfx.Arrow(sb, box.Center.X + (pointRight ? 2 : -2), box.Center.Y, 9, pointRight, color * a);
+            Gfx.Text(sb, Game.BigFont, numeral, x, y, Palette.PaperDim * a, TextSize.Small);
+            Gfx.TextSpaced(sb, Game.Font, title, x + 40, y + 7, Palette.Highlight * a, TextSize.Label, 4f);
+            Gfx.Rect(sb, x, y + 30, RightW - 10, 1, Palette.LineGrey * (0.6f * a));
+            Gfx.CircleOutline(sb, x + RightW - 10, y + 30, 3f, Palette.LineGrey * a, 1f);
+            Gfx.Circle(sb, x, y + 30, 2.5f, c.Spot * a);
         }
 
-        //Ribbon : a section heading. A dark band ending in an arrow tip, a roman numeral,
-        //and the title in spaced capitals.
-        private void DrawRibbon(SpriteBatch sb, string title, string numeral, int y, float a)
+        //Arrow : a ring with an arrow inside, for the next and the last profile. Pointed, it fills and sends out a ring.
+        //Dim at the ends.
+        private void DrawArrow(SpriteBatch sb, Rectangle box, bool pointRight, bool enabled, UiMotion m, float a)
         {
-            Gfx.Rect(sb, RightX - 12, y, RightW - 30, 28, Palette.Paper * (0.10f * a));
-            Gfx.Arrow(sb, RightX - 12 + RightW - 30 + 7, y + 14, 14, true, Palette.Paper * (0.10f * a));
-            Gfx.Rect(sb, RightX - 12, y, 3, 28, Palette.Paper * a);
-            Gfx.Text(sb, Game.BigFont, numeral, RightX, y + 1, Palette.PaperDim * a, TextSize.Small);
-            Gfx.TextSpaced(sb, Game.Font, title, RightX + 40, y + 7, Palette.Highlight * a, TextSize.Label, 4f);
+            float e = enabled ? m.Shown : 0f;
+            float s = m.Scale;
+            Color line = enabled ? Color.Lerp(Palette.Paper, Palette.Highlight, e) : Palette.LineGrey * 0.5f;
+            float cx = box.Center.X + (pointRight ? 3f : -3f) * e;
+            float cy = box.Center.Y;
+            float radius = 22f * s;
+            Gfx.Circle(sb, cx, cy, radius, Color.Lerp(Palette.Void * 0.8f, Palette.Paper, e) * a);
+            Gfx.CircleOutline(sb, cx, cy, radius, line * a, 1.5f);
+            if (enabled && m.Ring < 1f) Gfx.CircleOutline(sb, cx, cy, radius + 18f * m.Ring, Palette.Paper * ((1f - m.Ring) * 0.8f * a), 1.5f);
+            Gfx.Arrow(sb, cx + (pointRight ? 2f : -2f), cy, 8f * s, pointRight, Color.Lerp(line, Palette.Ink, e) * a);
         }
     }
 }

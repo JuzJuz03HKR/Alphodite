@@ -19,9 +19,9 @@ namespace Tacetno433.Core
             NoteResult[] fourPerfect = { new NoteResult(Grade.Perfect, true, 1f), new NoteResult(Grade.Perfect, true, 1f),
                                          new NoteResult(Grade.Perfect, true, 1f), new NoteResult(Grade.Perfect, true, 1f) };
 
-            //Conductors : the turn battle's gallery shows the six of the lore, Beethoven first
-            report += Same("conductors shown", "6 THE UNHEARING THE UNSIGNED",
-                ConductorList.Shown.Length + " " + ConductorList.Shown[0].Name + " " + ConductorList.Shown[5].Name);
+            //Conductors : the turn battle's gallery shows the three the user kept (Beta1, 29 Oct), Beethoven, Fanny, Bach
+            report += Same("conductors shown", "3 THE UNHEARING THE UNSIGNED THE METRONOME",
+                ConductorList.Shown.Length + " " + ConductorList.Shown[0].Name + " " + ConductorList.Shown[1].Name + " " + ConductorList.Shown[2].Name);
 
             //Intent : decided again right after an attack, so HUSH now shows its second phrase (Lp Rp Dp, 2 notes on floor 1)
             TurnBattle b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));

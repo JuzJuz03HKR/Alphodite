@@ -656,6 +656,8 @@ namespace Tacetno433.Core
             Input.PretendClick = false;
             if (names[index] == "rewardpick" && frames == 72) Input.PretendPress = Keys.Enter;            // Beta1 round 1 : the picked card
             if (names[index] == "shopbuy" && frames == 30) Input.PretendClick = true;                     //   a motif bought, on its way up
+            if (names[index] == "gallerywalk" && frames == 40) Input.PretendPress = Keys.Enter;          // Beta1 round 2 : stepping inside a painting
+            if (names[index] == "detailswap" && frames == 34) Input.PretendPress = Keys.Right;           //   the next profile
             if (names[index] == "duelcutin" && frames == waits[index] - 22) Input.PretendPress = Keys.Space;
             if ((names[index] == "duelpause" || names[index] == "pause") && frames == waits[index] - 30) Input.PretendPress = Keys.Escape;
             if (names[index] == "titlequit" && frames == waits[index] - 10) Input.PretendPress = Keys.Escape;
@@ -733,6 +735,8 @@ namespace Tacetno433.Core
         //       wipe sweep sweepdark sweepclose (Beta1 screens : a page change on its way, from the route to the title, e.g. wipe@30)
         //       wipeshop wiperest wipeevent wipereward wipechapter wipeband wipesettings (Beta1 screens : the wipe to that page,
         //       with its name, e.g. wipeshop@41) wipegallery (the stage curtain on its way to the conductor select page, e.g. wipegallery@30)
+        //       gallery1 gallery2 gallerywalk galleryback detailcarry detailswap (Beta1 round 2 : another conductor pointed, stepping
+        //       inside, coming back, the painting carried in, the next profile, e.g. gallerywalk@50 galleryback@10 detailcarry@12 detailswap@40)
         private static void Open(TacetGame game, string name)
         {
             RunState run = SampleRun(game, name);
@@ -746,10 +750,15 @@ namespace Tacetno433.Core
             if (name.StartsWith("guide")) screen = new GuideScreen();
             if (name.StartsWith("tutorial")) screen = new TutorialScreen();
             if (name == "settings" || name == "calibrate") screen = new SettingsScreen();
-            if (name == "gallery") screen = new ConductorSelectScreen(2);
-            if (name == "detail") screen = new ConductorDetailScreen(2, new Rectangle(475, 126, 330, 450));
-            if (IsConductorShot(name, "detail"))                                        // detail0 .. detail4 : one per conductor
-                screen = new ConductorDetailScreen(ShotConductor(name), new Rectangle(475, 126, 330, 450));
+            if (name == "gallery") screen = new ConductorSelectScreen(0);                 // Beta1 round 2 : THE UNHEARING pointed, his painting exists
+            if (IsConductorShot(name, "gallery")) screen = new ConductorSelectScreen(ShotConductor(name));   // gallery1 gallery2 : another one pointed
+            if (name == "gallerywalk") screen = new ConductorSelectScreen(0);             //   stepping inside, the others falling away (gallerywalk@12)
+            if (name == "galleryback") screen = new ConductorSelectScreen(0, true);       //   back from the profile, the gallery gathering round (galleryback@10)
+            if (name == "detail") screen = new ConductorDetailScreen(0);
+            if (IsConductorShot(name, "detail"))                                        // detail0 .. detail2 : one per conductor the gallery shows
+                screen = new ConductorDetailScreen(ShotConductor(name));
+            if (name == "detailcarry") screen = new ConductorDetailScreen(0);             //   the painting on its way to the middle (detailcarry@12)
+            if (name == "detailswap") screen = new ConductorDetailScreen(0);              //   the arrows sliding to the next profile (detailswap@40)
             if (name == "chapter") screen = new ChapterScreen();
             if (name == "era") screen = new EraChoiceScreen(true);
             if (name == "crossing") screen = new EraChoiceScreen(false);

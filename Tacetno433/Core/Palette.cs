@@ -45,6 +45,13 @@ namespace Tacetno433.Core
         public static Color LightningBlue = new Color(40, 170, 255);
         public static Color LightningBlueHot = new Color(170, 230, 255);
 
+        //Conductor Colours (Beta1, 29 Oct) : each of the three conductors' own colour, for the parts of the pages that are
+        //theirs (Conductor.Spot : the gallery, the profile). CRIMSON is the red of THE UNHEARING's eyes and cravat in his art,
+        //made brighter for the dark pages. VIOLET and TEAL are stand-ins until the user picks them with the art.
+        public static Color SpotCrimson = new Color(218, 64, 68);
+        public static Color SpotViolet = new Color(164, 120, 255);
+        public static Color SpotTeal = new Color(40, 208, 182);
+
         //Accent : THE ONE COLOUR SWITCH.
         //Selected things, the combo counter and warnings use this. It is white while the game
         //is greyscale. Change these two lines (for example to a deep red) and every accent follows.

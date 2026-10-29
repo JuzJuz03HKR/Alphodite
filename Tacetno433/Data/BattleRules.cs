@@ -357,6 +357,12 @@
         public static float UiCardLift = 1.05f;           //   and grows this much
         public static float UiCardShine = 0.2f;           //   the band of light that slides over a leaning card (0 = none)
         public static float[] UiRarityLight = { 0.18f, 0.3f, 0.46f };   //   the stage light on a card, common / rare / treasured
+        public static float UiGallerySlant = 34f;         // GALLERY (round 2, 29 Oct) : how far each conductor's panel leans (pixels, menu6)
+        public static float UiGalleryPoint = 0.22f;       //   a pointed panel straightens into the whole painting and steps into its light this fast (seconds)
+        public static float UiGalleryRise = 0.5f;         //   and the conductor's colour rises this far up it from the bottom (share of its height)
+        public static float UiGalleryWalk = 0.34f;        //   STEP INSIDE : the other panels fall away this long before the profile takes the painting
+        public static float UiProfileCarry = 0.5f;        // PROFILE : the painting is carried from its gallery panel to the middle of the shot this long (and back)
+        public static float UiProfileSwap = 0.32f;        //   the arrows slide one painting out and the next one in this long
 
         //Battle Shape
         public const int BeatsPerRound = 8;       // sub-turns in one round

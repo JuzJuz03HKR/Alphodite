@@ -65,6 +65,11 @@ namespace Tacetno433.Data
         //Conductor Look : brightness stand-in until the real portrait art goes in
         public Color ThemeColor = Palette.ToneC;
 
+        //Spot (Beta1, 29 Oct) : the conductor's own colour, like a musician's (Musician.Spot). The pages paint what is theirs
+        //with it : the light rising in their gallery panel, their numeral, their name on the profile. Plain paper for the
+        //conductors the gallery does not show.
+        public Color Spot = Palette.Paper;
+
         //Conductor Unlock
         public bool Unlocked = true;
         public string UnlockHint = "";
@@ -157,6 +162,7 @@ namespace Tacetno433.Data
                                                                                      // band plays the written mark, and paid 1.33 for it.
                                                                                      // Round 15 : playing is free, his size is never wrong
                 ThemeColor = Palette.ToneC,
+                Spot = Palette.SpotTeal,
                 Unlocked = true
             },
 
@@ -211,6 +217,7 @@ namespace Tacetno433.Data
                                                                                      // Round 13 : the perk counts lost breath, not the line,
                                                                                      // and push 4 -> 3 (DEAF EARS is worth a lot : 76 percent at 4)
                 ThemeColor = Palette.ToneD,
+                Spot = Palette.SpotCrimson,
                 Unlocked = true
             },
 
@@ -348,15 +355,17 @@ namespace Tacetno433.Data
                 TurnSignatureName = "DUET",
                 TurnSignatureText = "The 4/4 shape : FANNY strikes every enemy while FELIX heals every musician.",
                 ThemeColor = Palette.ToneC,
+                Spot = Palette.SpotViolet,
                 Unlocked = true
             },
         };
 
         //Shown : the conductors the gallery offers. The old duel shows all of them. The turn battle shows
-        //only the six of the lore, the ones with a PASSIVE and SIGNATURE (the user chose this, 19 Oct),
-        //Beethoven first. The others stay in All so the save file still finds them.
+        //three (Beta1, the user chose them 29 Oct) : Beethoven, Fanny and Bach, in that order. Until then it
+        //showed the six of the lore (19 Oct). The others stay in All so the save file still finds them, and a
+        //run saved with one of them still loads.
         public static Conductor[] Shown = BattleRules.TurnBattleOn
-            ? new Conductor[] { All[3], All[5], All[1], All[6], All[7], All[8] }
+            ? new Conductor[] { All[3], All[8], All[1] }
             : All;
 
         //Text Prepare : called once from LoadContent after the font exists.

@@ -220,6 +220,21 @@ namespace Tacetno433.Core
             Swap(screen);
         }
 
+        //Screen Cut (Beta1 screens) : swap at once, with no cover and without coming up from black. For two pages that hand
+        //one picture across (SHARED PICTURE : the gallery's painting walks into the profile page, and back). The old page
+        //plays its own way out first, the new page starts with the picture exactly where the old one left it, so the eye
+        //follows the picture and never sees the change.
+        public void Cut(GameScreen screen)
+        {
+            fade = 0f;
+            fadingOut = false;
+            waiting = null;
+            sweep = RingSweep.Kind.None;
+            curtain = false;
+            Swap(screen);
+            upFromBlack = false;
+        }
+
         //Swap : the page changes, under a cover or straight away
         private void Swap(GameScreen screen)
         {

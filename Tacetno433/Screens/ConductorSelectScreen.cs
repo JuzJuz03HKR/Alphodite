@@ -8,8 +8,17 @@ using Tacetno433.Data;
 
 namespace Tacetno433.Screens
 {
-    //ConductorSelectScreen : a gallery of portraits. You walk left and right along it,
-    //a spotlight follows whoever is in front of you, and clicking the painting steps inside it.
+    //ConductorSelectScreen : THE GALLERY, where a run begins. The stage curtain opens on it.
+    //
+    //Beta1 screens round 2 (29 Oct, docs/SCREENS_LEVEL_UP.md 16) : the three conductors the user kept (ConductorList.Shown)
+    //stand side by side as tall slanted panels, each cut from its painting (menu6). The paintings are pixel art drawn at the
+    //size they are shown (Content/Art/Conductors/gallery_<name>.png, 302 x 402), so they are never stretched.
+    //   POINT        the panel straightens into the whole painting and steps up into its own light, its numeral turns the
+    //                conductor's colour (Conductor.Spot) and that colour rises from the bottom of the panel. The other two
+    //                sink back into the dark. The mouse points only when it moves, so a resting mouse never fights the keys.
+    //   STEP INSIDE  a click or ENTER : the other panels fall away into the dark, then the profile page takes the painting
+    //                from where it stands (SHARED PICTURE, ScreenManager.Cut) and carries it to the middle of its shot.
+    //   RETURN       back from the profile, the painting is set down in its panel and the gallery comes back around it.
     public class ConductorSelectScreen : GameScreen
     {
         //Can Pause : a menu page outside the run, ESC here means going back
@@ -18,77 +27,140 @@ namespace Tacetno433.Screens
             get { return false; }
         }
 
-        //Uses Curtain : the gallery hangs between curtains, so the stage curtain opens on it
+        //Uses Curtain : the gallery is on the stage behind the curtain, so the stage curtain opens on it
         public override bool UsesCurtain
         {
             get { return true; }
         }
 
         //Gallery Layout : move these numbers to reposition everything
-        private const int FrameW = 330;
-        private const int FrameH = 430;
-        private const int FrameY = 148;
-        private const int Spacing = 440;              // gap between one painting and the next
+        public const int PaintW = 302;                // the painting's size, as it was drawn (docs/UI_ART_PLAN.md 2.3)
+        public const int PaintH = 402;
+        private const int PanelsY = 132;              // the top of the panels
+        private const int PanelGap = 36;
+        private const int SideRoom = 110;             // the least room left at each side of the row
+        private const int Lift = 8;                   // a pointed panel steps up this far (pixels)
+        private const int FloorY = 604;               // where the wall meets the floor
         private const int CenterX = TacetGame.ScreenW / 2;
-        private const int CurtainW = 150;
-        private const int FloorY = 640;
+        private static readonly string[] numerals = { "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX" };
 
         //Gallery Buttons
-        private Rectangle leftButton = new Rectangle(250, 318, 70, 70);
-        private Rectangle rightButton = new Rectangle(960, 318, 70, 70);
-        private Rectangle backButton = new Rectangle(36, 648, 150, 42);
+        private Rectangle backButton = new Rectangle(36, 650, 170, 42);
         private static Rectangle modeBox = new Rectangle(1010, 634, 234, 38);   // NORMAL or MAESTRO, MAESTRO MODE
 
         //Gallery State
-        private int index;                            // which painting we are standing at
-        private float scroll;                         // smoothly slides toward index
+        private enum Phase { Look, Walk }
+        private Phase phase = Phase.Look;
+        private int index;                            // the conductor pointed at
+        private float[] lit = new float[0];           // 0..1 for each panel, how far it is pointed at (straight, lit, coloured)
+        private bool returning;                       // back from the profile page, the painting already in its panel
         private float time;
+        private float walkTime;
+        private float sincePoint = 99f;               // seconds since the pointed panel changed, the line under the row fades in again
+        private Vector2 mouseWas;
+        private UiMotion backMotion = new UiMotion();
 
-        public ConductorSelectScreen()
+        public ConductorSelectScreen() : this(0, false)
         {
-            index = 0;
         }
 
-        //Gallery Return : used when coming back out of a painting, so we stand at the same one
-        public ConductorSelectScreen(int startIndex)
+        //Gallery Return : stand at this conductor
+        public ConductorSelectScreen(int startIndex) : this(startIndex, false)
+        {
+        }
+
+        //returning : the profile page has set the painting down in its panel (SHARED PICTURE), the gallery comes back round it
+        public ConductorSelectScreen(int startIndex, bool returning)
         {
             index = startIndex;
+            this.returning = returning;
         }
 
         public override void Load()
         {
-            scroll = index;
+            int n = ConductorList.Shown.Length;
+            index = Math.Max(0, Math.Min(n - 1, index));
+            lit = new float[n];
+            if (returning) lit[index] = 1f;               // the painting comes back straight, as the profile page held it
+            mouseWas = Input.MousePos;
             SoundBank.PlayMusic(Music.Gallery);
+
+            //The Lens : a dim room, every panel lit by its own beam (DrawLights), corners dark like a stage
+            Lens.Ambient = returning ? HandAmbient : RoomAmbient;
+            Lens.SpotPower = 0f;
+            Lens.Vignette = 0.5f;
+        }
+
+        //Ambient : the room's light, and the light the painting has while it passes between this page and the profile
+        //(as drawn, the same on both pages, so the picture never changes brightness when the pages swap)
+        private const float RoomAmbient = 0.34f;
+        private const float HandAmbient = 0.5f;
+
+        //Panel Rect : where panel i stands (not pointed, not moving). Three fit at the painting's own width, more get narrower
+        //and show the middle of their painting (the old duel's gallery of nine).
+        public static Rectangle PanelRect(int i)
+        {
+            int n = ConductorList.Shown.Length;
+            int w = Math.Min(PaintW, (TacetGame.ScreenW - SideRoom * 2 - (n - 1) * PanelGap) / Math.Max(1, n));
+            int total = n * w + (n - 1) * PanelGap;
+            return new Rectangle((TacetGame.ScreenW - total) / 2 + i * (w + PanelGap), PanelsY, w, PaintH);
+        }
+
+        //Painting Rect : where the whole painting of conductor i stands when its panel is pointed at, straight and stepped
+        //up. The profile page takes it from here and sets it back here (SHARED PICTURE).
+        public static Rectangle PaintingRect(int i)
+        {
+            Rectangle panel = PanelRect(i);
+            return new Rectangle(panel.Center.X - PaintW / 2, PanelsY - Lift, PaintW, PaintH);
         }
 
         public override void Update(float dt)
         {
             time += dt;
+            sincePoint += dt;
+            int n = ConductorList.Shown.Length;
 
-            //Gallery Scroll : ease the camera toward the selected painting
-            scroll += (index - scroll) * dt * 9f;
-            if (Math.Abs(index - scroll) < 0.002f) scroll = index;
+            //Point : each panel eases toward pointed or not
+            float step = dt / BattleRules.UiGalleryPoint;
+            for (int i = 0; i < n; i++)
+                lit[i] = i == index ? Math.Min(1f, lit[i] + step) : Math.Max(0f, lit[i] - step);
 
-            //Gallery Navigate : one step per frame, and a step ends the frame. The arrows sit over the
-            //next painting's spot, so the click that moved the gallery used to land on that painting
-            //as well and open it straight away (round 13 fix: the arrows seemed not to work).
-            bool right = Input.KeyPressed(Keys.Right) || Input.KeyPressed(Keys.D) || Input.ClickedOn(rightButton);
-            bool left = Input.KeyPressed(Keys.Left) || Input.KeyPressed(Keys.A) || Input.ClickedOn(leftButton);
-            if (right || left)
+            //Lens : the room light goes up to the hand over's light while the painting passes between the pages
+            Lens.Ambient = MathHelper.Lerp(RoomAmbient, HandAmbient, HandOver());
+
+            //Step Inside : once the others have gone, the profile page takes the painting
+            if (phase == Phase.Walk)
             {
-                Move(right ? 1 : -1);
+                walkTime += dt;
+                if (walkTime >= BattleRules.UiGalleryWalk) Game.Screens.Cut(new ConductorDetailScreen(index));
                 return;
             }
 
-            //Gallery Enter : click the painting or press confirm to step inside it
-            Rectangle centerFrame = FrameRect(index);
-            bool onArrow = Input.MouseOver(leftButton) || Input.MouseOver(rightButton);
-            bool stepInside = Input.KeyPressed(Keys.Enter) || Input.KeyPressed(Keys.Space) || (Input.ClickedOn(centerFrame) && !onArrow);
+            backMotion.Update(dt, Input.MouseOver(backButton));
 
-            if (stepInside)
+            //Point With The Mouse : only when it moves. A pointer that has not entered the window yet reads (0, 0), so its
+            //first report is not a move.
+            bool moved = mouseWas != Vector2.Zero && Vector2.DistanceSquared(Input.MousePos, mouseWas) > 1f;
+            mouseWas = Input.MousePos;
+            for (int i = 0; i < n; i++)
             {
-                SoundBank.Play(Sfx.UiConfirm);
-                Game.Screens.Change(new ConductorDetailScreen(index, centerFrame));
+                if (!Input.MouseOver(PanelRect(i))) continue;
+                if (moved && i != index) Point(i);
+                if (Input.MouseClicked())
+                {
+                    if (i != index) Point(i);
+                    StepInside();
+                    return;
+                }
+            }
+
+            //Point With The Keys
+            if (Input.KeyPressed(Keys.Right) || Input.KeyPressed(Keys.D)) Step(1);
+            if (Input.KeyPressed(Keys.Left) || Input.KeyPressed(Keys.A)) Step(-1);
+            if (Input.KeyPressed(Keys.Enter) || Input.KeyPressed(Keys.Space))
+            {
+                StepInside();
+                return;
             }
 
             //Gallery Mode : NORMAL or MAESTRO for the run about to start
@@ -97,200 +169,38 @@ namespace Tacetno433.Screens
             //Gallery Back
             if (Input.KeyPressed(Keys.Escape) || Input.ClickedOn(backButton))
             {
+                backMotion.Press();
                 SoundBank.Play(Sfx.UiBack);
                 Game.Screens.Change(new TitleScreen());
             }
         }
 
-        //Gallery Move : step one painting left or right, stopping at the ends
-        private void Move(int direction)
+        //Point : another panel is pointed at
+        private void Point(int i)
         {
-            int before = index;
-            index += direction;
-            if (index < 0) index = 0;
-            if (index > ConductorList.Shown.Length - 1) index = ConductorList.Shown.Length - 1;
-
-            SoundBank.Play(index != before ? Sfx.UiMove : Sfx.UiDenied);
+            index = i;
+            sincePoint = 0f;
+            SoundBank.Play(Sfx.UiMove);
         }
 
-        //Gallery Frame Position : where painting number i sits on screen right now
-        private Rectangle FrameRect(int i)
+        //Step : the keys point one panel along, stopping at the ends
+        private void Step(int direction)
         {
-            float x = CenterX + (i - scroll) * Spacing - FrameW / 2f;
-            return new Rectangle((int)x, FrameY, FrameW, FrameH);
-        }
-
-        public override void Draw(SpriteBatch sb)
-        {
-            DrawRoom(sb);
-
-            //Room Dim : everything that is not under the light goes dark
-            Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Color.Black * 0.42f);
-
-            DrawSpotlight(sb);
-            DrawPaintings(sb);
-            DrawCurtains(sb);
-            DrawVignette(sb);
-            DrawInterface(sb);        // drawn last so no text ends up under the shading
-        }
-
-        //Room : back wall and floor of the gallery
-        private void DrawRoom(SpriteBatch sb)
-        {
-            Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.StageDeep);
-
-            //Wall : slightly lighter block behind the paintings
-            Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, FloorY, Palette.Stage);
-
-            //Wall Panels : tall faint frames along the wall. A flat wall reads as empty space,
-            //a few panel lines make it read as a real room.
-            for (int i = 0; i < 9; i++)
+            int next = index + direction;
+            if (next < 0 || next > ConductorList.Shown.Length - 1)
             {
-                Rectangle panel = new Rectangle(20 + i * 142, 96, 120, 500);
-                Gfx.RectOutline(sb, panel, Palette.Paper * 0.03f, 1);
+                SoundBank.Play(Sfx.UiDenied);
+                return;
             }
-            Gfx.Rect(sb, 0, 88, TacetGame.ScreenW, 1, Palette.Paper * 0.05f);
-
-            //Floor : with long boards running toward the viewer
-            Gfx.Rect(sb, 0, FloorY, TacetGame.ScreenW, TacetGame.ScreenH - FloorY, Palette.StageDeep);
-            Gfx.Rect(sb, 0, FloorY, TacetGame.ScreenW, 1, Palette.LineGrey);
-            for (int i = -8; i <= 8; i++)
-                Gfx.Line(sb, CenterX + i * 40, FloorY, CenterX + i * 150, TacetGame.ScreenH, Palette.Paper * 0.03f, 1f);
+            Point(next);
         }
 
-        //Spotlight : a cone of light dropping from the ceiling onto whoever is selected.
-        //Drawn three pixel rows at a time so the sloped edge stays smooth but stays cheap.
-        private void DrawSpotlight(SpriteBatch sb)
+        //Step Inside : the others fall away, then the profile page takes the painting (Update)
+        private void StepInside()
         {
-            for (int y = 0; y < FloorY; y += 3)
-            {
-                float t = (float)y / FloorY;
-                float halfWidth = 45f + t * 285f;
-
-                //Three widths stacked on each row make the middle of the beam brighter
-                Gfx.Rect(sb, CenterX - halfWidth, y, halfWidth * 2f, 3, Color.White * 0.030f);
-                Gfx.Rect(sb, CenterX - halfWidth * 0.66f, y, halfWidth * 1.32f, 3, Color.White * 0.030f);
-                Gfx.Rect(sb, CenterX - halfWidth * 0.33f, y, halfWidth * 0.66f, 3, Color.White * 0.035f);
-            }
-
-            //Beam Dust : specks caught in the light. This is the small detail that makes a
-            //beam read as real light instead of a grey triangle.
-            for (int i = 0; i < 16; i++)
-            {
-                float t = (time * 0.06f + i * 0.0625f) % 1f;       // 0 at the ceiling, 1 at the floor
-                float spread = (45f + t * 285f) * 0.85f;
-                float x = CenterX + (float)Math.Sin(i * 53.1f + time * 0.3f) * spread;
-                float a = 0.05f + 0.25f * (1f - t);
-
-                Gfx.DrawGlow(sb, x, t * FloorY, 3f, Palette.Paper * a);
-            }
-
-            //Light Pool : where the beam lands. One soft glow, squashed flat.
-            Gfx.DrawGlowBox(sb, new Rectangle(CenterX - 340, FloorY - 60, 680, 150), Color.White * 0.16f);
-        }
-
-        //Paintings : draw every frame, the further from the light the darker it gets
-        private void DrawPaintings(SpriteBatch sb)
-        {
-            for (int i = 0; i < ConductorList.Shown.Length; i++)
-            {
-                Rectangle frame = FrameRect(i);
-
-                //Skip anything fully off screen
-                if (frame.Right < -40 || frame.X > TacetGame.ScreenW + 40) continue;
-
-                float distance = Math.Abs(i - scroll);
-                if (distance > 1f) distance = 1f;
-                float brightness = 1f - distance * 0.72f;
-
-                //Hanging Shadow : soft dark behind and below, so the frame sits on the wall
-                Gfx.DrawGlowBox(sb, new Rectangle(frame.X - 26, frame.Y + 24, frame.Width + 52, frame.Height + 52),
-                                Color.Black * 0.55f);
-
-                PortraitBox.Draw(sb, frame, ConductorList.Shown[i], brightness, true);
-
-                //Chapter Mark : the big number above each painting, like an exhibition label
-                Conductor c = ConductorList.Shown[i];
-                Gfx.TextCentered(sb, Game.BigFont, NumberText.Get(i + 1), frame.Center.X, frame.Y - 44, Palette.Paper * brightness, TextSize.Subtitle);
-                Gfx.Rect(sb, frame.Center.X - 16, frame.Y - 26, 32, 1, Palette.Paper * brightness);
-                Gfx.TextSpacedCentered(sb, Game.Font, c.Role, frame.Center.X, frame.Y - 20, Palette.PaperDim * brightness, TextSize.Tiny, 3f);
-            }
-        }
-
-        //Curtains : drawn after the paintings so the side ones slide away behind them
-        private void DrawCurtains(SpriteBatch sb)
-        {
-            DrawOneCurtain(sb, 0, false);
-            DrawOneCurtain(sb, TacetGame.ScreenW - CurtainW, true);
-        }
-
-        //Curtain : vertical folds made of thin bars
-        private void DrawOneCurtain(SpriteBatch sb, int x, bool mirrored)
-        {
-            for (int i = 0; i < CurtainW; i += 2)
-            {
-                float t = (float)i / CurtainW;
-                if (mirrored) t = 1f - t;
-
-                float fold = (float)Math.Sin(t * 24f);
-                Color c = Color.Lerp(Palette.CurtainDark, Palette.Curtain, 0.5f + fold * 0.5f);
-                c = Color.Lerp(c, Palette.Void, t * 0.6f);           // darker toward the stage
-
-                Gfx.Rect(sb, x + i, 0, 2, TacetGame.ScreenH, c);
-            }
-        }
-
-        //Vignette : shade the top and bottom. Left and right are already covered by curtains.
-        private void DrawVignette(SpriteBatch sb)
-        {
-            for (int i = 0; i < 40; i++)
-            {
-                float t = 1f - i / 40f;
-                float a = t * t * 0.5f;
-                Gfx.Rect(sb, 0, i, TacetGame.ScreenW, 1, Color.Black * a);
-                Gfx.Rect(sb, 0, TacetGame.ScreenH - 1 - i, TacetGame.ScreenW, 1, Color.Black * a);
-            }
-        }
-
-        //Interface : heading, arrows, back button and the lines under the painting
-        private void DrawInterface(SpriteBatch sb)
-        {
-            Conductor c = ConductorList.Shown[index];
-
-            //Header : spaced serif title with a thin rule and a small caption
-            Gfx.TextSpacedCentered(sb, Game.BigFont, "CHOOSE YOUR CONDUCTOR", CenterX, 16, Palette.Paper, TextSize.Small, 5f);
-            Ornament.Divider(sb, CenterX, 52, 170, Palette.LineGrey);
-            Gfx.TextSpaced(sb, Game.Font, "THE GALLERY OF CONDUCTORS", 36, 30, Palette.LineGrey, TextSize.Tiny, 3f);
-            Gfx.TextSpacedRight(sb, Game.Font, "SELECT ONE TO BEGIN", TacetGame.ScreenW - 36, 30, Palette.LineGrey, TextSize.Tiny, 3f);
-
-            //Epithet : the line under the painting, only once the camera has settled
-            float settled = 1f - Math.Min(1f, Math.Abs(index - scroll) * 3f);
-            if (settled > 0f)
-            {
-                //Skills : the PASSIVE's name and the SIGNATURE's, the whole of them on the profile page
-                Gfx.TextSpacedCentered(sb, Game.Font, c.SkillsLabel, CenterX, 585, Palette.Highlight * settled, TextSize.Tiny, 3f);
-                Gfx.TextCentered(sb, Game.StoryFont, c.Epithet, CenterX, 616, Palette.Paper * settled, TextSize.Story);
-                Gfx.TextSpacedCentered(sb, Game.Font, c.BasedOnLabel, CenterX, 640, Palette.LineGrey * settled, TextSize.Tiny, 3f);
-            }
-
-            //Arrow Buttons : greyed out at the ends of the gallery
-            DrawArrowButton(sb, leftButton, false, index > 0);
-            DrawArrowButton(sb, rightButton, true, index < ConductorList.Shown.Length - 1);
-
-            //Position Diamonds : which painting out of how many
-            int count = ConductorList.Shown.Length;
-            for (int i = 0; i < count; i++)
-            {
-                float dotX = CenterX - (count - 1) * 10f + i * 20f;
-                if (i == index) Gfx.Diamond(sb, dotX, 672, 5, Palette.Highlight);
-                else Gfx.DiamondOutline(sb, dotX, 672, 4, Palette.LineGrey, 1f);
-            }
-
-            Ui.Button(sb, backButton, "BACK", "ESC", false);
-            Ui.ModeSwitch(sb, modeBox, Settings.Maestro, Input.MouseOver(modeBox), 1f);
-
-            //Hint
-            Gfx.TextSpacedCentered(sb, Game.Font, "CLICK THE PAINTING TO STEP INSIDE", CenterX, 694, Palette.LineGrey, TextSize.Tiny, 3f);
+            SoundBank.Play(Sfx.UiConfirm);
+            phase = Phase.Walk;
+            walkTime = 0f;
         }
 
         //Flip Mode : MAESTRO MODE on or off, remembered in the settings file for the next run.
@@ -302,20 +212,303 @@ namespace Tacetno433.Screens
             SoundBank.Play(Sfx.UiMove);
         }
 
-        //Arrow Button : a diamond frame with an arrow inside, dimmed when you cannot go that way
-        private void DrawArrowButton(SpriteBatch sb, Rectangle box, bool pointRight, bool enabled)
+        //======================================================================================
+        //Timing : how far everything has come in, or gone
+        //======================================================================================
+
+        //Walked : 0..1 through the step inside
+        private float Walked()
         {
-            Color color = Palette.LineGrey * 0.5f;
-            if (enabled) color = Input.MouseOver(box) ? Palette.Highlight : Palette.Paper;
+            return MathHelper.Clamp(walkTime / BattleRules.UiGalleryWalk, 0f, 1f);
+        }
 
-            //Arrow Pulse : nudges outward so the player notices it can be pressed
-            float pulse = enabled ? (float)Math.Sin(time * 3f) * 3f : 0f;
-            float cx = box.Center.X + (pointRight ? pulse : -pulse);
+        //Hand Over : 0 in the gallery, 1 at the moment the painting passes between this page and the profile page. Then the
+        //room is black around it and it is lit as drawn, exactly as the profile page shows it on its first frame.
+        private float HandOver()
+        {
+            if (phase == Phase.Walk) return UiMotion.EaseInOut(Walked());
+            if (returning) return 1f - UiMotion.EaseInOut(MathHelper.Clamp(time / BattleRules.UiProfileCarry, 0f, 1f));
+            return 0f;
+        }
 
-            Gfx.Diamond(sb, cx, box.Center.Y, 30, Palette.Void * 0.7f);
-            Gfx.DiamondOutline(sb, cx, box.Center.Y, 30, color, 1.5f);
-            Gfx.DiamondOutline(sb, cx, box.Center.Y, 24, color * 0.4f, 1f);
-            Gfx.Arrow(sb, cx + (pointRight ? 2 : -2), box.Center.Y, 10, pointRight, color);
+        //Panel Alpha : how far panel i is there. Fresh from the curtain they rise in one after another, coming back from the
+        //profile the others gather round the painting, stepping inside they fall away.
+        private float PanelAlpha(int i)
+        {
+            float a = Arrived(i);
+            if (phase == Phase.Walk) a = i == index ? Math.Max(a, Walked()) : a * (1f - UiMotion.EaseInOut(Walked()));
+            return a;
+        }
+
+        //Panel Drop : how far below its place panel i is, rising in or falling away (pixels). The painting being handed over
+        //is always in its place by the time the profile page takes it.
+        private float PanelDrop(int i)
+        {
+            float drop = (1f - Arrived(i)) * 34f;
+            if (phase == Phase.Walk) drop = i == index ? drop * (1f - Walked()) : drop + Walked() * Walked() * 46f;
+            return drop;
+        }
+
+        //Arrived : 0..1, how far panel i has come in. Fresh from the curtain they rise one after another, back from the
+        //profile the others gather round the painting that is already there.
+        private float Arrived(int i)
+        {
+            if (returning) return i == index ? 1f : UiMotion.Between(time, 0.12f + 0.08f * Math.Abs(i - index), 0.45f);
+            return UiMotion.Between(time, 0.18f + 0.09f * i, 0.5f);
+        }
+
+        //Pointed : how far panel i is pointed at, eased. The painting being handed over is always fully pointed.
+        private float Pointed(int i)
+        {
+            float e = UiMotion.EaseOut(lit[i]);
+            if (i == index) e = Math.Max(e, HandOver());
+            return e;
+        }
+
+        //Words : the page's words and buttons. They come in after the panels, and leave first when stepping inside.
+        private float Words(float start)
+        {
+            float a = returning ? UiMotion.Between(time, 0.1f + start * 0.5f, BattleRules.UiEnterTime)
+                                : UiMotion.Between(time, 0.3f + start, BattleRules.UiEnterTime);
+            if (phase == Phase.Walk) a *= 1f - MathHelper.Clamp(walkTime / (BattleRules.UiGalleryWalk * 0.6f), 0f, 1f);
+            return a;
+        }
+
+        //Shown Rect : panel i as it stands this frame, risen in or fallen, stepped up when pointed
+        private Rectangle ShownRect(int i)
+        {
+            Rectangle r = PanelRect(i);
+            r.Y += (int)Math.Round(PanelDrop(i) - Lift * Pointed(i));
+            return r;
+        }
+
+        //======================================================================================
+        //The World (THE LENS) : a dark stage, a beam on every panel
+        //======================================================================================
+
+        public override bool HasWorld
+        {
+            get { return true; }
+        }
+
+        public override bool ShowsGrain
+        {
+            get { return false; }
+        }
+
+        public override void DrawWorld(SpriteBatch sb)
+        {
+            float room = 1f - HandOver();
+
+            //Room : a dark back wall and the floor, with thin boards running toward us
+            Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.Void);
+            if (room > 0f)
+            {
+                Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, FloorY, Palette.StageDeep * room);
+                Gfx.Rect(sb, 0, FloorY, TacetGame.ScreenW, 1, Palette.LineGrey * (0.3f * room));
+                for (int k = -8; k <= 8; k++)
+                    Gfx.Line(sb, CenterX + k * 46, FloorY, CenterX + k * 170, TacetGame.ScreenH, Palette.Paper * (0.03f * room), 1f);
+            }
+
+            //Panels : the pointed one last, so it stands over the others' shadows
+            for (int i = 0; i < ConductorList.Shown.Length; i++)
+                if (i != index) DrawPanel(sb, i);
+            DrawPanel(sb, index);
+        }
+
+        //Panel : the shadow, the plate, the painting cut by the slanted window, the colour rising and the edge
+        private void DrawPanel(SpriteBatch sb, int i)
+        {
+            float a = PanelAlpha(i);
+            if (a <= 0f) return;
+            Conductor c = ConductorList.Shown[i];
+            float e = Pointed(i);
+            float hand = i == index ? HandOver() : 0f;
+            Rectangle r = ShownRect(i);
+            float slant = BattleRules.UiGallerySlant * (1f - e);
+
+            //Shadow : soft dark behind and under, so the panel stands off the wall
+            Gfx.DrawGlowBox(sb, new Rectangle(r.X - 30, r.Y + 24, r.Width + 60, r.Height + 50), Color.Black * (0.6f * a * (1f - hand)));
+
+            //Plate and Painting : the plate shows where the painting is see through. Handed over, the plate is the black
+            //of the profile page, the painting lit as drawn.
+            CutRows(sb, null, r, slant, Color.Lerp(Palette.Panel, Palette.Void, hand) * a);
+            Texture2D art = ArtBank.GalleryOf(c);
+            if (art != null) CutRows(sb, art, r, slant, Color.White * (MathHelper.Lerp(0.72f, 1f, e) * a));
+            else EmptySlot(sb, r, slant, a * (1f - hand));
+
+            //Colour Rise : the conductor's own colour, up from the bottom (menu6)
+            float rise = e * (1f - hand);
+            if (rise > 0f) ColourRise(sb, r, slant, c.Spot, rise, a);
+
+            //Edge : a thin line round the window, bright when pointed
+            SlantEdge(sb, r, slant, Color.Lerp(Palette.LineGrey * 0.5f, Palette.Paper, e) * (a * (1f - hand)));
+        }
+
+        //Cut Rows : a picture (or a plain plate when art is null) cut by a panel's slanted window, the picture in the middle
+        //of the panel. ADVANCED PART (small) : a sprite can only be cut by a straight rectangle (its source rectangle), so the
+        //slanted cut is made of rows : each row of the picture is drawn on its own, from where the slanted window crosses it
+        //to where it leaves it. A row is one pixel of the picture, so the slanted edge steps like pixel art and the painting
+        //stays exactly the size it was painted. The window leans like Gfx.SlantBox : its top is slant pixels right of its foot.
+        public static void CutRows(SpriteBatch sb, Texture2D art, Rectangle r, float slant, Color color)
+        {
+            int artW = art != null ? art.Width : r.Width;
+            int artX = r.Center.X - artW / 2;
+            int rows = art != null ? Math.Min(r.Height, art.Height) : r.Height;
+            for (int j = 0; j < rows; j++)
+            {
+                float lean = slant * (1f - (j + 0.5f) / r.Height);
+                int from = Math.Max(artX, (int)Math.Round(r.X + lean));
+                int to = Math.Min(artX + artW, (int)Math.Round(r.X + lean + r.Width - slant));
+                if (to <= from) continue;
+                if (art != null) sb.Draw(art, new Vector2(from, r.Y + j), new Rectangle(from - artX, j, to - from, 1), color);
+                else sb.Draw(Gfx.Pixel, new Vector2(from, r.Y + j), null, color, 0f, Vector2.Zero, new Vector2(to - from, 1f), SpriteEffects.None, 0f);
+            }
+        }
+
+        //Colour Rise : a conductor's colour rising from the bottom of the panel (menu6), strongest at the foot. Rows two pixels
+        //tall like the ink bars (PIXEL x2). rise 0..1 is how far it has come up.
+        private static void ColourRise(SpriteBatch sb, Rectangle r, float slant, Color color, float rise, float alpha)
+        {
+            int tall = (int)(r.Height * BattleRules.UiGalleryRise * rise);
+            for (int k = 0; k < tall; k += 2)
+            {
+                int j = r.Height - 2 - k;
+                float t = 1f - (float)k / Math.Max(1, tall);
+                float lean = slant * (1f - (j + 1f) / r.Height);
+                sb.Draw(Gfx.Pixel, new Vector2(r.X + lean, r.Y + j), null, color * (0.42f * t * t * alpha), 0f, Vector2.Zero,
+                        new Vector2(r.Width - slant, 2f), SpriteEffects.None, 0f);
+            }
+        }
+
+        //Slant Edge : the four sides of a slanted window
+        private static void SlantEdge(SpriteBatch sb, Rectangle r, float slant, Color color)
+        {
+            float w = r.Width - slant;
+            Gfx.Line(sb, r.X + slant, r.Y, r.X + slant + w, r.Y, color, 1f);
+            Gfx.Line(sb, r.X, r.Bottom, r.X + w, r.Bottom, color, 1f);
+            Gfx.Line(sb, r.X + slant, r.Y, r.X, r.Bottom, color, 1f);
+            Gfx.Line(sb, r.X + slant + w, r.Y, r.X + w, r.Bottom, color, 1f);
+        }
+
+        //Empty Slot : the panel of a conductor whose painting is not drawn yet. Like ArtSlot it draws nothing inside on
+        //purpose : a faint fill and a mark at every corner of the slanted window.
+        private static void EmptySlot(SpriteBatch sb, Rectangle r, float slant, float a)
+        {
+            CutRows(sb, null, r, slant, Palette.Paper * (0.04f * a));
+            float w = r.Width - slant;
+            Vector2 topLeft = new Vector2(r.X + slant, r.Y);
+            Vector2 topRight = new Vector2(r.X + slant + w, r.Y);
+            Vector2 footLeft = new Vector2(r.X, r.Bottom);
+            Vector2 footRight = new Vector2(r.X + w, r.Bottom);
+            Color mark = Palette.Paper * (0.6f * a);
+            Corner(sb, topLeft, topRight, footLeft, mark);
+            Corner(sb, topRight, topLeft, footRight, mark);
+            Corner(sb, footLeft, footRight, topLeft, mark);
+            Corner(sb, footRight, footLeft, topRight, mark);
+        }
+
+        //Corner : two short strokes from a corner toward its two neighbours
+        private static void Corner(SpriteBatch sb, Vector2 at, Vector2 toA, Vector2 toB, Color color)
+        {
+            Vector2 a = toA - at;
+            Vector2 b = toB - at;
+            a.Normalize();
+            b.Normalize();
+            Gfx.Line(sb, at, at + a * 16f, color, 1f);
+            Gfx.Line(sb, at, at + b * 16f, color, 1f);
+        }
+
+        //Lights : a beam from above on every panel, the pointed one strong, the others faint. Handed over, the beams are gone
+        //and only the room's light (HandAmbient) is left on the painting, as on the profile page.
+        public override void DrawLights(SpriteBatch sb)
+        {
+            float hand = HandOver();
+            for (int i = 0; i < ConductorList.Shown.Length; i++)
+            {
+                float a = PanelAlpha(i) * (1f - hand);
+                if (a <= 0f) continue;
+                Rectangle r = ShownRect(i);
+                Beam(sb, r.Center.X, r.Bottom + 12f, r.Width * 0.66f, (0.24f + 0.36f * UiMotion.EaseOut(lit[i])) * a);
+            }
+        }
+
+        //Beam : a cone of light from the top of the stage, two widths stacked so its middle is brighter, and the pool it
+        //leaves on the floor
+        private static void Beam(SpriteBatch sb, float cx, float foot, float halfWide, float power)
+        {
+            for (float y = 0f; y < foot; y += 4f)
+            {
+                float half = 46f + (y / foot) * (halfWide - 46f);
+                Gfx.Rect(sb, cx - half, y, half * 2f, 4f, Color.White * (power * 0.55f));
+                Gfx.Rect(sb, cx - half * 0.6f, y, half * 1.2f, 4f, Color.White * (power * 0.5f));
+            }
+            Gfx.DrawGlowBox(sb, new Rectangle((int)(cx - halfWide * 1.4f), (int)(foot + 20f), (int)(halfWide * 2.8f), 130), Color.White * (power * 0.9f));
+        }
+
+        //Glow : the pointed conductor's colour glowing at the foot of their panel
+        public override void DrawGlow(SpriteBatch sb)
+        {
+            float hand = HandOver();
+            for (int i = 0; i < ConductorList.Shown.Length; i++)
+            {
+                float e = UiMotion.EaseOut(lit[i]) * PanelAlpha(i) * (1f - hand);
+                if (e <= 0f) continue;
+                Rectangle r = ShownRect(i);
+                Gfx.DrawGlowBox(sb, new Rectangle(r.X - 50, r.Bottom - 80, r.Width + 100, 150), ConductorList.Shown[i].Spot * (0.5f * e));
+            }
+        }
+
+        //======================================================================================
+        //The Words (crisp on top)
+        //======================================================================================
+
+        public override void Draw(SpriteBatch sb)
+        {
+            Conductor pointed = ConductorList.Shown[index];
+
+            //Header : the spaced serif title over a thin orbit rule, a caption in each corner
+            float head = Words(0f);
+            float slide = (1f - head) * BattleRules.UiEnterSlide * 0.5f;
+            Gfx.TextSpacedCentered(sb, Game.BigFont, "CHOOSE YOUR CONDUCTOR", CenterX, 18 - slide, Palette.Paper * head, TextSize.Small, 5f);
+            Ornament.OrbitRule(sb, CenterX, 56, 180, Palette.LineGrey * head);
+            Gfx.TextSpaced(sb, Game.Font, "THE GALLERY", 36, 30, Palette.LineGrey * head, TextSize.Tiny, 3f);
+            Gfx.TextSpacedRight(sb, Game.Font, "SELECT ONE TO BEGIN", TacetGame.ScreenW - 36, 30, Palette.LineGrey * head, TextSize.Tiny, 3f);
+
+            //Every Panel : a big thin numeral over its top corner, the name and the real composer under it
+            for (int i = 0; i < ConductorList.Shown.Length; i++)
+            {
+                float a = PanelAlpha(i) * Words(0.05f + 0.04f * i);
+                if (a <= 0f) continue;
+                Conductor c = ConductorList.Shown[i];
+                float e = UiMotion.EaseOut(lit[i]);
+                Rectangle r = ShownRect(i);
+
+                //Numeral : in the conductor's colour when pointed (menu6)
+                Gfx.Text(sb, Game.LogoFont, numerals[Math.Min(i, numerals.Length - 1)], r.X - 16, r.Y - 66, Color.Lerp(Palette.LineGrey, c.Spot, e) * (0.9f * a), 0.8f);
+
+                //Name : a stroke of the conductor's colour under it when pointed, and the key that steps inside
+                float nameY = r.Bottom + 14;
+                Gfx.Text(sb, Game.BigFont, c.Name, r.X + 2, nameY, Color.Lerp(Palette.PaperDim, Palette.Highlight, e) * a, TextSize.Subtitle);
+                Gfx.TextSpaced(sb, Game.Font, c.BasedOn, r.X + 2, nameY + 32, Palette.LineGrey * a, TextSize.Tiny, 3f);
+                if (e > 0f)
+                {
+                    float nameW = Gfx.TextWidth(Game.BigFont, c.Name, TextSize.Subtitle);
+                    Ui.InkBar(sb, r.X, nameY + 25, (nameW + 6f) * e, 4f, 3f, c.Spot * a, 13 * i + 5, 0.6f);
+                    Ui.KeyBox(sb, "ENTER", r.Right - 52, nameY + 12, Palette.Paper, Palette.Ink, a * e);
+                }
+            }
+
+            //Pointed : their two skills and their line, under the row, fading in again when the pointed panel changes
+            float line = Words(0.2f) * Math.Min(1f, sincePoint * 5f);
+            Gfx.TextSpacedCentered(sb, Game.Font, pointed.SkillsLabel, CenterX, 612, Palette.Highlight * line, TextSize.Tiny, 3f);
+            Gfx.TextCentered(sb, Game.StoryFont, pointed.Epithet, CenterX, 644, Palette.Paper * line, TextSize.Story);
+
+            //Buttons and Hint
+            float low = Words(0.25f);
+            Ui.Command(sb, backButton, "BACK", "ESC", backMotion, low, false);
+            Ui.ModeSwitch(sb, modeBox, Settings.Maestro, Input.MouseOver(modeBox), low);
+            Gfx.TextSpacedCentered(sb, Game.Font, "CLICK A PAINTING TO STEP INSIDE", CenterX, 694, Palette.LineGrey * low, TextSize.Tiny, 3f);
         }
     }
 }

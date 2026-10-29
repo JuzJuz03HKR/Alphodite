@@ -75,7 +75,7 @@
 4. SIGNATURE ของ THE UNSIGNED กับ THE METRONOME หน้าตาแบบไหน (ขอตัวอย่าง VFX ก่อน ห้ามเดา)
 
 ## 5. ลำดับงานที่แนะนำสำหรับแชทถัดไป
-1. วาทยากร 3 คน (`ConductorList.Shown`) แล้วยกระดับหน้า Gallery กับ Detail ให้รับ 3 ภาพ (รอบ 2)
+1. ✅ (29 ต.ค.) วาทยากร 3 คน (`ConductorList.Shown`) แล้วยกระดับหน้า Gallery กับ Detail ให้รับ 3 ภาพ (รอบ 2) ดู `SCREENS_LEVEL_UP.md` ข้อ 16
 2. หน้าแผนที่ใหม่ (ข้อ 3.1) พร้อมระบบแผนที่ทั้งชั้นแบบคร่าวๆ
 3. หน้าจัดวางวงแบบเสา (ข้อ 3.2) ใช้กับ Recruit ด้วย
 4. รอบ 2 ที่เหลือ : Chapter CurtainCall (ใช้ม่านผ้าจริง) BandName Archive แล้วรอบ 3 : Settings Pause HOW TO PLAY
