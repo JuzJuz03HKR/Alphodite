@@ -343,7 +343,7 @@ namespace Tacetno433.Core
             run.Rehearse(run.Roster[1]);
             run.RecordStop(NodeType.Battle);
             run.RecordStop(NodeType.Shop);
-            run.Chosen = run.Options[1];
+            run.Chosen = run.Options[Math.Min(1, run.Options.Length - 1)];
             run.CurrentEvent = EventList.All[2];
             run.Maestro = true;                                                         // MAESTRO MODE is kept too
             run.Roster[0].Life = 7;                                                     // Alpha 7 : life between turn battles
@@ -371,6 +371,8 @@ namespace Tacetno433.Core
                 report += Same("seats", Seats(run), Seats(back));
                 report += Same("motifs", run.Motifs.Count + (run.Motifs.Count > 0 ? run.Motifs[0].Name : ""), back.Motifs.Count + (back.Motifs.Count > 0 ? back.Motifs[0].Name : ""));
                 report += Same("journey", run.Journey.Count + "/" + run.Journey[run.Journey.Count - 1].Type, back.Journey.Count + "/" + back.Journey[back.Journey.Count - 1].Type);
+                report += Same("map", run.Map.Write(), back.Map.Write());                              // Beta1 : the whole floor
+                report += Same("map path", string.Join(",", run.MapPath), string.Join(",", back.MapPath));
                 report += Same("options", Options(run), Options(back));
                 report += Same("chosen", Array.IndexOf(run.Options, run.Chosen).ToString(), Array.IndexOf(back.Options, back.Chosen).ToString());
                 report += Same("enemy", run.Battle.Enemy.Name, SaveFile.LoadedEnemy != null ? SaveFile.LoadedEnemy.Name : "none");
@@ -407,9 +409,82 @@ namespace Tacetno433.Core
             SaveFile.DeleteRun();
             report += Same("delete", "False", SaveFile.HasRun.ToString());
 
+            report += MapCheck(game);
+
             SaveFile.FolderOverride = "";
             SaveFile.Enabled = false;
             File.WriteAllText(Path.Combine(outDir, "savecheck.txt"), report);
+        }
+
+        //Map Check (Beta1 map) : many floors' maps, each must let every place be reached (BFS), give every place a way on,
+        //and never cross two ways. Then an event's elite takes its place's spot on the map.
+        private static string MapCheck(TacetGame game)
+        {
+            int unreached = 0, deadEnds = 0, crossings = 0, rowsWrong = 0;
+            for (int m = 0; m < 300; m++)
+            {
+                RunState run = new RunState();
+                run.Start(ConductorList.Shown[0], game.StoryFont, RouteNodeInfo.CaptionWrapWidth);
+                FloorMap map = run.Map;
+                if (map.Reachable() != map.Places()) unreached++;
+                if (map.LastRow != run.StagesThisFloor || map.Count(map.LastRow) != 1 || map.Rows[map.LastRow][0].Type != NodeType.Boss) rowsWrong++;
+                for (int s = 2; s < map.LastRow; s++)
+                {
+                    if (map.Count(s) < 2 || map.Count(s) > 4) rowsWrong++;
+                    for (int c = 0; c < map.Count(s); c++)
+                    {
+                        if (map.Rows[s][c].Next.Count == 0) deadEnds++;
+                        for (int d = c + 1; d < map.Count(s); d++)
+                            for (int a = 0; a < map.Rows[s][c].Next.Count; a++)
+                                for (int b = 0; b < map.Rows[s][d].Next.Count; b++)
+                                    if (map.Rows[s][c].Next[a] > map.Rows[s][d].Next[b]) crossings++;
+                    }
+                }
+            }
+            string report = Same("map reach", "0 0 0 0", unreached + " " + deadEnds + " " + crossings + " " + rowsWrong);
+
+            //Elite : the event's fight takes the spot and the ways of the place it happened in
+            RunState walk = new RunState();
+            walk.Start(ConductorList.Shown[0], game.StoryFont, RouteNodeInfo.CaptionWrapWidth);
+            walk.LeaveOpening();
+            walk.Chosen = walk.Options[0];
+            int ways = walk.Chosen.Next.Count;
+            walk.ReplaceChosen(NodeType.Elite);
+            report += Same("map elite", "Elite 2 0 " + ways, walk.Map.Rows[2][0].Type + " " + walk.Chosen.Row + " " + walk.Chosen.Column + " " + walk.Chosen.Next.Count);
+            walk.Advance();
+            report += Same("map walk", "3 0 " + ways, walk.Stage + " " + walk.MapAt + " " + walk.Options.Length);
+            return report;
+        }
+
+        //Widest Way : the columns of a way from row 2 to the row before stage, the one whose last place leads to the most places
+        private static int[] WidestWay(FloorMap map, int stage)
+        {
+            int[] best = new int[0];
+            int most = -1;
+            List<int[]> ways = new List<int[]>();
+            for (int c = 0; c < map.Count(2); c++) ways.Add(new int[] { c });
+            for (int s = 3; s < stage; s++)
+            {
+                List<int[]> longer = new List<int[]>();
+                for (int w = 0; w < ways.Count; w++)
+                {
+                    RouteNode last = map.At(s - 1, ways[w][ways[w].Length - 1]);
+                    for (int k = 0; k < last.Next.Count; k++)
+                    {
+                        int[] way = new int[ways[w].Length + 1];
+                        ways[w].CopyTo(way, 0);
+                        way[way.Length - 1] = last.Next[k];
+                        longer.Add(way);
+                    }
+                }
+                ways = longer;
+            }
+            for (int w = 0; w < ways.Count; w++)
+            {
+                int next = map.At(stage - 1, ways[w][ways[w].Length - 1]).Next.Count;
+                if (next > most) { most = next; best = ways[w]; }
+            }
+            return best;
         }
 
         private static string Same(string what, string saved, string loaded)
@@ -657,6 +732,7 @@ namespace Tacetno433.Core
             if (names[index] == "rewardpick" && frames == 72) Input.PretendPress = Keys.Enter;            // Beta1 round 1 : the picked card
             if (names[index] == "shopbuy" && frames == 30) Input.PretendClick = true;                     //   a motif bought, on its way up
             if (names[index] == "gallerywalk" && frames == 40) Input.PretendPress = Keys.Enter;          // Beta1 round 2 : stepping inside a painting
+            if (names[index] == "routedive" && frames == 40) Input.PretendPress = Keys.Enter;            //   the camera diving into the chosen place
             if (names[index] == "detailswap" && frames == 34) Input.PretendPress = Keys.Right;           //   the next profile
             if (names[index] == "duelcutin" && frames == waits[index] - 22) Input.PretendPress = Keys.Space;
             if ((names[index] == "duelpause" || names[index] == "pause") && frames == waits[index] - 30) Input.PretendPress = Keys.Escape;
@@ -735,6 +811,7 @@ namespace Tacetno433.Core
         //       wipe sweep sweepdark sweepclose (Beta1 screens : a page change on its way, from the route to the title, e.g. wipe@30)
         //       wipeshop wiperest wipeevent wipereward wipechapter wipeband wipesettings (Beta1 screens : the wipe to that page,
         //       with its name, e.g. wipeshop@41) wipegallery (the stage curtain on its way to the conductor select page, e.g. wipegallery@30)
+        //       routestart routeboss routedive (Beta1 map : at the way in, the boss next, diving into a place, e.g. routedive@52)
         //       gallery1 gallery2 gallerywalk galleryback detailcarry detailswap (Beta1 round 2 : another conductor pointed, stepping
         //       inside, coming back, the painting carried in, the next profile, e.g. gallerywalk@50 galleryback@10 detailcarry@12 detailswap@40)
         private static void Open(TacetGame game, string name)
@@ -764,7 +841,7 @@ namespace Tacetno433.Core
             if (name == "crossing") screen = new EraChoiceScreen(false);
             if (name == "recruit") screen = new RecruitScreen();
             if (name == "bandname") screen = new BandNameScreen();
-            if (name == "route" || name == "pause" || name.StartsWith("wipe") || name.StartsWith("sweep")) screen = new RouteScreen();
+            if (name.StartsWith("route") || name == "pause" || name.StartsWith("wipe") || name.StartsWith("sweep")) screen = new RouteScreen();
             if (name == "view" || name == "band") screen = new BandScreen();
             if (name.StartsWith("duel") || name == "finale") screen = new DuelScreen();
             if (name == "archive") screen = new ArchiveScreen();                          // Alpha 7 step 7
@@ -856,13 +933,22 @@ namespace Tacetno433.Core
                 run.RecordStop(NodeType.Shop);
             }
 
-            //Route : keep rolling until four paths come up, so the picture shows a full row
+            //Route (Beta1 map) : a map of nine stages, the band at stage five with three places behind it, on the way
+            //that offers the most places next
             run.Stage = 5;
             run.StagesThisFloor = 9;
+            run.RestoreMap("", new int[0]);                                         // an empty line makes a new map
+            run.RestoreMap(run.Map.Write(), WidestWay(run.Map, run.Stage));
+            if (name == "routestart") { run.Stage = 2; run.RestoreMap(run.Map.Write(), new int[0]); }                       // at the way in
+            if (name == "routeboss") { run.Stage = run.StagesThisFloor; run.RestoreMap(run.Map.Write(), WidestWay(run.Map, run.Stage)); }   // the boss next
+
+            //Old Dice : before the map, rolling the paths here used the run's dice until four came up. The same dice are
+            //rolled the same way, so every picture after this point (the fights, the shop) shows what it showed before
             for (int tries = 0; tries < 60; tries++)
             {
-                run.RollOptions();
-                if (run.Options.Length == 4) break;
+                int count = 2 + run.Rng.Next(3);
+                for (int k = 0; k < count; k++) run.Rng.Next(100);
+                if (count == 4) break;
             }
 
             //Battle

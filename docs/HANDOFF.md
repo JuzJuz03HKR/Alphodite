@@ -38,6 +38,8 @@
 | หน้า Title / Result และ Defeat | `Screens/TitleScreen.cs` / `Screens/ResultScreen.cs` |
 | หน้าเลือกวาทยากร (แผง 3 แผ่นเอียงตัดจากภาพ ชี้แล้วตั้งตรง สีไล่ขึ้น) / โปรไฟล์ (ภาพกลางจอ หน้าใกล้ 224) : 29 ต.ค. รอบ 2 | `Screens/ConductorSelectScreen.cs` (`CutRows` `PaintingRect`) / `Screens/ConductorDetailScreen.cs` · สีของวาทยากร `Conductor.Spot` + `Palette.SpotCrimson/Violet/Teal` · วาทยากรที่โชว์ `ConductorList.Shown` · ตัวเลข `BattleRules.UiGallery*` `UiProfile*` |
 | เปลี่ยนหน้าแบบส่งภาพต่อกัน (SHARED PICTURE : ไม่มีอะไรปิด ไม่สว่างจากดำ) | `ScreenManager.Cut` (หน้าเก่าเล่นทางออกเอง หน้าใหม่เริ่มจากภาพที่ตำแหน่งเดิม) |
+| แผนที่ทั้งชั้น (DAG แบบ STAIRCASE + BFS, 29 ต.ค.) : สร้างตอนเปิดชั้น ห้องที่เลือกได้ ตำแหน่ง ทางที่เดินมา เซฟ | `Data/FloorMap.cs` · `RunState.BuildMap` `OfferPlaces` `RestoreMap` `ReplaceChosen` `Map` `MapAt` `MapPath` · เซฟ `map=` `mappath=` ใน `Data/SaveFile.cs` · ตรวจด้วย `--shots savecheck` (map reach) |
+| หน้าแผนที่วงซ้อนรอบหลุม (ห้อง ทาง การ์ดด้านข้าง กล้องพุ่ง) | `Screens/RouteScreen.cs` (`PlaceAt` `RingOf`) · ตัวเลข `BattleRules.UiRouteDive*` · แคป `routestart` `routeboss` `routedive` |
 | ภาพทดสอบ | `--shots titlereveal resultquiet wipe sweep sweepdark sweepclose` และ `result@3,result@30` (ชื่อซ้ำได้ ภาพชื่อ `ชื่อ_เฟรม`) · 29 ต.ค. : `wipeshop wiperest wipeevent wipereward wipechapter wipeband wipesettings` (แผ่นเฉียงไปหน้านั้น) `wipegallery` (ม่าน) `rewardpick rewardtilt shopbuy` |
 | ภาพทดสอบเต็มจอ / เทียบก่อนหลัง | `--scale 1.5` (1920×1080, 2 = 2560×1440, 3 = 4K) · `--steady` (1/60 วินาทีต่อภาพ ล็อกการสุ่มของรัน รันซ้ำได้ภาพเดิมทุกพิกเซล) |
 

@@ -363,6 +363,8 @@
         public static float UiGalleryWalk = 0.34f;        //   STEP INSIDE : the other panels fall away this long before the profile takes the painting
         public static float UiProfileCarry = 0.5f;        // PROFILE : the painting is carried from its gallery panel to the middle of the shot this long (and back)
         public static float UiProfileSwap = 0.32f;        //   the arrows slide one painting out and the next one in this long
+        public static float UiRouteDive = 0.3f;           // ROUTE (the floor's map, 29 Oct) : choosing a place, the camera dives along the way into it this long
+        public static float UiRouteDiveZoom = 0.16f;      //   and this far (0.16 = 16% closer) before the page changes
 
         //Battle Shape
         public const int BeatsPerRound = 8;       // sub-turns in one round

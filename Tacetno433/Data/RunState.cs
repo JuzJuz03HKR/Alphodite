@@ -11,11 +11,11 @@ namespace Tacetno433.Data
     //
     //Shape of a run:
     //   a run is FloorsPerRun floors. Beating the last boss wins the whole run.
-    //   a FLOOR is one room of 7 to 10 STAGES
+    //   a FLOOR is one room of 7 to 10 STAGES, and its whole MAP is made when it opens (Beta1, Data/FloorMap.cs)
     //   STAGE 1 of every floor is locked. You pick an era, and musicians from that era
     //     join you. The very first floor also asks you to name the band.
-    //   STAGES 2 upward deal route paths, and you stay in the chosen era until either a
-    //     CROSSING moves you, or the floor ends
+    //   STAGES 2 upward offer the places of the map the band can walk to next, and you stay in the
+    //     chosen era until either a CROSSING moves you, or the floor ends
     //   the LAST stage of a floor is always the boss, and beating it opens the next floor
     //
     //Stamina belongs to the run, not to a single fight. Battles drain it, a win gives a
@@ -67,9 +67,14 @@ namespace Tacetno433.Data
         public List<JourneyStop> Journey = new List<JourneyStop>();   // every place picked, in order
 
         //Run Route
-        public RouteNode[] Options = new RouteNode[0];
+        public RouteNode[] Options = new RouteNode[0];     // the places the band can walk to now (from the map)
         public RouteNode Chosen;
         public GameEvent CurrentEvent;
+
+        //Run Map (Beta1, 29 Oct) : the whole floor (Data/FloorMap.cs), where the band stands on it, and the way it came
+        public FloorMap Map = new FloorMap();
+        public int MapAt = -1;                               // the column of the last place walked through, -1 at the opening
+        public List<int> MapPath = new List<int>();          // the columns walked this floor, row 2 first
 
         //Run Battle : the fight in progress, null between fights
         public BattleState Battle;
@@ -88,6 +93,8 @@ namespace Tacetno433.Data
         public string MotifsLabel = "";
 
         private Random random = DebugShots.Steady ? new Random(433) : new Random();     // the capture tool's --steady fixes the dice
+        private Random mapDice = DebugShots.Steady ? new Random(4331) : new Random();   // the maps have their own dice, so the rest
+                                                                                         // of a run rolls the same as before the map
         private SpriteFont font;
         private float wrapWidth;
 
@@ -140,13 +147,14 @@ namespace Tacetno433.Data
             BeginFloor();
         }
 
-        //Floor Begin : a new floor opens on its locked stage one, where the era is chosen
+        //Floor Begin : a new floor opens on its locked stage one, where the era is chosen, and its whole map is made
         public void BeginFloor()
         {
             Stage = 1;
             StagesThisFloor = 7 + random.Next(4);   // 7 to 10
             SeatsBoughtThisFloor = 0;
             Options = new RouteNode[0];
+            BuildMap();
             RefreshLabels();
         }
 
@@ -160,7 +168,7 @@ namespace Tacetno433.Data
         public void LeaveOpening()
         {
             Stage = 2;
-            RollOptions();
+            OfferPlaces();
             RefreshLabels();
         }
 
@@ -483,6 +491,12 @@ namespace Tacetno433.Data
         //which starts on its own locked era choice again. Past the last floor the run is won.
         public void Advance()
         {
+            //MAP : the place just finished is where the band stands now
+            if (Chosen != null && Chosen.Row == Stage && Stage >= 2)
+            {
+                MapAt = Chosen.Column;
+                MapPath.Add(Chosen.Column);
+            }
             Stage++;
 
             if (Stage > StagesThisFloor)
@@ -499,57 +513,115 @@ namespace Tacetno433.Data
                 return;
             }
 
-            RollOptions();
+            OfferPlaces();
             RefreshLabels();
         }
 
-        //Route Roll : pick the paths on offer. Nothing is shown in advance, so a fresh set
-        //is only rolled when the player actually arrives at the next stage.
-        public void RollOptions()
+        //Offer Places (Beta1 map) : the places the band can walk to now, read from the floor's map. From the opening every
+        //place of row 2, after that the places the last one leads to. (Before the map a fresh set was rolled here, and
+        //nothing further on could be seen.)
+        public void OfferPlaces()
         {
-            //Boss Stage : no choice at all, the floor ends here
-            if (Stage >= StagesThisFloor)
+            RouteNode from = Map.At(Stage - 1, MapAt);
+            if (from == null || Stage <= 2)
             {
-                Options = new RouteNode[1];
-                Options[0] = MakeNode(NodeType.Boss);
+                Options = Map.Count(Stage) > 0 ? (RouteNode[])Map.Rows[Stage].Clone() : new RouteNode[0];
                 return;
             }
-
-            int count = 2 + random.Next(3);        // two to four paths
-            Options = new RouteNode[count];
-
-            for (int i = 0; i < count; i++)
-                Options[i] = MakeNode(PickType());
-
-            //Variety Guard : if every path rolled the same, change the first one,
-            //otherwise the player is not really being offered a choice
-            bool allSame = true;
-            for (int i = 1; i < count; i++)
-                if (Options[i].Type != Options[0].Type) allSame = false;
-
-            if (allSame && count > 1)
+            List<RouteNode> ways = new List<RouteNode>();
+            for (int k = 0; k < from.Next.Count; k++)
             {
-                NodeType swap = Options[0].Type == NodeType.Battle ? NodeType.Event : NodeType.Battle;
-                Options[0] = MakeNode(swap);
+                RouteNode next = Map.At(Stage, from.Next[k]);
+                if (next != null) ways.Add(next);
             }
+            if (ways.Count == 0 && Map.Count(Stage) > 0) ways.AddRange(Map.Rows[Stage]);       // a broken map still goes on
+            Options = ways.ToArray();
         }
 
-        //Options Restore : the paths a save file wrote down, built again with their captions
-        public void RestoreOptions(NodeType[] types)
+        //Map Build : the whole floor at once (Data/FloorMap.cs). Each row's kinds come from the same weights the paths
+        //were rolled with before the map, the last row is the boss, then the rows are joined by the STAIRCASE.
+        private void BuildMap()
         {
-            Options = new RouteNode[types.Length];
-            for (int i = 0; i < types.Length; i++)
-                Options[i] = MakeNode(types[i]);
+            int stages = StagesThisFloor;
+            Map = new FloorMap();
+            Map.Rows = new RouteNode[stages + 1][];
+            Map.Rows[0] = new RouteNode[0];
+            Map.Rows[1] = new RouteNode[0];                                  // the opening holds no places
+            for (int s = 2; s <= stages; s++)
+            {
+                int count = s == stages ? 1 : (s == 2 ? 3 + mapDice.Next(2) : 2 + mapDice.Next(3));   // the first row is wide, 3 or 4
+                RouteNode[] row = new RouteNode[count];
+                for (int c = 0; c < count; c++) row[c] = MakeNode(s == stages ? NodeType.Boss : PickType(s), s, c);
+
+                //Variety Guard : if every place of a row rolled the same, change the first one,
+                //otherwise the player is not really being offered a choice
+                bool allSame = true;
+                for (int c = 1; c < count; c++)
+                    if (row[c].Type != row[0].Type) allSame = false;
+                if (allSame && count > 1) row[0] = MakeNode(row[0].Type == NodeType.Battle ? NodeType.Event : NodeType.Battle, s, 0);
+
+                Map.Rows[s] = row;
+            }
+            for (int s = 2; s < stages; s++) FloorMap.Join(Map.Rows[s], Map.Rows[s + 1], mapDice);
+            MapAt = -1;
+            MapPath.Clear();
         }
 
-        //Route Weights : how often each kind of place turns up.
+        //Map Restore : the map a save file wrote down (FloorMap.Write), and the way the band came. A save from before the
+        //map, or a broken line, gets a new map for its floor and the band at its opening.
+        public void RestoreMap(string line, int[] path)
+        {
+            List<List<KeyValuePair<NodeType, List<int>>>> rows = FloorMap.Read(line);
+            if (rows == null || rows.Count != StagesThisFloor - 1)
+            {
+                BuildMap();
+                OfferPlaces();
+                return;
+            }
+            Map = new FloorMap();
+            Map.Rows = new RouteNode[StagesThisFloor + 1][];
+            Map.Rows[0] = new RouteNode[0];
+            Map.Rows[1] = new RouteNode[0];
+            for (int r = 0; r < rows.Count; r++)
+            {
+                int s = r + 2;
+                Map.Rows[s] = new RouteNode[rows[r].Count];
+                for (int c = 0; c < rows[r].Count; c++)
+                {
+                    Map.Rows[s][c] = MakeNode(rows[r][c].Key, s, c);
+                    Map.Rows[s][c].Next.AddRange(rows[r][c].Value);
+                }
+            }
+            MapPath.Clear();
+            for (int i = 0; i < path.Length; i++) MapPath.Add(path[i]);
+            MapAt = MapPath.Count > 0 ? MapPath[MapPath.Count - 1] : -1;
+            OfferPlaces();
+        }
+
+        //Replace Chosen : the place the band walked into turns into another kind (an event that starts an elite fight).
+        //The new place takes the old one's spot on the map and its ways, so the floor carries on from there.
+        public void ReplaceChosen(NodeType type)
+        {
+            RouteNode old = Chosen;
+            RouteNode node = old != null ? MakeNode(type, old.Row, old.Column) : MakeNode(type);
+            if (old != null)
+            {
+                node.Next.AddRange(old.Next);
+                if (Map.At(old.Row, old.Column) == old) Map.Rows[old.Row][old.Column] = node;
+                int slot = Array.IndexOf(Options, old);
+                if (slot >= 0) Options[slot] = node;
+            }
+            Chosen = node;
+        }
+
+        //Route Weights : how often each kind of place turns up on a stage of the floor.
         //Change these numbers to make the run feel different.
-        private NodeType PickType()
+        private NodeType PickType(int stage)
         {
-            int roll = random.Next(100);
+            int roll = mapDice.Next(100);
 
             //Early Stages : no shop, rest or crossing right after the floor opens
-            if (Stage <= 3)
+            if (stage <= 3)
             {
                 if (roll < 65) return NodeType.Battle;
                 return NodeType.Event;
@@ -564,6 +636,14 @@ namespace Tacetno433.Data
         }
 
         //Node Make : build one node and wrap its caption now, so drawing stays free of string work
+        private RouteNode MakeNode(NodeType type, int row, int column)
+        {
+            RouteNode node = MakeNode(type);
+            node.Row = row;
+            node.Column = column;
+            return node;
+        }
+
         private RouteNode MakeNode(NodeType type)
         {
             RouteNode node = new RouteNode();

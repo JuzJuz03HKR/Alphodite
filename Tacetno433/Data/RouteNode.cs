@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Tacetno433.Data
 {
     //NodeType : the kinds of place a path can lead to.
@@ -13,13 +15,19 @@ namespace Tacetno433.Data
         EraShift = 6
     }
 
-    //RouteNode : one of the paths offered on the route page
+    //RouteNode : one place on the floor's map (Beta1, 29 Oct, Data/FloorMap.cs), and one of the paths offered on the
+    //route page when the band can walk to it
     public class RouteNode
     {
         public NodeType Type;
         public string Title = "";
         public string Caption = "";
         public string CaptionWrapped = "";   // built once when the node is made, never while drawing
+
+        //Map : where the place is on the floor's map, and the places of the next row its ways lead to
+        public int Row;                      // the stage of the floor it belongs to (2 and up, the opening is row 1)
+        public int Column;                   // its place in that row, counted from the left
+        public List<int> Next = new List<int>();
     }
 
     //RouteNodeInfo : THE PLACE TO EDIT what each kind of place is called and says.

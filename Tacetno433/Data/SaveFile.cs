@@ -208,7 +208,12 @@ namespace Tacetno433.Data
                 journey.Add(run.Journey[i].Floor + ":" + (int)run.Journey[i].Type + ":" + (run.Journey[i].Lost ? 1 : 0));
             lines.Add("journey=" + string.Join(",", journey));
 
-            //Route : the paths on offer, and the one picked if the band has walked into it
+            //Route : the floor's whole map and the way the band came (Beta1), the paths on offer, and the one picked if the
+            //band has walked into it. The paths are made again from the map when the run loads.
+            lines.Add("map=" + run.Map.Write());
+            List<string> path = new List<string>();
+            for (int i = 0; i < run.MapPath.Count; i++) path.Add(run.MapPath[i].ToString());
+            lines.Add("mappath=" + string.Join(",", path));
             List<string> options = new List<string>();
             for (int i = 0; i < run.Options.Length; i++) options.Add(((int)run.Options[i].Type).ToString());
             lines.Add("options=" + string.Join(",", options));
@@ -296,10 +301,7 @@ namespace Tacetno433.Data
                 }
             }
 
-            int[] options = GetList(v, "options");
-            NodeType[] types = new NodeType[options.Length];
-            for (int i = 0; i < options.Length; i++) types[i] = (NodeType)options[i];
-            run.RestoreOptions(types);
+            run.RestoreMap(GetText(v, "map"), GetList(v, "mappath"));        // the map, the way the band came, the paths on offer
 
             int chosen = GetInt(v, "chosen", -1);
             run.Chosen = chosen >= 0 && chosen < run.Options.Length ? run.Options[chosen] : null;
