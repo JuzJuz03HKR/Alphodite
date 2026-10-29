@@ -20,6 +20,8 @@ namespace Tacetno433.Screens
     //   BOTTOM   BACK, the arrows to the next and the last profile either side of TAKE THE BATON, and the mode
     //The arrows slide one painting out and the next in. BACK carries the painting back to its panel in the gallery.
     //Two black bars top and bottom make it read like a shot from a film.
+    //AURA (29 Oct) : the conductor's theme lives round the painting as the room comes up (Core/ConductorAura.cs), the same
+    //weather the gallery shows when it is pointed at. A name too long for the column takes two lines (NAME FIT).
     public class ConductorDetailScreen : GameScreen
     {
         //Can Pause : a menu page outside the run, ESC here means going back
@@ -52,6 +54,10 @@ namespace Tacetno433.Screens
         private string storyWrapped = "";
         private string basedOnWrapped = "";
         private float nameScale;
+        private string nameTop = "";       // NAME FIT : the name, or its first line when it is too long for one
+        private string nameLow = "";       //   and the rest on a second line ("" for a name that fits)
+        private float nameDrop;            //   how far the column under the name steps down for that second line
+        private ConductorAura[] auras = new ConductorAura[0];   // AURA : one for each conductor the arrows can show
 
         //Detail State
         private enum Phase { Arrive, Look, Leave }
@@ -75,6 +81,8 @@ namespace Tacetno433.Screens
         public override void Load()
         {
             Prepare();
+            auras = new ConductorAura[ConductorList.Shown.Length];
+            for (int i = 0; i < auras.Length; i++) auras[i] = new ConductorAura(ConductorList.Shown[i].Aura, 433 + i);
 
             //The Lens : the painting is lit as drawn (the gallery hands it over in the same light), the corners like a stage
             Lens.Ambient = 0.5f;
@@ -91,16 +99,51 @@ namespace Tacetno433.Screens
             storyWrapped = Gfx.WrapText(Game.StoryFont, c.Story, LeftW, TextSize.Story);
             basedOnWrapped = Gfx.WrapText(Game.StoryFont, c.BasedOn, LeftW - FaceSize - 22, TextSize.Story);
 
-            //Name Fit : long names shrink so they never run into the painting
+            //Name Fit : long names shrink so they never run into the painting. NAME FIT : a name that would shrink to less
+            //than 80% takes two lines instead, broken at the space that keeps both lines shortest (FANNY MENDELSSOHN / AND ???)
+            nameTop = c.Name;
+            nameLow = "";
+            nameDrop = 0f;
             nameScale = TextSize.Hero;
             float width = Gfx.TextWidth(Game.BigFont, c.Name, nameScale);
             if (width > LeftW) nameScale *= LeftW / width;
+            if (nameScale < TextSize.Hero * 0.8f)
+            {
+                float best = float.MaxValue;
+                for (int k = c.Name.IndexOf(' '); k > 0; k = c.Name.IndexOf(' ', k + 1))
+                {
+                    float wider = Math.Max(Gfx.TextWidth(Game.BigFont, c.Name.Substring(0, k), TextSize.Hero),
+                                           Gfx.TextWidth(Game.BigFont, c.Name.Substring(k + 1), TextSize.Hero));
+                    if (wider >= best) continue;
+                    best = wider;
+                    nameTop = c.Name.Substring(0, k);
+                    nameLow = c.Name.Substring(k + 1);
+                }
+                nameScale = TextSize.Hero * Math.Min(1f, LeftW / best);
+                nameDrop = Game.BigFont.LineSpacing * nameScale * 0.86f;
+            }
         }
 
         public override void Update(float dt)
         {
             time += dt;
             swap += dt;
+
+            //Aura : the one on show comes up with the room, the one sliding out under the arrows fades with it
+            for (int i = 0; i < auras.Length; i++)
+            {
+                float power = 0f;
+                Rectangle frame = PaintingAt();
+                if (i == index) power = Room() * (swapFrom >= 0 ? Math.Min(1f, swap / BattleRules.UiProfileSwap) : 1f);
+                else if (i == swapFrom && swap < BattleRules.UiProfileSwap)
+                {
+                    float t = UiMotion.EaseOut(swap / BattleRules.UiProfileSwap);
+                    frame = paintBox;
+                    frame.X -= (int)Math.Round(t * 140f * swapWay);
+                    power = Room() * (1f - t);
+                }
+                auras[i].Update(dt, frame, power);
+            }
 
             //Motion : TAKE THE BATON is the page's main action, so it stands pointed at (white) unless another button is
             bool look = phase == Phase.Look;
@@ -260,6 +303,8 @@ namespace Tacetno433.Screens
             float room = Room();
             Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.Void);
             if (room > 0f) DrawScene(sb, room);
+            for (int i = 0; i < auras.Length; i++) auras[i].DrawBack(sb);
+            for (int i = 0; i < auras.Length; i++) auras[i].DrawMiddle(sb);
 
             //Painting : the one sliding out first, then the one on show
             if (swapFrom >= 0 && swap < BattleRules.UiProfileSwap)
@@ -271,6 +316,7 @@ namespace Tacetno433.Screens
             }
             float come = swapFrom >= 0 ? Math.Min(1f, swap / BattleRules.UiProfileSwap) : 1f;
             DrawPainting(sb, c, PaintingAt(), come, room);
+            for (int i = 0; i < auras.Length; i++) auras[i].DrawFront(sb);
         }
 
         //Painting : the conductor's painting at the size it was painted, or the empty slot that waits for it
@@ -320,7 +366,7 @@ namespace Tacetno433.Screens
             //Layer 5 : the backlight, a pale pool behind the painting with the conductor's colour in it, so the painting
             //stands out from the dark
             Gfx.DrawGlow(sb, 640, 300, 360, Palette.Paper * (0.13f * e));
-            Gfx.DrawGlow(sb, 640, 330, 240, c.Spot * (0.16f * e));
+            Gfx.DrawGlow(sb, 640, 330, 240, c.SpotAt(time) * (0.16f * e));
             Ornament.Rays(sb, 640, 250, 190, 430, 24, time * 0.02f, Palette.Paper * (0.03f * e));
 
             //Layer 6 : shade behind the two text columns so the words stay readable
@@ -328,18 +374,20 @@ namespace Tacetno433.Screens
             Gfx.DrawGlowBox(sb, new Rectangle(760, 0, 800, TacetGame.ScreenH), Color.Black * (0.55f * e));
         }
 
-        //Lights : the room's light only (Lens.Ambient), so the painting looks as it was drawn
+        //Lights : the room's light (Lens.Ambient), so the painting looks as it was drawn, and the AURA's own light on it
         public override void DrawLights(SpriteBatch sb)
         {
+            for (int i = 0; i < auras.Length; i++) auras[i].DrawLights(sb);
         }
 
         //Glow : the conductor's colour glowing at the foot of the painting
         public override void DrawGlow(SpriteBatch sb)
         {
             float e = Room() * Math.Min(1f, 0.25f + swap * 4f);
-            if (e <= 0f) return;
+            if (e <= 0f) return;                      // no room yet, so no aura either (it rises with the room)
             Rectangle r = PaintingAt();
-            Gfx.DrawGlowBox(sb, new Rectangle(r.X - 70, r.Bottom - 70, r.Width + 140, 130), c.Spot * (0.45f * e));
+            Gfx.DrawGlowBox(sb, new Rectangle(r.X - 70, r.Bottom - 70, r.Width + 140, 130), c.SpotAt(time) * (0.45f * e));
+            for (int i = 0; i < auras.Length; i++) auras[i].DrawGlow(sb);
         }
 
         //======================================================================================
@@ -389,14 +437,18 @@ namespace Tacetno433.Screens
             float f = Words(0.18f);
             float slide = BattleRules.UiEnterSlide;
 
-            //Name and Line
-            Gfx.Text(sb, Game.BigFont, c.Name, LeftX - (1f - Arrived(0f)) * slide, 54, Palette.Highlight * a, nameScale);
-            Gfx.Text(sb, Game.StoryFont, epithetWrapped, LeftX + 2 - (1f - Arrived(0.06f)) * slide, 108, Palette.PaperDim * b, TextSize.Story);
-            Gfx.Rect(sb, LeftX, 160, LeftW * Arrived(0.06f), 1, Palette.LineGrey * b);
-            Gfx.Circle(sb, LeftX, 160, 3f, c.Spot * b);
+            //Name and Line (NAME FIT : a second line pushes the rest of the column down by nameDrop)
+            float drop = nameDrop;
+            Gfx.Text(sb, Game.BigFont, nameTop, LeftX - (1f - Arrived(0f)) * slide, 54, Palette.Highlight * a, nameScale);
+            if (nameLow.Length > 0)
+                Gfx.Text(sb, Game.BigFont, nameLow, LeftX - (1f - Arrived(0.03f)) * slide, 54 + drop, Palette.Highlight * a, nameScale);
+            Gfx.Text(sb, Game.StoryFont, epithetWrapped, LeftX + 2 - (1f - Arrived(0.06f)) * slide, 108 + drop, Palette.PaperDim * b, TextSize.Story);
+            Gfx.Rect(sb, LeftX, 160 + drop, LeftW * Arrived(0.06f), 1, Palette.LineGrey * b);
+            Gfx.Circle(sb, LeftX, 160 + drop, 3f, c.SpotAt(time) * b);
 
             //Face : the close up, as it was drawn, or the empty slot that waits for it
             Rectangle face = faceBox;
+            face.Y += (int)Math.Round(drop);
             face.X -= (int)Math.Round((1f - Arrived(0.12f)) * slide);
             Gfx.Rect(sb, face, Palette.CanvasDark * d);
             ArtBank.DrawOrSlot(sb, ArtBank.FaceOf(c), face, Palette.Paper, d);
@@ -405,14 +457,16 @@ namespace Tacetno433.Screens
             //Record : beside the face, a label over each value like a record card
             float rx = faceBox.Right + 22;
             float rw = LeftX + LeftW - rx;
-            DrawRecord(sb, "ROLE", rx, faceBox.Y + 4, rw, d);
-            Gfx.TextSpaced(sb, Game.Font, c.Role, rx, faceBox.Y + 24, Palette.Paper * d, TextSize.Body, 2f);
-            DrawRecord(sb, "BASED ON", rx, faceBox.Y + 74, rw, d);
-            Gfx.Text(sb, Game.StoryFont, basedOnWrapped, rx, faceBox.Y + 92, Palette.Paper * d, TextSize.Story);
+            float ry = faceBox.Y + drop;
+            DrawRecord(sb, "ROLE", rx, ry + 4, rw, d);
+            Gfx.TextSpaced(sb, Game.Font, c.Role, rx, ry + 24, Palette.Paper * d, TextSize.Body, 2f);
+            DrawRecord(sb, "BASED ON", rx, ry + 74, rw, d);
+            Gfx.Text(sb, Game.StoryFont, basedOnWrapped, rx, ry + 92, Palette.Paper * d, TextSize.Story);
 
             //Who They Were
-            Gfx.TextSpaced(sb, Game.Font, "WHO THEY WERE", LeftX, faceBox.Bottom + 18, Palette.LineGrey * f, TextSize.Tiny, 3f);
-            Gfx.Text(sb, Game.StoryFont, storyWrapped, LeftX, faceBox.Bottom + 38, Palette.PaperDim * f, TextSize.Story);
+            float wy = faceBox.Bottom + drop;
+            Gfx.TextSpaced(sb, Game.Font, "WHO THEY WERE", LeftX, wy + 18, Palette.LineGrey * f, TextSize.Tiny, 3f);
+            Gfx.Text(sb, Game.StoryFont, storyWrapped, LeftX, wy + 38, Palette.PaperDim * f, TextSize.Story);
         }
 
         //Record : a small spaced label with a thin line under it
@@ -442,7 +496,7 @@ namespace Tacetno433.Screens
             sx = RightX + (1f - Arrived(0.1f)) * slide;
             DrawSection(sb, "II", "SIGNATURE", sx, y, b);
             Ui.KeyBox(sb, "SPACE", sx + RightW - 70, y + 13, Palette.Paper, Palette.Ink, b);
-            Gfx.Text(sb, Game.BigFont, c.SignatureName, sx, y + 40, Color.Lerp(Palette.Highlight, c.Spot, 0.75f) * b, TextSize.Subtitle);
+            Gfx.Text(sb, Game.BigFont, c.SignatureName, sx, y + 40, Color.Lerp(Palette.Highlight, c.SpotAt(time), 0.75f) * b, TextSize.Subtitle);
             Gfx.Text(sb, Game.StoryFont, c.SignatureWrapped, sx, y + 76, Palette.Paper * b, TextSize.Story);
 
             //Turn Battle : the gauge fills with PERFECTs, the same for every conductor (Alpha 7)
@@ -481,7 +535,7 @@ namespace Tacetno433.Screens
             Gfx.TextSpaced(sb, Game.Font, title, x + 40, y + 7, Palette.Highlight * a, TextSize.Label, 4f);
             Gfx.Rect(sb, x, y + 30, RightW - 10, 1, Palette.LineGrey * (0.6f * a));
             Gfx.CircleOutline(sb, x + RightW - 10, y + 30, 3f, Palette.LineGrey * a, 1f);
-            Gfx.Circle(sb, x, y + 30, 2.5f, c.Spot * a);
+            Gfx.Circle(sb, x, y + 30, 2.5f, c.SpotAt(time) * a);
         }
 
         //Arrow : a ring with an arrow inside, for the next and the last profile. Pointed, it fills and sends out a ring.

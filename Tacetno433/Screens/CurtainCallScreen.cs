@@ -243,7 +243,7 @@ namespace Tacetno433.Screens
                 float k = BowIn(i);
                 if (k <= 0f) continue;
                 Rectangle r = BowRect(i, count);
-                string name = i == 0 ? run.Conductor.Name : run.Order[i - 1].NameTag;
+                string name = i == 0 ? run.Conductor.NameShort : run.Order[i - 1].NameTag;
                 float scale = TextSize.Tiny;
                 float wide = Gfx.SpacedWidth(Game.Font, name, scale, 1.5f);
                 if (wide > BowW + 6) scale *= (BowW + 6) / wide;

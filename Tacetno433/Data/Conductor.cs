@@ -33,11 +33,16 @@ namespace Tacetno433.Data
     //Step 10 adds the other four of the lore. KEEP THE ORDER, append only.
     public enum TurnKit { None, Beethoven, Mozart, Bach, Paganini, Lully, Fanny }
 
+    //AuraKind (Beta1, 29 Oct) : the weather round a conductor's painting when it is pointed at, and on their profile
+    //(Core/ConductorAura.cs, docs/CHARACTER_DESIGN.md 4). None for the conductors the gallery does not show.
+    public enum AuraKind { None, Storm, Prism, Holy }
+
     //Conductor : one playable class. Everything shown on the select pages comes from these fields.
     public class Conductor
     {
         //Conductor Identity
         public string Name = "";
+        public string ShortName = "";      // (29 Oct) the name where only a few letters fit, empty when the full name fits there
         public string BasedOn = "";        // the real musician the class is bent from
         public string Role = "";           // the rough build, shown under the face icon
         public string Epithet = "";        // one short line under the painting
@@ -70,6 +75,9 @@ namespace Tacetno433.Data
         //conductors the gallery does not show.
         public Color Spot = Palette.Paper;
 
+        //Aura (Beta1, 29 Oct) : the conductor's theme made visible round the painting (STORM, PRISM, HOLY)
+        public AuraKind Aura = AuraKind.None;
+
         //Conductor Unlock
         public bool Unlocked = true;
         public string UnlockHint = "";
@@ -96,6 +104,20 @@ namespace Tacetno433.Data
         public string PushLabel = "";
         public string RecipeLabel = "";    // "NEEDS  1 STRING   3 PERCUSSION"
         public string SkillsLabel = "";    // "BY THE BOOK   /   SPACE  ABSOLUTE PITCH", under the gallery painting
+
+        //Name Short : the name for the narrow places (the band page's column, the curtain call's bows). The full name
+        //everywhere else.
+        public string NameShort
+        {
+            get { return ShortName.Length > 0 ? ShortName : Name; }
+        }
+
+        //Spot At : the conductor's colour at this moment. A PRISM conductor's crystal white shimmers slowly through the
+        //rainbow, like light turning in a crystal, every other conductor's stays still.
+        public Color SpotAt(float time)
+        {
+            return Aura == AuraKind.Prism ? Color.Lerp(Spot, Palette.Prism(time * 0.2f), 0.35f) : Spot;
+        }
     }
 
     //ConductorList : THE PLACE TO EDIT CHARACTERS.
@@ -162,7 +184,8 @@ namespace Tacetno433.Data
                                                                                      // band plays the written mark, and paid 1.33 for it.
                                                                                      // Round 15 : playing is free, his size is never wrong
                 ThemeColor = Palette.ToneC,
-                Spot = Palette.SpotTeal,
+                Spot = Palette.SpotHoly,            // HOLY (29 Oct) : a holy gold light, and the dark round him
+                Aura = AuraKind.Holy,
                 Unlocked = true
             },
 
@@ -217,7 +240,8 @@ namespace Tacetno433.Data
                                                                                      // Round 13 : the perk counts lost breath, not the line,
                                                                                      // and push 4 -> 3 (DEAF EARS is worth a lot : 76 percent at 4)
                 ThemeColor = Palette.ToneD,
-                Spot = Palette.SpotCrimson,
+                Spot = Palette.LightningBlue,       // STORM (29 Oct) : lightning's blue, the red stays in his art
+                Aura = AuraKind.Storm,
                 Unlocked = true
             },
 
@@ -332,15 +356,18 @@ namespace Tacetno433.Data
                 Unlocked = true
             },
 
-            //Conductor 9 : Fanny Mendelssohn with the shadow of Felix. Her Hollow has no name, two people in one.
+            //Conductor 9 : Fanny Mendelssohn with the shadow of Felix, two people in one. Called THE UNSIGNED until
+            //29 Oct, when the user named her FANNY MENDELSSOHN AND ??? : her brother is the ??? nobody names.
+            //BASED ON says F. MENDELSSOHN, like the others' initials, and both of them were F.
             new Conductor
             {
-                Name = "THE UNSIGNED",
-                BasedOn = "FANNY MENDELSSOHN",
+                Name = "FANNY MENDELSSOHN AND ???",
+                ShortName = "FANNY AND ???",
+                BasedOn = "F. MENDELSSOHN",
                 Role = "TWO VOICES",
                 Epithet = "Some of her songs were printed under her brother's name.",
                 Story = "She wrote hundreds of pieces and was told to keep them at home. "
-                      + "Her Hollow has no name of its own, and her brother's shadow plays beside her.",
+                      + "Her brother's shadow plays beside her, and no one says his name.",
                 MechanicName = "TWO VOICES",
                 MechanicText = "The voices take turns : FANNY hits harder, FELIX heals more.",
                 SignatureMark = "A due",
@@ -355,7 +382,8 @@ namespace Tacetno433.Data
                 TurnSignatureName = "DUET",
                 TurnSignatureText = "The 4/4 shape : FANNY strikes every enemy while FELIX heals every musician.",
                 ThemeColor = Palette.ToneC,
-                Spot = Palette.SpotViolet,
+                Spot = Palette.SpotPrism,           // PRISM (29 Oct) : a crystal's white, the rainbow when it moves (SpotAt)
+                Aura = AuraKind.Prism,
                 Unlocked = true
             },
         };

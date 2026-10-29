@@ -19,6 +19,9 @@ namespace Tacetno433.Screens
     //   STEP INSIDE  a click or ENTER : the other panels fall away into the dark, then the profile page takes the painting
     //                from where it stands (SHARED PICTURE, ScreenManager.Cut) and carries it to the middle of its shot.
     //   RETURN       back from the profile, the painting is set down in its panel and the gallery comes back around it.
+    //   AURA         (29 Oct) the pointed conductor's theme comes alive round the panel (Core/ConductorAura.cs) : a storm with
+    //                lightning for THE UNHEARING, prism shards for FANNY MENDELSSOHN AND ???, holy gold in the dark for
+    //                THE METRONOME. A name too long for its panel takes two lines (NAME FIT).
     public class ConductorSelectScreen : GameScreen
     {
         //Can Pause : a menu page outside the run, ESC here means going back
@@ -41,6 +44,7 @@ namespace Tacetno433.Screens
         private const int SideRoom = 110;             // the least room left at each side of the row
         private const int Lift = 8;                   // a pointed panel steps up this far (pixels)
         private const int FloorY = 604;               // where the wall meets the floor
+        private const int NameLine = 27;              // NAME FIT : the second line of a long name sits this far under the first
         private const int CenterX = TacetGame.ScreenW / 2;
         private static readonly string[] numerals = { "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX" };
 
@@ -59,6 +63,9 @@ namespace Tacetno433.Screens
         private float sincePoint = 99f;               // seconds since the pointed panel changed, the line under the row fades in again
         private Vector2 mouseWas;
         private UiMotion backMotion = new UiMotion();
+        private ConductorAura[] auras = new ConductorAura[0];   // AURA : one for each panel, made in Load
+        private string[] nameTop = new string[0];               // NAME FIT : the name, or its first line when it is too long
+        private string[] nameLow = new string[0];               //   and the rest on a second line ("" for a name that fits)
 
         public ConductorSelectScreen() : this(0, false)
         {
@@ -83,6 +90,16 @@ namespace Tacetno433.Screens
             lit = new float[n];
             if (returning) lit[index] = 1f;               // the painting comes back straight, as the profile page held it
             mouseWas = Input.MousePos;
+
+            //Aura and Name Fit : made once here, never while drawing
+            auras = new ConductorAura[n];
+            nameTop = new string[n];
+            nameLow = new string[n];
+            for (int i = 0; i < n; i++)
+            {
+                auras[i] = new ConductorAura(ConductorList.Shown[i].Aura, 433 + i);
+                SplitName(ConductorList.Shown[i].Name, PanelRect(i).Width - 8, out nameTop[i], out nameLow[i]);
+            }
             SoundBank.PlayMusic(Music.Gallery);
 
             //The Lens : a dim room, every panel lit by its own beam (DrawLights), corners dark like a stage
@@ -95,6 +112,21 @@ namespace Tacetno433.Screens
         //(as drawn, the same on both pages, so the picture never changes brightness when the pages swap)
         private const float RoomAmbient = 0.34f;
         private const float HandAmbient = 0.5f;
+
+        //Split Name : NAME FIT. A name wider than room is broken at the last space that lets its first line fit.
+        private void SplitName(string name, float room, out string top, out string low)
+        {
+            top = name;
+            low = "";
+            if (Gfx.TextWidth(Game.BigFont, name, TextSize.Subtitle) <= room) return;
+            for (int k = name.LastIndexOf(' '); k > 0; k = name.LastIndexOf(' ', k - 1))
+            {
+                if (Gfx.TextWidth(Game.BigFont, name.Substring(0, k), TextSize.Subtitle) > room) continue;
+                top = name.Substring(0, k);
+                low = name.Substring(k + 1);
+                return;
+            }
+        }
 
         //Panel Rect : where panel i stands (not pointed, not moving). Three fit at the painting's own width, more get narrower
         //and show the middle of their painting (the old duel's gallery of nine).
@@ -127,6 +159,13 @@ namespace Tacetno433.Screens
 
             //Lens : the room light goes up to the hand over's light while the painting passes between the pages
             Lens.Ambient = MathHelper.Lerp(RoomAmbient, HandAmbient, HandOver());
+
+            //Aura : as strong as its panel is pointed at, gone by the time the profile takes the painting
+            for (int i = 0; i < n; i++)
+            {
+                float hand = i == index ? HandOver() : 0f;
+                auras[i].Update(dt, ShownRect(i), UiMotion.EaseOut(lit[i]) * PanelAlpha(i) * (1f - hand));
+            }
 
             //Step Inside : once the others have gone, the profile page takes the painting
             if (phase == Phase.Walk)
@@ -310,10 +349,14 @@ namespace Tacetno433.Screens
                     Gfx.Line(sb, CenterX + k * 46, FloorY, CenterX + k * 170, TacetGame.ScreenH, Palette.Paper * (0.03f * room), 1f);
             }
 
-            //Panels : the pointed one last, so it stands over the others' shadows
+            //Panels : the pointed one last, so it stands over the others' shadows. AURA : its weather behind them, its
+            //lightning or its dark (THE METRONOME) over the room and the others, then whatever floats in front of the pointed one.
+            for (int i = 0; i < auras.Length; i++) auras[i].DrawBack(sb);
             for (int i = 0; i < ConductorList.Shown.Length; i++)
                 if (i != index) DrawPanel(sb, i);
+            for (int i = 0; i < auras.Length; i++) auras[i].DrawMiddle(sb);
             DrawPanel(sb, index);
+            for (int i = 0; i < auras.Length; i++) auras[i].DrawFront(sb);
         }
 
         //Panel : the shadow, the plate, the painting cut by the slanted window, the colour rising and the edge
@@ -339,7 +382,7 @@ namespace Tacetno433.Screens
 
             //Colour Rise : the conductor's own colour, up from the bottom (menu6)
             float rise = e * (1f - hand);
-            if (rise > 0f) Ui.ColourRise(sb, r, slant, c.Spot, BattleRules.UiGalleryRise * rise, a);
+            if (rise > 0f) Ui.ColourRise(sb, r, slant, c.SpotAt(time), BattleRules.UiGalleryRise * rise, a);
 
             //Edge : a thin line round the window, bright when pointed
             Ui.SlantEdge(sb, r, slant, Color.Lerp(Palette.LineGrey * 0.5f, Palette.Paper, e) * (a * (1f - hand)));
@@ -357,6 +400,7 @@ namespace Tacetno433.Screens
                 Rectangle r = ShownRect(i);
                 Beam(sb, r.Center.X, r.Bottom + 12f, r.Width * 0.66f, (0.24f + 0.36f * UiMotion.EaseOut(lit[i])) * a);
             }
+            for (int i = 0; i < auras.Length; i++) auras[i].DrawLights(sb);
         }
 
         //Beam : a cone of light from the top of the stage, two widths stacked so its middle is brighter, and the pool it
@@ -381,8 +425,9 @@ namespace Tacetno433.Screens
                 float e = UiMotion.EaseOut(lit[i]) * PanelAlpha(i) * (1f - hand);
                 if (e <= 0f) continue;
                 Rectangle r = ShownRect(i);
-                Gfx.DrawGlowBox(sb, new Rectangle(r.X - 50, r.Bottom - 80, r.Width + 100, 150), ConductorList.Shown[i].Spot * (0.5f * e));
+                Gfx.DrawGlowBox(sb, new Rectangle(r.X - 50, r.Bottom - 80, r.Width + 100, 150), ConductorList.Shown[i].SpotAt(time) * (0.5f * e));
             }
+            for (int i = 0; i < auras.Length; i++) auras[i].DrawGlow(sb);
         }
 
         //======================================================================================
@@ -409,19 +454,25 @@ namespace Tacetno433.Screens
                 Conductor c = ConductorList.Shown[i];
                 float e = UiMotion.EaseOut(lit[i]);
                 Rectangle r = ShownRect(i);
+                Color spot = c.SpotAt(time);
 
                 //Numeral : in the conductor's colour when pointed (menu6)
-                Gfx.Text(sb, Game.LogoFont, numerals[Math.Min(i, numerals.Length - 1)], r.X - 16, r.Y - 66, Color.Lerp(Palette.LineGrey, c.Spot, e) * (0.9f * a), 0.8f);
+                Gfx.Text(sb, Game.LogoFont, numerals[Math.Min(i, numerals.Length - 1)], r.X - 16, r.Y - 66, Color.Lerp(Palette.LineGrey, spot, e) * (0.9f * a), 0.8f);
 
-                //Name : a stroke of the conductor's colour under it when pointed, and the key that steps inside
+                //Name : a stroke of the conductor's colour under it when pointed, and the key that steps inside. NAME FIT : a
+                //name on two lines leaves out BASED ON, its real name is in it already (FANNY MENDELSSOHN AND ???).
                 float nameY = r.Bottom + 14;
-                Gfx.Text(sb, Game.BigFont, c.Name, r.X + 2, nameY, Color.Lerp(Palette.PaperDim, Palette.Highlight, e) * a, TextSize.Subtitle);
-                Gfx.TextSpaced(sb, Game.Font, c.BasedOn, r.X + 2, nameY + 32, Palette.LineGrey * a, TextSize.Tiny, 3f);
+                bool twoLines = nameLow[i].Length > 0;
+                Color ink = Color.Lerp(Palette.PaperDim, Palette.Highlight, e) * a;
+                Gfx.Text(sb, Game.BigFont, nameTop[i], r.X + 2, nameY, ink, TextSize.Subtitle);
+                if (twoLines) Gfx.Text(sb, Game.BigFont, nameLow[i], r.X + 2, nameY + NameLine, ink, TextSize.Subtitle);
+                else Gfx.TextSpaced(sb, Game.Font, c.BasedOn, r.X + 2, nameY + 32, Palette.LineGrey * a, TextSize.Tiny, 3f);
                 if (e > 0f)
                 {
-                    float nameW = Gfx.TextWidth(Game.BigFont, c.Name, TextSize.Subtitle);
-                    Ui.InkBar(sb, r.X, nameY + 25, (nameW + 6f) * e, 4f, 3f, c.Spot * a, 13 * i + 5, 0.6f);
-                    Ui.KeyBox(sb, "ENTER", r.Right - 52, nameY + 12, Palette.Paper, Palette.Ink, a * e);
+                    float lowY = twoLines ? NameLine : 0f;
+                    float nameW = Gfx.TextWidth(Game.BigFont, nameTop[i], TextSize.Subtitle);
+                    Ui.InkBar(sb, r.X, nameY + 25 + lowY, (nameW + 6f) * e, 4f, 3f, spot * a, 13 * i + 5, 0.6f);
+                    Ui.KeyBox(sb, "ENTER", r.Right - 52, nameY + 12 + lowY, Palette.Paper, Palette.Ink, a * e);
                 }
             }
 

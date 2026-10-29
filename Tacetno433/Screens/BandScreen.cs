@@ -394,7 +394,7 @@ namespace Tacetno433.Screens
             Rectangle cr = conductorRect;
             float ca = ColumnIn(0);
             cr.Y += (int)Math.Round((1f - ca) * 30f);
-            BandColumn.Words(sb, cr, c.Name, "CONDUCTOR", c.MechanicName, 0, c.SignatureName, 0, c.Spot, UiMotion.EaseOut(conductorLit), ca);
+            BandColumn.Words(sb, cr, c.NameShort, "CONDUCTOR", c.MechanicName, 0, c.SignatureName, 0, c.Spot, UiMotion.EaseOut(conductorLit), ca);
             for (int p = 0; p < slotRects.Length; p++)
             {
                 if (owner[p] == null) continue;

@@ -674,3 +674,30 @@ build 0 error 0 warning, turncheck 113/113 (แก้ค่าที่คาด
 3. กล้องเดินตอนกลับจากห้อง เร็วหรือช้าไป (`UiRouteWalk`)
 4. วงที่ไหลเข้าหลุมกับขอบจอที่มืดขึ้น รกไปไหม
 
+
+## 23. ธีมวาทยากร 3 คน (AURA) ในหน้า Gallery และ Detail : ทำแล้ว (29 ต.ค. บ่าย)
+
+ทำตาม `CHARACTER_DESIGN.md` ข้อ 4 (ผู้ใช้ให้ธีมไว้ 29 ต.ค. คำต่อคำ `USER_BRIEFS.md` 13.15 ภาพเรฟใน Character Design Picture1 ถึง 6)
+
+### 23.1 ที่ทำ
+- `Core/ConductorAura.cs` (ใหม่) เอฟเฟกต์รอบภาพของวาทยากรแต่ละคน ใช้ร่วมทั้งสองหน้า แต่ละหน้ามีหนึ่งตัวต่อวาทยากร แรงตามว่าถูกชี้แค่ไหน (Gallery) หรือห้องขึ้นมาแค่ไหน (Detail) ทุกอย่างอยู่ใน pool ที่สร้างตอนโหลด ไม่ new ระหว่างเล่น
+  - STORM (THE UNHEARING) : ฝน 140 เส้นเฉียงตามลม หนึ่งในห้าอยู่หน้าภาพ เมฆดำลอยด้านบน ฟ้าผ่าจากบนจอลงพื้นข้างภาพ (ADVANCED PART MIDPOINT DISPLACEMENT ทำเส้นหยัก มีกิ่งสองกิ่ง) ผ่าแวบ ดับแป๊บ แวบอีกที แล้วจาง ห้องสว่างวาบสีฟ้าสองจังหวะ ใน Gallery ฟ้าผ่าวาดทับภาพอื่นแต่อยู่หลังภาพของเขา LESS FLASHING ไม่มีวาบและฟ้าผ่าจางลง
+  - PRISM (FANNY MENDELSSOHN AND ???) : เศษปริซึม 7 ชิ้น เติมแบบโปร่ง (แถวละ 2 พิกเซล) ขอบขาว สันกลาง ขอบหนึ่งแตกเป็นสีรุ้งสามเส้น ประกายรูปกากบาทเป็น pixel ทุกชิ้นหันไปทางน้อง (`BrotherX` `BrotherY` ตั้งไว้ขวาของภาพก่อน) เส้นแสงสีรุ้งจากทุกชิ้นพุ่งไปหาน้อง สปอตไลต์ขาวจากบนจอส่องที่น้อง สองชิ้นลอยหน้าภาพ
+  - HOLY (THE METRONOME) : ทั้งห้องและภาพอื่นมืดลง (`UiAuraHolyDark` 0.55) ลำแสงทองจากบนจอลงที่เขาคนเดียว มีแกนสว่าง แอ่งแสงที่เท้า รัศมีทองบางๆ ฝุ่นทอง 40 จุดลอยลงช้าๆ แวววับ
+- สีใหม่ `Palette.SpotPrism` `SpotHoly` `SpotHolyHot` และ `Palette.Prism(t)` (วงล้อสีด้วยคลื่นสามลูก) ลบ `SpotCrimson` `SpotViolet` `SpotTeal` ที่ไม่มีใครใช้แล้ว
+- `Conductor.Aura` (STORM PRISM HOLY) `Conductor.SpotAt(time)` (Fanny เหลือบรุ้ง คนอื่นสีเดิม) `Conductor.ShortName` / `NameShort` (ที่แคบ)
+- NAME FIT : ชื่อยาวเกินขึ้นสองบรรทัด Gallery ซ่อน BASED ON ของชื่อสองบรรทัด Detail ดันคอลัมน์ซ้ายลงตามบรรทัดที่เพิ่ม ชื่ออื่นเหมือนเดิมทุกพิกเซล
+- ตัวเลข `BattleRules` หัวข้อ UI Feel : `UiAuraRain` `UiAuraBoltEvery` `UiAuraBoltFlash` `UiAuraShards` `UiAuraMotes` `UiAuraHolyDark`
+- เครื่องมือแคป : แคป gallery และ detail ทุกแบบให้เมาส์นิ่งใต้จอ วาทยากรที่ชื่อแคปบอกจึงถูกชี้ค้างไว้ (เดิมเมาส์ปลอมวิ่งไปชี้ภาพอื่น)
+
+### 23.2 ตรวจแล้ว
+- build 0 error 0 warning · turncheck 113/113 (แก้ชื่อที่คาดไว้เป็น FANNY MENDELSSOHN AND ???) · savecheck 31/31
+- หน้าอื่น 24 หน้าเหมือนเดิมทุกพิกเซล ที่เปลี่ยนคือ gallery detail (ตั้งใจ) กับ curtain curtainwin (สีของวาทยากรบนเสาเปลี่ยนจากแดงเป็นฟ้า)
+- ลองเปลี่ยนวาทยากรตัวอย่างเป็น Fanny ในสำเนาทดสอบ : แถบบน HUD Programme ของ CurtainCall cut-in SIGNATURE ชื่อเต็มพอดี เสาวาทยากรในหน้า THE BAND เดิมชื่อหดจนอ่านไม่ออก จึงใช้ชื่อสั้น
+- แคป `--scale 1.5` คม
+
+### 23.3 ให้ผู้ใช้ดูหลัง Rebuild
+1. หน้า Gallery ชี้ทีละคน : พายุกับฟ้าผ่าของ Beethoven ถี่หรือแรงไปไหม (`UiAuraBoltEvery` `UiAuraBoltFlash`) ห้องมืดรอบ Bach มืดพอไหม (`UiAuraHolyDark`)
+2. เศษปริซึมของ Fanny รกไปไหม ใหญ่พอไหม ตำแหน่งน้องในภาพอยู่ซ้ายหรือขวา (ตอนนี้ขวา)
+3. ชื่อ FANNY MENDELSSOHN AND ??? สองบรรทัดโอเคไหม ชื่อสั้น FANNY AND ??? ในที่แคบโอเคไหม
+4. ลองเปิด LESS FLASHING แล้วชี้ Beethoven ต้องไม่วาบ

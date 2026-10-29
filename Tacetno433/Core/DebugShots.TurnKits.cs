@@ -6,7 +6,7 @@ using Tacetno433.Data;
 namespace Tacetno433.Core
 {
     //DebugShots.TurnKits : DEVELOPER TOOL, the checks of step 10 (Alpha 7), part of --shots turncheck.
-    //The four new conductor kits (THE METRONOME, THE HEARTLESS, THE KING'S BATON, THE UNSIGNED),
+    //The four new conductor kits (THE METRONOME, THE HEARTLESS, THE KING'S BATON, FANNY MENDELSSOHN AND ???, once THE UNSIGNED),
     //the nine musician traits in the turn battle, and the intent that is decided right after an attack.
     //Like DebugShots.Turn.cs every line is PASS or FAIL with what was expected and what came out.
     public static partial class DebugShots
@@ -20,7 +20,7 @@ namespace Tacetno433.Core
                                          new NoteResult(Grade.Perfect, true, 1f), new NoteResult(Grade.Perfect, true, 1f) };
 
             //Conductors : the turn battle's gallery shows the three the user kept (Beta1, 29 Oct), Beethoven, Fanny, Bach
-            report += Same("conductors shown", "3 THE UNHEARING THE UNSIGNED THE METRONOME",
+            report += Same("conductors shown", "3 THE UNHEARING FANNY MENDELSSOHN AND ??? THE METRONOME",
                 ConductorList.Shown.Length + " " + ConductorList.Shown[0].Name + " " + ConductorList.Shown[1].Name + " " + ConductorList.Shown[2].Name);
 
             //Intent : decided again right after an attack, so HUSH now shows its second phrase (Lp Rp Dp, 2 notes on floor 1)
@@ -112,7 +112,7 @@ namespace Tacetno433.Core
             b.UseSignature(fourPerfect);
             report += Same("the sun", "18 18 18 0 0", b.Party[0].Hp + " " + b.Party[1].Hp + " " + b.Party[2].Hp + " " + b.Party[0].Dissonance + " " + b.Party[1].Mute);
 
-            //TWO VOICES (THE UNSIGNED) : KLARA (written first) in FANNY's voice 4 x 2 x 0.55 x 1.25 = 5.5 -> 6, then FELIX
+            //TWO VOICES (FANNY MENDELSSOHN AND ???) : KLARA (written first) in FANNY's voice 4 x 2 x 0.55 x 1.25 = 5.5 -> 6, then FELIX
             //leads and ANNA hits a plain 5.5 -> 6, then FANNY again
             b = new TurnBattle(band, new List<Enemy> { deadAir }, 1, new Random(433));
             b.Kit = TurnKit.Fanny;

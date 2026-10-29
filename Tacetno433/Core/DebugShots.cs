@@ -82,11 +82,17 @@ namespace Tacetno433.Core
             Input.PretendHeld = true;
 
             //Still Hand : the fermata picture needs the baton held still, and a few Beta1 round 1 pictures need the pointer
-            //resting on one thing (rewardtilt : the middle card, shopbuy : the first motif on the shelf)
+            //resting on one thing (rewardtilt : the middle card, shopbuy : the first motif on the shelf). The gallery and the
+            //profiles (29 Oct, AURA) rest it under everything, so the conductor the picture names stays pointed at.
             string shot = index < names.Length ? names[index] : "";
             if (shot == "duelfermata" || shot == "rewardtilt" || shot == "shopbuy")
             {
                 Input.MousePos = shot == "duelfermata" ? new Vector2(760f, 470f) : (shot == "rewardtilt" ? new Vector2(730f, 460f) : new Vector2(980f, 400f));
+                return;
+            }
+            if (shot.StartsWith("gallery") || shot.StartsWith("detail"))
+            {
+                Input.MousePos = new Vector2(640f, 712f);
                 return;
             }
             int leg = (int)(mouseClock / 0.7f) % 4;

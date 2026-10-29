@@ -164,10 +164,10 @@
         public static float TurnLullyWindow = 0.01f;   // THE KING'S BATON's PASSIVE : seconds added to both parry windows (0.05 won 99 percent of STRONG runs, the others 83 to 90;
                                                        // step 12 : 0.03 won 92 percent and 0.02 84 when parrying became most of the fight)
         public static int TurnSunHeal = 6;             // THE SUN : life back for every musician at full strength (step 13 : was 12, THE KING'S BATON was the strongest at 71 percent. Step 15 : 8 -> 6)
-        public static float TurnFannyScale = 0.25f;    // THE UNSIGNED's PASSIVE : FANNY's voice hits this much harder
+        public static float TurnFannyScale = 0.25f;    // FANNY MENDELSSOHN AND ???'s PASSIVE : FANNY's voice hits this much harder
         public static float TurnFelixHeal = 1.5f;      //                          FELIX's voice heals this much more
         public static int TurnFelixCrescendo = 1;      //                          and gives this much more CRESCENDO
-        public static int TurnDuetDamage = 12;         // TWO VOICES : damage to every enemy at full strength (step 13 : was 9 and 6, THE UNSIGNED 46 percent)
+        public static int TurnDuetDamage = 12;         // TWO VOICES : damage to every enemy at full strength (step 13 : was 9 and 6, FANNY 46 percent)
         public static int TurnDuetHeal = 8;             //              and life back for every musician
 
         //Musician Traits in the turn battle (step 10, the TurnTraitText of each musician in Data/Musician.cs)
@@ -374,6 +374,12 @@
         public static float UiRouteBoss = 3.4f;           //   the boss's circle is this many times a usual place at the same distance
         public static float UiRouteFar = 0.2f;            //   the furthest rows are this bright (1 = as bright as the next row)
         public static float UiRouteGloom = 0.25f;         //   the screen's edges darken this much more when the boss is next (added to the page's vignette)
+        public static int UiAuraRain = 140;               // AURA (29 Oct, Core/ConductorAura.cs) : STORM, raindrops falling while THE UNHEARING is pointed at
+        public static float UiAuraBoltEvery = 1.3f;       //   a bolt of lightning about this often (seconds, give or take half)
+        public static float UiAuraBoltFlash = 0.45f;      //   how bright the room flashes with it (none with LESS FLASHING)
+        public static int UiAuraShards = 7;               //   PRISM : big shards of prism glass round FANNY MENDELSSOHN AND ??? (7 at most)
+        public static int UiAuraMotes = 40;               //   HOLY : specks of dust turning in THE METRONOME's light
+        public static float UiAuraHolyDark = 0.55f;       //   and how dark the room goes round him (0 = no darker, 1 = black)
 
         //Battle Shape
         public const int BeatsPerRound = 8;       // sub-turns in one round

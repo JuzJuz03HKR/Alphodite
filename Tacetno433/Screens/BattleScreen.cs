@@ -1781,7 +1781,7 @@ namespace Tacetno433.Screens
             if (Settings.ClearFight) Gfx.Text(sb, Game.Font, NumberText.Get(battle.Round), TacetGame.ScreenW - 52, 14, Palette.Highlight, TextSize.Heading);   // CLEAR FIGHT
             else Gfx.Text(sb, Game.BigFont, NumberText.Get(battle.Round), TacetGame.ScreenW - 52, 12, Palette.Highlight, TextSize.Small);
 
-            //TWO VOICES (THE UNSIGNED) : whose voice leads the next musician's move
+            //TWO VOICES (FANNY MENDELSSOHN AND ???) : whose voice leads the next musician's move
             if (battle.Kit == TurnKit.Fanny)
             {
                 Gfx.TextSpacedRight(sb, Game.Font, "VOICE", TacetGame.ScreenW - 120, 62, Palette.LineGrey, TextSize.Label, 3f);

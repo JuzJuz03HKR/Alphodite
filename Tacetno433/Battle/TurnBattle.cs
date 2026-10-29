@@ -167,7 +167,7 @@ namespace Tacetno433.Battle
         private int perfectRun;        // PERFECTs in a row, for the result page's BEST STREAK
         private int prodigyRun;        // PERFECTs in a row toward the next PRODIGY breath
         public int BestRun;            // the longest run of PERFECTs this fight, for the result page
-        public bool FelixVoice;        // TWO VOICES (THE UNSIGNED) : false while FANNY's voice leads, true for FELIX's
+        public bool FelixVoice;        // TWO VOICES (FANNY MENDELSSOHN AND ???) : false while FANNY's voice leads, true for FELIX's
         public int CapriceTurns;       // CAPRICE (THE HEARTLESS) : turns left in which no swipe is a MISS
         public int Feather;            // FEATHER (THE SHADOWLESS) : free ATTACKs at the end of the band's part of this bar
 
@@ -1569,7 +1569,7 @@ namespace Tacetno433.Battle
                 }
             }
 
-            //TWO VOICES (THE UNSIGNED) : FANNY strikes every enemy while FELIX heals every musician
+            //TWO VOICES (FANNY MENDELSSOHN AND ???) : FANNY strikes every enemy while FELIX heals every musician
             if (Kit == TurnKit.Fanny)
             {
                 for (int i = 0; i < Enemies.Count; i++)

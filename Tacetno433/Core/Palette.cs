@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Xna.Framework;
 
 namespace Tacetno433.Core
@@ -45,12 +46,28 @@ namespace Tacetno433.Core
         public static Color LightningBlue = new Color(40, 170, 255);
         public static Color LightningBlueHot = new Color(170, 230, 255);
 
-        //Conductor Colours (Beta1, 29 Oct) : each of the three conductors' own colour, for the parts of the pages that are
-        //theirs (Conductor.Spot : the gallery, the profile). CRIMSON is the red of THE UNHEARING's eyes and cravat in his art,
-        //made brighter for the dark pages. VIOLET and TEAL are stand-ins until the user picks them with the art.
-        public static Color SpotCrimson = new Color(218, 64, 68);
-        public static Color SpotViolet = new Color(164, 120, 255);
-        public static Color SpotTeal = new Color(40, 208, 182);
+        //Conductor Colours (Beta1, 29 Oct, the user gave each conductor a theme, docs/CHARACTER_DESIGN.md 4) : each of the
+        //three conductors' own colour, for the parts of the pages that are theirs (Conductor.Spot : the gallery, the profile,
+        //the band page) and for their AURA round the painting (Core/ConductorAura.cs).
+        //   STORM   THE UNHEARING : the blue of lightning, the same blue as his LIGHTNING (LightningBlue above)
+        //   PRISM   FANNY MENDELSSOHN AND ??? : the white of a crystal, which breaks into the rainbow (Prism below) as it moves
+        //   HOLY    THE METRONOME : the gold of a holy light, paler than a musician's GOLD so the two never mix up. Hot is its core.
+        public static Color SpotPrism = new Color(214, 206, 255);
+        public static Color SpotHoly = new Color(255, 204, 104);
+        public static Color SpotHolyHot = new Color(255, 242, 200);
+
+        //Prism : the rainbow a crystal throws, going once round all the colours for every 1 that t grows. Mix it with white
+        //for the pale shimmer of the crystal itself (Conductor.SpotAt).
+        //ADVANCED PART (small) : a colour wheel without HSV. Three waves a third of a turn apart give the red, the green
+        //and the blue, so while one rises another falls and the colour walks round the rainbow.
+        public static Color Prism(float t)
+        {
+            float turn = t * MathHelper.TwoPi;
+            float r = 0.5f + 0.5f * (float)Math.Cos(turn);
+            float g = 0.5f + 0.5f * (float)Math.Cos(turn - 2.0944f);
+            float b = 0.5f + 0.5f * (float)Math.Cos(turn + 2.0944f);
+            return new Color(r, g, b);
+        }
 
         //Accent : THE ONE COLOUR SWITCH.
         //Selected things, the combo counter and warnings use this. It is white while the game
