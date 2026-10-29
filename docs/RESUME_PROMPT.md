@@ -21,6 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
+| 29 ต.ค. (แชทตวัดไม้ใหม่) | ทำ `BETA1_DIRECTION.md` 8.8 ข้อ 5 ระบบตวัดไม้ใหม่ (ผู้ใช้ "ลองทำออกมาก่อนได้" `USER_BRIEFS.md` 13.23 13.24) : เอาขนาด f mf p ออก ตวัดแล้วตัวละครตีทันทีทีละโน้ต กล้องซูม เอียง สั่น ตามการตวัด | `TurnBattle` `BattleScreen*` `NoteGlyph` `Baton` `HitFx` `GestureReader` กล้องใหม่ใน `Core/` `Skill` `BattleRules` `Conductor` `Musician` `Motif` `Enemy` `TutorialScreen*` `GuideScreen` `DebugShots.Turn*` และเอกสาร |
 
 ---
 
