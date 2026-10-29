@@ -347,6 +347,10 @@ namespace Tacetno433.Core
             run.CurrentEvent = EventList.All[2];
             run.Maestro = true;                                                         // MAESTRO MODE is kept too
             run.Roster[0].Life = 7;                                                     // Alpha 7 : life between turn battles
+            run.SyncOrder();                                                            // Beta1 : the band page's order, two traded
+            Musician first = run.Order[0];
+            run.Order[0] = run.Order[1];
+            run.Order[1] = first;
             run.RefreshLabels();
             SaveFile.SaveRun(run);
 
@@ -369,6 +373,7 @@ namespace Tacetno433.Core
                 report += Same("rehearsed", run.Roster[0].Rehearsed + "/" + run.Roster[1].Rehearsed, back.Roster[0].Rehearsed + "/" + back.Roster[1].Rehearsed);
                 report += Same("life", "7", back.Roster[0].Life.ToString());
                 report += Same("seats", Seats(run), Seats(back));
+                report += Same("order", OrderNames(run), OrderNames(back));
                 report += Same("motifs", run.Motifs.Count + (run.Motifs.Count > 0 ? run.Motifs[0].Name : ""), back.Motifs.Count + (back.Motifs.Count > 0 ? back.Motifs[0].Name : ""));
                 report += Same("journey", run.Journey.Count + "/" + run.Journey[run.Journey.Count - 1].Type, back.Journey.Count + "/" + back.Journey[back.Journey.Count - 1].Type);
                 report += Same("map", run.Map.Write(), back.Map.Write());                              // Beta1 : the whole floor
@@ -496,6 +501,14 @@ namespace Tacetno433.Core
         {
             string s = "";
             for (int i = 0; i < run.Roster.Count; i++) s += run.Roster[i].Name + " ";
+            return s;
+        }
+
+        private static string OrderNames(RunState run)
+        {
+            string s = "";
+            List<Musician> lineup = run.Lineup();
+            for (int i = 0; i < lineup.Count; i++) s += lineup[i].Name + " ";
             return s;
         }
 

@@ -8,67 +8,49 @@ using Tacetno433.Data;
 
 namespace Tacetno433.Screens
 {
-    //BandScreen : THE BAND, opened from the route page (round 14, it replaces the STAGE page).
+    //BandScreen : THE BAND, opened from the route page.
     //
-    //There is nothing to arrange before a fight. Everybody on stage plays every note, and each
-    //musician sits where their instrument sits in a real orchestra (StageLayout, MusicianArt.SideBadge):
-    //   the SECTION  strings at the front, winds in the middle, percussion at the back
-    //   the SIDE     left, centre or right, drawn as an arrow: when the baton points that way
-    //                on a beat of the 4/4 shape, they hit harder (CUE)
-    //The only choice here is WHO PLAYS. The stage has room for RunState.Seats players, the rest
-    //wait on the bench. Click a musician to move them on or off the stage. With the stage full,
-    //clicking someone on the bench picks them, and the next click on a player swaps the two.
-    //
-    //Left  : THE ORCHESTRA, seen from the podium. Everyone sits in their own chair, so the chart
-    //        fills itself: the rows are the sections, strings nearest the conductor, the columns
-    //        are the sides. A chair nobody plays yet shows its badge faintly, a player to look for.
-    //Right : everyone in the ensemble as portrait cards, on stage or on the bench.
+    //Beta1 (29 Oct, docs/BETA1_DIRECTION.md 3.2) : the band stands in a row of tall slanted columns (menu8, Core/BandColumn.cs).
+    //The conductor's column is first, cut from their painting. Then the seats ON STAGE, then the BENCH, a column for every
+    //place the ensemble has, a plus where nobody stands yet. A white slanted sheet closes the row on the right (menu8).
+    //   POINT   the column steps up and the musician's own colour rises from its foot, the box below explains them
+    //   CLICK   on stage to the bench, from the bench onto the stage while there is room. With the stage full, a bench
+    //           player is picked and the next click on a player swaps the two (as before)
+    //   DRAG    a column to another place : the two trade places. The ones on stage start a fight in this order, the
+    //           first one in front (RunState.Order, Lineup). Dragging across the line between the stage and the bench
+    //           moves them on or off the stage.
+    //TAB, ENTER or the button goes back to the route. ESC opens the pause menu, like every page of a run.
     public class BandScreen : GameScreen
     {
         //Band Layout
-        private Rectangle rosterBox = new Rectangle(770, 176, 476, 406);
-        private Rectangle detailBox = new Rectangle(36, 604, 880, 100);
-        private Rectangle primaryButton = new Rectangle(950, 628, 290, 56);
-        private const int CardGap = 10;
-        private const int CardColumns = 4;
-
-        //Orchestra Chart : one column per side, one row per section
-        private static float[] columnX = { 380f, 510f, 640f };        // left, centre, right
-        private static float[] partY = { 492f, 374f, 256f };          // strings, winds, percussion : strings nearest the conductor
-        private const float ChartTop = 130f;
-        private const float LabelX = 48f;
-        private const int ChairW = 54;
-        private const int ChairH = 104;
-        private const float PodiumY = 584f;
-
-        //Chart Words
-        private const string MissingShort = "NOBODY SITS HERE YET";
-        private string[] sectionWords = { "", "", "" };   // "SECTION  +10%" when two or three of a family play
-
-        //Notes : what the detail box says when the mouse is over nothing
-        private const string NoteTitle = "A REAL ORCHESTRA, SEEN FROM THE PODIUM";
-        //The turn battle (Alpha 7) has no beats and no section bonus. ONE BAR (step 12, step 15) : everybody on stage
-        //starts each fight, everybody else waits on the BENCH and can be called in during it.
-        //The arrow says the way their skills start.
-        private static readonly string NoteBand = BattleRules.TurnBattleOn
-            ? "Click a musician : on stage or on the bench. Everyone on stage starts the fight, the bench can be CALLED in."
-            : "Click a musician : on stage or on the bench. Everyone on stage plays every note.";
-        private static readonly string NoteArrow = BattleRules.TurnBattleOn
-            ? "ARROW = the way their skills start."
-            : "ARROW : swing their way, they hit 50 percent harder.";
-        private static string noteSection = "";        // SECTION, made once from BattleRules
+        private const int ColumnsTop = 132;
+        private const int SideLeft = 40;
+        private const int SideRight = 1146;            // the white sheet starts after this
+        private const int Gap = 14;
+        private const int GroupGap = 34;
+        private static readonly Rectangle detailBox = new Rectangle(40, 512, 1106, 112);
+        private Rectangle backButton = new Rectangle(900, 646, 246, 46);
 
         //Band State
-        private Musician picked;               // a bench player waiting to swap in, or null
-        private int hoverSeat = -1;            // a chair under the mouse, -1 for none
-        private int hoverCard = -1;            // a card under the mouse, -1 for none
+        private int columnW = 140;
+        private Rectangle conductorRect;
+        private Rectangle[] slotRects = new Rectangle[0];   // every place of the ensemble : the stage seats, then the bench
+        private Musician[] owner = new Musician[0];         // who stands in each place, null for nobody
+        private float[] lit = new float[0];
+        private float conductorLit;
+        private int hover = -2;                             // the place under the mouse : -1 the conductor, -2 nothing
+        private int pressed = -1;                           // the place the mouse went down on
+        private Vector2 pressedAt;
+        private bool dragging;
+        private Musician picked;                            // a bench player waiting to swap in, or null
         private float time;
         private float messageTimer;
         private string message = "";
+        private UiMotion backMotion = new UiMotion();
 
-        //Prepared Text : made in Load and whenever the band changes, never in Draw
-        private string[] sideBeats = { "", "", "" };   // "BEATS 2  6" for each side, CUE
-        private bool[] sectionEmpty = new bool[3];
+        //Prepared Text : made when the band changes, never in Draw
+        private string[] skillText = new string[0];         // each musician's two skills explained, by MusicianList index
+        private string conductorText = "";
 
         //Wipe Word : the page's name in the wipe on the way here (WIPE WORD)
         public override string WipeWord
@@ -81,87 +63,103 @@ namespace Tacetno433.Screens
             RunState run = Game.CurrentRun;
             SoundBank.PlayMusic(Music.Route);
             run.Formation.Tidy(run.Seats);
-            run.RefreshLabels();
 
-            noteSection = "SECTION : 2 of a family +" + (int)(BattleRules.SectionTwo * 100f + 0.5f)
-                        + "%, all 3 +" + (int)(BattleRules.SectionThree * 100f + 0.5f) + "%.";
-            if (BattleRules.TurnBattleOn) noteSection = "SIZE = strings mf, winds p, percussion f.";
-
-            //Side Beats : which beats of a round the baton points each way (CUE)
-            for (int side = 0; side < 3; side++)
+            skillText = new string[MusicianList.All.Length];
+            for (int i = 0; i < MusicianList.All.Length; i++)
             {
-                string beats = "BEATS";
-                for (int b = 0; b < BattleRules.BeatsPerRound; b++)
-                    if (BattleRules.CueSide[b % 4] == side) beats += "  " + (b + 1);
-                sideBeats[side] = beats;
+                Musician m = MusicianList.All[i];
+                Skill first = SkillList.First(m);
+                Skill second = SkillList.Second(m);
+                skillText[i] = Gfx.WrapText(Game.StoryFont, first.Name + " : " + first.Text, 470, TextSize.StorySmall, 2) + "\n"
+                             + Gfx.WrapText(Game.StoryFont, second.Name + " : " + second.Text, 470, TextSize.StorySmall, 2);
             }
-            if (BattleRules.TurnBattleOn) sideBeats = new string[] { "SKILLS LEFT", "SKILLS DOWN", "SKILLS RIGHT" };   // CUE in the turn battle : the way their skills start (ATTACK has no swing, step 12)
+            Conductor c = run.Conductor;
+            conductorText = Gfx.WrapText(Game.StoryFont, c.MechanicName + " : " + c.MechanicText, 470, TextSize.StorySmall, 2) + "\n"
+                          + Gfx.WrapText(Game.StoryFont, "SPACE  " + c.SignatureName + " : " + c.SignatureText, 470, TextSize.StorySmall, 2);
 
+            Lens.Ambient = 0.46f;
+            Lens.SpotPower = 0f;
+            Lens.Vignette = 0.5f;
             Rebuild(run);
         }
 
-        //Rebuild : the labels that follow the band, after every change
+        //Rebuild : the places and who stands in them, after every change. The stage seats first, then the bench, each in
+        //the player's order.
         private void Rebuild(RunState run)
         {
             run.RefreshLabels();
-            for (int section = 0; section < 3; section++)
+            run.SyncOrder();
+            int places = run.RosterCapacity;
+            int count = 1 + places;
+            columnW = Math.Min(160, (SideRight - SideLeft - GroupGap * 2 - Gap * Math.Max(0, count - 3)) / count);
+            int windowH = BandColumn.PictureH;
+            conductorRect = new Rectangle(SideLeft, ColumnsTop, columnW, windowH);
+
+            if (slotRects.Length != places)
             {
-                int playing = 0;
-                for (int side = 0; side < 3; side++)
-                    if (run.Formation.Seated[section * 3 + side] != null) playing++;
-                sectionEmpty[section] = playing == 0;
-
-                //SECTION : the bonus this family plays with, when two or three of them are on stage
-                float bonus = Battle.BattleState.SectionBonusFor(playing);
-                sectionWords[section] = bonus > 0f && !BattleRules.TurnBattleOn ? "SECTION  +" + (int)(bonus * 100f + 0.5f) + "%" : "";   // no SECTION in the turn battle
+                slotRects = new Rectangle[places];
+                owner = new Musician[places];
+                lit = new float[places];
             }
-        }
+            int stageX = SideLeft + columnW + GroupGap;
+            int benchX = stageX + run.Seats * (columnW + Gap) - Gap + GroupGap;
+            for (int p = 0; p < places; p++)
+            {
+                int x = p < run.Seats ? stageX + p * (columnW + Gap) : benchX + (p - run.Seats) * (columnW + Gap);
+                slotRects[p] = new Rectangle(x, ColumnsTop, columnW, windowH);
+                owner[p] = null;
+            }
 
-        //Card Rect : roster cards fill the right box in rows of four.
-        //More slots make the cards shorter, so a full bench still fits.
-        private Rectangle CardRect(int i)
-        {
-            int slots = Game.CurrentRun.RosterCapacity;
-            int rows = (slots + CardColumns - 1) / CardColumns;
-            int top = rosterBox.Y + 48;
-            int height = rosterBox.Bottom - top;
-            int w = (rosterBox.Width - CardGap * (CardColumns - 1)) / CardColumns;
-            int h = Math.Min(190, (height - CardGap * (rows - 1)) / rows);
-
-            int col = i % CardColumns;
-            int row = i / CardColumns;
-            return new Rectangle(rosterBox.X + col * (w + CardGap), top + row * (h + CardGap), w, h);
-        }
-
-        //Chair Rect : where a chair stands on the chart
-        private static Rectangle ChairRect(int seat)
-        {
-            float cx = columnX[StageLayout.SeatSide(seat)];
-            float cy = partY[StageLayout.SeatRow[seat]];
-            return new Rectangle((int)(cx - ChairW / 2f), (int)(cy - ChairH / 2f), ChairW, ChairH);
-        }
-
-        //Chair Owner : the musician of the ensemble whose home is this chair, on stage or not
-        private Musician ChairOwner(RunState run, int seat)
-        {
-            for (int i = 0; i < run.Roster.Count; i++)
-                if (StageLayout.HomeSeat(run.Roster[i]) == seat) return run.Roster[i];
-            return null;
+            int stage = 0;
+            int bench = run.Seats;
+            for (int i = 0; i < run.Order.Count; i++)
+            {
+                Musician m = run.Order[i];
+                if (run.Formation.OnStage(m)) { if (stage < run.Seats) owner[stage++] = m; }
+                else if (bench < places) owner[bench++] = m;
+            }
         }
 
         public override void Update(float dt)
         {
             time += dt;
             if (messageTimer > 0f) messageTimer -= dt;
-
             RunState run = Game.CurrentRun;
-            FindHover(run);
 
-            Musician under = null;
-            if (hoverCard >= 0) under = run.Roster[hoverCard];
-            else if (hoverSeat >= 0) under = ChairOwner(run, hoverSeat);
+            //Hover : the place under the mouse, its column and the words under it
+            hover = -2;
+            if (Input.MouseOver(Tall(conductorRect))) hover = -1;
+            for (int p = 0; p < slotRects.Length; p++)
+                if (Input.MouseOver(Tall(slotRects[p]))) hover = p;
 
-            if (Input.MouseClicked() && under != null) Choose(run, under);
+            float step = dt / BattleRules.UiGalleryPoint;
+            for (int p = 0; p < lit.Length; p++)
+            {
+                bool on = owner[p] != null && (dragging ? p == pressed : p == hover);
+                lit[p] = on ? Math.Min(1f, lit[p] + step) : Math.Max(0f, lit[p] - step);
+            }
+            conductorLit = hover == -1 ? Math.Min(1f, conductorLit + step) : Math.Max(0f, conductorLit - step);
+            backMotion.Update(dt, Input.MouseOver(backButton));
+
+            //Press, Drag, Release : a press that moves is a drag, one that does not is a click
+            if (Input.MouseClicked() && hover >= 0 && owner[hover] != null)
+            {
+                pressed = hover;
+                pressedAt = Input.MousePos;
+                dragging = false;
+            }
+            if (pressed >= 0 && Input.MouseDown() && !dragging && Vector2.DistanceSquared(Input.MousePos, pressedAt) > 64f)
+            {
+                dragging = true;
+                SoundBank.Play(Sfx.SeatPickUp);
+            }
+            if (pressed >= 0 && !Input.MouseDown())
+            {
+                if (dragging) Drop(run, pressed, PlaceAt(Input.MousePos.X));
+                else if (owner[pressed] != null) Choose(run, owner[pressed]);
+                pressed = -1;
+                dragging = false;
+            }
 
             //Cancel : a right click puts a picked player back down
             if (Input.MouseRightClicked() && picked != null)
@@ -170,34 +168,80 @@ namespace Tacetno433.Screens
                 SoundBank.Play(Sfx.UiBack);
             }
 
-            bool back = Input.KeyPressed(Keys.Enter) || Input.KeyPressed(Keys.Tab) || Input.ClickedOn(primaryButton);
-            if (back)
+            if (Input.KeyPressed(Keys.Enter) || Input.KeyPressed(Keys.Tab) || Input.ClickedOn(backButton))
             {
+                backMotion.Press();
                 SoundBank.Play(Sfx.UiBack);
                 Game.Screens.Change(new RouteScreen());
             }
         }
 
-        //Hover Find : which chair or card is under the mouse
-        private void FindHover(RunState run)
+        //Tall : a column with the words under it, the whole thing the mouse can take
+        private static Rectangle Tall(Rectangle r)
         {
-            hoverSeat = -1;
-            hoverCard = -1;
-
-            for (int s = 0; s < StageLayout.SeatCount; s++)
-            {
-                Rectangle r = ChairRect(s);
-                r.Inflate(10, 10);
-                if (Input.MouseOver(r)) hoverSeat = s;
-            }
-
-            for (int i = 0; i < run.Roster.Count; i++)
-                if (Input.MouseOver(CardRect(i))) hoverCard = i;
+            return new Rectangle(r.X, r.Y, r.Width, r.Height + BandColumn.WordsH);
         }
 
-        //Choose : a click on a musician. On stage they go to the bench, from the bench they step
-        //on while there is room. With the stage full, a bench player is picked and the next click
-        //on someone playing swaps the two.
+        //Place At : the place a dragged column would land on, the nearest along the row
+        private int PlaceAt(float x)
+        {
+            int best = 0;
+            float bestD = float.MaxValue;
+            for (int p = 0; p < slotRects.Length; p++)
+            {
+                float d = Math.Abs(slotRects[p].Center.X - x);
+                if (d < bestD) { bestD = d; best = p; }
+            }
+            return best;
+        }
+
+        //Drop : a dragged column lands on another place. The two trade places in the order, and when the line between the
+        //stage and the bench is crossed, the one coming up goes on stage and the other one sits out.
+        private void Drop(RunState run, int from, int to)
+        {
+            Musician m = owner[from];
+            Musician there = owner[to];
+            if (m == null || to == from) return;
+            bool fromStage = run.Formation.OnStage(m);
+            bool toStage = to < run.Seats;
+
+            if (fromStage && !toStage)
+            {
+                if (there != null) run.Formation.Swap(there, m);
+                else if (run.Formation.SeatedCount <= 1)
+                {
+                    Say("SOMEBODY HAS TO PLAY");
+                    SoundBank.Play(Sfx.UiDenied);
+                    return;
+                }
+                else run.Formation.Bench(m);
+            }
+            else if (!fromStage && toStage)
+            {
+                if (there != null) run.Formation.Swap(m, there);
+                else run.Formation.AutoSeat(m, run.Seats);
+            }
+
+            //Order : the two trade places, or the one moved goes to the end
+            int a = run.Order.IndexOf(m);
+            if (there != null)
+            {
+                int b = run.Order.IndexOf(there);
+                run.Order[a] = there;
+                run.Order[b] = m;
+            }
+            else
+            {
+                run.Order.RemoveAt(a);
+                run.Order.Add(m);
+            }
+            picked = null;
+            SoundBank.Play(Sfx.SeatDrop);
+            Rebuild(run);
+        }
+
+        //Choose : a click on a musician. On stage they go to the bench, from the bench they step on while there is room.
+        //With the stage full, a bench player is picked and the next click on someone playing swaps the two.
         private void Choose(RunState run, Musician m)
         {
             Formation f = run.Formation;
@@ -206,6 +250,9 @@ namespace Tacetno433.Screens
             if (picked != null && playing)
             {
                 f.Swap(picked, m);
+                int a = run.Order.IndexOf(picked);
+                int b = run.Order.IndexOf(m);
+                if (a >= 0 && b >= 0) { run.Order[a] = m; run.Order[b] = picked; }
                 picked = null;
                 SoundBank.Play(Sfx.SeatDrop);
                 Rebuild(run);
@@ -251,192 +298,181 @@ namespace Tacetno433.Screens
             messageTimer = 2.2f;
         }
 
+        //Column In : ENTER, the columns come in one after another from the left
+        private float ColumnIn(int i)
+        {
+            return UiMotion.Between(time, 0.1f + i * 0.05f, 0.4f);
+        }
+
+        //Shown : a place's window this frame, risen in, stepped up when pointed, or under the mouse while dragged
+        private Rectangle Shown(int p)
+        {
+            Rectangle r = slotRects[p];
+            float a = ColumnIn(p + 1);
+            r.Y += (int)Math.Round((1f - a) * 30f - BandColumn.Lift * UiMotion.EaseOut(lit[p]));
+            if (dragging && p == pressed) r.X += (int)Math.Round(Input.MousePos.X - pressedAt.X);
+            return r;
+        }
+
+        //======================================================================================
+        //The World (THE LENS) : the columns' pictures
+        //======================================================================================
+
+        public override bool HasWorld
+        {
+            get { return true; }
+        }
+
+        public override bool ShowsGrain
+        {
+            get { return false; }
+        }
+
+        public override void DrawWorld(SpriteBatch sb)
+        {
+            RunState run = Game.CurrentRun;
+            Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.StageDeep);
+            Gfx.DrawGlowBox(sb, new Rectangle(-100, 40, 1400, 560), Palette.Paper * 0.05f);
+
+            //The Line : between the stage and the bench, a thin rule with a circle on it
+            if (slotRects.Length > run.Seats && run.Seats > 0)
+            {
+                float lineX = (slotRects[run.Seats - 1].Right + slotRects[run.Seats].X) / 2f;
+                Gfx.Rect(sb, lineX, ColumnsTop - 6, 1, BandColumn.PictureH + 12, Palette.LineGrey * 0.4f);
+                Gfx.CircleOutline(sb, lineX, ColumnsTop + BandColumn.PictureH / 2f, 4f, Palette.LineGrey * 0.7f, 1f);
+            }
+
+            //Conductor : the leader's column, cut from their painting
+            float ca = ColumnIn(0);
+            Rectangle cr = conductorRect;
+            cr.Y += (int)Math.Round((1f - ca) * 30f - BandColumn.Lift * UiMotion.EaseOut(conductorLit));
+            BandColumn.Picture(sb, cr, ArtBank.GalleryOf(run.Conductor), run.Conductor.Spot, UiMotion.EaseOut(conductorLit), ca);
+
+            //Places : a plus where nobody stands, the dragged one last so it goes over the others
+            for (int p = 0; p < slotRects.Length; p++)
+            {
+                if (dragging && p == pressed) { BandColumn.Empty(sb, slotRects[p], ColumnIn(p + 1)); continue; }
+                Rectangle r = Shown(p);
+                if (owner[p] == null) BandColumn.Empty(sb, r, ColumnIn(p + 1));
+                else BandColumn.Picture(sb, r, UiArt.BustOf(owner[p]), BandColumn.SpotOf(owner[p]), UiMotion.EaseOut(lit[p]), ColumnIn(p + 1) * (p < run.Seats ? 1f : 0.6f));
+            }
+            if (dragging && pressed >= 0 && owner[pressed] != null)
+                BandColumn.Picture(sb, Shown(pressed), UiArt.BustOf(owner[pressed]), BandColumn.SpotOf(owner[pressed]), 1f, 1f);
+        }
+
+        //Lights : a soft light on the column pointed at
+        public override void DrawLights(SpriteBatch sb)
+        {
+            for (int p = 0; p < slotRects.Length; p++)
+            {
+                float e = UiMotion.EaseOut(lit[p]);
+                if (e <= 0f) continue;
+                Rectangle r = Shown(p);
+                Gfx.DrawGlow(sb, r.Center.X, r.Center.Y, 220f, Color.White * (0.45f * e));
+            }
+            if (conductorLit > 0f) Gfx.DrawGlow(sb, conductorRect.Center.X, conductorRect.Center.Y, 220f, Color.White * (0.45f * UiMotion.EaseOut(conductorLit)));
+        }
+
+        //======================================================================================
+        //The Words (crisp on top)
+        //======================================================================================
+
         public override void Draw(SpriteBatch sb)
         {
             RunState run = Game.CurrentRun;
 
-            Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.StageDeep);
-            Gfx.DrawGlow(sb, columnX[1], partY[1], 420f, Palette.Paper * 0.07f);
+            DrawSheet(sb);
 
-            DrawChart(sb, run);
-            DrawRoster(sb, run);
+            //Groups : what each part of the row is
+            float head = UiMotion.Between(time, 0.15f, BattleRules.UiEnterTime);
+            Gfx.TextSpaced(sb, Game.Font, "CONDUCTOR", conductorRect.X, ColumnsTop - 24, Palette.LineGrey * head, TextSize.Tiny, 3f);
+            if (run.Seats > 0) Gfx.TextSpaced(sb, Game.Font, run.SeatsLabel, slotRects[0].X, ColumnsTop - 24, Palette.Highlight * head, TextSize.Tiny, 3f);
+            if (slotRects.Length > run.Seats) Gfx.TextSpaced(sb, Game.Font, "BENCH", slotRects[run.Seats].X, ColumnsTop - 24, Palette.LineGrey * head, TextSize.Tiny, 3f);
+
+            //Words Under The Columns
+            Conductor c = run.Conductor;
+            Rectangle cr = conductorRect;
+            float ca = ColumnIn(0);
+            cr.Y += (int)Math.Round((1f - ca) * 30f);
+            BandColumn.Words(sb, cr, c.Name, "CONDUCTOR", c.MechanicName, 0, c.SignatureName, 0, c.Spot, UiMotion.EaseOut(conductorLit), ca);
+            for (int p = 0; p < slotRects.Length; p++)
+            {
+                if (owner[p] == null) continue;
+                Rectangle r = dragging && p == pressed ? Shown(p) : slotRects[p];
+                if (!(dragging && p == pressed)) r.Y += (int)Math.Round((1f - ColumnIn(p + 1)) * 30f);
+                Musician m = owner[p];
+                float a = ColumnIn(p + 1) * (p < run.Seats ? 1f : 0.6f);
+                BandColumn.Words(sb, r, m.NameTag, m.Instrument, SkillList.First(m).Name, SkillList.First(m).Cost, SkillList.Second(m).Name, SkillList.Second(m).Cost, BandColumn.SpotOf(m), UiMotion.EaseOut(lit[p]), a);
+                if (m == picked) Ornament.CornerBrackets(sb, new Rectangle(r.X - 6, r.Y - 6, r.Width + 12, r.Height + 12), 14, Palette.Highlight, 1);
+                if (picked != null && run.Formation.OnStage(m)) Gfx.CircleOutline(sb, r.Center.X, r.Y - 12, 4f + 2f * (float)Math.Sin(time * 6f), Palette.Highlight, 1f);
+            }
+
             DrawDetail(sb, run);
 
-            Ui.Button(sb, primaryButton, "BACK TO ROUTE", "TAB", true);
+            //Footer
+            Gfx.TextSpaced(sb, Game.Font, run.RosterLabel, 40, 664, Palette.PaperDim, TextSize.Tiny, 3f);
+            Gfx.TextSpaced(sb, Game.Font, "CLICK = STAGE OR BENCH   /   DRAG = CHANGE THE ORDER", 40, 684, Palette.LineGrey, TextSize.Tiny, 2f);
+            Ui.Command(sb, backButton, "BACK TO ROUTE", "TAB", backMotion, 1f, false);
+            if (messageTimer > 0f)
+                Gfx.TextSpacedRight(sb, Game.Font, message, backButton.X - 30, backButton.Y + 16, Palette.Accent * Math.Min(1f, messageTimer), TextSize.Label, 2f);
 
             RunHud.DrawTop(sb, run, "THE BAND");
-            Gfx.TextSpacedCentered(sb, Game.Font, "WHO PLAYS, AND WHO WAITS ON THE BENCH", 640, 90, Palette.LineGrey, TextSize.Tiny, 3f);
+            Gfx.TextSpaced(sb, Game.Font, "WHO PLAYS, IN WHAT ORDER, AND WHO WAITS ON THE BENCH", 40, RunHud.TopH + 14, Palette.LineGrey, TextSize.Tiny, 3f);
             RunHud.DrawTips(sb, run);
         }
 
-        //Chart : the orchestra, its sections down the side and its sides across the top
-        private void DrawChart(SpriteBatch sb, RunState run)
+        //Sheet : the white slanted sheet that closes the row on the right (menu8), the page's name down it
+        private void DrawSheet(SpriteBatch sb)
         {
-            //Sides : one column each, with the beats of a round the baton points that way
-            for (int side = 0; side < 3; side++)
-            {
-                float x = columnX[side];
-                DrawArrow(sb, side, x, ChartTop + 14);
-                Gfx.TextSpacedCentered(sb, Game.Font, StageLayout.SideNames[side], x, ChartTop + 38, Palette.Paper, TextSize.Tiny, 2f);
-                Gfx.TextSpacedCentered(sb, Game.Font, sideBeats[side], x, ChartTop + 54, Palette.LineGrey, TextSize.Tiny, 1.5f);
-                Gfx.Rect(sb, x, ChartTop + 72, 1, PodiumY - ChartTop - 96, Palette.LineGrey * 0.18f);
-            }
-
-            //Sections : one row each, strings nearest the conductor, percussion at the back
-            for (int section = 0; section < 3; section++)
-            {
-                StageRow row = StageLayout.Rows[section];
-                float y = partY[section];
-                Gfx.Rect(sb, 250, y + ChairH / 2f + 8, 470, 1, Palette.LineGrey * 0.3f);
-                Gfx.TextSpaced(sb, Game.Font, row.Name, LabelX + 66, y - 22, Palette.Highlight, TextSize.Label, 2f);
-                if (sectionEmpty[section])
-                    Gfx.TextSpaced(sb, Game.Font, MissingShort, LabelX + 66, y, Palette.Accent, TextSize.Tiny, 1.5f);
-                else if (sectionWords[section].Length > 0)
-                    Gfx.TextSpaced(sb, Game.Font, sectionWords[section], LabelX + 66, y, Palette.Highlight, TextSize.Tiny, 2f);
-            }
-
-            //Chairs
-            for (int s = 0; s < StageLayout.SeatCount; s++)
-                DrawChair(sb, run, s);
-
-            //Conductor : the podium every stroke starts from
-            float px = columnX[1];
-            Gfx.Rect(sb, px - 50, PodiumY - 4, 100, 8, Palette.PaperDim * 0.6f);
-            Gfx.Diamond(sb, px, PodiumY - 14, 5, Palette.Paper);
-            Gfx.TextSpacedCentered(sb, Game.Font, "CONDUCTOR", px, PodiumY + 8, Palette.LineGrey, TextSize.Tiny, 3f);
+            float a = UiMotion.Between(time, 0f, 0.5f);
+            int x = SideRight + 22 + (int)Math.Round((1f - a) * 80f);
+            Gfx.SlantBox(sb, new Rectangle(x, 116, 200, 604), 40, Palette.Paper * (0.92f * a));
+            Gfx.SlantBox(sb, new Rectangle(x - 10, 116, 12, 604), 40, Palette.LineGrey * (0.5f * a));
+            Gfx.TextVertical(sb, Game.BigFont, "THE BAND", x + 92, 150, Palette.Ink * a, TextSize.Title);
         }
 
-        //Arrow : the side a column sits on, a head for left and right, two (down and up) for the centre
-        private static void DrawArrow(SpriteBatch sb, int side, float x, float y)
+        //Detail : whoever the mouse is over, explained. Their trait and both skills.
+        private void DrawDetail(SpriteBatch sb, RunState run)
         {
-            if (side == 0) NoteGlyph.Arrow(sb, Flick.Left, x, y, 34f, 12f, Palette.Paper, 2f);
-            else if (side == 2) NoteGlyph.Arrow(sb, Flick.Right, x, y, 34f, 12f, Palette.Paper, 2f);
-            else
+            float a = UiMotion.Between(time, 0.4f, BattleRules.UiEnterTime);
+            Gfx.Rect(sb, detailBox, Palette.Panel * (0.9f * a));
+            Gfx.Rect(sb, detailBox.X, detailBox.Y, detailBox.Width, 1, Palette.LineGrey * (0.6f * a));
+
+            int x = detailBox.X + 18;
+            int y = detailBox.Y + 12;
+            Musician m = hover >= 0 && hover < owner.Length ? owner[hover] : null;
+            if (dragging && pressed >= 0) m = owner[pressed];
+
+            if (hover == -1)
             {
-                NoteGlyph.Arrow(sb, Flick.Down, x - 9, y, 24f, 10f, Palette.Paper, 2f);
-                NoteGlyph.Arrow(sb, Flick.Up, x + 9, y, 24f, 10f, Palette.Paper, 2f);
+                Conductor c = run.Conductor;
+                Gfx.Text(sb, Game.BigFont, c.Name, x, y - 2, c.Spot * a, TextSize.Subtitle);
+                Gfx.TextSpaced(sb, Game.Font, c.Role, x, y + 30, Palette.PaperDim * a, TextSize.Tiny, 2f);
+                Gfx.Text(sb, Game.StoryFont, conductorText, x + 560, y, Palette.Paper * a, TextSize.StorySmall);
+                return;
             }
-        }
-
-        //Chair : a player on stage, a player on the bench (dim), or a chair nobody plays yet
-        private void DrawChair(SpriteBatch sb, RunState run, int s)
-        {
-            Rectangle r = ChairRect(s);
-            Musician owner = ChairOwner(run, s);
-            bool hover = s == hoverSeat && owner != null;
-
-            if (owner == null)
+            if (m == null)
             {
-                //Empty Chair : the chair's own badge, faint, a player still to find
-                Gfx.CapsuleOutline(sb, r, Palette.LineGrey * 0.3f, 1f);
-                MusicianArt.SideBadge(sb, StageLayout.SeatSide(s), r.Center.X, r.Center.Y, 12f,
-                                      Palette.Ink, Palette.PaperDim, 0.35f);
+                Gfx.TextSpaced(sb, Game.Font, "THE ENSEMBLE", x, y, Palette.LineGrey * a, TextSize.Tiny, 3f);
+                Gfx.Text(sb, Game.StoryFont, "Everyone on stage starts the fight, the first one in front. The bench can be CALLED in.", x, y + 22, Palette.Paper * a, TextSize.StorySmall);
+                Gfx.Text(sb, Game.StoryFont, "Point at a column to read it. Drag one to change the order.", x, y + 46, Palette.PaperDim * a, TextSize.StorySmall);
                 return;
             }
 
-            bool playing = run.Formation.OnStage(owner);
-            bool swapTarget = picked != null && playing;
+            //Who : the name, the instrument, life and power
+            Gfx.Text(sb, Game.BigFont, m.NameTag, x, y - 2, BandColumn.SpotOf(m) * a, TextSize.Subtitle);
+            Gfx.TextSpaced(sb, Game.Font, m.FamilyLabel, x, y + 30, Palette.PaperDim * a, TextSize.Tiny, 2f);
+            Gfx.TextSpaced(sb, Game.Font, "LIFE", x, y + 56, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            Gfx.Text(sb, Game.Font, NumberText.Get(run.LifeOf(m)), x + 44, y + 52, Palette.Paper * a, TextSize.Body);
+            Gfx.Text(sb, Game.Font, NumberText.Get(run.MaxLifeOf(m)), x + 84, y + 56, Palette.LineGrey * a, TextSize.Tiny);
+            Gfx.TextSpaced(sb, Game.Font, "POWER", x + 130, y + 56, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            Gfx.Text(sb, Game.Font, NumberText.Get(run.PowerOf(m)), x + 186, y + 52, Palette.Paper * a, TextSize.Body);
 
-            if (swapTarget) Gfx.DrawGlow(sb, r.Center.X, r.Center.Y, r.Height * 0.8f, Palette.Highlight * (0.18f + 0.1f * (float)Math.Sin(time * 6f)));
-            MusicianArt.Token(sb, r, owner, playing ? 1f : 0.3f, hover ? 0.5f : 0f);
-            if (hover || owner == picked) Gfx.RectOutline(sb, r, Palette.Highlight, 2);
-
-            //Name Band : across the foot of the chair, BENCH over the top of it for a player sitting out
-            float nameW = Gfx.TextWidth(Game.BigFont, owner.NameTag, TextSize.Small * 0.75f) + 14f;
-            Rectangle band = new Rectangle((int)(r.Center.X - nameW / 2f), r.Bottom - 12, (int)nameW, 20);
-            Gfx.Rect(sb, band, Palette.Void * 0.9f);
-            Gfx.Rect(sb, band.X, band.Y, band.Width, 1, playing ? Palette.Paper : Palette.LineGrey);
-            Gfx.TextCentered(sb, Game.BigFont, owner.NameTag, band.Center.X, band.Center.Y, playing ? Palette.Highlight : Palette.PaperDim, TextSize.Small * 0.75f);
-            if (!playing)
-            {
-                Gfx.Rect(sb, r.X, r.Y + 6, r.Width, 16, Palette.Void * 0.85f);
-                Gfx.TextSpacedCentered(sb, Game.Font, "BENCH", r.Center.X, r.Y + 8, Palette.PaperDim, TextSize.Tiny, 2f);
-            }
-        }
-
-        //Roster : every musician owned as a card, then empty slots with a plus
-        private void DrawRoster(SpriteBatch sb, RunState run)
-        {
-            Ui.Header(sb, "", run.RosterLabel, rosterBox.X, rosterBox.Y - 4, rosterBox.Width, 1f);
-            Gfx.TextSpacedRight(sb, Game.Font, run.SeatsLabel, rosterBox.Right, rosterBox.Y + 4, Palette.PaperDim, TextSize.Tiny, 2f);
-
-            for (int i = 0; i < run.Roster.Count; i++)
-            {
-                Musician m = run.Roster[i];
-                bool playing = run.Formation.OnStage(m);
-                Rectangle card = CardRect(i);
-                if (picked != null && playing) Ornament.CornerBrackets(sb, new Rectangle(card.X - 4, card.Y - 4, card.Width + 8, card.Height + 8), 12, Palette.Highlight, 1);
-                MusicianArt.Card(sb, card, m, run, i == hoverCard, false, playing ? "ON STAGE" : "BENCH");
-                if (m == picked) Gfx.RectOutline(sb, card, Palette.Highlight, 3);
-            }
-
-            //Empty Slots : the plus cards from the reference
-            for (int i = run.Roster.Count; i < run.RosterCapacity; i++)
-            {
-                Rectangle slot = CardRect(i);
-                Gfx.RectOutline(sb, slot, Palette.LineGrey * 0.35f, 1);
-                Gfx.Rect(sb, slot.Center.X - 10, slot.Center.Y, 21, 1, Palette.LineGrey * 0.6f);
-                Gfx.Rect(sb, slot.Center.X, slot.Center.Y - 10, 1, 21, Palette.LineGrey * 0.6f);
-            }
-        }
-
-        //Detail : whatever the mouse is over, explained
-        private void DrawDetail(SpriteBatch sb, RunState run)
-        {
-            Ui.Panel(sb, detailBox, 1f);
-
-            Musician m = null;
-            if (hoverCard >= 0) m = run.Roster[hoverCard];
-            else if (hoverSeat >= 0) m = ChairOwner(run, hoverSeat);
-
-            int x = detailBox.X + 20;
-            int y = detailBox.Y + 10;
-
-            if (m != null)
-            {
-                MusicianArt.Tile(sb, new Rectangle(x, y, 80, 80), m, 1f);
-                Gfx.Text(sb, Game.BigFont, m.NameTag, x + 96, y - 4, Palette.Highlight, TextSize.Subtitle);
-                Gfx.TextSpaced(sb, Game.Font, m.Instrument, x + 98, y + 34, Palette.Paper, TextSize.Label, 2f);
-                Gfx.TextSpaced(sb, Game.Font, m.FamilyLabel, x + 98, y + 56, Palette.LineGrey, TextSize.Tiny, 1.5f);
-
-                //Seat : the badge, the section and side it stands for, and the beats the baton points there
-                int section = StageLayout.SectionOf(m.Family);
-                MusicianArt.SideBadge(sb, m.Cue, x + 300, y + 30, 18f, Palette.Ink, Palette.Paper, 1f);
-                Gfx.TextSpaced(sb, Game.Font, StageLayout.Rows[section].Name, x + 336, y + 10, Palette.Paper, TextSize.Tiny, 1.5f);
-                Gfx.TextSpaced(sb, Game.Font, StageLayout.SideNames[m.Cue], x + 336, y + 28, Palette.Paper, TextSize.Tiny, 1.5f);
-                Gfx.TextSpaced(sb, Game.Font, sideBeats[m.Cue], x + 336, y + 46, Palette.LineGrey, TextSize.Tiny, 1.5f);
-
-                //Numbers : the same power as the cards, rehearsals and motifs included
-                Gfx.TextSpaced(sb, Game.Font, "POWER", x + 300, y + 66, Palette.LineGrey, TextSize.Tiny, 2f);
-                Gfx.Text(sb, Game.Font, NumberText.Get(run.PowerOf(m)), x + 360, y + 62, Palette.Paper, TextSize.Body);
-                if (BattleRules.TurnBattleOn)
-                {
-                    //LIFE (step 15) : what this musician walks into the next fight with, out of their most
-                    Gfx.TextSpaced(sb, Game.Font, "LIFE", x + 400, y + 66, Palette.LineGrey, TextSize.Tiny, 2f);
-                    Gfx.Text(sb, Game.Font, NumberText.Get(run.LifeOf(m)), x + 440, y + 62, Palette.Paper, TextSize.Body);
-                    Gfx.Text(sb, Game.Font, "/", x + 470, y + 64, Palette.LineGrey, TextSize.Tiny);
-                    Gfx.Text(sb, Game.Font, NumberText.Get(run.MaxLifeOf(m)), x + 480, y + 66, Palette.LineGrey, TextSize.Tiny);
-                }
-
-                //Trait : what this musician does that nobody else does
-                Gfx.Rect(sb, x + 520, y, 1, 80, Palette.LineGrey * 0.5f);
-                Ui.Tag(sb, m.TraitName, x + 534, y + 2, true, 1f);
-                Gfx.Text(sb, Game.StoryFont, m.TraitWrapped, x + 534, y + 28, Palette.Paper, TextSize.StorySmall);
-            }
-            else
-            {
-                Gfx.TextSpaced(sb, Game.Font, NoteTitle, x, y + 2, Palette.LineGrey, TextSize.Tiny, 2f);
-                Gfx.Text(sb, Game.StoryFont, NoteBand, x, y + 20, Palette.Paper, TextSize.StorySmall);
-                Gfx.Text(sb, Game.StoryFont, NoteArrow, x, y + 42, Palette.Paper, TextSize.StorySmall);
-                Gfx.Text(sb, Game.StoryFont, noteSection, x, y + 64, Palette.PaperDim, TextSize.StorySmall);
-            }
-
-            //Message : short warnings, fading out
-            if (messageTimer > 0f)
-            {
-                float a = Math.Min(1f, messageTimer);
-                Gfx.TextSpacedRight(sb, Game.Font, message, primaryButton.Right, primaryButton.Y - 22, Palette.Accent * a, TextSize.Label, 2f);
-            }
+            //Trait and Skills
+            Gfx.Rect(sb, x + 250, y, 1, 86, Palette.LineGrey * (0.5f * a));
+            Ui.Tag(sb, m.TraitName, x + 266, y, true, a);
+            Gfx.Text(sb, Game.StoryFont, m.TraitWrapped, x + 266, y + 26, Palette.Paper * a, TextSize.StorySmall);
+            Gfx.Text(sb, Game.StoryFont, skillText[m.Index], x + 600, y, Palette.Paper * a, TextSize.StorySmall);
         }
     }
 }

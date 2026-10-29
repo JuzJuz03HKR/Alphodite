@@ -225,14 +225,11 @@ namespace Tacetno433.Screens
             }
             run = Game.CurrentRun;
 
-            //The Band : the ones on stage in seat order, then the rest of the ensemble. Everybody seated on the
-            //BAND page starts on the field, the others wait on the BENCH (ONE BAR, step 15 : it was always the first 2).
-            List<Musician> band = new List<Musician>();
-            for (int s = 0; s < run.Formation.Seated.Length; s++)
-                if (run.Formation.Seated[s] != null) band.Add(run.Formation.Seated[s]);
-            int onStage = Math.Max(1, Math.Min(band.Count, run.Seats));
-            for (int i = 0; i < run.Roster.Count; i++)
-                if (!band.Contains(run.Roster[i])) band.Add(run.Roster[i]);
+            //The Band : the ones on stage, then the rest of the ensemble, each in the BAND page's order (Beta1, RunState.Lineup).
+            //Everybody seated on the BAND page starts on the field, the others wait on the BENCH (ONE BAR, step 15 : it was
+            //always the first 2).
+            List<Musician> band = run.Lineup();
+            int onStage = Math.Max(1, Math.Min(run.Formation.SeatedCount, run.Seats));
 
             //BAND LIFE : everybody walks in with the life they left the last fight with (step 6)
             int[] life = new int[band.Count];

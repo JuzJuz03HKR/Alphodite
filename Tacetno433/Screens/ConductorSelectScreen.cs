@@ -332,91 +332,17 @@ namespace Tacetno433.Screens
 
             //Plate and Painting : the plate shows where the painting is see through. Handed over, the plate is the black
             //of the profile page, the painting lit as drawn.
-            CutRows(sb, null, r, slant, Color.Lerp(Palette.Panel, Palette.Void, hand) * a);
+            Ui.SlantCut(sb, null, r, slant, Color.Lerp(Palette.Panel, Palette.Void, hand) * a);
             Texture2D art = ArtBank.GalleryOf(c);
-            if (art != null) CutRows(sb, art, r, slant, Color.White * (MathHelper.Lerp(0.72f, 1f, e) * a));
-            else EmptySlot(sb, r, slant, a * (1f - hand));
+            if (art != null) Ui.SlantCut(sb, art, r, slant, Color.White * (MathHelper.Lerp(0.72f, 1f, e) * a));
+            else Ui.SlantSlot(sb, r, slant, a * (1f - hand));
 
             //Colour Rise : the conductor's own colour, up from the bottom (menu6)
             float rise = e * (1f - hand);
-            if (rise > 0f) ColourRise(sb, r, slant, c.Spot, rise, a);
+            if (rise > 0f) Ui.ColourRise(sb, r, slant, c.Spot, BattleRules.UiGalleryRise * rise, a);
 
             //Edge : a thin line round the window, bright when pointed
-            SlantEdge(sb, r, slant, Color.Lerp(Palette.LineGrey * 0.5f, Palette.Paper, e) * (a * (1f - hand)));
-        }
-
-        //Cut Rows : a picture (or a plain plate when art is null) cut by a panel's slanted window, the picture in the middle
-        //of the panel. ADVANCED PART (small) : a sprite can only be cut by a straight rectangle (its source rectangle), so the
-        //slanted cut is made of rows : each row of the picture is drawn on its own, from where the slanted window crosses it
-        //to where it leaves it. A row is one pixel of the picture, so the slanted edge steps like pixel art and the painting
-        //stays exactly the size it was painted. The window leans like Gfx.SlantBox : its top is slant pixels right of its foot.
-        public static void CutRows(SpriteBatch sb, Texture2D art, Rectangle r, float slant, Color color)
-        {
-            int artW = art != null ? art.Width : r.Width;
-            int artX = r.Center.X - artW / 2;
-            int rows = art != null ? Math.Min(r.Height, art.Height) : r.Height;
-            for (int j = 0; j < rows; j++)
-            {
-                float lean = slant * (1f - (j + 0.5f) / r.Height);
-                int from = Math.Max(artX, (int)Math.Round(r.X + lean));
-                int to = Math.Min(artX + artW, (int)Math.Round(r.X + lean + r.Width - slant));
-                if (to <= from) continue;
-                if (art != null) sb.Draw(art, new Vector2(from, r.Y + j), new Rectangle(from - artX, j, to - from, 1), color);
-                else sb.Draw(Gfx.Pixel, new Vector2(from, r.Y + j), null, color, 0f, Vector2.Zero, new Vector2(to - from, 1f), SpriteEffects.None, 0f);
-            }
-        }
-
-        //Colour Rise : a conductor's colour rising from the bottom of the panel (menu6), strongest at the foot. Rows two pixels
-        //tall like the ink bars (PIXEL x2). rise 0..1 is how far it has come up.
-        private static void ColourRise(SpriteBatch sb, Rectangle r, float slant, Color color, float rise, float alpha)
-        {
-            int tall = (int)(r.Height * BattleRules.UiGalleryRise * rise);
-            for (int k = 0; k < tall; k += 2)
-            {
-                int j = r.Height - 2 - k;
-                float t = 1f - (float)k / Math.Max(1, tall);
-                float lean = slant * (1f - (j + 1f) / r.Height);
-                sb.Draw(Gfx.Pixel, new Vector2(r.X + lean, r.Y + j), null, color * (0.42f * t * t * alpha), 0f, Vector2.Zero,
-                        new Vector2(r.Width - slant, 2f), SpriteEffects.None, 0f);
-            }
-        }
-
-        //Slant Edge : the four sides of a slanted window
-        private static void SlantEdge(SpriteBatch sb, Rectangle r, float slant, Color color)
-        {
-            float w = r.Width - slant;
-            Gfx.Line(sb, r.X + slant, r.Y, r.X + slant + w, r.Y, color, 1f);
-            Gfx.Line(sb, r.X, r.Bottom, r.X + w, r.Bottom, color, 1f);
-            Gfx.Line(sb, r.X + slant, r.Y, r.X, r.Bottom, color, 1f);
-            Gfx.Line(sb, r.X + slant + w, r.Y, r.X + w, r.Bottom, color, 1f);
-        }
-
-        //Empty Slot : the panel of a conductor whose painting is not drawn yet. Like ArtSlot it draws nothing inside on
-        //purpose : a faint fill and a mark at every corner of the slanted window.
-        private static void EmptySlot(SpriteBatch sb, Rectangle r, float slant, float a)
-        {
-            CutRows(sb, null, r, slant, Palette.Paper * (0.04f * a));
-            float w = r.Width - slant;
-            Vector2 topLeft = new Vector2(r.X + slant, r.Y);
-            Vector2 topRight = new Vector2(r.X + slant + w, r.Y);
-            Vector2 footLeft = new Vector2(r.X, r.Bottom);
-            Vector2 footRight = new Vector2(r.X + w, r.Bottom);
-            Color mark = Palette.Paper * (0.6f * a);
-            Corner(sb, topLeft, topRight, footLeft, mark);
-            Corner(sb, topRight, topLeft, footRight, mark);
-            Corner(sb, footLeft, footRight, topLeft, mark);
-            Corner(sb, footRight, footLeft, topRight, mark);
-        }
-
-        //Corner : two short strokes from a corner toward its two neighbours
-        private static void Corner(SpriteBatch sb, Vector2 at, Vector2 toA, Vector2 toB, Color color)
-        {
-            Vector2 a = toA - at;
-            Vector2 b = toB - at;
-            a.Normalize();
-            b.Normalize();
-            Gfx.Line(sb, at, at + a * 16f, color, 1f);
-            Gfx.Line(sb, at, at + b * 16f, color, 1f);
+            Ui.SlantEdge(sb, r, slant, Color.Lerp(Palette.LineGrey * 0.5f, Palette.Paper, e) * (a * (1f - hand)));
         }
 
         //Lights : a beam from above on every panel, the pointed one strong, the others faint. Handed over, the beams are gone

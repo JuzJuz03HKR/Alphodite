@@ -198,6 +198,12 @@ namespace Tacetno433.Data
             }
             lines.Add("seated=" + string.Join(",", seated));
 
+            //Order (Beta1) : the band page's order, the first one in front in a fight
+            run.SyncOrder();
+            List<string> order = new List<string>();
+            for (int i = 0; i < run.Order.Count; i++) order.Add(Array.IndexOf(MusicianList.All, run.Order[i]).ToString());
+            lines.Add("order=" + string.Join(",", order));
+
             List<string> motifs = new List<string>();
             for (int i = 0; i < run.Motifs.Count; i++) motifs.Add(Array.IndexOf(MotifList.All, run.Motifs[i]).ToString());
             lines.Add("motifs=" + string.Join(",", motifs));
@@ -279,6 +285,12 @@ namespace Tacetno433.Data
             for (int s = 0; s < StageLayout.SeatCount && s < seated.Length; s++)
                 if (seated[s] >= 0 && seated[s] < MusicianList.All.Length) run.Formation.Seated[s] = MusicianList.All[seated[s]];
             run.Formation.Tidy(run.Seats);       // a save from before round 12 sat its first players down the centre
+
+            int[] order = GetList(v, "order");                 // a save from before the band page's order : the roster's order
+            for (int i = 0; i < order.Length; i++)
+                if (order[i] >= 0 && order[i] < MusicianList.All.Length && run.Roster.Contains(MusicianList.All[order[i]]) && !run.Order.Contains(MusicianList.All[order[i]]))
+                    run.Order.Add(MusicianList.All[order[i]]);
+            run.SyncOrder();
 
             int[] motifs = GetList(v, "motifs");
             run.Motifs.Clear();                                // KEEPSAKE : Start rolled one, the save already holds it

@@ -11,19 +11,24 @@ namespace Tacetno433.Screens
     //RecruitScreen : musicians from the era you just chose walk on and join the ensemble.
     //Shown right after a floor opening, and after an elite fight that brought someone home.
     //The band is named here too, but only on the very first floor of a run.
+    //
+    //Beta1 (29 Oct, docs/BETA1_DIRECTION.md 3.2) : the same tall slanted columns as the band page (Core/BandColumn.cs).
+    //Each new face rises into its own beam, one after another, their colour flooding up the column as they arrive and
+    //settling, then their trait and where they went (on stage or the bench) under the column.
     public class RecruitScreen : GameScreen
     {
-        private static readonly string[] turnWays = { "LEFT", "DOWN", "RIGHT" };   // TURN BATTLE : a CUE as the way their skills start
-
         //Recruit Layout
-        private const int ColumnW = 440;
-        private const int ColumnGap = 40;
-        private Rectangle continueButton = new Rectangle(490, 646, 300, 48);
+        private const int ColumnW = 176;
+        private const int ColumnGap = 120;
+        private const int ColumnsTop = 120;
+        private Rectangle continueButton = new Rectangle(490, 648, 300, 46);
 
         //Recruit State
         private bool afterBattle;          // true when a fight or an event brought someone in
         private float time;
-        private float enter;
+        private UiMotion continueMotion = new UiMotion();
+        private string heading = "";
+        private string[] traitText = new string[0];
 
         public RecruitScreen()
         {
@@ -48,21 +53,33 @@ namespace Tacetno433.Screens
 
         public override void Load()
         {
-            if (Game.CurrentRun.JustJoined.Count > 0)
-                SoundBank.Play(Sfx.Recruit);
+            RunState run = Game.CurrentRun;
+            if (run.JustJoined.Count > 0) SoundBank.Play(Sfx.Recruit);
+            heading = run.JustJoined.Count == 1 ? "A MUSICIAN JOINS" : "THE ENSEMBLE GATHERS";
+            traitText = new string[run.JustJoined.Count];
+            for (int i = 0; i < traitText.Length; i++)
+                traitText[i] = Gfx.WrapText(Game.StoryFont, run.JustJoined[i].TraitText, ColumnW + 60, TextSize.StorySmall, 4);
+
+            Lens.Ambient = 0.4f;
+            Lens.SpotPower = 0f;
+            Lens.Vignette = 0.55f;
+        }
+
+        //Ready : the button works once everybody has walked on
+        private bool Ready
+        {
+            get { return time >= 0.5f + Game.CurrentRun.JustJoined.Count * 0.25f; }
         }
 
         public override void Update(float dt)
         {
             time += dt;
-
-            //Enter Animation : let them walk on before the button works
-            enter += dt * 1.8f;
-            if (enter > 1f) enter = 1f;
-            if (enter < 1f) return;
+            continueMotion.Update(dt, Ready && Input.MouseOver(continueButton));
+            if (!Ready) return;
 
             if (Input.KeyPressed(Keys.Enter) || Input.KeyPressed(Keys.Space) || Input.ClickedOn(continueButton))
             {
+                continueMotion.Press();
                 SoundBank.Play(Sfx.UiConfirm);
                 Continue();
             }
@@ -91,116 +108,150 @@ namespace Tacetno433.Screens
             Game.Screens.Change(new RouteScreen());
         }
 
+        //Column Rect : column i of the new faces, centred as a group
+        private Rectangle ColumnRect(int i)
+        {
+            int count = Game.CurrentRun.JustJoined.Count;
+            int total = count * ColumnW + (count - 1) * ColumnGap;
+            return new Rectangle((TacetGame.ScreenW - total) / 2 + i * (ColumnW + ColumnGap), ColumnsTop, ColumnW, BandColumn.PictureH);
+        }
+
+        //Arrive : 0..1, how far new face i has walked on, one after another
+        private float Arrive(int i)
+        {
+            return UiMotion.Between(time, 0.25f + i * 0.25f, 0.5f);
+        }
+
+        //Flood : their colour fills the column the moment they arrive, then settles to a glow at its foot
+        private float Flood(int i)
+        {
+            float t = time - (0.25f + i * 0.25f);
+            if (t < 0f) return 0f;
+            return 0.55f + 0.45f * Math.Max(0f, 1f - t * 1.6f);
+        }
+
+        //Shown : column i this frame, rising into place
+        private Rectangle Shown(int i)
+        {
+            Rectangle r = ColumnRect(i);
+            r.Y += (int)Math.Round((1f - Arrive(i)) * 60f);
+            return r;
+        }
+
+        //======================================================================================
+        //The World (THE LENS) : a beam for every new face
+        //======================================================================================
+
+        public override bool HasWorld
+        {
+            get { return true; }
+        }
+
+        public override bool ShowsGrain
+        {
+            get { return false; }
+        }
+
+        public override void DrawWorld(SpriteBatch sb)
+        {
+            RunState run = Game.CurrentRun;
+            Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.StageDeep);
+            for (int i = 0; i < run.JustJoined.Count; i++)
+            {
+                float a = Arrive(i);
+                if (a <= 0f) continue;
+                Musician m = run.JustJoined[i];
+                Rectangle r = Shown(i);
+                Gfx.DrawGlowBox(sb, new Rectangle(r.X - 60, r.Bottom - 40, r.Width + 120, 90), BandColumn.SpotOf(m) * (0.18f * a));
+                BandColumn.Picture(sb, r, UiArt.BustOf(m), BandColumn.SpotOf(m), Flood(i), a);
+            }
+        }
+
+        //Lights : a beam from above on every new face
+        public override void DrawLights(SpriteBatch sb)
+        {
+            RunState run = Game.CurrentRun;
+            for (int i = 0; i < run.JustJoined.Count; i++)
+            {
+                float a = Arrive(i);
+                if (a <= 0f) continue;
+                Rectangle r = ColumnRect(i);
+                for (float y = 0f; y < r.Bottom + 40; y += 4f)
+                {
+                    float half = 50f + (y / (r.Bottom + 40)) * 90f;
+                    Gfx.Rect(sb, r.Center.X - half, y, half * 2f, 4f, Color.White * (0.32f * a));
+                }
+            }
+        }
+
+        //Glow : their colour at the foot of the column as they arrive (none with LESS FLASHING)
+        public override void DrawGlow(SpriteBatch sb)
+        {
+            if (Settings.ReduceFlashing) return;
+            RunState run = Game.CurrentRun;
+            for (int i = 0; i < run.JustJoined.Count; i++)
+            {
+                float t = time - (0.25f + i * 0.25f);
+                if (t < 0f || t > 0.7f) continue;
+                Rectangle r = Shown(i);
+                Gfx.DrawGlow(sb, r.Center.X, r.Bottom - 20, 160f, BandColumn.SpotOf(run.JustJoined[i]) * (0.6f * (1f - t / 0.7f)));
+            }
+        }
+
+        //======================================================================================
+        //The Words (crisp on top)
+        //======================================================================================
+
         public override void Draw(SpriteBatch sb)
         {
             RunState run = Game.CurrentRun;
             float cx = TacetGame.ScreenW / 2f;
-            float ease = enter * enter * (3f - 2f * enter);
-
-            SceneBackdrop.Draw(sb, time);
-
             int count = run.JustJoined.Count;
 
             //Nobody Joined : the era ran out of people, or the ensemble is full
             if (count == 0)
             {
                 Gfx.TextSpacedCentered(sb, Game.BigFont, "NOBODY STEPS FORWARD", cx, 280, Palette.Paper, TextSize.Subtitle, 4f);
-                Ornament.Divider(sb, cx, 330, 160, Palette.LineGrey);
-
-                string why = run.RosterFull
-                    ? "Your ensemble and bench are both full."
-                    : "This era has nobody left to give.";
+                Ornament.OrbitRule(sb, cx, 330, 160, Palette.LineGrey);
+                string why = run.RosterFull ? "Your ensemble and bench are both full." : "This era has nobody left to give.";
                 Gfx.TextCentered(sb, Game.StoryFont, why, cx, 360, Palette.PaperDim, TextSize.Story);
-
                 DrawFooter(sb, run, 1f);
                 return;
             }
 
             //Header
-            string heading = count == 1 ? "A MUSICIAN JOINS" : "THE ENSEMBLE GATHERS";
-            Gfx.TextSpacedCentered(sb, Game.BigFont, heading, cx, 24, Palette.Paper * ease, TextSize.Small, 5f);
-            Ornament.Divider(sb, cx, 66, 200, Palette.LineGrey * ease);
-
-            //Columns : one per new musician, centred as a group
-            int totalW = count * ColumnW + (count - 1) * ColumnGap;
-            int startX = (TacetGame.ScreenW - totalW) / 2;
+            float head = UiMotion.Between(time, 0.1f, BattleRules.UiEnterTime);
+            Gfx.TextSpacedCentered(sb, Game.BigFont, heading, cx, 30, Palette.Paper * head, TextSize.Small, 5f);
+            Ornament.OrbitRule(sb, cx, 74, 200, Palette.LineGrey * head);
 
             for (int i = 0; i < count; i++)
             {
-                //Stagger : each one walks on a little after the one before
-                float step = ease * 1.3f - i * 0.3f;
-                if (step < 0f) step = 0f;
-                if (step > 1f) step = 1f;
+                float a = Arrive(i);
+                if (a <= 0f) continue;
+                Musician m = run.JustJoined[i];
+                Rectangle r = Shown(i);
+                BandColumn.Words(sb, r, m.NameTag, m.Instrument, SkillList.First(m).Name, SkillList.First(m).Cost, SkillList.Second(m).Name, SkillList.Second(m).Cost, BandColumn.SpotOf(m), 1f, a);
 
-                Rectangle column = new Rectangle(startX + i * (ColumnW + ColumnGap), 84, ColumnW, 540);
-                DrawColumn(sb, column, run.JustJoined[i], step, i);
+                //New, and where they went : on stage or waiting on the bench
+                Ui.Tag(sb, "NEW", r.X + BandColumn.Slant + 6, r.Y + 8, true, a);
+                bool seated = run.Formation.OnStage(m);
+                Gfx.TextSpacedRight(sb, Game.Font, seated ? "ON STAGE" : "ON THE BENCH", r.Right - 4, r.Y - 18, Palette.LineGrey * a, TextSize.Tiny, 3f);
+
+                //Trait : what they do that nobody else does
+                float ty = r.Bottom + BandColumn.WordsH + 6;
+                float tx = r.X - 30;
+                Ui.Tag(sb, m.TraitName, tx, ty, false, a);
+                Gfx.Text(sb, Game.StoryFont, traitText[i], tx, ty + 24, Palette.PaperDim * a, TextSize.StorySmall);
             }
 
-            DrawFooter(sb, run, ease);
-
-            //Reveal Flash : a white burst the moment the page opens, like a summon
-            float flash = 1f - time * 2.2f;
-            if (flash > 0f) Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Color.White * (0.7f * flash));
-        }
-
-        //Column : light burst, figure, then the details stacked underneath
-        private void DrawColumn(SpriteBatch sb, Rectangle column, Musician m, float a, int slot)
-        {
-            float cx = column.Center.X;
-            float figureCy = column.Y + 160;
-
-            //Light Burst : turning rays behind the figure
-            Gfx.DrawGlow(sb, cx, figureCy, 230f, Palette.Paper * (0.14f * a));
-            Ornament.Rays(sb, cx, figureCy, 70f, 230f, 30, time * 0.15f + slot, Palette.Paper * (0.10f * a));
-            Gfx.CircleOutline(sb, cx, figureCy, 150f, Palette.Paper * (0.12f * a), 1f);
-
-            //Figure : rises into place as it appears
-            Rectangle figure = new Rectangle((int)cx - 80, column.Y + 40 + (int)((1f - a) * 40f), 160, 236);
-            MusicianArt.Figure(sb, figure, m, a);
-
-            //New Tag and Instrument : printed up the side of the figure
-            Ui.Tag(sb, "NEW", column.X + 40, column.Y + 40, true, a);
-
-            //Seat : their section and the side of the stage they sit on, under the tag (round 15)
-            MusicianArt.SideBadge(sb, m.Cue, column.X + 62, column.Y + 108, 18f, Palette.Ink, Palette.Paper, a);
-            //TURN BATTLE : the arrow is the way their skills start, the seat itself gives nothing
-            Gfx.TextSpacedCentered(sb, Game.Font, BattleRules.TurnBattleOn ? "SKILLS" : "SEAT", column.X + 62, column.Y + 146, Palette.LineGrey * a, TextSize.Tiny, 2f);
-            if (!BattleRules.TurnBattleOn)
-                Gfx.TextSpacedCentered(sb, Game.Font, StageLayout.Rows[StageLayout.SectionOf(m.Family)].Name, column.X + 62, column.Y + 164, Palette.PaperDim * a, TextSize.Tiny, 1f);
-            Gfx.TextSpacedCentered(sb, Game.Font, BattleRules.TurnBattleOn ? turnWays[m.Cue] : StageLayout.SideNames[m.Cue], column.X + 62, column.Y + 164 + (BattleRules.TurnBattleOn ? 0 : 16), Palette.PaperDim * a, TextSize.Tiny, 1f);
-            Gfx.TextVertical(sb, Game.Font, m.Instrument, column.Right - 40, column.Y + 50, Palette.PaperDim * a, TextSize.Label);
-            Gfx.Rect(sb, column.Right - 60, column.Y + 40, 1, 200, Palette.LineGrey * a);
-
-            //Name : the big serif name with its slash
-            int y = column.Y + 282;
-            Gfx.TextCentered(sb, Game.BigFont, m.NameTag, cx, y + 20, Palette.Highlight * a, TextSize.Hero);
-            Gfx.TextSpacedCentered(sb, Game.Font, m.FamilyLabel, cx, y + 54, Palette.PaperDim * a, TextSize.Tiny, 3f);
-
-            //Stats : their power, the same number every page shows (round 15 : there is no cost)
-            RunState run = Game.CurrentRun;
-            Gfx.TextSpacedRight(sb, Game.Font, "POWER", cx - 6, y + 84, Palette.LineGrey * a, TextSize.Tiny, 2f);
-            Gfx.Text(sb, Game.BigFont, NumberText.Get(run.PowerOf(m)), cx + 2, y + 70, Palette.Paper * a, TextSize.Subtitle);
-
-            Ornament.Divider(sb, cx, y + 116, 150, Palette.LineGrey * a);
-            Gfx.Text(sb, Game.StoryFont, m.LineWrapped, cx - TacetGame.MusicianWrapWidth / 2f, y + 128, Palette.Paper * a, TextSize.Story);
-
-            //Trait : what they do in a duel, under the line it comes from
-            float tx = cx - TacetGame.MusicianWrapWidth / 2f;
-            Ui.Tag(sb, m.TraitName, tx, y + 190, true, a);
-            Gfx.Text(sb, Game.StoryFont, m.TraitWrapped, tx, y + 216, Palette.PaperDim * a, TextSize.StorySmall);
-
-            //Where They Went : on stage or waiting on the bench, printed up the side
-            bool seated = run.Formation.SeatOf(m) >= 0;
-            string where = seated ? "ON STAGE" : "ON THE BENCH";
-            Gfx.TextSpacedRight(sb, Game.Font, where, column.Right - 40, column.Y + 12, Palette.LineGrey * a, TextSize.Tiny, 3f);
+            DrawFooter(sb, run, head);
         }
 
         private void DrawFooter(SpriteBatch sb, RunState run, float a)
         {
             Gfx.TextSpaced(sb, Game.Font, run.RosterLabel, 40, 660, Palette.PaperDim * a, TextSize.Tiny, 3f);
             Gfx.TextSpaced(sb, Game.Font, run.SeatsLabel, 40, 680, Palette.PaperDim * a, TextSize.Tiny, 3f);
-
-            Ui.Button(sb, continueButton, "CONTINUE", "ENTER", true, enter >= 1f, a);
+            Ui.Command(sb, continueButton, "CONTINUE", "ENTER", continueMotion, Ready ? a : a * 0.4f, false);
         }
     }
 }

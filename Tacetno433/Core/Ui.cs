@@ -218,6 +218,85 @@ namespace Tacetno433.Core
             Gfx.CircleOutline(sb, x + to, lineY, 3f, ink * alpha, 1f);
         }
 
+        //======================================================================================
+        //Beta1 screens : slanted windows cut from pictures (the gallery, the band's columns, menu6 and menu8)
+        //======================================================================================
+
+        //Slant Cut : a picture (or a plain plate when art is null) cut by a slanted window, the picture in the middle of the
+        //window and its top on the window's top (a taller picture shows its top, the head). ADVANCED PART (small) : a sprite can only be cut by a straight rectangle (its source rectangle), so the
+        //slanted cut is made of rows : each row of the picture is drawn on its own, from where the slanted window crosses it
+        //to where it leaves it. A row is one pixel of the picture, so the slanted edge steps like pixel art and the picture
+        //stays exactly the size it was drawn. The window leans like Gfx.SlantBox : its top is slant pixels right of its foot.
+        public static void SlantCut(SpriteBatch sb, Texture2D art, Rectangle r, float slant, Color color)
+        {
+            int artW = art != null ? art.Width : r.Width;
+            int artX = r.Center.X - artW / 2;
+            int rows = art != null ? Math.Min(r.Height, art.Height) : r.Height;
+            for (int j = 0; j < rows; j++)
+            {
+                int row = j;                                                 // the row of the picture on this line
+                float lean = slant * (1f - (j + 0.5f) / r.Height);
+                int from = Math.Max(artX, (int)Math.Round(r.X + lean));
+                int to = Math.Min(artX + artW, (int)Math.Round(r.X + lean + r.Width - slant));
+                if (to <= from) continue;
+                if (art != null) sb.Draw(art, new Vector2(from, r.Y + j), new Rectangle(from - artX, row, to - from, 1), color);
+                else sb.Draw(Gfx.Pixel, new Vector2(from, r.Y + j), null, color, 0f, Vector2.Zero, new Vector2(to - from, 1f), SpriteEffects.None, 0f);
+            }
+        }
+
+        //Colour Rise : a character's own colour rising from the foot of a slanted window (menu6), strongest at the foot.
+        //Rows two pixels tall like the ink bars (PIXEL x2). reach 0..1 is how far up the window it has come.
+        public static void ColourRise(SpriteBatch sb, Rectangle r, float slant, Color color, float reach, float alpha)
+        {
+            int tall = (int)(r.Height * reach);
+            for (int k = 0; k < tall; k += 2)
+            {
+                int j = r.Height - 2 - k;
+                float t = 1f - (float)k / Math.Max(1, tall);
+                float lean = slant * (1f - (j + 1f) / r.Height);
+                sb.Draw(Gfx.Pixel, new Vector2(r.X + lean, r.Y + j), null, color * (0.42f * t * t * alpha), 0f, Vector2.Zero,
+                        new Vector2(r.Width - slant, 2f), SpriteEffects.None, 0f);
+            }
+        }
+
+        //Slant Edge : the four sides of a slanted window
+        public static void SlantEdge(SpriteBatch sb, Rectangle r, float slant, Color color)
+        {
+            float w = r.Width - slant;
+            Gfx.Line(sb, r.X + slant, r.Y, r.X + slant + w, r.Y, color, 1f);
+            Gfx.Line(sb, r.X, r.Bottom, r.X + w, r.Bottom, color, 1f);
+            Gfx.Line(sb, r.X + slant, r.Y, r.X, r.Bottom, color, 1f);
+            Gfx.Line(sb, r.X + slant + w, r.Y, r.X + w, r.Bottom, color, 1f);
+        }
+
+        //Slant Slot : a slanted window whose picture is not drawn yet. Like ArtSlot it draws nothing inside on purpose :
+        //a faint fill and a mark at every corner.
+        public static void SlantSlot(SpriteBatch sb, Rectangle r, float slant, float alpha)
+        {
+            SlantCut(sb, null, r, slant, Palette.Paper * (0.04f * alpha));
+            float w = r.Width - slant;
+            Vector2 topLeft = new Vector2(r.X + slant, r.Y);
+            Vector2 topRight = new Vector2(r.X + slant + w, r.Y);
+            Vector2 footLeft = new Vector2(r.X, r.Bottom);
+            Vector2 footRight = new Vector2(r.X + w, r.Bottom);
+            Color mark = Palette.Paper * (0.6f * alpha);
+            Corner(sb, topLeft, topRight, footLeft, mark);
+            Corner(sb, topRight, topLeft, footRight, mark);
+            Corner(sb, footLeft, footRight, topLeft, mark);
+            Corner(sb, footRight, footLeft, topRight, mark);
+        }
+
+        //Corner : two short strokes from a corner toward its two neighbours
+        private static void Corner(SpriteBatch sb, Vector2 at, Vector2 toA, Vector2 toB, Color color)
+        {
+            Vector2 a = toA - at;
+            Vector2 b = toB - at;
+            a.Normalize();
+            b.Normalize();
+            Gfx.Line(sb, at, at + a * 16f, color, 1f);
+            Gfx.Line(sb, at, at + b * 16f, color, 1f);
+        }
+
         //Hash : a steady random 0..1 from two whole numbers (the sine trick of TacetField)
         private static float Hash(int a, int b)
         {

@@ -47,6 +47,7 @@ namespace Tacetno433.Data
         public List<Musician> Roster = new List<Musician>();       // everyone you own
         public List<Musician> JustJoined = new List<Musician>();   // shown on the recruit page
         public Formation Formation = new Formation();              // who is on stage, who is on the bench
+        public List<Musician> Order = new List<Musician>();        // the band page's order (Beta1), see Lineup
         public List<Motif> Motifs = new List<Motif>();             // everything the band carries
 
         //Run Resources
@@ -121,6 +122,7 @@ namespace Tacetno433.Data
             BestCombo = 0;
             Journey.Clear();
             Roster.Clear();
+            Order.Clear();
             JustJoined.Clear();
             Motifs.Clear();
             Formation = new Formation();
@@ -233,6 +235,38 @@ namespace Tacetno433.Data
             Formation.AutoSeat(m, Seats);
             RefreshLabels();
             return m;
+        }
+
+        //Order (Beta1, 29 Oct, the band page's columns) : the order the player put the ensemble in, everyone in the roster
+        //once. A fight takes the ones on stage in this order, then the bench in it (Lineup), so the first one stands in
+        //front. New faces join at the end, among themselves in the order of their home seats (strings first), which is the
+        //order fights used before the band page could change it.
+        public void SyncOrder()
+        {
+            for (int i = Order.Count - 1; i >= 0; i--)
+                if (!Roster.Contains(Order[i])) Order.RemoveAt(i);
+            int from = Order.Count;
+            for (int i = 0; i < Roster.Count; i++)
+                if (!Order.Contains(Roster[i])) Order.Add(Roster[i]);
+            for (int i = from + 1; i < Order.Count; i++)                 // a few new faces : sorted by home seat
+                for (int k = i; k > from && StageLayout.HomeSeat(Order[k]) < StageLayout.HomeSeat(Order[k - 1]); k--)
+                {
+                    Musician swap = Order[k];
+                    Order[k] = Order[k - 1];
+                    Order[k - 1] = swap;
+                }
+        }
+
+        //Lineup : the ensemble the way a fight takes it, the ones on stage first, each group in the player's order
+        public List<Musician> Lineup()
+        {
+            SyncOrder();
+            List<Musician> band = new List<Musician>();
+            for (int i = 0; i < Order.Count; i++)
+                if (Formation.OnStage(Order[i])) band.Add(Order[i]);
+            for (int i = 0; i < Order.Count; i++)
+                if (!Formation.OnStage(Order[i])) band.Add(Order[i]);
+            return band;
         }
 
         //Missing Section Player : someone of a section (strings, winds or percussion) nobody in the
