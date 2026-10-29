@@ -21,7 +21,6 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 29 ต.ค. 14:44 (เวลาไทย) | ดูภาพ Character Design 6 ภาพ แล้วทำงานถัดไปตามสถานะล่าสุด : แผนที่แบบมองไกล → ธีมวาทยากร (สี + เอฟเฟกต์ตอนชี้และเลือก) → เสนอนักดนตรี 5 คนให้ผู้ใช้เลือก → เอายุคออก (หลังผู้ใช้ตอบ) | `Screens/RouteScreen.cs` `Data/BattleRules.cs` `Core/Palette.cs` `Data/Conductor.cs` `Screens/ConductorSelectScreen.cs` `Screens/ConductorDetailScreen.cs` `Core/` (VFX วาทยากรไฟล์ใหม่) `Core/DebugShots*.cs` `docs/` |
 
 ---
 
@@ -37,8 +36,8 @@ Beta1 คือการทำเกมให้สุดเหมือนเ�
 1. CLAUDE.md ที่ราก repo (หัวข้อ 00 กับ 0 สำคัญที่สุด)
 2. docs/RESUME_PROMPT.md หัวข้อ "สถานะล่าสุด"
 3. docs/BATTLE_SCENE_2_3D_CHANGE.md ข้อ 9 ขึ้นไป และ docs/BATTLE_ART_PLAN.md
-4. docs/BETA1_DIRECTION.md (ทิศทางเกมใหม่ 29 ต.ค. ลำดับงานอยู่ข้อ 5)
-5. docs/SCREENS_LEVEL_UP.md (งานยกระดับทุกหน้าจอ ทำถึงข้อ 14 แล้ว)
+4. docs/BETA1_DIRECTION.md (ทิศทางเกมใหม่ 29 ต.ค. ลำดับงานอยู่ข้อ 5) และ docs/CHARACTER_DESIGN.md (ดีไซน์วาทยากร 3 คน ข้อเสนอนักดนตรี 5 คน)
+5. docs/SCREENS_LEVEL_UP.md (งานยกระดับทุกหน้าจอ ทำถึงข้อ 23 แล้ว)
 เอกสารอื่นอ่านเมื่องานต้องใช้
 
 แล้วเช็กให้ฉัน
@@ -64,12 +63,21 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 
 ## สถานะล่าสุด (29 ต.ค.)
 
-**29 ต.ค. บ่าย (แชทนี้ยังทำอยู่ ดูแถวในตาราง "แชทที่กำลังทำงาน") : `/system` + ภาพ Character Design PNG 6 ภาพ (คำต่อคำ `USER_BRIEFS.md` 13.16)**
-✅ ดูภาพครบ สรุปไว้ `CHARACTER_DESIGN.md` หัวข้อ "ภาพเรฟ" · ✅ งานถัดไปข้อ 1 หน้าแผนที่แบบมองไกล เสร็จ (`SCREENS_LEVEL_UP.md` ข้อ 22.4 ถึง 22.6) build 0/0 turncheck 113/113 savecheck 31/31 หน้าอื่นเหมือนเดิมทุกพิกเซล
-✅ งานถัดไปข้อ 2 ธีมวาทยากร เสร็จ (`SCREENS_LEVEL_UP.md` ข้อ 23 `CHARACTER_DESIGN.md` ข้อ 4) : `Core/ConductorAura.cs` STORM PRISM HOLY · สีใหม่ · ชื่อ FANNY MENDELSSOHN AND ??? (ชื่อสั้น FANNY AND ??? ในที่แคบ BASED ON F. MENDELSSOHN) build 0/0 turncheck 113/113 savecheck 31/31
-⏳ กำลังทำข้อ 3 เสนอนักดนตรี 5 คน (ข้อ 4 เอายุคออก รอผู้ใช้ตอบข้อ 3)
+**29 ต.ค. บ่าย (ล่าสุด) : แชท `/system` + ภาพ Character Design PNG 6 ภาพ "ทำงานต่อได้เลย" (คำต่อคำ `USER_BRIEFS.md` 13.16) ทำงานถัดไปข้อ 1 ถึง 3 ครบ รอผู้ใช้ Rebuild และตอบคำถาม**
+✅ งานอยู่บน GitHub ครบ (`99bba11` แผนที่ `af34a1a` ธีมวาทยากร และ commit เอกสารข้อเสนอนักดนตรี) ตาราง "แชทที่กำลังทำงาน" ว่าง
+✅ ดูภาพครบ 6 ภาพ สรุปไว้ `CHARACTER_DESIGN.md` หัวข้อ "ภาพเรฟ" ของ Beethoven กับ Fanny (Bach ยังไม่มีภาพ)
+✅ ข้อ 1 หน้าแผนที่แบบมองไกล (`SCREENS_LEVEL_UP.md` ข้อ 22.4 ถึง 22.6) : perspective ถนนเข้าหาหลุม แถวไกลเล็กจาง กล้องเดินทีละแถว บอสจานดำหนามหมุนหน้าหลุม วงไหลเข้าหลุม ขอบจอมืดขึ้นใกล้บอส
+✅ ข้อ 2 ธีมวาทยากร (`SCREENS_LEVEL_UP.md` ข้อ 23 `CHARACTER_DESIGN.md` ข้อ 4) : `Core/ConductorAura.cs` STORM (ฝน เมฆ ฟ้าผ่า วาบ) PRISM (เศษปริซึม แสงรุ้งพุ่งหาน้อง สปอตไลต์) HOLY (ห้องมืด ลำแสงทอง ฝุ่นทอง) · สีใหม่ · ชื่อ FANNY MENDELSSOHN AND ??? (ชื่อสั้น FANNY AND ??? ที่แคบ, BASED ON F. MENDELSSOHN, แก้ประโยค WHO THEY WERE ท่อนท้าย)
+✅ ข้อ 3 เสนอนักดนตรี 5 คน ค้นตรวจแล้ว (`CHARACTER_DESIGN.md` ข้อ 5 "ข้อเสนอ") : PAGANINI หรือ TARTINI (ไวโอลิน) · DUPORT หรือ BOCCHERINI (เชลโล) · QUANTZ (ฟลุต) · PUNTO (ฮอร์น) · PFUNDT (ทิมปานี) พร้อมฉายาและอาวุธ
+✅ ทุกขั้น build 0/0 · turncheck 113/113 · savecheck 31/31 · หน้าที่ไม่เกี่ยวภาพเหมือนเดิมทุกพิกเซล · แคป `--scale 1.5` คม
+⚠️ รอผู้ใช้ : เลือกนักดนตรี (ข้อ 5) · TWO VOICES จะเรียกน้องว่า ??? แทน FELIX ไหม · ตำแหน่งน้องในภาพ (ตั้งไว้ขวา `ConductorAura.BrotherX`) · PLAYTEST SIGNATURE ยัง 1 (ผู้ใช้สั่งคงไว้) · ภาพจาก cloud ห้ามแทน `docs/screenshots/`
+**งานถัดไป (แชทใหม่)** :
+1. ผู้ใช้ Rebuild ดูตาม `SCREENS_LEVEL_UP.md` 22.6 (แผนที่) และ 23.3 (ธีมวาทยากร) แล้วแก้ตามที่บอก
+2. ผู้ใช้เลือกนักดนตรีแล้ว : แก้ `Data/Musician.cs` ในช่องเดิม (ANNA ไวโอลิน KLARA ฟลุต OTTO ทิมปานี LUKA เชลโล IRIS ฮอร์น) ห้ามลบหรือสลับ `MusicianList.All` ซ่อน MALI CHAI NUAN BORIS แบบ `ConductorList.Shown` แล้วไล่แก้ที่ใช้ชื่อ (`Core/DebugShots.Turn.cs` คาด ANNA KLARA ไว้ ภาพ `bust_<key>` `face_<key>` `docs/UI_ART_PLAN.md`)
+3. เอายุคออก (`BETA1_DIRECTION.md` ข้อ 2 และ 3.3) : `Data/Era.cs` `Screens/EraChoiceScreen.cs` `NodeType.Crossing` `RunState.ChooseEra` `RecruitAtOpening` `MusicianList.RollFromEra` `Enemy.Era` ฉากตามยุคใน `BattleScreen.Stage.cs` เซฟ `era=` (โหลดเซฟเก่าต้องไม่พัง)
+ทุกข้อ : build 0/0 turncheck savecheck แคปเทียบ `--steady` ทั้ง 1280×720 และ `--scale 1.5` อัปเดตเอกสาร บอกผู้ใช้ให้ Rebuild ใน Visual Studio
 
-**29 ต.ค. (ล่าสุด) : /update ปิดแชท "ทำข้อ 1 และข้อต่อๆไปได้เลย" (`BETA1_DIRECTION.md` ข้อ 5) ผู้ใช้ Rebuild บน Windows แล้ว "rebuild ผ่านทุกอย่าง ไม่ติดขัดอะไร"**
+**29 ต.ค. (ก่อนหน้า) : /update ปิดแชท "ทำข้อ 1 และข้อต่อๆไปได้เลย" (`BETA1_DIRECTION.md` ข้อ 5) ผู้ใช้ Rebuild บน Windows แล้ว "rebuild ผ่านทุกอย่าง ไม่ติดขัดอะไร"**
 ✅ งานของแชทนี้อยู่บน GitHub ครบ (`020a8d8` `7daf74f` `bf31d58` `d3bc3ae` `4587a70` `29b6b24` `c24f425` และ commit เอกสารปิดแชท) ตาราง "แชทที่กำลังทำงาน" ว่าง
 ✅ ข้อ 1 วาทยากร 3 คน + Gallery + Detail (`SCREENS_LEVEL_UP.md` ข้อ 16) · ข้อ 2 แผนที่ทั้งชั้นแบบวงซ้อน `Data/FloorMap.cs` (ข้อ 17) · ข้อ 3 หน้าจัดวงแบบเสา + Recruit `Core/BandColumn.cs` `Core/UiArt.cs` (ข้อ 18) · ข้อ 4 Chapter CurtainCall BandName Archive (ข้อ 19) และรอบ 3 Settings Pause HOW TO PLAY กล่องถาม (ข้อ 20) · ข้อ 6 ตัวเลือก CLEAR FIGHT (ข้อ 21) ทุกข้อ build 0/0 turncheck 113/113 savecheck ผ่าน หน้าอื่นภาพเหมือนเดิมทุกพิกเซล
 ✅ ผู้ใช้ตอบ (คำต่อคำ `USER_BRIEFS.md` 13.15 สรุปดีไซน์ `docs/CHARACTER_DESIGN.md`) :

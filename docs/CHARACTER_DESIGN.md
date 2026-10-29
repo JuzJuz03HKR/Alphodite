@@ -47,7 +47,8 @@
 - ใช้กับ VFX ได้ : แสงสายฟ้าขาวอมฟ้า ไม้บาตองขาวเรืองแสง ฉากหลังแบบพายุ ส่วนแดงคงอยู่ในตัวละคร (ผ้าพันคอ โบว์ ตา)
 
 ### ในโค้ดตอนนี้
-- (ทำแล้ว 29 ต.ค.) `Conductor.Spot` = `Palette.LightningBlue` สีเดียวกับสกิล LIGHTNING · `Conductor.Aura` = STORM (`Core/ConductorAura.cs`) สีแดงยังอยู่ในภาพตัวละคร (ตา ผ้าพันคอ โบว์)
+- (ทำแล้ว 29 ต.ค.) `Conductor.Spot` = `Palette.LightningBlue` สีเดียวกับสกิล LIGHTNING
+- `Conductor.Aura` = STORM (`Core/ConductorAura.cs`) สีแดงยังอยู่ในภาพตัวละคร (ตา ผ้าพันคอ โบว์)
 - สกิล LIGHTNING มีฟ้าผ่าแล้ว (`HitStyle.Lightning` รอบ 6) เข้ากับธีม
 
 ## 2. Fanny : THE UNSIGNED ชื่อใหม่ "FANNY MENDELSSOHN AND ???" (หัวข้อใน PDF "Fanny & Felix the Nobody")
@@ -89,10 +90,15 @@
 - ใช้กับ VFX ได้ : เศษผลึกชิ้นใหญ่ลอยหมุนช้าๆ ขอบเหลือบสีรุ้ง หันหน้าสะท้อนไปทางเดียวกัน ลำแสงกรวยสีขาวส่องลงข้างตัว (ที่ของน้องในภาพ) ไม่วาดเงาคนด้วยโค้ด เพราะเป็นการวาดตัวละครแทนอาร์ต ให้ตัวน้องอยู่ในภาพอาร์ตแล้วแสงไปตกที่นั่น
 
 ### ในโค้ดตอนนี้
-- (ทำแล้ว 29 ต.ค.) ชื่อ `FANNY MENDELSSOHN AND ???` ในช่องเดิม (ตัวที่ 8 ใน `ConductorList.All` ไม่ย้ายลำดับ เซฟเดิมโหลดได้) · ที่แคบ (เสาวาทยากรในหน้า THE BAND ป้ายใต้เสาตอน CurtainCall) ใช้ชื่อสั้น `FANNY AND ???` (`Conductor.ShortName`) · หน้า Gallery กับ Detail ชื่อยาวขึ้นสองบรรทัด FANNY MENDELSSOHN / AND ??? (NAME FIT)
-- (ทำแล้ว) BASED ON เปลี่ยนเป็น `F. MENDELSSOHN` ให้เป็นอักษรย่อแบบอีกสองคน (L. V. BEETHOVEN, J. S. BACH) และ F. เป็นได้ทั้ง Fanny และ Felix · ประโยค WHO THEY WERE แก้ท่อนท้ายเป็น "Her brother's shadow plays beside her, and no one says his name." (เดิมบอกว่าเธอไม่มีชื่อ ซึ่งไม่ตรงกับชื่อใหม่แล้ว) ถ้าไม่ชอบบอกได้
+- (ทำแล้ว 29 ต.ค.) ชื่อ `FANNY MENDELSSOHN AND ???` ในช่องเดิม (ตัวที่ 8 ใน `ConductorList.All` ไม่ย้ายลำดับ เซฟเดิมโหลดได้)
+- ที่แคบ (เสาวาทยากรในหน้า THE BAND ป้ายใต้เสาตอน CurtainCall) ใช้ชื่อสั้น `FANNY AND ???` (`Conductor.ShortName`)
+- หน้า Gallery กับ Detail ชื่อยาวขึ้นสองบรรทัด FANNY MENDELSSOHN / AND ??? (NAME FIT)
+- (ทำแล้ว) BASED ON เปลี่ยนเป็น `F. MENDELSSOHN` ให้เป็นอักษรย่อแบบอีกสองคน (L. V. BEETHOVEN, J. S. BACH) และ F. เป็นได้ทั้ง Fanny และ Felix
+- ประโยค WHO THEY WERE แก้ท่อนท้ายเป็น "Her brother's shadow plays beside her, and no one says his name." (เดิมบอกว่าเธอไม่มีชื่อ ซึ่งไม่ตรงกับชื่อใหม่แล้ว) ถ้าไม่ชอบบอกได้
 - ระบบ TWO VOICES (เสียงของ FANNY กับ FELIX สลับกันนำ `battle.FelixVoice`) มีอยู่แล้ว เข้ากับดีไซน์นี้พอดี **ยังเรียกน้องว่า FELIX ในคำอธิบายสกิลและหน้าต่อสู้ รอผู้ใช้ตัดสินว่าจะเปลี่ยนเป็น ??? ไหม**
-- (ทำแล้ว) `Conductor.Spot` = `Palette.SpotPrism` (ขาวผลึก) · `Conductor.SpotAt(time)` ทำให้สีของเธอเหลือบสีรุ้งช้าๆ ในหน้า Gallery กับ Detail · `Conductor.Aura` = PRISM
+- (ทำแล้ว) `Conductor.Spot` = `Palette.SpotPrism` (ขาวผลึก)
+- `Conductor.SpotAt(time)` ทำให้สีของเธอเหลือบสีรุ้งช้าๆ ในหน้า Gallery กับ Detail
+- `Conductor.Aura` = PRISM
 - ตำแหน่งของน้องในภาพ (ที่เศษปริซึมสะท้อนแสงไปหาและสปอตไลต์ส่อง) ตั้งไว้ทางขวาของภาพก่อน `ConductorAura.BrotherX` `BrotherY` พอภาพเสร็จให้ย้ายไปตรงตัวน้อง
 
 ## 3. Bach : THE METRONOME (ไม่มีใน PDF)
@@ -103,7 +109,8 @@
 - ตัวละครมีผ้าพันตา รอบข้างมืดมาก แต่แสงทองส่องลงที่เขาคนเดียว
 
 ### ในโค้ดตอนนี้
-- (ทำแล้ว 29 ต.ค.) `Conductor.Spot` = `Palette.SpotHoly` ทองของแสงศักดิ์สิทธิ์ (อ่อนกว่า GOLD ของนักดนตรี จะได้ไม่สับสนกัน) · `Conductor.Aura` = HOLY
+- (ทำแล้ว 29 ต.ค.) `Conductor.Spot` = `Palette.SpotHoly` ทองของแสงศักดิ์สิทธิ์ (อ่อนกว่า GOLD ของนักดนตรี จะได้ไม่สับสนกัน)
+- `Conductor.Aura` = HOLY
 - บอส THE BLIND CANTOR (Bach กลไก BY TOUCH) ใช้ธีมตาบอดอยู่แล้ว
 
 ## 4. สีและเอฟเฟกต์ของวาทยากร : ทำแล้ว 29 ต.ค. (รายละเอียด `SCREENS_LEVEL_UP.md` ข้อ 23)
@@ -125,13 +132,37 @@
 - ในโค้ดตอนนี้มี 5 คนที่ตรงเครื่องพอดี : ANNA ไวโอลิน, KLARA ฟลุต, OTTO ทิมปานี, LUKA เชลโล, IRIS ฮอร์น ส่วน BORIS (กลองใหญ่) กับ MALI CHAI NUAN ออก
 - ข้อควรระวัง : `MusicianList` เซฟเป็นลำดับ ห้ามลบหรือสลับ ให้ซ่อนแบบเดียวกับ `ConductorList.Shown` แล้วเปลี่ยนชื่อ ฉายา และอาวุธในช่องเดิม
 
-ไอเดียตั้งต้นให้แชทถัดไปเอาไปเสนอผู้ใช้ (ไอริสจำได้จากความรู้ทั่วไป ต้องตรวจกับแหล่งข้อมูลที่เชื่อถือได้ก่อนเสนอ ห้ามใส่ข้อมูลที่ไม่แน่ใจ)
-- ไวโอลิน : Niccolò Paganini (มีตำนานว่าขายวิญญาณให้ปีศาจ เดิมเป็นวาทยากร THE HEARTLESS ที่ซ่อนอยู่ตอนนี้) หรือ Giuseppe Tartini (ตำนานโซนาตา Devil's Trill ที่ได้ยินปีศาจเล่นในฝัน)
-- เชลโล : Luigi Boccherini
-- ฟลุต : Johann Joachim Quantz (ครูสอนฟลุตของ Frederick the Great กษัตริย์ที่ให้ธีมเพลงแก่ Bach จนเกิด Musical Offering)
-- ฮอร์น : Giovanni Punto (Beethoven แต่ง Horn Sonata ให้) หรือ Joseph Leutgeb (Mozart แต่งฮอร์นคอนแชร์โตให้)
-- ทิมปานี : Ernst Pfundt (นักทิมปานีวง Gewandhaus ที่ Leipzig สมัย Felix Mendelssohn)
-ข้อดีของชุดนี้ : แต่ละคนโยงกับวาทยากรของเราได้ (Punto กับ Beethoven, Quantz กับ Bach, Pfundt กับ Mendelssohn)
+### ข้อเสนอ (ค้นและตรวจแล้ว 29 ต.ค. บ่าย รอผู้ใช้เลือก)
+
+ทุกคนเป็นนักดนตรีตัวจริงที่เก่งเครื่องนั้นจนเป็นตำนาน เสียชีวิตเกิน 150 ปีแล้ว และโยงกับวาทยากรของเราได้ ช่องในโค้ดใช้ของเดิมตามเครื่อง (ท่า ความสามารถติดตัว ยังเป็นของช่องนั้น เปลี่ยนแค่ชื่อ ฉายา อาวุธ)
+
+| ช่องเดิม | ตัวเลือก | ตำนานที่ตรวจแล้ว | ฉายา (ไทย / บนจอ) | อาวุธ |
+|---|---|---|---|---|
+| ANNA ไวโอลิน | **PAGANINI** (Niccolò Paganini 1782–1840) | ข่าวลือว่าขายวิญญาณให้ปีศาจ ถูกเรียกว่า "นักไวโอลินของปีศาจ" ไวโอลิน Guarneri del Gesù ปี 1743 ที่เขาเรียกว่า "ปืนใหญ่" (Il Cannone) ยกให้เมืองเจนัวในพินัยกรรม | นักไวโอลินของปีศาจ ผู้ถือปืนใหญ่ที่ร้องเพลงได้ / THE DEVIL'S VIOLINIST | ดาบไวโอลิน IL CANNONE ตัวไวโอลินเป็นกระบัง คันชักเป็นใบดาบ ฟันทีดังเหมือนปืนใหญ่ |
+| | หรือ **TARTINI** (Giuseppe Tartini 1692–1770) | เล่าเองว่าฝันปี 1713 ยื่นไวโอลินให้ปีศาจ ปีศาจเล่นเพราะจนเขาหายใจไม่ออก ตื่นมาเขียนตามที่จำได้ เป็นโซนาตา Devil's Trill | ผู้ได้ยินปีศาจเล่นไวโอลินในความฝัน / WHO HEARD THE DEVIL PLAY | ดาบรัว (trill) ใบดาบสั่นระรัว |
+| LUKA เชลโล | **DUPORT** (Jean-Louis Duport 1749–1819) | น่าจะเป็นคนเล่น Cello Sonata Op. 5 รอบแรกคู่กับ Beethoven ที่ Berlin ปี 1796 (แหล่งข้อมูลแย้งกันว่าเขาหรือพี่ชาย) เชลโล Stradivarius ปี 1711 ของเขามีตำนานว่าปี 1812 นโปเลียนขอลองเล่นแล้วทิ้งรอยบุบไว้ (เดือยรองเท้า เป็นตำนานเล่าต่อ ไม่มีหลักฐานชั้นต้น) ภายหลัง Rostropovich เล่นตัวนี้ | ผู้ถือเชลโลที่จักรพรรดิทิ้งรอยแผล / THE CELLO THE EMPEROR SCARRED | โล่ใหญ่เชลโลมีรอยบุบ คันชักเป็นหอก (สายรับ) |
+| | หรือ **BOCCHERINI** (Luigi Boccherini 1743–1805) | นักเชลโลและคีตกวี | | |
+| KLARA ฟลุต | **QUANTZ** (Johann Joachim Quantz 1697–1773) | ครูสอนฟลุตของ Frederick the Great ตั้งแต่ปี 1728 อยู่ราชสำนักตั้งแต่ 1741 จนตาย แต่งคอนแชร์โตฟลุตราว 300 บทให้กษัตริย์เล่นตอนค่ำ ลูกศิษย์คนนี้คือกษัตริย์ที่ให้ธีมแก่ Bach วันที่ 7 พ.ค. 1747 จนเกิด Musical Offering | ครูขลุ่ยของราชา / THE KING'S FLUTE MASTER | ฟลุตเรเปียร์ ใบดาบเรียวที่หวีดเป็นเสียงเพลง |
+| IRIS ฮอร์น | **PUNTO** (Giovanni Punto 1746–1803 ชื่อเกิด Jan Václav Stich ชาวโบฮีเมีย) | Beethoven แต่ง Horn Sonata Op. 17 ให้ เล่นรอบแรกด้วยกันที่เวียนนา 18 เม.ย. 1800 ตอนนั้น Punto ดังกว่า Beethoven มาก นักวิจารณ์ถึงกับถามว่า Beethoven คือใคร | แตรที่ดังกว่าชื่อของ Beethoven / LOUDER THAN BEETHOVEN | จักรฮอร์น ท่อขดของฮอร์นเป็นวงใบมีด ขว้างแล้วหมุนกลับมา |
+| OTTO ทิมปานี | **PFUNDT** (Ernst Pfundt 1806–1871) | นักทิมปานีของวง Gewandhaus ที่ Leipzig ได้เครดิตว่าทำทิมปานีแบบหมุนข้อเหวี่ยงที่ใช้ได้จริง เขียนตำราทิมปานี Die Pauken (1849) วงนี้ Felix Mendelssohn เป็นวาทยากรปี 1835–1847 (ยังไม่ได้ยืนยันว่าช่วงที่ Pfundt อยู่วงตรงกับ Felix ปีไหน) | ผู้หมุนฟ้าร้องด้วยมือ / WHO TUNES THE THUNDER | ค้อนคู่ (ไม้ตีทิมปานี) กับกลองเป็นโล่ |
+
+ข้อดีของชุดนี้ : Punto กับ Duport โยงกับ Beethoven, Quantz โยงกับ Bach, Pfundt โยงกับวงของ Felix Mendelssohn
+ข้อควรรู้ : Paganini เคยเป็นวาทยากร THE HEARTLESS ที่ซ่อนอยู่ (เก็บไว้ให้เซฟเก่าโหลดได้) ถ้าเลือกเขาเป็นนักไวโอลิน THE HEARTLESS ก็ซ่อนต่อไป
+ทั้งชุดเป็นผู้ชายหมด ช่องเดิม ANNA KLARA IRIS เป็นชื่อผู้หญิง ถ้าอยากมีนักดนตรีหญิง ไอริสค้นเพิ่มให้ได้
+ชื่อบนจอใช้นามสกุลตัวใหญ่แบบเดิม (PAGANINI/ DUPORT/ ...)
+พอผู้ใช้เลือกแล้ว : แก้ `Data/Musician.cs` ในช่องเดิม ห้ามลบหรือสลับ `MusicianList.All` ซ่อน MALI CHAI NUAN BORIS แบบ `ConductorList.Shown` แล้วไล่แก้ที่ใช้ชื่อ (`Core/DebugShots.Turn.cs` คาดชื่อ ANNA KLARA ไว้ ภาพ `bust_<key>` `face_<key>` `docs/UI_ART_PLAN.md`)
+
+แหล่งที่ใช้ตรวจ :
+
+- [Il Cannone Guarnerius](https://en.wikipedia.org/wiki/Il_Cannone_Guarnerius)
+- [Devil's Trill Sonata](https://en.wikipedia.org/wiki/Devil%27s_Trill_Sonata)
+- [Cello Sonatas Nos. 1 and 2 (Beethoven)](https://en.wikipedia.org/wiki/Cello_Sonatas_Nos._1_and_2_(Beethoven))
+- [Duport Stradivarius](https://en.wikipedia.org/wiki/Duport_Stradivarius)
+- [Johann Joachim Quantz](https://en.wikipedia.org/wiki/Johann_Joachim_Quantz)
+- [The Musical Offering](https://en.wikipedia.org/wiki/The_Musical_Offering)
+- [Horn Sonata Op. 17 (Beethoven-Haus Bonn)](https://www.beethoven.de/en/work/view/5563653516427264)
+- [Ernst Pfundt, Die Pauken (IMSLP)](https://imslp.org/wiki/Category:Pfundt,_Ernst)
+- [Kolberg Museum (Pfundt's crank timpani)](https://kolberg.com/en/About/Kolberg-Museum/)
 
 ## 6. ยังเปิด
 1. ชื่อ ฉายา และอาวุธของนักดนตรี 5 คน (เสนอแล้วให้ผู้ใช้เลือก)
