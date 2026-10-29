@@ -11,10 +11,9 @@ namespace Tacetno433.Data
         Shards,       // Amount can be negative
         Stamina,      // Amount can be negative
         Motif,        // a random motif, Amount is the lowest rarity
-        Recruit,      // a musician from the current era joins
-        Rehearse,     // the musician who took the check gains 1 power
-        Fight,        // an elite fight starts
-        RecruitPart   // a musician of a section (strings, winds or percussion) the band has nobody in joins
+        Rehearse,     // a weapon goes up one tier : the musician who took the check, or without a check the band's least trained
+        Fight         // an elite fight starts
+        //THE BAND OF THREE (29 Oct) : RECRUIT and RECRUIT PART (someone joins the band) are gone, the band is picked at the start
     }
 
     //EventChoice : one button on an event page.
@@ -89,8 +88,8 @@ namespace Tacetno433.Data
                      + "and for the first time tonight they smile.",
                 Choices = new EventChoice[]
                 {
-                    new EventChoice { Text = "Offer them a seat", ShardCost = 30,
-                                      Win = Reward.Recruit, WinText = "They pack their case and walk with you." },
+                    new EventChoice { Text = "Pay for a lesson", ShardCost = 30,
+                                      Win = Reward.Rehearse, WinText = "One old trick, played slowly. Your band will not forget it." },
                     new EventChoice { Text = "Play along with them", Check = true, CheckFamily = (int)Family.String, CheckBase = 30,
                                       Win = Reward.Rehearse, WinText = "The duet teaches your player something new.",
                                       Lose = Reward.Stamina, LoseAmount = -10, LoseText = "You fall out of step. It is tiring to be out of step." },
@@ -157,13 +156,14 @@ namespace Tacetno433.Data
                     new EventChoice { Text = "Rest and drink",
                                       Win = Reward.Stamina, WinAmount = 25, WinText = "Warm tea, a quiet room. The band feels like itself again." },
                     new EventChoice { Text = "Play for the room", Check = true, CheckBase = 20,
-                                      Win = Reward.Recruit, WinText = "A regular puts down their cup and asks to join you.",
+                                      Win = Reward.Shards, WinAmount = 40, WinText = "The room goes quiet, then the tips come in.",
                                       Lose = Reward.Shards, LoseAmount = -10, LoseText = "Nobody listens. You pay for the tea after all." },
                 }
             },
 
             //THE EMPTY CHAIR (round 14) : a band can be missing a whole section of the orchestra
-            //(round 15, it was a letter). This place offers a player for one, for a price.
+            //(round 15, it was a letter). Until the band of three (29 Oct) this place offered a player for it, now the one
+            //who plays it leaves a rare motif behind.
             new GameEvent
             {
                 Title = "THE EMPTY CHAIR",
@@ -173,7 +173,7 @@ namespace Tacetno433.Data
                 Choices = new EventChoice[]
                 {
                     new EventChoice { Text = "Find the one who plays it", ShardCost = 35,
-                                      Win = Reward.RecruitPart, WinText = "A player steps out of the dark, reads the part once, and sits down." },
+                                      Win = Reward.Motif, WinAmount = 2, WinText = "A player steps out of the dark, plays the part once, and leaves something behind." },
                     new EventChoice { Text = "Play it yourselves", Check = true, CheckBase = 35,
                                       Win = Reward.Rehearse, WinText = "The line is strange and beautiful. Your player keeps it.",
                                       Lose = Reward.Stamina, LoseAmount = -8, LoseText = "The part is written for someone else. It fights every note." },

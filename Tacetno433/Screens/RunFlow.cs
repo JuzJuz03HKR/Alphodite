@@ -37,6 +37,7 @@ namespace Tacetno433.Screens
         public static void Enter(TacetGame game, RouteNode node, Enemy enemy, GameEvent ev, List<Enemy> pack = null)
         {
             RunState run = game.CurrentRun;
+            if (run.Chosen != node) run.PlaceSeed = run.Rng.Next(1, int.MaxValue);   // a new place rolls its own dice, a loaded one keeps them
             run.Chosen = node;
 
             if (node.Type == NodeType.Battle || node.Type == NodeType.Elite || node.Type == NodeType.Boss)

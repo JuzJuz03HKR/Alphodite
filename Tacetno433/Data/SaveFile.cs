@@ -168,8 +168,7 @@ namespace Tacetno433.Data
             lines.Add("stages=" + run.StagesThisFloor);
             lines.Add("maestro=" + (run.Maestro ? 1 : 0));          // MAESTRO MODE, a save from before 29 Sep has none : NORMAL
             lines.Add("shards=" + run.Shards);
-            lines.Add("seats=" + run.Seats);
-            lines.Add("seatsbought=" + run.SeatsBoughtThisFloor);
+            lines.Add("placeseed=" + run.PlaceSeed);                // the shop's shelves and the treasure (29 Oct), the same after CONTINUE
             lines.Add("stamina=" + run.Stamina);
             lines.Add("maxstamina=" + run.MaxStamina);
             lines.Add("power=" + Number(run.PowerMultiplier));
@@ -177,7 +176,8 @@ namespace Tacetno433.Data
             lines.Add("perfects=" + run.PerfectsTotal);
             lines.Add("bestcombo=" + run.BestCombo);
 
-            //Band : who is in the ensemble, how much each has rehearsed, who sits where
+            //Band : who is in the band, each one's weapon tier (rehearsed=, WEAPON TIERS), who sits where. Since the band of three
+            //(29 Oct) there are no seats to buy or BENCH, an old save's seats= and seatsbought= lines are read past.
             List<string> roster = new List<string>();
             for (int i = 0; i < run.Roster.Count; i++) roster.Add(Array.IndexOf(MusicianList.All, run.Roster[i]).ToString());
             lines.Add("roster=" + string.Join(",", roster));
@@ -261,8 +261,7 @@ namespace Tacetno433.Data
             //NO MORE ERAS (29 Oct) : a save from before keeps an era= line, it is read past. The movement follows the floor.
             run.Maestro = GetInt(v, "maestro", 0) == 1;
             run.Shards = GetInt(v, "shards", 0);
-            run.Seats = GetInt(v, "seats", 3);
-            run.SeatsBoughtThisFloor = GetInt(v, "seatsbought", 0);
+            run.PlaceSeed = GetInt(v, "placeseed", 0);
             run.MaxStamina = GetInt(v, "maxstamina", run.MaxStamina);
             run.Stamina = GetInt(v, "stamina", run.MaxStamina);
             run.PowerMultiplier = GetFloat(v, "power", run.PowerMultiplier);
@@ -285,13 +284,14 @@ namespace Tacetno433.Data
             int[] seated = GetList(v, "seated");
             for (int s = 0; s < StageLayout.SeatCount && s < seated.Length; s++)
                 if (seated[s] >= 0 && seated[s] < MusicianList.All.Length) run.Formation.Seated[s] = MusicianList.All[seated[s]];
-            run.Formation.Tidy(run.Seats);       // a save from before round 12 sat its first players down the centre
+            run.Formation.Tidy(StageLayout.SeatCount);   // a save from before round 12 sat its first players down the centre
 
             int[] order = GetList(v, "order");                 // a save from before the band page's order : the roster's order
             for (int i = 0; i < order.Length; i++)
                 if (order[i] >= 0 && order[i] < MusicianList.All.Length && run.Roster.Contains(MusicianList.All[order[i]]) && !run.Order.Contains(MusicianList.All[order[i]]))
                     run.Order.Add(MusicianList.All[order[i]]);
             run.SyncOrder();
+            run.KeepBand();                                    // THE BAND OF THREE : an old save's BENCH leaves, three stay
 
             int[] motifs = GetList(v, "motifs");
             run.Motifs.Clear();                                // KEEPSAKE : Start rolled one, the save already holds it

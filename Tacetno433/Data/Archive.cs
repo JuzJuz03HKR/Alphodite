@@ -34,7 +34,8 @@ namespace Tacetno433.Data
         public const int Signature = 2;     // the SIGNATURE gauge starts part full
         public const int Savings = 3;       // shards at the start of a run
         public const int Keepsake = 4;      // a common motif at the start of a run
-        public const int Stage = 5;         // FULL STAGE : one more musician on the field when a fight starts (step 12, ONE BAR)
+        public const int FirstChair = 5;    // FIRST CHAIR (29 Oct) : the first musician picked starts with a better weapon. This place held FULL STAGE
+                                            // (one more musician on the field) until the band of three, a level bought for it carries over
 
         public static ArchiveUpgrade[] All = new ArchiveUpgrade[]
         {
@@ -43,14 +44,8 @@ namespace Tacetno433.Data
             new ArchiveUpgrade { Name = "WARM UP",       Text = "The SIGNATURE starts 2 diamonds fuller.",    Prices = new int[] { 40, 80 } },
             new ArchiveUpgrade { Name = "SAVINGS",       Text = "Every run starts with 20 more shards.",      Prices = new int[] { 25, 50, 75 } },
             new ArchiveUpgrade { Name = "KEEPSAKE",      Text = "Every run starts with a common motif.",      Prices = new int[] { 100 } },
-            new ArchiveUpgrade { Name = "FULL STAGE",    Text = "Every run starts with 3 seats on stage.",    Prices = new int[] { 120 } },
+            new ArchiveUpgrade { Name = "FIRST CHAIR",   Text = "The first musician you pick starts with a tier I weapon.", Prices = new int[] { 120 } },
         };
-
-        //Start Band : the seats on stage a run starts with (ONE BAR), FULL STAGE included. Whoever sits in them starts each fight.
-        public static int StartBand
-        {
-            get { return BattleRules.TurnStartBand + Level(Stage) * BattleRules.ArchiveStagePerLevel; }
-        }
 
         public static int Echoes;           // ECHOES to spend (saved in archive.txt)
 

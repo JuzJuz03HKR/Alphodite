@@ -29,8 +29,8 @@ namespace Tacetno433.Data
 
         //ONE BAR (Alpha 7 step 13) : turn battle only, the old rhythm duel plays these enemies plainly
         HoldsTheRoom,    // ROOM TONE    while it stands, the other enemies take less
-        OnCue,           // THE CUE      it strikes the musician called in last
-        FeltHand,        // THE DAMPER   while it stands, a CALL costs more
+        OnCue,           // THE CUE      it strikes the musician who played the last skill (29 Oct, was : the one CALLED in last)
+        FeltHand,        // THE DAMPER   while it stands, an ATTACK gives less BREATH (29 Oct, was : a CALL costs more)
         TwiceABar,       // STUTTER      it cuts in twice a bar, one note each time
         FirstInLine,     // THE ROUND    it strikes the musician who plays first in the bar
 
@@ -177,22 +177,23 @@ namespace Tacetno433.Data
 
             //ONE BAR (Alpha 7 step 13, docs/ALPHA7_CONTENT_PROPOSALS.md) : any movement, added at the END because the
             //save file and ArtBank keep enemies by their place in this list. Each one is a puzzle for one part of
-            //ONE BAR : who to hit first (ROOM TONE), when to CALL (THE CUE, THE DAMPER) and the order of the bar
-            //(STUTTER, THE ROUND). TurnPower 0 : each note hits the average of the Pattern, like the others.
+            //ONE BAR : who to hit first (ROOM TONE), who plays the skills (THE CUE), ATTACK or not (THE DAMPER) and the order of
+            //the bar (STUTTER, THE ROUND). THE CUE and THE DAMPER were about CALL until it went away (29 Oct).
+            //TurnPower 0 : each note hits the average of the Pattern, like the others.
             new Enemy { Name = "ROOM TONE",
                         TurnHp = 45, TurnSpeed = 2, Phrases = new[] { "Dp", "Up Dp" }, TurnTraitText = "While it stands, the other enemies take 30 percent less.", Title = "The sound of an empty room, holding the others up.",
                         Trait = EnemyTrait.HoldsTheRoom, TraitName = "HOLDS THE ROOM", TraitFloor = 2,
                         TraitText = "While it stands, the other enemies take 30 percent less.",
                         Kind = EnemyKind.Normal, Pattern = new int[] { 4, 0, 4, 0, 4, 0, 4, 0 }, Tone = Palette.ToneE },
             new Enemy { Name = "THE CUE",
-                        TurnHp = 55, TurnSpeed = 5, Phrases = new[] { "Rmf Lmf", "Uf" }, TurnTraitText = "It always strikes the musician who was CALLED in last.", Title = "It waits in the wings for whoever walks on next.",
+                        TurnHp = 55, TurnSpeed = 5, Phrases = new[] { "Rmf Lmf", "Uf" }, TurnTraitText = "It always strikes the musician who played the last skill.", Title = "It waits in the wings for whoever takes the solo.",
                         Trait = EnemyTrait.OnCue, TraitName = "ON CUE", TraitFloor = 2,
-                        TraitText = "It always strikes the musician who was CALLED in last.",
+                        TraitText = "It always strikes the musician who played the last skill.",
                         Kind = EnemyKind.Normal, Pattern = new int[] { 4, 0, 4, 0, 4, 0, 4, 0 }, Tone = Palette.ToneC },
             new Enemy { Name = "THE DAMPER",
-                        TurnHp = 42, TurnSpeed = 3, Phrases = new[] { "Dmf Dp", "Lmf Rmf" }, TurnTraitText = "While it stands, a CALL costs 1 more BREATH.", Title = "A felt hand resting on every string.",
+                        TurnHp = 42, TurnSpeed = 3, Phrases = new[] { "Dmf Dp", "Lmf Rmf" }, TurnTraitText = "While it stands, an ATTACK gives 1 less BREATH.", Title = "A felt hand resting on every string.",
                         Trait = EnemyTrait.FeltHand, TraitName = "FELT HAND", TraitFloor = 2,
-                        TraitText = "While it stands, a CALL costs 1 more BREATH.",
+                        TraitText = "While it stands, an ATTACK gives 1 less BREATH.",
                         Kind = EnemyKind.Normal, Pattern = new int[] { 4, 0, 4, 0, 4, 0, 4, 0 }, Tone = Palette.ToneD },
             new Enemy { Name = "STUTTER",
                         TurnHp = 36, TurnSpeed = 7, Phrases = new[] { "Lp", "Rp", "Up" }, TurnTraitText = "It cuts in twice a bar, after the 1st and the 3rd move, one note each time.", Title = "It cannot finish a word, so it never stops starting.",

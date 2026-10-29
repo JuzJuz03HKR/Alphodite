@@ -15,16 +15,16 @@ namespace Tacetno433.Core
     //COUNTS ALOUD, FASHIONABLY LATE, STEADY PULSE, CAPRICE) works as in the game.
     //ONE BAR : an ATTACK needs no swipe, so only skills, the SIGNATURE and the parries use the timing error.
     //One plain habit writes each bar (SimPlan) :
-    //   SIGNATURE as soon as it is full. CALL the first one on the BENCH when the free BREATH covers it while
-    //   fewer than four play or somebody fell. Then for each musician : a heal when someone is under half life,
-    //   the dearest skill that hits enemies when 3 BREATH or more are free (step 13 : and it leaves enough for a
-    //   CALL it is saving up for), otherwise ATTACK the enemy with the least life.
+    //   SIGNATURE as soon as it is full. Then for each musician : a heal when someone is under half life,
+    //   the dearest skill that hits enemies when 3 BREATH or more are free, otherwise ATTACK the enemy with the least life.
+    //   (Until 29 Oct it also CALLED the BENCH in.)
     //Reports :
-    //   FIGHTS      one fight at full life with the PACKS of the run (BattleRules ONE BAR), four musicians, two on the field
+    //   FIGHTS      one fight at full life with the PACKS of the run (BattleRules ONE BAR), the band of three
+    //   RANKS       the RANK of the won fights above (29 Oct, BattleState.RankScore), S / A / B / C percent and the shards' scale
     //   RUNS        three floors in a row with life carried over : N N E N N, a rest (40 percent back), then the boss,
-    //               after every win the result page's life back. FirstFloorRecruits musicians on floor 1, LaterFloorRecruits
-    //               more at each new floor, one more after an elite at EliteRecruitChance, one more rehearsal each per floor,
-    //               THE UNHEARING, no motifs, shops or events (so it is harder than a real run)
+    //               after every win the result page's life back. THE BAND OF THREE (29 Oct) : 3 of the 5 legends picked at
+    //               random for each run, every weapon one tier up after each floor (WEAPON TIERS, as a rehearsal each per
+    //               floor before), THE UNHEARING, no motifs, shops, luthier or events (so it is harder than a real run)
     //   CONDUCTORS  the same runs with each of the six conductors of the turn battle
     //How well real people swipe is a guess, so read the numbers side by side rather than as the truth.
     //Results move by a few percent between runs.
@@ -76,11 +76,14 @@ namespace Tacetno433.Core
             report += "Players : timing spread FLAWLESS 0 / EXPERT 0.08 / STRONG 0.12 / AVERAGE 0.2 / NEWCOMER 0.3 seconds\r\n\r\n";
 
             MusicianList.ResetRehearsals();
-            List<Musician> four = SimBand(4);
+            List<Musician> three = SimBand(BattleRules.BandSize);
             string[] cells = { "EARLY", "LATE", "ELITE", "BOSS" };
+            int[,] ranks = new int[simPlayers.Length, 4];
+            float[] scales = new float[simPlayers.Length];
+            int[] rankedWins = new int[simPlayers.Length];
 
             //FIGHTS : win percent / bars / life lost percent, with the packs of each place on each floor
-            report += "FIGHTS at full life (4 musicians, 2 on the field) : WIN PERCENT  /  BARS  /  LIFE LOST PERCENT  /  CALLS\r\n";
+            report += "FIGHTS at full life (the band of three) : WIN PERCENT  /  BARS  /  LIFE LOST PERCENT\r\n";
             for (int p = 0; p < simPlayers.Length; p++)
             {
                 SimPlayer player = simPlayers[p];
@@ -93,14 +96,21 @@ namespace Tacetno433.Core
                         int bars = 0;
                         int lost = 0;
                         int max = 0;
-                        int calls = 0;
                         for (int f = 0; f < SimFights; f++)
                         {
                             List<Enemy> pack = SimPack(cells[c], floor, rng, f);
-                            TurnBattle b = SimFight(four, pack, floor, player, null, rng, TurnKit.Beethoven, false);
-                            if (b.Step == TurnStep.Won) wins++;
+                            simNotes = 0;
+                            simPerfects = 0;
+                            TurnBattle b = SimFight(three, pack, floor, player, null, rng, TurnKit.Beethoven, false);
+                            if (b.Step == TurnStep.Won)
+                            {
+                                wins++;
+                                int rank = SimRank(b);                                     // RANK
+                                ranks[p, rank]++;
+                                scales[p] += BattleRules.RankShards[rank];
+                                rankedWins[p]++;
+                            }
                             bars += b.Round;
-                            calls += b.Calls;
                             for (int i = 0; i < b.Party.Count; i++)
                             {
                                 lost += b.Party[i].MaxHp - b.Party[i].Hp;
@@ -108,8 +118,7 @@ namespace Tacetno433.Core
                             }
                         }
                         line += cells[c].PadRight(6) + (wins * 100 / SimFights).ToString().PadLeft(3) + "% "
-                              + (bars / (float)SimFights).ToString("0.0").PadLeft(4) + "b " + (lost * 100 / Math.Max(1, max)).ToString().PadLeft(3) + "% "
-                              + (calls / (float)SimFights).ToString("0.0") + "c   ";
+                              + (bars / (float)SimFights).ToString("0.0").PadLeft(4) + "b " + (lost * 100 / Math.Max(1, max)).ToString().PadLeft(3) + "%   ";
                     }
                     report += line + "\r\n";
                 }
@@ -118,6 +127,16 @@ namespace Tacetno433.Core
             //Damage Share : from the FIGHTS above
             long allDamage = Math.Max(1, simAttackDamage + simSkillDamage);
             report += "  DAMAGE SHARE in all of the fights above : ATTACK " + (simAttackDamage * 100 / allDamage) + "%  SKILLS " + (simSkillDamage * 100 / allDamage) + "%\r\n";
+
+            //RANKS : the won fights above, S / A / B / C and the average scale of their shards (29 Oct)
+            report += "\r\nRANKS of the won fights above : S / A / B / C PERCENT  /  SHARDS SCALE\r\n";
+            for (int p = 0; p < simPlayers.Length; p++)
+            {
+                int n = Math.Max(1, rankedWins[p]);
+                report += "  " + simPlayers[p].Name.PadRight(9) + (ranks[p, 0] * 100 / n).ToString().PadLeft(3) + " / " + (ranks[p, 1] * 100 / n).ToString().PadLeft(3)
+                        + " / " + (ranks[p, 2] * 100 / n).ToString().PadLeft(3) + " / " + (ranks[p, 3] * 100 / n).ToString().PadLeft(3)
+                        + "   x" + (scales[p] / n).ToString("0.00") + "\r\n";
+            }
 
             //EACH ENEMY as the leader of its pack on floor 2 (bosses floor 3), AVERAGE and STRONG players (step 14 : STRONG added,
             //every boss was 0 to 3 percent for AVERAGE, so they could not be told apart)
@@ -136,7 +155,7 @@ namespace Tacetno433.Core
                         List<Enemy> pack = new List<Enemy> { enemy };
                         int escorts = SimEscorts(enemy.Kind == EnemyKind.Normal ? "LATE" : (enemy.Kind == EnemyKind.Elite ? "ELITE" : "BOSS"), floor);
                         for (int k = 0; k < escorts; k++) pack.Add(EnemyList.PickOther(EnemyKind.Normal, 0, pack, rng));
-                        TurnBattle b = SimFight(four, pack, floor, simPlayers[p], null, rng, TurnKit.Beethoven, false);
+                        TurnBattle b = SimFight(three, pack, floor, simPlayers[p], null, rng, TurnKit.Beethoven, false);
                         if (b.Step == TurnStep.Won) wins++;
                         bars += b.Round;
                     }
@@ -230,14 +249,15 @@ namespace Tacetno433.Core
             MusicianList.ResetRehearsals();
             Dictionary<Musician, int> life = new Dictionary<Musician, int>();
             string[] path = { "EARLY", "EARLY", "ELITE", "LATE", "LATE", "BOSS" };
-            int members = BattleRules.FirstFloorRecruits;
+
+            //THE BAND OF THREE : 3 of the 5 legends, picked at random (the order they are picked in is the order they play in)
+            List<Musician> band = new List<Musician>(SimBand(simRoster.Length));
+            while (band.Count > BattleRules.BandSize) band.RemoveAt(rng.Next(band.Count));
 
             for (int floor = 1; floor <= 3; floor++)
             {
-                if (floor > 1) members += BattleRules.LaterFloorRecruits;                 // joining at each new floor
                 for (int i = 0; i < path.Length; i++)
                 {
-                    List<Musician> band = SimBand(members);
                     if (path[i] == "BOSS") SimHeal(band, life, BattleRules.BreatheRecover);   // a rest stop before the boss
 
                     int[] start = new int[band.Count];
@@ -248,9 +268,9 @@ namespace Tacetno433.Core
 
                     for (int m = 0; m < b.Party.Count; m++) life[b.Party[m].Musician] = b.HpAfterBattle(b.Party[m]);
                     SimHeal(band, life, BattleRules.RecoverAfterWin);                 // the result page's life back
-                    if (path[i] == "ELITE" && rng.Next(100) < BattleRules.EliteRecruitChance) members++;   // the result page's elite recruit
                 }
-                for (int m = 0; m < members && m < simRoster.Length; m++) MusicianList.All[simRoster[m]].Rehearsed++;   // a rehearsal each per floor
+                for (int m = 0; m < band.Count; m++)                                 // WEAPON TIERS : every weapon one tier up per floor
+                    band[m].Rehearsed = Math.Min(BattleRules.RehearseMax, band[m].Rehearsed + 1);
             }
             return 4;
         }
@@ -265,10 +285,28 @@ namespace Tacetno433.Core
             }
         }
 
-        //Sim Fight : one fight to the end with the player's habit, BattleRules.TurnStartBand on the field
+        //Sim Rank : the RANK of a won fight, as the result page gives it (BattleState.RankScore), from the notes this fight
+        //swiped (simNotes, simPerfects) and the band's life kept
+        private static int simNotes;
+        private static int simPerfects;
+
+        private static int SimRank(TurnBattle b)
+        {
+            int start = 0;
+            int end = 0;
+            for (int i = 0; i < b.Party.Count; i++)
+            {
+                start += b.Party[i].MaxHp;                                                 // the FIGHTS above start at full life
+                end += b.Party[i].Hp;
+            }
+            float kept = start > 0 ? end / (float)start : 1f;
+            return Math.Min(3, BattleState.RankIndexOf(BattleState.RankScoreOf(simPerfects, simNotes, kept)));
+        }
+
+        //Sim Fight : one fight to the end with the player's habit, the whole band on the field
         private static TurnBattle SimFight(List<Musician> band, List<Enemy> enemies, int floor, SimPlayer player, int[] startHp, Random rng, TurnKit kit, bool maestro)
         {
-            TurnBattle b = new TurnBattle(band, enemies, floor, rng, startHp, 0, BattleRules.TurnStartBand);
+            TurnBattle b = new TurnBattle(band, enemies, floor, rng, startHp, 0);
             b.Kit = kit;
             b.Maestro = maestro;
 
@@ -321,22 +359,6 @@ namespace Tacetno433.Core
                 if (b.Step != TurnStep.Plan) return;
             }
 
-            //CALL : while fewer than four play, or someone fell
-            int standing = 0;
-            bool fallen = false;
-            for (int i = 0; i < b.Party.Count; i++)
-            {
-                if (b.Party[i].Down) fallen = true;
-                else standing++;
-            }
-            bool wantCall = b.Bench.Count > 0 && (standing < 4 || fallen) && b.Party.Count < BattleRules.TurnFieldMost;
-            if (wantCall && b.CanCall(0))
-            {
-                b.Call(0);
-                wantCall = false;
-            }
-            int keep = wantCall ? b.CallCost : 0;   // step 13 : saving up for a CALL it cannot pay yet (FELT HAND makes it dearer)
-
             Fighter weakest = null;
             for (int i = 0; i < b.Enemies.Count; i++)
                 if (!b.Enemies[i].Down && (weakest == null || b.Enemies[i].Hp < weakest.Hp)) weakest = b.Enemies[i];
@@ -369,7 +391,7 @@ namespace Tacetno433.Core
                     b.PlanSkill(me, heal, heal.Target == SkillTarget.Ally ? hurt : me);
                     hurt = null;
                 }
-                else if (!noSkills && hit != null && (noAttacks || (b.BreathFree >= 3 && b.BreathFree - hit.Cost >= keep))) b.PlanSkill(me, hit, weakest);
+                else if (!noSkills && hit != null && (noAttacks || b.BreathFree >= 3)) b.PlanSkill(me, hit, weakest);
                 else if (noAttacks && heal != null) b.PlanSkill(me, heal, me);
                 else b.PlanAttack(me, weakest);
             }
@@ -403,6 +425,8 @@ namespace Tacetno433.Core
             else if (offset < -BattleRules.EarlyTime) g = Grade.Miss;
             else g = b.Judge(offset, rightWay);
             bool rightSize = b.AnySize || rng.NextDouble() >= player.WrongSize;              // LOCKED TEMPO
+            simNotes++;                                                                      // RANK
+            if (g == Grade.Perfect && rightSize) simPerfects++;
             return new NoteResult(g, rightSize, 1f);
         }
     }

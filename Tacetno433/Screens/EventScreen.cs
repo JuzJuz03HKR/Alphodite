@@ -61,7 +61,6 @@ namespace Tacetno433.Screens
         private int roll;
         private bool success;
         private bool startFight;
-        private bool recruited;
         private Motif gotMotif;
         private string resultWord = "";
         private string rollLabel = "";
@@ -261,23 +260,10 @@ namespace Tacetno433.Screens
                 return "MOTIF  /  " + gotMotif.Name;
             }
 
-            if (reward == Reward.Recruit || reward == Reward.RecruitPart)
-            {
-                run.JustJoined.Clear();
-                Musician m = reward == Reward.RecruitPart ? run.Recruit(run.MissingSectionPlayer()) : run.RecruitOne();
-                if (m == null)
-                {
-                    run.AddShards(ev.Choices[chosen].ShardCost);       // money back, nobody could come
-                    return "NO ROOM IN THE ENSEMBLE";
-                }
-                recruited = true;
-                return m.Name + " JOINS THE ENSEMBLE";
-            }
-
+            //Rehearse : a weapon goes up one tier, the one who took the check, or without a check the band's least trained
             if (reward == Reward.Rehearse)
             {
-                Musician m = checker;
-                if (m == null && run.Roster.Count > 0) m = run.Roster[0];
+                Musician m = checker != null ? checker : run.LeastTrained();
                 if (m == null || !run.CanRehearse(m))
                 {
                     run.AddShards(BattleRules.SkipMotifShards);
@@ -285,7 +271,7 @@ namespace Tacetno433.Screens
                 }
                 run.Rehearse(m);
                 SoundBank.Play(Sfx.Rehearse);
-                return m.Name + "  +1 POWER";
+                return m.Name + "  /  " + m.WeaponNow;
             }
 
             if (reward == Reward.Fight)
@@ -297,7 +283,7 @@ namespace Tacetno433.Screens
             return "NOTHING CHANGES";
         }
 
-        //Go On : a fight, a new face, or simply the next stage
+        //Go On : a fight, or simply the next stage
         private void GoOn(RunState run)
         {
             if (startFight)
@@ -308,12 +294,6 @@ namespace Tacetno433.Screens
                 run.BeginBattle();
                 SaveFile.SaveRun(run);
                 Game.Screens.Change(RunFlow.FightScreen());
-                return;
-            }
-
-            if (recruited)
-            {
-                Game.Screens.Change(new RecruitScreen(true));
                 return;
             }
 

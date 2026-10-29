@@ -80,7 +80,7 @@ namespace Tacetno433.Screens
             "ATTACK hits by itself. Only skills and blocks need a swing.",
             "f big, mf middle, p small. The wrong size hits weaker.",
             "Skills cost BREATH. ATTACKS and PERFECT blocks give it back.",
-            "Names on the BENCH can be called in for BREATH, one a bar.",
+            "The shop sells what makes the whole band stronger. Play well, earn more shards.",
             "A CUT IN enemy plays in the middle of your bar. Silence it early.",
             "Attacks and PERFECT blocks fill the enemy's OFF-BEAT bar. Full, it loses a turn.",
             "Every third attack most bosses play a CADENZA : more notes, and harder.",

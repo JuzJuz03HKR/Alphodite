@@ -1,12 +1,12 @@
 namespace Tacetno433.Data
 {
-    //Formation : who is on stage and who waits on the bench.
+    //Formation : who is on stage.
     //
     //Round 14 : nobody chooses a seat any more. Each musician plays a PART written on their card
     //(a letter for the strokes that bring them in, an arrow for the way they answer, see
     //StageLayout), and each part belongs to one musician, so everyone on stage always sits in
-    //their own HOME SEAT. The only choice left is who plays: the stage has room for RunState.Seats
-    //players, the rest wait on the bench. The band page (BandScreen) swaps them.
+    //their own HOME SEAT. THE BAND OF THREE (Beta1, 29 Oct) : the whole band is on stage, nobody waits
+    //on a bench any more. The old rhythm duel still reads who sits where.
     public class Formation
     {
         public Musician[] Seated = new Musician[StageLayout.SeatCount];
@@ -36,7 +36,7 @@ namespace Tacetno433.Data
         }
 
         //Auto Seat : a musician steps onto the stage, into their home seat, while there is room.
-        //Returns false when the stage is full (they wait on the bench).
+        //Returns false when the stage is full.
         public bool AutoSeat(Musician m, int seatsOwned)
         {
             if (OnStage(m)) return true;
@@ -45,23 +45,9 @@ namespace Tacetno433.Data
             return true;
         }
 
-        //Bench : off the stage
-        public void Bench(Musician m)
-        {
-            int seat = SeatOf(m);
-            if (seat >= 0) Seated[seat] = null;
-        }
-
-        //Swap : one on the bench takes the place of one on stage
-        public void Swap(Musician fromBench, Musician fromStage)
-        {
-            Bench(fromStage);
-            Seated[StageLayout.HomeSeat(fromBench)] = fromBench;
-        }
-
         //Tidy : everyone moves to their home seat, and when there are more players on stage than
-        //room for them (a smaller stage, or a save from before round 14 where anyone could sit
-        //anywhere) the last ones go to the bench.
+        //room for them (a save from before round 14 where anyone could sit anywhere, or one from
+        //before the band of three) the last ones step off.
         public void Tidy(int seatsOwned)
         {
             Musician[] before = (Musician[])Seated.Clone();

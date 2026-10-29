@@ -9,8 +9,8 @@ using Tacetno433.Data;
 
 namespace Tacetno433.Screens
 {
-    //BandNameScreen : name your ensemble. Shown once, right after the first path of a run
-    //is chosen, and the game calls the band by that name for the rest of the run.
+    //BandNameScreen : name your ensemble. Shown once, right after the band of three is picked at the start of a run
+    //(TeamPickScreen), and the game calls the band by that name for the rest of the run. The first movement's card follows.
     //
     //Beta1 screens round 2 (29 Oct, docs/SCREENS_LEVEL_UP.md 19) : the name sits on an orbit rule like a signature, and the
     //band that is being named stands under it as the same tall columns as the band page (Core/BandColumn.cs), each in its
@@ -102,9 +102,8 @@ namespace Tacetno433.Screens
                 Game.CurrentRun.BandName = name.Length == 0 ? DefaultName : name;
                 SoundBank.Play(Sfx.UiConfirm);
 
-                //Opening Done : the floor opening is finished, routing starts at stage two
-                Game.CurrentRun.LeaveOpening();
-                Game.Screens.Change(new RouteScreen());
+                //Named : the first movement's card opens the run (ChapterScreen saves it there)
+                Game.Screens.Change(new ChapterScreen());
             }
         }
 

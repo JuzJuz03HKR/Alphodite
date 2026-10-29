@@ -11,9 +11,9 @@ namespace Tacetno433.Screens
 {
     //ResultScreen : how the fight ended.
     //
-    //WIN  : rewards are handed out once when the page opens (shards, some stamina back,
-    //       after an elite a chance that a musician follows you home), and the run record
-    //       is updated. Then a motif choice may follow.
+    //WIN  : rewards are handed out once when the page opens (shards, some stamina back), and the run
+    //       record is updated. After an elite or a boss a motif choice follows (the turn battle's
+    //       normal fights pay shards only, 29 Oct : fighting is fighting).
     //LOSS : the run is over. The curtain call page sums it up.
     //
     //Beta1 screens (28 Oct, docs/SCREENS_LEVEL_UP.md 4.3 and table 5) :
@@ -52,14 +52,14 @@ namespace Tacetno433.Screens
 
         //Result Data : worked out once in Load
         private bool won;
-        private bool recruited;
         private bool offerMotif;
         private string enemyLine = "";
         private string rank = "";
-        private string[] statNames = new string[5];
-        private string[] statValues = new string[5];     // LOSS : the ledger's words
-        private int[] statNumbers = new int[5];          // WIN : the numbers that count up
-        private bool[] statSigned = new bool[5];
+        private string rankScaleLabel = "";              // RANK : "SHARDS x2" under the rank, made in Load
+        private string[] statNames = new string[6];
+        private string[] statValues = new string[6];     // LOSS : the ledger's words
+        private int[] statNumbers = new int[6];          // WIN : the numbers that count up
+        private bool[] statSigned = new bool[6];
         private int statCount;
         private string footnote = "";
 
@@ -134,7 +134,9 @@ namespace Tacetno433.Screens
         private void ApplyWin(RunState run, BattleState battle)
         {
             int shards = battle.ShardsEarned();
+            int beforeRank = battle.ShardsBeforeRank();
             run.AddShards(shards);
+            rankScaleLabel = "SHARDS  x" + battle.RankScale().ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
 
             float recover = BattleRules.RecoverAfterWin;
             if (run.Has(MotifId.Encore)) recover += BattleRules.EncoreRecover;         // ENCORE
@@ -147,37 +149,41 @@ namespace Tacetno433.Screens
             run.PerfectsTotal += battle.PerfectCount;
             if (battle.BestCombo > run.BestCombo) run.BestCombo = battle.BestCombo;
 
-            //Elite Bonus : a chance that someone not in the band yet joins
-            if (battle.Enemy.Kind == EnemyKind.Elite && run.RollPercent() < BattleRules.EliteRecruitChance)
-            {
-                run.JustJoined.Clear();
-                recruited = run.RecruitOne() != null;
-            }
-
-            //Motif Offer : elites and bosses always, normal fights sometimes
-            offerMotif = battle.Enemy.Kind != EnemyKind.Normal || run.RollPercent() < BattleRules.MotifChanceNormal;
-            if (run.Motifs.Count >= MotifList.All.Length) offerMotif = false;
+            //Motif Offer : elites and bosses always. The turn battle's normal fights pay shards only (29 Oct, the user : fighting
+            //is fighting, BETA1_DIRECTION 8.2), the old duel's sometimes offer one.
+            offerMotif = battle.Enemy.Kind != EnemyKind.Normal || (!BattleRules.TurnBattleOn && run.RollPercent() < BattleRules.MotifChanceNormal);
+            if (run.Motifs.Count >= MotifList.All.Length && battle.Enemy.Kind != EnemyKind.Boss) offerMotif = false;
 
             //Final Boss : the run ends straight after, so there is nothing left to hand out
             bool lastBoss = battle.Enemy.Kind == EnemyKind.Boss && run.Floor >= BattleRules.FloorsPerRun;
-            if (lastBoss)
-            {
-                offerMotif = false;
-                recruited = false;
-            }
+            if (lastBoss) offerMotif = false;
 
-            //Numbers : TURN BATTLE has no beats or combo, it counts PERFECTs, the best streak and the bars
-            SetNumber(0, BattleRules.TurnBattleOn ? "PERFECTS" : "PERFECT BEATS", battle.PerfectCount, false);
-            SetNumber(1, BattleRules.TurnBattleOn ? "BEST STREAK" : "BEST COMBO", battle.BestCombo, false);
-            if (BattleRules.TurnBattleOn) SetNumber(2, "BARS", run.LastRounds, false);
-            else SetNumber(2, "FINAL LINE", (int)battle.Line, true);
-            SetNumber(3, BattleRules.LifeWord + " BACK", recovered, true);
-            SetNumber(4, "SHARDS", shards, true);
-            statCount = 5;
+            //Numbers : TURN BATTLE has no beats or combo. RANK (29 Oct) : the two things the rank is made of come first (the
+            //PERFECT share and the life kept, in percent), and the shards are split into the fight's own and what the rank adds,
+            //so a player sees why they earned what they earned.
+            if (BattleRules.TurnBattleOn)
+            {
+                int perfectShare = battle.NotesPlayed > 0 ? (int)Math.Round(100f * battle.PerfectCount / battle.NotesPlayed) : 100;
+                SetNumber(0, "PERFECT %", perfectShare, false);
+                SetNumber(1, BattleRules.LifeWord + " KEPT %", (int)Math.Round(100f * battle.LifeKept), false);
+                SetNumber(2, "BARS", run.LastRounds, false);
+                SetNumber(3, BattleRules.LifeWord + " BACK", recovered, true);
+                SetNumber(4, "SHARDS", beforeRank, true);
+                SetNumber(5, "RANK BONUS", shards - beforeRank, true);
+                statCount = 6;
+            }
+            else
+            {
+                SetNumber(0, "PERFECT BEATS", battle.PerfectCount, false);
+                SetNumber(1, "BEST COMBO", battle.BestCombo, false);
+                SetNumber(2, "FINAL LINE", (int)battle.Line, true);
+                SetNumber(3, BattleRules.LifeWord + " BACK", recovered, true);
+                SetNumber(4, "SHARDS", shards, true);
+                statCount = 5;
+            }
 
             footnote = "";
             if (offerMotif) footnote = "A MOTIF IS LEFT BEHIND";
-            if (recruited) footnote = "SOMEONE FOLLOWS YOU OUT OF THE FIGHT";
             if (battle.Enemy.Kind == EnemyKind.Boss)
                 footnote = run.Floor >= BattleRules.FloorsPerRun ? "THE LAST SILENCE IS BROKEN" : "FLOOR CLEARED  -  THE NEXT MOVEMENT IS WAITING";
 
@@ -306,7 +312,7 @@ namespace Tacetno433.Screens
             Lens.Engulf = BattleRules.ResultEngulf * creep;
         }
 
-        //Continue : reward choice first, then whoever joined, then the next stage
+        //Continue : the reward choice first, then the next stage
         private void Continue()
         {
             if (!won)
@@ -316,9 +322,7 @@ namespace Tacetno433.Screens
             }
 
             if (offerMotif)
-                Game.Screens.Change(new MotifRewardScreen(recruited));
-            else if (recruited)
-                Game.Screens.Change(new RecruitScreen(true));
+                Game.Screens.Change(new MotifRewardScreen());
             else
                 RunFlow.NextStage(Game);
         }
@@ -529,6 +533,8 @@ namespace Tacetno433.Screens
             Gfx.DiamondOutline(sb, rx, ry, size + 10f, Palette.Ink * (0.5f * a), 1f);
             Gfx.TextCentered(sb, Game.LogoFont, rank, rx, ry - 4, Palette.Paper * a, TextSize.Banner * 0.9f * Math.Min(1f, size / 66f));
             Gfx.TextSpacedCentered(sb, Game.Font, "RANK", rx - 110, ry - 6, soft * a, TextSize.Tiny, 4f);
+            if (rankScaleLabel.Length > 0)                                                            // RANK : what it did to the shards
+                Gfx.TextSpacedCentered(sb, Game.Font, rankScaleLabel, rx + 130, ry - 6, Palette.Ink * (a * Math.Min(1f, k * 2f)), TextSize.Label, 3f);
 
             //Knock : the ring of ink as it lands
             float knock = (time - RankAt - RankSlam * 0.6f) / 0.4f;

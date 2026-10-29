@@ -38,17 +38,13 @@
         //ONE BAR (step 12, 24 Oct, the user played it and chose this) : each round is a BAR. The player gives
         //every musician on the field one move (ATTACK or a skill) in the order they want, then the bar plays
         //as one phrase and TACET answers. ATTACK needs no swipe any more, only skills and parries do.
-        //The fight starts with a few musicians, the rest wait on the BENCH and can be CALLED in during it
-        //(like Wildfrost, where a new card on the board costs your turn).
+        //THE BAND OF THREE (Beta1, 29 Oct, docs/BETA1_DIRECTION.md 8) : a run starts by picking 3 of the 5 legends and they
+        //stay together all run, all three on the field in every fight. CALL, the BENCH and the seats are gone (the user :
+        //"not needed any more").
+        public static int BandSize = 3;               // the musicians a run picks at its start, every one of them plays every fight
         public static float TurnAttackScale = 0.55f;  // ATTACK : no swipe, it always hits at this (step 15 : was 1, the user found ATTACK far too strong and fights too short.
                                                       // turnsim : ATTACK did 68 percent of the band's damage, now about 36, the skills carry the rest)
         public static int TurnAttackOffBeat = 10;     // ATTACK : the OFF-BEAT it adds
-        public static int TurnStartBand = 2;          // seats on stage a run starts with (FULL STAGE in the ARCHIVE adds 1, EXTRA SEAT in the shop 1 each).
-                                                      // Step 15 : everybody seated on the BAND page starts the fight on the field
-        public static int TurnFieldMost = 6;          // musicians on the field at most, the called ones too
-        public static int TurnCallCost = 3;           // CALL : BREATH to bring one in from the BENCH, one per bar (NORMAL)
-        public static int MaestroTurnCallCost = 5;    //        MAESTRO
-        public static int TurnCallCostStep = 1;       //        the second call of a fight and every one after costs this much more
         public static int TurnCutInSpeed = 5;         // CUT IN : an enemy this fast plays in the middle of the bar
         public static int TurnCutInAfter = 2;         //          right after this many of the band's moves
 
@@ -59,7 +55,7 @@
         public static int[] TurnEliteEscort = { 0, 1, 2 };    // ordinary enemies that come with an ELITE
         public static int[] TurnBossEscort = { 0, 1, 2 };     // and with the BOSS
         public static float MaestroTurnDamage = 1.15f;           // MAESTRO : each of TACET's notes hits this much harder (1 = as NORMAL :
-                                                              // its narrower windows and dearer CALL already make it hard, 1.25 left EXPERT at 0 percent)
+                                                              // its narrower windows already make it hard, 1.25 left EXPERT at 0 percent)
         public static int TurnShardsPerEscort = 6;            // shards for each enemy beyond the first
 
         //Floor Scale (step 8) : enemies are tougher deeper down, life and each note's damage, floor 1 / 2 / 3
@@ -74,7 +70,8 @@
         public static int TurnBargainSteal = 1;          // THE DEVIL'S STRING : breath taken by each attack
         //ONE BAR enemies (step 13)
         public static float TurnRoomToneKeep = 0.7f;     // ROOM TONE : the share of the band's damage the OTHER enemies take while it stands
-        public static int TurnFeltHandCall = 1;          // THE DAMPER : a CALL costs this much more while it stands (2 left the sim's STRONG player at 23 percent against it)
+        public static int TurnFeltHandBreath = 1;        // THE DAMPER (FELT HAND, 29 Oct) : an ATTACK gives this much less BREATH while it stands (until CALL went
+                                                         // away a CALL cost this much more)
         public static int TurnTwiceFirst = 1;            // STUTTER : cuts in after this many of the band's moves
         public static int TurnTwiceSecond = 3;           //           and again after this many
         //Bosses of step 14
@@ -191,7 +188,7 @@
         public static int ArchiveBreathPerLevel = 1;   // DEEP BREATH
         public static int ArchiveSignaturePerLevel = 2;// WARM UP
         public static int ArchiveShardsPerLevel = 20;  // SAVINGS
-        public static int ArchiveStagePerLevel = 1;    // FULL STAGE : musicians more on the field at the start (step 12)
+        public static int ArchiveFirstChairTier = 1;   // FIRST CHAIR (29 Oct, was FULL STAGE) : the first musician picked starts with their weapon this many tiers up
 
         //Turn Motifs (step 6) : what the 21 motifs do in the turn battle (their TurnText in Data/Motif.cs).
         //ROSIN keeps FamilyMotifPower, STEADY PULSE keeps SteadyWindowBonus, ENCORE and PATRON'S PURSE work on the result page.
@@ -213,8 +210,9 @@
         public static float TurnCodaScale = 1.5f;         //        takes this much more
         //ONE BAR motifs (step 13). SEGUE and LAST WORD need no number.
         public static float TurnDownbeatScale = 1.5f;     // DOWNBEAT : the first move of a bar
-        public static float TurnEntranceScale = 2f;       // ENTRANCE : a called musician's moves in their first bar
-        public static int TurnGreenRoomHeal = 2;          // GREEN ROOM : life back for each musician on the BENCH at the end of a bar
+        public static float TurnEntranceScale = 2f;       // ENTRANCE (29 Oct, CALL is gone) : each musician's first move of a fight. Was : a called musician's first bar
+        public static int TurnGreenRoomHeal = 3;          // GREEN ROOM (29 Oct, the BENCH is gone) : life back for the most hurt musician standing at the end of a
+                                                          // bar. Was : 2 for each musician on the BENCH
         public static float TurnUnisonScale = 2f;         // UNISON : the last ATTACK of a bar that all goes at one enemy
 
         //Turn Feel (seconds) : how the battle page paces a swipe. The ring always closes at the same
@@ -655,13 +653,12 @@
         public static int ShardsElite = 40;
         public static int ShardsBoss = 80;
         public static int ShardsPerPerfect = 1;      // was 2 : duels are longer, so there are more PERFECTs (round 9)
-        public static int EliteRecruitChance = 50;   // percent
 
-        //Party
-        public static int BenchSize = 3;             // musicians you can keep off stage
-        public static int TurnBenchSize = 4;         // TURN BATTLE (step 15) : the stage starts with 2 seats, so the bench holds one more
-        public static int FirstFloorRecruits = 3;    // how many join at the very first opening (step 12 : was 2, so the first fight already has one on the BENCH)
-        public static int LaterFloorRecruits = 1;
+        //RANK (turn battle, 29 Oct, BETA1_DIRECTION 8.6, the user : the better the player, the more shards) : a won fight's
+        //score is half its PERFECT share and half the band's life kept (BattleState.RankScore), and its shards are multiplied
+        //by the rank. S A B C, in this order.
+        public static float[] RankAt = { 0.85f, 0.7f, 0.5f };          // the score S, A and B start from (below B is C)
+        public static float[] RankShards = { 2f, 1.5f, 1.25f, 1f };     // the shards multiplied by this at S, A, B, C
 
         //Run Length : beating the boss of the last floor wins the whole run
         public static int FloorsPerRun = 3;
@@ -673,7 +670,8 @@
 
         //Motif Rewards
         public static int MotifChoices = 3;          // pick one of this many after a win
-        public static int MotifChanceNormal = 60;    // percent, after a normal fight. Elites and bosses always offer.
+        public static int MotifChanceNormal = 60;    // percent, after a normal fight of the OLD DUEL. Elites and bosses always offer. The turn battle's
+                                                     // normal fights give shards only (29 Oct, the user : fighting is fighting, BETA1_DIRECTION 8.2)
         public static int SkipMotifShards = 15;      // taking nothing pays this instead
         public static int[] MotifPrice = { 0, 45, 70, 100 };   // shop price by rarity 1, 2, 3
 
@@ -729,18 +727,22 @@
                                                          // Round 14 : 0.07 -> 0.05, with stamina 6 -> 5 (he was 5 to 9 points above the rest)
         public static int VillageBandRecover = 3;    // THE FOLK LEADER's VILLAGE BAND, breath back for every stroke on time under it (round 15)
 
-        //Shop
-        public static int SeatPriceBase = 55;        // the first extra seat
-        public static int SeatPriceStep = 25;        // each seat after that costs this much more
-        public static int SeatsPerFloor = 2;
-        public static int TuningPrice = 30;          // stamina back
+        //Shop (29 Oct, the user : the shop is where the whole band gets stronger, BETA1_DIRECTION 8.5) : four wares rolled
+        //for each visit, two MOTIFS (MotifPrice above), one WEAPON (one musician's weapon up a tier) and one for the whole
+        //band (TUNING, or now and then SECTIONAL). REROLL buys a new shelf, dearer each time in one visit (like Balatro).
+        public static int TuningPrice = 30;          // TUNING : life back for the whole band
         public static float TuningRecover = 0.4f;
-        public static int HirePrice = 80;            // a musician not in the band yet (NO MORE ERAS, 29 Oct : any of the five)
+        public static int[] ShopWeaponPrice = { 0, 50, 70, 95 };   // WEAPON : one musician's weapon up to tier I, II, III
+        public static int ShopSectionalPrice = 150;  // SECTIONAL : every weapon of the band up one tier
+        public static int ShopSectionalChance = 25;  //            percent : the band's ware is SECTIONAL instead of TUNING
+        public static int ShopRerollBase = 10;       // REROLL : the first new shelf of a visit
+        public static int ShopRerollStep = 5;        //          each one after it costs this much more
 
         //Rest
         public static float BreatheRecover = 0.4f;   // free
         public static int DeepRestPrice = 35;        // full stamina
-        public static int RehearseMax = 3;           // how many times one musician can train
+        public static int RehearseMax = 3;           // WEAPON TIERS (29 Oct) : the top tier of a weapon, I II III (how many times one musician can train)
+        public static int WeaponTierPower = 1;       // each tier adds this much power (a rehearsal always did)
 
         //Event Checks
         public static int CheckPerPower = 5;         // each point of power adds this many percent

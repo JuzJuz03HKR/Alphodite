@@ -8,23 +8,26 @@ using Tacetno433.Data;
 
 namespace Tacetno433.Screens
 {
-    //ShopScreen : trade shards for help.
+    //ShopScreen : trade shards for what makes the whole band stronger.
     //
     //Left  : the shop itself, shelves and a counter with the shopkeeper behind it (placeholder)
-    //Right : the wares. Click one to buy it.
+    //Right : the wares and REROLL. Click a ware to buy it.
     //Bottom: the shopkeeper talks in a dialogue box, and reacts to what you point at.
     //
-    //Wares, top to bottom:
-    //   EXTRA SEAT    one more seat on stage, at most two per floor, dearer each time
-    //   TUNING        stamina back
-    //   HIRE          a musician not in the band yet joins (any of the five, NO MORE ERAS). Round 14 : the shop shows who, with
-    //                 their part, before paying, so the band can be built on purpose
-    //   three motifs, rolled when the shop opens
+    //THE SHOP OF THE BAND OF THREE (29 Oct, docs/BETA1_DIRECTION.md 8.5, the user : "the important place that makes the whole
+    //team stronger, the wares are random and can be rolled again for shards, so early shards matter a lot") :
+    //   MOTIF x2    rolled from the motifs the band does not carry
+    //   WEAPON      one musician's weapon up a tier (WEAPON TIERS), the musician is rolled among the ones that can still train
+    //   THE BAND    TUNING (life back for everyone) or, now and then, SECTIONAL (every weapon up a tier)
+    //   REROLL      a new shelf, dearer each time in one visit (BattleRules.ShopRerollBase / ShopRerollStep, like Balatro)
+    //The shelves come from the place's own dice (RunState.PlaceSeed) and the number of rolls, so leaving the game and coming
+    //back finds the same first shelf (the run was saved when the band walked in, the shards too). The seats on stage and
+    //HIRE (a new musician) were sold here until the band of three.
     //Leaving asks first, because the shelves are gone once the band walks out.
     //Beta1 screens round 1 (29 Oct, docs/SCREENS_LEVEL_UP.md 14) : THE ARCHIVIST stands in a stage light, the rest of the
     //room is dark. The wares come in one after another and light up like the menus when pointed at. What the band buys
-    //flies up into the top bar (a motif to its badge, a seat to SEATS, tuning to LIFE, a player to the band's name), and
-    //the keeper's words are written out line by line.
+    //flies up into the top bar (a motif to its badge, tuning to LIFE, a weapon to the band's name), and the keeper's words
+    //are written out line by line. A new shelf comes in the same way.
     public class ShopScreen : GameScreen
     {
         //Leave Box : "are you sure?" before walking out
@@ -57,32 +60,42 @@ namespace Tacetno433.Screens
         };
         private const string PoorLine = "Not enough shards, I am afraid. Come back a little richer.";
         private const string SoldLine = "That is all I have of those for now.";
-        private const string FullLine = "Your ensemble has no room for anyone else.";
-        private const string NobodyLine = "Nobody is looking for a band right now.";
         private const string RestedLine = "Your band is already in perfect tune.";
+        private const string RerollLine = "Something else from the back, then. It costs a little more every time.";
+        private const string RerolledLine = "There. A fresh shelf. Mind the dust.";
 
-        //Ware Rows
-        private const int SeatRow = 0;
-        private static readonly string[] TurnWays = { "LEFT", "DOWN", "RIGHT" };   // a musician's CUE as the way their skills start
-        private const int TuningRow = 1;
-        private const int HireRow = 2;
-        private const int FirstMotifRow = 3;
-        private const int RowCount = 6;
+        //Wares : what one place on the shelf holds
+        private enum WareKind { Motif, Weapon, Tuning, Sectional, Empty }
+
+        private class Ware
+        {
+            public WareKind Kind;
+            public Motif Motif;              // MOTIF
+            public Musician Who;             // WEAPON : whose weapon
+            public int Price;
+            public bool Sold;
+            public string Name = "";
+            public string KindLabel = "";    // COMMON / RARE / TREASURED, WEAPON, FOR THE BAND
+            public string Note = "";         // what the keeper says when it is pointed at
+            public string PriceLabel = "";
+            public string IconLabel = "";    // the word or numeral where a badge would be
+        }
+
+        private const int WareCount = 4;
+        private static readonly string[] TierWords = { "", "TIER I", "TIER II", "TIER III" };
 
         //Shop Layout
         private Rectangle waresBox = new Rectangle(730, 120, 510, 450);
         private Rectangle dialogueBox = new Rectangle(36, 566, 660, 130);
         private Rectangle leaveButton = new Rectangle(930, 630, 310, 54);
-        private const int RowH = 68;
+        private Rectangle rerollButton = new Rectangle(750, 500, 470, 50);
+        private const int RowH = 82;
 
         //Shop State
-        private Motif[] motifs = new Motif[0];
-        private Musician hire;                 // the musician on offer, rolled when the shop opens, or null
-        private string[] names = new string[RowCount];
-        private string[] notes = new string[RowCount];
-        private string[] priceLabels = new string[RowCount];
-        private bool[] sold = new bool[RowCount];
-        private int hoverRow = -1;
+        private Ware[] wares = new Ware[WareCount];
+        private int rerolls;                    // new shelves bought in this visit
+        private string rerollLabel = "";
+        private int hoverRow = -1;              // a ware, WareCount for REROLL, -1 for nothing
         private int lastHover = -1;
         private string line = "";
         private string lineWrapped = "";
@@ -90,15 +103,17 @@ namespace Tacetno433.Screens
         private float lineAge;
         private int thanksIndex;
         private float time;
+        private float shelfTime;                // since this shelf came in, the wares come in one after another from it
 
-        //Motion (Beta1 round 1) : the rows and the button point like the menus (Core/UiMotion.cs)
-        private UiMotion[] rowMotion = new UiMotion[RowCount];
+        //Motion (Beta1 round 1) : the rows and the buttons point like the menus (Core/UiMotion.cs)
+        private UiMotion[] rowMotion = new UiMotion[WareCount];
+        private UiMotion rerollMotion = new UiMotion();
         private UiMotion leaveMotion = new UiMotion();
 
         //FLY UP : what was just bought, on its way from the shelf to the top bar
         private const float FlyTime = 0.6f;
         private int flyRow = -1;                // the ware flying, -1 for none
-        private Motif flyMotif;                 // the motif it is, for its badge
+        private Ware flyWare;                   // the ware it is, for its badge
         private Vector2 flyFrom;
         private Vector2 flyTo;
         private float flyAge;
@@ -112,45 +127,11 @@ namespace Tacetno433.Screens
         public override void Load()
         {
             RunState run = Game.CurrentRun;
-            motifs = MotifList.Roll(run.Motifs, 3, 1, run.Floor, run.Rng);
-
-            names[SeatRow] = "EXTRA SEAT";
-            notes[SeatRow] = "One more musician on stage. Two per floor at most.";
-            names[TuningRow] = "TUNING";
-            notes[TuningRow] = "The band gets back " + (int)(BattleRules.TuningRecover * 100) + " percent of its " + BattleRules.LifeWordLower + ".";
-            if (BattleRules.TurnBattleOn) notes[SeatRow] = "One more musician on stage when a fight starts. Two per floor at most.";   // TURN BATTLE (step 15)
-            //Hire : one player not in the band yet, known before buying, with their seat
-            hire = MusicianList.Roll(run.Roster, run.Rng);
-            names[HireRow] = hire != null ? "HIRE " + hire.Name : "HIRE A PLAYER";
-            notes[HireRow] = hire != null
-                ? hire.Name + ", " + hire.Instrument + ". Sits " + StageLayout.Rows[StageLayout.SectionOf(hire.Family)].Name
-                  + ", " + StageLayout.SideNames[hire.Cue] + ". " + hire.TraitName + " : " + hire.TraitText
-                : NobodyLine;
-            if (hire != null && BattleRules.TurnBattleOn)                                   // TURN BATTLE : the side is the way their skills start
-                notes[HireRow] = hire.Name + ", " + hire.Instrument + ". Skills " + TurnWays[hire.Cue] + ". " + hire.TraitName + " : " + hire.TraitText;
-            if (hire == null) sold[HireRow] = true;
-
-            for (int i = 0; i < 3; i++)
-            {
-                int row = FirstMotifRow + i;
-                if (i < motifs.Length)
-                {
-                    names[row] = motifs[i].Name;
-                    notes[row] = BattleRules.TurnBattleOn && motifs[i].TurnText.Length > 0 ? motifs[i].TurnText : motifs[i].Text;   // step 15 : the turn battle's words, like the cards
-                }
-                else
-                {
-                    names[row] = "EMPTY SHELF";
-                    notes[row] = "";
-                    sold[row] = true;
-                }
-            }
-
-            RefreshPrices();
+            Stock();
             Say(greetings[run.Rng.Next(greetings.Length)]);
             SoundBank.PlayMusic(Music.Shop);
 
-            for (int r = 0; r < RowCount; r++) rowMotion[r] = new UiMotion();
+            for (int r = 0; r < WareCount; r++) rowMotion[r] = new UiMotion();
             RunHud.Arriving = 0;
 
             //The Lens : a dark room, the light is the keeper's (DrawLights)
@@ -165,22 +146,103 @@ namespace Tacetno433.Screens
             RunHud.Arriving = 0;
         }
 
-        //Prices : the seat gets dearer after each purchase, so the labels are rebuilt then
-        private void RefreshPrices()
+        //======================================================================================
+        //The Shelf
+        //======================================================================================
+
+        //Stock : a shelf from the place's dice and the number of rolls, so the same visit always shows the same shelves
+        private void Stock()
         {
-            priceLabels[SeatRow] = Game.CurrentRun.SeatPrice.ToString();
-            priceLabels[TuningRow] = BattleRules.TuningPrice.ToString();
-            priceLabels[HireRow] = BattleRules.HirePrice.ToString();
-            for (int i = 0; i < motifs.Length; i++)
-                priceLabels[FirstMotifRow + i] = MotifList.Price(motifs[i]).ToString();
+            RunState run = Game.CurrentRun;
+            Random dice = new Random(run.PlaceSeed + rerolls * 7919);
+
+            Motif[] motifs = MotifList.Roll(run.Motifs, 2, 1, run.Floor, dice);
+            for (int i = 0; i < 2; i++)
+                wares[i] = i < motifs.Length ? MotifWare(motifs[i]) : EmptyWare();
+
+            //Weapon : one of the band who can still train, rolled
+            Musician who = null;
+            int candidates = 0;
+            for (int i = 0; i < run.Roster.Count; i++)
+                if (run.CanRehearse(run.Roster[i]) && dice.Next(++candidates) == 0) who = run.Roster[i];
+            wares[2] = who != null ? WeaponWare(run, who) : EmptyWare();
+
+            //The Band : TUNING, or now and then SECTIONAL while a weapon can still go up
+            bool sectional = run.AnyToTrain && dice.Next(100) < BattleRules.ShopSectionalChance;
+            wares[3] = sectional ? SectionalWare() : TuningWare();
+
+            rerollLabel = "REROLL   " + RerollPrice;
+            shelfTime = 0f;
         }
 
-        private int PriceOf(int row)
+        private int RerollPrice
         {
-            if (row == SeatRow) return Game.CurrentRun.SeatPrice;
-            if (row == TuningRow) return BattleRules.TuningPrice;
-            if (row == HireRow) return BattleRules.HirePrice;
-            return MotifList.Price(motifs[row - FirstMotifRow]);
+            get { return BattleRules.ShopRerollBase + BattleRules.ShopRerollStep * rerolls; }
+        }
+
+        private static Ware MotifWare(Motif m)
+        {
+            Ware w = new Ware();
+            w.Kind = WareKind.Motif;
+            w.Motif = m;
+            w.Price = MotifList.Price(m);
+            w.Name = m.Name;
+            w.KindLabel = m.RarityLabel;
+            w.Note = BattleRules.TurnBattleOn && m.TurnText.Length > 0 ? m.TurnText : m.Text;   // step 15 : the turn battle's words, like the cards
+            w.PriceLabel = w.Price.ToString();
+            return w;
+        }
+
+        private static Ware WeaponWare(RunState run, Musician m)
+        {
+            int next = m.Rehearsed + 1;
+            Ware w = new Ware();
+            w.Kind = WareKind.Weapon;
+            w.Who = m;
+            w.Price = BattleRules.ShopWeaponPrice[Math.Min(next, BattleRules.ShopWeaponPrice.Length - 1)];
+            w.Name = m.WeaponAt[next];
+            w.KindLabel = "WEAPON  /  " + m.Name;
+            w.Note = m.Name + "'s weapon goes up to " + TierWords[Math.Min(next, TierWords.Length - 1)] + ". Power " + run.PowerOf(m) + " to "
+                   + (run.PowerOf(m) + BattleRules.WeaponTierPower) + ".";
+            w.PriceLabel = w.Price.ToString();
+            w.IconLabel = MusicianList.TierNames[Math.Min(next, MusicianList.TierNames.Length - 1)];
+            return w;
+        }
+
+        private static Ware TuningWare()
+        {
+            Ware w = new Ware();
+            w.Kind = WareKind.Tuning;
+            w.Price = BattleRules.TuningPrice;
+            w.Name = "TUNING";
+            w.KindLabel = "FOR THE BAND";
+            w.Note = "The whole band gets back " + (int)(BattleRules.TuningRecover * 100) + " percent of its " + BattleRules.LifeWordLower + ".";
+            w.PriceLabel = w.Price.ToString();
+            w.IconLabel = "TUNE";
+            return w;
+        }
+
+        private static Ware SectionalWare()
+        {
+            Ware w = new Ware();
+            w.Kind = WareKind.Sectional;
+            w.Price = BattleRules.ShopSectionalPrice;
+            w.Name = "SECTIONAL";
+            w.KindLabel = "FOR THE BAND";
+            w.Note = "A long night of practice. Every weapon in the band goes up one tier.";
+            w.PriceLabel = w.Price.ToString();
+            w.IconLabel = "ALL";
+            return w;
+        }
+
+        private static Ware EmptyWare()
+        {
+            Ware w = new Ware();
+            w.Kind = WareKind.Empty;
+            w.Sold = true;
+            w.Name = "EMPTY SHELF";
+            w.KindLabel = "";
+            return w;
         }
 
         //Say : the shopkeeper's line, wrapped once when it changes
@@ -195,19 +257,21 @@ namespace Tacetno433.Screens
 
         private Rectangle RowRect(int row)
         {
-            return new Rectangle(waresBox.X, waresBox.Y + 44 + row * RowH, waresBox.Width, RowH - 6);
+            return new Rectangle(waresBox.X, waresBox.Y + 44 + row * RowH, waresBox.Width, RowH - 8);
         }
 
         public override void Update(float dt)
         {
             time += dt;
+            shelfTime += dt;
             lineAge += dt;
             UpdateFly(dt);
 
             //Leaving : only once the player has said yes
             if (confirm.Open)
             {
-                for (int r = 0; r < RowCount; r++) rowMotion[r].Update(dt, false);
+                for (int r = 0; r < WareCount; r++) rowMotion[r].Update(dt, false);
+                rerollMotion.Update(dt, false);
                 leaveMotion.Update(dt, false);
                 if (confirm.Update(dt) == 1) RunFlow.NextStage(Game);
                 return;
@@ -215,19 +279,23 @@ namespace Tacetno433.Screens
 
             //Hover : describe whatever is being pointed at
             hoverRow = -1;
-            for (int r = 0; r < RowCount; r++)
+            for (int r = 0; r < WareCount; r++)
                 if (Input.MouseOver(RowRect(r))) hoverRow = r;
-            for (int r = 0; r < RowCount; r++) rowMotion[r].Update(dt, r == hoverRow && !Gone(r));
+            if (Input.MouseOver(rerollButton)) hoverRow = WareCount;
+            for (int r = 0; r < WareCount; r++) rowMotion[r].Update(dt, r == hoverRow && !wares[r].Sold);
+            rerollMotion.Update(dt, hoverRow == WareCount);
             leaveMotion.Update(dt, Input.MouseOver(leaveButton));
 
             if (hoverRow != lastHover)
             {
-                if (hoverRow >= 0 && notes[hoverRow].Length > 0) Say(notes[hoverRow]);
+                if (hoverRow >= 0 && hoverRow < WareCount && wares[hoverRow].Note.Length > 0) Say(wares[hoverRow].Note);
+                if (hoverRow == WareCount) Say(RerollLine);
                 if (hoverRow >= 0) SoundBank.Play(Sfx.UiMove);
                 lastHover = hoverRow;
             }
 
-            if (Input.MouseClicked() && hoverRow >= 0) Buy(hoverRow);
+            if (Input.MouseClicked() && hoverRow >= 0 && hoverRow < WareCount) Buy(hoverRow);
+            if (Input.ClickedOn(rerollButton) || Input.KeyPressed(Keys.R)) Reroll();
 
             if (Input.KeyPressed(Keys.Enter) || Input.ClickedOn(leaveButton))
             {
@@ -236,10 +304,17 @@ namespace Tacetno433.Screens
             }
         }
 
-        //Gone : sold out, or a seat the band cannot buy any more of on this floor
-        private bool Gone(int row)
+        //Reroll : pay, and a new shelf comes in (everything on the old one goes, sold or not)
+        private void Reroll()
         {
-            return sold[row] || (row == SeatRow && !Game.CurrentRun.SeatForSale);
+            RunState run = Game.CurrentRun;
+            if (!run.SpendShards(RerollPrice)) { Deny(PoorLine); return; }
+            rerollMotion.Press();
+            rerolls++;
+            Stock();
+            for (int r = 0; r < WareCount; r++) rowMotion[r] = new UiMotion();
+            Say(RerolledLine);
+            SoundBank.Play(Sfx.PageTurn);
         }
 
         //Fly : what was bought leaves its shelf for the top bar. A motif's badge is not drawn up there until it lands.
@@ -247,11 +322,11 @@ namespace Tacetno433.Screens
         {
             Rectangle r = RowRect(row);
             flyRow = row;
-            flyMotif = row >= FirstMotifRow ? motifs[row - FirstMotifRow] : null;
+            flyWare = wares[row];
             flyFrom = new Vector2(r.X + 46, r.Center.Y);
             flyTo = to;
             flyAge = 0f;
-            RunHud.Arriving = flyMotif != null ? 1 : 0;
+            RunHud.Arriving = flyWare.Kind == WareKind.Motif ? 1 : 0;
         }
 
         private void UpdateFly(float dt)
@@ -278,55 +353,39 @@ namespace Tacetno433.Screens
         private void Buy(int row)
         {
             RunState run = Game.CurrentRun;
+            Ware w = wares[row];
 
-            if (sold[row]) { Deny(SoldLine); return; }
-            if (row == SeatRow && !run.SeatForSale) { Deny(SoldLine); return; }
-            if (row == TuningRow && run.Stamina >= run.MaxStamina) { Deny(RestedLine); return; }
-            if (row == HireRow && run.RosterFull) { Deny(FullLine); return; }
-            if (row == HireRow && hire == null) { Deny(NobodyLine); return; }
+            if (w.Sold) { Deny(SoldLine); return; }
+            if (w.Kind == WareKind.Tuning && run.Stamina >= run.MaxStamina) { Deny(RestedLine); return; }
+            if (w.Kind == WareKind.Weapon && !run.CanRehearse(w.Who)) { Deny(SoldLine); return; }
+            if (!run.SpendShards(w.Price)) { Deny(PoorLine); return; }
 
-            if (!run.SpendShards(PriceOf(row))) { Deny(PoorLine); return; }
-
-            if (row == SeatRow)
+            w.Sold = true;
+            if (w.Kind == WareKind.Motif)
             {
-                run.AddSeat();
-                if (!run.SeatForSale) sold[row] = true;
-                Say(thanks[thanksIndex++ % thanks.Length]);
-                Fly(row, RunHud.SeatsAt);
-            }
-            else if (row == TuningRow)
-            {
-                run.ChangeStamina((int)(run.MaxStamina * BattleRules.TuningRecover));
-                sold[row] = true;
-                Say(thanks[thanksIndex++ % thanks.Length]);
-                Fly(row, RunHud.LifeAt);
-            }
-            else if (row == HireRow)
-            {
-                run.JustJoined.Clear();
-                Musician m = run.Recruit(hire);
-                if (m == null)
-                {
-                    run.AddShards(PriceOf(row));      // nobody came, give the money back
-                    Deny(NobodyLine);
-                    return;
-                }
-                sold[row] = true;
-                bool seated = run.Formation.SeatOf(m) >= 0;
-                Say(m.Name + " packs up an instrument and joins you." + (seated ? " A seat was free." : " They wait on the bench."));
-                Fly(row, RunHud.BandAt);
-            }
-            else
-            {
-                run.AddMotif(motifs[row - FirstMotifRow]);
-                sold[row] = true;
+                run.AddMotif(w.Motif);
                 SoundBank.Play(Sfx.MotifGet);
-                Say(thanks[thanksIndex++ % thanks.Length]);
                 Fly(row, RunHud.BadgeCentre(run.Motifs.Count - 1));
             }
-
+            else if (w.Kind == WareKind.Weapon)
+            {
+                run.Rehearse(w.Who);
+                SoundBank.Play(Sfx.Rehearse);
+                Fly(row, RunHud.BandAt);
+            }
+            else if (w.Kind == WareKind.Tuning)
+            {
+                run.ChangeStamina((int)(run.MaxStamina * BattleRules.TuningRecover));
+                Fly(row, RunHud.LifeAt);
+            }
+            else if (w.Kind == WareKind.Sectional)
+            {
+                for (int i = 0; i < run.Roster.Count; i++) run.Rehearse(run.Roster[i]);
+                SoundBank.Play(Sfx.Rehearse);
+                Fly(row, RunHud.BandAt);
+            }
+            Say(thanks[thanksIndex++ % thanks.Length]);
             run.RefreshLabels();
-            RefreshPrices();
             SoundBank.Play(Sfx.Buy);
         }
 
@@ -369,7 +428,7 @@ namespace Tacetno433.Screens
             Gfx.DrawGlowBox(sb, new Rectangle(140, -80, 440, 720), Color.White * (0.4f * up));
             Gfx.DrawGlow(sb, KeeperLight.X, KeeperLight.Y, 380f, Color.White * (0.62f * up * breathe));
             Gfx.DrawGlow(sb, waresBox.Center.X, waresBox.Center.Y, 440f, Color.White * 0.3f);
-            if (hoverRow >= 0 && !Gone(hoverRow))
+            if (hoverRow >= 0 && hoverRow < WareCount && !wares[hoverRow].Sold)
             {
                 Rectangle r = RowRect(hoverRow);
                 Gfx.DrawGlow(sb, r.Center.X, r.Center.Y, 240f, Color.White * (0.3f * rowMotion[hoverRow].Shown));
@@ -405,8 +464,9 @@ namespace Tacetno433.Screens
             confirm.Draw(sb);
         }
 
-        //Wares : one row per item, coming in one after another. Pointed at, an ink plate shoots out under it like the
-        //menus (Ui.InkBar) and its words turn black. Its price, and a SOLD band when it is gone.
+        //Wares : one row per ware, coming in one after another (again with every new shelf). Pointed at, an ink plate shoots
+        //out under it like the menus (Ui.InkBar) and its words turn black. Its price, and a SOLD band when it is gone.
+        //REROLL sits under them with its price.
         private void DrawWares(SpriteBatch sb, RunState run)
         {
             float panel = UiMotion.Between(time, 0.1f, BattleRules.UiEnterTime);
@@ -415,16 +475,17 @@ namespace Tacetno433.Screens
             Ui.Panel(sb, box, panel);
             Ui.Header(sb, "", "Wares", box.X + 20, box.Y + 8, box.Width - 40, panel);
 
-            for (int r = 0; r < RowCount; r++)
+            float start = time < 1f ? 0.18f : 0f;                  // the first shelf waits for the panel, a new one comes in at once
+            for (int r = 0; r < WareCount; r++)
             {
-                float a = UiMotion.Between(time, 0.18f + r * BattleRules.UiEnterStagger, BattleRules.UiEnterTime);
+                float a = UiMotion.Between(shelfTime, start + r * BattleRules.UiEnterStagger, BattleRules.UiEnterTime);
                 if (a <= 0f) continue;
+                Ware w = wares[r];
                 Rectangle row = RowRect(r);
                 row.Inflate(-12, 0);
                 row.X += (int)((1f - a) * BattleRules.UiEnterSlide * 1.5f);
-                bool gone = Gone(r);
-                float dim = (gone ? 0.35f : 1f) * a;
-                float e = gone ? 0f : rowMotion[r].Shown;
+                float dim = (w.Sold ? 0.35f : 1f) * a;
+                float e = w.Sold ? 0f : rowMotion[r].Shown;
 
                 Gfx.Rect(sb, row, Palette.Void * (0.4f * a));
                 if (e > 0f)
@@ -436,45 +497,45 @@ namespace Tacetno433.Screens
                 Color soft = Color.Lerp(Palette.LineGrey, Palette.InkSoft, e);
 
                 //Icon : not on the shelf while it is flying up
-                if (r != flyRow) DrawWareIcon(sb, r, row.X + 34, row.Center.Y, dim, ink);
+                if (r != flyRow) DrawWareIcon(sb, w, row.X + 34, row.Center.Y, dim, ink);
 
-                //Name and Note
-                Gfx.Text(sb, Game.BigFont, names[r], row.X + 70, row.Y + 4, ink * dim, TextSize.Small);
-                string kind = r >= FirstMotifRow && r - FirstMotifRow < motifs.Length ? motifs[r - FirstMotifRow].RarityLabel : "SERVICE";
-                Gfx.TextSpaced(sb, Game.Font, kind, row.X + 72, row.Y + 38, soft * dim, TextSize.Tiny, 2f);
+                //Name and Kind
+                Gfx.Text(sb, Game.BigFont, w.Name, row.X + 70, row.Y + 10, ink * dim, TextSize.Small);
+                if (w.KindLabel.Length > 0) Gfx.TextSpaced(sb, Game.Font, w.KindLabel, row.X + 72, row.Y + 44, soft * dim, TextSize.Tiny, 2f);
 
                 //Price : a diamond and the number, dimmed when you cannot afford it
-                if (!gone)
+                if (!w.Sold)
                 {
-                    bool afford = run.Shards >= PriceOf(r);
+                    bool afford = run.Shards >= w.Price;
                     Color priceColor = Color.Lerp(afford ? Palette.Highlight : Palette.LineGrey, Palette.Ink, e);
                     Gfx.Diamond(sb, row.Right - 70, row.Center.Y, 5, priceColor * a);
-                    Gfx.Text(sb, Game.BigFont, priceLabels[r], row.Right - 58, row.Center.Y - 16, priceColor * a, TextSize.Small);
+                    Gfx.Text(sb, Game.BigFont, w.PriceLabel, row.Right - 58, row.Center.Y - 16, priceColor * a, TextSize.Small);
                 }
-                else
+                else if (w.Kind != WareKind.Empty)
                 {
                     Gfx.Rect(sb, row.X, row.Center.Y, row.Width, 1, Palette.LineGrey * (0.6f * a));
                     Ui.Tag(sb, "SOLD", row.Right - 70, row.Center.Y - 9, true, 0.8f * a);
                 }
             }
+
+            //REROLL : its price on the button, dimmed when there is not enough
+            float b = UiMotion.Between(time, 0.45f, BattleRules.UiEnterTime);
+            bool can = run.Shards >= RerollPrice;
+            Ui.Command(sb, rerollButton, rerollLabel, "R", rerollMotion, can ? b : b * 0.5f, false);
         }
 
-        //Ware Icons : a word for a seat and for tuning, the new player's side arrow, or the motif's
-        //badge (round 15 : plain words, the drawn chair and tuning fork were hard to read)
-        private void DrawWareIcon(SpriteBatch sb, int row, float x, float y, float a, Color ink)
+        //Ware Icons : the motif's badge, the weapon's next tier as a numeral, or a word for the band's wares
+        //(round 15 : plain words, the drawn chair and tuning fork were hard to read)
+        private void DrawWareIcon(SpriteBatch sb, Ware w, float x, float y, float a, Color ink)
         {
             Color c = ink * a;
-            if (row == SeatRow) Gfx.TextSpacedCentered(sb, Game.Font, "SEAT", x, y - 7, c, TextSize.Tiny, 2f);
-            else if (row == TuningRow) Gfx.TextSpacedCentered(sb, Game.Font, "TUNE", x, y - 7, c, TextSize.Tiny, 2f);
-            else if (row == HireRow)
+            if (w.Kind == WareKind.Motif) MotifArt.Badge(sb, w.Motif, x, y, 22, a);
+            else if (w.Kind == WareKind.Weapon)
             {
-                if (hire != null) MusicianArt.SideBadge(sb, hire.Cue, x, y, 14f, Palette.Ink, Palette.Paper, a);
-                else Gfx.TextSpacedCentered(sb, Game.Font, "HIRE", x, y - 7, c, TextSize.Tiny, 2f);
+                Gfx.DiamondOutline(sb, x, y, 22f, BandColumn.SpotOf(w.Who) * a, 2f);
+                Gfx.TextCentered(sb, Game.BigFont, w.IconLabel, x, y - 15, c, TextSize.Small);
             }
-            else if (row - FirstMotifRow < motifs.Length)
-            {
-                MotifArt.Badge(sb, motifs[row - FirstMotifRow], x, y, 22, a);
-            }
+            else if (w.IconLabel.Length > 0) Gfx.TextSpacedCentered(sb, Game.Font, w.IconLabel, x, y - 7, c, TextSize.Tiny, 2f);
         }
 
         //Fly Draw : FLY UP, the ware rising off its shelf, growing on the way up and shrinking into its place, with a
@@ -491,8 +552,8 @@ namespace Tacetno433.Screens
                     float size = (1f + 0.45f * (float)Math.Sin(behind * MathHelper.Pi)) * (1f - 0.25f * behind);
                     float alpha = k == 0 ? 1f : 0.3f * (1f - k / 5f);
                     if (k == 0) Gfx.DrawGlow(sb, at.X, at.Y, 46f * size, Palette.Paper * 0.35f);
-                    if (flyMotif != null) MotifArt.Badge(sb, flyMotif, at.X, at.Y, 22f * size, alpha);
-                    else DrawWareIcon(sb, flyRow, at.X, at.Y, alpha, Palette.Paper);
+                    if (flyWare.Kind == WareKind.Motif) MotifArt.Badge(sb, flyWare.Motif, at.X, at.Y, 22f * size, alpha);
+                    else DrawWareIcon(sb, flyWare, at.X, at.Y, alpha, Palette.Paper);
                 }
             }
             if (landAge < 0.45f)

@@ -32,30 +32,33 @@ namespace Tacetno433.Core
             int down2 = b.Attack();
             report += Same("downbeat", "8 4", down1 + " " + down2);
 
-            //ENTRANCE : PFUNDT is called in bar 1, so in bar 2 he hits x2 (6.6 x 2 = 13.2 -> 13), in bar 3 plainly (7)
-            b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433), null, 0, 2);
+            //ENTRANCE (29 Oct) : each musician's first move of the fight is x2 (PAGANINI 5.5 x 2 = 11, QUANTZ 4.4 x 2 = 8.8 -> 9,
+            //PFUNDT 6.6 x 2 = 13.2 -> 13), the next bar plainly (PAGANINI 6). Until CALL went away : a called musician's first bar.
+            b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             Tough(b);
             b.GiveMotifs(new List<Motif> { MotifList.Get(MotifId.Entrance) });
-            b.Breath = 10;
-            b.Call(0);
+            b.PlayBar();
+            string entrance = b.Attack() + " " + b.Attack() + " " + b.Attack();
             PlayWholeBar(b);
             b.PlayBar();
-            b.Attack();
-            b.Attack();
-            int entrance = b.Attack();
-            PlayWholeBar(b);
-            b.PlayBar();
-            b.Attack();
-            b.Attack();
-            report += Same("entrance", "13 7", entrance + " " + b.Attack());
+            report += Same("entrance", "11 9 13 6", entrance + " " + b.Attack());
 
-            //GREEN ROOM : PFUNDT waits on the BENCH with 20 life, one bar later he has 22
-            b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433), new int[] { 30, 26, 20 }, 0, 2);
+            //GREEN ROOM (29 Oct) : after the bar the most hurt musician (PFUNDT at half his life) gets 3 back, nobody else.
+            //Until the BENCH went away it healed the BENCH.
+            b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             Tough(b);
+            b.Party[2].Hp = 500;
             b.GiveMotifs(new List<Motif> { MotifList.Get(MotifId.GreenRoom) });
-            string before = b.BenchLife[0].ToString();
             PlayWholeBar(b);
-            report += Same("green room", "20 22", before + " " + b.BenchLife[0]);
+            int roomHeal = 0;
+            int otherHeal = 0;
+            for (int i = 0; i < b.Events.Count; i++)
+                if (b.Events[i].Kind == TurnEventKind.Heal)
+                {
+                    if (b.Events[i].Who == b.Party[2]) roomHeal += b.Events[i].Amount;
+                    else otherHeal += b.Events[i].Amount;
+                }
+            report += Same("green room", "3 0", roomHeal + " " + otherHeal);
 
             //UNISON : the whole bar ATTACKs HUSH (PAGANINI 6), so QUANTZ's last ATTACK is x2 (8.8 -> 9). QUANTZ at DEAD AIR instead : no unison (4)
             b = new TurnBattle(Duo(), new List<Enemy> { hush, deadAir }, 1, new Random(433));
@@ -110,19 +113,24 @@ namespace Tacetno433.Core
             b.Attack();
             report += Same("holds the room", "101 4 74", room + " " + b.Enemies[0].Hp);
 
-            //ON CUE (THE CUE, floor 2) : it turns to PFUNDT the moment he is called
+            //ON CUE (THE CUE, floor 2, 29 Oct) : it turns to the musician who plays a skill, the moment they play it
             Enemy cue = EnemyNamed("THE CUE");
-            b = new TurnBattle(band, new List<Enemy> { cue }, 2, new Random(433), null, 0, 2);
+            b = new TurnBattle(band, new List<Enemy> { cue }, 2, new Random(433));
+            Tough(b);
             b.Breath = 10;
-            string aimed = b.Enemies[0].IntentTarget.Name;
-            b.Call(0);
-            report += Same("on cue", "True PFUNDT", (aimed != "PFUNDT") + " " + b.Enemies[0].IntentTarget.Name);
+            Fighter solo = b.Enemies[0].IntentTarget == b.Party[0] ? b.Party[1] : b.Party[0];
+            Skill soloSkill = SkillList.First(solo.Musician);
+            b.PlanSkill(solo, soloSkill, soloSkill.Target == SkillTarget.Enemy ? b.Enemies[0] : solo);
+            b.PlayBar();
+            bool aimedElsewhere = b.Enemies[0].IntentTarget != solo;
+            b.UseSkill(AllNotes(soloSkill, Grade.Good));
+            report += Same("on cue", "True True True", aimedElsewhere + " " + (b.Enemies[0].IntentTarget == solo) + " " + (b.LastSoloist == solo));
 
-            //FELT HAND (THE DAMPER, floor 2) : a CALL costs 3 + 1 while it stands, 3 once it is silenced
-            b = new TurnBattle(band, new List<Enemy> { EnemyNamed("THE DAMPER") }, 2, new Random(433), null, 0, 2);
-            int damped = b.CallCost;
+            //FELT HAND (THE DAMPER, floor 2, 29 Oct) : an ATTACK gives 2 - 1 BREATH while it stands, 2 once it is silenced
+            b = new TurnBattle(band, new List<Enemy> { EnemyNamed("THE DAMPER") }, 2, new Random(433));
+            int damped = b.AttackBreath;
             b.Enemies[0].Hp = 0;
-            report += Same("felt hand", "4 3", damped + " " + b.CallCost);
+            report += Same("felt hand", "1 2", damped + " " + b.AttackBreath);
 
             //TWICE A BAR (STUTTER, floor 2) : it cuts in after the 1st and the 3rd move with one note each time.
             //On floor 1 the trait is off and it is a plain CUT IN after the 2nd move.
@@ -242,6 +250,14 @@ namespace Tacetno433.Core
                 b.Enemies[i].Hp = 999;
             }
             Sturdy(b);
+        }
+
+        //All Notes : every note of a skill swiped with this grade
+        private static NoteResult[] AllNotes(Skill s, Grade grade)
+        {
+            NoteResult[] all = new NoteResult[s.Notes.Length];
+            for (int i = 0; i < all.Length; i++) all[i] = new NoteResult(grade, true, 1f);
+            return all;
         }
 
         //Play Whole Bar : the bar is played to its end with plain ATTACKs and every note let through

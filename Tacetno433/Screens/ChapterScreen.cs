@@ -10,7 +10,8 @@ namespace Tacetno433.Screens
 {
     //ChapterScreen : the card that opens every floor, staged like a Limbus Company canto card.
     //A floor is a MOVEMENT of the piece (Data/Movement.cs). It plays by itself for a few seconds, and a click or a key
-    //skips it. Next the floor's new faces join (RecruitScreen). Until 29 Oct an era was chosen here first (NO MORE ERAS).
+    //skips it. Then the floor's map (RouteScreen). Until 29 Oct an era was chosen here first (NO MORE ERAS) and new faces
+    //joined after it (THE BAND OF THREE : the band is picked before the first card, TeamPickScreen).
     //
     //Beta1 screens round 2 (29 Oct, docs/SCREENS_LEVEL_UP.md 19) : TACET's real hole hangs in the middle (the shader of the
     //battle), bigger with every movement, and opens with a shock wave. A ring of ticks draws itself round it, a line of
@@ -103,12 +104,19 @@ namespace Tacetno433.Screens
             }
 
             bool skip = time > 0.6f && (Input.MouseClicked() || Input.KeyPressed(Keys.Enter) || Input.KeyPressed(Keys.Space));
-            //Opening : the floor's new faces join, then they walk on (NO MORE ERAS, 29 Oct : an era was chosen here first)
+            //Opening : on to the floor's map. A save from before the band of three, made on the first card, has no band yet,
+            //so it is picked first (and named, then this card shows again).
             if ((time >= ShowTime || skip) && !left)
             {
-                left = true;                                    // once : recruiting twice would bring in twice the faces
-                Game.CurrentRun.RecruitAtOpening();
-                Game.Screens.Change(new RecruitScreen());
+                left = true;                                    // once
+                RunState run = Game.CurrentRun;
+                if (!run.BandReady)
+                {
+                    Game.Screens.Change(new TeamPickScreen());
+                    return;
+                }
+                run.LeaveOpening();
+                Game.Screens.Change(new RouteScreen());
             }
         }
 

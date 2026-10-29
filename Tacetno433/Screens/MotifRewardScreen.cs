@@ -24,7 +24,6 @@ namespace Tacetno433.Screens
         private Rectangle skipButton = new Rectangle(470, 624, 340, 50);
 
         //Reward State
-        private bool thenRecruit;          // someone also joined, show them after this page
         private Motif[] offer = new Motif[0];
         private Rectangle[] cards = new Rectangle[0];
         private int selected;
@@ -44,11 +43,6 @@ namespace Tacetno433.Screens
         private float[] leanX = new float[0];
         private float[] leanY = new float[0];
         private float[] lift = new float[0];
-
-        public MotifRewardScreen(bool recruitAfter)
-        {
-            thenRecruit = recruitAfter;
-        }
 
         //Wipe Word : the page's name in the wipe on the way here (WIPE WORD), short for SPOILS OF THE FIGHT
         public override string WipeWord
@@ -152,13 +146,10 @@ namespace Tacetno433.Screens
             }
         }
 
-        //Go On : on to whoever joined, or straight to the next stage
+        //Go On : the next stage
         private void GoOn()
         {
-            if (thenRecruit)
-                Game.Screens.Change(new RecruitScreen(true));
-            else
-                RunFlow.NextStage(Game);
+            RunFlow.NextStage(Game);
         }
 
         //======================================================================================

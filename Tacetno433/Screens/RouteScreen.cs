@@ -73,7 +73,6 @@ namespace Tacetno433.Screens
         private Vector2 lastMouse;
         private UiMotion[] optionMotion = new UiMotion[0];
         private UiMotion bandMotion = new UiMotion();
-        private string benchLabel = "";               // "2 ON THE BENCH" over the band button, made in Load
         private string[] cardLines = new string[0];   // each kind's line wrapped for the card, made in Load
         private float cardShown;                      // the card eases in and out
         private RouteNode cardNode;                   // the place the card shows
@@ -114,9 +113,6 @@ namespace Tacetno433.Screens
             RunState run = Game.CurrentRun;
             selected = 0;
 
-            //Bench Note : players waiting off stage are easy to forget, so the band button says so
-            int benched = run.Roster.Count - run.Formation.SeatedCount;
-            benchLabel = benched > 0 ? benched + " ON THE BENCH" : "";
             optionMotion = new UiMotion[run.Options.Length];
             for (int i = 0; i < optionMotion.Length; i++) optionMotion[i] = new UiMotion();
             lastMouse = Input.MousePos;
@@ -805,8 +801,6 @@ namespace Tacetno433.Screens
             Gfx.TextSpacedCentered(sb, Game.BigFont, run.StageLabel, cx, 640, Palette.Paper, TextSize.Subtitle, 6f);
 
             Ui.Command(sb, bandButton, "THE BAND", "TAB", bandMotion, 1f, false);
-            if (benchLabel.Length > 0)
-                Gfx.TextSpaced(sb, Game.Font, benchLabel, bandButton.X + 4, bandButton.Y - 20, Palette.Highlight, TextSize.Tiny, 2f);
 
             Gfx.TextSpacedRight(sb, Game.Font, run.FloorShort, 1244, 640, Palette.PaperDim, TextSize.Label, 3f);
             Gfx.TextSpacedRight(sb, Game.Font, "ARROWS  CHOOSE   /   ENTER  GO", 1244, 670, Palette.LineGrey, TextSize.Tiny, 2f);

@@ -8,7 +8,8 @@ namespace Tacetno433.Core
     //BandColumn (Beta1, 29 Oct, docs/BETA1_DIRECTION.md 3.2) : one member of the band as a tall slanted column (menu8).
     //The picture cut by the column (UiArt.Busts : bust_<name>.png, 160 x 256, drawn at the size it was drawn), the name with
     //its slash, the instrument they fight with, and their two skills as small cards. Pointed at, the column steps up and
-    //their own colour rises from its foot (menu6). The band page and the recruit page stand them in a row.
+    //their own colour rises from its foot (menu6). The band page, the audition (TeamPickScreen), the name page and the
+    //luthier stand them in a row, and Detail explains the one pointed at in the box under the row.
     //The cards under a column are a first try : the user has an idea for the band's cards that is still to come
     //(BETA1_DIRECTION 4), so they only show a skill's name and its BREATH for now.
     public static class BandColumn
@@ -80,6 +81,56 @@ namespace Tacetno433.Core
             {
                 Gfx.Diamond(sb, box.Right - 15f, box.Center.Y, 3f, Palette.PaperDim * alpha);
                 Gfx.Text(sb, Ui.Font, NumberText.Get(cost), box.Right - 10f, y + 2f, Palette.Paper * alpha, TextSize.Tiny);
+            }
+        }
+
+        //Skill Text : each musician's two skills explained, by MusicianList index, wrapped once for Detail (a page's Load)
+        public static string[] SkillText(SpriteFont font)
+        {
+            string[] text = new string[MusicianList.All.Length];
+            for (int i = 0; i < MusicianList.All.Length; i++)
+            {
+                Musician m = MusicianList.All[i];
+                Skill first = SkillList.First(m);
+                Skill second = SkillList.Second(m);
+                text[i] = Gfx.WrapText(font, first.Name + " : " + first.Text, 470, TextSize.StorySmall, 2) + "\n"
+                        + Gfx.WrapText(font, second.Name + " : " + second.Text, 470, TextSize.StorySmall, 2);
+            }
+            return text;
+        }
+
+        //Detail : one musician explained in the box under the row. The name, the name the legends give them (or the family
+        //for a hidden one from an old save), life and power, the weapon their instrument becomes at its tier (WEAPON TIERS),
+        //then their trait and both skills (skills from SkillText).
+        public static void Detail(SpriteBatch sb, Rectangle box, Musician m, RunState run, string skills, float a)
+        {
+            int x = box.X + 18;
+            int y = box.Y + 12;
+            Gfx.Text(sb, Ui.BigFont, m.NameTag, x, y - 2, SpotOf(m) * a, TextSize.Subtitle);
+            Gfx.TextSpaced(sb, Ui.Font, m.Epithet.Length > 0 ? m.Epithet : m.FamilyLabel, x, y + 30, Palette.PaperDim * a, TextSize.Tiny, 2f);
+            Gfx.TextSpaced(sb, Ui.Font, "LIFE", x, y + 56, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            Gfx.Text(sb, Ui.Font, NumberText.Get(run.LifeOf(m)), x + 44, y + 52, Palette.Paper * a, TextSize.Body);
+            Gfx.Text(sb, Ui.Font, NumberText.Get(run.MaxLifeOf(m)), x + 84, y + 56, Palette.LineGrey * a, TextSize.Tiny);
+            Gfx.TextSpaced(sb, Ui.Font, "POWER", x + 130, y + 56, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            Gfx.Text(sb, Ui.Font, NumberText.Get(run.PowerOf(m)), x + 186, y + 52, Palette.Paper * a, TextSize.Body);
+            Gfx.TextSpaced(sb, Ui.Font, "WEAPON", x, y + 80, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            Gfx.TextSpaced(sb, Ui.Font, m.WeaponNow, x + 74, y + 80, Palette.Paper * a, TextSize.Tiny, 2f);
+
+            //Trait and Skills
+            Gfx.Rect(sb, x + 250, y, 1, 86, Palette.LineGrey * (0.5f * a));
+            Ui.Tag(sb, m.TraitName, x + 266, y, true, a);
+            Gfx.Text(sb, Ui.StoryFont, m.TraitWrapped, x + 266, y + 26, Palette.Paper * a, TextSize.StorySmall);
+            Gfx.Text(sb, Ui.StoryFont, skills, x + 600, y, Palette.Paper * a, TextSize.StorySmall);
+        }
+
+        //Tier Pips : WEAPON TIERS, three small diamonds, the tiers the weapon has filled
+        public static void TierPips(SpriteBatch sb, float x, float y, Musician m, Color spot, float alpha)
+        {
+            for (int t = 0; t < BattleRules.RehearseMax; t++)
+            {
+                float px = x + t * 12f;
+                if (t < m.Rehearsed) Gfx.Diamond(sb, px, y, 4f, spot * alpha);
+                else Gfx.DiamondOutline(sb, px, y, 4f, Palette.LineGrey * (0.8f * alpha), 1f);
             }
         }
 

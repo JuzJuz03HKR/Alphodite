@@ -58,7 +58,7 @@ namespace Tacetno433.Screens
             "ARROW : which way. LETTER : how far (p small, mf middle, f big). RING : stop as it closes.",
 
             turnBattle ? "Your bar : give each musician a move, ENTER plays them in order. ATTACK hits by itself, a skill asks for a swing. "
-                   + "Their turn : swipe back at each note to block it. BREATH pays for skills and for calling the BENCH."
+                   + "Their turn : swipe back at each note to block it. BREATH pays for skills."
                  : "Win a note, push the line. Lose a note, lose breath. "
                    + "Push the line all the way to win. Let silent beats pass to breathe."
         };

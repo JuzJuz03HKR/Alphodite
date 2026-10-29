@@ -224,13 +224,13 @@ namespace Tacetno433.Screens
         {
             chooseMotion.Press();
 
-            //Run Begin : build a fresh run, the first movement's card opens it
+            //Run Begin : build a fresh run. The band is picked first (THE BAND OF THREE), then named, then the first movement's card
             Game.CurrentRun = new RunState();
             Game.CurrentRun.Start(c, Game.StoryFont, RouteNodeInfo.CaptionWrapWidth);
             Game.CurrentRun.Maestro = Settings.Maestro;                                  // MAESTRO MODE
             SoundBank.Play(Sfx.UiConfirm);
             Game.Screens.SweepNext(chooseButton.Center.ToVector2(), RingSweep.Kind.Light);     // RING SWEEP : the run begins
-            Game.Screens.Change(new ChapterScreen());
+            Game.Screens.Change(new TeamPickScreen());
         }
 
         //======================================================================================

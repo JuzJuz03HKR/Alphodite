@@ -65,8 +65,9 @@ namespace Tacetno433.Data
         //Musician Battle Stats
         public int Power = 4;                 // how hard one note pushes (round 15 : playing costs no stamina, there is no cost)
 
-        //Rehearsed : extra power earned during THIS run at rest stops and events.
-        //RunState.Start sets it back to zero, so a new run starts clean.
+        //Rehearsed : the TIER of their weapon in THIS run, 0 to BattleRules.RehearseMax (WEAPON TIERS, 29 Oct : shown as
+        //I II III, each tier hits harder). Earned at rest stops, the luthier, the shop, events and bosses.
+        //RunState.Start sets it back to zero, so a new run starts clean. The save file keeps it (rehearsed=).
         public int Rehearsed = 0;
 
         //Life (Alpha 7) : this musician's life during THIS run, kept from one turn battle to the next.
@@ -90,6 +91,13 @@ namespace Tacetno433.Data
         public string FamilyLabel = "";
         public string PartLabel = "";         // "STRINGS   LEFT", their chair in words
         public string NameTag = "";           // "PAGANINI/"  the gacha style name with a slash
+        public string[] WeaponAt = new string[0];   // their weapon at each tier : "IL CANNONE", "IL CANNONE  I" ... (WEAPON TIERS)
+
+        //Weapon Now : their weapon at the tier it has now (a broken save's tier is kept inside the list)
+        public string WeaponNow
+        {
+            get { return WeaponAt.Length == 0 ? Weapon : WeaponAt[Math.Max(0, Math.Min(Rehearsed, WeaponAt.Length - 1))]; }
+        }
     }
 
     //MusicianList : THE PLACE TO EDIT MUSICIANS.
@@ -193,6 +201,9 @@ namespace Tacetno433.Data
 
         private static string[] familyNames = { "STRING", "WIND", "PERCUSSION" };
 
+        //Tier Names : WEAPON TIERS, the numeral after a weapon's name (tier 0 is the weapon as it starts)
+        public static readonly string[] TierNames = { "", "I", "II", "III" };
+
         //Text Prepare : called once from LoadContent after the font exists
         public static void PrepareText(SpriteFont storyFont, float wrapWidth)
         {
@@ -206,6 +217,12 @@ namespace Tacetno433.Data
                 m.PartLabel = StageLayout.Rows[StageLayout.SectionOf(m.Family)].Name + "   " + StageLayout.SideNames[m.Cue];
                 m.NameTag = m.Name + "/";
                 m.Index = i;
+
+                //WEAPON TIERS : the weapon's name at each tier (a hidden musician from an old save has none, their instrument stands in)
+                string weapon = m.Weapon.Length > 0 ? m.Weapon : m.Instrument;
+                m.WeaponAt = new string[BattleRules.RehearseMax + 1];
+                for (int t = 0; t < m.WeaponAt.Length; t++)
+                    m.WeaponAt[t] = t == 0 ? weapon : weapon + "  " + TierNames[Math.Min(t, TierNames.Length - 1)];
             }
         }
 

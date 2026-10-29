@@ -110,6 +110,8 @@ namespace Tacetno433.Battle
         public bool PlayerWon;
         public bool Collapsed;                   // lost by running out of breath, not by the line
         public int PerfectCount;
+        public int NotesPlayed;                  // RANK (turn battle, 29 Oct) : every note swiped, so PerfectCount / NotesPlayed is the PERFECT share
+        public float LifeKept = 1f;              //   the share of the band's life it walked in with that it still has (0..1)
 
         //Combo
         public int Combo;                        // PERFECT strokes in a row
@@ -1543,8 +1545,16 @@ namespace Tacetno433.Battle
             Run.ChangeStamina(0);     // keeps stamina under the new maximum and rebuilds the labels
         }
 
-        //Shards : the reward for a won fight
+        //Shards : the reward for a won fight. The turn battle multiplies it by the RANK (29 Oct, BETA1_DIRECTION 8.6, the user :
+        //play well and the shards pile up), ShardsBeforeRank is the part before it for the result page's rows.
         public int ShardsEarned()
+        {
+            int reward = ShardsBeforeRank();
+            if (BattleRules.TurnBattleOn) reward = (int)Math.Round(reward * RankScale());       // RANK
+            return reward;
+        }
+
+        public int ShardsBeforeRank()
         {
             int reward = BattleRules.ShardsNormal;
             if (Enemy.Kind == EnemyKind.Elite) reward = BattleRules.ShardsElite;
@@ -1559,11 +1569,45 @@ namespace Tacetno433.Battle
             return reward;
         }
 
+        //RANK (turn battle, 29 Oct) : half the share of the notes swiped PERFECT, half the share of the band's life kept, so
+        //both a clean hand and a band that was not hurt count. A fight with no note to swipe missed none. Rank Index : 0 S,
+        //1 A, 2 B, 3 C (BattleRules.RankAt and RankShards, the same order).
+        public float RankScore()
+        {
+            return RankScoreOf(PerfectCount, NotesPlayed, LifeKept);
+        }
+
+        public int RankIndex()
+        {
+            return RankIndexOf(RankScore());
+        }
+
+        //Rank Score Of / Rank Index Of : the same for any numbers (the battle simulator ranks its fights with them)
+        public static float RankScoreOf(int perfects, int notes, float lifeKept)
+        {
+            float perfect = notes > 0 ? perfects / (float)notes : 1f;
+            return 0.5f * Math.Min(1f, perfect) + 0.5f * Math.Max(0f, Math.Min(1f, lifeKept));
+        }
+
+        public static int RankIndexOf(float score)
+        {
+            for (int i = 0; i < BattleRules.RankAt.Length; i++)
+                if (score >= BattleRules.RankAt[i]) return i;
+            return BattleRules.RankAt.Length;
+        }
+
+        public float RankScale()
+        {
+            return PlayerWon ? BattleRules.RankShards[Math.Min(RankIndex(), BattleRules.RankShards.Length - 1)] : 1f;
+        }
+
+        private static readonly string[] rankLetters = { "S", "A", "B", "C" };
+
         //Rank : a letter for how well the fight went, shown on the result page
         public string Rank()
         {
             if (!PlayerWon) return "-";
-            if (BattleRules.TurnBattleOn) return PerfectCount >= 6 ? "S" : "B";            // TURN BATTLE : a win is B, 6 PERFECTs or more S
+            if (BattleRules.TurnBattleOn) return rankLetters[Math.Min(RankIndex(), rankLetters.Length - 1)];   // RANK
             if (Line >= BattleRules.LineLimit && PerfectCount >= 6) return "S";
             if (Line >= 60f || PerfectCount >= 6) return "A";
             if (Line >= 25f) return "B";

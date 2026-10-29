@@ -8,7 +8,7 @@ namespace Tacetno433.Core
     //
     //Left   band name and conductor
     //Centre the page title
-    //Right  breath, seats, shards and motif count
+    //Right  life, shards and motif count (the seats went with the band of three, 29 Oct)
     //Under the bar on the right, one badge per motif. Point at a badge to read it.
     //
     //Pages call DrawTop early and DrawTips last, so the tooltip sits above everything.
@@ -24,9 +24,9 @@ namespace Tacetno433.Core
         //the shop shelf (ShopScreen). The page that sets it puts it back to 0 when it leaves.
         public static int Arriving;
 
-        //Chip Places : where the top bar shows LIFE, SEATS and the band's name, for something flying into them
+        //Chip Places : where the top bar shows LIFE, SHARDS and the band's name, for something flying into them
         public static readonly Vector2 LifeAt = new Vector2(925f, 39f);
-        public static readonly Vector2 SeatsAt = new Vector2(1040f, 40f);
+        public static readonly Vector2 ShardsAt = new Vector2(1060f, 40f);
         public static readonly Vector2 BandAt = new Vector2(110f, 22f);
 
         //Top Bar
@@ -54,14 +54,8 @@ namespace Tacetno433.Core
             Gfx.TextRight(sb, Ui.Font, run.StaminaValue, sx + 150, 8, Palette.Paper, TextSize.Body);
             Ui.CapsuleBar(sb, new Rectangle(sx, 34, 150, 10), run.Stamina / (float)run.MaxStamina, Palette.Paper, 1f);
 
-            //Seats Chip
-            int seatX = 1030;
-            Gfx.TextSpaced(sb, Ui.Font, "SEATS", seatX, 12, Palette.LineGrey, TextSize.Tiny, 2f);
-            Gfx.Capsule(sb, new Rectangle(seatX, 32, 7, 16), Palette.PaperDim);
-            Gfx.Text(sb, Ui.Font, run.SeatsValue, seatX + 14, 28, Palette.Paper, TextSize.Body);
-
-            //Shards Chip
-            int shardX = 1130;
+            //Shards Chip : wider than the others since the shop became the band's place to grow (29 Oct)
+            int shardX = 1050;
             Gfx.TextSpaced(sb, Ui.Font, "SHARDS", shardX, 12, Palette.LineGrey, TextSize.Tiny, 2f);
             Gfx.Diamond(sb, shardX + 5, 40, 5, Palette.Paper);
             Gfx.Text(sb, Ui.Font, NumberText.Get(run.Shards), shardX + 16, 28, Palette.Highlight, TextSize.Body);

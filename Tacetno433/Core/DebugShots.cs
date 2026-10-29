@@ -371,7 +371,7 @@ namespace Tacetno433.Core
                 report += Same("band", run.BandName, back.BandName);
                 report += Same("floor / stage", run.Floor + "/" + run.Stage + "/" + run.StagesThisFloor, back.Floor + "/" + back.Stage + "/" + back.StagesThisFloor);
                 report += Same("maestro", run.Maestro.ToString(), back.Maestro.ToString());
-                report += Same("shards / seats", run.Shards + "/" + run.Seats + "/" + run.SeatsBoughtThisFloor, back.Shards + "/" + back.Seats + "/" + back.SeatsBoughtThisFloor);
+                report += Same("shards / dice", run.Shards + "/" + run.PlaceSeed, back.Shards + "/" + back.PlaceSeed);
                 report += Same("stamina", run.StaminaValue, back.StaminaValue);
                 report += Same("record", run.BattlesWon + "/" + run.PerfectsTotal + "/" + run.BestCombo, back.BattlesWon + "/" + back.PerfectsTotal + "/" + back.BestCombo);
                 report += Same("roster", Names(run), Names(back));
@@ -395,6 +395,17 @@ namespace Tacetno433.Core
                 RunState old = SampleRun(game, "savecheck");
                 old.RestoreMap("6" + written.Substring(written.IndexOf(':')), new int[0]);
                 report += Same("old crossing", "Event", old.Map.Rows[2][0].Type.ToString());
+
+                //THE BAND OF THREE (29 Oct) : a save from before can hold five musicians, three on stage and two on the BENCH.
+                //It loads with the three on stage, in the band page's order, and the BENCH gone.
+                RunState bench = SampleRun(game, "savecheck");
+                bench.Roster.Add(MusicianList.All[6]);                                      // DUPORT and PUNTO waited on the BENCH
+                bench.Roster.Add(MusicianList.All[7]);
+                bench.Order.Add(MusicianList.All[7]);
+                bench.Order.Add(MusicianList.All[6]);
+                SaveFile.SaveRun(bench);
+                RunState benchBack = SaveFile.LoadRun(game);
+                report += Same("old bench", OrderNames(SampleRun(game, "savecheck")) + "3", benchBack != null ? OrderNames(benchBack) + benchBack.Roster.Count : "none");
             }
 
             //Settings : change them, save, scramble, load, compare, then put the defaults back
@@ -605,7 +616,7 @@ namespace Tacetno433.Core
             {
                 if (run.AtFloorOpening)
                 {
-                    run.RecruitAtOpening();                                             // NO MORE ERAS : no era to choose first
+                    if (!run.BandReady) run.PickBand(new List<Musician>(MusicianList.Shown));   // THE BAND OF THREE : the first three
                     run.LeaveOpening();
                     continue;
                 }
@@ -636,7 +647,6 @@ namespace Tacetno433.Core
                     float recover = BattleRules.RecoverAfterWin;
                     if (run.Has(MotifId.Encore)) recover += BattleRules.EncoreRecover;         // ENCORE
                     run.ChangeStamina((int)(run.MaxStamina * recover));
-                    if (type == NodeType.Elite && run.RollPercent() < BattleRules.EliteRecruitChance) run.RecruitOne();
                     if (takeMotifs) TakeMotif(run, type, random);
                 }
                 else if (type == NodeType.Rest)
@@ -647,12 +657,6 @@ namespace Tacetno433.Core
                 {
                     if (run.Stamina < run.MaxStamina * 0.6f && run.SpendShards(BattleRules.TuningPrice))
                         run.ChangeStamina((int)(run.MaxStamina * BattleRules.TuningRecover));
-                    if (run.SeatForSale && run.Roster.Count > run.Seats && run.SpendShards(run.SeatPrice))
-                    {
-                        run.AddSeat();
-                        for (int i = 0; i < run.Roster.Count; i++)
-                            if (run.Formation.SeatOf(run.Roster[i]) < 0) run.Formation.AutoSeat(run.Roster[i], run.Seats);
-                    }
                 }
 
                 run.FinishBattle();
@@ -795,7 +799,7 @@ namespace Tacetno433.Core
             if (name == "wipeshop") return new ShopScreen();
             if (name == "wiperest") return new RestScreen();
             if (name == "wipeevent") return new EventScreen();
-            if (name == "wipereward") return new MotifRewardScreen(false);
+            if (name == "wipereward") return new MotifRewardScreen();
             if (name == "wipechapter") return new ChapterScreen();
             if (name == "wipeband") return new BandScreen();
             if (name == "wipesettings") return new SettingsScreen();
@@ -857,7 +861,7 @@ namespace Tacetno433.Core
             if (name == "detailcarry") screen = new ConductorDetailScreen(0);             //   the painting on its way to the middle (detailcarry@12)
             if (name == "detailswap") screen = new ConductorDetailScreen(0);              //   the arrows sliding to the next profile (detailswap@40)
             if (name == "chapter") screen = new ChapterScreen();
-            if (name == "recruit") screen = new RecruitScreen();
+            if (name == "teampick" || name == "teampickfull") screen = new TeamPickScreen();   // THE AUDITION (29 Oct)
             if (name == "bandname") screen = new BandNameScreen();
             if (name.StartsWith("route") || name.StartsWith("pause") || name.StartsWith("wipe") || name.StartsWith("sweep")) screen = new RouteScreen();
             if (name == "view" || name == "band") screen = new BandScreen();
@@ -866,7 +870,7 @@ namespace Tacetno433.Core
             if (name.StartsWith("battle")) screen = new BattleScreen();                // Alpha 7 : battle battleswing battleskill battleparry battlestatus
             if (name.StartsWith("practice")) screen = new BattleScreen(true);          // Alpha 7 step 9 : practice practiceskill practicesig
             if (name == "result" || name == "defeat" || name == "resultquiet") screen = new ResultScreen();
-            if (name == "reward" || name == "rewardpick" || name == "rewardtilt") screen = new MotifRewardScreen(false);
+            if (name == "reward" || name == "rewardpick" || name == "rewardtilt") screen = new MotifRewardScreen();
             if (name == "shop" || name == "shopleave" || name == "shopbuy") screen = new ShopScreen();
             if (name.StartsWith("event")) screen = new EventScreen();
             if (name == "rest") screen = new RestScreen();
@@ -905,7 +909,7 @@ namespace Tacetno433.Core
             return 0;
         }
 
-        //Sample Run : a run part way through floor one, with four musicians and a fight ready
+        //Sample Run : a run part way through floor one, with the band of three and a fight ready
         private static RunState SampleRun(TacetGame game, string name)
         {
             RunState run = new RunState();
@@ -914,18 +918,10 @@ namespace Tacetno433.Core
             run.Start(ownConductor ? ConductorList.All[ShotConductor(name)] : sample, game.StoryFont, RouteNodeInfo.CaptionWrapWidth);
             run.BandName = "THE SILENT CHOIR";
 
-            //Ensemble : four of the five legends (NO MORE ERAS, 29 Oct), PUNTO still free for the shop's HIRE
-            run.Recruit(MusicianList.All[0]);                                       // PAGANINI, violin
-            run.Recruit(MusicianList.All[1]);                                       // QUANTZ, flute
-            run.Recruit(MusicianList.All[2]);                                       // PFUNDT, timpani
-            run.Recruit(MusicianList.All[6]);                                       // DUPORT, cello
-
-            if (name == "recruit")
-            {
-                run.JustJoined.Clear();
-                run.JustJoined.Add(run.Roster[0]);
-                run.JustJoined.Add(run.Roster[1]);
-            }
+            //The Band : THE BAND OF THREE (29 Oct), PAGANINI violin, QUANTZ flute and PFUNDT timpani. The audition starts
+            //with nobody picked (teampick), or with these three already picked (teampickfull, the page picks the run's band).
+            if (name != "teampick")
+                run.PickBand(new List<Musician> { MusicianList.All[0], MusicianList.All[1], MusicianList.All[2] });
 
             //Extras : a few motifs, some shards and one rehearsed player, so the bars have content.
             //The balance check skips these so its numbers stay plain.
@@ -975,11 +971,6 @@ namespace Tacetno433.Core
             {
                 run.Chosen.Type = NodeType.Boss;
                 run.Floor = 2;
-            }
-            if (name == "battlefull")                                                 // all five musicians, four enemies (floor 3, late)
-            {
-                run.Recruit(MusicianList.All[7]);                                     // PUNTO
-                run.Floor = 3;
             }
             if (name == "reward" || name == "dueltremolo" || name.EndsWith("repeat")) run.Chosen.Type = NodeType.Elite;
             if (name == "dueldouble") run.Floor = 3;                                  // pairs from floor two, more on the last
@@ -1062,6 +1053,8 @@ namespace Tacetno433.Core
                 run.Battle.PlayerWon = name != "defeat";
                 run.Battle.Line = name != "defeat" ? 64f : -100f;
                 run.Battle.PerfectCount = 3;
+                run.Battle.NotesPlayed = 5;                                           // RANK : 60 percent PERFECT, 80 percent life kept = A
+                run.Battle.LifeKept = 0.8f;
 
                 //Performance Sheet : two rounds and a half of made up beats
                 run.Battle.Round = 3;

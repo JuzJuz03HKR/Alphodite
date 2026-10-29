@@ -12,10 +12,9 @@ namespace Tacetno433.Data
     //Shape of a run:
     //   a run is FloorsPerRun floors. Beating the last boss wins the whole run.
     //   a FLOOR is one room of 7 to 10 STAGES, and its whole MAP is made when it opens (Beta1, Data/FloorMap.cs)
-    //   STAGE 1 of every floor is locked. You pick an era, and musicians from that era
-    //     join you. The very first floor also asks you to name the band.
-    //   STAGES 2 upward offer the places of the map the band can walk to next, and you stay in the
-    //     chosen era until either a CROSSING moves you, or the floor ends
+    //   STAGE 1 of every floor is its opening, the movement's card (Data/Movement.cs). Before the very first one the run
+    //     picks its band, 3 of the 5 legends (THE BAND OF THREE, TeamPickScreen), and names it.
+    //   STAGES 2 upward offer the places of the map the band can walk to next
     //   the LAST stage of a floor is always the boss, and beating it opens the next floor
     //
     //Stamina belongs to the run, not to a single fight. Battles drain it, a win gives a
@@ -42,17 +41,16 @@ namespace Tacetno433.Data
         public bool RunComplete;             // true once the last boss is beaten
         public bool Maestro;                 // MAESTRO MODE : hard from the first fight, NORMAL when false (29 Sep, BattleRules)
 
-        //Run Party
-        public List<Musician> Roster = new List<Musician>();       // everyone you own
-        public List<Musician> JustJoined = new List<Musician>();   // shown on the recruit page
-        public Formation Formation = new Formation();              // who is on stage, who is on the bench
-        public List<Musician> Order = new List<Musician>();        // the band page's order (Beta1), see Lineup
+        //Run Party : THE BAND OF THREE (Beta1, 29 Oct, docs/BETA1_DIRECTION.md 8), picked at the start and together all run
+        public List<Musician> Roster = new List<Musician>();       // the band, BattleRules.BandSize musicians
+        public Formation Formation = new Formation();              // everybody is on stage (the old duel still reads their seats)
+        public List<Musician> Order = new List<Musician>();        // the band page's order (Beta1), the first one in front, see Lineup
         public List<Motif> Motifs = new List<Motif>();             // everything the band carries
 
         //Run Resources
         public int Shards = 0;
-        public int Seats = 3;                // how many players fit on stage
-        public int SeatsBoughtThisFloor = 0; // the shop will only sell two per floor
+        public int PlaceSeed;                // the dice of the place the band walked into (the shop's shelves, the treasure), saved with the run,
+                                             // so leaving the game and coming back finds the same shelves (RunFlow.Enter)
         public int LastRounds;               // Alpha 7 : rounds the last turn battle took, for the result page
         public bool EchoesPaid;              // ARCHIVE : this run's ECHOES are already given (Archive.Pay)
         public int EchoesEarned;
@@ -85,11 +83,8 @@ namespace Tacetno433.Data
         public string FloorLabel = "";       // "FLOOR 1   SIAM ERA"
         public string FloorShort = "";       // "FLOOR 1 / 3"
         public string ShardsLabel = "";
-        public string SeatsLabel = "";
-        public string SeatsValue = "";       // "3 / 3"
         public string StaminaLabel = "";
         public string StaminaValue = "";     // "64 / 84"
-        public string RosterLabel = "";
         public string MotifsLabel = "";
 
         private Random random = DebugShots.Steady ? new Random(433) : new Random();     // the capture tool's --steady fixes the dice
@@ -113,7 +108,6 @@ namespace Tacetno433.Data
 
             Floor = 1;
             Shards = 0;
-            Seats = StartSeats;
             BandName = "";
             RunComplete = false;
             BattlesWon = 0;
@@ -122,7 +116,6 @@ namespace Tacetno433.Data
             Journey.Clear();
             Roster.Clear();
             Order.Clear();
-            JustJoined.Clear();
             Motifs.Clear();
             Formation = new Formation();
             Battle = null;
@@ -148,25 +141,23 @@ namespace Tacetno433.Data
             BeginFloor();
         }
 
-        //Floor Begin : a new floor opens on its locked stage one, where its movement's card shows and new faces join, and its
-        //whole map is made
+        //Floor Begin : a new floor opens on its locked stage one, where its movement's card shows, and its whole map is made
         public void BeginFloor()
         {
             Stage = 1;
             StagesThisFloor = 7 + random.Next(4);   // 7 to 10
-            SeatsBoughtThisFloor = 0;
             Options = new RouteNode[0];
             BuildMap();
             RefreshLabels();
         }
 
-        //Floor Opening : true while we are on the locked stage one (the movement's card and the new faces)
+        //Floor Opening : true while we are on the locked stage one (the movement's card)
         public bool AtFloorOpening
         {
             get { return Stage == 1; }
         }
 
-        //Opening Leave : the new faces have joined, routing starts now
+        //Opening Leave : the card has been shown, routing starts now
         public void LeaveOpening()
         {
             Stage = 2;
@@ -181,61 +172,59 @@ namespace Tacetno433.Data
             get { return MovementList.Of(Floor); }
         }
 
-        //Start Seats : the seats on stage a run starts with. TURN BATTLE (step 15) : the ones seated on the BAND page
-        //are the ones on the field when a fight starts, so it starts with Archive.StartBand (2, FULL STAGE 3).
-        public static int StartSeats
+        //THE BAND OF THREE (Beta1, 29 Oct, docs/BETA1_DIRECTION.md 8) : the run picks its band once, at its start (TeamPickScreen),
+        //BattleRules.BandSize of the five legends, and they stay together all run, every one of them in every fight. Until 29 Oct
+        //new faces joined at each floor, the shop hired more, a seat on stage was bought and the BENCH was CALLED in.
+        //Pick Band : the ones picked, in the order they were picked (the first one stands in front)
+        public void PickBand(List<Musician> picked)
         {
-            get { return BattleRules.TurnBattleOn ? Archive.StartBand : 3; }
-        }
+            SeatBand(picked);
 
-        //Roster Limits : everyone on stage plus a small bench (the turn battle's bench is one longer, so a run still holds 6 at the start)
-        public int RosterCapacity
-        {
-            get { return Seats + (BattleRules.TurnBattleOn ? BattleRules.TurnBenchSize : BattleRules.BenchSize); }
-        }
-
-        public bool RosterFull
-        {
-            get { return Roster.Count >= RosterCapacity; }
-        }
-
-        //Recruit Opening : new faces join at the start of a floor (NO MORE ERAS : anyone the run can meet, MusicianList.Shown)
-        public void RecruitAtOpening()
-        {
-            JustJoined.Clear();
-            int count = Floor == 1 ? BattleRules.FirstFloorRecruits : BattleRules.LaterFloorRecruits;
-
-            for (int i = 0; i < count; i++)
-                RecruitOne();
-
+            //FIRST CHAIR (ARCHIVE) : the first one picked starts with a better weapon
+            if (Roster.Count > 0 && Archive.Level(Archive.FirstChair) > 0)
+                Roster[0].Rehearsed = Math.Max(Roster[0].Rehearsed, Math.Min(BattleRules.RehearseMax, BattleRules.ArchiveFirstChairTier));
             RefreshLabels();
         }
 
-        //Recruit One : returns the new musician, or null if nobody could join.
-        //They sit down straight away if a seat is free, otherwise they wait on the bench.
-        public Musician RecruitOne()
+        //Band Ready : the run has its whole band. A save made on the first floor's opening before the band of three has nobody yet.
+        public bool BandReady
         {
-            if (RosterFull) return null;
-            return Recruit(MusicianList.Roll(Roster, random));
+            get { return Roster.Count >= BattleRules.BandSize; }
         }
 
-        //Recruit : this musician joins (the shop shows who it will be before paying). Null when
-        //there is no room or nobody was given.
-        public Musician Recruit(Musician m)
+        //Keep Band : a save from before the band of three can hold up to seven musicians, some on the BENCH. The first ones of the
+        //fight's lineup (on stage first, in the player's order) stay, the others leave, and everybody left is on stage. The roster
+        //and the order keep their own order. Called once when a save is loaded.
+        public void KeepBand()
         {
-            if (m == null || RosterFull || Roster.Contains(m)) return null;
-
-            Roster.Add(m);
-            JustJoined.Add(m);
-            Formation.AutoSeat(m, Seats);
-            RefreshLabels();
-            return m;
+            List<Musician> lineup = Lineup();
+            List<Musician> keep = new List<Musician>();
+            for (int i = 0; i < lineup.Count && keep.Count < BattleRules.BandSize; i++) keep.Add(lineup[i]);
+            Roster.RemoveAll(m => !keep.Contains(m));
+            Order.RemoveAll(m => !keep.Contains(m));
+            Formation = new Formation();
+            for (int i = 0; i < Roster.Count; i++) Formation.AutoSeat(Roster[i], BattleRules.BandSize);
         }
 
-        //Order (Beta1, 29 Oct, the band page's columns) : the order the player put the ensemble in, everyone in the roster
-        //once. A fight takes the ones on stage in this order, then the bench in it (Lineup), so the first one stands in
-        //front. New faces join at the end, among themselves in the order of their home seats (strings first), which is the
-        //order fights used before the band page could change it.
+        //Seat Band : these musicians are the band, all on stage, in this order
+        private void SeatBand(List<Musician> band)
+        {
+            Roster.Clear();
+            Order.Clear();
+            Formation = new Formation();
+            for (int i = 0; i < band.Count && Roster.Count < BattleRules.BandSize; i++)
+            {
+                Musician m = band[i];
+                if (m == null || Roster.Contains(m)) continue;
+                Roster.Add(m);
+                Order.Add(m);
+                Formation.AutoSeat(m, BattleRules.BandSize);
+            }
+        }
+
+        //Order (Beta1, 29 Oct, the band page's columns) : the order the player put the band in, everyone in the roster once.
+        //A fight takes them in this order (Lineup), so the first one stands in front. Anyone missing from it (a save from
+        //before the band page) joins at the end, among themselves in the order of their home seats (strings first).
         public void SyncOrder()
         {
             for (int i = Order.Count - 1; i >= 0; i--)
@@ -252,7 +241,8 @@ namespace Tacetno433.Data
                 }
         }
 
-        //Lineup : the ensemble the way a fight takes it, the ones on stage first, each group in the player's order
+        //Lineup : the band the way a fight takes it, in the player's order. Everyone is on stage since the band of three, the
+        //ones off stage only come from an old save (KeepBand reads them last).
         public List<Musician> Lineup()
         {
             SyncOrder();
@@ -262,27 +252,6 @@ namespace Tacetno433.Data
             for (int i = 0; i < Order.Count; i++)
                 if (!Formation.OnStage(Order[i])) band.Add(Order[i]);
             return band;
-        }
-
-        //Missing Section Player : someone of a section (strings, winds or percussion) nobody in the
-        //ensemble plays yet. When every section is covered, just someone new. Null when nobody is left
-        //(THE EMPTY CHAIR). Only the musicians a run can meet (MusicianList.Shown).
-        public Musician MissingSectionPlayer()
-        {
-            bool[] covered = new bool[StageLayout.Rows.Length];
-            for (int i = 0; i < Roster.Count; i++) covered[StageLayout.SectionOf(Roster[i].Family)] = true;
-
-            Musician best = null;
-            int picks = 0;
-            for (int i = 0; i < MusicianList.Shown.Length; i++)
-            {
-                Musician m = MusicianList.Shown[i];
-                if (Roster.Contains(m) || covered[StageLayout.SectionOf(m.Family)]) continue;
-                picks++;
-                if (random.Next(picks) == 0) best = m;             // every candidate gets a fair chance
-            }
-            if (best == null) best = MusicianList.Roll(Roster, random);
-            return best;
         }
 
         //Motif Check : does the band carry this motif
@@ -301,24 +270,42 @@ namespace Tacetno433.Data
         }
 
         //Power Of : what one musician hits for right now, before the CUE and the beat.
-        //Rehearsals and family motifs are added here, so every page shows the same number.
+        //Their weapon's tier and family motifs are added here, so every page shows the same number.
         public int PowerOf(Musician m)
         {
-            int power = m.Power + m.Rehearsed;
+            int power = m.Power + m.Rehearsed * BattleRules.WeaponTierPower;                // WEAPON TIERS
             if (m.Family == Family.String && Has(MotifId.Resin)) power += BattleRules.FamilyMotifPower;
             return power;
         }
 
-        //Rehearse : one musician gets permanently stronger for this run
+        //Rehearse : WEAPON TIERS (29 Oct), one musician's weapon goes up a tier for the rest of the run (it was 1 power,
+        //and still is : BattleRules.WeaponTierPower). The rest stop, the luthier, the shop, events and the bosses all use it.
         public bool CanRehearse(Musician m)
         {
-            return m.Rehearsed < BattleRules.RehearseMax;
+            return m != null && m.Rehearsed < BattleRules.RehearseMax;
         }
 
         public void Rehearse(Musician m)
         {
             if (!CanRehearse(m)) return;
             m.Rehearsed++;
+        }
+
+        //Least Trained : the musician of the band with the lowest weapon tier (the one further forward on a tie), null when
+        //every weapon is at the top. For a lesson nobody picked (an event).
+        public Musician LeastTrained()
+        {
+            Musician best = null;
+            List<Musician> band = Lineup();
+            for (int i = 0; i < band.Count; i++)
+                if (CanRehearse(band[i]) && (best == null || band[i].Rehearsed < best.Rehearsed)) best = band[i];
+            return best;
+        }
+
+        //Any To Train : at least one weapon of the band can still go up a tier
+        public bool AnyToTrain
+        {
+            get { return LeastTrained() != null; }
         }
 
         //Journey : called when a path is picked, and when the run ends on it
@@ -414,32 +401,6 @@ namespace Tacetno433.Data
             return true;
         }
 
-        //Seat Shop : each seat costs more than the last, two per floor, nine at most
-        public int SeatPrice
-        {
-            get { return BattleRules.SeatPriceBase + BattleRules.SeatPriceStep * SeatsBoughtTotal; }
-        }
-
-        private int SeatsBoughtTotal
-        {
-            get
-            {
-                return Seats - StartSeats;      // round 15 : THE FOLK LEADER no longer starts with 2
-            }
-        }
-
-        public bool SeatForSale
-        {
-            get { return SeatsBoughtThisFloor < BattleRules.SeatsPerFloor && Seats < (BattleRules.TurnBattleOn ? BattleRules.TurnFieldMost : StageLayout.SeatCount); }
-        }
-
-        public void AddSeat()
-        {
-            Seats++;
-            SeatsBoughtThisFloor++;
-            RefreshLabels();
-        }
-
         //Battle Begin : pick an enemy that fits the chosen path and set up the fight
         public void BeginBattle()
         {
@@ -491,7 +452,7 @@ namespace Tacetno433.Data
             return random.Next(100);
         }
 
-        //Label Refresh : call after changing stage, floor, shards, seats or stamina
+        //Label Refresh : call after changing stage, floor, shards or stamina
         public void RefreshLabels()
         {
             StageLabel = "STAGE " + Stage;
@@ -499,12 +460,9 @@ namespace Tacetno433.Data
             FloorLabel = "FLOOR " + Floor + "   " + MovementList.Names[Movement];
             FloorShort = "FLOOR " + Floor + " / " + BattleRules.FloorsPerRun;
             ShardsLabel = "SHARDS  " + Shards;
-            SeatsLabel = "SEATS  " + Formation.SeatedCount + " / " + Seats;
-            SeatsValue = Formation.SeatedCount + " / " + Seats;
             SyncBandLife();
             StaminaLabel = BattleRules.LifeWord + "  " + Stamina + " / " + MaxStamina;
             StaminaValue = Stamina + " / " + MaxStamina;
-            RosterLabel = "ENSEMBLE  " + Roster.Count + " / " + RosterCapacity;
             MotifsLabel = "MOTIFS  " + Motifs.Count;
         }
 
@@ -514,8 +472,8 @@ namespace Tacetno433.Data
             get { return Stage + 1 >= StagesThisFloor; }
         }
 
-        //Run Advance : move one stage forward. Past the boss opens the next floor,
-        //which starts on its own locked era choice again. Past the last floor the run is won.
+        //Run Advance : move one stage forward. Past the boss opens the next floor, which starts on its own opening (the
+        //movement's card) again. Past the last floor the run is won.
         public void Advance()
         {
             //MAP : the place just finished is where the band stands now

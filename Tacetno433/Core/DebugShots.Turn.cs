@@ -430,11 +430,11 @@ namespace Tacetno433.Core
             report += Same("answer better", "Down Up 0 0", b.Enemies[0].IntentWays[0] + " " + b.Enemies[0].IntentWays[1] + " " + b.Enemies[0].IntentSizes[0] + " " + b.Enemies[0].IntentSizes[1]);
 
             //ARCHIVE (step 7) : a lost run on floor 2 with 4 wins leaves 4 x 3 + 1 x 10 = 22 echoes, STRONGER BAND costs 30
-            //and gives every musician 2 more life. FULL STAGE (step 12) costs 120 and starts fights with 3 on the field.
-            //The real archive is put back afterwards.
+            //and gives every musician 2 more life. FIRST CHAIR (29 Oct, was FULL STAGE) costs 120 and the first musician picked
+            //starts with a tier I weapon, the others with none. The real archive is put back afterwards.
             int keptEchoes = Archive.Echoes;
             int keptLife = Archive.All[Archive.Life].Level;
-            int keptStage = Archive.All[Archive.Stage].Level;
+            int keptChair = Archive.All[Archive.FirstChair].Level;
             run.Floor = 2;
             run.BattlesWon = 4;
             run.Maestro = false;
@@ -445,64 +445,43 @@ namespace Tacetno433.Core
             Archive.All[Archive.Life].Level = 0;
             bool bought = Archive.Buy(Archive.Life);
             report += Same("archive", "22 False True 0 32", earned + " " + tooPoor + " " + bought + " " + Archive.Echoes + " " + run.MaxLifeOf(MusicianList.All[0]));
-            Archive.All[Archive.Stage].Level = 0;
-            int before = Archive.StartBand;
+            Archive.All[Archive.FirstChair].Level = 0;
             Archive.Echoes = 120;
-            Archive.Buy(Archive.Stage);
-            report += Same("full stage", "2 3 0", before + " " + Archive.StartBand + " " + Archive.Echoes);
+            bool chair = Archive.Buy(Archive.FirstChair);
+            MusicianList.ResetRehearsals();
+            run.PickBand(band);
+            report += Same("first chair", "True 0 1 0 0", chair + " " + Archive.Echoes + " " + band[0].Rehearsed + " " + band[1].Rehearsed + " " + band[2].Rehearsed);
+            MusicianList.ResetRehearsals();
             Archive.Echoes = keptEchoes;
             Archive.All[Archive.Life].Level = keptLife;
-            Archive.All[Archive.Stage].Level = keptStage;
+            Archive.All[Archive.FirstChair].Level = keptChair;
 
             //PRACTICE (step 9) : the tutorial's enemy is in no list (never in a run, never saved), 60 x 1.6 = 96 life, notes of 2 x 1.85 = 3.7 -> 4
             b = new TurnBattle(band, new List<Enemy> { EnemyList.Practice }, 1, new Random(433));
             report += Same("practice enemy", "-1 96 4", Array.IndexOf(EnemyList.All, EnemyList.Practice) + " " + b.Enemies[0].MaxHp + " " + b.Enemies[0].IntentNotes[0]);
 
-            report += TurnCheckBench(band, hush);
+            report += TurnCheckBand(band, hush);
             for (int i = 0; i < traits.Length; i++) MusicianList.All[i].Trait = traits[i];
             report += TurnCheckStep10(band, hush, deadAir);
             report += TurnCheckStep13(band, hush, deadAir);
             File.WriteAllText(Path.Combine(outDir, "turncheck.txt"), report);
         }
 
-        //Turn Check Bench : ONE BAR (step 12), the BENCH, CALL, PACKS and MAESTRO's harder notes
-        private static string TurnCheckBench(List<Musician> band, Enemy hush)
+        //Turn Check Band : THE BAND OF THREE (29 Oct, CALL and the BENCH are gone), PACKS and MAESTRO's harder notes
+        private static string TurnCheckBand(List<Musician> band, Enemy hush)
         {
             string report = "";
 
-            //Start Band : two on the field, PFUNDT waits on the BENCH with his life
-            TurnBattle b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433), new int[] { 30, 26, 20 }, 0, 2);
-            report += Same("start band", "2 1 PFUNDT 20", b.Party.Count + " " + b.Bench.Count + " " + b.Bench[0].Name + " " + b.BenchLife[0]);
-
-            //CALL : 3 BREATH, he walks in with his own life and plays from the next bar, one call per bar
-            bool could = b.CanCall(0);
-            Fighter otto = b.Call(0);
-            report += Same("call", "True 3 0 0 20 True", could + " " + b.Party.Count + " " + b.Bench.Count + " " + b.Breath + " " + otto.Hp + " " + otto.JustCalled);
+            //Band Of Three : all three on the field with the life they walked in with, and all three play the first bar
+            TurnBattle b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433), new int[] { 30, 26, 20 });
+            report += Same("band of three", "3 20", b.Party.Count + " " + b.Party[2].Hp);
             b.PlayBar();
-            report += Same("called waits", "PAGANINI QUANTZ HUSH", OrderNames(b));
-            b.Attack();
-            b.Attack();
-            b.TakeEnemyAttack(null);
-            b.PlayBar();
-            report += Same("called plays", "PAGANINI QUANTZ PFUNDT HUSH", OrderNames(b));
+            report += Same("all play", "PAGANINI QUANTZ PFUNDT HUSH", OrderNames(b));
 
-            //Call Cost : 3, then 4 for every call after the first (MAESTRO 5 and 6). One per bar.
-            List<Musician> four = new List<Musician> { MusicianList.All[0], MusicianList.All[1], MusicianList.All[2], MusicianList.All[3] };
-            b = new TurnBattle(four, new List<Enemy> { hush }, 1, new Random(433), null, 0, 2);
-            b.Breath = 10;
-            int firstCost = b.CallCost;
-            b.Call(0);
-            bool again = b.CanCall(0);
-            int secondCost = b.CallCost;
-            b.Maestro = true;
-            report += Same("call cost", "3 False 4 6", firstCost + " " + again + " " + secondCost + " " + b.CallCost);
-
-            //Field Most : six on the field, the seventh cannot be called
-            List<Musician> seven = new List<Musician>();
-            for (int i = 0; i < 7; i++) seven.Add(MusicianList.All[i]);
-            b = new TurnBattle(seven, new List<Enemy> { hush }, 1, new Random(433), null, 0, 6);
-            b.Breath = 10;
-            report += Same("field most", "6 1 False", b.Party.Count + " " + b.Bench.Count + " " + b.CanCall(0));
+            //Band Pick : the run keeps the first three picked, in that order, all on stage
+            RunState picked = new RunState();
+            picked.PickBand(new List<Musician> { MusicianList.All[6], MusicianList.All[0], MusicianList.All[7], MusicianList.All[1] });
+            report += Same("band pick", "DUPORT PAGANINI PUNTO 3 True", Names(picked.Lineup()) + " " + picked.Formation.SeatedCount + " " + picked.BandReady);
 
             //MAESTRO : TACET's notes hit MaestroTurnDamage harder, 1 for now (HUSH still 9)
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
@@ -572,6 +551,13 @@ namespace Tacetno433.Core
         }
 
         private static string Names(List<Fighter> list)
+        {
+            string s = "";
+            for (int i = 0; i < list.Count; i++) s += (i > 0 ? " " : "") + list[i].Name;
+            return s;
+        }
+
+        private static string Names(List<Musician> list)
         {
             string s = "";
             for (int i = 0; i < list.Count; i++) s += (i > 0 ? " " : "") + list[i].Name;

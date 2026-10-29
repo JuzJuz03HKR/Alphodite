@@ -22,17 +22,17 @@ namespace Tacetno433.Screens
     //   PAUSE   a short breath after a turn, so the result can be read
     //   OVER    the banner, then the result page
     //PRACTICE (step 9) : new BattleScreen(true) is the tutorial's practice fight. No run is needed and
-    //nothing is saved. A card at the top teaches one thing at a time : PLAY, PARRY, a skill, CALL, the SIGNATURE.
+    //nothing is saved. A card at the top teaches one thing at a time : PLAY, PARRY, a skill, the SIGNATURE.
     //Layout (Beta1, 28 Oct) : the conductor's view from behind the band, see BattleScreen.Stage.cs. The musician
     //pointed at stands big on the left, TACET further off on the right, the bar along the top with THE BAND
-    //under it, and the commands with the BENCH and the shared BREATH along the bottom. While a swipe is wanted
+    //under it, and the commands and the shared BREATH along the bottom. While a swipe is wanted
     //the world goes dark and soft behind the ring (QTE FOCUS) and the pointer becomes the baton. The ring,
     //the notes and the baton never shake. (Alpha 7 had the band in six seats like Wildfrost's board.)
     public partial class BattleScreen : GameScreen
     {
         private enum View { Plan, Target, Strike, Swipe, Pause, Over }
         private enum SwipeFor { Skill, Parry, Signature }
-        private enum Lesson { Play, Parry, Skill, Call, Signature }
+        private enum Lesson { Play, Parry, Skill, Signature }        // CALL was a lesson until it went away (29 Oct)
 
         //Layout
         private const float HitX = 640f;
@@ -52,11 +52,6 @@ namespace Tacetno433.Screens
         private static readonly Rectangle playBox = new Rectangle(1000, 674, 256, 40);
         private const int BreathX = 1006;         // BREATH, the label at the top right of the panel
         private const int BreathY = 594;
-        private const int BenchX = 480;
-        private const int BenchY = 662;
-        private const int BenchW = 110;
-        private const int BenchH = 32;
-        private const int BenchStep = 116;
 
         private RunState run;
         private TurnBattle battle;
@@ -68,6 +63,8 @@ namespace Tacetno433.Screens
         private float hitStop;
         private float shake;
         private int perfects;
+        private int notesPlayed;      // RANK (29 Oct) : every note swiped this fight (skills, parries, the SIGNATURE), the PERFECT share
+        private int lifeAtStart;      //   and the band's life when it walked in, for the share it kept (BattleState.Rank)
 
         private GestureReader gesture = new GestureReader();
         private Baton baton = new Baton();
@@ -79,7 +76,6 @@ namespace Tacetno433.Screens
         private Skill pending;                             // the skill waiting for a target, null for ATTACK
         private Fighter hover;
         private Skill hoverSkill;
-        private int hoverBench = -1;
 
         //Bar Strip : who plays in what order, worked out again whenever the plan changes (never in Draw)
         private List<Fighter> previewOrder = new List<Fighter>();
@@ -156,7 +152,6 @@ namespace Tacetno433.Screens
         private const string HintPlan = "CLICK A MUSICIAN, THEN AN ENEMY OR A SKILL   /   ENTER = PLAY THE BAR";
         private const string HintEnemy = "CLICK AN ENEMY   /   RIGHT CLICK = BACK";
         private const string HintAlly = "CLICK A MUSICIAN   /   RIGHT CLICK = BACK";
-        private const string HintCalled = "JUST CALLED : PLAYS FROM THE NEXT BAR";
         private const string HintSwing = "SWIPE AS THE RING TOUCHES THE NOTE";
         private const string HintParry = "SWIPE BACK AT EACH NOTE";
         private const string HintHold = "HOLD STILL";
@@ -166,17 +161,16 @@ namespace Tacetno433.Screens
         private const string HintNoAttacks = "DECREE : AN ATTACK THIS BAR HURTS WHOEVER PLAYS IT (NO MOVE = ATTACK)";
         private const string WordAttack = "ATTACK";
 
-        //PRACTICE : what the card at the top says, and which of the five lessons are done
+        //PRACTICE : what the card at the top says, and which of the four lessons are done
         private const string CoachPlay = "Your bar. Press ENTER (PLAY) and the whole band attacks.";
         private const string CoachParry = "Its turn. Swipe back at each note to block it. PERFECT blocks it all.";
         private const string CoachSkill = "Click a musician, then 2 or 3 for a skill. Skills cost BREATH.";
         private const string CoachSkillSwipe = "A skill is a few notes. Swing the way the arrow points as the ring meets it.";
-        private const string CoachCall = "Click a name on the BENCH to call them in. They play from the next bar.";
         private const string CoachSignature = "The diamonds are full. Press SPACE for the SIGNATURE.";
         private const string CoachSignatureSwipe = "Draw the 4/4 shape : DOWN, LEFT, RIGHT, UP. Any size.";
         private const string CoachWin = "That is all of it. Now win the fight.";
         private static readonly Rectangle coachBox = new Rectangle(240, 64, 800, 60);
-        private bool[] learned = new bool[5];              // one per Lesson
+        private bool[] learned = new bool[4];              // one per Lesson
         private int learnedCount;
         private string coachLine = CoachPlay;
 
@@ -225,19 +219,20 @@ namespace Tacetno433.Screens
             }
             run = Game.CurrentRun;
 
-            //The Band : the ones on stage, then the rest of the ensemble, each in the BAND page's order (Beta1, RunState.Lineup).
-            //Everybody seated on the BAND page starts on the field, the others wait on the BENCH (ONE BAR, step 15 : it was
-            //always the first 2).
+            //The Band : THE BAND OF THREE, all of them on the field, in the BAND page's order (Beta1, RunState.Lineup)
             List<Musician> band = run.Lineup();
-            int onStage = Math.Max(1, Math.Min(run.Formation.SeatedCount, run.Seats));
 
             //BAND LIFE : everybody walks in with the life they left the last fight with (step 6)
             int[] life = new int[band.Count];
-            for (int i = 0; i < band.Count; i++) life[i] = run.LifeOf(band[i]);
+            for (int i = 0; i < band.Count; i++)
+            {
+                life[i] = run.LifeOf(band[i]);
+                lifeAtStart += life[i];                                                      // RANK
+            }
 
             //PACKS : every enemy of the fight (step 12)
             List<Enemy> enemies = new List<Enemy>(run.Battle.Pack);
-            battle = new TurnBattle(band, enemies, run.Floor, run.Rng, life, Archive.Level(Archive.Life) * BattleRules.ArchiveLifePerLevel, onStage);
+            battle = new TurnBattle(band, enemies, run.Floor, run.Rng, life, Archive.Level(Archive.Life) * BattleRules.ArchiveLifePerLevel);
             battle.GiveMotifs(run.Motifs);                                                   // the motifs the band carries
             battle.Maestro = run.Maestro;                                                    // MAESTRO
             battle.Kit = run.Conductor.Turn;                                                 // the conductor's PASSIVE and SIGNATURE
@@ -251,13 +246,12 @@ namespace Tacetno433.Screens
             SoundBank.PlayMusic(RunFlow.FightMusic(run));
         }
 
-        //Practice Load : PRACTICE. The first three musicians at full life, two on the field and one on the
-        //BENCH, THE UNHEARING's SIGNATURE, floor 1 and the soft PRACTICE enemy (EnemyList.Practice).
-        //No motifs and no ARCHIVE.
+        //Practice Load : PRACTICE. The first three musicians at full life, all on the field, THE UNHEARING's SIGNATURE,
+        //floor 1 and the soft PRACTICE enemy (EnemyList.Practice). No motifs and no ARCHIVE.
         private void PracticeLoad()
         {
             List<Musician> band = new List<Musician> { MusicianList.All[0], MusicianList.All[1], MusicianList.All[2] };
-            battle = new TurnBattle(band, new List<Enemy> { EnemyList.Practice }, 1, new Random(), null, 0, BattleRules.TurnStartBand);
+            battle = new TurnBattle(band, new List<Enemy> { EnemyList.Practice }, 1, new Random());
             battle.Kit = TurnKit.Beethoven;
             for (int i = 0; i < ConductorList.All.Length; i++)
                 if (ConductorList.All[i].Turn == TurnKit.Beethoven) signatureName = ConductorList.All[i].TurnSignatureName;
@@ -465,7 +459,6 @@ namespace Tacetno433.Screens
         {
             hover = null;
             hoverSkill = null;
-            hoverBench = -1;
 
             //SIGNATURE : SPACE, or a click on the gauge
             if (battle.CanSignature && (Input.KeyPressed(Keys.Space) || Input.ClickedOn(signatureBox)))
@@ -479,18 +472,6 @@ namespace Tacetno433.Screens
             {
                 PlayBar();
                 return;
-            }
-
-            //CALL : a name on the BENCH
-            for (int i = 0; i < battle.Bench.Count; i++)
-            {
-                if (!Input.MouseOver(BenchBox(i))) continue;
-                hoverBench = i;
-                if (Input.MouseClicked())
-                {
-                    CallIn(i);
-                    return;
-                }
             }
 
             //A click on a musician selects them, a click on an enemy is the selected musician's ATTACK
@@ -578,22 +559,6 @@ namespace Tacetno433.Screens
 
             bool written = pending == null ? battle.PlanAttack(selected, hover) : battle.PlanSkill(selected, pending, hover);
             if (written) AfterWrite();
-        }
-
-        //Call In : CALL, the musician on the BENCH walks onto the field
-        private void CallIn(int bench)
-        {
-            if (!battle.CanCall(bench))
-            {
-                SoundBank.Play(Sfx.UiDenied);
-                return;
-            }
-            Fighter f = battle.Call(bench);
-            hoverBench = -1;                                                           // the chip under the pointer is gone
-            Name(f);
-            if (practice) Learn(Lesson.Call);
-            ShowEvents();
-            RefreshPreview();
         }
 
         //Play Bar : ENTER. Musicians with no move ATTACK, then the bar plays from its first move.
@@ -903,6 +868,7 @@ namespace Tacetno433.Screens
         private void Land(Grade grade, bool rightSize, float hold)
         {
             missKept = false;
+            notesPlayed++;                                                               // RANK
             results[next] = new NoteResult(grade, rightSize, hold);
             qteEffects.SpawnHit(HitX, HitY, grade);
             judgeLife = 1f;
@@ -1087,12 +1053,6 @@ namespace Tacetno433.Screens
                     }
                     else effects.SpawnPop(x, box.Y - 90, "DOWN", Palette.PaperDim, 1f);
                 }
-                else if (e.Kind == TurnEventKind.Called)
-                {
-                    effects.SpawnFlare(box.Center.X, box.Center.Y, 0.8f);
-                    effects.SpawnSparks(box.Center.X, box.Bottom, 20, 0f);
-                    effects.SpawnPop(x, y, "CALLED", Palette.Highlight, 1f);
-                }
                 else if (e.Kind == TurnEventKind.Heal) SpawnNumber(new Vector2(x, y), e.Amount, true, false, Palette.Highlight);
                 else if (e.Kind == TurnEventKind.Dissonance) effects.SpawnPop(x, y, "DISSONANCE", Palette.PaperDim, 0.6f);
                 else if (e.Kind == TurnEventKind.Crescendo) effects.SpawnPop(x, y, "CRESCENDO", Palette.Paper, 0.6f);
@@ -1177,18 +1137,10 @@ namespace Tacetno433.Screens
             return t * t * (3f - 2f * t);
         }
 
-        //Bench Box : a long BENCH makes the chips narrower, so the row never runs under the SIGNATURE and
-        //PLAY THE BAR boxes (a click there played the bar instead of calling, step 13)
-        private Rectangle BenchBox(int i)
-        {
-            int step = Math.Min(BenchStep, (signatureBox.X - 16 - BenchX) / Math.Max(1, battle.Bench.Count));
-            return new Rectangle(BenchX + i * step, BenchY, step - (BenchStep - BenchW), BenchH);
-        }
-
-        //Fight Over : every musician on the field keeps the life they end with (KNOCKED OUT gets up with 1),
-        //the ones on the BENCH keep theirs, and the old duel's record carries the result to the result page,
-        //which hands out the rewards. Line is set to the old duel's full win, which keeps its shards the same.
-        //The rank reads the PERFECTs (BattleState.Rank : a win is B, with 6 PERFECTs or more S).
+        //Fight Over : every musician keeps the life they end with (KNOCKED OUT gets up with 1), and the old duel's record
+        //carries the result to the result page, which hands out the rewards. Line is set to the old duel's full win, which
+        //keeps its shards the same. RANK (29 Oct) : the share of the notes swiped PERFECT and the share of the band's life
+        //kept go with it (BattleState.Rank, and the shards are multiplied by the rank).
         private void Finish()
         {
             //PRACTICE : a win goes back to the title, a loss tries again
@@ -1201,10 +1153,12 @@ namespace Tacetno433.Screens
                 return;
             }
 
+            int lifeAtEnd = 0;
             for (int i = 0; i < battle.Party.Count; i++)
+            {
                 run.SetLife(battle.Party[i].Musician, battle.HpAfterBattle(battle.Party[i]));
-            for (int i = 0; i < battle.Bench.Count; i++)                                    // GREEN ROOM : the BENCH may have healed
-                if (battle.BenchLife[i] >= 0) run.SetLife(battle.Bench[i], battle.BenchLife[i]);
+                lifeAtEnd += battle.Party[i].Hp;                                             // RANK : a fallen musician kept nothing
+            }
             run.LastRounds = battle.Round;
             run.RefreshLabels();
 
@@ -1212,6 +1166,8 @@ namespace Tacetno433.Screens
             record.Finished = true;
             record.PlayerWon = battle.Step == TurnStep.Won;
             record.PerfectCount = perfects;
+            record.NotesPlayed = notesPlayed;                                               // RANK
+            record.LifeKept = lifeAtStart > 0 ? lifeAtEnd / (float)lifeAtStart : 1f;
             record.BestCombo = battle.BestRun;
             record.Line = record.PlayerWon ? BattleRules.LineLimit : -BattleRules.LineLimit;
 
@@ -1228,7 +1184,7 @@ namespace Tacetno433.Screens
         //PRACTICE : the tutorial's fight
         //======================================================================================
 
-        //Learn : one of the five lessons is done
+        //Learn : one of the four lessons is done
         private void Learn(Lesson lesson)
         {
             if (learned[(int)lesson]) return;
@@ -1237,12 +1193,11 @@ namespace Tacetno433.Screens
             SoundBank.Play(Sfx.ComboUp, 1f, 0.5f);
         }
 
-        //Practice Help : enough BREATH for the skill lesson, then for a CALL, then a full gauge for the SIGNATURE lesson
+        //Practice Help : enough BREATH for the skill lesson, then a full gauge for the SIGNATURE lesson
         private void PracticeHelp()
         {
             if (!learned[(int)Lesson.Play]) return;
             if (!learned[(int)Lesson.Skill]) battle.Breath = Math.Max(battle.Breath, 4);
-            else if (!learned[(int)Lesson.Call] && battle.Bench.Count > 0) battle.Breath = Math.Max(battle.Breath, battle.CallCost);
             else if (!learned[(int)Lesson.Signature]) battle.Signature = battle.SignatureNeed;
         }
 
@@ -1260,7 +1215,6 @@ namespace Tacetno433.Screens
             {
                 if (!learned[(int)Lesson.Play]) coachLine = CoachPlay;
                 else if (!learned[(int)Lesson.Skill]) coachLine = CoachSkill;
-                else if (!learned[(int)Lesson.Call] && battle.Bench.Count > 0) coachLine = CoachCall;
                 else if (!learned[(int)Lesson.Signature]) coachLine = CoachSignature;
                 else coachLine = CoachWin;
             }
@@ -1329,20 +1283,6 @@ namespace Tacetno433.Screens
                 StartParry();
                 clock = RingTime * 0.75f;
             }
-            else if (name == "battlecall" || name == "battlefull")
-            {
-                //CALL : one in from the BENCH, or (battlefull) everyone who fits, six on the field
-                battle.Breath = 10;
-                CallIn(0);
-                while (name == "battlefull" && battle.Bench.Count > 0 && battle.Party.Count < BattleRules.TurnFieldMost)
-                {
-                    battle.CalledThisBar = false;
-                    battle.Breath = 10;
-                    CallIn(0);
-                }
-                if (name == "battlefull") battle.Breath = 6;
-                RefreshPreview();
-            }
             else if (name == "battlevoice" || name == "battlecaprice" || name == "battlefugue")
             {
                 //Step 10 kits : FANNY's voice tag, CAPRICE's count, and an ECHO waiting on a musician
@@ -1403,12 +1343,11 @@ namespace Tacetno433.Screens
                 for (int i = 0; i < low.Count; i++) low[i].Hp = Math.Max(1, low[i].MaxHp / 8);
                 battle.Events.Clear();
             }
-            else if (name == "practiceskill" || name == "practicecall" || name == "practicesig")
+            else if (name == "practiceskill" || name == "practicesig")
             {
                 Learn(Lesson.Play);                                                     // PRACTICE
                 Learn(Lesson.Parry);
                 if (name != "practiceskill") Learn(Lesson.Skill);
-                if (name == "practicesig") Learn(Lesson.Call);
                 EnterPlan();
             }
         }
@@ -1540,7 +1479,6 @@ namespace Tacetno433.Screens
                 //Statuses : under the card, a filled tag hurts the one who has it, an outlined tag helps them
                 float x = r.X;
                 float y = r.Bottom + 5;
-                if (f.JustCalled) x = DrawTagRow(sb, "NEXT BAR", 0, false, x, y);
                 if (f.Dissonance > 0) x = DrawTagRow(sb, "DISSONANCE", f.Dissonance, true, x, y);
                 if (f.Crescendo > 0) x = DrawTagRow(sb, "CRESCENDO", f.Crescendo, false, x, y);
                 if (f.Mute > 0) x = DrawTagRow(sb, "MUTE", 0, true, x, y);
@@ -1951,22 +1889,10 @@ namespace Tacetno433.Screens
                     }
                 }
 
-                //BENCH : who can be CALLED, and what it costs
-                if (battle.Bench.Count > 0)
-                {
-                    Gfx.TextSpaced(sb, Game.Font, "BENCH", 392, BenchY, Palette.LineGrey, TextSize.Label, 3f);
-                    Gfx.TextSpaced(sb, Game.Font, "CALL", 392, BenchY + 17, Palette.PaperDim, TextSize.Label, 2f);
-                    if (Settings.ClearFight) Gfx.Text(sb, Game.Font, NumberText.Get(battle.CallCost), 446, BenchY + 6, Palette.Highlight, TextSize.Body);   // CLEAR FIGHT
-                    else Gfx.Text(sb, Game.BigFont, NumberText.Get(battle.CallCost), 446, BenchY + 8, Palette.Highlight, TextSize.Small);
-                    for (int i = 0; i < battle.Bench.Count; i++)
-                        Ui.Button(sb, BenchBox(i), battle.Bench[i].Name, "", hoverBench == i && battle.CanCall(i), battle.CanCall(i), 1f);
-                }
-
                 //Info Line : one line only. MUTE first, then what is under the pointer, then what to do.
                 string line = HintPlan;
                 Color ink = Settings.ClearFight ? Palette.PaperDim : Palette.LineGrey;                 // CLEAR FIGHT : the line a step brighter
                 if (view == View.Target) line = pending != null && pending.Target == SkillTarget.Ally ? HintAlly : HintEnemy;
-                else if (hover != null && !hover.IsEnemy && hover.JustCalled) line = HintCalled;
                 else if (selected != null && selected.Mute > 0) line = HintMute;
                 else if (battle.Decree != DecreeKind.None) line = battle.Decree == DecreeKind.NoSkills ? HintNoSkills : HintNoAttacks;   // DECREE
                 if (hoverSkill != null && view == View.Plan)                               // while aiming, the line says how to aim
@@ -1979,12 +1905,7 @@ namespace Tacetno433.Screens
                     line = hover.Enemy.TurnTraitLine;                                                    // what the enemy's trait does
                     ink = Palette.Paper;
                 }
-                else if (hoverBench >= 0 && hoverBench < battle.Bench.Count)
-                {
-                    line = battle.Bench[hoverBench].TraitText;
-                    ink = Palette.Paper;
-                }
-                else if (hover != null && !hover.IsEnemy && !hover.JustCalled && view == View.Plan)
+                else if (hover != null && !hover.IsEnemy && view == View.Plan)
                 {
                     line = hover.Musician.TraitText;                                                     // step 15 : the ones on the field too
                     ink = Palette.Paper;

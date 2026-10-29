@@ -47,10 +47,10 @@ namespace Tacetno433.Data
 
         public static string[] Captions =
         {
-            BattleRules.TurnBattleOn ? "A fight with TACET. Win and take whatever it leaves behind." : "A duel with TACET. Win and take whatever it leaves behind.",
+            BattleRules.TurnBattleOn ? "A fight with TACET. The better you play, the more shards." : "A duel with TACET. Win and take whatever it leaves behind.",
             "Something is waiting here. A person, a gift, or a fight.",
-            BattleRules.TurnBattleOn ? "Trade shards for motifs, life, seats and musicians." : "Trade shards for motifs, breath and seats.",
-            "Harder than it looks. Better spoils, and sometimes a musician.",
+            BattleRules.TurnBattleOn ? "Spend shards to make the whole band stronger." : "Trade shards for motifs, breath and seats.",
+            "Harder than it looks. More shards, and a motif to choose.",
             BattleRules.TurnBattleOn ? "Recover, or rehearse. The ensemble chooses one." : "Breathe, or rehearse. The ensemble chooses one.",
             "The last room of this floor. It has been waiting for you.",
             "A door out of this era. The world changes around you."

@@ -34,7 +34,8 @@ namespace Tacetno433.Data
         ConBrio,
         Coda,
 
-        //ONE BAR (Alpha 7 step 13) : motifs about the order of the bar, the BENCH and packs of enemies. Added at the END.
+        //ONE BAR (Alpha 7 step 13) : motifs about the order of the bar and packs of enemies (and the BENCH until it went away,
+        //ENTRANCE and GREEN ROOM do something else since 29 Oct). Added at the END.
         Downbeat,
         Entrance,
         GreenRoom,
@@ -142,17 +143,18 @@ namespace Tacetno433.Data
                         Text = "The FINALE is offered from +60 on the line instead of +80.",
                         TurnText = "Enemies under a quarter of their life take 50 percent more." },
 
-            //ONE BAR (step 13) : each one is about the order of the bar, the BENCH or a pack of enemies,
-            //so carrying it changes how a bar is written. They only work in the turn battle.
+            //ONE BAR (step 13) : each one is about the order of the bar or a pack of enemies, so carrying it changes how a
+            //bar is written. They only work in the turn battle. THE BAND OF THREE (29 Oct) : CALL and the BENCH are gone, so
+            //ENTRANCE (was : a CALLED musician twice as strong in their first bar) and GREEN ROOM (was : the BENCH heals) changed.
             new Motif { Id = MotifId.Downbeat,     Name = "DOWNBEAT",      Mark = "1",    Rarity = 1,
                         Text = "The first move of every bar is 50 percent stronger.",
                         TurnText = "The first move of every bar is 50 percent stronger." },
             new Motif { Id = MotifId.Entrance,     Name = "ENTRANCE",      Mark = "ent.", Rarity = 1, Initials = "ET",
-                        Text = "A musician you CALL is twice as strong in their first bar.",
-                        TurnText = "A musician you CALL is twice as strong in their first bar." },
+                        Text = "Each musician's first move of a fight is twice as strong.",
+                        TurnText = "Each musician's first move of a fight is twice as strong." },
             new Motif { Id = MotifId.GreenRoom,    Name = "GREEN ROOM",    Mark = "gr",   Rarity = 1,
-                        Text = "Musicians on the BENCH get back 2 life every bar.",
-                        TurnText = "Musicians on the BENCH get back 2 life every bar." },
+                        Text = "After every bar, the most hurt musician gets back 3 life.",
+                        TurnText = "After every bar, the most hurt musician gets back 3 life." },
             new Motif { Id = MotifId.Unison,       Name = "UNISON",        Mark = "unis.", Rarity = 2,
                         Text = "When every move of a bar is an ATTACK at one enemy, the last one hits twice as hard.",
                         TurnText = "When every move of a bar is an ATTACK at one enemy, the last one hits twice as hard." },
