@@ -167,7 +167,7 @@ namespace Tacetno433.Data
                 {
                     string[] bits = places[c].Split(':');
                     int type;
-                    if (bits.Length != 2 || !int.TryParse(bits[0], out type) || type < 0 || type > (int)NodeType.EraShift) return null;
+                    if (bits.Length != 2 || !int.TryParse(bits[0], out type) || type < 0 || type > (int)NodeType.Treasure) return null;
                     List<int> ways = new List<int>();
                     if (bits[1].Length > 0)
                     {

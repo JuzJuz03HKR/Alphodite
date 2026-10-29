@@ -41,9 +41,9 @@ namespace Tacetno433.Core
             NoteResult perfect = new NoteResult(Grade.Perfect, true, 1f);
             NoteResult miss = new NoteResult(Grade.Miss, true, 1f);
 
-            //Life, and the bar being written first
+            //Life, and the bar being written first (THE BAND OF THREE, 29 Oct : the band's life x1.5, was 30/26/36)
             TurnBattle b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
-            report += Same("life", "30/26/36/80", b.Party[0].Hp + "/" + b.Party[1].Hp + "/" + b.Party[2].Hp + "/" + b.Enemies[0].Hp);
+            report += Same("life", "45/39/54/80", b.Party[0].Hp + "/" + b.Party[1].Hp + "/" + b.Party[2].Hp + "/" + b.Enemies[0].Hp);
             report += Same("plan first", "Plan 1 3 True", b.Step + " " + b.Round + " " + b.Breath + " " + (b.Current == null));
             List<Fighter> preview = new List<Fighter>();
             List<BarMove> previewMoves = new List<BarMove>();
@@ -239,12 +239,12 @@ namespace Tacetno433.Core
             b.PlayBar();
             report += Same("muted move", "True 3", (b.CurrentMove.Skill == null) + " " + b.Breath);
 
-            //SOFT AIR (QUANTZ) : 3 back per note that lands to the whole band, never past full life
-            b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433), new int[] { 20, 26, 30 });
+            //SOFT AIR (QUANTZ) : 3 back per note that lands to the whole band, never past full life (QUANTZ 37 + 6 stops at her 39)
+            b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433), new int[] { 20, 37, 30 });
             b.PlanSkill(b.Party[1], softAir, null);
             b.PlayBar();
             b.UseSkill(new NoteResult[] { perfect, new NoteResult(Grade.Good, false, 1f) });
-            report += Same("soft air", "26 26 36 1", b.Party[0].Hp + " " + b.Party[1].Hp + " " + b.Party[2].Hp + " " + b.Breath);
+            report += Same("soft air", "26 39 36 1", b.Party[0].Hp + " " + b.Party[1].Hp + " " + b.Party[2].Hp + " " + b.Breath);
 
             //THE FLOOR (BORIS) : one held note hits every enemy. PERFECT held to the end : 7 x 2 x 1.3 x 1.4 = 25.48 -> 25 (80 -> 55 each)
             Musician boris = MusicianList.All[8];
@@ -356,13 +356,14 @@ namespace Tacetno433.Core
             report += Same("second wind", "1", b.Party[1].Hp.ToString());
 
             //BAND LIFE (step 6) : the run's breath numbers are the band's life, and a change hits each musician by share
+            //(half of an odd life is rounded, 45 -> 23 or 22, so one either way is right)
             RunState run = SampleRun(game, "turncheck");
             run.RestoreAllStamina();
             int max = run.MaxStamina;
             run.ChangeStamina(-max / 2);
             bool halved = run.Roster.Count > 0;
             for (int i = 0; i < run.Roster.Count; i++)
-                halved = halved && run.LifeOf(run.Roster[i]) == run.MaxLifeOf(run.Roster[i]) / 2;
+                halved = halved && Math.Abs(run.LifeOf(run.Roster[i]) * 2 - run.MaxLifeOf(run.Roster[i])) <= 1;
             run.RestoreAllStamina();
             report += Same("band life", "True " + max, halved + " " + run.Stamina);
 
@@ -444,7 +445,7 @@ namespace Tacetno433.Core
             Archive.Echoes = 30;
             Archive.All[Archive.Life].Level = 0;
             bool bought = Archive.Buy(Archive.Life);
-            report += Same("archive", "22 False True 0 32", earned + " " + tooPoor + " " + bought + " " + Archive.Echoes + " " + run.MaxLifeOf(MusicianList.All[0]));
+            report += Same("archive", "22 False True 0 47", earned + " " + tooPoor + " " + bought + " " + Archive.Echoes + " " + run.MaxLifeOf(MusicianList.All[0]));
             Archive.All[Archive.FirstChair].Level = 0;
             Archive.Echoes = 120;
             bool chair = Archive.Buy(Archive.FirstChair);
@@ -483,10 +484,26 @@ namespace Tacetno433.Core
             picked.PickBand(new List<Musician> { MusicianList.All[6], MusicianList.All[0], MusicianList.All[7], MusicianList.All[1] });
             report += Same("band pick", "DUPORT PAGANINI PUNTO 3 True", Names(picked.Lineup()) + " " + picked.Formation.SeatedCount + " " + picked.BandReady);
 
-            //MAESTRO : TACET's notes hit MaestroTurnDamage harder, 1 for now (HUSH still 9)
+            //WEAPON TIERS (29 Oct) : each tier is WeaponTierPower (2) more power, three tiers at most. PAGANINI 5 -> 9 at tier II,
+            //and the least trained of the band is the one an event's lesson goes to (DUPORT at 0 before PUNTO, he stands further forward)
+            MusicianList.ResetRehearsals();
+            MusicianList.All[0].Rehearsed = 2;
+            int tierPower = picked.PowerOf(MusicianList.All[0]);
+            picked.Rehearse(MusicianList.All[0]);
+            bool more = picked.CanRehearse(MusicianList.All[0]);
+            report += Same("weapon tiers", "9 3 False DUPORT IL CANNONE  III", tierPower + " " + MusicianList.All[0].Rehearsed + " " + more + " " + picked.LeastTrained().Name + " " + MusicianList.All[0].WeaponNow);
+            MusicianList.ResetRehearsals();
+
+            //RANK (29 Oct) : half the PERFECT share, half the life kept. 6 of 10 PERFECT and 80 percent kept = 0.7 = A (shards x1.5),
+            //all PERFECT and nothing lost = S, no note to swipe and nothing lost = S, 2 of 10 and half the life = 0.35 = C
+            string ranks = BattleState.RankIndexOf(BattleState.RankScoreOf(6, 10, 0.8f)) + " " + BattleState.RankIndexOf(BattleState.RankScoreOf(10, 10, 1f))
+                         + " " + BattleState.RankIndexOf(BattleState.RankScoreOf(0, 0, 1f)) + " " + BattleState.RankIndexOf(BattleState.RankScoreOf(2, 10, 0.5f));
+            report += Same("rank", "1 0 0 3", ranks);
+
+            //MAESTRO : TACET's notes hit MaestroTurnDamage harder (1.3 since the band of three : HUSH's note 10, it was 9 at 1.15)
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             b.Maestro = true;
-            report += Same("maestro notes", "9", b.Enemies[0].IntentNotes[0].ToString());
+            report += Same("maestro notes", "10", b.Enemies[0].IntentNotes[0].ToString());
 
             //PACKS : ordinary enemies that join a fight. Floor 1 early 0, floor 1 elite 0, floor 3 late 3, floor 3 boss 2
             RunState run = new RunState();

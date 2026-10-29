@@ -606,19 +606,23 @@ namespace Tacetno433.Data
         {
             int roll = mapDice.Next(100);
 
-            //Early Stages : no shop or rest right after the floor opens
+            //Early Stages : no shop or rest right after the floor opens, now and then a chest
             if (stage <= 3)
             {
-                if (roll < 65) return NodeType.Battle;
-                return NodeType.Event;
+                if (roll < 62) return NodeType.Battle;
+                if (roll < 90) return NodeType.Event;
+                return NodeType.Treasure;
             }
 
-            //NO MORE ERAS (29 Oct) : the CROSSING's 9 went to the ??? (22 -> 31)
+            //NO MORE ERAS (29 Oct) : the CROSSING's 9 went to the ??? (22 -> 31). THE BAND OF THREE (29 Oct) : the LUTHIER
+            //and the TREASURE took 14 of the ???'s 31, two new kinds at most so the map stays easy to read (BETA1_DIRECTION 8.3)
             if (roll < 34) return NodeType.Battle;
-            if (roll < 65) return NodeType.Event;
-            if (roll < 77) return NodeType.Elite;
-            if (roll < 89) return NodeType.Shop;
-            return NodeType.Rest;
+            if (roll < 51) return NodeType.Event;
+            if (roll < 63) return NodeType.Elite;
+            if (roll < 75) return NodeType.Shop;
+            if (roll < 86) return NodeType.Rest;
+            if (roll < 94) return NodeType.Luthier;
+            return NodeType.Treasure;
         }
 
         //Node Make : build one node and wrap its caption now, so drawing stays free of string work

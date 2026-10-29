@@ -12,7 +12,9 @@ namespace Tacetno433.Data
         Elite = 3,
         Rest = 4,
         Boss = 5,
-        EraShift = 6
+        EraShift = 6,
+        Luthier = 7,      // THE BAND OF THREE (29 Oct, BETA1_DIRECTION 8.3) : the luthier, one weapon a tier up for free
+        Treasure = 8      //                                              a chest, one motif for free
     }
 
     //RouteNode : one place on the floor's map (Beta1, 29 Oct, Data/FloorMap.cs), and one of the paths offered on the
@@ -42,7 +44,9 @@ namespace Tacetno433.Data
             "ELITE",       // Elite
             "REST",        // Rest
             "BOSS",        // Boss
-            "CROSSING"     // EraShift : NO MORE ERAS (29 Oct), never made now, an old save's CROSSING loads as a ??? (RunState.RestoreMap)
+            "CROSSING",    // EraShift : NO MORE ERAS (29 Oct), never made now, an old save's CROSSING loads as a ??? (RunState.RestoreMap)
+            "LUTHIER",     // Luthier
+            "TREASURE"     // Treasure
         };
 
         public static string[] Captions =
@@ -51,9 +55,11 @@ namespace Tacetno433.Data
             "Something is waiting here. A person, a gift, or a fight.",
             BattleRules.TurnBattleOn ? "Spend shards to make the whole band stronger." : "Trade shards for motifs, breath and seats.",
             "Harder than it looks. More shards, and a motif to choose.",
-            BattleRules.TurnBattleOn ? "Recover, or rehearse. The ensemble chooses one." : "Breathe, or rehearse. The ensemble chooses one.",
+            BattleRules.TurnBattleOn ? "Recover, or train one weapon a tier up. The band chooses one." : "Breathe, or rehearse. The ensemble chooses one.",
             "The last room of this floor. It has been waiting for you.",
-            "A door out of this era. The world changes around you."
+            "A door out of this era. The world changes around you.",
+            "A maker of instruments. One weapon gets a tier sharper, free.",
+            "A chest left in the wings. One motif inside, free."
         };
 
         //Tags : the small words on the panel that say what kind of place it is
@@ -65,14 +71,16 @@ namespace Tacetno433.Data
             "DUEL  +",
             "RECOVER",
             "FINALE",
-            "TRAVEL"
+            "TRAVEL",
+            "UPGRADE",
+            "FREE"
         };
 
         //Danger : how many of the three diamonds are filled on the panel
-        public static int[] Danger = { 1, 0, 0, 2, 0, 3, 0 };
+        public static int[] Danger = { 1, 0, 0, 2, 0, 3, 0, 0, 0 };
 
         //Marks : one letter per kind of place, on the route's road and tiles and in the curtain call
-        public static string[] Marks = { "E", "?", "$", "!", "R", "B", "X" };
+        public static string[] Marks = { "E", "?", "$", "!", "R", "B", "X", "L", "T" };
 
         //Caption Wrap : the route's detail box prints the whole caption at this width (round 12.2)
         public const float CaptionWrapWidth = 470f;

@@ -20,7 +20,10 @@
 
         //Life and Speed of the band, by family in the order of the Family enum : strings, winds, percussion.
         //Each round everybody acts once, the fastest first (winds, then strings, then percussion).
-        public static int[] TurnHp = { 30, 26, 36 };
+        //THE BAND OF THREE (29 Oct) : was 30, 26, 36. With CALL gone three musicians take every note TACET plays for a whole
+        //run (a BENCH used to stand in), turnsim NORMAL STRONG fell from 42-48 to 2-5 percent. Life x1.5 with WeaponTierPower 2
+        //brought it back to 45-50 (the difficulty the user last played, BETA1_DIRECTION 9.6)
+        public static int[] TurnHp = { 45, 39, 54 };
         public static int[] TurnSpeed = { 5, 7, 3 };
 
         //Life and Speed of TACET, by EnemyKind : normal, elite, boss.
@@ -54,8 +57,9 @@
         public static int[] TurnPackLate = { 2, 3, 4 };       //              in the second half
         public static int[] TurnEliteEscort = { 0, 1, 2 };    // ordinary enemies that come with an ELITE
         public static int[] TurnBossEscort = { 0, 1, 2 };     // and with the BOSS
-        public static float MaestroTurnDamage = 1.15f;           // MAESTRO : each of TACET's notes hits this much harder (1 = as NORMAL :
-                                                              // its narrower windows already make it hard, 1.25 left EXPERT at 0 percent)
+        public static float MaestroTurnDamage = 1.3f;            // MAESTRO : each of TACET's notes hits this much harder (1 = as NORMAL :
+                                                              // its narrower windows already make it hard). THE BAND OF THREE (29 Oct) : was 1.15,
+                                                              // the band's life x1.5 left MAESTRO EXPERT at 80 percent, 1.3 is 68-71 (was 64)
         public static int TurnShardsPerEscort = 6;            // shards for each enemy beyond the first
 
         //Floor Scale (step 8) : enemies are tougher deeper down, life and each note's damage, floor 1 / 2 / 3
@@ -267,6 +271,7 @@
         //Hit Feel (Beta1 round 4) : what a blow looks like where it lands (Core/HitFx.cs). Nothing flies : the musician
         //strikes and the light happens on the enemy. Strings SLASH, winds SHOT, percussion SMASH, the SIGNATURE CROSS.
         public static float HitSize = 105f;               // the size of a blow's light (pixels), more for a stronger blow
+        public static float HitTierSize = 0.12f;          // WEAPON TIERS (29 Oct) : each tier of the striker's weapon makes it this much bigger
         public static float HitCrossLength = 1500f;       // CROSS : how far the SIGNATURE's two cuts reach each way
         public static float HitImpactTurn = 0.07f;        // IMPACT FRAME (round 6 : more impact, a little longer) : the world turned over (seconds)
         public static float HitImpactFlash = 0.05f;       //   then a frame of white
@@ -742,7 +747,8 @@
         public static float BreatheRecover = 0.4f;   // free
         public static int DeepRestPrice = 35;        // full stamina
         public static int RehearseMax = 3;           // WEAPON TIERS (29 Oct) : the top tier of a weapon, I II III (how many times one musician can train)
-        public static int WeaponTierPower = 1;       // each tier adds this much power (a rehearsal always did)
+        public static int WeaponTierPower = 2;       // each tier adds this much power (a rehearsal added 1 until the band of three, 29 Oct :
+                                                     // an upgrade has to be felt, and three legends carry the whole run, BETA1_DIRECTION 9.6)
 
         //Event Checks
         public static int CheckPerPower = 5;         // each point of power adds this many percent

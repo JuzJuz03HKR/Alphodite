@@ -39,7 +39,7 @@ namespace Tacetno433.Core
 
         //Card : the tall lineup card. Portrait on top, the name with its slash over the bottom
         //of the portrait, instrument and numbers below.
-        //seatWord is the band along the bottom (FRONT, BENCH, a chance like 65%), empty for none.
+        //seatWord is the band along the bottom (+1 TIER, TOP TIER, a chance like 65%), empty for none.
         //The number is the musician's own power with rehearsals and motifs added, the same number
         //every other page shows (RunState.PowerOf). Beside it, the section they sit in, in short.
         public static void Card(SpriteBatch sb, Rectangle r, Musician m, RunState run, bool hover, bool dim, string seatWord)
@@ -91,7 +91,7 @@ namespace Tacetno433.Core
                 Gfx.Rect(sb, r.X + 8, art.Bottom, (int)((r.Width - 16) * now / (float)most), 3, (now * 2 < most ? Palette.Highlight : Palette.Paper) * (0.8f * bright));
             }
 
-            //Seat Word : FRONT / MIDDLE / BACK / BENCH, or a chance like "65%"
+            //Seat Word : a word like +1 TIER, or a chance like "65%" (BENCH, the one dark word, is gone with the band of three)
             if (seatWord.Length > 0)
             {
                 Rectangle band = new Rectangle(r.X, r.Bottom - 18, r.Width, 18);

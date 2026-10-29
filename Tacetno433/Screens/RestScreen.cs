@@ -10,7 +10,7 @@ namespace Tacetno433.Screens
 {
     //RestScreen : a quiet room. The band sits around a lamp and the player picks ONE thing:
     //   BREATHE    some stamina back, free
-    //   REHEARSE   one musician gains a point of power for the rest of the run
+    //   REHEARSE   one musician's weapon goes up a tier for the rest of the run (WEAPON TIERS, 29 Oct : it was a point of power)
     //   DEEP REST  all stamina back, costs shards
     //Beta1 screens round 1 (29 Oct, docs/SCREENS_LEVEL_UP.md 14) : A QUIET ROOM, the softest light of the game. One lamp
     //glows low in the middle of the room and breathes slowly, nothing flickers, the corners are only a little dark. The
@@ -74,12 +74,12 @@ namespace Tacetno433.Screens
         {
             RunState run = Game.CurrentRun;
             stageLine = "REST STOP   /   " + run.StageLabel;
-            pickHint = "EACH MUSICIAN CAN TRAIN " + BattleRules.RehearseMax + " TIMES";
+            pickHint = "EACH WEAPON GOES UP TO TIER " + MusicianList.TierNames[Math.Min(BattleRules.RehearseMax, MusicianList.TierNames.Length - 1)];
 
             optionTexts[Breathe] = Gfx.WrapText(Game.StoryFont, "Sit down, close your eyes. The band gets back "
                                    + (int)(BattleRules.BreatheRecover * 100) + " percent of its " + BattleRules.LifeWordLower + ".", CardW - 40, TextSize.StorySmall);
-            optionTexts[Rehearse] = Gfx.WrapText(Game.StoryFont, "Practise one part until it is perfect. "
-                                   + "That musician gains 1 power for the rest of the run.", CardW - 40, TextSize.StorySmall);
+            optionTexts[Rehearse] = Gfx.WrapText(Game.StoryFont, "Practise until the weapon sings. "
+                                   + "One musician's weapon goes up a tier for the rest of the run.", CardW - 40, TextSize.StorySmall);
             optionTexts[DeepRest] = Gfx.WrapText(Game.StoryFont, "Pay for a real bed. The band gets back all of its " + BattleRules.LifeWordLower + ".",
                                    CardW - 40, TextSize.StorySmall);
             optionPrices[Breathe] = "FREE";
@@ -161,7 +161,7 @@ namespace Tacetno433.Screens
                     {
                         run.Rehearse(m);
                         SoundBank.Play(Sfx.Rehearse);
-                        Done("REHEARSED", m.Name + " plays the part again and again until it is perfect. Power is now " + run.PowerOf(m) + ".");
+                        Done("REHEARSED", m.Name + " plays it again and again until it is perfect. " + m.WeaponNow + ", power " + run.PowerOf(m) + ".");
                     }
                 }
 
@@ -360,7 +360,7 @@ namespace Tacetno433.Screens
                 card.Y += (int)((1f - k) * 50f);
                 Musician m = run.Roster[i];
                 bool can = run.CanRehearse(m);
-                MusicianArt.Card(sb, card, m, run, i == hoverCard && can, !can, can ? "+1 POWER" : "MASTERED");
+                MusicianArt.Card(sb, card, m, run, i == hoverCard && can, !can, can ? "+1 TIER" : "TOP TIER");
             }
 
             Ui.Command(sb, cancelButton, "BACK", "ESC", cancelMotion, slide, false);

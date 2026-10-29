@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 29 ต.ค. 20:30 | ทำ `BETA1_DIRECTION.md` 8.8 ข้อ 1 ถึง 4 : หน้าเลือกทีม 3 จาก 5, เอา CALL ม้านั่ง ที่นั่งออก, ร้านใหม่ REROLL เงินตามอันดับ, อาวุธขั้น I II III ห้อง LUTHIER TREASURE | หน้าใหม่ใน `Screens/` และไฟล์ตาม 8.7 (`TurnBattle` `BattleScreen*` `BandScreen` `Formation` `RecruitScreen` `ResultScreen` `RouteScreen` `ShopScreen` `MotifRewardScreen` `ChapterScreen` `RunFlow` `RunState` `SaveFile` `BattleRules` `Archive` `Motif` `Enemy` `GameEvent` `FloorMap` `RouteNode` `Musician` `MusicianArt` `DebugShots*`) และเอกสาร |
+| 29 ต.ค. 20:30 | ทำ `BETA1_DIRECTION.md` 8.8 ข้อ 1 ถึง 4 เสร็จแล้ว (ทีม 3 คน เอา CALL ออก ร้าน REROLL เงินตามอันดับ อาวุธขั้น I II III ห้อง LUTHIER TREASURE รางวัลบอส) รอผู้ใช้ Rebuild แล้วคุย 8.8 ข้อ 5 (ตวัดไม้) | หน้าใหม่ `Screens/TeamPickScreen.cs` `Screens/LuthierScreen.cs` และไฟล์ตาม 8.7 (`TurnBattle` `BattleScreen*` `BandScreen` `Formation` `ResultScreen` `RouteScreen` `ShopScreen` `MotifRewardScreen` `ChapterScreen` `RunFlow` `RunState` `SaveFile` `BattleRules` `Archive` `Motif` `Enemy` `GameEvent` `FloorMap` `RouteNode` `Musician` `MusicianArt` `HitFx` `MotifArt` `ArtBank` `DebugShots*`) และเอกสาร |
 
 ---
 
@@ -64,13 +64,16 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 
 ## สถานะล่าสุด (29 ต.ค.)
 
-**29 ต.ค. ค่ำ (ล่าสุด กำลังทำอยู่) : ผู้ใช้ตอบ `BETA1_DIRECTION.md` 8.2 "เอาตามนั้น" ทุกข้อ + Rebuild งานแชทก่อนแล้ว "โอเคมากๆ ... ตอนนี้เหลือสิ่งที่ต้องทำหลักๆคือเกมเพลย์ที่สนุก"** (คำต่อคำ `USER_BRIEFS.md` 13.20 13.21 รายละเอียด `BETA1_DIRECTION.md` ข้อ 9)
-✅ ก้อนแรกเสร็จ (commit นี้) : หน้า THE AUDITION เลือกทีม 3 จาก 5 (`Screens/TeamPickScreen.cs`) · เอา CALL ม้านั่ง ที่นั่ง HIRE ออก · ENTRANCE GREEN ROOM THE CUE THE DAMPER ARCHIVE FIRST CHAIR เหตุการณ์ 3 อันเปลี่ยนผล · ร้านใหม่ 4 ช่อง + REROLL (`PlaceSeed` กันรีสุ่มฟรี) · เงินคูณตามอันดับ S x2 A x1.5 B x1.25 · หน้า Result 6 แถว · ไฟต์ธรรมดาได้แค่เงิน · หน้าวง 3 เสาลากสลับ · build 0/0 · turncheck 110/110 · savecheck 32/32
-⚠️ **ตัวจำลอง : ไม่มี CALL แล้วยากขึ้นมาก NORMAL STRONG 42–48% เหลือ 2–5%** (ข้อ 9.6) ลองชดเชยไว้ในสำเนา ยังไม่ได้ใส่ในเกม ต้องถามผู้ใช้ (ห้ามลดความยากเองโดยไม่ถาม)
-⚠️ ยังไม่ได้แคปหน้าจอของก้อนนี้ · PLAYTEST SIGNATURE ยัง 1
-**งานถัดไป (แชทนี้)** : 8.8 ข้อ 4 ห้อง LUTHIER TREASURE บอสเลือกอัปเกรดใหญ่ VFX ตามขั้นอาวุธ แล้วแคป เอกสาร ถามเรื่องความยาก ให้ผู้ใช้ Rebuild
+**29 ต.ค. ค่ำ (ล่าสุด) : ผู้ใช้ตอบ `BETA1_DIRECTION.md` 8.2 "เอาตามนั้น" ทุกข้อ + Rebuild งานแชทก่อนแล้ว "โอเคมากๆ ... ตอนนี้เหลือสิ่งที่ต้องทำหลักๆคือเกมเพลย์ที่สนุก"** (คำต่อคำ `USER_BRIEFS.md` 13.20 13.21 รายละเอียด `BETA1_DIRECTION.md` ข้อ 9)
+✅ **8.8 ข้อ 1 ถึง 4 เสร็จ** (ก้อนแรก commit `0787013` ก้อนสอง commit ถัดไป) :
+หน้า THE AUDITION เลือกทีม 3 จาก 5 (`Screens/TeamPickScreen.cs`) · เอา CALL ม้านั่ง ที่นั่ง HIRE ออก (ENTRANCE GREEN ROOM THE CUE THE DAMPER ARCHIVE FIRST CHAIR เหตุการณ์ 3 อันเปลี่ยนผล) · ร้านใหม่ 4 ช่อง + REROLL (`PlaceSeed` กันรีสุ่มฟรี) · เงินคูณตามอันดับ S x2 A x1.5 B x1.25 หน้า Result 6 แถว · ไฟต์ธรรมดาได้แค่เงิน · หน้าวง 3 เสาลากสลับ ·
+อาวุธขั้น I II III ขั้นละ +2 พลัง ชื่ออาวุธตามขั้น · ห้อง LUTHIER (`Screens/LuthierScreen.cs` อัปฟรี 1 คน) TREASURE (MOTIF ฟรี) · บอสเลือก REFORGE หรือ MOTIF TREASURED · VFX ตอนตีโตตามขั้น (`HitFx` tier)
+✅ **ความยากชดเชยแล้วให้ใกล้ของเดิม** (ไม่ได้ลด) : เลือดนักดนตรี x1.5 อาวุธขั้นละ 2 MAESTRO 1.3 → NORMAL STRONG 45–50% (เดิม 38–48) EXPERT 99 MAESTRO EXPERT 68–71 (เดิม 64–74) · ไม่ชดเชยจะเหลือ STRONG 2–5% (ข้อ 9.6)
+✅ build 0/0 · turncheck 112/112 · savecheck 32/32 · แคป 13 หน้าดูแล้ว · `TACET_Balance.xlsx` อัปเดตแล้ว
+⚠️ ผู้ใช้ยังไม่ได้ Rebuild ดูงานนี้ (สิ่งที่ให้ลอง `BETA1_DIRECTION.md` 9.8) · PLAYTEST SIGNATURE ยัง 1 · ภาพจาก cloud ห้ามแทน `docs/screenshots/`
+**งานถัดไป** : รอผลผู้ใช้ Rebuild (ความยาก VFX ตามขั้น หน้าใหม่) แล้วคุย 8.8 ข้อ 5 ทำระบบตวัดไม้ (f mf p) ให้ง่ายแบบ CZN (มาคุยกันก่อน เสนอทางเลือก) · อาร์ตที่ต้องเพิ่ม `Art/Places/luthier.png` 520×470 `Art/Route/route_luthier.png` `route_treasure.png` (`ASSET_LIST.md` ข้อ 8 9)
 
-**29 ต.ค. ดึก (ล่าสุด) : /update ปิดแชทภาพ Character Design PNG ผู้ใช้เลือกทิศทางใหม่ (คำต่อคำ `USER_BRIEFS.md` 13.19) ยังไม่ได้เขียนโค้ดของทิศทางนี้ ผู้ใช้จะเปิดแชทใหม่**
+**29 ต.ค. ดึก (แชทก่อน) : /update ปิดแชทภาพ Character Design PNG ผู้ใช้เลือกทิศทางใหม่ (คำต่อคำ `USER_BRIEFS.md` 13.19) ยังไม่ได้เขียนโค้ดของทิศทางนี้ ผู้ใช้จะเปิดแชทใหม่**
 ✅ งานอยู่บน GitHub ครบ (commit ปิดแชทนี้) ตาราง "แชทที่กำลังทำงาน" ว่าง
 ✅ ผู้ใช้เลือก : ต้นรันเลือกนักดนตรี 3 จาก 5 (เปิดครบ) ผสมห้องใหม่และอัปเกรดทั้งทีมกับรายตัวละคร **เอา CALL (ม้านั่ง) ออกไปก่อน** ร้านเลิกขายคน เป็นที่อัปทั้งทีม ของสุ่ม รีสุ่มด้วยเงิน เล่นเก่งเงินเยอะ **เกมต้องเข้าใจง่ายทันทีแบบ CZN อัปเกรดคืออัปเกรด สู้คือสู้** ระบบตวัดไม้ (f mf p) จะคุยใหม่ทีหลัง (`BETA1_DIRECTION.md` 7.6 และข้อ 8)
 ✅ ไอริสร่างห้อง (LUTHIER อัปอาวุธ TREASURE ได้ MOTIF) อัปเกรด (อาวุธขั้น I II III ใช้ `Musician.Rehearsed` + MOTIF) ร้าน (4 ช่อง + REROLL ราคาขึ้นแบบ Balatro) เงินตามอันดับ และรายการโค้ดที่ผูกกับ CALL ม้านั่ง การซื้อคน ไว้ใน `BETA1_DIRECTION.md` 8.3 ถึง 8.8 (ร่าง รอผู้ใช้ยืนยัน)

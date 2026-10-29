@@ -13,8 +13,15 @@ namespace Tacetno433.Screens
     //Beta1 screens round 1 (29 Oct, docs/SCREENS_LEVEL_UP.md 14) : THE SPOILS. Three cards lie face down under three
     //stage lights, flip up one after another and lean toward the mouse like the cards of Balatro (Core/Card3D.cs). The
     //rarer the motif, the stronger its light. A picked card jumps and flashes, the others turn back over.
+    //THE BAND OF THREE (29 Oct, BETA1_DIRECTION 8.3 and 8.4) : the same cards for three things
+    //   FIGHT     after an ELITE, three motifs, the common ones left out (normal fights pay shards only now)
+    //   BOSS      a great upgrade, 1 of 3 : REFORGE (every weapon of the band a tier up, MotifArt.ReforgeFace) and two
+    //             treasured motifs. REFORGE sits in the middle while a weapon can still go up.
+    //   TREASURE  a chest on the map : one card, one motif, free (from the place's own dice, RunState.PlaceSeed)
     public class MotifRewardScreen : GameScreen
     {
+        public enum Kind { Fight, Treasure }
+
         //Reward Layout
         private const int CardW = 240;
         private const int CardH = 366;
@@ -24,6 +31,10 @@ namespace Tacetno433.Screens
         private Rectangle skipButton = new Rectangle(470, 624, 340, 50);
 
         //Reward State
+        private Kind kind = Kind.Fight;
+        private bool boss;                 // the boss's great upgrade (BOSS above)
+        private int reforgeCard = -1;      // the card that is REFORGE, -1 for none. Its place in offer is null.
+        private string reforgeText = "";
         private Motif[] offer = new Motif[0];
         private Rectangle[] cards = new Rectangle[0];
         private int selected;
@@ -44,21 +55,49 @@ namespace Tacetno433.Screens
         private float[] leanY = new float[0];
         private float[] lift = new float[0];
 
+        public MotifRewardScreen()
+        {
+        }
+
+        public MotifRewardScreen(Kind kind)
+        {
+            this.kind = kind;
+        }
+
         //Wipe Word : the page's name in the wipe on the way here (WIPE WORD), short for SPOILS OF THE FIGHT
         public override string WipeWord
         {
-            get { return "THE SPOILS"; }
+            get { return kind == Kind.Treasure ? "THE TREASURE" : "THE SPOILS"; }
         }
 
         public override void Load()
         {
             RunState run = Game.CurrentRun;
 
-            //Offer : bosses and elites skip the common motifs
-            int minRarity = 1;
-            if (run.Battle != null && run.Battle.Enemy.Kind == EnemyKind.Elite) minRarity = 2;
-            if (run.Battle != null && run.Battle.Enemy.Kind == EnemyKind.Boss) minRarity = 3;
-            offer = MotifList.Roll(run.Motifs, BattleRules.MotifChoices, minRarity, run.Floor, run.Rng);
+            if (kind == Kind.Treasure)
+            {
+                //TREASURE : one motif of any rarity, from the place's dice so CONTINUE finds the same one
+                offer = MotifList.Roll(run.Motifs, 1, 1, run.Floor, new Random(run.PlaceSeed));
+            }
+            else
+            {
+                //Offer : bosses and elites skip the common motifs. A boss offers REFORGE in the middle while a weapon can go up.
+                int minRarity = 1;
+                if (run.Battle != null && run.Battle.Enemy.Kind == EnemyKind.Elite) minRarity = 2;
+                if (run.Battle != null && run.Battle.Enemy.Kind == EnemyKind.Boss) minRarity = 3;
+                boss = minRarity == 3;
+                bool reforge = boss && run.AnyToTrain;
+                Motif[] motifs = MotifList.Roll(run.Motifs, BattleRules.MotifChoices - (reforge ? 1 : 0), minRarity, run.Floor, run.Rng);
+                if (reforge)
+                {
+                    offer = new Motif[motifs.Length + 1];
+                    reforgeCard = offer.Length / 2;
+                    for (int i = 0, k = 0; i < offer.Length; i++)
+                        if (i != reforgeCard) offer[i] = motifs[k++];
+                    reforgeText = Gfx.WrapText(Game.StoryFont, "Every weapon of the band goes up one tier.", CardW - 44, TextSize.StorySmall, 4);
+                }
+                else offer = motifs;
+            }
 
             cards = new Rectangle[offer.Length];
             int totalW = offer.Length * CardW + (offer.Length - 1) * CardGap;
@@ -130,8 +169,17 @@ namespace Tacetno433.Screens
             if (confirm)
             {
                 picked = selected;
-                Game.CurrentRun.AddMotif(offer[picked]);
-                SoundBank.Play(Sfx.MotifGet);
+                RunState run = Game.CurrentRun;
+                if (picked == reforgeCard)
+                {
+                    for (int i = 0; i < run.Roster.Count; i++) run.Rehearse(run.Roster[i]);    // REFORGE : every weapon a tier up
+                    SoundBank.Play(Sfx.Rehearse);
+                }
+                else
+                {
+                    run.AddMotif(offer[picked]);
+                    SoundBank.Play(Sfx.MotifGet);
+                }
             }
 
             //Skip
@@ -243,11 +291,12 @@ namespace Tacetno433.Screens
             {
                 faces[i] = Card3D.Picture(device, faces[i], w, h);
                 Card3D.BeginPicture(device, sb, faces[i]);
-                MotifArt.CardFace(sb, card, offer[i], lift[i] > 0.5f, 1f, time);
+                if (i == reforgeCard) MotifArt.ReforgeFace(sb, card, Game.CurrentRun, reforgeText, lift[i] > 0.5f, 1f, time);   // REFORGE
+                else MotifArt.CardFace(sb, card, offer[i], lift[i] > 0.5f, 1f, time);
                 sb.End();
 
                 //Shine : across the card from corner to corner, further along the more it leans, brighter when rarer
-                float shine = BattleRules.UiCardShine * (0.4f + 0.6f * lift[i]) * (0.6f + 0.2f * offer[i].Rarity);
+                float shine = BattleRules.UiCardShine * (0.4f + 0.6f * lift[i]) * (0.6f + 0.2f * RarityOf(i));
                 if (shine <= 0.01f) continue;
                 float along = 0.5f + 1.1f * (leanY[i] - leanX[i]) / MathHelper.ToRadians(Math.Max(1f, BattleRules.UiCardTilt));
                 Vector2 at = new Vector2(card.X + card.Width * along, card.Y + card.Height * (1f - along));
@@ -306,7 +355,7 @@ namespace Tacetno433.Screens
             for (int i = 0; i < cards.Length; i++)
             {
                 Rectangle r = cards[i];
-                float power = RarityLight(offer[i]) * LightIn(i) * (1f + 0.25f * lift[i]);
+                float power = RarityLight(i) * LightIn(i) * (1f + 0.25f * lift[i]);
                 Gfx.DrawGlow(sb, r.Center.X, r.Center.Y - 20f, 300f, Color.White * power);
                 Gfx.DrawGlowBox(sb, new Rectangle(r.X - 20, -60, r.Width + 40, r.Bottom + 40), Color.White * (power * 0.6f));
             }
@@ -321,7 +370,7 @@ namespace Tacetno433.Screens
                 Rectangle r = cards[i];
                 Vector2 c = r.Center.ToVector2();
                 float light = LightIn(i);
-                int rarity = offer[i].Rarity;
+                int rarity = RarityOf(i);
                 if (rarity >= 2)
                 {
                     float halo = (rarity >= 3 ? 0.42f : 0.28f) * light;
@@ -337,10 +386,16 @@ namespace Tacetno433.Screens
             }
         }
 
-        private static float RarityLight(Motif m)
+        private float RarityLight(int i)
         {
             float[] lights = BattleRules.UiRarityLight;
-            return lights[MathHelper.Clamp(m.Rarity, 1, lights.Length) - 1];
+            return lights[MathHelper.Clamp(RarityOf(i), 1, lights.Length) - 1];
+        }
+
+        //Rarity Of : card i's rarity for its light, REFORGE is as bright as a treasured motif
+        private int RarityOf(int i)
+        {
+            return i == reforgeCard || offer[i] == null ? 3 : offer[i].Rarity;
         }
 
         //======================================================================================
@@ -355,8 +410,10 @@ namespace Tacetno433.Screens
             //Heading : comes in first
             float head = UiMotion.Between(time, 0.05f, BattleRules.UiEnterTime);
             float rise = (1f - head) * BattleRules.UiEnterSlide;
-            Gfx.TextSpacedCentered(sb, Game.Font, BattleRules.TurnBattleOn ? "SPOILS OF THE FIGHT" : "SPOILS OF THE DUEL", cx, 76 - rise, Palette.LineGrey * head, TextSize.Tiny, 5f);
-            Gfx.TextCentered(sb, Game.BigFont, "Choose a motif", cx, 122 - rise, Palette.Paper * head, TextSize.Title);
+            string over = kind == Kind.Treasure ? "A CHEST IN THE WINGS" : (boss ? "SPOILS OF THE MOVEMENT" : (BattleRules.TurnBattleOn ? "SPOILS OF THE FIGHT" : "SPOILS OF THE DUEL"));
+            string title = kind == Kind.Treasure ? "Take what is inside" : (boss ? "Choose a great upgrade" : "Choose a motif");
+            Gfx.TextSpacedCentered(sb, Game.Font, over, cx, 76 - rise, Palette.LineGrey * head, TextSize.Tiny, 5f);
+            Gfx.TextCentered(sb, Game.BigFont, title, cx, 122 - rise, Palette.Paper * head, TextSize.Title);
 
             if (offer.Length == 0)
                 Gfx.TextCentered(sb, Game.StoryFont, "The band already carries every motif there is.", cx, 340, Palette.PaperDim * head, TextSize.Story);
@@ -385,7 +442,7 @@ namespace Tacetno433.Screens
             float leaving = picked == -1 ? 1f : 1f - MathHelper.Clamp(leaveTimer / 0.3f, 0f, 1f);
             Ui.Command(sb, skipButton, skipLabel, "", skipMotion, foot * leaving, false);
 
-            RunHud.DrawTop(sb, run, "REWARD");
+            RunHud.DrawTop(sb, run, kind == Kind.Treasure ? "TREASURE" : "REWARD");
             RunHud.DrawTips(sb, run);
         }
 

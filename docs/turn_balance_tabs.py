@@ -4,7 +4,7 @@
 # Turn Enemies    : the turn data of Data/Enemy.cs
 # Turn Conductors : each conductor's SIGNATURE text from Data/Conductor.cs, matched by kit
 # Turn Sim        : turnsim.txt as it is
-# Game States     : FirstFloorRecruits
+# Game States     : BandSize
 # Needs openpyxl (pip install openpyxl). Run it after changing a number in BattleRules, then commit the sheet.
 import os, re, sys, copy, openpyxl
 repo = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -94,11 +94,11 @@ ws.append([title])
 for line in open(sim, encoding='utf-8').read().replace('\r', '').split('\n'):
     ws.append([line if line else None])
 
-# --- Game States : FirstFloorRecruits
+# --- Game States : BandSize (29 Oct, the band of three : FirstFloorRecruits is gone)
 ws = wb['Game States']
 for row in ws.iter_rows():
-    if len(row) > 2 and row[2].value == 'FirstFloorRecruits':
-        row[1].value = int(re.search(r'FirstFloorRecruits = (\d+)', '\n'.join(src)).group(1))
+    if len(row) > 2 and row[2].value == 'BandSize':
+        row[1].value = int(re.search(r'BandSize = (\d+)', '\n'.join(src)).group(1))
 
 wb.save(f'{repo}/docs/TACET_Balance.xlsx')
 print('rows', len(rows))

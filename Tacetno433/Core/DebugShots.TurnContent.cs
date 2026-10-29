@@ -210,7 +210,7 @@ namespace Tacetno433.Core
             b.TakeEnemyAttack(null);
             report += Same("the court", "397 True 1 Down 20 20 20", court + " " + (anna - b.Party[0].Hp) + " " + (klara - b.Party[1].Hp));
 
-            //DECREE (THE DEAF CROWN) : bar 1 forbids skills, PAGANINI's QUICK BOW costs her 5 (30 -> 25). It CUTS IN after
+            //DECREE (THE DEAF CROWN) : bar 1 forbids skills, PAGANINI's QUICK BOW costs her 5 (45 -> 40). It CUTS IN after
             //QUANTZ, every note is parried PERFECT and still no COUNTER. Bar 2 forbids attacks, PAGANINI's ATTACK costs 5 more.
             Skill quickBow = SkillList.First(MusicianList.All[0]);
             NoteResult[] goods = new NoteResult[quickBow.Notes.Length];
@@ -231,7 +231,7 @@ namespace Tacetno433.Core
             decree += " " + b.Decree;
             b.PlayBar();
             b.Attack();
-            report += Same("decree", "NoSkills 25 0 NoAttacks 20", decree + " " + b.Party[0].Hp);
+            report += Same("decree", "NoSkills 40 0 NoAttacks 35", decree + " " + b.Party[0].Hp);
             return report;
         }
 

@@ -1018,7 +1018,11 @@ namespace Tacetno433.Screens
                         hits.HitLater(style, DrawBox(e.Who), power, colors, BattleRules.HitBoltStagger * bolts);
                         bolts++;
                     }
-                    else hits.Hit(style, DrawBox(e.Who), power, colors);
+                    else
+                    {
+                        int tier = !hitSignature && hitBy != null && !hitBy.IsEnemy ? hitBy.Musician.Rehearsed : 0;   // WEAPON TIERS
+                        hits.Hit(style, DrawBox(e.Who), power, colors, tier);
+                    }
 
                     //IMPACT FRAME : the world holds still through the turns and the flash
                     if (hitSignature) hitStop = Math.Max(hitStop, BattleRules.HitImpactHold);
@@ -1304,18 +1308,21 @@ namespace Tacetno433.Screens
                 battle.Events.Clear();
             }
             else if (name == "battleslash" || name == "battleshot" || name == "battlesmash" || name == "battlecross" || name == "battleink"
-                     || name == "battlegold" || name == "battlefire")
+                     || name == "battlegold" || name == "battlefire" || name == "battletier")
             {
                 //Beta1 round 4 : one blow of each style on the front enemy (or the front musician for INK), for pictures.
-                //battlegold = a SLASH in GOLD with its sparkles, battlefire = a SHOT in RED with its flames.
-                HitStyle style = name == "battleslash" || name == "battlegold" ? HitStyle.Slash : name == "battleshot" || name == "battlefire" ? HitStyle.Shot
+                //battlegold = a SLASH in GOLD with its sparkles, battlefire = a SHOT in RED with its flames,
+                //battletier = the GOLD SLASH of a weapon at tier III (WEAPON TIERS, 29 Oct).
+                HitStyle style = name == "battleslash" || name == "battlegold" || name == "battletier" ? HitStyle.Slash : name == "battleshot" || name == "battlefire" ? HitStyle.Shot
                                : name == "battlesmash" ? HitStyle.Smash : name == "battlecross" ? HitStyle.Cross : HitStyle.Ink;
+                int tierPicture = name == "battletier" ? BattleRules.RehearseMax : 0;
+                if (name == "battletier") name = "battlegold";
                 HitColors colors = name == "battlegold" ? new HitColors(Palette.SpotGold, Palette.SpotGoldHot, HitFlair.Sparkle)
                                  : name == "battlefire" ? new HitColors(Palette.SpotRed, Palette.SpotRedHot, HitFlair.Flame) : HitColors.Plain;
                 Fighter at = style == HitStyle.Ink ? battle.Party[0] : battle.Enemies[0];
                 if (style == HitStyle.Ink) fore = at;
                 Rectangle box = BoxOf(at);
-                hits.Hit(style, box, 1f, colors);
+                hits.Hit(style, box, 1f, colors, tierPicture);
                 StageHit(box.Center.ToVector2(), style != HitStyle.Ink, 1f, colors.Tint);
                 if (style != HitStyle.Ink) SpawnNumber(new Vector2(box.Center.X, box.Y - 34), 24, false, true, name == "battlegold" || name == "battlefire" ? colors.Tint : Palette.Highlight);
             }

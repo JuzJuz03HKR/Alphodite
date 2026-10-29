@@ -55,6 +55,14 @@ namespace Tacetno433.Screens
             {
                 game.Screens.Change(new RestScreen());
             }
+            else if (node.Type == NodeType.Luthier)
+            {
+                game.Screens.Change(new LuthierScreen());                                       // 29 Oct : one weapon a tier up
+            }
+            else if (node.Type == NodeType.Treasure)
+            {
+                game.Screens.Change(new MotifRewardScreen(MotifRewardScreen.Kind.Treasure));    // 29 Oct : one motif, free
+            }
             else
             {
                 run.CurrentEvent = ev != null ? ev : EventList.Pick(run.Rng);

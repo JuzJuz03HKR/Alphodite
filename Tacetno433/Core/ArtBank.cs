@@ -25,6 +25,7 @@ namespace Tacetno433.Core
     //   RoutePanel         a kind of place, small and wide       Art/Route/route_shop    (230 x 142 on the route page)
     //   EventPicture       one per event                         Art/Events/event_a_street_musician
     //   Shop, Rest         the shop and the rest room            Art/Places/shop, Art/Places/rest
+    //   Luthier            the luthier's workshop (29 Oct)       Art/Places/luthier
     //   Baton              the stick the player holds            Art/Baton/baton
     //
     //The conductor's hand and the pixel musicians animate, so they have their own files:
@@ -44,12 +45,13 @@ namespace Tacetno433.Core
         public static Texture2D[] EventPicture = new Texture2D[0];        // lined up with EventList.All
         public static Texture2D Shop;
         public static Texture2D Rest;
+        public static Texture2D Luthier;                                  // the luthier's workshop (29 Oct)
         public static Texture2D Baton;
 
         public static int Loaded;
 
         //Route File Names : in NodeType order
-        private static string[] routeFile = { "battle", "event", "shop", "elite", "rest", "boss", "crossing" };
+        private static string[] routeFile = { "battle", "event", "shop", "elite", "rest", "boss", "crossing", "luthier", "treasure" };
 
         //Art Load : called once from LoadContent
         public static void Load(ContentManager content)
@@ -100,6 +102,7 @@ namespace Tacetno433.Core
 
             Shop = Picture(content, "Art/Places/shop");
             Rest = Picture(content, "Art/Places/rest");
+            Luthier = Picture(content, "Art/Places/luthier");
             Baton = Picture(content, "Art/Baton/baton");
         }
 

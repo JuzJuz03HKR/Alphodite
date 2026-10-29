@@ -62,7 +62,7 @@ namespace Tacetno433.Core
 
             //CAPRICE (THE HEARTLESS) : 2 strokes land, so 4 turns where every swipe goes one better (a wrong way is
             //GOOD, 0.15 s off is PERFECT, one shake is GOOD). Three ATTACKs and HUSH's turn (blocked PERFECT) use them up.
-            //Then everybody pays 20 percent (step 13) : PAGANINI 30 -> 24, QUANTZ 26 -> 21, PFUNDT 36 -> 29
+            //Then everybody pays 20 percent (step 13) : PAGANINI 45 -> 36, QUANTZ 39 -> 31, PFUNDT 54 -> 43 (the band's life x1.5, 29 Oct)
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             b.Kit = TurnKit.Paganini;
             b.Signature = b.SignatureNeed;
@@ -74,7 +74,7 @@ namespace Tacetno433.Core
             b.Attack();
             b.Attack();
             b.TakeEnemyAttack(AllGrades(b.Current.IntentNotes.Length, Grade.Perfect));
-            report += Same("caprice", "4 Good Perfect Good 0 24 21 29", caprice + " " + b.CapriceTurns + " " + b.Party[0].Hp + " " + b.Party[1].Hp + " " + b.Party[2].Hp);
+            report += Same("caprice", "4 Good Perfect Good 0 36 31 43", caprice + " " + b.CapriceTurns + " " + b.Party[0].Hp + " " + b.Party[1].Hp + " " + b.Party[2].Hp);
 
             //BORROWED BREATH (THE HEARTLESS) : no BREATH, QUANTZ's LONG BREATH (2) costs 2 x 6 = 12 life and gives 4 BREATH.
             //Without the kit it cannot be written, and with 12 life or less it cannot be paid (she has 6).
@@ -93,7 +93,7 @@ namespace Tacetno433.Core
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433), new int[] { 30, 6, 36 });
             b.Kit = TurnKit.Paganini;
             b.Breath = 0;
-            report += Same("borrowed breath", "False 12 14 4 False", paid + " " + b.CanPlanSkill(b.Party[1], longBreath));
+            report += Same("borrowed breath", "False 12 27 4 False", paid + " " + b.CanPlanSkill(b.Party[1], longBreath));
 
             //STEADY HAND (THE KING'S BATON) : on HUSH's turn 0.225 s late is still GOOD (0.22 + 0.01), not without it
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));

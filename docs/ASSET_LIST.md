@@ -109,10 +109,11 @@
 - **แผงยุค** แนวตั้ง ยืดตามช่อง (วาดประมาณ 480 × 720) ด้านล่าง 150 px ถูกคำบรรยายทับ ของสำคัญไว้ด้านบน :
   `Content/Art/Eras/` : `era_classical.png` · `era_siam.png` · `era_romantic.png`
 - **ภาพเส้นทาง (เปลี่ยน 28 ก.ย.)** หน้าเลือกเส้นทางไม่ใช้แผงสูงแล้ว ภาพไปอยู่ในกล่องรายละเอียด **แนวนอนเล็ก แสดง 230 × 142 (วาด 460 × 284)** :
-  `Content/Art/Route/` : `route_battle.png` · `route_elite.png` · `route_boss.png` · `route_event.png` · `route_shop.png` · `route_rest.png` · `route_crossing.png`
+  `Content/Art/Route/` : `route_battle.png` · `route_elite.png` · `route_boss.png` · `route_event.png` · `route_shop.png` · `route_rest.png` · (29 ต.ค.) `route_luthier.png` (ช่างทำเครื่องดนตรี) · `route_treasure.png` (หีบหลังเวที) · ~~`route_crossing.png`~~ ไม่ใช้แล้ว (เอายุคออก)
 
 ### 9. ร้าน ห้องพัก เหตุการณ์ ⭐
-- `Content/Art/Places/shop.png` 672 × 470 (มีคนขายของในภาพ) · `Content/Art/Places/rest.png` 960 × 236 (แถบกว้างเหนือตัวเลือก)
+- `Content/Art/Places/shop.png` 672 × 470 (มีคนขายของในภาพ) · `Content/Art/Places/rest.png` 960 × 236 (แถบกว้างเหนือตัวเลือก) ·
+  (29 ต.ค.) `Content/Art/Places/luthier.png` 520 × 470 (โรงช่างทำเครื่องดนตรี มีช่างในภาพได้ อยู่ซ้ายของหน้า LUTHIER ข้างเสานักดนตรี 3 ต้น)
 - `Content/Art/Events/` 520 × 430 : `event_the_broken_metronome.png` · `event_a_street_musician.png` · `event_the_silent_audience.png` ·
   `event_a_lost_score.png` · `event_tacet_s_echo.png` · `event_the_tea_house.png` · `event_the_empty_chair.png` · (ขั้น 13) `event_a_rival_band.png` · `event_a_tuning_fork.png` · `event_a_cracked_bow.png`
 

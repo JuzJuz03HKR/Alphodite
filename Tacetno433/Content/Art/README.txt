@@ -88,7 +88,8 @@ Code: Core/ArtBank.cs (DrawStage)
 6. PANELS : PLACES  (the era panels went with the eras, 29 Oct)
 ---------------------------
 Folder:  Content/Art/Route     route_battle.png  route_elite.png  route_boss.png  route_event.png
-                               route_shop.png  route_rest.png  route_crossing.png
+                               route_shop.png  route_rest.png  route_luthier.png  route_treasure.png
+                               (route_crossing.png is not used any more, the eras are gone)
 A small WIDE picture in the route page's detail box, shown at 230 x 142 (paint 460 x 284).
 (Before 28 Sep 2026 these were tall 480 x 720 panels; the route page no longer uses panels.)
 Code: Screens/RouteScreen.cs (DrawDetail)
@@ -98,6 +99,8 @@ Code: Screens/RouteScreen.cs (DrawDetail)
 --------------------
 Folder:  Content/Art/Places    shop.png   672 x 470, the shopkeeper is part of the picture
                                rest.png   960 x 236, a wide strip over the three choices
+                               luthier.png  520 x 470, the instrument maker's workshop, on the
+                               left of the LUTHIER page beside the band's three columns
 Folder:  Content/Art/Events    event_<title>.png, 520 x 430, one per event, for example
                                event_a_street_musician.png  (the titles are in Data/GameEvent.cs)
 

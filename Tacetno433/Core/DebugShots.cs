@@ -82,12 +82,18 @@ namespace Tacetno433.Core
             Input.PretendHeld = true;
 
             //Still Hand : the fermata picture needs the baton held still, and a few Beta1 round 1 pictures need the pointer
-            //resting on one thing (rewardtilt : the middle card, shopbuy : the first motif on the shelf). The gallery and the
-            //profiles (29 Oct, AURA) rest it under everything, so the conductor the picture names stays pointed at.
+            //resting on one thing (rewardtilt : the middle card, shopbuy : the first motif on the shelf, 29 Oct : the luthier's
+            //middle column, the audition's middle legend). The gallery and the profiles (29 Oct, AURA) rest it under everything,
+            //so the conductor the picture names stays pointed at.
             string shot = index < names.Length ? names[index] : "";
             if (shot == "duelfermata" || shot == "rewardtilt" || shot == "shopbuy")
             {
-                Input.MousePos = shot == "duelfermata" ? new Vector2(760f, 470f) : (shot == "rewardtilt" ? new Vector2(730f, 460f) : new Vector2(980f, 400f));
+                Input.MousePos = shot == "duelfermata" ? new Vector2(760f, 470f) : (shot == "rewardtilt" ? new Vector2(730f, 460f) : new Vector2(980f, 200f));
+                return;
+            }
+            if (shot == "luthier" || shot == "luthierdone" || shot == "teampickfull")
+            {
+                Input.MousePos = shot == "teampickfull" ? new Vector2(640f + (mouseClock > 0.2f ? 1f : 0f), 300f) : new Vector2(900f, 300f);
                 return;
             }
             if (shot.StartsWith("gallery") || shot.StartsWith("detail"))
@@ -749,6 +755,7 @@ namespace Tacetno433.Core
             Input.PretendClick = false;
             if (names[index] == "rewardpick" && frames == 72) Input.PretendPress = Keys.Enter;            // Beta1 round 1 : the picked card
             if (names[index] == "shopbuy" && frames == 30) Input.PretendClick = true;                     //   a motif bought, on its way up
+            if (names[index] == "luthierdone" && frames == 30) Input.PretendClick = true;                 // 29 Oct : the middle weapon sharpened
             if (names[index] == "gallerywalk" && frames == 40) Input.PretendPress = Keys.Enter;          // Beta1 round 2 : stepping inside a painting
             if (names[index] == "routedive" && frames == 40) Input.PretendPress = Keys.Enter;            //   the camera diving into the chosen place
             if (names[index] == "detailswap" && frames == 34) Input.PretendPress = Keys.Right;           //   the next profile
@@ -827,6 +834,8 @@ namespace Tacetno433.Core
         //       result defeat reward shop shopleave event eventchair rest curtain curtainwin
         //       rewardpick rewardtilt shopbuy (Beta1 round 1 : a card picked, the pointed card leaning, a motif bought, e.g. rewardpick@80)
         //       battle battleswing battleskill battleparry battlestatus (Alpha 7, use a few frames, e.g. battleswing@2) battlewin battlelose (Beta1, TACET's dark) battleslash battleshot battlesmash battlecross battleink (Beta1, one blow, e.g. battleslash@4) battlecutin battlekill battlebolt battleboltsoft battleimpact (Beta1 round 6)
+        //       teampick teampickfull luthier treasure rewardboss battletier (29 Oct : THE AUDITION empty and with three picked, the
+        //       luthier, a chest, the boss's great upgrade with REFORGE, a tier III blow e.g. battletier@4)
         //       practice practiceskill practicesig (Alpha 7, the tutorial's practice fight, e.g. practice@60)
         //       titlereveal resultquiet (Beta1 screens : the first opening of the game, e.g. titlereveal@40 ; a won fight with LESS FLASHING)
         //       wipe sweep sweepdark sweepclose (Beta1 screens : a page change on its way, from the route to the title, e.g. wipe@30)
@@ -862,6 +871,9 @@ namespace Tacetno433.Core
             if (name == "detailswap") screen = new ConductorDetailScreen(0);              //   the arrows sliding to the next profile (detailswap@40)
             if (name == "chapter") screen = new ChapterScreen();
             if (name == "teampick" || name == "teampickfull") screen = new TeamPickScreen();   // THE AUDITION (29 Oct)
+            if (name == "luthier" || name == "luthierdone") screen = new LuthierScreen();   // 29 Oct : the luthier, the chest, the boss's great upgrade
+            if (name == "treasure") screen = new MotifRewardScreen(MotifRewardScreen.Kind.Treasure);
+            if (name == "rewardboss") screen = new MotifRewardScreen();
             if (name == "bandname") screen = new BandNameScreen();
             if (name.StartsWith("route") || name.StartsWith("pause") || name.StartsWith("wipe") || name.StartsWith("sweep")) screen = new RouteScreen();
             if (name == "view" || name == "band") screen = new BandScreen();
@@ -931,7 +943,7 @@ namespace Tacetno433.Core
                 run.AddMotif(MotifList.Get(MotifId.Sforzando));
                 run.AddMotif(MotifList.Get(MotifId.Resin));
                 run.AddShards(120);
-                run.Rehearse(run.Roster[0]);
+                if (run.Roster.Count > 0) run.Rehearse(run.Roster[0]);                // the audition (teampick) has nobody yet
                 run.CurrentEvent = EventList.All[name == "eventchair" ? EventList.All.Length - 1 : 1];   // eventchair : THE EMPTY CHAIR
                 run.BattlesWon = 6;
                 run.PerfectsTotal = 23;
@@ -973,6 +985,8 @@ namespace Tacetno433.Core
                 run.Floor = 2;
             }
             if (name == "reward" || name == "dueltremolo" || name.EndsWith("repeat")) run.Chosen.Type = NodeType.Elite;
+            if (name == "rewardboss") run.Chosen.Type = NodeType.Boss;                  // REFORGE in the middle of two treasured motifs
+            run.PlaceSeed = 4331;                                                     // the shop's and the chest's dice
             if (name == "dueldouble") run.Floor = 3;                                  // pairs from floor two, more on the last
             if (name == "duelfermata") run.Floor = 2;                                 // held notes from floor two
             if (name == "duelgentle") run.BattlesWon = 0;                             // round 15 : a first fight, f and p on beats 1 and 3

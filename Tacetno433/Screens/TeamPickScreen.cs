@@ -281,8 +281,8 @@ namespace Tacetno433.Screens
             //Heading : who leads the audition, and what to do
             float head = UiMotion.Between(time, 0.05f, BattleRules.UiEnterTime);
             float rise = (1f - head) * BattleRules.UiEnterSlide;
-            Gfx.TextSpacedCentered(sb, Game.Font, run.Conductor.Name, cx, 34 - rise, Palette.LineGrey * head, TextSize.Tiny, 5f);
-            Gfx.TextCentered(sb, Game.BigFont, "Choose your band of three", cx, 60 - rise, Palette.Paper * head, TextSize.Title);
+            Gfx.TextSpacedCentered(sb, Game.Font, run.Conductor.Name, cx, 22 - rise, Palette.LineGrey * head, TextSize.Tiny, 5f);
+            Gfx.TextCentered(sb, Game.BigFont, "Choose your band of three", cx, 64 - rise, Palette.Paper * head, TextSize.Title);
 
             //Columns : the words under each, and the number of a picked one
             for (int i = 0; i < legends.Length; i++)

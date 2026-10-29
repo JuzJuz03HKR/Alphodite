@@ -248,10 +248,12 @@ namespace Tacetno433.Core
 
         //Hit : a blow of this style lands on a fighter standing in box. power 0..1.5 scales everything,
         //c is the striker's colours (Plain = white, for the SIGNATURE and TACET).
-        public void Hit(HitStyle style, Rectangle box, float power, HitColors c)
+        //tier : WEAPON TIERS (29 Oct), the striker's weapon tier 0 to 3. Every tier makes the blow bigger with more sparks
+        //(BattleRules.HitTierSize), tier II adds a ring of their colour, tier III a star where it lands, so an upgrade is seen.
+        public void Hit(HitStyle style, Rectangle box, float power, HitColors c, int tier = 0)
         {
             Vector2 at = new Vector2(box.Center.X, box.Y + box.Height * 0.45f);
-            float size = (0.75f + 0.35f * power) * BattleRules.HitSize;
+            float size = (0.75f + 0.35f * power) * BattleRules.HitSize * (1f + BattleRules.HitTierSize * tier);
             float lean = (float)(random.NextDouble() - 0.5) * 0.6f;
             Vector2 way = new Vector2(1f, 0f);
 
@@ -330,6 +332,15 @@ namespace Tacetno433.Core
                 AddBurst(at, size * 0.7f, 0f, 1f, 10, 2f, 0.2f, HitColors.Plain);
                 Throw(at, new Vector2(0f, -1f), 16, 380f, Ink, HitColors.Plain);
                 return;
+            }
+
+            //WEAPON TIERS : a sharper weapon's blow shows it (SLASH, SHOT and SMASH, the musicians' own blows)
+            if (tier >= 1) Throw(at, way, 6 * tier, 480f, Streak, c);
+            if (tier >= 2) AddRing(at, size * 1.35f, 1f, 2f, 0.36f, c.Tint);
+            if (tier >= 3)
+            {
+                Star(at, size * 1.25f, c);
+                AddRing(at, size * 1.9f, 1f, 1f, 0.46f, c.Hot);
             }
 
             //FLAIR : the striker's own touch on top of the blow

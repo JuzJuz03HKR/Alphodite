@@ -533,7 +533,7 @@ namespace Tacetno433.Screens
             else if (w.Kind == WareKind.Weapon)
             {
                 Gfx.DiamondOutline(sb, x, y, 22f, BandColumn.SpotOf(w.Who) * a, 2f);
-                Gfx.TextCentered(sb, Game.BigFont, w.IconLabel, x, y - 15, c, TextSize.Small);
+                Gfx.TextCentered(sb, Game.BigFont, w.IconLabel, x, y - 2f, c, TextSize.Small * 0.8f);
             }
             else if (w.IconLabel.Length > 0) Gfx.TextSpacedCentered(sb, Game.Font, w.IconLabel, x, y - 7, c, TextSize.Tiny, 2f);
         }
