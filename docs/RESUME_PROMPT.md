@@ -21,6 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
+| 29 ต.ค. (แชทก้อน 1 ข้อ 2) | ก้อน 1 ข้อ 2 ชุดสกิลใหม่ 5 คน (`BETA1_DIRECTION.md` 11.6) ผู้ใช้ลองข้อ 1 แล้ว "ไม่มีอะไรต้องแก้ ทำข้อ 2 ต่อ" (จบข้อ 2 แล้วหยุดรอ) | `Data/Skill.cs` `Data/Musician.cs` `Data/BattleRules.cs` `Battle/TurnBattle.cs` `Core/DebugShots.Turn*.cs` `docs/TACET_Balance.xlsx` เอกสาร |
 
 ---
 
