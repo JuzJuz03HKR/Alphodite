@@ -17,7 +17,7 @@ namespace Tacetno433.Screens
     //   TACET     the enemies further off on the right, standing on the floor, the front one nearest
     //   THE DARK  a black hole behind the enemies pours TACET's dark over the floor towards the camera, as far as the
     //             balance of life lets it (Core/TacetVoid.cs). A hit throws it and it springs back to its place.
-    //   LAYERS    the era's backdrop (far, middle), the stage the band stands on, a dark front layer. Each layer
+    //   LAYERS    the movement's backdrop (far, middle), the stage the band stands on, a dark front layer. Each layer
     //             follows the camera less the further away it is (PARALLAX), so a small camera move reads as depth.
     //   LIGHT     a dark stage lit by lights : a stage light on the front musician, the rift's glow, a flash at each hit
     //   FOCUS     while a ring is up the world goes dark, grey and soft behind it and moves slowly (QTE FOCUS)
@@ -56,7 +56,7 @@ namespace Tacetno433.Screens
         private bool hitSignature;         // the blows being shown are the SIGNATURE's (CROSS)
         private Vector2 stageCam;          // the camera of the frame being drawn
         private Vector2 kick;              // the camera's nudge after a hit
-        private int era;                   // which era's backdrop
+        private int movement;              // which movement's backdrop (the floor, Data/Movement.cs, NO MORE ERAS 29 Oct)
         private string[] layerName = new string[0];   // LAYERS : the words in the empty frames, made once
 
         //Stage Lights : short flashes of light where something lands, kept in a fixed pool (no garbage)
@@ -87,8 +87,8 @@ namespace Tacetno433.Screens
         //Stage Load : called from Arrange, once the battle exists
         private void LoadStage()
         {
-            era = run != null ? run.Era : 0;
-            string key = EraList.All[Math.Max(0, Math.Min(EraList.All.Length - 1, era))].Name;
+            movement = run != null ? run.Movement : 0;
+            string key = MovementList.Names[movement];
             layerName = new string[]
             {
                 "FAR  " + key + "  704 x 360",
@@ -101,9 +101,9 @@ namespace Tacetno433.Screens
             dark.Reset();
             focus = 0f;
 
-            //LAYERS : the era's pictures, if the team has made them (Content/Art/Battle/Stages/<era>_far.png ...)
-            string eraKey = ArtBank.Key(key);
-            for (int i = 0; i < layerArt.Length; i++) layerArt[i] = FrameArt.Picture(Game.GraphicsDevice, "Stages", eraKey + layerFile[i]);
+            //LAYERS : the movement's pictures, if the team has made them (Content/Art/Battle/Stages/<movement>_far.png ...)
+            string movementKey = ArtBank.Key(key);
+            for (int i = 0; i < layerArt.Length; i++) layerArt[i] = FrameArt.Picture(Game.GraphicsDevice, "Stages", movementKey + layerFile[i]);
 
             arts.Clear();
             for (int i = 0; i < battle.Party.Count; i++) ArtOf(battle.Party[i]);
@@ -374,7 +374,7 @@ namespace Tacetno433.Screens
             stageCam = cam;
             dark.Place(cam, Horizon);
 
-            //BACK : the era's backdrop and the floor, alone
+            //BACK : the movement's backdrop and the floor, alone
             PostChain.BeginBack(device);
             DrawBackdrop(sb, cam);
 
@@ -441,7 +441,7 @@ namespace Tacetno433.Screens
         {
             int left = (TacetGame.ScreenW - LayerW) / 2;
 
-            //Far : the era's backdrop above the horizon (an empty frame until the art comes), then the middle layer
+            //Far : the movement's backdrop above the horizon (an empty frame until the art comes), then the middle layer
             sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, Layer(cam, 0));
             if (layerArt[0] != null) DrawLayerArt(sb, layerArt[0], left);
             else

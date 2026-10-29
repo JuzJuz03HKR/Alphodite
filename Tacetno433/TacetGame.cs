@@ -163,7 +163,6 @@ namespace Tacetno433
 
             //Text Prepare : wrap all the long text ONCE, never while drawing
             ConductorList.PrepareText(StoryFont, TextWrapWidth, TextSize.Story);
-            EraList.PrepareText(StoryFont, PanelStrip.CaptionWrapWidth);
             MusicianList.PrepareText(StoryFont, MusicianWrapWidth);
             EnemyList.PrepareText(StoryFont, TraitWrapWidth);
             MotifList.PrepareText(StoryFont, MotifCardWidth, MotifTipWidth);

@@ -20,15 +20,15 @@ namespace Tacetno433.Data
     public enum MusicianTrait
     {
         None,
-        KeepsCount,      // ANNA   beats the baton goes her way have a wider PERFECT window
-        QuietPart,       // KLARA  twice as hard against TACET's p notes (round 14, she used to play on every stroke)
-        Momentum,        // OTTO   each beat in a row he plays hits 1 harder, up to 3
-        ByEar,           // MALI   50 percent harder on TACET's hidden beats
-        HeldNote,        // CHAI   his note rings on into a beat nobody plays, at 40 percent
-        OneStepBetter,   // NUAN   30 percent harder when TACET plays loud
-        FourBars,        // LUKA   the fourth beat of a bar he plays all of hits twice as hard
-        Forgiven,        // IRIS   on her beats a late stroke still counts as GOOD
-        Thunder          // BORIS  his big stroke on an f note knocks 2 off TACET's next note
+        KeepsCount,      // PAGANINI  beats the baton goes their way have a wider PERFECT window (COUNTS ALOUD, was ANNA's)
+        QuietPart,       // QUANTZ    twice as hard against TACET's p notes (round 14, used to play on every stroke, was KLARA's)
+        Momentum,        // PFUNDT    each beat in a row they play hits 1 harder, up to 3 (was OTTO's)
+        ByEar,           // MALI      50 percent harder on TACET's hidden beats (hidden since 29 Oct)
+        HeldNote,        // CHAI      his note rings on into a beat nobody plays, at 40 percent (hidden since 29 Oct)
+        OneStepBetter,   // NUAN      30 percent harder when TACET plays loud (hidden since 29 Oct)
+        FourBars,        // DUPORT    the fourth beat of a bar they play all of hits twice as hard (was LUKA's)
+        Forgiven,        // PUNTO     on their beats a late stroke still counts as GOOD (FASHIONABLY LATE, was IRIS's)
+        Thunder          // BORIS     his big stroke on an f note knocks 2 off TACET's next note (hidden since 29 Oct)
     }
 
     //Musician : one player in the ensemble.
@@ -41,7 +41,12 @@ namespace Tacetno433.Data
         public string Culture = "";
         public Family Family = Family.String;
         public SpotLook Spot = SpotLook.Gold;  // their colour in a fight (round 4 : strings and percussion GOLD, winds RED for now)
-        public int Era;                       // which era in EraList they come from
+
+        //Legend (Beta1, 29 Oct, docs/CHARACTER_DESIGN.md 5) : the user's five are real musicians who became legends on
+        //their instrument. The name the legends give them, and the weapon their instrument becomes (the user's theme :
+        //instruments are weapons). The user designs their look and decides who is a woman, so no word here says he or she.
+        public string Epithet = "";           // "THE DEVIL'S VIOLINIST"
+        public string Weapon = "";            // "IL CANNONE"
 
         //Cue : the side of the stage this musician sits on, 0 left, 1 centre, 2 right, where their
         //instrument sits in a real orchestra. The baton points at it on some beats of the 4/4 shape
@@ -84,82 +89,107 @@ namespace Tacetno433.Data
         public string TraitWrapped = "";
         public string FamilyLabel = "";
         public string PartLabel = "";         // "STRINGS   LEFT", their chair in words
-        public string NameTag = "";           // "ANNA/"  the gacha style name with a slash
+        public string NameTag = "";           // "PAGANINI/"  the gacha style name with a slash
     }
 
     //MusicianList : THE PLACE TO EDIT MUSICIANS.
-    //Era is the index into EraList, so 0 is CLASSICAL, 1 is SIAM, 2 is ROMANTIC.
-    //Rough guide for stats (round 15) : everybody plays every note and nobody costs stamina, so
-    //the powers sit close together, percussion a little stronger, winds a little weaker, the
-    //last era a little stronger than the first. What sets players apart is their trait.
+    //NO MORE ERAS (Beta1, 29 Oct) : the user took the eras out and kept five legends, one for each instrument that stays
+    //(violin, flute, timpani, cello, horn, docs/CHARACTER_DESIGN.md 5). They took the places of ANNA, KLARA, OTTO, LUKA and
+    //IRIS, keeping their traits and skills. MALI, CHAI and NUAN (the Siam era) and BORIS (bass drum) stay in All, hidden
+    //(Shown), because the save file keeps musicians by their place in All : NEVER REMOVE OR REORDER, only add at the end.
+    //Rough guide for stats (round 15) : everybody plays every note and nobody costs stamina, so the powers sit close
+    //together, percussion a little stronger, winds a little weaker. What sets players apart is their trait.
     //(Round 14 : winds were cheap and weak, percussion hit 8 to 10 and cost 7 to 8.)
-    //Cue : where they sit, as in a real orchestra : violins left, cello right, flute centre.
-    //Every era has one player for each side, and every family has each side once, so a band
-    //from one era always answers all three ways, and no two players share a chair.
+    //Cue : where they sit, as in a real orchestra : violins left, cello right, flute centre. Every family has each side
+    //once at most, so no two players share a chair.
     public static class MusicianList
     {
         public static Musician[] All = new Musician[]
         {
-            //Era 0 : CLASSICAL
-            new Musician { Name = "ANNA",  Instrument = "VIOLIN",    Culture = "EUROPEAN", Family = Family.String,     Era = 0, Cue = 0, Spot = SpotLook.Gold,
+            //0 : violin. Niccolo Paganini (1782 - 1840) : rumour said he sold his soul to the devil. His Guarneri violin, the
+            //one he called his cannon (Il Cannone), was left to Genoa in his will. IL CANNONE : the violin is the guard of a
+            //sword and the bow its blade, and it hits like a cannon.
+            new Musician { Name = "PAGANINI", Instrument = "VIOLIN",    Culture = "EUROPEAN", Family = Family.String,     Cue = 0, Spot = SpotLook.Gold,
+                           Epithet = "THE DEVIL'S VIOLINIST", Weapon = "IL CANNONE",
                            Power = 5, Sample = "violin", SampleNote = 60, ThemeColor = Palette.ToneB,
                            Trait = MusicianTrait.KeepsCount, TraitName = "COUNTS ALOUD",
-                           TraitText = "On her beats, when the baton points her way, the PERFECT window is wider.",
-                           TurnTraitText = "The notes of her skills have a wider PERFECT window.",
-                           Line = "Counts every bar out loud, even when nobody asked her to." },
-            new Musician { Name = "KLARA", Instrument = "FLUTE",     Culture = "EUROPEAN", Family = Family.Wind,       Era = 0, Cue = 1, Spot = SpotLook.Red,
+                           TraitText = "On their beats, when the baton points their way, the PERFECT window is wider.",
+                           TurnTraitText = "The notes of their skills have a wider PERFECT window.",
+                           Line = "They say the devil taught those hands. Nobody asks twice." },
+
+            //1 : flute. Johann Joachim Quantz (1697 - 1773) : the flute teacher of Frederick the Great, about 300 concertos
+            //for the king's evening concerts. The king was the one who gave Bach the theme of the Musical Offering (1747).
+            new Musician { Name = "QUANTZ",   Instrument = "FLUTE",     Culture = "EUROPEAN", Family = Family.Wind,       Cue = 1, Spot = SpotLook.Red,
+                           Epithet = "THE KING'S FLUTE MASTER", Weapon = "FLUTE RAPIER",
                            Power = 4, Sample = "flute", SampleNote = 72, ThemeColor = Palette.ToneC,
                            Trait = MusicianTrait.QuietPart, TraitName = "THE QUIET PART",
-                           TraitText = "Against TACET's soft p notes she plays twice as hard.",
+                           TraitText = "Against TACET's soft p notes, plays twice as hard.",
                            TurnTraitText = "Hits 50 percent harder against an enemy showing a p note.",
-                           Line = "Plays the quiet parts nobody else wants and never misses one." },
-            new Musician { Name = "OTTO",  Instrument = "TIMPANI",   Culture = "EUROPEAN", Family = Family.Percussion, Era = 0, Cue = 2, Spot = SpotLook.Gold,
+                           Line = "Taught a king the flute. Three hundred concertos, one listener." },
+
+            //2 : timpani. Ernst Pfundt (1806 - 1871) : the timpanist of the Leipzig Gewandhaus, credited with the crank timpani
+            //that tune with a turn of the hand, and the author of a book on the timpani (Die Pauken, 1849).
+            new Musician { Name = "PFUNDT",   Instrument = "TIMPANI",   Culture = "EUROPEAN", Family = Family.Percussion, Cue = 2, Spot = SpotLook.Gold,
+                           Epithet = "WHO TUNES THE THUNDER", Weapon = "TWIN HAMMERS",
                            Power = 6, Sample = "timpani", SampleNote = 0, ThemeColor = Palette.ToneD,
                            Trait = MusicianTrait.Momentum, TraitName = "MOMENTUM",
-                           TraitText = "Each beat in a row he plays hits 1 harder, up to 3.",
-                           TurnTraitText = "Each of his moves in a row that lands hits 1 harder, up to 3.",
-                           Line = "Slow to start, impossible to stop once he has." },
+                           TraitText = "Each beat in a row they play hits 1 harder, up to 3.",
+                           TurnTraitText = "Each of their moves in a row that lands hits 1 harder, up to 3.",
+                           Line = "One turn of the hand, and the thunder changes key." },
 
-            //Era 1 : SIAM
-            new Musician { Name = "MALI",  Instrument = "SO DUANG",  Culture = "SIAM",     Family = Family.String,     Era = 1, Cue = 1, Spot = SpotLook.Gold,
+            //3 to 5 : the Siam era, hidden since 29 Oct (Shown)
+            new Musician { Name = "MALI",  Instrument = "SO DUANG",  Culture = "SIAM",     Family = Family.String,     Cue = 1, Spot = SpotLook.Gold,
                            Power = 5, Sample = "soduang", SampleNote = 60, ThemeColor = Palette.ToneA,
                            Trait = MusicianTrait.ByEar, TraitName = "BY EAR",
                            TraitText = "Hits 50 percent harder on TACET's hidden ??? beats.",
                            TurnTraitText = "Hits 50 percent harder against an enemy that is OFF-BEAT.",
                            Line = "Learned by ear in a courtyard and has never read a page." },
-            new Musician { Name = "CHAI",  Instrument = "PI NAI",    Culture = "SIAM",     Family = Family.Wind,       Era = 1, Cue = 2, Spot = SpotLook.Red,
+            new Musician { Name = "CHAI",  Instrument = "PI NAI",    Culture = "SIAM",     Family = Family.Wind,       Cue = 2, Spot = SpotLook.Red,
                            Power = 4, Sample = "pinai", SampleNote = 62, ThemeColor = Palette.ToneC,
                            Trait = MusicianTrait.HeldNote, TraitName = "HELD NOTE",
                            TraitText = "When nobody plays a beat, his last note rings on at 40 percent.",
                            TurnTraitText = "His ATTACK rings on : a second hit for 40 percent.",
                            Line = "Can hold one note longer than anyone thinks is possible." },
-            new Musician { Name = "NUAN",  Instrument = "RANAT EK",  Culture = "SIAM",     Family = Family.Percussion, Era = 1, Cue = 0, Spot = SpotLook.Gold,
+            new Musician { Name = "NUAN",  Instrument = "RANAT EK",  Culture = "SIAM",     Family = Family.Percussion, Cue = 0, Spot = SpotLook.Gold,
                            Power = 6, Sample = "ranatek", SampleNote = 72, ThemeColor = Palette.ToneB,
                            Trait = MusicianTrait.OneStepBetter, TraitName = "ONE STEP BETTER",
                            TraitText = "Hits 30 percent harder when TACET plays loud (f).",
                            TurnTraitText = "Hits 30 percent harder against an enemy showing an f note.",
                            Line = "Answers whatever she hears, faster and one step better." },
 
-            //Era 2 : ROMANTIC
-            new Musician { Name = "LUKA",  Instrument = "CELLO",     Culture = "EUROPEAN", Family = Family.String,     Era = 2, Cue = 2, Spot = SpotLook.Gold,
+            //6 : cello. Jean-Louis Duport (1749 - 1819) : thought to have played the first Cello Sonatas Op. 5 with Beethoven in
+            //Berlin, 1796. The legend of the Duport Stradivarius : Napoleon tried it in 1812 and left a dent that is still there.
+            //THE SCARRED SHIELD : the cello is a great shield with the emperor's dent in it, the bow a lance.
+            new Musician { Name = "DUPORT",   Instrument = "CELLO",     Culture = "EUROPEAN", Family = Family.String,     Cue = 2, Spot = SpotLook.Gold,
+                           Epithet = "SCARRED BY AN EMPEROR", Weapon = "THE SCARRED SHIELD",
                            Power = 6, Sample = "cello", SampleNote = 48, ThemeColor = Palette.ToneC,
                            Trait = MusicianTrait.FourBars, TraitName = "FOUR BARS STRAIGHT",
                            TraitText = "Playing all four beats of a bar, the fourth hits twice as hard.",
-                           TurnTraitText = "Every fourth ATTACK he makes hits twice as hard.",
-                           Line = "Says almost nothing and then plays for four bars straight." },
-            new Musician { Name = "IRIS",  Instrument = "HORN",      Culture = "EUROPEAN", Family = Family.Wind,       Era = 2, Cue = 0, Spot = SpotLook.Red,
+                           TurnTraitText = "Every fourth ATTACK they make hits twice as hard.",
+                           Line = "An emperor once tried this cello and left a scar. It plays louder for it." },
+
+            //7 : horn. Giovanni Punto (1746 - 1803, born Jan Vaclav Stich in Bohemia) : Beethoven wrote the Horn Sonata Op. 17
+            //for them and they played it first together in Vienna, 18 April 1800, when Punto was far more famous than
+            //Beethoven. HORN CHAKRAM : the coiled horn is a ring of blades, thrown and caught again.
+            new Musician { Name = "PUNTO",    Instrument = "HORN",      Culture = "EUROPEAN", Family = Family.Wind,       Cue = 0, Spot = SpotLook.Red,
+                           Epithet = "LOUDER THAN BEETHOVEN", Weapon = "HORN CHAKRAM",
                            Power = 5, Sample = "horn", SampleNote = 48, ThemeColor = Palette.ToneA,
                            Trait = MusicianTrait.Forgiven, TraitName = "FASHIONABLY LATE",
-                           TraitText = "On her beats, when the baton points her way, a late stroke still counts as GOOD.",
-                           TurnTraitText = "On the notes of her skills, a late stroke still counts as GOOD.",
-                           Line = "Arrives late, plays louder than the rest, is forgiven." },
-            new Musician { Name = "BORIS", Instrument = "BASS DRUM", Culture = "EUROPEAN", Family = Family.Percussion, Era = 2, Cue = 1, Spot = SpotLook.Gold,
+                           TraitText = "On their beats, when the baton points their way, a late stroke still counts as GOOD.",
+                           TurnTraitText = "On the notes of their skills, a late stroke still counts as GOOD.",
+                           Line = "Once more famous than Beethoven, and plays like nobody said otherwise." },
+
+            //8 : bass drum, hidden since 29 Oct (Shown)
+            new Musician { Name = "BORIS", Instrument = "BASS DRUM", Culture = "EUROPEAN", Family = Family.Percussion, Cue = 1, Spot = SpotLook.Gold,
                            Power = 7, Sample = "bassdrum", SampleNote = 0, ThemeColor = Palette.ToneD,
                            Trait = MusicianTrait.Thunder, TraitName = "THE WHOLE FLOOR",
                            TraitText = "His big stroke on an f note knocks 2 off TACET's next note.",
                            TurnTraitText = "A PERFECT f note of his skills takes 2 off each note of the enemy's next attack.",
                            Line = "One hit from him and the whole floor knows about it." },
         };
+
+        //Shown : the musicians a run can meet, the user's five legends. The others stay in All for old saves only.
+        public static Musician[] Shown = { All[0], All[1], All[2], All[6], All[7] };
 
         private static string[] familyNames = { "STRING", "WIND", "PERCUSSION" };
 
@@ -189,24 +219,12 @@ namespace Tacetno433.Data
             }
         }
 
-        //Available In Era : how many musicians of this era are not in the band yet
-        public static int AvailableInEra(int era, List<Musician> alreadyHave)
-        {
-            int count = 0;
-            for (int i = 0; i < All.Length; i++)
-                if (All[i].Era == era && !alreadyHave.Contains(All[i])) count++;
-            return count;
-        }
-
-        //Musician Roll : pick someone from this era who is not already in the band.
-        //Returns null when the era has nobody left to give.
-        public static Musician RollFromEra(int era, List<Musician> alreadyHave, Random random)
+        //Musician Roll : someone a run can meet (Shown) who is not in the band yet, null when nobody is left
+        public static Musician Roll(List<Musician> alreadyHave, Random random)
         {
             List<Musician> pool = new List<Musician>();
-
-            for (int i = 0; i < All.Length; i++)
-                if (All[i].Era == era && !alreadyHave.Contains(All[i]))
-                    pool.Add(All[i]);
+            for (int i = 0; i < Shown.Length; i++)
+                if (!alreadyHave.Contains(Shown[i])) pool.Add(Shown[i]);
 
             if (pool.Count == 0) return null;
             return pool[random.Next(pool.Count)];

@@ -224,7 +224,7 @@ namespace Tacetno433.Screens
         {
             chooseMotion.Press();
 
-            //Run Begin : build a fresh run and hand the player their first choice of era
+            //Run Begin : build a fresh run, the first movement's card opens it
             Game.CurrentRun = new RunState();
             Game.CurrentRun.Start(c, Game.StoryFont, RouteNodeInfo.CaptionWrapWidth);
             Game.CurrentRun.Maestro = Settings.Maestro;                                  // MAESTRO MODE

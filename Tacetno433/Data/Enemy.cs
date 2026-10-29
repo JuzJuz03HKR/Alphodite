@@ -46,7 +46,7 @@ namespace Tacetno433.Data
         public string Name = "";
         public string Title = "";               // short line under the name
         public EnemyKind Kind = EnemyKind.Normal;
-        public int Era = -1;                    // -1 means it can turn up in any era
+        public int Movement = -1;               // the movement (floor) it waits in, -1 means any (Data/Movement.cs, NO MORE ERAS 29 Oct)
 
         //Enemy Pattern : power on each of the 8 beats, 0 means silent on that beat.
         //These are floor 1 numbers, deeper floors scale them up automatically.
@@ -109,7 +109,7 @@ namespace Tacetno433.Data
     {
         public static Enemy[] All = new Enemy[]
         {
-            //Normal : any era. Round 11 : HUSH and THE LULL were given heavier parts, they were
+            //Normal : any movement. Round 11 : HUSH and THE LULL were given heavier parts, they were
             //far weaker than the other two and never threatened anyone.
             //Round 15 : the roadside enemies play ODE TO JOY for now (the first song). In the month
             //after the 29 Sep hand in, each should get a piece of its own.
@@ -134,7 +134,7 @@ namespace Tacetno433.Data
                         TraitText = "One note in every bar shows the wrong loudness.",
                         Kind = EnemyKind.Normal, Song = SongList.OdeToJoy, Pattern = new int[] { 4, 0, 3, 0, 4, 0, 3, 6 }, Tone = Palette.ToneB, Temper = 10 },
 
-            //Elite : any era
+            //Elite : any movement
             new Enemy { Name = "THE MUTE CHOIR",
                         TurnHp = 120, TurnSpeed = 4, Phrases = new[] { "Df Df Uf", "Lmf Rmf Lmf Rmf" }, TurnTraitText = "A note you miss takes the target's skills away for a turn.", Title = "A hundred mouths, open, making nothing.",
                         Trait = EnemyTrait.SilentMouths, TraitName = "SILENT MOUTHS", TraitFloor = 1,
@@ -156,26 +156,26 @@ namespace Tacetno433.Data
                         TraitText = "It never stops, so silent beats give back only half the breath.",
                         Kind = EnemyKind.Elite, Song = SongList.PreludeInC, Pattern = new int[] { 5, 5, 5, 5, 5, 5, 5, 5 }, Tone = Palette.ToneA, Temper = 0 },
 
-            //Boss : one per era
+            //Boss : one per movement (was one per era until 29 Oct)
             new Enemy { Name = "REQUIEM",
                         TurnHp = 250, TurnSpeed = 5, Phrases = new[] { "Df Lmf Rmf Uf", "Lf Rf Lf Rf" }, TurnTraitText = "Below half life it swaps left and right and plays faster.",            Title = "The piece that was never finished.",
                         Trait = EnemyTrait.Unfinished, TraitName = "UNFINISHED", TraitFloor = 1,
                         TraitText = "In round three it plays backwards and faster, and your band is mirrored: the players on the left and right swap sides.",
-                        Kind = EnemyKind.Boss, Era = 0, Song = SongList.RondoAllaTurca, Pattern = new int[] { 6, 0, 4, 0, 8, 0, 4, 9 }, Hidden = new int[] { 2, 6 }, Tone = Palette.ToneA },
+                        Kind = EnemyKind.Boss, Movement = 0, Song = SongList.RondoAllaTurca, Pattern = new int[] { 6, 0, 4, 0, 8, 0, 4, 9 }, Hidden = new int[] { 2, 6 }, Tone = Palette.ToneA },
             new Enemy { Name = "THE NAMELESS MASTER",
                         TurnHp = 230, TurnSpeed = 4, Phrases = new[] { "Dmf Umf Lmf", "Rf Lf Dp Up" }, TurnTraitText = "It answers with the notes of the last skill your band played.", Title = "He plays a phrase. You must answer better.",
                         Trait = EnemyTrait.Mirror, TraitName = "ANSWER BETTER", TraitFloor = 1,
                         TraitText = "From round two it plays your last round back at you.",
-                        Kind = EnemyKind.Boss, Era = 1, Song = SongList.NachtMusik, Pattern = new int[] { 3, 0, 3, 5, 0, 3, 2, 7 }, Hidden = new int[] { 3, 7 }, Tone = Palette.ToneB },
+                        Kind = EnemyKind.Boss, Movement = 1, Song = SongList.NachtMusik, Pattern = new int[] { 3, 0, 3, 5, 0, 3, 2, 7 }, Hidden = new int[] { 3, 7 }, Tone = Palette.ToneB },
                         // round 12.1, was 3 3 0 5 0 3 0 8 : a strong player lost to it on floor one 27 percent of the time,
                         // twice the hardest elite. Now about 15 percent, still the hardest boss. Round 12 : was 4 4 0 6 4 4 0 9
             new Enemy { Name = "THE DEVIL'S STRING",
                         TurnHp = 260, TurnSpeed = 6, Phrases = new[] { "Rf Rf Lf", "Uf Df Uf Df" }, TurnTraitText = "Each of its attacks steals 1 BREATH.",  Title = "One string, one bow, one bargain.",
                         Trait = EnemyTrait.Bargain, TraitName = "THE BARGAIN", TraitFloor = 1,
                         TraitText = "Before round two it offers a deal: more power now, less breath for ever.",
-                        Kind = EnemyKind.Boss, Era = 2, Pattern = new int[] { 7, 0, 7, 0, 0, 9, 0, 9 }, Hidden = new int[] { 4 }, Tone = Palette.ToneA, Temper = 20 },
+                        Kind = EnemyKind.Boss, Movement = 2, Pattern = new int[] { 7, 0, 7, 0, 0, 9, 0, 9 }, Hidden = new int[] { 4 }, Tone = Palette.ToneA, Temper = 20 },
 
-            //ONE BAR (Alpha 7 step 13, docs/ALPHA7_CONTENT_PROPOSALS.md) : any era, added at the END because the
+            //ONE BAR (Alpha 7 step 13, docs/ALPHA7_CONTENT_PROPOSALS.md) : any movement, added at the END because the
             //save file and ArtBank keep enemies by their place in this list. Each one is a puzzle for one part of
             //ONE BAR : who to hit first (ROOM TONE), when to CALL (THE CUE, THE DAMPER) and the order of the bar
             //(STUTTER, THE ROUND). TurnPower 0 : each note hits the average of the Pattern, like the others.
@@ -205,24 +205,25 @@ namespace Tacetno433.Data
                         TraitText = "It always strikes the musician who plays first in the bar.",
                         Kind = EnemyKind.Elite, Pattern = new int[] { 5, 0, 5, 0, 5, 0, 5, 5 }, Tone = Palette.ToneB },
 
-            //Bosses of step 14 (option B : no new era, each era picks one of its two bosses at random). The Hollow
+            //Bosses of step 14 (option B : each movement picks one of its two bosses at random, they were the eras' until
+            //29 Oct). The Hollow
             //of three conductors from the lore (docs/USER_BRIEFS.md) : Bach with no eyes, Lully with no legs and a cane,
             //Beethoven with no ears and a crown of black thorns. The names are stand-ins until the story is written.
             new Enemy { Name = "THE DEAF CROWN",
                         TurnHp = 240, TurnSpeed = 5, TurnPower = 6, Phrases = new[] { "Uf Uf Uf Df", "Lf Rf Df" }, TurnTraitText = "Each bar it forbids SKILLS or ATTACKS, and breaking it hurts. It never takes a COUNTER.", Title = "It cannot hear you. It only gives orders.",
                         Trait = EnemyTrait.Decree, TraitName = "DECREE", TraitFloor = 1,
                         TraitText = "Each bar it forbids SKILLS or ATTACKS, and breaking it hurts. It never takes a COUNTER.",
-                        Kind = EnemyKind.Boss, Era = 0, Pattern = new int[] { 6, 0, 6, 0, 6, 0, 6, 9 }, Tone = Palette.ToneA },
+                        Kind = EnemyKind.Boss, Movement = 0, Pattern = new int[] { 6, 0, 6, 0, 6, 0, 6, 9 }, Tone = Palette.ToneA },
             new Enemy { Name = "THE STAFF",
                         TurnHp = 250, TurnSpeed = 3, TurnPower = 7, Phrases = new[] { "Df Dmf Df", "Dmf Lmf Dmf Rmf" }, TurnTraitText = "While its court stands it takes half. Every third attack it strikes the floor and hits everyone.", Title = "It cannot walk. It beats time on the floor instead.",
                         Trait = EnemyTrait.TheCourt, TraitName = "THE COURT", TraitFloor = 1,
                         TraitText = "While its court stands it takes half. Every third attack it strikes the floor and hits everyone.",
-                        Kind = EnemyKind.Boss, Era = 1, Pattern = new int[] { 6, 0, 6, 0, 6, 0, 6, 6 }, Tone = Palette.ToneB },
+                        Kind = EnemyKind.Boss, Movement = 1, Pattern = new int[] { 6, 0, 6, 0, 6, 0, 6, 6 }, Tone = Palette.ToneB },
             new Enemy { Name = "THE BLIND CANTOR",
                         TurnHp = 240, TurnSpeed = 4, TurnPower = 6, Phrases = new[] { "Df Umf Df Umf", "Lmf Rmf Lp Rp" }, TurnTraitText = "It strikes the seats in turn, front to back. A note you miss comes back in its next attack.", Title = "It plays by touch, one voice after another.",
                         Trait = EnemyTrait.ByTouch, TraitName = "BY TOUCH", TraitFloor = 1,
                         TraitText = "It strikes the seats in turn, front to back. A note you miss comes back in its next attack.",
-                        Kind = EnemyKind.Boss, Era = 2, Pattern = new int[] { 6, 0, 6, 0, 6, 0, 6, 6 }, Tone = Palette.ToneA },
+                        Kind = EnemyKind.Boss, Movement = 2, Pattern = new int[] { 6, 0, 6, 0, 6, 0, 6, 6 }, Tone = Palette.ToneA },
         };
 
         //Practice : the enemy of the tutorial's practice fight (Alpha 7, step 9, BattleRules PRACTICE).
@@ -247,19 +248,19 @@ namespace Tacetno433.Data
         }
 
         //Pick Other : like Pick, but someone not in the fight yet while there is anyone left (PACKS, Alpha 7 step 12)
-        public static Enemy PickOther(EnemyKind kind, int era, List<Enemy> already, Random random)
+        public static Enemy PickOther(EnemyKind kind, int movement, List<Enemy> already, Random random)
         {
             for (int tries = 0; tries < 20; tries++)
             {
-                Enemy e = Pick(kind, era, random);
+                Enemy e = Pick(kind, movement, random);
                 if (!already.Contains(e)) return e;
             }
-            return Pick(kind, era, random);
+            return Pick(kind, movement, random);
         }
 
-        //Enemy Pick : a random enemy of this kind that fits the era.
-        //Bosses prefer their own era, and fall back to any boss if none is written for it.
-        public static Enemy Pick(EnemyKind kind, int era, Random random)
+        //Enemy Pick : a random enemy of this kind that fits the movement (the floor, Data/Movement.cs).
+        //Bosses prefer their own movement, and fall back to any boss if none is written for it.
+        public static Enemy Pick(EnemyKind kind, int movement, Random random)
         {
             List<Enemy> pool = new List<Enemy>();
 
@@ -267,10 +268,10 @@ namespace Tacetno433.Data
             {
                 Enemy e = All[i];
                 if (e.Kind != kind) continue;
-                if (e.Era == -1 || e.Era == era) pool.Add(e);
+                if (e.Movement == -1 || e.Movement == movement) pool.Add(e);
             }
 
-            //Fallback : nothing fits the era, take any enemy of the right kind
+            //Fallback : nothing fits the movement, take any enemy of the right kind
             if (pool.Count == 0)
                 for (int i = 0; i < All.Length; i++)
                     if (All[i].Kind == kind) pool.Add(All[i]);

@@ -459,9 +459,15 @@ namespace Tacetno433.Screens
                 return;
             }
 
-            //Who : the name, the instrument, life and power
+            //Who : the name, the name the legends give them (or the family for a hidden one from an old save), life and power,
+            //and the weapon their instrument becomes (29 Oct, docs/CHARACTER_DESIGN.md 5)
             Gfx.Text(sb, Game.BigFont, m.NameTag, x, y - 2, BandColumn.SpotOf(m) * a, TextSize.Subtitle);
-            Gfx.TextSpaced(sb, Game.Font, m.FamilyLabel, x, y + 30, Palette.PaperDim * a, TextSize.Tiny, 2f);
+            Gfx.TextSpaced(sb, Game.Font, m.Epithet.Length > 0 ? m.Epithet : m.FamilyLabel, x, y + 30, Palette.PaperDim * a, TextSize.Tiny, 2f);
+            if (m.Weapon.Length > 0)
+            {
+                Gfx.TextSpaced(sb, Game.Font, "WEAPON", x, y + 80, Palette.LineGrey * a, TextSize.Tiny, 2f);
+                Gfx.TextSpaced(sb, Game.Font, m.Weapon, x + 74, y + 80, Palette.Paper * a, TextSize.Tiny, 2f);
+            }
             Gfx.TextSpaced(sb, Game.Font, "LIFE", x, y + 56, Palette.LineGrey * a, TextSize.Tiny, 2f);
             Gfx.Text(sb, Game.Font, NumberText.Get(run.LifeOf(m)), x + 44, y + 52, Palette.Paper * a, TextSize.Body);
             Gfx.Text(sb, Game.Font, NumberText.Get(run.MaxLifeOf(m)), x + 84, y + 56, Palette.LineGrey * a, TextSize.Tiny);

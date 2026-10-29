@@ -112,8 +112,8 @@ namespace Tacetno433.Battle
         public bool JustCalled;        // CALL (step 12) : walked in from the BENCH this bar, plays from the next one
         public int CalledBar;          // ENTRANCE (step 13) : the bar they were called in, 0 for the ones who started on the field
         public float Echo;             // FUGUE : the next skill plays again at this strength, 0 for none
-        public int Momentum;           // MOMENTUM (OTTO) : hits in a row, each one 1 power more
-        public int Swings;             // FOUR BARS STRAIGHT (LUKA) : ATTACKs made this fight
+        public int Momentum;           // MOMENTUM (PFUNDT) : hits in a row, each one 1 power more
+        public int Swings;             // FOUR BARS STRAIGHT (DUPORT) : ATTACKs made this fight
 
         public bool Down { get { return Hp <= 0; } }
     }
@@ -986,7 +986,7 @@ namespace Tacetno433.Battle
             MusicianTrait trait = attacker.Musician.Trait;
             float scale = BattleRules.TurnAttackScale;
 
-            //FOUR BARS STRAIGHT (LUKA) : every fourth ATTACK hits twice as hard
+            //FOUR BARS STRAIGHT (DUPORT) : every fourth ATTACK hits twice as hard
             attacker.Swings++;
             if (trait == MusicianTrait.FourBars && attacker.Swings % BattleRules.TurnFourBarsEvery == 0) scale *= BattleRules.TurnFourBarsScale;
 
@@ -1163,7 +1163,7 @@ namespace Tacetno433.Battle
             return s.Damage > 0f || s.Heal > 0f || s.Dissonance > 0 || s.Crescendo > 0 || s.OffBeat > 0;
         }
 
-        //Count Hit : MOMENTUM (OTTO), a turn that lands adds one, a turn that misses starts again
+        //Count Hit : MOMENTUM (PFUNDT), a turn that lands adds one, a turn that misses starts again
         private void CountHit(Fighter f, bool landed)
         {
             if (f.Musician.Trait != MusicianTrait.Momentum) return;
@@ -1245,7 +1245,7 @@ namespace Tacetno433.Battle
         private static float TraitScale(Fighter attacker, Fighter target)
         {
             MusicianTrait trait = attacker.Musician.Trait;
-            if (trait == MusicianTrait.QuietPart && ShowsSize(target, 0)) return BattleRules.TurnQuietScale;          // THE QUIET PART (KLARA)
+            if (trait == MusicianTrait.QuietPart && ShowsSize(target, 0)) return BattleRules.TurnQuietScale;          // THE QUIET PART (QUANTZ)
             if (trait == MusicianTrait.OneStepBetter && ShowsSize(target, 2)) return BattleRules.TurnStepBetterScale; // ONE STEP BETTER (NUAN)
             if (trait == MusicianTrait.ByEar && target.Staggered) return BattleRules.TurnByEarScale;                  // BY EAR (MALI)
             return 1f;
@@ -1397,14 +1397,14 @@ namespace Tacetno433.Battle
                 perfect += BattleRules.TurnLullyWindow;
                 good += BattleRules.TurnLullyWindow;
             }
-            if (trait == MusicianTrait.KeepsCount) perfect = Math.Min(good, perfect + BattleRules.TurnCountsWindow);   // COUNTS ALOUD (ANNA)
+            if (trait == MusicianTrait.KeepsCount) perfect = Math.Min(good, perfect + BattleRules.TurnCountsWindow);   // COUNTS ALOUD (PAGANINI)
 
             float gap = Math.Abs(offset);
             Grade grade = Grade.Miss;
             if (rightWay && gap <= perfect) grade = Grade.Perfect;
             else if (rightWay && gap <= good) grade = Grade.Good;
             else if (rightWay && trait == MusicianTrait.Forgiven && offset > 0f && offset <= good + BattleRules.TurnLateBonus)
-                grade = Grade.Good;                                                                  // FASHIONABLY LATE (IRIS)
+                grade = Grade.Good;                                                                  // FASHIONABLY LATE (PUNTO)
 
             //CAPRICE : every swipe goes one better, a MISS is GOOD and a GOOD is PERFECT
             if (CapriceTurns > 0 && grade == Grade.Good) grade = Grade.Perfect;

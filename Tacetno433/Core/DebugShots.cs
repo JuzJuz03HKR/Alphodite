@@ -370,7 +370,6 @@ namespace Tacetno433.Core
                 report += Same("conductor", run.Conductor.Name, back.Conductor.Name);
                 report += Same("band", run.BandName, back.BandName);
                 report += Same("floor / stage", run.Floor + "/" + run.Stage + "/" + run.StagesThisFloor, back.Floor + "/" + back.Stage + "/" + back.StagesThisFloor);
-                report += Same("era", run.Era.ToString(), back.Era.ToString());
                 report += Same("maestro", run.Maestro.ToString(), back.Maestro.ToString());
                 report += Same("shards / seats", run.Shards + "/" + run.Seats + "/" + run.SeatsBoughtThisFloor, back.Shards + "/" + back.Seats + "/" + back.SeatsBoughtThisFloor);
                 report += Same("stamina", run.StaminaValue, back.StaminaValue);
@@ -390,6 +389,12 @@ namespace Tacetno433.Core
                 report += Same("pack", PackNames(run.Battle.Pack), PackNames(SaveFile.LoadedPack));      // PACKS (Alpha 7 step 12)
                 report += Same("event", run.CurrentEvent.Title, SaveFile.LoadedEvent != null ? SaveFile.LoadedEvent.Title : "none");
                 report += Same("summary", run.Conductor.Name + "  /  FLOOR 2  /  STAGE 5", SaveFile.RunSummary());
+
+                //NO MORE ERAS (29 Oct) : a save from before can still hold a CROSSING (6) on its map, it loads as a ??? (Event)
+                string written = run.Map.Write();
+                RunState old = SampleRun(game, "savecheck");
+                old.RestoreMap("6" + written.Substring(written.IndexOf(':')), new int[0]);
+                report += Same("old crossing", "Event", old.Map.Rows[2][0].Type.ToString());
             }
 
             //Settings : change them, save, scramble, load, compare, then put the defaults back
@@ -533,7 +538,7 @@ namespace Tacetno433.Core
             return s;
         }
 
-        //Whole Runs : plays complete runs from the first era choice to the end, 200 per habit,
+        //Whole Runs : plays complete runs from the first floor's opening to the end, 200 per habit,
         //with THE APPRENTICE. Paths are picked at random. Rests breathe, shops buy stamina when
         //the band is low and a seat when someone waits on the bench, events are skipped.
         //After a win the sim takes a motif at random from the same offer the reward page makes
@@ -581,11 +586,10 @@ namespace Tacetno433.Core
             public int Runs, Won, OutOfBreath, BossStamina, BossCount, Fights, Beats, Signatures;
             public int[] LostOnFloor = new int[BattleRules.FloorsPerRun + 1];
             public int[] LostTo = new int[3];                         // by EnemyKind
-            public int[] EraRuns = new int[3], EraWon = new int[3];   // by the first era chosen
             public Dictionary<string, int[]> Enemies = new Dictionary<string, int[]>();   // "NAME (floor)" -> fights, losses
         }
 
-        //Play Run : one whole run with a fixed habit, from the first era choice to the end.
+        //Play Run : one whole run with a fixed habit, from the first floor's opening to the end.
         //startMotif (or null) is owned from the start, takeMotifs picks one after every win.
         //Everything that happened is added to rec. Returns true when the run was won.
         private static bool PlayRun(TacetGame game, Conductor conductor, int habit, Motif startMotif, bool takeMotifs, Random random, RunRecord rec)
@@ -596,16 +600,12 @@ namespace Tacetno433.Core
             run.BandName = "SIM";
             if (startMotif != null) run.AddMotif(startMotif);
             bool alive = true;
-            int firstEra = -1;
 
             for (int guard = 0; guard < 200 && alive && !run.RunComplete; guard++)
             {
                 if (run.AtFloorOpening)
                 {
-                    int era = random.Next(EraList.All.Length);
-                    if (firstEra < 0) firstEra = era;
-                    run.ChooseEra(era);
-                    run.RecruitAtOpening();
+                    run.RecruitAtOpening();                                             // NO MORE ERAS : no era to choose first
                     run.LeaveOpening();
                     continue;
                 }
@@ -654,10 +654,6 @@ namespace Tacetno433.Core
                             if (run.Formation.SeatOf(run.Roster[i]) < 0) run.Formation.AutoSeat(run.Roster[i], run.Seats);
                     }
                 }
-                else if (type == NodeType.EraShift)
-                {
-                    run.ChooseEra((run.Era + 1) % EraList.All.Length);
-                }
 
                 run.FinishBattle();
                 run.Advance();
@@ -666,7 +662,6 @@ namespace Tacetno433.Core
             bool won = alive && run.RunComplete;
             rec.Runs++;
             if (won) rec.Won++;
-            if (firstEra >= 0) { rec.EraRuns[firstEra]++; if (won) rec.EraWon[firstEra]++; }
             return won;
         }
 
@@ -822,8 +817,8 @@ namespace Tacetno433.Core
         }
 
         //Page Open : build a sample run that suits the page, then show it.
-        //Names: title titlecontinue titlequit guide guide3 guide4 guide5 settings calibrate gallery detail chapter era
-        //       crossing recruit bandname route pause band (or view) duelbargain dueltrait duelmute duelmirror
+        //Names: title titlecontinue titlequit guide guide3 guide4 guide5 settings calibrate gallery detail chapter
+        //       recruit bandname route pause band (or view) duelbargain dueltrait duelmute duelmirror
         //       duel duelcombo duelboss duelcutin duelpause dueldouble dueltremolo duelfermata duelfire duelrepeat finale
         //       result defeat reward shop shopleave event eventchair rest curtain curtainwin
         //       rewardpick rewardtilt shopbuy (Beta1 round 1 : a card picked, the pointed card leaning, a motif bought, e.g. rewardpick@80)
@@ -862,8 +857,6 @@ namespace Tacetno433.Core
             if (name == "detailcarry") screen = new ConductorDetailScreen(0);             //   the painting on its way to the middle (detailcarry@12)
             if (name == "detailswap") screen = new ConductorDetailScreen(0);              //   the arrows sliding to the next profile (detailswap@40)
             if (name == "chapter") screen = new ChapterScreen();
-            if (name == "era") screen = new EraChoiceScreen(true);
-            if (name == "crossing") screen = new EraChoiceScreen(false);
             if (name == "recruit") screen = new RecruitScreen();
             if (name == "bandname") screen = new BandNameScreen();
             if (name.StartsWith("route") || name.StartsWith("pause") || name.StartsWith("wipe") || name.StartsWith("sweep")) screen = new RouteScreen();
@@ -921,14 +914,11 @@ namespace Tacetno433.Core
             run.Start(ownConductor ? ConductorList.All[ShotConductor(name)] : sample, game.StoryFont, RouteNodeInfo.CaptionWrapWidth);
             run.BandName = "THE SILENT CHOIR";
 
-            //Ensemble : three from Siam on stage, one from the Classical era on the bench
-            run.ChooseEra(1);
-            run.RecruitOne();
-            run.RecruitOne();
-            run.RecruitOne();
-            run.ChooseEra(0);
-            run.RecruitOne();
-            run.ChooseEra(name == "shop" ? 0 : 1);                                  // the shop picture : a Classical player still for hire
+            //Ensemble : four of the five legends (NO MORE ERAS, 29 Oct), PUNTO still free for the shop's HIRE
+            run.Recruit(MusicianList.All[0]);                                       // PAGANINI, violin
+            run.Recruit(MusicianList.All[1]);                                       // QUANTZ, flute
+            run.Recruit(MusicianList.All[2]);                                       // PFUNDT, timpani
+            run.Recruit(MusicianList.All[6]);                                       // DUPORT, cello
 
             if (name == "recruit")
             {
@@ -986,11 +976,9 @@ namespace Tacetno433.Core
                 run.Chosen.Type = NodeType.Boss;
                 run.Floor = 2;
             }
-            if (name == "battlefull")                                                 // six musicians, four enemies (floor 3, late)
+            if (name == "battlefull")                                                 // all five musicians, four enemies (floor 3, late)
             {
-                run.ChooseEra(2);
-                run.RecruitOne();
-                run.RecruitOne();
+                run.Recruit(MusicianList.All[7]);                                     // PUNTO
                 run.Floor = 3;
             }
             if (name == "reward" || name == "dueltremolo" || name.EndsWith("repeat")) run.Chosen.Type = NodeType.Elite;
@@ -1099,7 +1087,7 @@ namespace Tacetno433.Core
                 for (int i = 0; i < path.Length; i++) run.RecordStop(path[i]);
                 run.Floor = 2;
                 run.RecordStop(NodeType.Battle);
-                run.RecordStop(NodeType.EraShift);
+                run.RecordStop(NodeType.Event);
                 run.RecordStop(NodeType.Elite);
                 if (name == "curtain") run.MarkLastStopLost();
                 run.Floor = 1;

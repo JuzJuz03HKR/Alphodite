@@ -75,23 +75,18 @@ Draw on a transparent background: the eclipse behind it is an effect and stays.
 Code: Screens/DuelScreen.Stage.cs (DrawTacetSide)
 
 
-5. DUEL BACKGROUND  (one per era)
+5. DUEL BACKGROUND  (one per movement, the floors : no more eras since 29 Oct)
 ---------------------------------
 Folder:  Content/Art/Stage
-    stage_classical.png   stage_siam.png   stage_romantic.png
+    stage_prelude.png   stage_nocturne.png   stage_coda.png
 Size: 1280 x 720, the whole screen. TACET's black covers the right side of it during a
 fight, so the important part of the painting should sit on the left. The band stands with
 their feet between y 506 and y 554, so paint the floor from about y 452 down.
 Code: Core/ArtBank.cs (DrawStage)
 
 
-6. PANELS : ERAS AND PLACES
+6. PANELS : PLACES  (the era panels went with the eras, 29 Oct)
 ---------------------------
-Folder:  Content/Art/Eras      era_classical.png   era_siam.png   era_romantic.png
-Tall panels that stretch to fit the column they are in (around 480 x 720 is a good size).
-The bottom 150 pixels sit under the caption, so keep the subject in the upper part.
-Code: Core/PanelStrip.cs, Screens/EraChoiceScreen.cs
-
 Folder:  Content/Art/Route     route_battle.png  route_elite.png  route_boss.png  route_event.png
                                route_shop.png  route_rest.png  route_crossing.png
 A small WIDE picture in the route page's detail box, shown at 230 x 142 (paint 460 x 284).

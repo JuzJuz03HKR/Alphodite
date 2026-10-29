@@ -35,7 +35,7 @@ namespace Tacetno433.Screens
         private static readonly Vector2 LostHole = new Vector2(372f, 286f);   // behind the band, under the headline
 
         //Journey Marks : one letter per kind of place, the same as the route's map (RouteNodeInfo.Marks)
-        private static string[] journeyKey = { "E ENCOUNTER", "! ELITE", "B BOSS", "? UNKNOWN", "$ SHOP", "R REST", "X CROSSING" };
+        private static string[] journeyKey = { "E ENCOUNTER", "! ELITE", "B BOSS", "? UNKNOWN", "$ SHOP", "R REST" };   // NO MORE ERAS : no X CROSSING
 
         private bool won;
         private RunState run;            // kept here, because Game.CurrentRun is cleared when we leave

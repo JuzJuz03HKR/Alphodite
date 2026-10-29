@@ -8,7 +8,7 @@ using Tacetno433.Data;
 
 namespace Tacetno433.Screens
 {
-    //RecruitScreen : musicians from the era you just chose walk on and join the ensemble.
+    //RecruitScreen : the floor's new faces walk on and join the ensemble (any of the five legends, NO MORE ERAS 29 Oct).
     //Shown right after a floor opening, and after an elite fight that brought someone home.
     //The band is named here too, but only on the very first floor of a run.
     //
@@ -208,12 +208,12 @@ namespace Tacetno433.Screens
             float cx = TacetGame.ScreenW / 2f;
             int count = run.JustJoined.Count;
 
-            //Nobody Joined : the era ran out of people, or the ensemble is full
+            //Nobody Joined : everyone the run can meet is in the band already, or the ensemble is full
             if (count == 0)
             {
                 Gfx.TextSpacedCentered(sb, Game.BigFont, "NOBODY STEPS FORWARD", cx, 280, Palette.Paper, TextSize.Subtitle, 4f);
                 Ornament.OrbitRule(sb, cx, 330, 160, Palette.LineGrey);
-                string why = run.RosterFull ? "Your ensemble and bench are both full." : "This era has nobody left to give.";
+                string why = run.RosterFull ? "Your ensemble and bench are both full." : "Everyone is in the band already.";
                 Gfx.TextCentered(sb, Game.StoryFont, why, cx, 360, Palette.PaperDim, TextSize.Story);
                 DrawFooter(sb, run, 1f);
                 return;

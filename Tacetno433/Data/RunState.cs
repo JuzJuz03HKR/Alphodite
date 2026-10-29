@@ -39,7 +39,6 @@ namespace Tacetno433.Data
         public int Floor = 1;
         public int Stage = 1;
         public int StagesThisFloor = 8;      // the boss sits on this stage number
-        public int Era = 0;                  // index into EraList.All
         public bool RunComplete;             // true once the last boss is beaten
         public bool Maestro;                 // MAESTRO MODE : hard from the first fight, NORMAL when false (29 Sep, BattleRules)
 
@@ -149,7 +148,8 @@ namespace Tacetno433.Data
             BeginFloor();
         }
 
-        //Floor Begin : a new floor opens on its locked stage one, where the era is chosen, and its whole map is made
+        //Floor Begin : a new floor opens on its locked stage one, where its movement's card shows and new faces join, and its
+        //whole map is made
         public void BeginFloor()
         {
             Stage = 1;
@@ -160,13 +160,13 @@ namespace Tacetno433.Data
             RefreshLabels();
         }
 
-        //Floor Opening : true while we are on the locked era choice stage
+        //Floor Opening : true while we are on the locked stage one (the movement's card and the new faces)
         public bool AtFloorOpening
         {
             get { return Stage == 1; }
         }
 
-        //Opening Leave : the era is picked and the musicians taken, routing starts now
+        //Opening Leave : the new faces have joined, routing starts now
         public void LeaveOpening()
         {
             Stage = 2;
@@ -174,16 +174,11 @@ namespace Tacetno433.Data
             RefreshLabels();
         }
 
-        //Era Choose : used both by the floor opening and by a CROSSING
-        public void ChooseEra(int era)
+        //Movement : NO MORE ERAS (Beta1, 29 Oct). Each floor is a movement of the piece (Data/Movement.cs), which picks its
+        //bosses and its battle backdrop. It follows the floor, so it is never saved.
+        public int Movement
         {
-            Era = era;
-            RefreshLabels();
-        }
-
-        public Era CurrentEra
-        {
-            get { return EraList.All[Era]; }
+            get { return MovementList.Of(Floor); }
         }
 
         //Start Seats : the seats on stage a run starts with. TURN BATTLE (step 15) : the ones seated on the BAND page
@@ -204,7 +199,7 @@ namespace Tacetno433.Data
             get { return Roster.Count >= RosterCapacity; }
         }
 
-        //Recruit Opening : musicians from the chosen era join at the start of a floor
+        //Recruit Opening : new faces join at the start of a floor (NO MORE ERAS : anyone the run can meet, MusicianList.Shown)
         public void RecruitAtOpening()
         {
             JustJoined.Clear();
@@ -221,7 +216,7 @@ namespace Tacetno433.Data
         public Musician RecruitOne()
         {
             if (RosterFull) return null;
-            return Recruit(MusicianList.RollFromEra(Era, Roster, random));
+            return Recruit(MusicianList.Roll(Roster, random));
         }
 
         //Recruit : this musician joins (the shop shows who it will be before paying). Null when
@@ -270,8 +265,8 @@ namespace Tacetno433.Data
         }
 
         //Missing Section Player : someone of a section (strings, winds or percussion) nobody in the
-        //ensemble plays yet, from this era if there is one, from any era if not. When every section
-        //is covered, just someone new from this era. Null when nobody is left (THE EMPTY CHAIR).
+        //ensemble plays yet. When every section is covered, just someone new. Null when nobody is left
+        //(THE EMPTY CHAIR). Only the musicians a run can meet (MusicianList.Shown).
         public Musician MissingSectionPlayer()
         {
             bool[] covered = new bool[StageLayout.Rows.Length];
@@ -279,16 +274,14 @@ namespace Tacetno433.Data
 
             Musician best = null;
             int picks = 0;
-            for (int pass = 0; pass < 2 && best == null; pass++)
-                for (int i = 0; i < MusicianList.All.Length; i++)
-                {
-                    Musician m = MusicianList.All[i];
-                    if (Roster.Contains(m) || covered[StageLayout.SectionOf(m.Family)]) continue;
-                    if (pass == 0 && m.Era != Era) continue;
-                    picks++;
-                    if (random.Next(picks) == 0) best = m;         // every candidate gets a fair chance
-                }
-            if (best == null) best = MusicianList.RollFromEra(Era, Roster, random);
+            for (int i = 0; i < MusicianList.Shown.Length; i++)
+            {
+                Musician m = MusicianList.Shown[i];
+                if (Roster.Contains(m) || covered[StageLayout.SectionOf(m.Family)]) continue;
+                picks++;
+                if (random.Next(picks) == 0) best = m;             // every candidate gets a fair chance
+            }
+            if (best == null) best = MusicianList.Roll(Roster, random);
             return best;
         }
 
@@ -461,7 +454,7 @@ namespace Tacetno433.Data
             if (Chosen != null && Chosen.Type == NodeType.Elite) kind = EnemyKind.Elite;
             if (Chosen != null && Chosen.Type == NodeType.Boss) kind = EnemyKind.Boss;
 
-            Enemy enemy = known != null ? known : EnemyList.Pick(kind, Era, random);
+            Enemy enemy = known != null ? known : EnemyList.Pick(kind, Movement, random);
             Battle = new BattleState(this, enemy, random);
 
             //PACKS (Alpha 7 step 12) : the turn battle brings ordinary enemies along, more on deeper floors
@@ -472,7 +465,7 @@ namespace Tacetno433.Data
                 Battle.Pack = new List<Enemy>(knownPack);
                 return;
             }
-            for (int i = 0; i < PackEscorts(kind); i++) Battle.Pack.Add(EnemyList.PickOther(EnemyKind.Normal, Era, Battle.Pack, random));
+            for (int i = 0; i < PackEscorts(kind); i++) Battle.Pack.Add(EnemyList.PickOther(EnemyKind.Normal, Movement, Battle.Pack, random));
         }
 
         //Pack Escorts : how many ordinary enemies join the one picked for this fight
@@ -498,12 +491,12 @@ namespace Tacetno433.Data
             return random.Next(100);
         }
 
-        //Label Refresh : call after changing stage, floor, era, shards, seats or stamina
+        //Label Refresh : call after changing stage, floor, shards, seats or stamina
         public void RefreshLabels()
         {
             StageLabel = "STAGE " + Stage;
             StageNumber = Stage.ToString("00");
-            FloorLabel = "FLOOR " + Floor + "   " + CurrentEra.Name + " ERA";
+            FloorLabel = "FLOOR " + Floor + "   " + MovementList.Names[Movement];
             FloorShort = "FLOOR " + Floor + " / " + BattleRules.FloorsPerRun;
             ShardsLabel = "SHARDS  " + Shards;
             SeatsLabel = "SEATS  " + Formation.SeatedCount + " / " + Seats;
@@ -622,7 +615,8 @@ namespace Tacetno433.Data
                 Map.Rows[s] = new RouteNode[rows[r].Count];
                 for (int c = 0; c < rows[r].Count; c++)
                 {
-                    Map.Rows[s][c] = MakeNode(rows[r][c].Key, s, c);
+                    NodeType type = rows[r][c].Key == NodeType.EraShift ? NodeType.Event : rows[r][c].Key;   // NO MORE ERAS : an old save's CROSSING is a ???
+                    Map.Rows[s][c] = MakeNode(type, s, c);
                     Map.Rows[s][c].Next.AddRange(rows[r][c].Value);
                 }
             }
@@ -654,19 +648,19 @@ namespace Tacetno433.Data
         {
             int roll = mapDice.Next(100);
 
-            //Early Stages : no shop, rest or crossing right after the floor opens
+            //Early Stages : no shop or rest right after the floor opens
             if (stage <= 3)
             {
                 if (roll < 65) return NodeType.Battle;
                 return NodeType.Event;
             }
 
+            //NO MORE ERAS (29 Oct) : the CROSSING's 9 went to the ??? (22 -> 31)
             if (roll < 34) return NodeType.Battle;
-            if (roll < 56) return NodeType.Event;
-            if (roll < 68) return NodeType.Elite;
-            if (roll < 80) return NodeType.Shop;
-            if (roll < 91) return NodeType.Rest;
-            return NodeType.EraShift;
+            if (roll < 65) return NodeType.Event;
+            if (roll < 77) return NodeType.Elite;
+            if (roll < 89) return NodeType.Shop;
+            return NodeType.Rest;
         }
 
         //Node Make : build one node and wrap its caption now, so drawing stays free of string work

@@ -7,7 +7,7 @@ namespace Tacetno433.Core
 {
     //DebugShots.TurnContent : DEVELOPER TOOL, the checks of steps 13 and 14 (Alpha 7), part of --shots turncheck.
     //The six ONE BAR motifs, the five new enemies, the three bosses of step 14 and the bugs fixed with them.
-    //The musicians' own traits are switched off here so the numbers stay plain (ANNA 6, KLARA 4, OTTO 7 an ATTACK, enemies x1.6 life on floor 1).
+    //The musicians' own traits are switched off here so the numbers stay plain (PAGANINI 6, QUANTZ 4, PFUNDT 7 an ATTACK, enemies x1.6 life on floor 1).
     public static partial class DebugShots
     {
         private static string TurnCheckStep13(List<Musician> band, Enemy hush, Enemy deadAir)
@@ -24,7 +24,7 @@ namespace Tacetno433.Core
             //Lists : 21 + 6 motifs, 9 + 5 + 3 enemies, 7 + 3 events, the new ones at the end (the save keeps their places)
             report += Same("content", "27 17 10 ROOM TONE", MotifList.All.Length + " " + EnemyList.All.Length + " " + EventList.All.Length + " " + EnemyList.All[9].Name);
 
-            //DOWNBEAT : the first move of the bar x1.5 (ANNA 5.5 x 1.5 = 8.25 -> 8), the second plain (KLARA 4)
+            //DOWNBEAT : the first move of the bar x1.5 (PAGANINI 5.5 x 1.5 = 8.25 -> 8), the second plain (QUANTZ 4)
             TurnBattle b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             b.GiveMotifs(new List<Motif> { MotifList.Get(MotifId.Downbeat) });
             b.PlayBar();
@@ -32,7 +32,7 @@ namespace Tacetno433.Core
             int down2 = b.Attack();
             report += Same("downbeat", "8 4", down1 + " " + down2);
 
-            //ENTRANCE : OTTO is called in bar 1, so in bar 2 he hits x2 (6.6 x 2 = 13.2 -> 13), in bar 3 plainly (7)
+            //ENTRANCE : PFUNDT is called in bar 1, so in bar 2 he hits x2 (6.6 x 2 = 13.2 -> 13), in bar 3 plainly (7)
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433), null, 0, 2);
             Tough(b);
             b.GiveMotifs(new List<Motif> { MotifList.Get(MotifId.Entrance) });
@@ -49,7 +49,7 @@ namespace Tacetno433.Core
             b.Attack();
             report += Same("entrance", "13 7", entrance + " " + b.Attack());
 
-            //GREEN ROOM : OTTO waits on the BENCH with 20 life, one bar later he has 22
+            //GREEN ROOM : PFUNDT waits on the BENCH with 20 life, one bar later he has 22
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433), new int[] { 30, 26, 20 }, 0, 2);
             Tough(b);
             b.GiveMotifs(new List<Motif> { MotifList.Get(MotifId.GreenRoom) });
@@ -57,7 +57,7 @@ namespace Tacetno433.Core
             PlayWholeBar(b);
             report += Same("green room", "20 22", before + " " + b.BenchLife[0]);
 
-            //UNISON : the whole bar ATTACKs HUSH (ANNA 6), so KLARA's last ATTACK is x2 (8.8 -> 9). KLARA at DEAD AIR instead : no unison (4)
+            //UNISON : the whole bar ATTACKs HUSH (PAGANINI 6), so QUANTZ's last ATTACK is x2 (8.8 -> 9). QUANTZ at DEAD AIR instead : no unison (4)
             b = new TurnBattle(Duo(), new List<Enemy> { hush, deadAir }, 1, new Random(433));
             b.GiveMotifs(new List<Motif> { MotifList.Get(MotifId.Unison) });
             b.PlayBar();
@@ -71,7 +71,7 @@ namespace Tacetno433.Core
             b.Attack();
             report += Same("unison", "6 9 4", uni1 + " " + uni2 + " " + b.Attack());
 
-            //SEGUE : HUSH has 5 life, ANNA's 6 silences it and the 1 left over goes on to DEAD AIR (80 -> 79). Without it 80.
+            //SEGUE : HUSH has 5 life, PAGANINI's 6 silences it and the 1 left over goes on to DEAD AIR (80 -> 79). Without it 80.
             b = new TurnBattle(Duo(), new List<Enemy> { hush, deadAir }, 1, new Random(433));
             b.GiveMotifs(new List<Motif> { MotifList.Get(MotifId.Segue) });
             b.Enemies[0].Hp = 5;
@@ -86,7 +86,7 @@ namespace Tacetno433.Core
             b.Attack();
             report += Same("segue", "0 79 80", segue + " " + b.Enemies[1].Hp);
 
-            //LAST WORD : KLARA plays the bar's last move, so she stands GUARD and ANNA does not
+            //LAST WORD : QUANTZ plays the bar's last move, so she stands GUARD and PAGANINI does not
             b = new TurnBattle(Duo(), new List<Enemy> { hush }, 1, new Random(433));
             b.GiveMotifs(new List<Motif> { MotifList.Get(MotifId.LastWord) });
             b.PlayBar();
@@ -94,8 +94,8 @@ namespace Tacetno433.Core
             b.Attack();
             report += Same("last word", "False True", b.Party[0].Guard + " " + b.Party[1].Guard);
 
-            //HOLDS THE ROOM (ROOM TONE, floor 2) : HUSH takes 70 percent while it stands (ANNA 6 -> 4.2 -> 4, 105 -> 101),
-            //ROOM TONE itself takes all of KLARA's 4. On floor 1 the trait is off (80 -> 74).
+            //HOLDS THE ROOM (ROOM TONE, floor 2) : HUSH takes 70 percent while it stands (PAGANINI 6 -> 4.2 -> 4, 105 -> 101),
+            //ROOM TONE itself takes all of QUANTZ's 4. On floor 1 the trait is off (80 -> 74).
             Enemy roomTone = EnemyNamed("ROOM TONE");
             b = new TurnBattle(Duo(), new List<Enemy> { hush, roomTone }, 2, new Random(433));
             b.PlanAttack(b.Party[0], b.Enemies[0]);
@@ -110,13 +110,13 @@ namespace Tacetno433.Core
             b.Attack();
             report += Same("holds the room", "101 4 74", room + " " + b.Enemies[0].Hp);
 
-            //ON CUE (THE CUE, floor 2) : it turns to OTTO the moment he is called
+            //ON CUE (THE CUE, floor 2) : it turns to PFUNDT the moment he is called
             Enemy cue = EnemyNamed("THE CUE");
             b = new TurnBattle(band, new List<Enemy> { cue }, 2, new Random(433), null, 0, 2);
             b.Breath = 10;
             string aimed = b.Enemies[0].IntentTarget.Name;
             b.Call(0);
-            report += Same("on cue", "True OTTO", (aimed != "OTTO") + " " + b.Enemies[0].IntentTarget.Name);
+            report += Same("on cue", "True PFUNDT", (aimed != "PFUNDT") + " " + b.Enemies[0].IntentTarget.Name);
 
             //FELT HAND (THE DAMPER, floor 2) : a CALL costs 3 + 1 while it stands, 3 once it is silenced
             b = new TurnBattle(band, new List<Enemy> { EnemyNamed("THE DAMPER") }, 2, new Random(433), null, 0, 2);
@@ -132,7 +132,7 @@ namespace Tacetno433.Core
             string twice = OrderNames(b) + " " + b.Enemies[0].IntentNotes.Length;
             b = new TurnBattle(band, new List<Enemy> { stutter, hush }, 1, new Random(433));
             b.PlayBar();
-            report += Same("twice a bar", "ANNA STUTTER KLARA OTTO STUTTER HUSH 1 / ANNA KLARA STUTTER OTTO HUSH", twice + " / " + OrderNames(b));
+            report += Same("twice a bar", "PAGANINI STUTTER QUANTZ PFUNDT STUTTER HUSH 1 / PAGANINI QUANTZ STUTTER PFUNDT HUSH", twice + " / " + OrderNames(b));
 
             //FIRST IN LINE (THE ROUND) : it aims at the first musician of the bar, and turns as the bar is written
             b = new TurnBattle(band, new List<Enemy> { EnemyNamed("THE ROUND") }, 1, new Random(433));
@@ -140,7 +140,7 @@ namespace Tacetno433.Core
             b.PlanAttack(b.Party[2], b.Enemies[0]);
             line += " " + b.Enemies[0].IntentTarget.Name;
             b.Unplan(b.Party[2]);
-            report += Same("first in line", "ANNA OTTO ANNA", line + " " + b.Enemies[0].IntentTarget.Name);
+            report += Same("first in line", "PAGANINI PFUNDT PAGANINI", line + " " + b.Enemies[0].IntentTarget.Name);
 
             //Fallen Target (bug fix) : HUSH aims at someone after its attack, they fall later in the bar,
             //so when the next bar is written HUSH aims at somebody standing
@@ -157,20 +157,21 @@ namespace Tacetno433.Core
             return report;
         }
 
-        //Turn Check Bosses : step 14, option B. Each era picks one of two bosses, and the three new ones' rules.
+        //Turn Check Bosses : step 14, option B. Each movement (floor, the eras' until 29 Oct) picks one of two bosses, and
+        //the three new ones' rules.
         private static string TurnCheckBosses(List<Musician> band, Enemy hush)
         {
             string report = "";
-            string eras = "";
-            for (int era = 0; era < 3; era++)
+            string movements = "";
+            for (int movement = 0; movement < 3; movement++)
             {
-                if (era > 0) eras += " / ";
+                if (movement > 0) movements += " / ";
                 for (int i = 0; i < EnemyList.All.Length; i++)
-                    if (EnemyList.All[i].Kind == EnemyKind.Boss && EnemyList.All[i].Era == era) eras += EnemyList.All[i].Name + ",";
+                    if (EnemyList.All[i].Kind == EnemyKind.Boss && EnemyList.All[i].Movement == movement) movements += EnemyList.All[i].Name + ",";
             }
-            report += Same("bosses by era", "REQUIEM,THE DEAF CROWN, / THE NAMELESS MASTER,THE STAFF, / THE DEVIL'S STRING,THE BLIND CANTOR,", eras);
+            report += Same("bosses by movement", "REQUIEM,THE DEAF CROWN, / THE NAMELESS MASTER,THE STAFF, / THE DEVIL'S STRING,THE BLIND CANTOR,", movements);
 
-            //BY TOUCH (THE BLIND CANTOR) : ANNA's seat first, then KLARA's. Both of its notes got through,
+            //BY TOUCH (THE BLIND CANTOR) : PAGANINI's seat first, then QUANTZ's. Both of its notes got through,
             //so its next attack is its own 2 (Lmf Rmf) and those 2 again (Df Umf), 6 x 1.85 = 11.1 -> 11 each on floor 1
             TurnBattle b = new TurnBattle(band, new List<Enemy> { EnemyNamed("THE BLIND CANTOR") }, 1, new Random(433));
             Sturdy(b);
@@ -178,10 +179,10 @@ namespace Tacetno433.Core
             PlayToEnemy(b);
             b.TakeEnemyAttack(null);
             Fighter cantor = b.Enemies[0];
-            report += Same("by touch", "ANNA KLARA 4 Left Right Down Up 11", first + " " + cantor.IntentTarget.Name + " " + cantor.IntentNotes.Length + " "
+            report += Same("by touch", "PAGANINI QUANTZ 4 Left Right Down Up 11", first + " " + cantor.IntentTarget.Name + " " + cantor.IntentNotes.Length + " "
                 + cantor.IntentWays[0] + " " + cantor.IntentWays[1] + " " + cantor.IntentWays[2] + " " + cantor.IntentWays[3] + " " + cantor.IntentNotes[3]);
 
-            //THE COURT (THE STAFF) : with HUSH standing, ANNA's 6 is halved (250 x 1.6 = 400 -> 397)
+            //THE COURT (THE STAFF) : with HUSH standing, PAGANINI's 6 is halved (250 x 1.6 = 400 -> 397)
             Enemy staffBoss = EnemyNamed("THE STAFF");
             b = new TurnBattle(Duo(), new List<Enemy> { staffBoss, hush }, 1, new Random(433));
             b.PlanAttack(b.Party[0], b.Enemies[0]);
@@ -201,8 +202,8 @@ namespace Tacetno433.Core
             b.TakeEnemyAttack(null);
             report += Same("the court", "397 True 1 Down 20 20 20", court + " " + (anna - b.Party[0].Hp) + " " + (klara - b.Party[1].Hp));
 
-            //DECREE (THE DEAF CROWN) : bar 1 forbids skills, ANNA's QUICK BOW costs her 5 (30 -> 25). It CUTS IN after
-            //KLARA, every note is parried PERFECT and still no COUNTER. Bar 2 forbids attacks, ANNA's ATTACK costs 5 more.
+            //DECREE (THE DEAF CROWN) : bar 1 forbids skills, PAGANINI's QUICK BOW costs her 5 (30 -> 25). It CUTS IN after
+            //QUANTZ, every note is parried PERFECT and still no COUNTER. Bar 2 forbids attacks, PAGANINI's ATTACK costs 5 more.
             Skill quickBow = SkillList.First(MusicianList.All[0]);
             NoteResult[] goods = new NoteResult[quickBow.Notes.Length];
             for (int i = 0; i < goods.Length; i++) goods[i] = new NoteResult(Grade.Good, true, 1f);
@@ -226,7 +227,7 @@ namespace Tacetno433.Core
             return report;
         }
 
-        //Duo : ANNA and KLARA
+        //Duo : PAGANINI and QUANTZ
         private static List<Musician> Duo()
         {
             return new List<Musician> { MusicianList.All[0], MusicianList.All[1] };

@@ -369,18 +369,18 @@ namespace Tacetno433.Data
                 Story = "She wrote hundreds of pieces and was told to keep them at home. "
                       + "Her brother's shadow plays beside her, and no one says his name.",
                 MechanicName = "TWO VOICES",
-                MechanicText = "The voices take turns : FANNY hits harder, FELIX heals more.",
+                MechanicText = "The voices take turns : FANNY hits harder, ??? heals more.",   // ??? : her brother, nobody says his name (29 Oct)
                 SignatureMark = "A due",
                 SignatureName = "DUET",
-                SignatureText = "The 4/4 shape : FANNY strikes every enemy while FELIX heals every musician.",
+                SignatureText = "The 4/4 shape : FANNY strikes every enemy while ??? heals every musician.",
                 SignatureCall = "* DUET! Two voices at once.",
                 Recipe = new int[] { 2, 2, 2 },
                 Stamina = 5, PushPower = 5, Perk = ConductorPerk.None, Move = SignatureMove.AbsolutePitch,   // the old duel plays her plain
                 Turn = TurnKit.Fanny,
                 TurnPassiveName = "TWO VOICES",
-                TurnPassiveText = "The voices take turns, one musician each : FANNY hits 25 percent harder, FELIX heals 50 percent more.",
+                TurnPassiveText = "The voices take turns, one musician each : FANNY hits 25 percent harder, ??? heals 50 percent more.",
                 TurnSignatureName = "DUET",
-                TurnSignatureText = "The 4/4 shape : FANNY strikes every enemy while FELIX heals every musician.",
+                TurnSignatureText = "The 4/4 shape : FANNY strikes every enemy while ??? heals every musician.",
                 ThemeColor = Palette.ToneC,
                 Spot = Palette.SpotPrism,           // PRISM (29 Oct) : a crystal's white, the rainbow when it moves (SpotAt)
                 Aura = AuraKind.Prism,

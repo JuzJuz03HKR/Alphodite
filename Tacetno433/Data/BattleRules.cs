@@ -171,15 +171,15 @@
         public static int TurnDuetHeal = 8;             //              and life back for every musician
 
         //Musician Traits in the turn battle (step 10, the TurnTraitText of each musician in Data/Musician.cs)
-        public static float TurnCountsWindow = 0.05f;  // COUNTS ALOUD (ANNA) : seconds added to her PERFECT window
-        public static float TurnQuietScale = 1.5f;     // THE QUIET PART (KLARA) : against an enemy showing a p note
-        public static int TurnMomentumMost = 3;        // MOMENTUM (OTTO) : power gained by hits in a row, at most
+        public static float TurnCountsWindow = 0.05f;  // COUNTS ALOUD (PAGANINI) : seconds added to their PERFECT window
+        public static float TurnQuietScale = 1.5f;     // THE QUIET PART (QUANTZ) : against an enemy showing a p note
+        public static int TurnMomentumMost = 3;        // MOMENTUM (PFUNDT) : power gained by hits in a row, at most
         public static float TurnByEarScale = 1.5f;     // BY EAR (MALI) : against an enemy that is OFF-BEAT
         public static float TurnHeldNoteShare = 0.4f;  // HELD NOTE (CHAI) : his ATTACK hits again for this share
         public static float TurnStepBetterScale = 1.3f;   // ONE STEP BETTER (NUAN) : against an enemy showing an f note
-        public static int TurnFourBarsEvery = 4;       // FOUR BARS STRAIGHT (LUKA) : every this many ATTACKs
+        public static int TurnFourBarsEvery = 4;       // FOUR BARS STRAIGHT (DUPORT) : every this many ATTACKs
         public static float TurnFourBarsScale = 2f;    //                             hits this much harder
-        public static float TurnLateBonus = 0.12f;     // FASHIONABLY LATE (IRIS) : seconds after the GOOD window a late stroke still counts
+        public static float TurnLateBonus = 0.12f;     // FASHIONABLY LATE (PUNTO) : seconds after the GOOD window a late stroke still counts
         public static int TurnThunderSoften = 2;       // THE WHOLE FLOOR (BORIS) : taken off each note of the enemy's next attack
 
         //ARCHIVE (step 7, Data/Archive.cs) : ECHOES a finished run leaves, and what each upgrade level gives
@@ -569,15 +569,15 @@
         public static int BargainStamina = 15;      //     for this much max stamina, for the whole run
 
         //Musician Traits : the numbers behind each MusicianTrait (see Data/Musician.cs)
-        public static float KeepsCountWindow = 0.05f;  // ANNA, added to the PERFECT window on her beats (her arrow)
-        public static int MomentumStep = 1;            // OTTO, per beat in a row
+        public static float KeepsCountWindow = 0.05f;  // PAGANINI, added to the PERFECT window on their beats (their arrow)
+        public static int MomentumStep = 1;            // PFUNDT, per beat in a row
         public static int MomentumMax = 3;
         public static float ByEarPower = 1.5f;         // MALI, on hidden beats
         public static float HeldNoteShare = 0.4f;      // CHAI, how much of his note rings on
         public static float OneStepBetterPower = 1.3f; // NUAN, against a loud note
-        public static float FourBarsPower = 2f;        // LUKA, the fourth beat of a full bar
+        public static float FourBarsPower = 2f;        // DUPORT, the fourth beat of a full bar
         public static int ThunderKnock = 2;            // BORIS, taken off TACET's next note after his big stroke on an f
-        public static float QuietPartPower = 2f;       // KLARA, against TACET's p notes (round 14, she used to play on every stroke)
+        public static float QuietPartPower = 2f;       // QUANTZ, against TACET's p notes (round 14, used to play on every stroke)
 
         //Timing Lengths (seconds). The beats themselves follow TempoBpm above.
         public static float IntroTime = 1.1f;      // round banner

@@ -1785,7 +1785,7 @@ namespace Tacetno433.Screens
             if (battle.Kit == TurnKit.Fanny)
             {
                 Gfx.TextSpacedRight(sb, Game.Font, "VOICE", TacetGame.ScreenW - 120, 62, Palette.LineGrey, TextSize.Label, 3f);
-                Gfx.TextSpacedRight(sb, Game.Font, battle.FelixVoice ? "FELIX" : "FANNY", TacetGame.ScreenW - 24, 60, Palette.Highlight, TextSize.Body, 2f);
+                Gfx.TextSpacedRight(sb, Game.Font, battle.FelixVoice ? "???" : "FANNY", TacetGame.ScreenW - 24, 60, Palette.Highlight, TextSize.Body, 2f);
             }
 
             //DECREE (THE DEAF CROWN) : what this bar forbids

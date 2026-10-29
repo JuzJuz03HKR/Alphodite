@@ -13,11 +13,11 @@ namespace Tacetno433.Screens
     //sun and its edge, the lane at the middle of the screen and the notes sliding along it.
     public partial class DuelScreen
     {
-        //Stage Side : the painting for this era, or the plain bright stage until it exists.
+        //Stage Side : the painting for this movement (the floor), or the plain bright stage until it exists.
         //ARTWORK : Content/Art/Stage/stage_<era>.png, see ArtBank.
         private void DrawStageSide(SpriteBatch sb)
         {
-            ArtBank.DrawStage(sb, Game.CurrentRun.Era, new Rectangle(0, 0, TacetGame.ScreenW, TacetGame.ScreenH), StageLayout.DuelFloorY);
+            ArtBank.DrawStage(sb, Game.CurrentRun.Movement, new Rectangle(0, 0, TacetGame.ScreenW, TacetGame.ScreenH), StageLayout.DuelFloorY);
         }
 
         //Staff : five lines of music across the upper stage, from the hand's picture to TACET's

@@ -166,7 +166,6 @@ namespace Tacetno433.Data
             lines.Add("floor=" + run.Floor);
             lines.Add("stage=" + run.Stage);
             lines.Add("stages=" + run.StagesThisFloor);
-            lines.Add("era=" + run.Era);
             lines.Add("maestro=" + (run.Maestro ? 1 : 0));          // MAESTRO MODE, a save from before 29 Sep has none : NORMAL
             lines.Add("shards=" + run.Shards);
             lines.Add("seats=" + run.Seats);
@@ -259,7 +258,7 @@ namespace Tacetno433.Data
             run.Floor = GetInt(v, "floor", 1);
             run.Stage = GetInt(v, "stage", 1);
             run.StagesThisFloor = GetInt(v, "stages", 8);
-            run.Era = Math.Max(0, Math.Min(EraList.All.Length - 1, GetInt(v, "era", 0)));
+            //NO MORE ERAS (29 Oct) : a save from before keeps an era= line, it is read past. The movement follows the floor.
             run.Maestro = GetInt(v, "maestro", 0) == 1;
             run.Shards = GetInt(v, "shards", 0);
             run.Seats = GetInt(v, "seats", 3);
@@ -336,11 +335,11 @@ namespace Tacetno433.Data
         //Run Summary : one line for the CONTINUE button, read straight from the file
         public static string RunSummary()
         {
-            if (PretendRun) return "THE INFERNO  /  FLOOR 2  /  STAGE 5";
+            if (PretendRun) return "THE UNHEARING  /  FLOOR 2  /  STAGE 5";
             Dictionary<string, string> v = Read(RunPath);
             if (v == null) return "";
             int conductor = GetInt(v, "conductor", -1);
-            string name = conductor >= 0 && conductor < ConductorList.All.Length ? ConductorList.All[conductor].Name : "";
+            string name = conductor >= 0 && conductor < ConductorList.All.Length ? ConductorList.All[conductor].NameShort : "";
             return name + "  /  FLOOR " + GetInt(v, "floor", 1) + "  /  STAGE " + GetInt(v, "stage", 1);
         }
 

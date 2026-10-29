@@ -46,10 +46,6 @@ namespace Tacetno433.Screens
                 run.BeginBattle(enemy, pack);
                 game.Screens.Change(FightScreen());
             }
-            else if (node.Type == NodeType.EraShift)
-            {
-                game.Screens.Change(new EraChoiceScreen(false));
-            }
             else if (node.Type == NodeType.Shop)
             {
                 game.Screens.Change(new ShopScreen());

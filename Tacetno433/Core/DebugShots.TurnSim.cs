@@ -59,7 +59,8 @@ namespace Tacetno433.Core
         private const int SimRuns = 300;
 
         //Sim Roster : who joins a simulated run, in this order (two of them start floor 1)
-        private static int[] simRoster = { 0, 1, 2, 3, 4, 5 };
+        //NO MORE ERAS (29 Oct) : the five legends a run can meet (MusicianList.Shown), was ANNA KLARA OTTO MALI CHAI NUAN
+        private static int[] simRoster = { 0, 1, 2, 6, 7 };
 
         private static void TurnSim()
         {

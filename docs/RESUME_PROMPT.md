@@ -21,7 +21,6 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 29 ต.ค. 15:43 (เวลาไทย) | ผู้ใช้เลือกนักดนตรีชุดที่เสนอ (ไวโอลิน PAGANINI) ให้เปลี่ยน FELIX เป็น ??? น้องอยู่ขวา : ใส่นักดนตรี 5 คน ซ่อน MALI CHAI NUAN BORIS แล้วเอายุคออก | `Data/Musician.cs` `Data/Conductor.cs` `Data/Era.cs` `Data/RunState.cs` `Data/SaveFile.cs` `Data/Enemy*.cs` `Data/BattleRules.cs` `Battle/TurnBattle.cs` `Screens/` (EraChoice Chapter Recruit Band Route Battle Shop Event Archive CurtainCall) `Core/DebugShots*.cs` `Core/ArtBank.cs` `docs/` |
 
 ---
 
@@ -64,7 +63,22 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 
 ## สถานะล่าสุด (29 ต.ค.)
 
-**29 ต.ค. บ่าย (ล่าสุด) : แชท `/system` + ภาพ Character Design PNG 6 ภาพ "ทำงานต่อได้เลย" (คำต่อคำ `USER_BRIEFS.md` 13.16) ทำงานถัดไปข้อ 1 ถึง 3 ครบ รอผู้ใช้ Rebuild และตอบคำถาม**
+**29 ต.ค. เย็น (ล่าสุด) : แชทเดียวกัน ผู้ใช้ตอบ 3 ข้อ (คำต่อคำ `USER_BRIEFS.md` 13.17) ใส่นักดนตรีในตำนาน 5 คน FELIX บนจอเป็น ??? และเอายุคออก แล้วผู้ใช้สั่ง "บันทึกข้อมูลต่างๆและอัพเดทด้วย เพราะ compact session เริ่มไปแล้ว" รอผู้ใช้ Rebuild และตัดสินเรื่องความยาก**
+✅ งานอยู่บน GitHub ครบ (commit นี้) ตาราง "แชทที่กำลังทำงาน" ว่าง
+✅ นักดนตรี 5 คนในช่องเดิม : 0 PAGANINI ไวโอลิน, 1 QUANTZ ฟลุต, 2 PFUNDT ทิมปานี, 6 DUPORT เชลโล (ผู้ใช้ไม่ได้ระบุเชลโล ใช้ตัวแรกของชุด), 7 PUNTO ฮอร์น พร้อมฉายา อาวุธ ข้อความไม่ระบุเพศ (ผู้ใช้ออกแบบเองว่าใครเป็นผู้หญิง) ซ่อน MALI CHAI NUAN BORIS ด้วย `MusicianList.Shown` สุ่มคนใหม่ `MusicianList.Roll` หน้า THE BAND โชว์ฉายากับ WEAPON (`CHARACTER_DESIGN.md` ข้อ 5)
+✅ TWO VOICES บนจอเรียกน้องว่า ??? (คำอธิบาย SIGNATURE ป้ายเสียงในหน้าต่อสู้) น้องอยู่ขวาของภาพตามที่ตั้งไว้ ปุ่ม CONTINUE ใช้ชื่อสั้น `Conductor.NameShort`
+✅ เอายุคออก (`BETA1_DIRECTION.md` ข้อ 6) : ไม่มีหน้าเลือกยุคกับห้อง CROSSING ชั้นเป็นท่อนเพลง PRELUDE NOCTURNE CODA (`Data/Movement.cs`) ต้นชั้น การ์ดท่อนแล้วคนเข้าวง (ชั้น 1 สามคน ต่อไปชั้นละคน) บอสท่อนละ 2 สุ่ม 1 ฉากต่อสู้ตามท่อน เซฟเก่าโหลดได้ (CROSSING เก่าเป็น ???) ลบ `Data/Era.cs` `Screens/EraChoiceScreen.cs` `Core/PanelStrip.cs`
+✅ build 0/0 · turncheck 113/113 · savecheck 31/31 (มีข้อใหม่ old crossing) · แคป chapter recruit band route event rest shop result title ดูแล้ว
+⚠️ **ความยากเปลี่ยน รอผู้ใช้ตัดสิน ห้ามปรับเอง** : ตัวจำลอง 4 seed ชนะทั้งรัน NORMAL STRONG เฉลี่ย 54% เป็น 41% MAESTRO EXPERT 73–76% เป็น 64–70% ไฟต์เดี่ยวเท่าเดิม (ตาราง `BETA1_DIRECTION.md` 6.3) แท็บ Turn ใน `docs/TACET_Balance.xlsx` ยังเป็นผลเก่า
+⚠️ chibi เดิมไม่โชว์กับ 5 คนนี้ (Rest Event เป็นกรอบว่าง) · บอส THE DEVIL'S STRING อ้างถึง Paganini ซึ่งตอนนี้อยู่ในวง (ถามผู้ใช้) · PLAYTEST SIGNATURE ยัง 1 · ภาพจาก cloud ห้ามแทน `docs/screenshots/`
+**งานถัดไป (แชทใหม่)** :
+1. ผู้ใช้ Rebuild ดูตาม `SCREENS_LEVEL_UP.md` 22.6 (แผนที่) 23.3 (ธีมวาทยากร) และ `BETA1_DIRECTION.md` 6.5 (รันใหม่ไม่มียุค นักดนตรี 5 คน) แล้วแก้ตามที่บอก
+2. ผู้ใช้ตอบเรื่องความยาก (6.3) : คงไว้ หรือปรับตัวเลขใน `Data/BattleRules.cs` (ต้องแก้ค่าคาดใน `Core/DebugShots.Turn.cs` ถ้ากระทบ turncheck) แล้วสร้างแท็บ Turn ใหม่ `python3 docs/turn_balance_tabs.py <turnsim.txt>`
+3. คุยกับผู้ใช้ก่อนทำ : หน้าเลือกนักดนตรีเริ่มต้น ห้องได้ตัวละคร ตัวซ้ำเป็นอัปเกรด (`BETA1_DIRECTION.md` 3.3 และ 6.4) ทีมโหดขึ้นเรื่อยๆ (3.4) ฟาร์ม (3.5)
+4. รออาร์ตจากผู้ใช้ : ภาพ Bach ภาพ bust กับ face ของ 5 คน (`UI_ART_PLAN.md`) สีเดี่ยวของแต่ละคน
+ทุกข้อ : build 0/0 turncheck savecheck แคปเทียบ `--steady` ทั้ง 1280×720 และ `--scale 1.5` อัปเดตเอกสาร บอกผู้ใช้ให้ Rebuild ใน Visual Studio
+
+**29 ต.ค. บ่าย (ก่อนหน้า) : แชท `/system` + ภาพ Character Design PNG 6 ภาพ "ทำงานต่อได้เลย" (คำต่อคำ `USER_BRIEFS.md` 13.16) ทำงานถัดไปข้อ 1 ถึง 3 ครบ (คำถามท้ายรายการนี้ผู้ใช้ตอบแล้ว ดูรายการบน)**
 ✅ งานอยู่บน GitHub ครบ (`99bba11` แผนที่ `af34a1a` ธีมวาทยากร และ commit เอกสารข้อเสนอนักดนตรี) ตาราง "แชทที่กำลังทำงาน" ว่าง
 ✅ ดูภาพครบ 6 ภาพ สรุปไว้ `CHARACTER_DESIGN.md` หัวข้อ "ภาพเรฟ" ของ Beethoven กับ Fanny (Bach ยังไม่มีภาพ)
 ✅ ข้อ 1 หน้าแผนที่แบบมองไกล (`SCREENS_LEVEL_UP.md` ข้อ 22.4 ถึง 22.6) : perspective ถนนเข้าหาหลุม แถวไกลเล็กจาง กล้องเดินทีละแถว บอสจานดำหนามหมุนหน้าหลุม วงไหลเข้าหลุม ขอบจอมืดขึ้นใกล้บอส

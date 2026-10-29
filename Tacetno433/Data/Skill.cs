@@ -76,22 +76,22 @@ namespace Tacetno433.Data
 
         public static Skill[] All = new Skill[]
         {
-            //ANNA, violin (strings, left)
+            //PAGANINI, violin (strings, left)
             new Skill { Name = "QUICK BOW", Text = "3 quick hits. Each adds 1 DISSONANCE.", Cost = 2, Target = SkillTarget.Enemy,
                         Notes = new[] { S(L, 1), S(R, 1), S(L, 1) }, Damage = 0.5f, Dissonance = 1 },
             new Skill { Name = "LONG TONE", Text = "One held note. Hold still = harder. 2 DISSONANCE.", Cost = 3, Target = SkillTarget.Enemy,
                         Notes = new[] { H(L, 1) }, Damage = 1.2f, Dissonance = 2 },
 
-            //KLARA, flute (winds, centre)
+            //QUANTZ, flute (winds, centre)
             new Skill { Name = "SOFT AIR", Text = "Heals the whole band 3 per note.", Cost = 2, Target = SkillTarget.AllAllies,
                         Notes = new[] { S(D, 0), S(U, 0) }, Heal = 3 },
             new Skill { Name = "LONG BREATH", Text = "4 soft notes. Each gives 1 BREATH back.", Cost = 2, Target = SkillTarget.Self,
                         Notes = new[] { S(D, 0), S(D, 0), S(U, 0), S(U, 0) }, Breath = 1 },
 
-            //OTTO, timpani (percussion, right)
+            //PFUNDT, timpani (percussion, right)
             new Skill { Name = "TIMPANI ROLL", Text = "Shake fast. Big OFF-BEAT.", Cost = 2, Target = SkillTarget.Enemy,
                         Notes = new[] { T() }, Damage = 1f, OffBeat = 30 },
-            new Skill { Name = "STAND FIRM", Text = "Enemies aim at OTTO. He takes half damage.", Cost = 2, Target = SkillTarget.Self,
+            new Skill { Name = "STAND FIRM", Text = "Enemies aim at PFUNDT, who takes half damage.", Cost = 2, Target = SkillTarget.Self,
                         Notes = new[] { S(R, 2) }, Guard = true, Taunt = true },
 
             //MALI, so duang (strings, centre)
@@ -112,13 +112,13 @@ namespace Tacetno433.Data
             new Skill { Name = "ONE STEP", Text = "A big hit and a spark. OFF-BEAT each.", Cost = 2, Target = SkillTarget.Enemy,
                         Notes = new[] { S(L, 2), K() }, Damage = 0.7f, OffBeat = 12 },
 
-            //LUKA, cello (strings, right)
+            //DUPORT, cello (strings, right)
             new Skill { Name = "DEEP BOW", Text = "2 hits. Each adds 1 DISSONANCE.", Cost = 2, Target = SkillTarget.Enemy,
                         Notes = new[] { S(R, 1), S(R, 2) }, Damage = 0.8f, Dissonance = 1 },
             new Skill { Name = "FOUR BARS", Text = "The 4/4 shape. Each note adds 1 DISSONANCE.", Cost = 4, Target = SkillTarget.Enemy,
                         Notes = new[] { S(D, 1), S(L, 1), S(R, 1), S(U, 2) }, Damage = 0.6f, Dissonance = 1 },
 
-            //IRIS, horn (winds, left)
+            //PUNTO, horn (winds, left)
             new Skill { Name = "FANFARE", Text = "The band hits harder : 1 CRESCENDO per note.", Cost = 2, Target = SkillTarget.AllAllies,
                         Notes = new[] { S(L, 0), S(L, 1) }, Crescendo = 1 },
             new Skill { Name = "LATE ENTRY", Text = "Heals one musician 5 per note.", Cost = 3, Target = SkillTarget.Ally,

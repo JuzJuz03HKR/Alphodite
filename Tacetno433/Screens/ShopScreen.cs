@@ -17,7 +17,7 @@ namespace Tacetno433.Screens
     //Wares, top to bottom:
     //   EXTRA SEAT    one more seat on stage, at most two per floor, dearer each time
     //   TUNING        stamina back
-    //   HIRE          a musician from the current era joins. Round 14 : the shop shows who, with
+    //   HIRE          a musician not in the band yet joins (any of the five, NO MORE ERAS). Round 14 : the shop shows who, with
     //                 their part, before paying, so the band can be built on purpose
     //   three motifs, rolled when the shop opens
     //Leaving asks first, because the shelves are gone once the band walks out.
@@ -58,7 +58,7 @@ namespace Tacetno433.Screens
         private const string PoorLine = "Not enough shards, I am afraid. Come back a little richer.";
         private const string SoldLine = "That is all I have of those for now.";
         private const string FullLine = "Your ensemble has no room for anyone else.";
-        private const string NobodyLine = "Nobody from this era is looking for a band right now.";
+        private const string NobodyLine = "Nobody is looking for a band right now.";
         private const string RestedLine = "Your band is already in perfect tune.";
 
         //Ware Rows
@@ -119,8 +119,8 @@ namespace Tacetno433.Screens
             names[TuningRow] = "TUNING";
             notes[TuningRow] = "The band gets back " + (int)(BattleRules.TuningRecover * 100) + " percent of its " + BattleRules.LifeWordLower + ".";
             if (BattleRules.TurnBattleOn) notes[SeatRow] = "One more musician on stage when a fight starts. Two per floor at most.";   // TURN BATTLE (step 15)
-            //Hire : one player from this era, known before buying, with their seat
-            hire = MusicianList.RollFromEra(run.Era, run.Roster, run.Rng);
+            //Hire : one player not in the band yet, known before buying, with their seat
+            hire = MusicianList.Roll(run.Roster, run.Rng);
             names[HireRow] = hire != null ? "HIRE " + hire.Name : "HIRE A PLAYER";
             notes[HireRow] = hire != null
                 ? hire.Name + ", " + hire.Instrument + ". Sits " + StageLayout.Rows[StageLayout.SectionOf(hire.Family)].Name

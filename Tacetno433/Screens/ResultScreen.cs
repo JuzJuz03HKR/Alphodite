@@ -147,7 +147,7 @@ namespace Tacetno433.Screens
             run.PerfectsTotal += battle.PerfectCount;
             if (battle.BestCombo > run.BestCombo) run.BestCombo = battle.BestCombo;
 
-            //Elite Bonus : a chance that someone from this era joins
+            //Elite Bonus : a chance that someone not in the band yet joins
             if (battle.Enemy.Kind == EnemyKind.Elite && run.RollPercent() < BattleRules.EliteRecruitChance)
             {
                 run.JustJoined.Clear();
@@ -179,7 +179,7 @@ namespace Tacetno433.Screens
             if (offerMotif) footnote = "A MOTIF IS LEFT BEHIND";
             if (recruited) footnote = "SOMEONE FOLLOWS YOU OUT OF THE FIGHT";
             if (battle.Enemy.Kind == EnemyKind.Boss)
-                footnote = run.Floor >= BattleRules.FloorsPerRun ? "THE LAST SILENCE IS BROKEN" : "FLOOR CLEARED  -  A NEW ERA IS WAITING";
+                footnote = run.Floor >= BattleRules.FloorsPerRun ? "THE LAST SILENCE IS BROKEN" : "FLOOR CLEARED  -  THE NEXT MOVEMENT IS WAITING";
 
             SoundBank.Play(Sfx.Victory);
             SoundBank.PlayMusic(Music.Victory);

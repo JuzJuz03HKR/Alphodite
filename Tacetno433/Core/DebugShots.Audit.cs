@@ -10,7 +10,7 @@ namespace Tacetno433.Core
     //
     //The same whole runs as the simulate report (PlayRun in DebugShots.cs), but split up so an
     //unfair piece stands out :
-    //   BASELINE    THE APPRENTICE, how often each enemy on each floor ends a run, and the first era
+    //   BASELINE    THE APPRENTICE, how often each enemy on each floor ends a run
     //   CONDUCTORS  every conductor with the same habits
     //   MOTIFS      one motif owned from the start and no others, against no motif at all
     //The sim hands in grades directly, lets the SIGNATURE loose as soon as it can (round 13, it
@@ -35,10 +35,7 @@ namespace Tacetno433.Core
                 r += "\r\nBASELINE  THE APPRENTICE  " + auditHabit[h] + "   RUN WON " + Percent(rec.Won, rec.Runs)
                    + "   LOST ON FLOOR 1/2/3  " + rec.LostOnFloor[1] + " / " + rec.LostOnFloor[2] + " / " + rec.LostOnFloor[3]
                    + "   OUT OF BREATH " + rec.OutOfBreath + "   BEATS PER FIGHT " + (rec.Beats / (float)rec.Fights).ToString("0.0") + "\r\n";
-                r += "   FIRST ERA   ";
-                for (int e = 0; e < EraList.All.Length && e < rec.EraRuns.Length; e++)
-                    r += EraList.All[e].Name + " " + Percent(rec.EraWon[e], rec.EraRuns[e]) + "   ";
-                r += "\r\n   ENEMY (FLOOR)                  FIGHTS  LOSSES  LOSS RATE\r\n";
+                r += "   ENEMY (FLOOR)                  FIGHTS  LOSSES  LOSS RATE\r\n";
 
                 List<string> names = new List<string>(rec.Enemies.Keys);
                 names.Sort();

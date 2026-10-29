@@ -42,7 +42,7 @@ namespace Tacetno433.Data
             "ELITE",       // Elite
             "REST",        // Rest
             "BOSS",        // Boss
-            "CROSSING"     // EraShift
+            "CROSSING"     // EraShift : NO MORE ERAS (29 Oct), never made now, an old save's CROSSING loads as a ??? (RunState.RestoreMap)
         };
 
         public static string[] Captions =

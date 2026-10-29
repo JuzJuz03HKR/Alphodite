@@ -13,7 +13,7 @@ namespace Tacetno433.Core
     //box in its place, so the game runs today with no artwork and switches each picture on by
     //itself the moment its file exists. The file names are listed in Content/Art/README.txt.
     //
-    //   Stage              the duel background, one per era      Art/Stage/stage_siam
+    //   Stage              the duel background, one per movement Art/Stage/stage_prelude
     //   Stand              a musician standing in the duel       Art/Musicians/stand_mali
     //   MusicianPortrait   full body, recruit page and cards     Art/Musicians/portrait_mali
     //   MusicianFace       small square face, lists and panels   Art/Musicians/face_mali
@@ -22,7 +22,6 @@ namespace Tacetno433.Core
     //   ConductorGallery   the gallery painting only (29 Sep)    Art/Conductors/gallery_the_inferno, else the portrait
     //   CutIn              the signature picture                 Art/Conductors/cutin_the_inferno
     //   Enemy              TACET's shape in a duel               Art/Enemies/enemy_hush
-    //   EraPanel           the tall panel on the era page        Art/Eras/era_siam
     //   RoutePanel         a kind of place, small and wide       Art/Route/route_shop    (230 x 142 on the route page)
     //   EventPicture       one per event                         Art/Events/event_a_street_musician
     //   Shop, Rest         the shop and the rest room            Art/Places/shop, Art/Places/rest
@@ -32,7 +31,7 @@ namespace Tacetno433.Core
     //HandArt and CharacterArt.
     public static class ArtBank
     {
-        public static Texture2D[] Stage = new Texture2D[0];               // lined up with EraList.All
+        public static Texture2D[] Stage = new Texture2D[0];               // lined up with MovementList.Names
         public static Texture2D[] Stand = new Texture2D[0];               // lined up with MusicianList.All
         public static Texture2D[] MusicianPortrait = new Texture2D[0];
         public static Texture2D[] MusicianFace = new Texture2D[0];
@@ -41,7 +40,6 @@ namespace Tacetno433.Core
         public static Texture2D[] ConductorGallery = new Texture2D[0];
         public static Texture2D[] CutIn = new Texture2D[0];
         public static Texture2D[] Enemy = new Texture2D[0];               // lined up with EnemyList.All
-        public static Texture2D[] EraPanel = new Texture2D[0];
         public static Texture2D[] RoutePanel = new Texture2D[0];          // lined up with NodeType
         public static Texture2D[] EventPicture = new Texture2D[0];        // lined up with EventList.All
         public static Texture2D Shop;
@@ -58,14 +56,9 @@ namespace Tacetno433.Core
         {
             Loaded = 0;
 
-            Stage = new Texture2D[EraList.All.Length];
-            EraPanel = new Texture2D[EraList.All.Length];
+            Stage = new Texture2D[MovementList.Names.Length];
             for (int i = 0; i < Stage.Length; i++)
-            {
-                string key = Key(EraList.All[i].Name);
-                Stage[i] = Picture(content, "Art/Stage/stage_" + key);
-                EraPanel[i] = Picture(content, "Art/Eras/era_" + key);
-            }
+                Stage[i] = Picture(content, "Art/Stage/stage_" + Key(MovementList.Names[i]));
 
             int musicians = MusicianList.All.Length;
             Stand = new Texture2D[musicians];
@@ -161,18 +154,17 @@ namespace Tacetno433.Core
         public static Texture2D EnemyOf(Enemy e) { return Find(Enemy, Array.IndexOf(EnemyList.All, e)); }
         public static Texture2D EventOf(GameEvent e) { return Find(EventPicture, Array.IndexOf(EventList.All, e)); }
         public static Texture2D RouteOf(NodeType type) { return Find(RoutePanel, (int)type); }
-        public static Texture2D EraOf(int era) { return Find(EraPanel, era); }
 
         private static Texture2D Find(Texture2D[] list, int i)
         {
             return (i >= 0 && i < list.Length) ? list[i] : null;
         }
 
-        //Stage Draw : the painting for this era, or the bright empty stage the band stands on.
+        //Stage Draw : the painting for this movement (the floor), or the bright empty stage the band stands on.
         //The bright side is part of the fight itself (our light against TACET's dark), so it stays.
-        public static void DrawStage(SpriteBatch sb, int era, Rectangle box, float floorY)
+        public static void DrawStage(SpriteBatch sb, int movement, Rectangle box, float floorY)
         {
-            Texture2D art = Find(Stage, era);
+            Texture2D art = Find(Stage, movement);
             if (art != null)
             {
                 sb.Draw(art, box, Color.White);
