@@ -13,18 +13,19 @@ namespace Tacetno433.Core
     //   Number      a number that matters, big and blocky, counting up over a thin line (menu7)
     //   InkBar      the slanted bar with a torn front end both of them use
     //   KeyBox      the key that does the job, a small filled box
+    //   TitleBar    the page's name turned on a tall white bar at the side of the menu (menu1)
+    //   Fader       a thin line with a circle to slide, the settings page's volumes and timing (menu3)
+    //   Choice      one word of a choice (ENGLISH / THAI, OFF / ON), the chosen one sitting on a white plate
+    //   Steps       circles on a line, which page of HOW TO PLAY you are on (menu3)
     //Before Beta1 (pages not lifted yet) :
     //   Button      a slanted blade, solid for the main action, outlined for the rest
     //   Tag         a small label in a box
     //   KeyChip     the keyboard key that also does the job
     //   KeyCap      a keyboard key drawn as a key, and MouseIcon, for the pages that teach the controls
-    //   StepNav     diamonds on a line, which step of a process you are on
     //   Header      "01" plus a serif heading plus a rule
     //   Panel       the dark box with corner marks that holds content
     //   Pips        a row of small diamonds, used like rarity stars
     //   Tooltip     a box that explains whatever the mouse is over
-    //   Slider      a track with a diamond knob, used by the settings page
-    //   CheckBox    a small box with a tick in it when the option is on
     //   ModeSwitch  NORMAL or MAESTRO, the chosen half filled (29 Sep, the conductor pages)
     //
     //The fonts are handed over once by TacetGame, so every call stays short.
@@ -216,6 +217,98 @@ namespace Tacetno433.Core
             Gfx.Rect(sb, x, lineY, width, 1f, soft * (0.4f * alpha));
             Gfx.Rect(sb, x, lineY - 1f, to, 2f, ink * (0.85f * alpha));
             Gfx.CircleOutline(sb, x + to, lineY, 3f, ink * alpha, 1f);
+        }
+
+        //Title Bar : the page's name turned a quarter turn on a tall white bar beside the menu (menu1). THE ARCHIVE,
+        //SETTINGS, HOW TO PLAY and the pause menu. The word reads from top to bottom, black on the bar.
+        public static void TitleBar(SpriteBatch sb, Rectangle bar, int slant, string word, float alpha)
+        {
+            Gfx.SlantBox(sb, bar, slant, Palette.Paper * (0.94f * alpha));
+            Gfx.TextVertical(sb, BigFont, word, bar.X + bar.Width - 20, bar.Y + 36, Palette.Ink * alpha, TextSize.Title);
+        }
+
+        //Fader : a setting that slides (menu3). A thin line, the part up to the value drawn brighter, small ticks every
+        //tenth, and a hollow circle to slide that fills and glows when hot (pointed, held or chosen). centre : the line is
+        //lit from its middle instead, and the middle is marked (STROKE TIMING, early to the left, late to the right).
+        //Like Command it only draws. The page decides what a click or a drag means.
+        public static void Fader(SpriteBatch sb, Rectangle track, float value, bool hot, bool centre, float alpha)
+        {
+            value = MathHelper.Clamp(value, 0f, 1f);
+            float cy = track.Center.Y;
+            float knob = track.X + track.Width * value;
+            float from = centre ? track.Center.X : track.X;
+            Gfx.Rect(sb, track.X, cy, track.Width, 1f, Palette.LineGrey * (0.7f * alpha));
+            Gfx.Rect(sb, Math.Min(from, knob), cy - 1f, Math.Abs(knob - from), 2f, (hot ? Palette.Paper : Palette.PaperDim) * alpha);
+
+            //Ticks : one every tenth under the line, longer at the ends and the middle
+            for (int i = 0; i <= 10; i++)
+                Gfx.Rect(sb, track.X + track.Width * i / 10f, cy + 5f, 1f, i % 5 == 0 ? 6f : 3f, Palette.LineGrey * (0.6f * alpha));
+            if (centre) Gfx.Rect(sb, track.Center.X, cy - 7f, 1f, 14f, Palette.PaperDim * alpha);
+
+            //Circle : hollow at rest, filled and glowing when hot
+            if (hot) Gfx.DrawGlow(sb, knob, cy, 26f, Palette.Paper * (0.25f * alpha));
+            Gfx.Circle(sb, knob, cy, 7f, Palette.StageDeep * alpha);
+            Gfx.CircleOutline(sb, knob, cy, 7f, (hot ? Palette.Paper : Palette.PaperDim) * alpha, 1.5f);
+            if (hot) Gfx.Circle(sb, knob, cy, 4f, Palette.Paper * alpha);
+        }
+
+        //Choice : one word of a choice (ENGLISH / THAI, OFF / ON). The chosen word sits black on a slanted white plate,
+        //the others are grey words in a thin slanted outline that brighten under the mouse. lit : the row is the chosen
+        //one, so the plate is fully white, its front torn like ink, with the grey plate behind (Persona 5).
+        //seed keeps the tear still.
+        public static void Choice(SpriteBatch sb, Rectangle box, string word, bool chosen, bool lit, bool over, int seed, float alpha)
+        {
+            if (chosen)
+            {
+                if (lit) InkBar(sb, box.X + BattleRules.UiShadow * 0.5f, box.Y + BattleRules.UiShadow * 0.5f, box.Width, box.Height, 8f, Palette.LineGrey * (0.5f * alpha), seed + 5, 1f);
+                InkBar(sb, box.X, box.Y, box.Width, box.Height, 8f, (lit ? Palette.Paper : Palette.PaperDim) * alpha, seed, lit ? 1f : 0f);
+            }
+            else
+            {
+                Gfx.SlantOutline(sb, box, 8, (over ? Palette.Paper : Palette.LineGrey * 0.6f) * alpha, 1f);
+            }
+
+            Color ink = chosen ? Palette.Ink : (over ? Palette.Paper : Palette.LineGrey);
+            Gfx.TextSpacedCentered(sb, Font, word, box.Center.X + 2f, box.Center.Y - Font.LineSpacing * TextSize.Label / 2f, ink * alpha, TextSize.Label, 2f);
+        }
+
+        //Steps : which page out of a few is on show (menu3). Circles on a thin line, the pages' names under them.
+        //Pages already seen are small filled circles, the page on show a filled circle in a ring with a soft light,
+        //the rest hollow. Where to click : StepRect.
+        public static void Steps(SpriteBatch sb, string[] steps, int current, float cx, float y, float spacing, float alpha)
+        {
+            int count = steps.Length;
+            float left = cx - (count - 1) * spacing / 2f;
+            Gfx.Rect(sb, left - 24f, y, (count - 1) * spacing + 48f, 1f, Palette.LineGrey * (0.6f * alpha));
+
+            for (int i = 0; i < count; i++)
+            {
+                float x = left + i * spacing;
+                bool over = Input.MouseOver(StepRect(count, i, cx, y, spacing));
+                if (i == current)
+                {
+                    Gfx.DrawGlow(sb, x, y, 26f, Palette.Paper * (0.3f * alpha));
+                    Gfx.Circle(sb, x, y, 9f, Palette.StageDeep * alpha);
+                    Gfx.CircleOutline(sb, x, y, 9f, Palette.Paper * alpha, 1.5f);
+                    Gfx.Circle(sb, x, y, 4.5f, Palette.Paper * alpha);
+                }
+                else
+                {
+                    Gfx.Circle(sb, x, y, 5f, Palette.StageDeep * alpha);
+                    Gfx.CircleOutline(sb, x, y, 5f, (over ? Palette.Paper : Palette.LineGrey) * alpha, 1.5f);
+                    if (i < current) Gfx.Circle(sb, x, y, 2.5f, Palette.PaperDim * alpha);
+                }
+
+                Color label = i == current ? Palette.Highlight : (over ? Palette.Paper : Palette.LineGrey);
+                Gfx.TextSpacedCentered(sb, Font, steps[i], x, y + 16f, label * alpha, TextSize.Tiny, 2f);
+            }
+        }
+
+        //Step Rect : the clickable area of step i on Steps
+        public static Rectangle StepRect(int count, int i, float cx, float y, float spacing)
+        {
+            float x = cx - (count - 1) * spacing / 2f + i * spacing;
+            return new Rectangle((int)(x - spacing / 2f), (int)(y - 16), (int)spacing, 44);
         }
 
         //======================================================================================
@@ -473,49 +566,6 @@ namespace Tacetno433.Core
             }
         }
 
-        //Step Rect : the clickable area of step i on a StepNav
-        public static Rectangle StepRect(int count, int i, float cx, float y, float spacing)
-        {
-            float x = cx - (count - 1) * spacing / 2f + i * spacing;
-            return new Rectangle((int)(x - spacing / 2f), (int)(y - 16), (int)spacing, 44);
-        }
-
-        //Step Nav : diamonds joined by a line, labels underneath. Steps before current are
-        //done, current is lit, the rest are waiting.
-        public static void StepNav(SpriteBatch sb, string[] steps, int current, float cx, float y, float spacing)
-        {
-            int count = steps.Length;
-            float left = cx - (count - 1) * spacing / 2f;
-
-            Gfx.Rect(sb, left, y, (count - 1) * spacing, 1, Palette.LineGrey * 0.7f);
-
-            for (int i = 0; i < count; i++)
-            {
-                float x = left + i * spacing;
-                bool over = Input.MouseOver(StepRect(count, i, cx, y, spacing));
-
-                if (i == current)
-                {
-                    Gfx.DrawGlow(sb, x, y, 22f, Palette.Accent * 0.35f);
-                    Gfx.Diamond(sb, x, y, 9, Palette.Void);
-                    Gfx.DiamondOutline(sb, x, y, 9, Palette.Accent, 2f);
-                    Gfx.Diamond(sb, x, y, 4, Palette.Accent);
-                }
-                else if (i < current)
-                {
-                    Gfx.Diamond(sb, x, y, 5, over ? Palette.Highlight : Palette.PaperDim);
-                }
-                else
-                {
-                    Gfx.Diamond(sb, x, y, 5, Palette.Void);
-                    Gfx.DiamondOutline(sb, x, y, 5, over ? Palette.Highlight : Palette.LineGrey, 1f);
-                }
-
-                Color label = (i == current) ? Palette.Highlight : (over ? Palette.Paper : Palette.LineGrey);
-                Gfx.TextSpacedCentered(sb, Font, steps[i], x, y + 14, label, TextSize.Tiny, 2f);
-            }
-        }
-
         //Tooltip : a small box next to the mouse. body should already be wrapped.
         public static void Tooltip(SpriteBatch sb, string title, string body, float x, float y)
         {
@@ -535,42 +585,6 @@ namespace Tacetno433.Core
             Ornament.DoubleFrame(sb, box, Palette.PaperDim);
             Gfx.Text(sb, BigFont, title, box.X + 14, box.Y + 10, Palette.Highlight, TextSize.Small);
             Gfx.Text(sb, StoryFont, body, box.X + 14, box.Y + 40, Palette.PaperDim, TextSize.StorySmall);
-        }
-
-        //Slider : a rail with tick marks and a diamond knob sitting on it.
-        //Like Button, this only draws. The page decides what a click or a drag means.
-        public static void Slider(SpriteBatch sb, Rectangle track, float value, bool hot, float alpha)
-        {
-            if (value < 0f) value = 0f;
-            if (value > 1f) value = 1f;
-
-            float cy = track.Center.Y;
-            Gfx.Rect(sb, track.X, cy - 1, track.Width, 2, Palette.LineGrey * alpha);
-            Gfx.Rect(sb, track.X, cy - 1, track.Width * value, 2, Palette.Paper * alpha);
-
-            //Gauge Marks : a tick every tenth, a taller one at each end and the middle
-            for (int i = 0; i <= 10; i++)
-                Gfx.Rect(sb, track.X + track.Width * i / 10f, cy + 7, 1, (i % 5 == 0) ? 7 : 4, Palette.LineGrey * alpha);
-
-            //Knob
-            float kx = track.X + track.Width * value;
-            float size = hot ? 9f : 7f;
-            if (hot) Gfx.DrawGlow(sb, kx, cy, 28f, Palette.Accent * (0.30f * alpha));
-            Gfx.Diamond(sb, kx, cy, size, Palette.Void * alpha);
-            Gfx.DiamondOutline(sb, kx, cy, size, (hot ? Palette.Accent : Palette.PaperDim) * alpha, 2f);
-            Gfx.Diamond(sb, kx, cy, 3f, (hot ? Palette.Accent : Palette.PaperDim) * alpha);
-        }
-
-        //Check Box : empty when the option is off, ticked when it is on
-        public static void CheckBox(SpriteBatch sb, Rectangle box, bool on, bool hot, float alpha)
-        {
-            Gfx.Rect(sb, box, Palette.Void * alpha);
-            Gfx.RectOutline(sb, box, (hot ? Palette.Accent : Palette.LineGrey) * alpha, 1);
-            if (!on) return;
-
-            Color tick = (hot ? Palette.Highlight : Palette.Paper) * alpha;
-            Gfx.Line(sb, box.X + 6, box.Center.Y, box.Center.X - 1, box.Bottom - 7, tick, 2f);
-            Gfx.Line(sb, box.Center.X - 1, box.Bottom - 7, box.Right - 5, box.Y + 6, tick, 2f);
         }
 
         //Capsule Bar : a rounded bar, used for stamina everywhere

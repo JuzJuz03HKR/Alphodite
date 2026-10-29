@@ -12,6 +12,10 @@ namespace Tacetno433.Core
     //   Update returns  1  for YES,  -1  for NO,  0  while the player is still deciding.
     //NO is chosen at the start, so pressing ENTER by accident is always safe.
     //Keys : LEFT and RIGHT choose, ENTER presses, Y is yes, N or ESC is no. The mouse clicks.
+    //
+    //Beta1 screens round 3 (29 Oct, docs/SCREENS_LEVEL_UP.md 20) : a dark slanted plate with a thin bright edge, the question
+    //big, the line under it, and the two answers as Ui.Command plates. The chosen answer is drawn as the pointed one
+    //(white, torn like ink), so the keys and the mouse always show the same thing.
     public class ConfirmBox
     {
         public bool Open;
@@ -23,12 +27,15 @@ namespace Tacetno433.Core
         private bool yesChosen;
         private float appear;
         private Vector2 lastMouse;
+        private UiMotion yesMotion = new UiMotion();
+        private UiMotion noMotion = new UiMotion();
 
         //Box Layout
-        private Rectangle box = new Rectangle(390, 250, 500, 220);
-        private Rectangle yesButton = new Rectangle(420, 396, 210, 48);
-        private Rectangle noButton = new Rectangle(650, 396, 210, 48);
-        private const float LineWrap = 440f;
+        private Rectangle box = new Rectangle(350, 240, 580, 236);
+        private Rectangle yesButton = new Rectangle(404, 404, 220, 46);
+        private Rectangle noButton = new Rectangle(654, 404, 220, 46);
+        private const int BoxSlant = 30;
+        private const float LineWrap = 480f;
 
         //Box Show : the text is wrapped here, once, never while drawing
         public void Show(string title, string line, string yes, string no)
@@ -38,6 +45,9 @@ namespace Tacetno433.Core
             yesText = yes;
             noText = no;
             yesChosen = false;
+            yesMotion = new UiMotion();
+            noMotion = new UiMotion();
+            noMotion.Snap(true);
             appear = 0f;
             lastMouse = Input.MousePos;
             Open = true;
@@ -61,6 +71,8 @@ namespace Tacetno433.Core
                 if (Input.MouseOver(yesButton)) yesChosen = true;
                 if (Input.MouseOver(noButton)) yesChosen = false;
             }
+            yesMotion.Update(dt, yesChosen);
+            noMotion.Update(dt, !yesChosen);
 
             bool yes = Input.KeyPressed(Keys.Y) || Input.ClickedOn(yesButton);
             bool no = Input.KeyPressed(Keys.N) || Input.KeyPressed(Keys.Escape) || Input.ClickedOn(noButton);
@@ -85,25 +97,34 @@ namespace Tacetno433.Core
             return 0;
         }
 
-        //Box Draw : the page goes dark, the box sits in the middle with its two buttons
+        //Box Draw : the page goes dark, the plate drops in a little, the two answers under the line
         public void Draw(SpriteBatch sb)
         {
             if (!Open) return;
             float a = appear;
 
             Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Color.Black * (0.6f * a));
+            int drop = (int)((1f - UiMotion.EaseOut(a)) * 16f);
             Rectangle r = box;
-            r.Y += (int)((1f - a) * 16f);
+            r.Y += drop;
 
-            Gfx.Rect(sb, r, Palette.Void * a);
-            Ornament.DoubleFrame(sb, r, Palette.Paper * a);
-            Hollow.Streak(sb, r.Center.X, r.Y, r.Width * 0.8f, 0.5f * a);
+            //Plate : a shadow, the dark slanted plate, its thin bright edge
+            Gfx.SlantBox(sb, new Rectangle(r.X + 8, r.Y + 8, r.Width, r.Height), BoxSlant, Color.Black * (0.5f * a));
+            Gfx.SlantBox(sb, r, BoxSlant, Palette.Void * (0.97f * a));
+            Gfx.SlantOutline(sb, r, BoxSlant, Palette.Paper * (0.55f * a), 1f);
 
-            Gfx.TextCentered(sb, Ui.BigFont, title, r.Center.X, r.Y + 46, Palette.Highlight * a, TextSize.Subtitle);
-            Gfx.Text(sb, Ui.StoryFont, lineWrapped, r.X + 30, r.Y + 80, Palette.PaperDim * a, TextSize.Story);
+            //Question : big, then a thin line with a small ring at its start (menu3), then the line
+            Gfx.Text(sb, Ui.BigFont, title, r.X + 60, r.Y + 26, Palette.Highlight * a, TextSize.Subtitle);
+            Gfx.CircleOutline(sb, r.X + 58, r.Y + 80, 3f, Palette.LineGrey * a, 1f);
+            Gfx.Rect(sb, r.X + 64, r.Y + 80, r.Width - BoxSlant - 100, 1, Palette.LineGrey * (0.6f * a));
+            Gfx.Text(sb, Ui.StoryFont, lineWrapped, r.X + 54, r.Y + 94, Palette.PaperDim * a, TextSize.Story);
 
-            Ui.Button(sb, yesButton, yesText, "Y", yesChosen, true, a);
-            Ui.Button(sb, noButton, noText, "N", !yesChosen, true, a);
+            Rectangle yes = yesButton;
+            Rectangle no = noButton;
+            yes.Y += drop;
+            no.Y += drop;
+            Ui.Command(sb, yes, yesText, "Y", yesMotion, a, false);
+            Ui.Command(sb, no, noText, "N", noMotion, a, false);
         }
     }
 }

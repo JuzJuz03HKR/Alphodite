@@ -27,7 +27,8 @@
 | เลนส์ของทุกหน้า (แสงสปอต bloom vignette สว่างจากดำตอนเข้า) และหน้าไหนวาดเอง (`OwnLens` `HasWorld` `DrawWorld` `DrawLights` `DrawGlow` `Lens` `Dark`) | `Core/ScreenManager.cs` + `Core/PostChain.cs` (`DrawPage` `PageLook` `ShowPage`) |
 | หลุม TACET บนหน้าอื่น | `TacetVoid.PlaceOnPage` (shader `Void.fx` ค่า `Fine`) |
 | ปุ่มแบบผสม (รายการเมนู ปุ่มคำสั่ง ตัวเลข แถบหมึก กล่องคีย์) | `Core/Ui.cs` (`MenuItem` `Command` `Number` `InkBar` `KeyBox`) + จังหวะ `Core/UiMotion.cs` |
-| เส้นคั่นวงกลม วงแหวนมีขีด | `Core/Ornament.cs` (`OrbitRule` `TickRing`) |
+| แถบชื่อหน้าแนวตั้ง แถบเลื่อน ตัวเลือกคำ วงกลมบอกหน้า (รอบ 3) | `Core/Ui.cs` (`TitleBar` `Fader` `Choice` `Steps`) ใช้ที่ Archive Settings HOW TO PLAY Pause |
+| เส้นคั่นวงกลม วงแหวนมีขีด วงแหวนบนพื้น หลุมนิ่งแบบรูปทรง | `Core/Ornament.cs` (`OrbitRule` `TickRing` `FloorRing` `StillHole`) · `StillHole` ใช้เฉพาะสิ่งที่วาดทับหน้า (เมนูหยุด) หน้าปกติใช้ `TacetVoid` |
 | เปลี่ยนหน้าปกติ (แผ่นเฉียงหลายชั้น คำในแผ่นดำ = ชื่อหน้าที่กำลังไป) / ช่วงสำคัญ (วงแหวนกวาด LIGHT DARK CLOSE) / ม่าน (เข้าออกหน้าเลือกวาทยากร) | `Core/SlantWipe.cs` (`SetWord`) + คำของแต่ละหน้า `GameScreen.WipeWord` (WIPE WORD) / `Core/RingSweep.cs` เรียกด้วย `ScreenManager.SweepNext` หรือ `EntersWithSweep` ของหน้า / `Core/Curtain.cs` (`UsesCurtain`) |
 | ม่านผ้าจริง (REAL CLOTH, 29 ต.ค.) : จีบบนราว ADVANCED PART position based dynamics, ชายผ้าแกว่ง (HEM), ตาข่ายสามเหลี่ยม | `Core/Curtain.cs` (`Begin` `Update` `Draw`) เรียกจาก `ScreenManager.Change/Update` · ตัวเลข `BattleRules.UiCurtain*` · สี `Palette.CurtainLight` |
 | การ์ด 3D แบบ Balatro (พลิก เอียงตามเมาส์ แถบแสง) : วาดหน้าการ์ดลงภาพใน `PreDraw` แล้วโชว์เป็นสี่เหลี่ยมใน 3D ใน `Draw` | `Core/Card3D.cs` (`Picture` `BeginPicture` `Batch` `Draw` `AddLight`) · ใช้ที่ `Screens/MotifRewardScreen.cs` · หน้าการ์ด `MotifArt.CardFace` `CardBack` · ตัวเลข `BattleRules.UiCard*` `UiRarityLight` |
@@ -186,7 +187,7 @@ Tacetno433/
 | ความรู้สึกการตวัด (เริ่ม/หยุด/ขนาด) | ค่าคงที่บนสุดของ `Core/GestureReader.cs` |
 | ลำดับหน้าหลังจบแต่ละด่าน · เดินเข้าด่าน · CONTINUE | `Screens/RunFlow.cs` (`NextStage` / `Enter` / `Continue`) |
 | เซฟ (ไฟล์อยู่ `%AppData%\TACET433\`) | `Data/SaveFile.cs` — **ห้ามสลับลำดับรายการใน `MusicianList` `MotifList` `EnemyList` `EventList` `ConductorList`** เซฟเก็บเป็นลำดับ |
-| เมนูหยุด / หน้าไหนกด Esc แล้วเปิดเมนู | `Screens/PauseMenu.cs` · `GameScreen.CanPause` / `UsesEscape` / `Paused` / `Resumed` ใน `Core/ScreenManager.cs` |
+| เมนูหยุด / หน้าไหนกด Esc แล้วเปิดเมนู | `Screens/PauseMenu.cs` (Beta1 รอบ 3 : แถบดำเฉียง FERMATA วงแหวนรอบหลุม · `OpenSettings` `AskReturn`) · กล่องถาม `Core/ConfirmBox.cs` · `GameScreen.CanPause` / `UsesEscape` / `Paused` / `Resumed` ใน `Core/ScreenManager.cs` |
 | FERMATA (โน้ตค้าง) | กติกา `BattleState` (ค้น `FERMATA`, `HoldFraction`) · หน้าจอ `DuelScreen.Notes.cs` (`StartHold` / `UpdateHold` / `FinishHold`) |
 | หน้าตาโน้ตในเลน | `DuelScreen.Stage.cs` (`DrawIncoming` · `Focus` โน้ตไหนสว่าง) · หัวลูกศร ✦ เฟอร์มาตา แถบรัว อยู่ `Core/NoteGlyph.cs` (`Pointer` `Spark` `FermataSign` `RollBar`) |
 | ชั้นที่โน้ตพิเศษเริ่มมา | `BattleRules.TremoloFromFloor / FermataFromFloor / PairsFromFloor` · ใครรัว/ใครค้าง `BattleState.PrepareRound` |
@@ -268,7 +269,7 @@ Tacetno433/
    ยังเหลือ : ตัวเลขปะทะนับพร้อมเสียงไต่ระดับ (รอไฟล์เสียง) · แผงวงด้านล่างเต้นตาม BPM
 9. เนื้อหาเพิ่ม : เหตุการณ์ (6 → 12+) · บอสยุคละ 2 · นักดนตรี · Motif
 10. ต่อไฟล์ภาพ/เสียงเมื่อทีมส่งมา (เพิ่มใน `Content.mgcb` เท่านั้น ไม่ต้องแก้โค้ด) และเช็กขนาดในเกม
-10.1 **ช่องโหลดภาพ UI skin (8 ต.ค., ยังไม่ได้ทำ)** : ทีมอาร์ตจะวาดตาม `docs/TACET_UI_Asset_List.xlsx` (126 ไฟล์ `Content/Art/UI/<code id>.png`) · ต้องเพิ่มการโหลดแบบ ArtBank + วาดแบบ 3-slice / 9-slice ใน `Core/Ui.cs` (Button Panel Tag Slider CheckBox CapsuleBar ModeSwitch) และจุดที่วาดเองในหน้าจอ · ไม่มีไฟล์ = ใช้แบบโค้ดเดิม
+10.1 **ช่องโหลดภาพ UI skin (8 ต.ค., ยังไม่ได้ทำ)** : ทีมอาร์ตจะวาดตาม `docs/TACET_UI_Asset_List.xlsx` (126 ไฟล์ `Content/Art/UI/<code id>.png`) · ต้องเพิ่มการโหลดแบบ ArtBank + วาดแบบ 3-slice / 9-slice ใน `Core/Ui.cs` (Button Panel Tag CapsuleBar ModeSwitch และชิ้น Beta1 Command MenuItem Fader Choice) และจุดที่วาดเองในหน้าจอ · ไม่มีไฟล์ = ใช้แบบโค้ดเดิม
 
 ### ทำทีหลัง (P3)
 11. ภาษาไทยจริง (ต้อง build ฟอนต์ที่มีตัวไทย + ตารางข้อความ 2 ภาษา ตอนนี้หน้าตั้งค่าเลือกได้แต่ยังไม่แปล)

@@ -749,6 +749,9 @@ namespace Tacetno433.Core
             if (names[index] == "detailswap" && frames == 34) Input.PretendPress = Keys.Right;           //   the next profile
             if (names[index] == "duelcutin" && frames == waits[index] - 22) Input.PretendPress = Keys.Space;
             if ((names[index] == "duelpause" || names[index] == "pause") && frames == waits[index] - 30) Input.PretendPress = Keys.Escape;
+            if (names[index] == "pausesettings" && frames == waits[index] - 80) { game.Pause.Show(); game.Pause.OpenSettings(); }   // round 3 : the settings page borrowed
+            if (names[index] == "pauseask" && frames == waits[index] - 30) { game.Pause.Show(); game.Pause.AskReturn(); }          //   and the box asking first
+            if (names[index] == "battlepause" && frames == waits[index] - 30) game.Pause.Show();                                    //   and over a fight
             if (names[index] == "titlequit" && frames == waits[index] - 10) Input.PretendPress = Keys.Escape;
             if (names[index] == "shopleave" && frames == waits[index] - 10) Input.PretendPress = Keys.Enter;
             if (names[index] == "guide2" && frames == 10) Input.PretendPress = Keys.Right;
@@ -854,7 +857,7 @@ namespace Tacetno433.Core
             if (name == "crossing") screen = new EraChoiceScreen(false);
             if (name == "recruit") screen = new RecruitScreen();
             if (name == "bandname") screen = new BandNameScreen();
-            if (name.StartsWith("route") || name == "pause" || name.StartsWith("wipe") || name.StartsWith("sweep")) screen = new RouteScreen();
+            if (name.StartsWith("route") || name.StartsWith("pause") || name.StartsWith("wipe") || name.StartsWith("sweep")) screen = new RouteScreen();
             if (name == "view" || name == "band") screen = new BandScreen();
             if (name.StartsWith("duel") || name == "finale") screen = new DuelScreen();
             if (name == "archive") screen = new ArchiveScreen();                          // Alpha 7 step 7

@@ -1567,6 +1567,7 @@ detail0 – detail4 (โปรไฟล์คอนดักเตอร์ท�
 duels0 – duels4 (ดวลขณะ SIGNATURE ของคนนั้นทำงาน · UNHEARING ลมเหลือน้อยให้เห็นป้าย LOUDER) (รอบ 13) · audit บอกจำนวน SIGNATURE ต่อดวล `(SIG x.x)`
 (บางหน้าให้เครื่องมือแกล้งกดปุ่มก่อนแคป ผ่าน `Input.PretendPress` เช่น Esc ของ `pause`/`duelpause`/`titlequit`, Enter ของ `shopleave` ·
 `dueldouble`/`dueltremolo`/`finale`/`calibrate` กระโดดไปจังหวะนั้นเลยผ่าน hook สำหรับถ่ายภาพ)
+Beta1 รอบ 3 (29 ต.ค.) : `pausesettings@150` (Settings ที่เมนูหยุดยืม) `pauseask@120` (กล่องถามก่อนกลับ Title) `battlepause` (เมนูหยุดทับหน้าต่อสู้) เปิดผ่าน `PauseMenu.OpenSettings` / `AskReturn` ไม่ขึ้นกับเมาส์จำลอง
 
 ```bash
 Tacetno433.exe --shots title,battle,result --out C:\pictures --scale 1.5 --steady

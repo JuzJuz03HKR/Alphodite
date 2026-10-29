@@ -170,21 +170,7 @@ namespace Tacetno433.Screens
             for (int k = 0; k < 4; k++)
             {
                 float rx = 240f + k * 150f;
-                DrawRing(sb, 700f, 640f, rx, rx * 0.16f, Palette.Paper * ((0.1f - k * 0.02f) * a), a);
-            }
-        }
-
-        private static void DrawRing(SpriteBatch sb, float cx, float cy, float rx, float ry, Color color, float drawn)
-        {
-            const int pieces = 64;
-            Vector2 last = new Vector2(cx, cy + ry);
-            int shown = (int)(pieces * drawn);
-            for (int p = 1; p <= shown; p++)
-            {
-                float angle = MathHelper.PiOver2 + MathHelper.TwoPi * p / pieces;
-                Vector2 now = new Vector2(cx + rx * (float)Math.Cos(angle), cy + ry * (float)Math.Sin(angle));
-                Gfx.Line(sb, last, now, color, 1f);
-                last = now;
+                Ornament.FloorRing(sb, 700f, 640f, rx, rx * 0.16f, Palette.Paper * ((0.1f - k * 0.02f) * a), a);
             }
         }
 
@@ -278,8 +264,7 @@ namespace Tacetno433.Screens
         {
             float a = UiMotion.Between(time, 0f, 0.45f);
             int x = 40 + (int)Math.Round((1f - a) * -40f);
-            Gfx.SlantBox(sb, new Rectangle(x, 80, 96, 540), 24, Palette.Paper * (0.94f * a));
-            Gfx.TextVertical(sb, Game.BigFont, "THE ARCHIVE", x + 76, 116, Palette.Ink * a, TextSize.Title);
+            Ui.TitleBar(sb, new Rectangle(x, 80, 96, 540), 24, "THE ARCHIVE", a);
             Gfx.TextSpaced(sb, Game.Font, "EVERY RUN LEAVES ECHOES BEHIND", x + 4, 630, Palette.LineGrey * a, TextSize.Tiny, 2f);
         }
     }

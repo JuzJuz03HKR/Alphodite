@@ -82,6 +82,35 @@ namespace Tacetno433.Core
             }
         }
 
+        //Still Hole (Beta1 screens) : TACET's hole drawn with plain shapes, still and faint, for what is drawn on top of a
+        //page and so has no lens of its own (the pause menu, and the settings page it borrows). A black disc with a thin
+        //bright rim, a soft halo and a ring of ticks turning very slowly. The pages themselves use the real hole (TacetVoid).
+        public static void StillHole(SpriteBatch sb, float cx, float cy, float radius, float turn, float alpha)
+        {
+            if (alpha <= 0f || radius <= 0f) return;
+            Gfx.DrawGlow(sb, cx, cy, radius * 3.4f, Color.White * (0.06f * alpha));
+            Gfx.Circle(sb, cx, cy, radius, Palette.Void * alpha);
+            Gfx.CircleOutline(sb, cx, cy, radius, Palette.Paper * (0.6f * alpha), 1.5f);
+            Gfx.CircleOutline(sb, cx, cy, radius + 4f, Palette.Paper * (0.15f * alpha), 1f);
+            TickRing(sb, cx, cy, radius + 16f, 48, turn, 1f, Palette.Paper * (0.3f * alpha));
+        }
+
+        //Floor Ring (Beta1 screens) : a ring lying flat on the floor of a dark room (menu7), drawn from the front round,
+        //drawn 0..1 of the way. THE ARCHIVE, SETTINGS and HOW TO PLAY stand on a few of them.
+        public static void FloorRing(SpriteBatch sb, float cx, float cy, float rx, float ry, Color color, float drawn)
+        {
+            const int pieces = 64;
+            Vector2 last = new Vector2(cx, cy + ry);
+            int shown = (int)(pieces * drawn);
+            for (int p = 1; p <= shown; p++)
+            {
+                float angle = MathHelper.PiOver2 + MathHelper.TwoPi * p / pieces;
+                Vector2 now = new Vector2(cx + rx * (float)Math.Cos(angle), cy + ry * (float)Math.Sin(angle));
+                Gfx.Line(sb, last, now, color, 1f);
+                last = now;
+            }
+        }
+
         //Rule With Diamond : a heading underline that ends in a small diamond
         public static void Rule(SpriteBatch sb, float x, float y, float width, Color color)
         {

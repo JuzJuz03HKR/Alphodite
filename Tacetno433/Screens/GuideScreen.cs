@@ -15,9 +15,14 @@ namespace Tacetno433.Screens
     //   03 THE LINE  how a duel is won and lost
     //Alpha 7 (step 9) : with the turn battle on, page 3 is THE FIGHT (turns, blocking, BREATH)
     //and the controls page lists the keys of the turn battle.
-    //Left  : a small drawing of the thing being explained
+    //Left  : the page's name on its bar, then a small drawing of the thing being explained
     //Right : the page number, a title and a few sentences
-    //Bottom: the page track, click a diamond to jump
+    //Bottom: the pages as circles on a line, click one to jump
+    //
+    //Beta1 screens round 3 (29 Oct, docs/SCREENS_LEVEL_UP.md 20) : the same dark, still room as THE ARCHIVE and SETTINGS.
+    //HOW TO PLAY stands turned on the tall white bar (menu1), the drawing sits in a thin frame with rings at its
+    //corners (menu3), the pages are circles on a line (Ui.Steps) and PREV, NEXT and BACK are Ui.Command plates.
+    //NEXT stays lit unless the mouse points at another one, so the way on is always clear.
     public class GuideScreen : GameScreen
     {
         //Can Pause : a menu page outside the run, ESC here means going back
@@ -59,12 +64,17 @@ namespace Tacetno433.Screens
         };
 
         //Guide Layout
-        private Rectangle artBox = new Rectangle(70, 110, 600, 440);
-        private Rectangle backButton = new Rectangle(70, 640, 170, 46);
-        private Rectangle prevButton = new Rectangle(880, 560, 150, 46);
-        private Rectangle nextButton = new Rectangle(1050, 560, 170, 46);
-        private const float NavY = 664f;
-        private const float NavSpacing = 110f;
+        private Rectangle artBox = new Rectangle(180, 110, 600, 440);
+        private const float ArtShift = 110f;            // the drawings were laid out for a frame at x 70, the frame moved this far right
+        private const float TextX = 830f;
+        private const float TextWrap = 390f;
+        private Rectangle backButton = new Rectangle(40, 646, 190, 46);
+        private Rectangle prevButton = new Rectangle(830, 560, 170, 46);
+        private Rectangle nextButton = new Rectangle(1030, 560, 190, 46);
+        private const float NavX = 480f;                // the circles of the pages, under the drawing
+        private const float NavY = 604f;
+        private const float NavSpacing = 120f;
+        private static readonly Vector2 Hole = new Vector2(1150f, 92f);
 
         //Drawing Data : the made-up examples in the pictures, kept out of Draw so drawing never allocates
         private static string[] demoSizes = { "p", "mf", "f" };
@@ -85,7 +95,11 @@ namespace Tacetno433.Screens
         private static string[] wrapped;
         private int page;
         private float time;
-        private float turn;                 // 0 right after a page flip, 1 when settled
+        private float turn = 1f;            // 0 right after a page flip, 1 when settled
+        private float ox;                   // where the drawings sit this frame : ArtShift, plus a little slide after a flip
+        private UiMotion prevMotion = new UiMotion();
+        private UiMotion nextMotion = new UiMotion();
+        private UiMotion backMotion = new UiMotion();
 
         public override void Load()
         {
@@ -94,8 +108,15 @@ namespace Tacetno433.Screens
             {
                 wrapped = new string[bodies.Length];
                 for (int i = 0; i < bodies.Length; i++)
-                    wrapped[i] = Gfx.WrapText(Game.StoryFont, bodies[i], 440, TextSize.Story);
+                    wrapped[i] = Gfx.WrapText(Game.StoryFont, bodies[i], TextWrap, TextSize.Story);
             }
+
+            //TACET and the page's light : the dark, still room of THE ARCHIVE
+            Dark = new TacetVoid();
+            Lens.Ambient = 0.42f;
+            Lens.SpotPower = 0f;
+            Lens.Vignette = 0.6f;
+            nextMotion.Snap(true);
 
             SoundBank.PlayMusic(Music.Title);
         }
@@ -105,14 +126,35 @@ namespace Tacetno433.Screens
             time += dt;
             turn = Math.Min(1f, turn + dt * 3f);
 
-            if (Input.KeyPressed(Keys.Right) || Input.KeyPressed(Keys.D) || Input.ClickedOn(nextButton)) Flip(page + 1);
-            if (Input.KeyPressed(Keys.Left) || Input.KeyPressed(Keys.A) || Input.ClickedOn(prevButton)) Flip(page - 1);
+            //TACET : far up in the corner, still
+            Dark.Update(dt, 0.3f);
+            Dark.PlaceOnPage(Hole, 26f * UiMotion.EaseBack(MathHelper.Clamp(time / 0.6f, 0f, 1f)) * (1f + 0.03f * (float)Math.Sin(time * 0.6f)), 0f, 0f, 0f);
+
+            //POINT : NEXT stays lit unless the mouse points at PREV or BACK
+            bool last = page >= steps.Length - 1;
+            bool overPrev = page > 0 && Input.MouseOver(prevButton);
+            bool overBack = Input.MouseOver(backButton);
+            prevMotion.Update(dt, overPrev);
+            nextMotion.Update(dt, !last && !overPrev && !overBack);
+            backMotion.Update(dt, overBack);
+
+            if (Input.KeyPressed(Keys.Right) || Input.KeyPressed(Keys.D) || Input.ClickedOn(nextButton))
+            {
+                if (!last) nextMotion.Press();
+                Flip(page + 1);
+            }
+            if (Input.KeyPressed(Keys.Left) || Input.KeyPressed(Keys.A) || Input.ClickedOn(prevButton))
+            {
+                if (page > 0) prevMotion.Press();
+                Flip(page - 1);
+            }
 
             for (int i = 0; i < steps.Length; i++)
-                if (Input.ClickedOn(Ui.StepRect(steps.Length, i, 640, NavY, NavSpacing))) Flip(i);
+                if (Input.ClickedOn(Ui.StepRect(steps.Length, i, NavX, NavY, NavSpacing))) Flip(i);
 
             if (Input.KeyPressed(Keys.Escape) || Input.ClickedOn(backButton))
             {
+                backMotion.Press();
                 SoundBank.Play(Sfx.UiBack);
                 Game.Screens.Change(new TitleScreen());
             }
@@ -126,53 +168,115 @@ namespace Tacetno433.Screens
             SoundBank.Play(Sfx.PageTurn);
         }
 
+        //======================================================================================
+        //The World (THE LENS) : the dark, still room, the frame of the drawing
+        //======================================================================================
+
+        public override bool HasWorld
+        {
+            get { return true; }
+        }
+
+        public override bool ShowsGrain
+        {
+            get { return false; }
+        }
+
+        //Back : what the hole bends, the dark room and the rings lying on its floor (menu7)
+        public override void DrawBack(SpriteBatch sb)
+        {
+            Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.StageDeep);
+            Gfx.DrawGlowBox(sb, new Rectangle(200, 60, 1100, 640), Palette.Paper * 0.05f);
+            float a = UiMotion.Between(time, 0.1f, 0.8f);
+            for (int k = 0; k < 4; k++)
+            {
+                float rx = 240f + k * 150f;
+                Ornament.FloorRing(sb, 700f, 640f, rx, rx * 0.16f, Palette.Paper * ((0.1f - k * 0.02f) * a), a);
+            }
+        }
+
+        //World : the bits the hole pulls in, and the drawing's frame, a thin line with a ring on each corner (menu3)
+        public override void DrawWorld(SpriteBatch sb)
+        {
+            Dark.DrawDebris(sb, false);
+            float a = UiMotion.Between(time, 0.15f, 0.5f);
+            Gfx.Rect(sb, artBox, Palette.Void * (0.45f * a));
+            Gfx.RectOutline(sb, artBox, Palette.LineGrey * (0.4f * a), 1);
+            Corner(sb, artBox.X, artBox.Y, a);
+            Corner(sb, artBox.Right, artBox.Y, a);
+            Corner(sb, artBox.X, artBox.Bottom, a);
+            Corner(sb, artBox.Right, artBox.Bottom, a);
+        }
+
+        private static void Corner(SpriteBatch sb, float x, float y, float a)
+        {
+            Gfx.Circle(sb, x, y, 4f, Palette.StageDeep * a);
+            Gfx.CircleOutline(sb, x, y, 4f, Palette.PaperDim * a, 1f);
+        }
+
+        //Lights : a soft light on the drawing, a softer one on the words
+        public override void DrawLights(SpriteBatch sb)
+        {
+            float a = UiMotion.Between(time, 0.1f, 0.6f);
+            Gfx.DrawGlow(sb, artBox.Center.X, artBox.Center.Y, 440f, Color.White * (0.26f * a));
+            Gfx.DrawGlow(sb, 1020f, 300f, 320f, Color.White * (0.14f * a));
+        }
+
+        //======================================================================================
+        //The Words (crisp on top)
+        //======================================================================================
+
         public override void Draw(SpriteBatch sb)
         {
-            SceneBackdrop.Draw(sb, time);
+            //Title Bar : the page's name turned on the tall white bar at the left (menu1)
+            float t = UiMotion.Between(time, 0f, 0.45f);
+            int barX = 40 + (int)Math.Round((1f - t) * -40f);
+            Ui.TitleBar(sb, new Rectangle(barX, 80, 96, 540), 24, "HOW TO PLAY", t);
 
-            //Heading
-            Gfx.TextSpaced(sb, Game.Font, "HOW TO PLAY", 70, 46, Palette.PaperDim, TextSize.Label, 6f);
-            Ornament.Rule(sb, 70, 72, 1140, Palette.LineGrey);
-
-            //Drawing
-            Ui.Panel(sb, artBox, 1f);
-            float a = turn;
+            //Drawing : fades in and slides a little after every flip
+            float a = turn * UiMotion.Between(time, 0.2f, BattleRules.UiEnterTime);
+            ox = ArtShift + (1f - UiMotion.EaseOut(turn)) * 14f;
             if (page == 0) DrawControls(sb, a);
             if (page == 1) DrawNote(sb, a);
             if (page == 2 && turnBattle) DrawFight(sb, a);
             if (page == 2 && !turnBattle) DrawLine(sb, a);
 
             //Text Column : slides in a little on every flip
-            float x = 740 + (1f - a) * 20f;
-            Gfx.Text(sb, Game.LogoFont, numbers[page], x - 4, 96, Palette.Paper * (0.25f * a), TextSize.Banner);
-            Gfx.TextSpaced(sb, Game.Font, steps[page], x, 196, Palette.PaperDim * a, TextSize.Label, 5f);
-            Gfx.Text(sb, Game.BigFont, titles[page], x, 214, Palette.Highlight * a, TextSize.Title);
-            Ornament.Rule(sb, x, 266, 440, Palette.LineGrey * a);
-            Gfx.Text(sb, Game.StoryFont, wrapped[page], x, 284, Palette.Paper * a, TextSize.Story);
+            float w = turn * UiMotion.Between(time, 0.25f, BattleRules.UiEnterTime);
+            float x = TextX + (1f - UiMotion.EaseOut(turn)) * 20f;
+            Gfx.Text(sb, Game.LogoFont, numbers[page], x - 4, 96, Palette.Paper * (0.25f * w), TextSize.Banner);
+            Gfx.TextSpaced(sb, Game.Font, steps[page], x, 196, Palette.PaperDim * w, TextSize.Label, 5f);
+            Gfx.Text(sb, Game.BigFont, titles[page], x, 214, Palette.Highlight * w, TextSize.Title);
+            Gfx.CircleOutline(sb, x + 3, 266, 3f, Palette.LineGrey * w, 1f);
+            Gfx.Rect(sb, x + 9, 266, TextWrap - 9, 1, Palette.LineGrey * (0.6f * w));
+            Gfx.Text(sb, Game.StoryFont, wrapped[page], x, 284, Palette.Paper * w, TextSize.Story);
 
-            Ui.Button(sb, prevButton, "PREV", "A", false, page > 0, 1f);
-            Ui.Button(sb, nextButton, "NEXT", "D", true, page < steps.Length - 1, 1f);
-            Ui.Button(sb, backButton, "BACK", "ESC", false);
+            //Buttons : PREV and NEXT fade out where there is no page to go to
+            float low = UiMotion.Between(time, 0.4f, BattleRules.UiEnterTime);
+            Ui.Command(sb, prevButton, "PREV", "A", prevMotion, low * (page > 0 ? 1f : 0.35f), false);
+            Ui.Command(sb, nextButton, "NEXT", "D", nextMotion, low * (page < steps.Length - 1 ? 1f : 0.35f), false);
+            Ui.Command(sb, backButton, "BACK", "ESC", backMotion, low, false);
 
-            Ui.StepNav(sb, steps, page, 640, NavY, NavSpacing);
+            Ui.Steps(sb, steps, page, NavX, NavY, NavSpacing, low);
+            Gfx.TextSpacedRight(sb, Game.Font, "LEFT RIGHT  TURN THE PAGE   /   ESC  BACK", 1240, 692, Palette.LineGrey * low, TextSize.Tiny, 2f);
         }
 
-        //Page 1 : the mouse with its left button lit, and the three keys with their jobs
+        //Page 1 : the mouse with its left button lit, and the keys with their jobs
         private void DrawControls(SpriteBatch sb, float a)
         {
             //Mouse : hold and swing, the baton tip drawing the 4/4 shape beside it
-            Ui.MouseIcon(sb, 180f, 230f, 2f, a);
-            Gfx.TextSpaced(sb, Game.Font, "HOLD + SWING", 250, 204, Palette.Highlight * a, TextSize.Label, 3f);
-            Gfx.Text(sb, Game.StoryFont, "the left button raises the baton", 250, 232, Palette.PaperDim * a, TextSize.StorySmall);
-            DrawShape(sb, 520f, 230f, 56f, a);
+            Ui.MouseIcon(sb, ox + 180f, 230f, 2f, a);
+            Gfx.TextSpaced(sb, Game.Font, "HOLD + SWING", ox + 250, 204, Palette.Highlight * a, TextSize.Label, 3f);
+            Gfx.Text(sb, Game.StoryFont, "the left button raises the baton", ox + 250, 232, Palette.PaperDim * a, TextSize.StorySmall);
+            DrawShape(sb, ox + 520f, 230f, 56f, a);
 
             //Keys : five rows in the turn battle, so they sit a little closer
             float keyStep = keyNames.Length > 4 ? 40f : (keyNames.Length > 3 ? 46f : 56f);
             for (int i = 0; i < keyNames.Length; i++)
             {
                 float y = 350f + i * keyStep;
-                Ui.KeyCap(sb, keyNames[i], 130f, y, a);
-                Gfx.TextSpaced(sb, Game.Font, keyJobs[i], 250, y - 8, Palette.Paper * a, TextSize.Tiny, 2f);
+                Ui.KeyCap(sb, keyNames[i], ox + 130f, y, a);
+                Gfx.TextSpaced(sb, Game.Font, keyJobs[i], ox + 250, y - 8, Palette.Paper * a, TextSize.Tiny, 2f);
             }
         }
 
@@ -180,7 +284,7 @@ namespace Tacetno433.Screens
         private void DrawNote(SpriteBatch sb, float a)
         {
             //The Note : a big one, its arrow on the edge, its letter inside
-            float nx = 200f;
+            float nx = ox + 200f;
             float ny = 230f;
             Gfx.Circle(sb, nx, ny, 48f, Palette.Paper * a);
             Gfx.CircleOutline(sb, nx, ny, 48f, Palette.Ink * a, 4f);
@@ -190,7 +294,7 @@ namespace Tacetno433.Screens
             Gfx.TextSpacedCentered(sb, Game.Font, "LETTER f : A BIG STROKE", nx, ny + 90, Palette.Highlight * a, TextSize.Tiny, 2f);
 
             //Sizes : a ruler with three zones, a stroke growing along it
-            float rx = 360f;
+            float rx = ox + 360f;
             float ry = 210f;
             float rw = 260f;
             Gfx.Rect(sb, rx, ry, rw, 2, Palette.LineGrey * a);
@@ -208,7 +312,7 @@ namespace Tacetno433.Screens
             Gfx.TextSpaced(sb, Game.Font, "HOW FAR  =  HOW LOUD", rx, ry - 34, Palette.PaperDim * a, TextSize.Tiny, 3f);
 
             //Ring : the stroke should stop just as the ring meets its mark
-            float cx = 490f;
+            float cx = ox + 490f;
             float cy = 400f;
             float ringT = (time * 0.8f) % 1f;
             Gfx.CircleOutline(sb, cx, cy, 30, Palette.Highlight * a, 3f);
@@ -218,7 +322,7 @@ namespace Tacetno433.Screens
                                    (ringT > 0.9f ? Palette.Highlight : Palette.PaperDim) * a, TextSize.Tiny, 2f);
 
             //Shape : the four ways of the bar, in beat order
-            DrawShape(sb, 200f, 420f, 50f, a);
+            DrawShape(sb, ox + 200f, 420f, 50f, a);
         }
 
         //Shape : the 4/4 pattern, four points and a line for each stroke, the baton tip travelling round
@@ -248,11 +352,11 @@ namespace Tacetno433.Screens
         private void DrawFight(SpriteBatch sb, float a)
         {
             //The Bar : the band are filled plates, TACET an outline, like the fight page
-            Gfx.TextSpaced(sb, Game.Font, "THE BAR", 110, 140, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            Gfx.TextSpaced(sb, Game.Font, "THE BAR", ox + 110, 140, Palette.LineGrey * a, TextSize.Tiny, 2f);
             int now = (int)(time / 1.6f) % demoOrder.Length;
             for (int i = 0; i < demoOrder.Length; i++)
             {
-                Rectangle plate = new Rectangle(110 + i * 92, 160, 84, 30);
+                Rectangle plate = new Rectangle((int)(ox + 110 + i * 92), 160, 84, 30);
                 bool enemy = i == 2;
                 Color ink = i == now ? Palette.Highlight : Palette.PaperDim;
                 if (enemy) Gfx.RectOutline(sb, plate, ink * a, i == now ? 2 : 1);
@@ -262,41 +366,42 @@ namespace Tacetno433.Screens
 
             //The Band and TACET : empty frames, the art comes later
             for (int i = 0; i < 3; i++)
-                Gfx.RectOutline(sb, new Rectangle(110 + i * 70, 240, 56, 100), Palette.PaperDim * a, 1);
-            Gfx.TextSpaced(sb, Game.Font, "BAND", 110, 350, Palette.Paper * a, TextSize.Label, 3f);
-            Gfx.RectOutline(sb, new Rectangle(490, 220, 110, 130), Palette.Paper * a, 2);
-            Gfx.TextSpaced(sb, Game.Font, "TACET", 490, 360, Palette.Paper * a, TextSize.Label, 3f);
+                Gfx.RectOutline(sb, new Rectangle((int)(ox + 110 + i * 70), 240, 56, 100), Palette.PaperDim * a, 1);
+            Gfx.TextSpaced(sb, Game.Font, "BAND", ox + 110, 350, Palette.Paper * a, TextSize.Label, 3f);
+            Gfx.RectOutline(sb, new Rectangle((int)(ox + 490), 220, 110, 130), Palette.Paper * a, 2);
+            Gfx.TextSpaced(sb, Game.Font, "TACET", ox + 490, 360, Palette.Paper * a, TextSize.Label, 3f);
 
             //Block : a note flies from TACET to the ring, which closes as it arrives
             float t = (time % 1.4f) / 1.4f;
-            float cx = 400f;
+            float cx = ox + 400f;
             float cy = 290f;
             NoteGlyph.TimingRing(sb, cx, cy, Math.Min(1f, t / 0.8f), 30f, 80f, 0f, a);
-            if (t < 0.8f) NoteGlyph.Note(sb, Game.BigFont, MathHelper.Lerp(480f, cx, t / 0.8f), cy, 1, Flick.Left, 1f, time, a);
+            if (t < 0.8f) NoteGlyph.Note(sb, Game.BigFont, MathHelper.Lerp(ox + 480f, cx, t / 0.8f), cy, 1, Flick.Left, 1f, time, a);
             else Gfx.TextSpacedCentered(sb, Game.Font, "BLOCK", cx, cy + 50, Palette.Highlight * a, TextSize.Label, 3f);
 
             //BREATH : what skills spend and blocks give back
-            Gfx.TextSpaced(sb, Game.Font, "BREATH  :  SKILLS AND CALLS SPEND IT, HITS GIVE IT BACK", 110, 440, Palette.LineGrey * a, TextSize.Tiny, 2f);
-            Ui.Pips(sb, 116, 476, 3 + (int)(time * 0.8f) % 5, BattleRules.TurnBreathMax, 8f, 22f, a);
+            Gfx.TextSpaced(sb, Game.Font, "BREATH  :  SKILLS AND CALLS SPEND IT, HITS GIVE IT BACK", ox + 110, 440, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            Ui.Pips(sb, ox + 116, 476, 3 + (int)(time * 0.8f) % 5, BattleRules.TurnBreathMax, 8f, 22f, a);
         }
 
         //Page 3 : the line and the breath bar
         private void DrawLine(SpriteBatch sb, float a)
         {
-            float split = 370 + (float)Math.Sin(time * 1.2f) * 90f;
-            Gfx.Rect(sb, 100, 150, split - 100, 250, Palette.StageLight * a);
-            Gfx.Rect(sb, split, 150, 640 - split, 250, Palette.Void * a);
+            float left = ox + 100f;
+            float split = ox + 370f + (float)Math.Sin(time * 1.2f) * 90f;
+            Gfx.Rect(sb, left, 150, split - left, 250, Palette.StageLight * a);
+            Gfx.Rect(sb, split, 150, ox + 640f - split, 250, Palette.Void * a);
             for (int y = 150; y < 400; y += 4)
                 Gfx.Rect(sb, split - 2 + (float)Math.Sin(y * 0.05f + time * 3f) * 4f, y, 3, 4, Palette.Paper * a);
 
-            Gfx.TextSpaced(sb, Game.Font, "YOU", 116, 166, Palette.Ink * a, TextSize.Label, 3f);
-            Gfx.TextSpacedRight(sb, Game.Font, "TACET", 624, 166, Palette.Paper * a, TextSize.Label, 3f);
+            Gfx.TextSpaced(sb, Game.Font, "YOU", ox + 116, 166, Palette.Ink * a, TextSize.Label, 3f);
+            Gfx.TextSpacedRight(sb, Game.Font, "TACET", ox + 624, 166, Palette.Paper * a, TextSize.Label, 3f);
 
-            Ui.CapsuleBar(sb, new Rectangle(120, 430, 500, 14), (split - 100f) / 540f, Palette.Paper, a);
-            Gfx.TextSpaced(sb, Game.Font, "THE LINE", 120, 412, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            Ui.CapsuleBar(sb, new Rectangle((int)(ox + 120), 430, 500, 14), (split - left) / 540f, Palette.Paper, a);
+            Gfx.TextSpaced(sb, Game.Font, "THE LINE", ox + 120, 412, Palette.LineGrey * a, TextSize.Tiny, 2f);
 
-            Gfx.TextSpaced(sb, Game.Font, "BREATH  :  THE BAND'S LIFE  /  AT ZERO THE FIGHT IS LOST", 120, 476, Palette.LineGrey * a, TextSize.Tiny, 2f);
-            Ui.CapsuleBar(sb, new Rectangle(120, 494, 500, 10), 0.45f, Palette.PaperDim, a);
+            Gfx.TextSpaced(sb, Game.Font, "BREATH  :  THE BAND'S LIFE  /  AT ZERO THE FIGHT IS LOST", ox + 120, 476, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            Ui.CapsuleBar(sb, new Rectangle((int)(ox + 120), 494, 500, 10), 0.45f, Palette.PaperDim, a);
         }
     }
 }

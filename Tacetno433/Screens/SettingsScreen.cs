@@ -10,15 +10,21 @@ namespace Tacetno433.Screens
 {
     //SettingsScreen : the options page, opened from the title menu or from the pause menu.
     //
-    //Six rows: three volume sliders, the language choice, a full screen tick box, and the
-    //stroke timing. Up and down pick a row, left and right change it, and the mouse can drag
-    //the sliders or click the chips. The panel on the right explains whichever row is chosen.
+    //Seven rows: three volume sliders, the language choice, full screen, the stroke timing and
+    //LESS FLASHING. Up and down pick a row, left and right change it, and the mouse can drag
+    //the sliders or click the words. The column on the right explains whichever row is chosen.
     //
     //STROKE TIMING has a test: a flash (and a tick) every beat, the player strokes on each one,
     //and the page works out how early or late their strokes land. See Settings.TimingOffset.
     //
     //The numbers themselves live in Core/Settings.cs. They are saved to a file (SaveFile)
     //as soon as the page closes.
+    //
+    //Beta1 screens round 3 (29 Oct, docs/SCREENS_LEVEL_UP.md 20) : the same dark, still room as THE ARCHIVE. The page's
+    //name stands turned on the tall white bar at the left (menu1), the rows are menu lines hanging on one thin line
+    //(Ui.MenuItem, the ink bar under the chosen one), the sliders are thin lines with a circle (Ui.Fader) and the
+    //either-or rows are words on plates (Ui.Choice). TACET's hole hangs still above the help. Borrowed by the pause
+    //menu the page has no lens of its own, so it draws the same room flat and the hole with plain shapes.
     public class SettingsScreen : GameScreen
     {
         //Can Pause : a menu page outside the run, ESC here means going back
@@ -44,19 +50,19 @@ namespace Tacetno433.Screens
         private const int RowCount = 7;
 
         //Settings Layout
-        private const int PanelX = 80;
-        private const int PanelY = 140;
-        private const int PanelW = 700;
-        private const int PanelH = 440;
-        private const int RowX = 96;
-        private const int RowY = 164;
-        private const int RowStep = 58;                     // Beta1 : seven rows now (LESS FLASHING), a little closer
-        private const int RowW = 668;
-        private const int RowH = 50;
-        private const int TrackX = 430;
-        private const int TrackW = 260;
-        private const int ValueRight = 762;
-        private const int HelpWrap = 340;
+        private const int SpineX = 262;                     // the thin line the rows hang on, each row's circle sits on it
+        private const int RowY = 92;                        // the top of the first row
+        private const int RowStep = 64;
+        private const int RowH = 56;
+        private const int RowLeft = 200;                    // the row's box for the mouse, from here ...
+        private const int RowRight = 900;                   // ... to here
+        private const int TrackX = 560;
+        private const int TrackW = 240;
+        private const int ValueRight = 890;
+        private const int HelpX = 950;                      // the column that explains the chosen row
+        private const int HelpW = 270;
+        private static readonly Vector2 Hole = new Vector2(1085f, 96f);
+        private const float HoleRadius = 30f;
 
         private static string[] rowIndex = { "01", "02", "03", "04", "05", "06", "07" };
         private static string[] rowNames =
@@ -69,6 +75,7 @@ namespace Tacetno433.Screens
             "STROKE TIMING",
             "LESS FLASHING"
         };
+        private static string[] offOn = { "OFF", "ON" };
 
         //Row Help : the sentence shown on the right for whichever row is chosen
         private static string[] rowHelp =
@@ -94,16 +101,15 @@ namespace Tacetno433.Screens
 
         //Setting Boxes : worked out once in Load
         private Rectangle[] rowBoxes = new Rectangle[RowCount];
-        private Rectangle[] tracks = new Rectangle[3];      // the drawn rail of each slider
+        private Rectangle[] tracks = new Rectangle[3];      // the drawn line of each slider
         private Rectangle[] grabs = new Rectangle[3];       // the easier area the mouse can grab
         private Rectangle[] langBoxes = new Rectangle[2];
-        private Rectangle fullBox;
-        private Rectangle flashBox;                         // LESS FLASHING's tick box
+        private Rectangle[] fullBoxes = new Rectangle[2];   // FULL SCREEN : OFF, ON
+        private Rectangle[] flashBoxes = new Rectangle[2];  // LESS FLASHING : OFF, ON
         private Rectangle timingTrack;
         private Rectangle timingGrab;
         private Rectangle testChip;
-        private Rectangle helpBox = new Rectangle(820, 140, 380, 240);
-        private Rectangle backButton = new Rectangle(80, 596, 260, 50);
+        private Rectangle backButton;
 
         private int selected;
         private int dragging = -1;      // which slider the mouse is holding, -1 for none
@@ -111,8 +117,10 @@ namespace Tacetno433.Screens
         private float hold;             // how long an arrow key has been held
         private float repeat;
         private float time;
-        private float enter;
+        private float helpClock;        // since the chosen row changed, so the help can slide in again
         private Vector2 lastMouse;
+        private UiMotion[] rowMotion = new UiMotion[RowCount];
+        private UiMotion backMotion = new UiMotion();
 
         //From Pause : the pause menu borrows this page. BACK then only closes it (Closed turns
         //true and the pause menu takes over again) instead of going to the title page.
@@ -144,10 +152,19 @@ namespace Tacetno433.Screens
             this.fromPause = fromPause;
         }
 
+        //Row Center : the middle of row i, where its circle sits on the line
+        private static float RowCenter(int i)
+        {
+            return RowY + i * RowStep + RowH / 2f;
+        }
+
         public override void Load()
         {
             for (int i = 0; i < RowCount; i++)
-                rowBoxes[i] = new Rectangle(RowX, RowY + i * RowStep, RowW, RowH);
+            {
+                rowBoxes[i] = new Rectangle(RowLeft, RowY + i * RowStep, RowRight - RowLeft, RowH);
+                rowMotion[i] = new UiMotion();
+            }
 
             for (int i = 0; i < 3; i++)
             {
@@ -157,30 +174,58 @@ namespace Tacetno433.Screens
             }
 
             int lang = rowBoxes[RowLanguage].Center.Y;
-            langBoxes[0] = new Rectangle(TrackX, lang - 17, 122, 34);
-            langBoxes[1] = new Rectangle(TrackX + 134, lang - 17, 122, 34);
-            fullBox = new Rectangle(TrackX, rowBoxes[RowFull].Center.Y - 13, 26, 26);
-            flashBox = new Rectangle(TrackX, rowBoxes[RowFlash].Center.Y - 13, 26, 26);
+            langBoxes[0] = new Rectangle(TrackX, lang - 16, 120, 32);
+            langBoxes[1] = new Rectangle(TrackX + 132, lang - 16, 120, 32);
+            for (int k = 0; k < 2; k++)
+            {
+                fullBoxes[k] = new Rectangle(TrackX + k * 88, rowBoxes[RowFull].Center.Y - 16, 76, 32);
+                flashBoxes[k] = new Rectangle(TrackX + k * 88, rowBoxes[RowFlash].Center.Y - 16, 76, 32);
+            }
 
             int timing = rowBoxes[RowTiming].Center.Y;
-            timingTrack = new Rectangle(TrackX, timing - 8, 160, 16);
-            timingGrab = new Rectangle(TrackX - 12, timing - 18, 184, 36);
-            testChip = new Rectangle(ValueRight - 66, timing - 17, 66, 34);
+            timingTrack = new Rectangle(TrackX, timing - 8, 150, 16);
+            timingGrab = new Rectangle(TrackX - 12, timing - 18, 174, 36);
+            testChip = new Rectangle(ValueRight - 72, timing - 16, 72, 32);
+            backButton = new Rectangle(40, 646, fromPause ? 250 : 190, 46);
 
             //Help Text : wrapped once here, never while drawing
             for (int i = 0; i < RowCount; i++)
-                helpWrapped[i] = Gfx.WrapText(Game.StoryFont, rowHelp[i], HelpWrap, TextSize.StorySmall);
-            savedWrapped = Gfx.WrapText(Game.StoryFont, savedNote, HelpWrap, TextSize.StorySmall);
-            testWrapped = Gfx.WrapText(Game.StoryFont, testNote, HelpWrap, TextSize.StorySmall);
+                helpWrapped[i] = Gfx.WrapText(Game.StoryFont, rowHelp[i], HelpW, TextSize.StorySmall);
+            savedWrapped = Gfx.WrapText(Game.StoryFont, savedNote, HelpW, TextSize.StorySmall);
+            testWrapped = Gfx.WrapText(Game.StoryFont, testNote, HelpW, TextSize.StorySmall);
+
+            //TACET and the page's light : the dark, still room of THE ARCHIVE (borrowed by the pause menu, none of this shows)
+            if (!fromPause) Dark = new TacetVoid();
+            Lens.Ambient = 0.42f;
+            Lens.SpotPower = 0f;
+            Lens.Vignette = 0.6f;
 
             lastMouse = Input.MousePos;
             if (!fromPause) SoundBank.PlayMusic(Music.Title);
         }
 
+        //Hole Size : opens a little past its size and settles, then breathes very slowly
+        private float HoleSize()
+        {
+            return HoleRadius * UiMotion.EaseBack(MathHelper.Clamp(time / 0.6f, 0f, 1f)) * (1f + 0.03f * (float)Math.Sin(time * 0.6f));
+        }
+
         public override void Update(float dt)
         {
             time += dt;
-            enter = Math.Min(1f, enter + dt * 2.5f);
+            helpClock += dt;
+
+            //TACET : above the help, still
+            if (Dark != null)
+            {
+                Dark.Update(dt, 0.3f);
+                Dark.PlaceOnPage(Hole, HoleSize(), 0f, 0f, 0f);
+            }
+
+            //POINT : the chosen row's ink bar shoots out, the others pull theirs back
+            for (int i = 0; i < RowCount; i++)
+                rowMotion[i].Update(dt, i == selected && RowIn(i) > 0.5f);
+            backMotion.Update(dt, !testing && Input.MouseOver(backButton));
 
             //Timing Test : takes over the page until it ends or is stopped
             if (testing)
@@ -208,6 +253,7 @@ namespace Tacetno433.Screens
             {
                 SoundBank.Play(Sfx.UiMove);
                 lastStep = -1;
+                helpClock = 0f;
             }
 
             //Value Change : one step per press, then a repeat while the key is held
@@ -220,11 +266,18 @@ namespace Tacetno433.Screens
 
             if (Input.KeyPressed(Keys.Escape) || Input.KeyPressed(Keys.Back) || Input.ClickedOn(backButton))
             {
+                backMotion.Press();
                 SoundBank.Play(Sfx.UiBack);
                 SaveFile.SaveSettings();
                 if (fromPause) Closed = true;
                 else Game.Screens.Change(new TitleScreen());
             }
+        }
+
+        //Row In : how far row i has come in (ENTER), the rows one after another
+        private float RowIn(int i)
+        {
+            return UiMotion.Between(time, 0.2f + i * BattleRules.UiEnterStagger, BattleRules.UiEnterTime);
         }
 
         //Begin Test : DEVELOPER TOOL hook, so the capture tool can picture the test running
@@ -245,6 +298,8 @@ namespace Tacetno433.Screens
             testResult = "";
             testGesture.Clear();
             selected = RowTiming;
+            rowMotion[RowTiming].Press();
+            helpClock = 0f;
             SoundBank.Play(Sfx.UiConfirm);
         }
 
@@ -285,6 +340,7 @@ namespace Tacetno433.Screens
             if (Input.KeyPressed(Keys.Escape) || Input.MouseRightClicked())
             {
                 testing = false;
+                helpClock = 0f;
                 SoundBank.Play(Sfx.UiBack);
             }
         }
@@ -302,6 +358,7 @@ namespace Tacetno433.Screens
             Settings.SetTiming(middle);
             SaveFile.SaveSettings();
             testing = false;
+            helpClock = 0f;
             testResult = "MEASURED  " + Settings.TimingLabel(middle) + "   /   SET TO  " + Settings.TimingLabel(Settings.TimingOffset);
             SoundBank.Play(Sfx.ComboUp);
         }
@@ -330,7 +387,7 @@ namespace Tacetno433.Screens
             else SetVolume(selected, VolumeOf(selected) + dir * 0.02f);
         }
 
-        //Mouse : grab a slider and hold it, or click one of the chips
+        //Mouse : grab a slider and hold it, or click one of the words
         private void UpdateMouse()
         {
             if (Input.MouseClicked())
@@ -338,10 +395,12 @@ namespace Tacetno433.Screens
                 for (int i = 0; i < 3; i++)
                     if (Input.MouseOver(grabs[i])) { dragging = i; selected = i; lastStep = -1; }
 
-                if (Input.MouseOver(langBoxes[0])) { selected = RowLanguage; SetLanguage(0); }
-                if (Input.MouseOver(langBoxes[1])) { selected = RowLanguage; SetLanguage(1); }
-                if (Input.MouseOver(fullBox)) { selected = RowFull; SetFullscreen(!Settings.Fullscreen); }
-                if (Input.MouseOver(flashBox)) { selected = RowFlash; SetFlashing(!Settings.ReduceFlashing); }
+                for (int k = 0; k < 2; k++)
+                {
+                    if (Input.MouseOver(langBoxes[k])) { selected = RowLanguage; SetLanguage(k); }
+                    if (Input.MouseOver(fullBoxes[k])) { selected = RowFull; SetFullscreen(k == 1); }
+                    if (Input.MouseOver(flashBoxes[k])) { selected = RowFlash; SetFlashing(k == 1); }
+                }
                 if (Input.MouseOver(timingGrab)) { dragging = RowTiming; selected = RowTiming; }
                 if (Input.MouseOver(testChip)) { StartTest(); return; }
             }
@@ -370,13 +429,14 @@ namespace Tacetno433.Screens
             else SetFullscreen(dir > 0);
         }
 
-        //Enter Press : the two rows that are simply on or off flip over
+        //Enter Press : the rows that are simply one or the other flip over
         private void Press(int row)
         {
             if (row == RowLanguage) SetLanguage(Settings.Language == 0 ? 1 : 0);
             else if (row == RowFull) SetFullscreen(!Settings.Fullscreen);
             else if (row == RowFlash) SetFlashing(!Settings.ReduceFlashing);
             else if (row == RowTiming) StartTest();
+            if (row >= RowLanguage) rowMotion[row].Press();
         }
 
         private float VolumeOf(int row)
@@ -431,185 +491,223 @@ namespace Tacetno433.Screens
             SoundBank.Play(Sfx.UiConfirm);
         }
 
-        public override void Draw(SpriteBatch sb)
+        //======================================================================================
+        //The World (THE LENS) : the dark, still room of THE ARCHIVE, TACET's hole above the help
+        //======================================================================================
+
+        public override bool HasWorld
         {
-            float e = enter * enter * (3f - 2f * enter);
-
-            DrawBackground(sb);
-
-            //Page Head
-            Gfx.TextSpaced(sb, Game.Font, "TACET 4'33   /   OPTIONS", 82, 38, Palette.LineGrey, TextSize.Tiny, 4f);
-            Gfx.Text(sb, Game.LogoFont, "SETTINGS", 78, 52, Palette.Paper * e, TextSize.Banner);
-            Ornament.Rule(sb, 80, 124, 700, Palette.LineGrey * e);
-
-            //Rows
-            Ui.Panel(sb, new Rectangle(PanelX, PanelY, PanelW, PanelH), e);
-            for (int i = 0; i < RowCount; i++) DrawRow(sb, i, e);
-
-            if (testing) DrawTest(sb, e);
-            else DrawHelp(sb, e);
-
-            Ui.Button(sb, backButton, fromPause ? "BACK TO PAUSE" : "BACK", "ESC", false, enter >= 1f, e);
-
-            Gfx.TextSpaced(sb, Game.Font, "UP DOWN TO CHOOSE  /  LEFT RIGHT TO CHANGE  /  MOUSE CAN DRAG THE SLIDERS", 82, 664, Palette.LineGrey, TextSize.Tiny, 2f);
+            get { return true; }
         }
 
-        //Background : the same dark stage as the title page, so the two feel like one place
-        private void DrawBackground(SpriteBatch sb)
+        public override bool ShowsGrain
+        {
+            get { return false; }
+        }
+
+        //Back : what the hole bends, the dark room and the rings lying on its floor (menu7)
+        public override void DrawBack(SpriteBatch sb)
+        {
+            DrawRoom(sb);
+        }
+
+        //World : the bits the hole pulls in, and the line the rows hang on
+        public override void DrawWorld(SpriteBatch sb)
+        {
+            Dark.DrawDebris(sb, false);
+            DrawSpine(sb);
+        }
+
+        //Lights : a soft light on the chosen row, and one on the help
+        public override void DrawLights(SpriteBatch sb)
+        {
+            Gfx.DrawGlow(sb, 520f, RowCenter(selected), 380f, Color.White * (0.32f * rowMotion[selected].Shown));
+            Gfx.DrawGlow(sb, HelpX + HelpW / 2f, 300f, 300f, Color.White * (0.16f * UiMotion.Between(time, 0.2f, 0.6f)));
+        }
+
+        //Room : the dark room and the rings on its floor, the same as THE ARCHIVE's
+        private void DrawRoom(SpriteBatch sb)
         {
             Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.StageDeep);
-            Gfx.DrawGlowBox(sb, new Rectangle(-300, -200, 1300, 900), Palette.Paper * 0.07f);
-            Gfx.Rect(sb, 60, 30, 1, TacetGame.ScreenH - 60, Palette.Paper * 0.08f);
-            Gfx.Rect(sb, 60, 30, 1140, 1, Palette.Paper * 0.08f);
-            Ornament.Crosses(sb, 1180, 44, 1, 1, 16, Palette.LineGrey);
-
-            //TACET : a thin band of silence still waiting at the right edge
-            TacetField.Draw(sb, 1224f + (float)Math.Sin(time * 0.5f) * 8f, time, 0.1f);
-
-            Ornament.Vignette(sb, 60, 0.55f);
+            Gfx.DrawGlowBox(sb, new Rectangle(200, 60, 1100, 640), Palette.Paper * 0.05f);
+            float a = UiMotion.Between(time, 0.1f, 0.8f);
+            for (int k = 0; k < 4; k++)
+            {
+                float rx = 240f + k * 150f;
+                Ornament.FloorRing(sb, 700f, 640f, rx, rx * 0.16f, Palette.Paper * ((0.1f - k * 0.02f) * a), a);
+            }
         }
 
-        //Row : index, name, and whatever control that row uses
-        private void DrawRow(SpriteBatch sb, int i, float e)
+        //Spine : the thin line the rows hang on, drawing itself down, with a gap round each row's circle
+        private void DrawSpine(SpriteBatch sb)
         {
-            Rectangle box = rowBoxes[i];
-            bool on = (i == selected);
-            float a = MathHelper.Clamp(e * 2f - i * 0.12f, 0f, 1f);
-
-            //Chosen Row : a slanted plate behind it, a bar down the left, a diamond in the margin
-            if (on)
+            float top = RowCenter(0) - 34f;
+            float end = RowCenter(RowCount - 1) + 34f;
+            float bottom = top + (end - top) * UiMotion.Between(time, 0.15f, 0.6f);
+            Color line = Palette.LineGrey * 0.6f;
+            float from = top;
+            for (int i = 0; i <= RowCount; i++)
             {
-                Gfx.SlantBox(sb, new Rectangle(box.X - 10, box.Y, box.Width + 16, box.Height), Ui.Slant, Palette.Stage * (0.92f * a));
-                Gfx.Rect(sb, box.X - 10, box.Y, 3, box.Height, Palette.Accent * a);
-                float bob = (float)Math.Sin(time * 6f) * 2f;
-                Gfx.Diamond(sb, box.X - 26 + bob, box.Center.Y, 5, Palette.Accent * a);
+                float to = Math.Min(i < RowCount ? RowCenter(i) - 9f : end, bottom);
+                if (to > from) Gfx.Rect(sb, SpineX, from, 1, to - from, line);
+                if (i < RowCount) from = RowCenter(i) + 9f;
             }
-            else
+        }
+
+        //======================================================================================
+        //The Words (crisp on top)
+        //======================================================================================
+
+        public override void Draw(SpriteBatch sb)
+        {
+            //Borrowed : the pause menu draws only this, so the room, the line and the hole come along flat
+            if (fromPause)
             {
-                Gfx.Rect(sb, box.X, box.Bottom - 1, box.Width, 1, Palette.LineGrey * (0.25f * a));
+                DrawRoom(sb);
+                DrawSpine(sb);
+                Ornament.StillHole(sb, Hole.X, Hole.Y, HoleSize(), time * 0.02f, 1f);
             }
 
-            Gfx.Text(sb, Game.Font, rowIndex[i], box.X + 14, box.Y + 23, (on ? Palette.Accent : Palette.LineGrey) * a, TextSize.Label);
-            Gfx.TextSpaced(sb, Game.Font, rowNames[i], box.X + 48, box.Y + 19, (on ? Palette.Paper : Palette.PaperDim) * a, TextSize.Heading, 2f);
+            DrawTitleBar(sb);
+            for (int i = 0; i < RowCount; i++) DrawRow(sb, i);
+
+            if (testing) DrawTest(sb);
+            else DrawHelp(sb);
+
+            float low = UiMotion.Between(time, 0.5f, BattleRules.UiEnterTime);
+            Ui.Command(sb, backButton, fromPause ? "BACK TO PAUSE" : "BACK", "ESC", backMotion, low, false);
+            Gfx.TextSpacedRight(sb, Game.Font, "UP DOWN  CHOOSE   /   LEFT RIGHT  CHANGE   /   DRAG THE SLIDERS", 1240, 692, Palette.LineGrey * low, TextSize.Tiny, 2f);
+        }
+
+        //Title Bar : the page's name turned on the tall white bar at the left (menu1)
+        private void DrawTitleBar(SpriteBatch sb)
+        {
+            float a = UiMotion.Between(time, 0f, 0.45f);
+            int x = 40 + (int)Math.Round((1f - a) * -40f);
+            Ui.TitleBar(sb, new Rectangle(x, 80, 96, 540), 24, "SETTINGS", a);
+        }
+
+        //Row : the menu line (number, circle on the line, name, the ink bar when chosen), then the row's control
+        private void DrawRow(SpriteBatch sb, int i)
+        {
+            float a = RowIn(i);
+            if (a <= 0f) return;
+            float slide = (1f - a) * BattleRules.UiEnterSlide;
+            bool on = i == selected;
+            float cy = RowCenter(i);
+
+            Ui.MenuItem(sb, new Vector2(SpineX + slide, cy), rowIndex[i], rowNames[i], "", rowMotion[i], a);
+            Gfx.Rect(sb, TrackX - 24 + slide, cy + RowH / 2f + 3f, ValueRight - TrackX + 24, 1, Palette.LineGrey * (0.18f * a));
 
             if (i <= RowMusic) DrawVolumeRow(sb, i, on, a);
             else if (i == RowLanguage) DrawLanguageRow(sb, on, a);
-            else if (i == RowFull) DrawFullscreenRow(sb, on, a);
-            else if (i == RowFlash) DrawFlashRow(sb, on, a);
+            else if (i == RowFull) DrawSwitchRow(sb, fullBoxes, Settings.Fullscreen, "BORDERLESS  WINDOW", 21, on, a);
+            else if (i == RowFlash) DrawSwitchRow(sb, flashBoxes, Settings.ReduceFlashing, "SOFTER  HITS", 33, on, a);
             else DrawTimingRow(sb, on, a);
         }
 
-        //Timing Row : a slider with the middle marked, the value, and the TEST chip
-        private void DrawTimingRow(SpriteBatch sb, bool on, float a)
-        {
-            bool hot = on || dragging == RowTiming || Input.MouseOver(timingGrab);
-            float value = (Settings.TimingOffset / Settings.TimingMost + 1f) / 2f;
-            Ui.Slider(sb, timingTrack, value, hot, a);
-            Gfx.Rect(sb, timingTrack.Center.X, timingTrack.Y - 5, 1, timingTrack.Height + 10, Palette.PaperDim * a);
-
-            Gfx.TextRight(sb, Game.Font, Settings.TimingLabel(Settings.TimingOffset), testChip.X - 12, timingTrack.Y - 2, (on ? Palette.Highlight : Palette.Paper) * a, TextSize.Body);
-            DrawChip(sb, testChip, "TEST", false, on, a);
-        }
-
-        //Test Panel : in place of the help while the test runs. A ring flashes on every beat,
-        //the marks along the ruler are the strokes so far, early to the left, late to the right.
-        private void DrawTest(SpriteBatch sb, float e)
-        {
-            Ui.Panel(sb, helpBox, e);
-            Ui.Header(sb, "", "Stroke timing test", helpBox.X + 20, helpBox.Y + 26, helpBox.Width - 40, e);
-
-            float cx = helpBox.Center.X;
-            float cy = helpBox.Y + 112;
-            Gfx.DrawGlow(sb, cx, cy, 40f + testFlash * 50f, Palette.Highlight * (0.15f + testFlash * 0.6f));
-            Hollow.Ring(sb, cx, cy, 24f + testFlash * 8f, 2f + testFlash * 3f, 0.5f + testFlash * 0.5f);
-            Gfx.TextSpacedCentered(sb, Game.Font, testStrokes < TestPractice ? "PRACTICE" : "COUNTING", cx, cy + 42, Palette.PaperDim * e, TextSize.Tiny, 3f);
-            Ui.Pips(sb, cx - (TestCount - 1) * 7f, cy + 66, testRecorded, TestCount, 4, 14, e);
-
-            //Ruler : -150 to +150 milliseconds, the middle is right on the beat
-            float left = helpBox.X + 40;
-            float width = helpBox.Width - 80;
-            float ry = helpBox.Bottom - 30;
-            Gfx.Rect(sb, left, ry, width, 1, Palette.LineGrey * e);
-            Gfx.Rect(sb, left + width / 2f, ry - 8, 1, 16, Palette.Paper * e);
-            Gfx.TextSpaced(sb, Game.Font, "EARLY", left, ry + 8, Palette.LineGrey * e, TextSize.Tiny, 2f);
-            Gfx.TextSpacedRight(sb, Game.Font, "LATE", left + width, ry + 8, Palette.LineGrey * e, TextSize.Tiny, 2f);
-            for (int i = 0; i < testRecorded; i++)
-            {
-                float t = MathHelper.Clamp(testOffsets[i] / Settings.TimingMost, -1f, 1f);
-                Gfx.Rect(sb, left + width / 2f + t * width / 2f - 1f, ry - 10, 3, 20, Palette.Highlight * e);
-            }
-
-            Gfx.Text(sb, Game.StoryFont, testWrapped, helpBox.X, helpBox.Bottom + 24, Palette.PaperDim * e, TextSize.StorySmall);
-            Gfx.TextSpaced(sb, Game.Font, "ESC OR RIGHT CLICK TO STOP", helpBox.X, helpBox.Bottom + 96, Palette.LineGrey * e, TextSize.Tiny, 2f);
-        }
-
-        //Volume Row : the slider and the number beside it
+        //Volume Row : the fader and the number beside it
         private void DrawVolumeRow(SpriteBatch sb, int i, bool on, float a)
         {
             float value = VolumeOf(i);
             bool hot = on || dragging == i || Input.MouseOver(grabs[i]);
-
-            Ui.Slider(sb, tracks[i], value, hot, a);
-            Gfx.TextRight(sb, Game.BigFont, Settings.Percent(value), ValueRight, tracks[i].Center.Y - 15, (on ? Palette.Highlight : Palette.Paper) * a, TextSize.Subtitle);
+            Ui.Fader(sb, tracks[i], value, hot, false, a);
+            Gfx.TextRight(sb, Game.Font, Settings.Percent(value), ValueRight, tracks[i].Center.Y - Game.Font.LineSpacing * TextSize.Heading / 2f, (on ? Palette.Highlight : Palette.PaperDim) * a, TextSize.Heading);
         }
 
-        //Language Row : two chips, the chosen one filled in
+        //Language Row : the two languages, the chosen one on its plate
         private void DrawLanguageRow(SpriteBatch sb, bool on, float a)
         {
-            for (int i = 0; i < 2; i++)
-                DrawChip(sb, langBoxes[i], Settings.LanguageNames[i], Settings.Language == i, on, a);
+            for (int k = 0; k < 2; k++)
+                Ui.Choice(sb, langBoxes[k], Settings.LanguageNames[k], Settings.Language == k, on, Input.MouseOver(langBoxes[k]), 7 + k * 4, a);
         }
 
-        //Full Screen Row : a tick box and the word beside it
-        private void DrawFullscreenRow(SpriteBatch sb, bool on, float a)
+        //Switch Row : OFF and ON, the one in use on its plate, and what it means at the right
+        private void DrawSwitchRow(SpriteBatch sb, Rectangle[] boxes, bool value, string note, int seed, bool on, float a)
         {
-            bool hot = on || Input.MouseOver(fullBox);
-            Ui.CheckBox(sb, fullBox, Settings.Fullscreen, hot, a);
-            Gfx.TextSpaced(sb, Game.Font, Settings.Fullscreen ? "ON" : "OFF", fullBox.Right + 16, fullBox.Y + 4, (on ? Palette.Paper : Palette.PaperDim) * a, TextSize.Body, 2f);
-            Gfx.TextSpacedRight(sb, Game.Font, "BORDERLESS  WINDOW", ValueRight, fullBox.Y + 7, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            for (int k = 0; k < 2; k++)
+                Ui.Choice(sb, boxes[k], offOn[k], value == (k == 1), on, Input.MouseOver(boxes[k]), seed + k * 4, a);
+            Gfx.TextSpacedRight(sb, Game.Font, note, ValueRight, boxes[0].Center.Y - 7, Palette.LineGrey * a, TextSize.Tiny, 2f);
         }
 
-        //Less Flashing Row : a tick box and the word beside it, like FULL SCREEN
-        private void DrawFlashRow(SpriteBatch sb, bool on, float a)
+        //Timing Row : a fader lit from its middle, the value, and TEST (white when the row is chosen, ENTER runs it)
+        private void DrawTimingRow(SpriteBatch sb, bool on, float a)
         {
-            bool hot = on || Input.MouseOver(flashBox);
-            Ui.CheckBox(sb, flashBox, Settings.ReduceFlashing, hot, a);
-            Gfx.TextSpaced(sb, Game.Font, Settings.ReduceFlashing ? "ON" : "OFF", flashBox.Right + 16, flashBox.Y + 4, (on ? Palette.Paper : Palette.PaperDim) * a, TextSize.Body, 2f);
-            Gfx.TextSpacedRight(sb, Game.Font, "SOFTER  HITS", ValueRight, flashBox.Y + 7, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            bool hot = on || dragging == RowTiming || Input.MouseOver(timingGrab);
+            float value = (Settings.TimingOffset / Settings.TimingMost + 1f) / 2f;
+            Ui.Fader(sb, timingTrack, value, hot, true, a);
+            Gfx.TextRight(sb, Game.Font, Settings.TimingLabel(Settings.TimingOffset), testChip.X - 14, timingTrack.Center.Y - Game.Font.LineSpacing * TextSize.Body / 2f, (on ? Palette.Highlight : Palette.PaperDim) * a, TextSize.Body);
+            Ui.Choice(sb, testChip, "TEST", on, on, Input.MouseOver(testChip), 45, a);
         }
 
-        //Chip : a small slanted blade, used for the language choice
-        private void DrawChip(SpriteBatch sb, Rectangle box, string text, bool chosen, bool rowOn, float a)
+        //Help Column : what the chosen row does, sliding in again whenever the row changes, and the note that nothing
+        //is lost (options are saved on the way out)
+        private void DrawHelp(SpriteBatch sb)
         {
-            bool over = Input.MouseOver(box);
+            float a = UiMotion.Between(time, 0.3f, BattleRules.UiEnterTime);
+            float turn = UiMotion.EaseOut(MathHelper.Clamp(helpClock / 0.2f, 0f, 1f));
+            float x = HelpX + (1f - turn) * 12f;
 
-            if (chosen)
-            {
-                Gfx.SlantBox(sb, box, 8, (rowOn ? Palette.Paper : Palette.PaperDim) * a);
-                Gfx.TextSpacedCentered(sb, Game.Font, text, box.Center.X, box.Y + 10, Palette.Ink * a, TextSize.Label, 2f);
-            }
-            else
-            {
-                Gfx.SlantOutline(sb, box, 8, (over ? Palette.Highlight : Palette.LineGrey) * a, 1f);
-                Gfx.TextSpacedCentered(sb, Game.Font, text, box.Center.X, box.Y + 10, (over ? Palette.Paper : Palette.LineGrey) * a, TextSize.Label, 2f);
-            }
-        }
+            Gfx.TextSpaced(sb, Game.Font, rowNames[selected], x, 168, Palette.Paper * (a * turn), TextSize.Label, 3f);
+            DrawHelpRule(sb, 196, a);
+            Gfx.Text(sb, Game.StoryFont, helpWrapped[selected], x, 210, Palette.PaperDim * (a * turn), TextSize.StorySmall);
 
-        //Help : what the chosen row does, plus the warning that nothing is saved
-        private void DrawHelp(SpriteBatch sb, float e)
-        {
-            Ui.Panel(sb, helpBox, e);
-            Ui.Header(sb, "", "What this does", helpBox.X + 20, helpBox.Y + 26, helpBox.Width - 40, e);
-
-            Gfx.TextSpaced(sb, Game.Font, rowNames[selected], helpBox.X + 20, helpBox.Y + 74, Palette.Accent * e, TextSize.Label, 3f);
-            Gfx.Text(sb, Game.StoryFont, helpWrapped[selected], helpBox.X + 20, helpBox.Y + 100, Palette.PaperDim * e, TextSize.StorySmall);
-
-            Ui.Tag(sb, "SAVED", helpBox.X, helpBox.Bottom + 30, false, e);
-            Gfx.Text(sb, Game.StoryFont, savedWrapped, helpBox.X, helpBox.Bottom + 58, Palette.LineGrey * e, TextSize.StorySmall);
+            Gfx.Circle(sb, HelpX + 3, 452, 3f, Palette.LineGrey * a);
+            Gfx.TextSpaced(sb, Game.Font, "SAVED", HelpX + 14, 445, Palette.LineGrey * a, TextSize.Tiny, 3f);
+            Gfx.Text(sb, Game.StoryFont, savedWrapped, HelpX, 466, Palette.LineGrey * a, TextSize.StorySmall);
 
             //Test Result : what the last timing test measured
             if (testResult.Length > 0)
-                Gfx.TextSpaced(sb, Game.Font, testResult, helpBox.X, helpBox.Bottom + 128, Palette.Highlight * e, TextSize.Tiny, 2f);
+                Gfx.TextSpaced(sb, Game.Font, testResult, HelpX, 540, Palette.Highlight * a, TextSize.Tiny, 2f);
+        }
+
+        //Help Rule : a thin line with a small ring at its start (menu3)
+        private void DrawHelpRule(SpriteBatch sb, float y, float a)
+        {
+            Gfx.CircleOutline(sb, HelpX + 3, y, 3f, Palette.LineGrey * a, 1f);
+            Gfx.Rect(sb, HelpX + 9, y, HelpW - 9, 1, Palette.LineGrey * (0.6f * a));
+        }
+
+        //Test Column : in place of the help while the test runs. A ring flashes on every beat, the circles under it
+        //are the strokes counted so far, and the marks along the ruler are where they landed, early to the left.
+        private void DrawTest(SpriteBatch sb)
+        {
+            float a = UiMotion.Between(helpClock, 0f, 0.2f);
+            Gfx.TextSpaced(sb, Game.Font, "STROKE TIMING TEST", HelpX, 168, Palette.Paper * a, TextSize.Label, 3f);
+            DrawHelpRule(sb, 196, a);
+
+            //Beat : the ring flashes and swells a little on every tick
+            float cx = HelpX + HelpW / 2f;
+            float cy = 270f;
+            Gfx.DrawGlow(sb, cx, cy, 40f + testFlash * 50f, Palette.Highlight * ((0.12f + testFlash * 0.5f) * a));
+            Gfx.CircleOutline(sb, cx, cy, 24f + testFlash * 8f, Palette.Paper * ((0.5f + testFlash * 0.5f) * a), 1.5f + testFlash * 2f);
+            Gfx.Circle(sb, cx, cy, 3f, Palette.Paper * a);
+            Gfx.TextSpacedCentered(sb, Game.Font, testStrokes < TestPractice ? "PRACTICE" : "COUNTING", cx, cy + 40, Palette.PaperDim * a, TextSize.Tiny, 3f);
+
+            //Counted : one circle per stroke that counts, filled once it is in
+            for (int i = 0; i < TestCount; i++)
+            {
+                float px = cx - (TestCount - 1) * 7f + i * 14f;
+                if (i < testRecorded) Gfx.Circle(sb, px, cy + 70, 4f, Palette.Paper * a);
+                else Gfx.CircleOutline(sb, px, cy + 70, 4f, Palette.LineGrey * a, 1f);
+            }
+
+            //Ruler : -150 to +150 milliseconds, the middle is right on the beat
+            float left = HelpX + 10;
+            float width = HelpW - 20;
+            float ry = 392f;
+            Gfx.Rect(sb, left, ry, width, 1, Palette.LineGrey * a);
+            Gfx.Rect(sb, left + width / 2f, ry - 8, 1, 16, Palette.Paper * a);
+            Gfx.TextSpaced(sb, Game.Font, "EARLY", left, ry + 10, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            Gfx.TextSpacedRight(sb, Game.Font, "LATE", left + width, ry + 10, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            for (int i = 0; i < testRecorded; i++)
+            {
+                float t = MathHelper.Clamp(testOffsets[i] / Settings.TimingMost, -1f, 1f);
+                Gfx.Rect(sb, left + width / 2f + t * width / 2f - 1f, ry - 10, 3, 20, Palette.Highlight * a);
+            }
+
+            Gfx.Text(sb, Game.StoryFont, testWrapped, HelpX, 446, Palette.PaperDim * a, TextSize.StorySmall);
+            Gfx.TextSpaced(sb, Game.Font, "ESC OR RIGHT CLICK TO STOP", HelpX, 540, Palette.LineGrey * a, TextSize.Tiny, 2f);
         }
     }
 }
