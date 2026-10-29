@@ -21,7 +21,6 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 29 ต.ค. (แชทก้อน 1 ข้อ 2) | ก้อน 1 ข้อ 2 ชุดสกิลใหม่ 5 คน (`BETA1_DIRECTION.md` 11.6) ผู้ใช้ลองข้อ 1 แล้ว "ไม่มีอะไรต้องแก้ ทำข้อ 2 ต่อ" (จบข้อ 2 แล้วหยุดรอ) | `Data/Skill.cs` `Data/Musician.cs` `Data/BattleRules.cs` `Battle/TurnBattle.cs` `Core/DebugShots.Turn*.cs` `docs/TACET_Balance.xlsx` เอกสาร |
 
 ---
 
@@ -63,6 +62,19 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 ---
 
 ## สถานะล่าสุด (29 ต.ค.)
+
+**29 ต.ค. ดึก (ล่าสุด) : แชทก้อน 1 ข้อ 2 ✅ ชุดสกิลใหม่ 5 คน (THE FIVE KITS) เสร็จ หยุดรอผู้ใช้สั่งข้อ 3** (ผู้ใช้ลองข้อ 1 แล้ว "ไม่มีอะไรต้องแก้ ทำข้อ 2 ต่อ" คำต่อคำ `USER_BRIEFS.md` 13.32 รายละเอียดทั้งหมด `BETA1_DIRECTION.md` 12.2)
+✅ PAGANINI CAPRICE IL CANNONE + THE DEVIL'S BARGAIN · QUANTZ SOFT AIR THE LESSON + BREATH CONTROL · PFUNDT TIMPANI ROLL THUNDER CALL + TURN OF THE HAND · DUPORT SHIELD LANCE + THE SCAR · PUNTO FANFARE CHAKRAM + THE HUNTING CALL (โค้ด `TurnBattle` ค้นชื่อตัวพิมพ์ใหญ่ · ฟิลด์ใหม่ `Skill.Shield Lesson Bounce Revenge` · `TurnBattle.HitTarget CanAim PaysInLife`)
+✅ ไอริสตัดสินเอง 11 ข้อ (12.2) สำคัญสุด : TURN OF THE HAND ตัดโน้ตเฉพาะตอนสกิลโดน เหลืออย่างน้อย 2 (แบบร่างทำให้วงที่มี PFUNDT ชนะ 67% ไม่มี 47%) · CAPRICE ยังใส่ DISSONANCE · IL CANNONE 1.5 CHAKRAM 1
+✅ ความยากเท่าเดิม : ตัวจำลองมีนิสัยใหม่ (บัง สอน เสริม PUNTO เขียนก่อน) ชุดเดิมกับนิสัยใหม่ 52.4% ชุดใหม่ + `TurnNoteDamage` 1.95 → 2 = 54.2% (12 seed) MAESTRO EXPERT 76.8 → 74.7 · 5 คนห่างกันไม่เกิน 4.5% (เดิม 10%) · ตาราง MUSICIANS ใหม่ใน turnsim · `TACET_SIM_SET` ลองตัวเลขไม่ต้อง build
+✅ build 0/0 · turncheck 116/116 (ไฟล์ใหม่ `Core/DebugShots.TurnLegends.cs`) · savecheck 32/32 · `TACET_Balance.xlsx` แท็บใหม่ Turn Skills · ภาพใหม่ `battlekit` · ตาราง "แชทที่กำลังทำงาน" ว่างแล้ว
+⚠️ ผู้ใช้ยังไม่ได้ Rebuild ดูข้อ 2 · VFX ของสกิลใหม่ (SHIELD CHAKRAM THE LESSON TURN OF THE HAND) ยังเป็นแบบเดิม ถามตัวอย่างผู้ใช้แล้ว รอคำตอบ (ข้อ 7) · PLAYTEST SIGNATURE ยัง 1 · ภาพจาก cloud ห้ามแทน `docs/screenshots/`
+**วิธีทำงานที่ผู้ใช้สั่ง** : ทำก้อน 1 ทีละข้อ จบข้อไหนบันทึก commit push แล้วหยุดรอ
+**งานถัดไป : ข้อ 3 ศัตรู CHARGE กับ GUARD** (`BETA1_DIRECTION.md` 11.7 ข้อ 2 กับ 11.11 ข้อ 3)
+1. `Data/Enemy.cs` : ท่าใหม่ของศัตรู CHARGE (ห้องนี้ตั้งท่า ห้องหน้าตีแรงมาก) GUARD (ตั้งโล่เป็นตัวเลข) ตัวไหนใช้ให้มาจากชื่อและเรื่องของมัน (เช่น DEAD AIR ชาร์จในความเงียบ) ของเดิมที่มีเหตุผลเก็บไว้ ห้ามสลับลำดับ `EnemyList`
+2. `Battle/TurnBattle.cs` : ตอนวางท่า (`PlanIntent`) ชาร์จกับโล่ / โล่รับดาเมจก่อนเลือด (`Strike`) / ชาร์จถูกยกเลิกเมื่อเสียศูนย์ (`AddOffBeat` / OFF-BEAT) และเมื่อโดน TIMPANI ROLL / IL CANNONE กับ DISSONANCE ไม่สนโล่ (ฟิลด์ใหม่ใน `Skill` เช่น `Pierce` แล้วแก้ข้อความ IL CANNONE) / เซฟศัตรู (`pack=`) ต้องยังโหลดได้
+3. ตัวเลขใหม่ลง `Data/BattleRules.cs` · turncheck เพิ่มข้อ CHARGE GUARD PIERCE · turnsim 12 seed (`TACET_SIM_SEED` 4330 กับ 1 ถึง 11 รันพร้อมกันได้) ชดเชยให้ NORMAL STRONG ใกล้ 54% (นิสัยใหม่) · `python3 docs/turn_balance_tabs.py` · หน้าจอให้เห็นเจตนาแบบง่ายก่อน (ข้อ 4 ทำทั้งแถบศัตรู)
+จบข้อ 3 แล้วบันทึก commit push หยุดรอผู้ใช้
 
 **29 ต.ค. ดึก (ล่าสุด) : /update ปิดแชทก้อน 1 หลังจบข้อ 1 ผู้ใช้ : "บันทึกแล้วฉันจะไปขึ้นแชทใหม่"** (คำต่อคำ `USER_BRIEFS.md` 13.31)
 ✅ งานอยู่บน GitHub ครบ (commit ปิดแชทนี้) ตาราง "แชทที่กำลังทำงาน" ว่าง

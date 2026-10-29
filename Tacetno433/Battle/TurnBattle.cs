@@ -15,7 +15,10 @@ namespace Tacetno433.Battle
 
     //TurnEventKind : something that happened, kept so the screen can show it (numbers, words, sparks).
     //The rules never draw, they only write down what happened (docs/research/ALPHA7_battle_ui.md).
-    public enum TurnEventKind { Damage, Heal, Breath, Dissonance, Crescendo, Mute, Break, Skip, Counter, Down, Ready, Extra, Saved, Steal, Echo, Quieter, Thorns }
+    //THE FIVE KITS (Beta1 29 Oct) : Cut = TURN OF THE HAND took notes off an enemy's next attack, Shield = SHIELD went up in front
+    //of a musician, Lesson = THE LESSON was given, Cue = THE HUNTING CALL made this move harder, Revenge = LANCE hits back twice as hard.
+    public enum TurnEventKind { Damage, Heal, Breath, Dissonance, Crescendo, Mute, Break, Skip, Counter, Down, Ready, Extra, Saved, Steal, Echo, Quieter, Thorns,
+                                Cut, Shield, Lesson, Cue, Revenge }
 
     //DecreeKind : DECREE (THE DEAF CROWN, step 14), what the band may not do this bar
     public enum DecreeKind { None, NoSkills, NoAttacks }
@@ -109,8 +112,12 @@ namespace Tacetno433.Battle
         //Band only (step 10)
         public bool Entered;           // ENTRANCE (29 Oct) : their first move of the fight has been played
         public float Echo;             // FUGUE : the next skill plays again at this strength, 0 for none
-        public int Momentum;           // MOMENTUM (PFUNDT) : hits in a row, each one 1 power more
-        public int Swings;             // FOUR BARS STRAIGHT (DUPORT) : ATTACKs made this fight
+
+        //Band only, THE FIVE KITS (Beta1 29 Oct)
+        public Fighter CoveredBy;      // SHIELD (DUPORT) : who stands in front of this musician until their own next turn, null for nobody
+        public bool Lesson;            // THE LESSON (QUANTZ) : this musician's next skill is easier to swipe and plays harder
+        public bool Wounded;           // LANCE (DUPORT) : an enemy's note has hurt this musician since their last move
+        public bool Scarred;           // THE SCAR (DUPORT) : the enemy attack going on now has hurt them
 
         public bool Down { get { return Hp <= 0; } }
     }
@@ -146,6 +153,7 @@ namespace Tacetno433.Battle
         public int OrderIndex;
         public int Round;              // the bar
         private int bandMovesDone;     // the band's own moves played so far in this bar (DOWNBEAT), FEATHER's free ATTACKs not counted
+        private Fighter lastMover;     // THE HUNTING CALL : the musician who played the band's last move in this bar, null before the first
 
         public int Breath;             // BREATH, shared by the whole band
         public DecreeKind Decree;      // DECREE (THE DEAF CROWN) : what this bar forbids, None without it
@@ -337,14 +345,42 @@ namespace Tacetno433.Battle
         }
 
         //Can Plan Skill : enough free BREATH and not under MUTE. A skill already written for this musician gives its BREATH back first.
-        //BORROWED BREATH (THE HEARTLESS) : short of BREATH, it can still be written if the life it would cost is there.
+        //BORROWED BREATH (THE HEARTLESS) and THE DEVIL'S BARGAIN (PAGANINI) : short of BREATH, it can still be written if the
+        //life it would cost is there. SHIELD and THE LESSON need somebody else standing to be played at.
         public bool CanPlanSkill(Fighter who, Skill s)
         {
             if (!CanPlan(who) || s == null || who.Mute > 0) return false;
+            if (s.OthersOnly && !OtherStanding(who)) return false;
             BarMove old = MoveOf(who);
             int free = BreathFree + (old != null && old.Skill != null ? old.Skill.Cost : 0);
             if (free >= s.Cost) return true;
-            return Kit == TurnKit.Paganini && (s.Cost - Math.Max(0, free)) * BattleRules.TurnPaganiniLife < who.Hp;
+            return PaysInLife(who) && (s.Cost - Math.Max(0, free)) * BattleRules.TurnPaganiniLife < who.Hp;
+        }
+
+        //Can Aim : the skill may be played at this target. A skill at an enemy wants one standing, a skill for one
+        //musician wants one standing, and SHIELD and THE LESSON never the one who plays it (the screen uses this too).
+        public bool CanAim(Fighter who, Skill s, Fighter target)
+        {
+            if (s == null || s.Target == SkillTarget.Enemy) return CanTarget(target);
+            if (s.Target != SkillTarget.Ally) return true;
+            if (target == null || target.IsEnemy || target.Down) return false;
+            return !(s.OthersOnly && target == who);
+        }
+
+        //Other Standing : a musician other than this one is still standing
+        private bool OtherStanding(Fighter who)
+        {
+            for (int i = 0; i < Party.Count; i++)
+                if (Party[i] != who && !Party[i].Down) return true;
+            return false;
+        }
+
+        //Pays In Life : the musician may pay for a skill in life when BREATH is short. BORROWED BREATH (THE HEARTLESS) lets the
+        //whole band do it, THE DEVIL'S BARGAIN (Beta1 29 Oct) only the musician PAGANINI. TurnPaganiniLife for each BREATH missing.
+        public bool PaysInLife(Fighter who)
+        {
+            if (Kit == TurnKit.Paganini) return true;
+            return who != null && !who.IsEnemy && who.Musician.Trait == MusicianTrait.DevilsBargain;
         }
 
         //Plan Attack : this musician ATTACKs that enemy. A musician written again keeps their place in the bar.
@@ -360,8 +396,7 @@ namespace Tacetno433.Battle
         public bool PlanSkill(Fighter who, Skill s, Fighter target)
         {
             if (!CanPlanSkill(who, s)) return false;
-            if (s.Target == SkillTarget.Enemy && !CanTarget(target)) return false;
-            if (s.Target == SkillTarget.Ally && (target == null || target.IsEnemy || target.Down)) return false;
+            if (!CanAim(who, s, target)) return false;
             if (s.Target == SkillTarget.Self) target = who;
             if (s.Target == SkillTarget.AllEnemies || s.Target == SkillTarget.AllAllies) target = null;
             Write(who, s, target);
@@ -414,6 +449,7 @@ namespace Tacetno433.Battle
             Feather = 0;
             OrderIndex = 0;
             bandMovesDone = 0;
+            lastMover = null;                                                        // THE HUNTING CALL : a new bar, nobody has played
             BeginTurn();
         }
 
@@ -693,6 +729,7 @@ namespace Tacetno433.Battle
                 Fighter f = Order[OrderIndex];
                 bool free = OrderMoves[OrderIndex] != null && OrderMoves[OrderIndex].Free;   // FEATHER : not their turn
                 if (!free) f.Guard = false;
+                if (!free) StepAside(f);                                                     // SHIELD ends with its owner's next turn
                 if (f.Taunt && !free)
                 {
                     //TAUNT ends : an enemy that planned its next attack while taunted aims again
@@ -739,7 +776,8 @@ namespace Tacetno433.Battle
             }
         }
 
-        //Retarget : a move whose target fell goes to Focus (an enemy) or to the musician with the least life
+        //Retarget : a move whose target fell goes to Focus (an enemy) or to the musician with the least life.
+        //SHIELD and THE LESSON look for somebody else, and with nobody else standing the move becomes an ATTACK.
         private void Retarget(BarMove move)
         {
             bool atEnemy = move.Skill == null || move.Skill.Target == SkillTarget.Enemy;
@@ -748,8 +786,39 @@ namespace Tacetno433.Battle
             {
                 move.Target = null;
                 for (int i = 0; i < Party.Count; i++)
-                    if (!Party[i].Down && (move.Target == null || Party[i].Hp < move.Target.Hp)) move.Target = Party[i];
+                {
+                    Fighter f = Party[i];
+                    if (f.Down || (move.Skill.OthersOnly && f == move.Who)) continue;
+                    if (move.Target == null || f.Hp < move.Target.Hp) move.Target = f;
+                }
+                if (move.Target == null)
+                {
+                    move.Skill = null;
+                    move.Forced = true;                                                      // not the player's choice, DECREE lets it pass
+                    move.Target = FocusTarget();
+                }
             }
+        }
+
+        //Step Aside : SHIELD (DUPORT), the musician whose turn it is stops standing in front of anyone
+        private void StepAside(Fighter shielder)
+        {
+            for (int i = 0; i < Party.Count; i++)
+                if (Party[i].CoveredBy == shielder) Party[i].CoveredBy = null;
+        }
+
+        //Cover Of : who takes a blow aimed at this musician, the one standing in front of them (SHIELD) or themself
+        private static Fighter CoverOf(Fighter target)
+        {
+            if (target != null && !target.Down && target.CoveredBy != null && !target.CoveredBy.Down) return target.CoveredBy;
+            return target;
+        }
+
+        //Hit Target : the musician an enemy's next attack lands on, the one it aims at or the one standing in front of them
+        //(SHIELD). The screen marks this one as the target and shows them parrying.
+        public Fighter HitTarget(Fighter enemy)
+        {
+            return enemy == null ? null : CoverOf(enemy.IntentTarget);
         }
 
         private Fighter PickTaunt()
@@ -818,7 +887,9 @@ namespace Tacetno433.Battle
             {
                 bandMovesDone++;                                                             // DOWNBEAT
                 done.Entered = true;                                                         // ENTRANCE
+                done.Wounded = false;                                                        // LANCE : the blows count again from here
             }
+            if (!done.IsEnemy) lastMover = done;                                             // THE HUNTING CALL
             if (!done.IsEnemy && Kit == TurnKit.Fanny) FelixVoice = !FelixVoice;              // TWO VOICES : the other voice leads next
             if (CapriceTurns > 0)
             {
@@ -868,19 +939,19 @@ namespace Tacetno433.Battle
         }
 
         //Can Use : enough BREATH, and not under MUTE.
-        //BORROWED BREATH (THE HEARTLESS) : a skill short of BREATH can be paid in life instead (LifeCost)
+        //BORROWED BREATH (THE HEARTLESS) and THE DEVIL'S BARGAIN (PAGANINI) : a skill short of BREATH can be paid in life instead (LifeCost)
         public bool CanUse(Skill s)
         {
             if (Step != TurnStep.PlayerTurn || s == null || Current.Mute > 0) return false;
             if (Breath >= s.Cost) return true;
-            return Kit == TurnKit.Paganini && LifeCost(s) < Current.Hp;
+            return PaysInLife(Current) && LifeCost(s) < Current.Hp;
         }
 
-        //Life Cost : BORROWED BREATH, the life a skill takes for the BREATH it is short of (0 when there is enough).
-        //It is never all of the musician's life, CanUse says no first.
+        //Life Cost : BORROWED BREATH and THE DEVIL'S BARGAIN, the life a skill takes for the BREATH it is short of (0 when there
+        //is enough). It is never all of the musician's life, CanUse says no first.
         public int LifeCost(Skill s)
         {
-            if (Kit != TurnKit.Paganini || s == null || Breath >= s.Cost) return 0;
+            if (!PaysInLife(Current) || s == null || Breath >= s.Cost) return 0;
             return (s.Cost - Breath) * BattleRules.TurnPaganiniLife;
         }
 
@@ -896,15 +967,10 @@ namespace Tacetno433.Battle
             Fighter attacker = Current;
             MusicianTrait trait = attacker.Musician.Trait;
             float scale = BattleRules.TurnAttackScale;
-
-            //FOUR BARS STRAIGHT (DUPORT) : every fourth ATTACK hits twice as hard
-            attacker.Swings++;
-            if (trait == MusicianTrait.FourBars && attacker.Swings % BattleRules.TurnFourBarsEvery == 0) scale *= BattleRules.TurnFourBarsScale;
-
-            scale *= MoveScale(attacker, CurrentMove);                                              // DOWNBEAT, ENTRANCE, UNISON
+            scale *= MoveScale(attacker, CurrentMove) * CueScale(attacker);                         // DOWNBEAT, ENTRANCE, UNISON, THE HUNTING CALL
             int damage = HitDamage(attacker, target, scale);
             Strike(target, damage);
-            AddBreath(AttackBreath);
+            AddBreath(AttackBreath + (trait == MusicianTrait.BreathControl ? BattleRules.TurnBreathControl : 0));   // BREATH CONTROL (QUANTZ)
 
             //HELD NOTE (CHAI) : his ATTACK rings on, a second hit for a share of the first
             if (trait == MusicianTrait.HeldNote && !target.Down)
@@ -919,7 +985,6 @@ namespace Tacetno433.Battle
                 Strike(target, Math.Max(1, (int)Math.Round(damage * echo)));
             }
 
-            CountHit(attacker, true);                                                                // MOMENTUM
             AddOffBeat(target, BattleRules.TurnAttackOffBeat * (Has(MotifId.Marcato) ? BattleRules.TurnMarcatoOffBeat : 1));   // OFF-BEAT, MARCATO
             LastWord(attacker);                                                                      // LAST WORD
             BreaksDecree(attacker, DecreeKind.NoAttacks);                                            // DECREE
@@ -961,9 +1026,12 @@ namespace Tacetno433.Battle
         //The skill being played is kept here between them.
         private Skill playing;                                      // null while no skill is being played
         private List<Fighter> playingTargets = new List<Fighter>();
-        private float playingScale;                                 // DOWNBEAT, ENTRANCE
-        private bool playingLanded;                                 // a note has landed (MOMENTUM, FUGUE, GUARD, TAUNT)
+        private float playingScale;                                 // DOWNBEAT, ENTRANCE, THE HUNTING CALL, THE LESSON, LANCE
+        private bool playingLanded;                                 // a note has landed (FUGUE, GUARD, TAUNT, SHIELD, THE LESSON)
         private NoteResult[] playingNotes = new NoteResult[0];      // how each note went, for the FUGUE echo
+        private List<Fighter> bounced = new List<Fighter>();        // CHAKRAM : the enemies this throw has hit
+        private List<Fighter> noteTargets = new List<Fighter>();    // CHAKRAM : the one enemy a note flies to (kept, so a note makes no new list)
+        private List<Fighter> handStruck = new List<Fighter>();     // TURN OF THE HAND : the enemies PFUNDT's skill has hit
 
         //Begin Skill : the move written for the musician who is up starts, its BREATH is paid now
         public bool BeginSkill()
@@ -982,12 +1050,20 @@ namespace Tacetno433.Battle
 
             playing = s;
             playingTargets = targets;
-            playingScale = MoveScale(user, CurrentMove);                                           // DOWNBEAT, ENTRANCE
+            playingScale = MoveScale(user, CurrentMove) * CueScale(user);                          // DOWNBEAT, ENTRANCE, THE HUNTING CALL
+            if (user.Lesson) playingScale *= BattleRules.TurnLessonScale;                          // THE LESSON (used up in EndSkill)
+            if (s.Revenge > 0f && user.Wounded)                                                    // LANCE : the blow that just landed is paid back
+            {
+                playingScale *= s.Revenge;
+                Events.Add(new TurnEvent(TurnEventKind.Revenge, user, 0));
+            }
             playingLanded = false;
+            bounced.Clear();                                                                       // CHAKRAM : a new throw
+            handStruck.Clear();
             playingNotes = new NoteResult[s.Notes.Length];
             for (int n = 0; n < playingNotes.Length; n++) playingNotes[n] = new NoteResult(Grade.Hesitate, 1f);
 
-            int lifeCost = LifeCost(s);                                                            // BORROWED BREATH
+            int lifeCost = LifeCost(s);                                                            // BORROWED BREATH, THE DEVIL'S BARGAIN
             Breath = Math.Max(0, Breath - s.Cost);
             if (lifeCost > 0) Hurt(user, lifeCost);
             OnCue(user);                                                                           // ON CUE
@@ -1012,11 +1088,39 @@ namespace Tacetno433.Battle
             {
                 user.Crescendo = 0;                                                         // CRESCENDO is lost on a MISS
                 //RUBATO : a missed note still plays, at TurnRubatoMiss of a GOOD one and with no BREATH
-                if (Has(MotifId.Rubato)) PlayNote(playing, playing.Notes[n], new NoteResult(Grade.Good, r.Hold), playingTargets, user, BattleRules.TurnRubatoMiss * playingScale, false, last);
+                if (Has(MotifId.Rubato))
+                {
+                    float again;
+                    List<Fighter> missed = NoteTargets(playing, n, out again);
+                    PlayNote(playing, playing.Notes[n], new NoteResult(Grade.Good, r.Hold), missed, user, BattleRules.TurnRubatoMiss * playingScale * again, false, last);
+                }
                 return;
             }
             playingLanded = true;
-            PlayNote(playing, playing.Notes[n], r, playingTargets, user, playingScale, true, last);
+            float repeat;
+            List<Fighter> reached = NoteTargets(playing, n, out repeat);                    // CHAKRAM : one enemy a note
+            PlayNote(playing, playing.Notes[n], r, reached, user, playingScale * repeat, true, last);
+        }
+
+        //Note Targets : who note n of a skill reaches. A plain skill reaches all of its targets with every note.
+        //CHAKRAM (PUNTO, a skill with a Bounce) : the note flies to the next enemy of the throw's line (the one picked, then the
+        //ones after it, see TargetsOf), round to the start again when the line runs out, past any that fell. An enemy this
+        //throw has already hit takes TurnChakramRepeat of it (repeat). Nothing is left standing : an empty list.
+        private List<Fighter> NoteTargets(Skill s, int n, out float repeat)
+        {
+            repeat = 1f;
+            if (s.Bounce <= 0) return playingTargets;
+            noteTargets.Clear();
+            for (int k = 0; k < playingTargets.Count; k++)
+            {
+                Fighter f = playingTargets[(n + k) % playingTargets.Count];
+                if (f.Down) continue;
+                if (bounced.Contains(f)) repeat = BattleRules.TurnChakramRepeat;
+                else bounced.Add(f);
+                noteTargets.Add(f);
+                break;
+            }
+            return noteTargets;
         }
 
         //Skill Targets Down : every enemy the skill being played is aimed at has fallen, so the screen can stop
@@ -1039,7 +1143,6 @@ namespace Tacetno433.Battle
             Skill s = playing;
             Fighter user = Current;
             playing = null;
-            CountHit(user, playingLanded);                                                  // MOMENTUM
 
             //FUGUE (THE METRONOME) : an echo waiting on this musician plays the notes that landed once more
             if (user.Echo > 0f && playingLanded && Echoes(s))
@@ -1047,8 +1150,14 @@ namespace Tacetno433.Battle
                 float echo = user.Echo;
                 user.Echo = 0f;
                 Events.Add(new TurnEvent(TurnEventKind.Echo, user, 0));
+                bounced.Clear();                                                            // CHAKRAM : the echo is a second throw
                 for (int n = 0; n < s.Notes.Length; n++)
-                    if (playingNotes[n].Lands) PlayNote(s, s.Notes[n], playingNotes[n], playingTargets, user, echo, false, n == s.Notes.Length - 1);
+                {
+                    if (!playingNotes[n].Lands) continue;
+                    float repeat;
+                    List<Fighter> reached = NoteTargets(s, n, out repeat);
+                    PlayNote(s, s.Notes[n], playingNotes[n], reached, user, echo * repeat, false, n == s.Notes.Length - 1);
+                }
             }
 
             //GUARD and TAUNT : the percussion stands in front, every enemy turns to them at once
@@ -1059,6 +1168,27 @@ namespace Tacetno433.Battle
                 for (int i = 0; i < Enemies.Count; i++)
                     if (!Enemies[i].Down) Enemies[i].IntentTarget = user;
             }
+
+            //SHIELD (DUPORT) : they stand in front of the friend until their own next turn, every note aimed at the friend lands
+            //on them for TurnShieldKeep (NoteHits). THE LESSON (QUANTZ) : the friend's next skill is easier and harder.
+            for (int i = 0; i < playingTargets.Count && playingLanded; i++)
+            {
+                Fighter friend = playingTargets[i];
+                if (friend.IsEnemy || friend.Down || friend == user) continue;
+                if (s.Shield)
+                {
+                    friend.CoveredBy = user;
+                    Events.Add(new TurnEvent(TurnEventKind.Shield, friend, 0));
+                }
+                if (s.Lesson)
+                {
+                    friend.Lesson = true;
+                    Events.Add(new TurnEvent(TurnEventKind.Lesson, friend, 0));
+                }
+            }
+            user.Lesson = false;                                                            // THE LESSON : this skill used it up, however it went
+
+            TurnOfTheHand();                                                                // TURN OF THE HAND
             LastWord(user);                                                                 // LAST WORD
             BreaksDecree(user, DecreeKind.NoSkills);                                        // DECREE
 
@@ -1103,6 +1233,7 @@ namespace Tacetno433.Battle
                     if (f.IsEnemy)
                     {
                         if (s.Damage > 0f) Strike(f, HitDamage(user, f, scale * s.Damage * tutti));
+                        if (s.Damage > 0f && user.Musician.Trait == MusicianTrait.TurnOfTheHand && !handStruck.Contains(f)) handStruck.Add(f);   // TURN OF THE HAND
                         if (s.Dissonance > 0 && !f.Down) AddDissonance(f, s.Dissonance);
                         if (offBeat > 0 && !f.Down) AddOffBeat(f, offBeat);
                         if (thunder && !f.Down) Quieten(f);
@@ -1118,18 +1249,39 @@ namespace Tacetno433.Battle
             }
         }
 
-        //Echoes : FUGUE only repeats what a skill does to the fighters, so a skill that only gives BREATH or
-        //stands guard (LONG BREATH, STAND FIRM) leaves the echo waiting for the next one
+        //Echoes : FUGUE only repeats what a skill does to the fighters, so a skill that only stands guard or helps
+        //someone (THUNDER CALL, SHIELD, THE LESSON) leaves the echo waiting for the next one
         private static bool Echoes(Skill s)
         {
             return s.Damage > 0f || s.Heal > 0f || s.Dissonance > 0 || s.Crescendo > 0 || s.OffBeat > 0;
         }
 
-        //Count Hit : MOMENTUM (PFUNDT), a turn that lands adds one, a turn that misses starts again
-        private void CountHit(Fighter f, bool landed)
+        //TURN OF THE HAND (PFUNDT) : every enemy their skill hit (TIMPANI ROLL, not an ATTACK) plays TurnHandCut notes fewer in its
+        //next attack, never fewer than TurnHandLeast, so a long boss phrase gets shorter for the BREATH it costs. The notes leave
+        //the attack shown over its head at once. (On every hit, ATTACKs too, PFUNDT's band won 67 percent of the runs, the others 47.)
+        private void TurnOfTheHand()
         {
-            if (f.Musician.Trait != MusicianTrait.Momentum) return;
-            f.Momentum = landed ? Math.Min(BattleRules.TurnMomentumMost, f.Momentum + 1) : 0;
+            for (int i = 0; i < handStruck.Count; i++)
+            {
+                Fighter enemy = handStruck[i];
+                int now = enemy.IntentNotes.Length;
+                int keep = Math.Max(BattleRules.TurnHandLeast, now - BattleRules.TurnHandCut);
+                if (enemy.Down || enemy.IntentRest || keep >= now) continue;
+                Array.Resize(ref enemy.IntentNotes, keep);                                  // the last notes of the phrase go
+                Array.Resize(ref enemy.IntentWays, keep);
+                Array.Resize(ref enemy.IntentLate, keep);
+                Events.Add(new TurnEvent(TurnEventKind.Cut, enemy, now - keep));
+            }
+            handStruck.Clear();
+        }
+
+        //THE HUNTING CALL (PUNTO) : the musician who plays right after PUNTO in the bar hits harder, the horn gave the signal.
+        //Returns TurnHuntingCallScale for them (and writes a CUE down for the screen), 1 for everyone else.
+        private float CueScale(Fighter who)
+        {
+            if (lastMover == null || lastMover == who || lastMover.Musician.Trait != MusicianTrait.HuntingCall) return 1f;
+            Events.Add(new TurnEvent(TurnEventKind.Cue, who, 0));
+            return BattleRules.TurnHuntingCallScale;
         }
 
         //Quieten : THE WHOLE FLOOR (BORIS), every note of the enemy's next attack hits a little softer (at least 1)
@@ -1139,13 +1291,6 @@ namespace Tacetno433.Battle
             for (int i = 0; i < enemy.IntentNotes.Length; i++)
                 enemy.IntentNotes[i] = Math.Max(1, enemy.IntentNotes[i] - BattleRules.TurnThunderSoften);
             Events.Add(new TurnEvent(TurnEventKind.Quieter, enemy, BattleRules.TurnThunderSoften));
-        }
-
-        //Unwatched : the enemy's next attack is aimed at someone else, not at the musician (THE QUIET PART : the quiet one
-        //strikes where nobody is looking). Beta1 29 Oct : it read the size p before, and the sizes are gone.
-        private static bool Unwatched(Fighter enemy, Fighter musician)
-        {
-            return enemy.IsEnemy && !enemy.IntentAll && enemy.IntentTarget != musician;
         }
 
         //Long Attack : the enemy's next attack has TurnLongNotes notes or more (ONE STEP BETTER, it read the size f before)
@@ -1159,7 +1304,16 @@ namespace Tacetno433.Battle
         {
             List<Fighter> list = new List<Fighter>();
 
-            if (s.Target == SkillTarget.Enemy && CanTarget(target)) list.Add(target);
+            if (s.Target == SkillTarget.Enemy && CanTarget(target))
+            {
+                list.Add(target);
+                //CHAKRAM : the throw's line, the enemies standing after the one picked (round to the start), Bounce in all
+                for (int k = 1; k < Enemies.Count && list.Count < s.Bounce; k++)
+                {
+                    Fighter next = Enemies[(target.Slot + k) % Enemies.Count];
+                    if (!next.Down) list.Add(next);
+                }
+            }
             if (s.Target == SkillTarget.Self) list.Add(user);
             if (s.Target == SkillTarget.Ally && target != null && !target.IsEnemy && !target.Down) list.Add(target);
 
@@ -1191,7 +1345,7 @@ namespace Tacetno433.Battle
         //Hit Damage : power x TurnAttackPerPower x scale, harder with CRESCENDO and against an enemy OFF-BEAT
         public int HitDamage(Fighter attacker, Fighter target, float scale)
         {
-            float power = attacker.IsEnemy ? attacker.Enemy.SongNotePower() : PowerOf(attacker.Musician) + attacker.Momentum;   // MOMENTUM
+            float power = attacker.IsEnemy ? attacker.Enemy.SongNotePower() : PowerOf(attacker.Musician);
             float damage = power * BattleRules.TurnAttackPerPower * scale;
             if (target.IsEnemy && target.Hp < target.MaxHp * BattleRules.TurnCodaBelow && Has(MotifId.Coda)) damage *= BattleRules.TurnCodaScale;   // CODA
             if (!attacker.IsEnemy && !overtureDone && Has(MotifId.Overture))                  // OVERTURE
@@ -1207,11 +1361,10 @@ namespace Tacetno433.Battle
             return Math.Max(1, (int)Math.Round(damage));
         }
 
-        //Trait Scale : the traits that make a musician hit harder against some enemies
+        //Trait Scale : the traits that make a musician hit harder against some enemies (the hidden musicians' since 29 Oct)
         private static float TraitScale(Fighter attacker, Fighter target)
         {
             MusicianTrait trait = attacker.Musician.Trait;
-            if (trait == MusicianTrait.QuietPart && Unwatched(target, attacker)) return BattleRules.TurnQuietScale;  // THE QUIET PART (QUANTZ)
             if (trait == MusicianTrait.OneStepBetter && LongAttack(target)) return BattleRules.TurnStepBetterScale;  // ONE STEP BETTER (NUAN)
             if (trait == MusicianTrait.ByEar && target.Staggered) return BattleRules.TurnByEarScale;                  // BY EAR (MALI)
             return 1f;
@@ -1282,8 +1435,22 @@ namespace Tacetno433.Battle
             bool trait = TraitOn(enemy);
             if (trait && enemy.Enemy.Trait == EnemyTrait.FillsGaps && g != Grade.Good)             // FILLS THE GAPS (DEAD AIR)
                 damage = (int)Math.Round(damage * BattleRules.TurnFillsGapsScale);
+
+            //SHIELD (DUPORT) : a musician someone stands in front of is not hit, the one in front takes TurnShieldKeep of it
+            //(and everything else the note does below : MUTE, DISSONANCE, CRESCENDO lost)
+            Fighter cover = CoverOf(target);
+            if (cover != target)
+            {
+                target = cover;
+                damage = (int)Math.Ceiling(damage * BattleRules.TurnShieldKeep);
+            }
             if (target.Guard) damage = (int)Math.Ceiling(damage * BattleRules.TurnGuardKeep);      // GUARD
             Hurt(target, damage);
+            if (damage > 0)
+            {
+                target.Wounded = true;                                                       // LANCE
+                if (target.Musician.Trait == MusicianTrait.TheScar) target.Scarred = true;   // THE SCAR
+            }
             if (trait && enemy.Enemy.Trait == EnemyTrait.EchoFades && damage > 0 && !target.Down)  // ECHO FADES (HUSH)
                 AddDissonance(target, 1);
 
@@ -1316,11 +1483,20 @@ namespace Tacetno433.Battle
             if (Step != TurnStep.EnemyTurn) return;
 
             Fighter enemy = Current;
-            Fighter target = enemy.IntentTarget;
+            Fighter target = HitTarget(enemy);                                               // SHIELD : the one in front blocked it
             enemy.Attacks++;
 
             //LULLABY : the humming turn heals it
             if (enemy.IntentRest) Heal(enemy, BattleRules.TurnLullHeal);
+
+            //THE SCAR (DUPORT) : an attack that hurt them leaves CRESCENDO ("It plays louder for it")
+            for (int i = 0; i < Party.Count; i++)
+            {
+                Fighter scarred = Party[i];
+                if (!scarred.Scarred) continue;
+                scarred.Scarred = false;
+                if (!scarred.Down) AddCrescendo(scarred, BattleRules.TurnScarCrescendo);
+            }
 
             //THE BARGAIN (THE DEVIL'S STRING) : every attack steals breath
             if (TraitOn(enemy) && enemy.Enemy.Trait == EnemyTrait.Bargain && enemy.IntentNotes.Length > 0 && Breath > 0)
@@ -1355,7 +1531,6 @@ namespace Tacetno433.Battle
             float perfect = (Maestro ? BattleRules.MaestroPerfectWindow : BattleRules.PerfectWindow) + steady;   // MAESTRO
             float good = (Maestro ? BattleRules.MaestroGoodWindow : BattleRules.GoodWindow) + steady;
             bool parry = Step == TurnStep.EnemyTurn;
-            MusicianTrait trait = !parry && Current != null && !Current.IsEnemy ? Current.Musician.Trait : MusicianTrait.None;
 
             if (parry && Kit == TurnKit.Lully)                                                      // STEADY HAND (THE KING'S BATON)
             {
@@ -1363,14 +1538,12 @@ namespace Tacetno433.Battle
                 good += BattleRules.TurnLullyWindow;
             }
             if (!parry && Kit == TurnKit.Bach) perfect = Math.Min(good, perfect + BattleRules.TurnLockedTempoWindow);   // LOCKED TEMPO (THE METRONOME)
-            if (trait == MusicianTrait.KeepsCount) perfect = Math.Min(good, perfect + BattleRules.TurnCountsWindow);   // COUNTS ALOUD (PAGANINI)
+            if (Taught()) perfect = Math.Min(good, perfect + BattleRules.TurnLessonWindow);         // THE LESSON (QUANTZ)
 
             float gap = Math.Abs(offset);
             Grade grade = Grade.Miss;
             if (rightWay && gap <= perfect) grade = Grade.Perfect;
             else if (rightWay && gap <= good) grade = Grade.Good;
-            else if (rightWay && trait == MusicianTrait.Forgiven && offset > 0f && offset <= good + BattleRules.TurnLateBonus)
-                grade = Grade.Good;                                                                  // FASHIONABLY LATE (PUNTO)
 
             //CAPRICE : every swipe goes one better, a MISS is GOOD and a GOOD is PERFECT
             if (CapriceTurns > 0 && grade == Grade.Good) grade = Grade.Perfect;
@@ -1383,6 +1556,7 @@ namespace Tacetno433.Battle
         {
             int perfect = Maestro ? BattleRules.MaestroTurnRollPerfect : BattleRules.TurnRollPerfect;   // MAESTRO
             int good = Maestro ? BattleRules.MaestroTurnRollGood : BattleRules.TurnRollGood;
+            if (Taught()) perfect = Math.Max(good, perfect - BattleRules.TurnLessonShakes);         // THE LESSON (QUANTZ)
             if (Has(MotifId.Accelerando)) shakes *= BattleRules.TurnAccelerandoShakes;              // ACCELERANDO
             if (shakes >= perfect || (shakes >= good && CapriceTurns > 0)) return Grade.Perfect;   // CAPRICE : one better
             if (shakes >= good || (shakes > 0 && CapriceTurns > 0)) return Grade.Good;
@@ -1390,16 +1564,22 @@ namespace Tacetno433.Battle
         }
 
         //Late Limit : after this many seconds past the ring a note counts as not swiped at all
-        //(STEADY HAND and FASHIONABLY LATE wait longer, see Judge)
+        //(STEADY HAND waits longer, see Judge)
         public float LateLimit
         {
             get
             {
                 float late = (Maestro ? BattleRules.MaestroGoodWindow : BattleRules.GoodWindow) + (Has(MotifId.SteadyPulse) ? BattleRules.SteadyWindowBonus : 0f);
                 if (Step == TurnStep.EnemyTurn && Kit == TurnKit.Lully) late += BattleRules.TurnLullyWindow;                       // STEADY HAND
-                if (Step == TurnStep.PlayerTurn && Current != null && Current.Musician.Trait == MusicianTrait.Forgiven) late += BattleRules.TurnLateBonus;   // FASHIONABLY LATE
                 return late;
             }
+        }
+
+        //Taught : THE LESSON (QUANTZ), the musician playing a skill now was given a lesson, so its notes are easier
+        //(a wider PERFECT window, a ROLL that needs fewer shakes). The skill uses the lesson up when it ends (EndSkill).
+        private bool Taught()
+        {
+            return Step == TurnStep.PlayerTurn && Current != null && !Current.IsEnemy && Current.Lesson;
         }
 
         //======================================================================================
@@ -1711,6 +1891,7 @@ namespace Tacetno433.Battle
             if (f.Down)
             {
                 f.Staggered = false;
+                if (!f.IsEnemy) StepAside(f);                                                // SHIELD : a fallen musician stands in front of nobody
                 Events.Add(new TurnEvent(TurnEventKind.Down, f, 0));
             }
         }

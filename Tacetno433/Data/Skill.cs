@@ -58,19 +58,35 @@ namespace Tacetno433.Data
         public bool Guard;                   // GUARD : the player takes TurnGuardKeep of every hit until their next turn
         public bool Taunt;                   // TAUNT : every enemy aims at the player until their next turn
 
+        //The five legends' own moves (Beta1 29 Oct, docs/BETA1_DIRECTION.md 11.6), see TurnBattle (search the names)
+        public bool Shield;                  // SHIELD : the player stands in front of the friend it is played at until their next turn
+        public bool Lesson;                  // THE LESSON : the friend's next skill is easier to swipe and plays harder
+        public int Bounce;                   // CHAKRAM : each note hits the next enemy in line, this many enemies at most (0 for a plain skill)
+        public float Revenge;                // LANCE : x this when the player has been hit since their last move (0 for none)
+
         public bool HitsEnemy
         {
             get { return Target == SkillTarget.Enemy || Target == SkillTarget.AllEnemies; }
         }
+
+        //Others Only : a skill about standing by someone else (SHIELD, THE LESSON) is never played at the one who plays it
+        public bool OthersOnly
+        {
+            get { return Shield || Lesson; }
+        }
     }
 
     //SkillList : THE PLACE TO EDIT SKILLS. Two per musician, in the order of MusicianList.All
-    //(skill 2k and 2k + 1 belong to musician k). Roles by family (ALPHA7_DESIGN 5.8) :
-    //   strings     damage over time, several notes, DISSONANCE
-    //   winds       help : healing, breath, CRESCENDO for the band
-    //   percussion  OFF-BEAT, GUARD and TAUNT
+    //(skill 2k and 2k + 1 belong to musician k), so the five legends' kits sit in the places 0 1, 2 3, 4 5, 12 13 and 14 15.
+    //THE FIVE KITS (Beta1 29 Oct, docs/BETA1_DIRECTION.md 11.6, the user : "use these for now, adjust later") : every skill
+    //comes from who the musician was and answers one problem in a fight, so the player thinks about whom to bring and when.
+    //   PAGANINI  the damage dealer            QUANTZ  the teacher and the only healer
+    //   PFUNDT    breaks TACET's beat          DUPORT  the guardian
+    //   PUNTO     rallies the band, reaches a pack
+    //The hidden musicians (MALI, CHAI, NUAN, BORIS) keep their Alpha 7 skills for old saves.
     //Every skill starts on the musician's own arrow, so a player learns one shape per musician.
-    //First draft (18 Oct), not played yet : the numbers are guesses to tune.
+    //Numbers (29 Oct, turnsim 12 seeds) : IL CANNONE 1.8 and CHAKRAM 0.8 were the first guesses, 1.5 and 1 put the runs won
+    //with each legend in the band between 52 and 56 percent (47 to 57 with the old kits).
     public static class SkillList
     {
         private const Flick L = Flick.Left;
@@ -85,22 +101,27 @@ namespace Tacetno433.Data
 
         public static Skill[] All = new Skill[]
         {
-            //PAGANINI, violin (strings, left)
-            new Skill { Name = "QUICK BOW", Kind = SkillKind.Attack, Text = "3 quick hits. Each adds 1 DISSONANCE.", Cost = 2, Target = SkillTarget.Enemy,
-                        Notes = new[] { S(L), S(R), S(L) }, Damage = 0.5f, Dissonance = 1 },
-            new Skill { Name = "LONG TONE", Kind = SkillKind.Attack, Text = "One held note. Hold it = harder. 2 DISSONANCE.", Cost = 3, Target = SkillTarget.Enemy,
-                        Notes = new[] { H(L) }, Damage = 1.2f, Dissonance = 2 },
+            //PAGANINI, violin (strings, left) : rumour said they sold their soul to the devil and played faster than any hand
+            //could (the 24 Caprices), on the violin they called their cannon. CAPRICE answers the enemy that must fall first,
+            //every cut leaves DISSONANCE (the devil's interval). IL CANNONE is one big shot.
+            new Skill { Name = "CAPRICE", Kind = SkillKind.Attack, Text = "4 quick cuts. Each adds 1 DISSONANCE.", Cost = 2, Target = SkillTarget.Enemy,
+                        Notes = new[] { S(L), S(R), S(L), S(R) }, Damage = 0.4f, Dissonance = 1 },
+            new Skill { Name = "IL CANNONE", Kind = SkillKind.Attack, Text = "One big held shot. Hold it = harder.", Cost = 3, Target = SkillTarget.Enemy,
+                        Notes = new[] { H(L) }, Damage = 1.5f },
 
-            //QUANTZ, flute (winds, centre)
+            //QUANTZ, flute (winds, centre) : taught Frederick the Great the flute and wrote the book on playing it (1752).
+            //SOFT AIR when the band is hurt (the only healer of the five), THE LESSON so a friend's big skill lands.
             new Skill { Name = "SOFT AIR", Kind = SkillKind.Heal, Text = "Heals the whole band 3 per note.", Cost = 2, Target = SkillTarget.AllAllies,
                         Notes = new[] { S(D), S(U) }, Heal = 3 },
-            new Skill { Name = "LONG BREATH", Kind = SkillKind.Boost, Text = "4 soft notes. Each gives 1 BREATH back.", Cost = 2, Target = SkillTarget.Self,
-                        Notes = new[] { S(D), S(D), S(U), S(U) }, Breath = 1 },
+            new Skill { Name = "THE LESSON", Kind = SkillKind.Boost, Text = "A friend's next skill : wider PERFECT, harder hits.", Cost = 2, Target = SkillTarget.Ally,
+                        Notes = new[] { S(U), S(D) }, Lesson = true },
 
-            //PFUNDT, timpani (percussion, right)
+            //PFUNDT, timpani (percussion, right) : the crank timpani that change key with one turn of the hand. The drum is the
+            //thunder that throws everything off the beat. TIMPANI ROLL against a big move, THUNDER CALL to save a friend
+            //(the loudest sound on the stage, every enemy has to turn and look).
             new Skill { Name = "TIMPANI ROLL", Kind = SkillKind.Attack, Text = "Shake fast. Big OFF-BEAT.", Cost = 2, Target = SkillTarget.Enemy,
                         Notes = new[] { T() }, Damage = 1f, OffBeat = 30 },
-            new Skill { Name = "STAND FIRM", Kind = SkillKind.Defend, Text = "Enemies aim at PFUNDT, who takes half damage.", Cost = 2, Target = SkillTarget.Self,
+            new Skill { Name = "THUNDER CALL", Kind = SkillKind.Defend, Text = "Enemies aim at PFUNDT, who takes half damage.", Cost = 2, Target = SkillTarget.Self,
                         Notes = new[] { S(R) }, Guard = true, Taunt = true },
 
             //MALI, so duang (strings, centre)
@@ -121,17 +142,21 @@ namespace Tacetno433.Data
             new Skill { Name = "ONE STEP", Kind = SkillKind.Attack, Text = "A big hit and a spark. OFF-BEAT each.", Cost = 2, Target = SkillTarget.Enemy,
                         Notes = new[] { S(L), K() }, Damage = 0.7f, OffBeat = 12 },
 
-            //DUPORT, cello (strings, right)
-            new Skill { Name = "DEEP BOW", Kind = SkillKind.Attack, Text = "2 hits. Each adds 1 DISSONANCE.", Cost = 2, Target = SkillTarget.Enemy,
-                        Notes = new[] { S(R), S(R) }, Damage = 0.8f, Dissonance = 1 },
-            new Skill { Name = "FOUR BARS", Kind = SkillKind.Attack, Text = "The 4/4 shape. Each note adds 1 DISSONANCE.", Cost = 4, Target = SkillTarget.Enemy,
-                        Notes = new[] { S(D), S(L), S(R), S(U) }, Damage = 0.6f, Dissonance = 1 },
+            //DUPORT, cello (strings, right) : the Duport Stradivarius that Napoleon left a dent in. The cello is a great shield, the
+            //bow a lance ("It plays louder for it"). SHIELD for a friend a big move is aimed at (holding the note = holding the
+            //shield up), LANCE to pay back the blow that just landed.
+            new Skill { Name = "SHIELD", Kind = SkillKind.Defend, Text = "Guard a friend : their hits land on DUPORT, halved.", Cost = 2, Target = SkillTarget.Ally,
+                        Notes = new[] { H(R) }, Shield = true },
+            new Skill { Name = "LANCE", Kind = SkillKind.Attack, Text = "2 thrusts. Twice as hard if DUPORT was just hit.", Cost = 2, Target = SkillTarget.Enemy,
+                        Notes = new[] { S(R), S(R) }, Damage = 0.7f, Revenge = 2f },
 
-            //PUNTO, horn (winds, left)
+            //PUNTO, horn (winds, left) : the horn is the hunting horn that sends everyone in at once, and Punto was once more
+            //famous than Beethoven. The coiled horn is a ring of blades, thrown and caught again. FANFARE to finish a fight
+            //against one big enemy, CHAKRAM against a pack.
             new Skill { Name = "FANFARE", Kind = SkillKind.Boost, Text = "The band hits harder : 1 CRESCENDO per note.", Cost = 2, Target = SkillTarget.AllAllies,
                         Notes = new[] { S(L), S(L) }, Crescendo = 1 },
-            new Skill { Name = "LATE ENTRY", Kind = SkillKind.Heal, Text = "Heals one musician 5 per note.", Cost = 3, Target = SkillTarget.Ally,
-                        Notes = new[] { S(L), K() }, Heal = 5 },
+            new Skill { Name = "CHAKRAM", Kind = SkillKind.Attack, Text = "3 throws, a new enemy each. Hit again = half.", Cost = 3, Target = SkillTarget.Enemy,
+                        Notes = new[] { S(L), S(R), S(L) }, Damage = 1f, Bounce = 3 },
 
             //BORIS, bass drum (percussion, centre)
             new Skill { Name = "THE FLOOR", Kind = SkillKind.Attack, Text = "Hits every enemy. Hold it = harder.", Cost = 3, Target = SkillTarget.AllEnemies,

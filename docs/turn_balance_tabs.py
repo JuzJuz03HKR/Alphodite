@@ -2,6 +2,7 @@
 #   python3 docs/turn_balance_tabs.py <folder of --shots turnsim>/turnsim.txt
 # Turn Battle     : every number of the TURN BATTLE section of Data/BattleRules.cs (section, code, value, note)
 # Turn Enemies    : the turn data of Data/Enemy.cs
+# Turn Skills     : every skill of Data/Skill.cs with its musician, and each musician's trait (Beta1 29 Oct, THE FIVE KITS)
 # Turn Conductors : each conductor's SIGNATURE text from Data/Conductor.cs, matched by kit
 # Turn Sim        : turnsim.txt as it is
 # Game States     : BandSize
@@ -71,6 +72,63 @@ for block in re.findall(r'new Enemy \{ Name = "([^"]+)",(.*?)\},\s*(?=//|new Ene
     floor = get('TraitFloor', '1')
     text = re.search(r'TurnTraitText = "([^"]+)"', body).group(1)
     ws.append([name, kind, hp, speed, power, phrases, f'{trait} ({floor})', text, 'yes' if int(speed) >= 5 else ''])
+
+# --- Turn Skills (Beta1 29 Oct, THE FIVE KITS) : every skill of Data/Skill.cs with its musician (skills 2k and 2k + 1 belong
+#     to musician k of Data/Musician.cs), and each musician's trait on their first row. The legends of MusicianList.Shown first.
+values = {r[1]: r[2] for r in rows}
+ms = open(f'{repo}/Tacetno433/Data/Musician.cs', encoding='utf-8-sig').read()
+musicians = []
+for block in re.findall(r'new Musician \{ Name = "([^"]+)",(.*?)\},\s*(?=//|new Musician|\};)', ms, re.S):
+    name, body = block
+    trait = re.search(r'TraitName = "([^"]+)"', body)
+    turn = re.search(r'TurnTraitText = ((?:"[^"]*"|\s*\+\s*|BattleRules\.\w+)+),', body)
+    text = ''
+    if turn:                                       # "..." + BattleRules.X + "..." : the numbers read from BattleRules above
+        for part in re.findall(r'"([^"]*)"|BattleRules\.(\w+)', turn.group(1)):
+            text += part[0] if part[0] or not part[1] else values.get(part[1], part[1])
+    family = re.search(r'Family = Family\.(\w+)', body).group(1)
+    power = re.search(r'Power = (\d+)', body).group(1)
+    musicians.append((name, family, power, trait.group(1) if trait else '', text))
+shown = re.findall(r'All\[(\d+)\]', re.search(r'public static Musician\[\] Shown = \{([^}]*)\}', ms).group(1))
+ss = open(f'{repo}/Tacetno433/Data/Skill.cs', encoding='utf-8-sig').read()
+skills = re.findall(r'new Skill \{(.*?)\},\s*\n', ss, re.S)
+if 'Turn Skills' not in wb.sheetnames:
+    ws = wb.create_sheet('Turn Skills', wb.sheetnames.index('Turn Enemies') + 1)
+    head = ['Musician', 'Skill', 'Kind', 'BREATH', 'Target', 'Notes', 'Damage per note', 'DISSONANCE', 'Heal', 'CRESCENDO',
+            'BREATH back', 'OFF-BEAT', 'Special', 'Text', 'Trait (turn battle)']
+    styles = header_style(wb['Turn Enemies'])
+    for c, h in enumerate(head, 1):
+        ws.cell(row=1, column=c).value = h
+        ws.cell(row=1, column=c)._style = copy.copy(styles[min(c, len(styles)) - 1])
+ws = wb['Turn Skills']
+clear(ws)
+order = [int(i) for i in shown] + [i for i in range(len(musicians)) if str(i) not in shown]
+for k in order:
+    name, family, power, trait, trait_text = musicians[k]
+    for j in (0, 1):
+        body = skills[2 * k + j]
+        def get(key, default=''):
+            m = re.search(r'\b' + key + r' = ([^,]+?)(?:,|$)', body)
+            v = m.group(1).strip() if m else default
+            return v[:-1] if re.match(r'^-?\d+(\.\d+)?f$', v) else v      # 0.4f -> 0.4, but SkillTarget.Self keeps its f
+        notes = ' '.join(n.replace('()', '').replace('S(', '').replace('H(', 'HOLD ').replace(')', '')
+                         .replace('K', 'SPARK').replace('T', 'ROLL') for n in re.findall(r'[SHKT]\([LRUD]?\)', body))
+        special = ' '.join(w for w, key in (('GUARD', 'Guard'), ('TAUNT', 'Taunt'), ('SHIELD', 'Shield'), ('LESSON', 'Lesson'))
+                           if get(key) == 'true')
+        if get('Bounce'): special += f' BOUNCE {get("Bounce")}'
+        if get('Revenge'): special += f' x{get("Revenge")} WHEN HIT'
+        def num(v):                                # a number from the code as a number in the sheet (None when it is not there)
+            try:
+                f = float(v)
+                return int(f) if f.is_integer() else f
+            except ValueError:
+                return v or None
+        label = f'{name} ({family}, power {power})' + ('' if str(k) in shown else ' hidden')
+        ws.append([label if j == 0 else None, re.search(r'Name = "([^"]+)"', body).group(1), get('Kind').replace('SkillKind.', ''),
+                   int(get('Cost', '2')), get('Target').replace('SkillTarget.', ''), notes, num(get('Damage')),
+                   num(get('Dissonance')), num(get('Heal')), num(get('Crescendo')), num(get('Breath')),
+                   num(get('OffBeat')), special.strip() or None, re.search(r'Text = "([^"]+)"', body).group(1),
+                   f'{trait} : {trait_text}' if j == 0 and trait else None])
 
 # --- Turn Conductors : the signature texts from the code, matched by kit
 cs = open(f'{repo}/Tacetno433/Data/Conductor.cs', encoding='utf-8-sig').read()

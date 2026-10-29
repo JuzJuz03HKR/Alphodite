@@ -675,3 +675,53 @@
 - ทดสอบในแชท cloud : build 0 error 0 warning / turncheck 112/112 / ภาพ `battle` กับ `battleplan` เห็นครบ 4 สี (ภาพจาก cloud ไม่ commit)
 - ให้ผู้ใช้ลองหลัง Rebuild : เข้าไฟต์ คลิก QUANTZ เห็นแถบเขียว (SOFT AIR) กับทอง (LONG BREATH) คลิก PFUNDT เห็นแถบฟ้า (STAND FIRM) แถบหนาพอไหม สีไหนดูไม่เข้ากับฉาก
 - ถัดไป ข้อ 2 ชุดสกิลใหม่ 5 คน (11.6) รอผู้ใช้สั่ง
+
+### 12.2 ข้อ 2 ชุดสกิลใหม่ 5 คน (THE FIVE KITS) เสร็จ รอผู้ใช้ Rebuild ดู
+ผู้ใช้สั่ง (คำต่อคำ `USER_BRIEFS.md` 13.32) : "ลองเล่นแล้วไม่มีอะไรต้องแก้ ทำข้อ 2 ต่อ" แปลว่าข้อ 1 ผ่าน ทำข้อ 2 แล้วหยุดรอ
+
+ชุดที่อยู่ในเกมตอนนี้ (สกิลอยู่ช่องเดิมของ `SkillList.All` ความสามารถติดตัวต่อท้าย `enum MusicianTrait` เซฟเก่าโหลดได้)
+| คน | สกิล 1 | สกิล 2 | ติดตัว |
+|---|---|---|---|
+| PAGANINI | CAPRICE โจมตี ลม 2 ฟัน 4 ครั้ง L R L R ครั้งละ 0.4 + DISSONANCE 1 | IL CANNONE โจมตี ลม 3 โน้ตค้าง 1.5 | THE DEVIL'S BARGAIN ลมไม่พอจ่ายเลือดแทน ลมละ 6 (เฉพาะสกิลของ PAGANINI) |
+| QUANTZ | SOFT AIR ฮีลทั้งวง (เหมือนเดิม) | THE LESSON เสริม ลม 2 เลือกเพื่อน U D | BREATH CONTROL ATTACK ได้ลม 2 + 1 |
+| PFUNDT | TIMPANI ROLL โจมตี ลม 2 โน้ตรัว OFF-BEAT 30 (เหมือนเดิม) | THUNDER CALL ป้องกัน (STAND FIRM เดิม เปลี่ยนชื่อ) | TURN OF THE HAND สกิลของ PFUNDT ที่โดนศัตรู ท่าถัดไปของมันโน้ตหาย 1 (เหลืออย่างน้อย 2) |
+| DUPORT | SHIELD ป้องกัน ลม 2 เลือกเพื่อน โน้ตค้าง R | LANCE โจมตี ลม 2 R R ครั้งละ 0.7 x2 ถ้าเพิ่งโดนตี | THE SCAR โดนศัตรูตีแล้วเจ็บ ได้ CRESCENDO 1 ต่อการโจมตี 1 ครั้ง |
+| PUNTO | FANFARE ทั้งวงได้ CRESCENDO (เหมือนเดิม) | CHAKRAM โจมตี ลม 3 L R L ครั้งละ 1 เด้ง 3 ตัว | THE HUNTING CALL คนที่เล่นถัดจาก PUNTO ในห้องแรงขึ้น x1.3 |
+
+ที่ไอริสตัดสินเองหรือต่างจากร่าง 11.6 (ผู้ใช้เปลี่ยนได้ทุกข้อ)
+1. CAPRICE ยังใส่ DISSONANCE ครั้งละ 1 (ร่างไม่ได้บอก) : ไม่มีใน 5 คนใส่ DISSONANCE เลยถ้าเอาออก ทั้งที่ตาราง 11.5 ใช้ "DISSONANCE ไม่สนโล่" ตอบปัญหาโล่ของศัตรู และเรื่องของ PAGANINI เข้ากับช่วงเสียงปีศาจ (diabolus in musica)
+2. TURN OF THE HAND ตัดโน้ตเฉพาะตอนสกิลโดน (TIMPANI ROLL) ไม่ใช่ทุกครั้งที่ตี และเหลืออย่างน้อย 2 (ร่าง : ทุกครั้งที่ตีโดน เหลืออย่างน้อย 1) เพราะตัวจำลอง : แบบร่าง วงที่มี PFUNDT ชนะทั้งรัน 67% ไม่มี 47% แรงกว่าคนอื่นมาก แบบนี้ 5 คนห่างกันไม่เกิน 4.5% และการตัดโน้ตกลายเป็นการตัดสินใจ จ่ายลม 2 เพื่อตัดท่ายาวของบอส ตรงกับ "แก้ : ท่ายาวของบอส"
+3. SHIELD เป็นโน้ตค้าง (กดค้าง = ยกโล่ค้าง) อยู่จนถึงตาถัดไปของ DUPORT (เหมือน GUARD TAUNT) หรือ DUPORT ล้ม ใช้กับตัวเองไม่ได้ โน้ตที่เล็งเพื่อนไปโดน DUPORT ครึ่งเดียว (ผลของโน้ตอื่นๆ เช่น MUTE ก็ไปที่ DUPORT) เครื่องหมายเป้าบนจอย้ายมาที่ DUPORT ทันที DUPORT ออกมายืนหน้าตอนปัด เพื่อนมีป้าย SHIELD ใต้การ์ด
+4. LANCE "เพิ่งโดนตีมา" = โดนโน้ตของศัตรูจนเจ็บตั้งแต่ท่าก่อนของ DUPORT (ไม่ใช่แค่ห้องนี้ เพราะศัตรูส่วนใหญ่เล่นหลังวง ถ้านับแค่ห้องนี้แทบไม่เกิด) ตอนแรงขึ้นมีคำ x2 เด้ง
+5. THE SCAR นับต่อการโจมตี 1 ครั้งของศัตรู ไม่ใช่ต่อโน้ต (ต่อโน้ตจะเต็ม 5 เร็วเกิน) ได้ CRESCENDO ตอนท่านั้นจบ
+6. CHAKRAM : เลือกศัตรูตัวแรก จักรเด้งไปตัวถัดไปในแถวทีละตวัด ตัวละ 1 ครั้ง ถ้าศัตรูน้อยกว่า 3 จักรวนกลับมาตีซ้ำแค่ครึ่ง ทุกตวัดยังตีโดนตามกฎ "ตวัดแล้วตีทันที" (ร่างไม่ได้บอกกรณีศัตรูน้อยกว่า 3)
+7. THE LESSON : สกิลถัดไปของเพื่อน ช่วง PERFECT กว้างขึ้น 0.05 วิ (ไม่เกินช่วง GOOD) โน้ตรัวต้องการน้อยลง 1 ครั้ง แรงขึ้น x1.3 ใช้หมดเมื่อสกิลนั้นจบ ATTACK ไม่ใช้บทเรียน ใช้กับตัวเองไม่ได้ เพื่อนมีป้าย LESSON
+8. THE HUNTING CALL : คนที่เล่นถัดจาก PUNTO ในห้อง (ข้ามศัตรูที่แทรก) x1.3 ขึ้นคำ CUE
+9. THE DEVIL'S BARGAIN ใช้โค้ดกับตัวเลขของ BORROWED BREATH (`TurnPaganiniLife` 6) ราคาบนปุ่มยังเป็นเพชรลม ไอคอนเลือดรอข้อ 4
+10. IL CANNONE 1.5 กับ CHAKRAM 1 (ร่างแรกที่ใส่ 1.8 กับ 0.8) ทำให้วงที่มีแต่ละคนชนะใกล้กัน ส่วน "ทะลุโล่" ของ IL CANNONE กับ "ยกเลิกท่าชาร์จ" ของ TIMPANI ROLL รอข้อ 3 (ยังไม่มีโล่และท่าชาร์จ)
+11. ความสามารถเดิม COUNTS ALOUD THE QUIET PART MOMENTUM FOUR BARS STRAIGHT FASHIONABLY LATE เอาโค้ดออกจากการต่อสู้แบบผลัดตาแล้ว (ชื่อใน enum ยังอยู่ให้ดวลเดิม) สกิลเดิมที่หายไปตามร่าง 11.6
+
+ให้เห็นบนจอทันที (ดึงมานิดเดียวจากข้อ 4 แบบข้อ 1) : คำเด้งสีตามชนิดสกิล SHIELD (ฟ้า) LESSON CUE (ทอง) x2 (แดง) -1 NOTE (ขาว บนศัตรู) / ป้าย SHIELD กับ LESSON ใต้การ์ดเพื่อน / เป้าของศัตรูกับคนที่ออกมาปัดย้ายไปที่ DUPORT ตอนบัง (`TurnBattle.HitTarget`) / ชี้ตัวเองตอนเลือกเพื่อนของ SHIELD และ THE LESSON ไม่ขึ้นกรอบ (`TurnBattle.CanAim`) / VFX จริงของสกิลใหม่ยังเป็นแบบเดิม (ข้อ 7 ต้องถามตัวอย่างก่อน)
+
+ความยาก (ชดเชยให้เท่าเดิม ไม่ได้ลด)
+- ตัวจำลองต้องรู้จักใช้สกิลใหม่ จึงเพิ่มนิสัย (`Core/DebugShots.TurnSim.cs` หัวไฟล์) : บังหรือเรียกศัตรูเมื่อเพื่อนเลือดต่ำกว่าครึ่งกำลังโดนเล็ง / สกิลเสริม (THE LESSON ให้คนที่มีสกิลตีแพงสุด, FANFARE) เมื่อลมว่าง 4 ขึ้นไป / CHAKRAM เฉพาะศัตรู 2 ตัวขึ้นไป / PUNTO เขียนก่อนคนอื่น / จ่ายเลือดแทนลมเฉพาะตอนเลือดยังเกิน 3/4 (จ่ายถึงครึ่งทำให้แพ้มากกว่าชนะ 61% เทียบ 65%)
+- นิสัยใหม่อย่างเดียวทำให้ชุดสกิลเดิมชนะ 48% → 52.4% (12 seed) จึงเทียบกันที่นิสัยใหม่ทั้งคู่ : ชุดใหม่ก่อนชดเชย 57% / `TurnNoteDamage` 1.95 → 2 แล้วเหลือ 54.2% (12 seed) MAESTRO EXPERT 76.8% → 74.7% ต่างกันไม่ถึง 2% (อยู่ในค่าแกว่งของตัวจำลอง) / โน้ตพลัง 4 ยัง 8 เท่าเดิม ชั้น 2 เป็น 10 (เดิม 9)
+- วาทยากร STRONG : THE UNHEARING 55% FANNY 54% THE METRONOME 53% (ชุดเดิม 53 57 51)
+- วงที่มีแต่ละคน ชนะทั้งรัน (NORMAL STRONG) : PAGANINI 52% QUANTZ 52% PFUNDT 56% DUPORT 56% PUNTO 54% (ชุดเดิมห่างกันกว่า : PUNTO 47% PAGANINI 48% DUPORT 57%)
+- ตัวจำลองมีตาราง MUSICIANS ใหม่ (ชนะเมื่อมีคนนั้น / ไม่มี) และ `TACET_SIM_SET` ลองเปลี่ยนตัวเลขโดยไม่ต้อง build ใหม่ เช่น `TACET_SIM_SET="TurnLessonScale=1.2;IL CANNONE.Damage=1.6"`
+- การทดลองที่ใช้ตัดสิน (6 seed ต่อแถว ก่อนตั้ง TurnHandLeast 2 แบบสกิลเท่านั้น) : ปิด TURN OF THE HAND -9% / IL CANNONE 1.2 -7% / ปิด THE HUNTING CALL -5% / ปิด BREATH CONTROL -3% / CHAKRAM 0.6 -3% / SHIELD ไม่ลดดาเมจ -2.5% / ปิด LANCE x2 -1.5% / ปิด THE LESSON -1% / ปิด THE SCAR -0.7%
+
+ทดสอบในแชท cloud : build 0 error 0 warning / turncheck 116/116 (ใหม่ `Core/DebugShots.TurnLegends.cs` : five kits, devil's bargain, breath control, turn of hand, hunting call, the lesson, shield, lance, chakram / แก้ค่าที่คาด caprice skill, dissonance, rubato, borrowed breath, fugue waits, floor 2, fills the gaps) / savecheck 32/32 / ภาพ `battlekit` (ป้ายกับคำเด้งใหม่) `battleskill` (CAPRICE 4 โน้ต) `battlehold` (IL CANNONE) ภาพจาก cloud ไม่ commit
+`docs/TACET_Balance.xlsx` : แท็บใหม่ Turn Skills (สกิลกับความสามารถติดตัวทุกคน สร้างจากโค้ด) อัปเดต Turn Battle กับ Turn Sim ด้วย `python3 docs/turn_balance_tabs.py <turnsim.txt>`
+
+โค้ดที่แตะ : `Data/Skill.cs` (ฟิลด์ `Shield` `Lesson` `Bounce` `Revenge` `OthersOnly`) / `Data/Musician.cs` / `Data/BattleRules.cs` (หัวข้อ Musician Traits : `TurnBreathControl` `TurnHandCut` `TurnHandLeast` `TurnScarCrescendo` `TurnHuntingCallScale` `TurnLesson*` `TurnShieldKeep` `TurnChakramRepeat`) / `Battle/TurnBattle.cs` (`PaysInLife` `CanAim` `HitTarget` `CoverOf` `StepAside` `NoteTargets` `TurnOfTheHand` `CueScale` `Taught`, ค้นชื่อตัวพิมพ์ใหญ่ของแต่ละอย่าง) / `Screens/BattleScreen.cs` `BattleScreen.Stage.cs` / `Core/DebugShots.Turn*.cs`
+
+ให้ผู้ใช้ลองหลัง Rebuild
+- หน้า THE AUDITION ชี้แต่ละคน เห็นสกิลกับความสามารถใหม่
+- ไฟต์ที่มี DUPORT : SHIELD เพื่อนที่ศัตรูเล็ง (คลิก SHIELD แล้วคลิกเพื่อน กดค้างโน้ต) เป้าย้ายมาที่ DUPORT ห้องหน้า LANCE ขึ้น x2
+- QUANTZ : THE LESSON ให้ PAGANINI แล้วให้ PAGANINI เล่น IL CANNONE หลัง QUANTZ ในห้องเดียวกัน
+- PUNTO เขียนก่อนคนตีแรง (ขึ้น CUE) และ CHAKRAM ตอนศัตรูหลายตัว
+- PFUNDT TIMPANI ROLL ใส่บอสที่มีโน้ต 3 ตัวขึ้นไป โน้ตบนหัวหายพร้อม -1 NOTE
+- ความยากควรรู้สึกเท่าเดิม
+
+ถัดไป ข้อ 3 ศัตรู CHARGE กับ GUARD (รอผู้ใช้สั่ง) : ใส่ "ทะลุโล่" ของ IL CANNONE กับ DISSONANCE และ "ยกเลิกท่าชาร์จ" ของ TIMPANI ROLL ในข้อนี้ด้วย

@@ -98,11 +98,14 @@
         public static int[] TurnNotesMax = { 2, 3, 4 };
         public static int[] TurnSmallNotesMin = { 1, 1, 2 };   // ordinary enemies
         public static int[] TurnSmallNotesMax = { 2, 2, 2 };
-        public static float TurnNoteDamage = 1.95f;          // step 12 : was 1.5, the user found NORMAL far too easy (turnsim STRONG 81 -> 57 percent).
+        public static float TurnNoteDamage = 2f;             // step 12 : was 1.5, the user found NORMAL far too easy (turnsim STRONG 81 -> 57 percent).
                                                              // Step 15 : was 2.2, longer fights give TACET more turns, so each note is softer and the run is as hard as before.
                                                              // Notes are rounded to whole numbers, so a small change can jump (1.9 made power 4 notes 8 instead of 7)
                                                              // Beta1 29 Oct (ONE RULE) : was 1.85. Without the sizes swipes are easier to land and parry, turnsim
                                                              // NORMAL STRONG went 48 -> 58 percent, 1.95 brings it back to 49 (MAESTRO EXPERT 70 -> 72), 2 was 45.
+                                                             // THE FIVE KITS (29 Oct) : was 1.95. turnsim's habit learned the new skills (it guards and boosts now),
+                                                             // which alone takes the old kits from 48 to 52 percent (12 seeds), the new kits made it 57, and 2
+                                                             // brings them back to 54 (12 seeds, MAESTRO EXPERT 77 -> 75). Power 4 notes stay 8, floor 2 makes them 10.
 
         //PARRY : swiping back at a note. PERFECT blocks all of it and gives breath back,
         //GOOD lets this share through, a MISS or no swipe lets all of it through.
@@ -163,7 +166,8 @@
         public static float TurnLockedTempoWindow = 0.05f;   // LOCKED TEMPO : seconds added to the PERFECT window of skills and the SIGNATURE, never
                                                              // past GOOD (Beta1 29 Oct : was "any size is right", and the sizes are gone)
         public static float TurnFugueScale = 1.8f;     // FUGUE : the echo plays at the SIGNATURE's strength x this (step 13 : was 1, THE METRONOME was the weakest at 44 percent)
-        public static int TurnPaganiniLife = 6;        // THE HEARTLESS's PASSIVE : life paid for each BREATH a skill is short of (step 15 : was 3, skills carry the fight now)
+        public static int TurnPaganiniLife = 6;        // THE HEARTLESS's PASSIVE : life paid for each BREATH a skill is short of (step 15 : was 3, skills carry the fight now).
+                                                       // THE DEVIL'S BARGAIN (the musician PAGANINI, Beta1 29 Oct) pays the same for their own skills
         public static float TurnCapricePrice = 0.2f;   // CAPRICE : when it ends, every musician pays this share of their life (never below 1, step 13 : was 0.1)
         public static int TurnCapricePerStroke = 2;    // CAPRICE : turns per stroke that lands (step 12, a bar has more turns now)
         public static float TurnLullyWindow = 0.01f;   // THE KING'S BATON's PASSIVE : seconds added to both parry windows (0.05 won 99 percent of STRONG runs, the others 83 to 90;
@@ -176,17 +180,25 @@
         public static int TurnDuetHeal = 8;             //              and life back for every musician
 
         //Musician Traits in the turn battle (step 10, the TurnTraitText of each musician in Data/Musician.cs)
-        public static float TurnCountsWindow = 0.05f;  // COUNTS ALOUD (PAGANINI) : seconds added to their PERFECT window
-        public static float TurnQuietScale = 1.5f;     // THE QUIET PART (QUANTZ) : against an enemy whose next attack is aimed at someone else
-                                                       //   (Beta1 29 Oct : was an enemy showing a p note, the sizes are gone)
-        public static int TurnMomentumMost = 3;        // MOMENTUM (PFUNDT) : power gained by hits in a row, at most
+        //THE FIVE KITS (Beta1 29 Oct) : the five legends' traits and the new moves of their skills (Data/Skill.cs).
+        //THE DEVIL'S BARGAIN (PAGANINI) pays TurnPaganiniLife for each BREATH short, like BORROWED BREATH above.
+        //Until then COUNTS ALOUD, THE QUIET PART, MOMENTUM, FOUR BARS STRAIGHT and FASHIONABLY LATE were theirs.
+        public static int TurnBreathControl = 1;       // BREATH CONTROL (QUANTZ) : more BREATH from their ATTACK
+        public static int TurnHandCut = 1;             // TURN OF THE HAND (PFUNDT) : notes taken off the next attack of an enemy their skill hits
+        public static int TurnHandLeast = 2;           //                            never fewer notes left than this (its point is a long phrase,
+                                                       //   at 1 the bands with PFUNDT won 63 percent of the runs, the others 56)
+        public static int TurnScarCrescendo = 1;       // THE SCAR (DUPORT) : CRESCENDO after each enemy attack that hurt them
+        public static float TurnHuntingCallScale = 1.3f;  // THE HUNTING CALL (PUNTO) : the musician who plays right after PUNTO in the bar
+        public static float TurnLessonWindow = 0.05f;  // THE LESSON (QUANTZ's skill) : seconds added to the PERFECT window of the friend's next skill, never past GOOD
+        public static int TurnLessonShakes = 1;        //                               a ROLL in it needs this many shakes fewer for PERFECT
+        public static float TurnLessonScale = 1.3f;    //                               and the skill plays this much harder
+        public static float TurnShieldKeep = 0.5f;     // SHIELD (DUPORT's skill) : the share of a hit on the friend that DUPORT takes instead
+        public static float TurnChakramRepeat = 0.5f;  // CHAKRAM (PUNTO's skill) : an enemy the same throw already hit takes this share
+        //The hidden musicians (old saves only since 29 Oct)
         public static float TurnByEarScale = 1.5f;     // BY EAR (MALI) : against an enemy that is OFF-BEAT
         public static float TurnHeldNoteShare = 0.4f;  // HELD NOTE (CHAI) : his ATTACK hits again for this share
         public static float TurnStepBetterScale = 1.3f;   // ONE STEP BETTER (NUAN) : against an enemy whose next attack is long
         public static int TurnLongNotes = 3;              //                           long = this many notes or more (Beta1 29 Oct : was an f note)
-        public static int TurnFourBarsEvery = 4;       // FOUR BARS STRAIGHT (DUPORT) : every this many ATTACKs
-        public static float TurnFourBarsScale = 2f;    //                             hits this much harder
-        public static float TurnLateBonus = 0.12f;     // FASHIONABLY LATE (PUNTO) : seconds after the GOOD window a late stroke still counts
         public static int TurnThunderSoften = 2;       // THE WHOLE FLOOR (BORIS) : taken off each note of the enemy's next attack
 
         //ARCHIVE (step 7, Data/Archive.cs) : ECHOES a finished run leaves, and what each upgrade level gives

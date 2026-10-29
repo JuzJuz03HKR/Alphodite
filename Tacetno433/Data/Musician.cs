@@ -15,20 +15,28 @@ namespace Tacetno433.Data
     public enum SpotLook { Gold, Red }
 
     //MusicianTrait : the one thing each musician does that nobody else does.
-    //Every trait comes straight from the line written about them, and BattleState checks
+    //Every trait comes straight from the line written about them, and TurnBattle (BattleState in the old duel) checks
     //each one by name, so searching for a trait finds every place it works.
+    //THE FIVE KITS (Beta1 29 Oct) : the five legends got traits of their own, the last five below. KeepsCount, QuietPart,
+    //Momentum, FourBars and Forgiven were theirs before (ANNA's, KLARA's ... until then) and only the old rhythm duel
+    //(Battle/BattleState.cs) still reads them. New traits go at the end.
     public enum MusicianTrait
     {
         None,
-        KeepsCount,      // PAGANINI  beats the baton goes their way have a wider PERFECT window (COUNTS ALOUD, was ANNA's)
-        QuietPart,       // QUANTZ    twice as hard against TACET's p notes (round 14, used to play on every stroke, was KLARA's)
-        Momentum,        // PFUNDT    each beat in a row they play hits 1 harder, up to 3 (was OTTO's)
+        KeepsCount,      // (old duel) beats the baton goes their way have a wider PERFECT window (COUNTS ALOUD)
+        QuietPart,       // (old duel) twice as hard against TACET's p notes (THE QUIET PART)
+        Momentum,        // (old duel) each beat in a row they play hits 1 harder, up to 3 (MOMENTUM)
         ByEar,           // MALI      50 percent harder on TACET's hidden beats (hidden since 29 Oct)
         HeldNote,        // CHAI      his note rings on into a beat nobody plays, at 40 percent (hidden since 29 Oct)
         OneStepBetter,   // NUAN      30 percent harder when TACET plays loud (hidden since 29 Oct)
-        FourBars,        // DUPORT    the fourth beat of a bar they play all of hits twice as hard (was LUKA's)
-        Forgiven,        // PUNTO     on their beats a late stroke still counts as GOOD (FASHIONABLY LATE, was IRIS's)
-        Thunder          // BORIS     his big stroke on an f note knocks 2 off TACET's next note (hidden since 29 Oct)
+        FourBars,        // (old duel) the fourth beat of a bar they play all of hits twice as hard (FOUR BARS STRAIGHT)
+        Forgiven,        // (old duel) on their beats a late stroke still counts as GOOD (FASHIONABLY LATE)
+        Thunder,         // BORIS     his big stroke on an f note knocks 2 off TACET's next note (hidden since 29 Oct)
+        DevilsBargain,   // PAGANINI  short of BREATH, their skills take life instead (THE DEVIL'S BARGAIN)
+        BreathControl,   // QUANTZ    their ATTACK gives more BREATH (BREATH CONTROL)
+        TurnOfTheHand,   // PFUNDT    an enemy their skill hits plays one note fewer in its next attack (TURN OF THE HAND)
+        TheScar,         // DUPORT    every attack that hurts them gives CRESCENDO (THE SCAR)
+        HuntingCall      // PUNTO     the musician who plays right after them hits harder (THE HUNTING CALL)
     }
 
     //Musician : one player in the ensemble.
@@ -103,7 +111,9 @@ namespace Tacetno433.Data
     //MusicianList : THE PLACE TO EDIT MUSICIANS.
     //NO MORE ERAS (Beta1, 29 Oct) : the user took the eras out and kept five legends, one for each instrument that stays
     //(violin, flute, timpani, cello, horn, docs/CHARACTER_DESIGN.md 5). They took the places of ANNA, KLARA, OTTO, LUKA and
-    //IRIS, keeping their traits and skills. MALI, CHAI and NUAN (the Siam era) and BORIS (bass drum) stay in All, hidden
+    //IRIS. THE FIVE KITS (29 Oct, BETA1_DIRECTION 11.6) : their skills (Data/Skill.cs) and traits come from their own
+    //legends now. Those traits only work in the turn battle, so they have a TurnTraitText and no TraitText (the old duel's).
+    //MALI, CHAI and NUAN (the Siam era) and BORIS (bass drum) stay in All, hidden
     //(Shown), because the save file keeps musicians by their place in All : NEVER REMOVE OR REORDER, only add at the end.
     //Rough guide for stats (round 15) : everybody plays every note and nobody costs stamina, so the powers sit close
     //together, percussion a little stronger, winds a little weaker. What sets players apart is their trait.
@@ -120,9 +130,8 @@ namespace Tacetno433.Data
             new Musician { Name = "PAGANINI", Instrument = "VIOLIN",    Culture = "EUROPEAN", Family = Family.String,     Cue = 0, Spot = SpotLook.Gold,
                            Epithet = "THE DEVIL'S VIOLINIST", Weapon = "IL CANNONE",
                            Power = 5, Sample = "violin", SampleNote = 60, ThemeColor = Palette.ToneB,
-                           Trait = MusicianTrait.KeepsCount, TraitName = "COUNTS ALOUD",
-                           TraitText = "On their beats, when the baton points their way, the PERFECT window is wider.",
-                           TurnTraitText = "The notes of their skills have a wider PERFECT window.",
+                           Trait = MusicianTrait.DevilsBargain, TraitName = "THE DEVIL'S BARGAIN",
+                           TurnTraitText = "Short of BREATH, their skills take " + BattleRules.TurnPaganiniLife + " life for each BREATH missing.",
                            Line = "They say the devil taught those hands. Nobody asks twice." },
 
             //1 : flute. Johann Joachim Quantz (1697 - 1773) : the flute teacher of Frederick the Great, about 300 concertos
@@ -130,9 +139,8 @@ namespace Tacetno433.Data
             new Musician { Name = "QUANTZ",   Instrument = "FLUTE",     Culture = "EUROPEAN", Family = Family.Wind,       Cue = 1, Spot = SpotLook.Red,
                            Epithet = "THE KING'S FLUTE MASTER", Weapon = "FLUTE RAPIER",
                            Power = 4, Sample = "flute", SampleNote = 72, ThemeColor = Palette.ToneC,
-                           Trait = MusicianTrait.QuietPart, TraitName = "THE QUIET PART",
-                           TraitText = "Against TACET's soft p notes, plays twice as hard.",
-                           TurnTraitText = "Hits 50 percent harder against an enemy that is not aiming at QUANTZ.",
+                           Trait = MusicianTrait.BreathControl, TraitName = "BREATH CONTROL",
+                           TurnTraitText = "Their ATTACK gives " + BattleRules.TurnBreathControl + " BREATH more.",
                            Line = "Taught a king the flute. Three hundred concertos, one listener." },
 
             //2 : timpani. Ernst Pfundt (1806 - 1871) : the timpanist of the Leipzig Gewandhaus, credited with the crank timpani
@@ -140,9 +148,8 @@ namespace Tacetno433.Data
             new Musician { Name = "PFUNDT",   Instrument = "TIMPANI",   Culture = "EUROPEAN", Family = Family.Percussion, Cue = 2, Spot = SpotLook.Gold,
                            Epithet = "WHO TUNES THE THUNDER", Weapon = "TWIN HAMMERS",
                            Power = 6, Sample = "timpani", SampleNote = 0, ThemeColor = Palette.ToneD,
-                           Trait = MusicianTrait.Momentum, TraitName = "MOMENTUM",
-                           TraitText = "Each beat in a row they play hits 1 harder, up to 3.",
-                           TurnTraitText = "Each of their moves in a row that lands hits 1 harder, up to 3.",
+                           Trait = MusicianTrait.TurnOfTheHand, TraitName = "TURN OF THE HAND",
+                           TurnTraitText = "An enemy their skill hits plays " + BattleRules.TurnHandCut + " note fewer next time (" + BattleRules.TurnHandLeast + " at least).",
                            Line = "One turn of the hand, and the thunder changes key." },
 
             //3 to 5 : the Siam era, hidden since 29 Oct (Shown)
@@ -171,9 +178,8 @@ namespace Tacetno433.Data
             new Musician { Name = "DUPORT",   Instrument = "CELLO",     Culture = "EUROPEAN", Family = Family.String,     Cue = 2, Spot = SpotLook.Gold,
                            Epithet = "SCARRED BY AN EMPEROR", Weapon = "THE SCARRED SHIELD",
                            Power = 6, Sample = "cello", SampleNote = 48, ThemeColor = Palette.ToneC,
-                           Trait = MusicianTrait.FourBars, TraitName = "FOUR BARS STRAIGHT",
-                           TraitText = "Playing all four beats of a bar, the fourth hits twice as hard.",
-                           TurnTraitText = "Every fourth ATTACK they make hits twice as hard.",
+                           Trait = MusicianTrait.TheScar, TraitName = "THE SCAR",
+                           TurnTraitText = "Every attack that hurts them gives " + BattleRules.TurnScarCrescendo + " CRESCENDO.",
                            Line = "An emperor once tried this cello and left a scar. It plays louder for it." },
 
             //7 : horn. Giovanni Punto (1746 - 1803, born Jan Vaclav Stich in Bohemia) : Beethoven wrote the Horn Sonata Op. 17
@@ -182,9 +188,8 @@ namespace Tacetno433.Data
             new Musician { Name = "PUNTO",    Instrument = "HORN",      Culture = "EUROPEAN", Family = Family.Wind,       Cue = 0, Spot = SpotLook.Red,
                            Epithet = "LOUDER THAN BEETHOVEN", Weapon = "HORN CHAKRAM",
                            Power = 5, Sample = "horn", SampleNote = 48, ThemeColor = Palette.ToneA,
-                           Trait = MusicianTrait.Forgiven, TraitName = "FASHIONABLY LATE",
-                           TraitText = "On their beats, when the baton points their way, a late stroke still counts as GOOD.",
-                           TurnTraitText = "On the notes of their skills, a late stroke still counts as GOOD.",
+                           Trait = MusicianTrait.HuntingCall, TraitName = "THE HUNTING CALL",
+                           TurnTraitText = "The musician who plays right after them in the bar hits harder.",
                            Line = "Once more famous than Beethoven, and plays like nobody said otherwise." },
 
             //8 : bass drum, hidden since 29 Oct (Shown)

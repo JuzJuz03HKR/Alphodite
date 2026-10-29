@@ -566,6 +566,7 @@ namespace Tacetno433.Screens
 
             bool forAlly = pending != null && pending.Target == SkillTarget.Ally;
             hover = forAlly ? MusicianUnderPointer(false) : EnemyUnderPointer();
+            if (forAlly && hover != null && !battle.CanAim(selected, pending, hover)) hover = null;   // SHIELD, THE LESSON : never at themself
             if (hover == null || !Input.MouseClicked()) return;
 
             bool written = pending == null ? battle.PlanAttack(selected, hover) : battle.PlanSkill(selected, pending, hover);
@@ -711,7 +712,7 @@ namespace Tacetno433.Screens
             hitBy = enemy;
             hitSignature = false;
             PlayArt(enemy, "attack");
-            PlayArt(enemy.IntentTarget, "parry");
+            PlayArt(battle.HitTarget(enemy), "parry");                                    // SHIELD : the one standing in front parries
             notes.Clear();
             for (int i = 0; i < enemy.IntentNotes.Length; i++)
                 AddNote(NoteKind.Swipe, enemy.IntentWays[i], i < enemy.IntentLate.Length && enemy.IntentLate[i]);   // FALSE NOTES
@@ -923,7 +924,7 @@ namespace Tacetno433.Screens
                 judgeWord = perfect ? "PARRY" : (landed ? "GOOD" : "MISS");
                 if (perfect) qteEffects.SpawnSparks(HitX, HitY, 10, 1f);
                 if (landed)                                                              // the parry's clash, in the colours of the one who parried
-                    qteHits.Clash(new Vector2(HitX, HitY), perfect, SpotOf(battle.Current != null ? battle.Current.IntentTarget : null));
+                    qteHits.Clash(new Vector2(HitX, HitY), perfect, SpotOf(battle.HitTarget(battle.Current)));
                 ShowEvents();
                 ParryAction(grade);
             }
@@ -969,7 +970,7 @@ namespace Tacetno433.Screens
             else
             {
                 if (practice) Learn(Lesson.Parry);
-                Fighter parried = battle.Current != null ? battle.Current.IntentTarget : null;
+                Fighter parried = battle.HitTarget(battle.Current);                            // SHIELD : the one in front blocked it
                 battle.FinishEnemyTurn();
                 if (parried != null) hitBy = parried;                                    // a COUNTER is the musician's blow, in their colours
             }
@@ -1113,6 +1114,12 @@ namespace Tacetno433.Screens
                 else if (e.Kind == TurnEventKind.Echo) effects.SpawnPop(x, box.Y - 60, "ECHO", Palette.Highlight, 0.7f);       // FUGUE
                 else if (e.Kind == TurnEventKind.Quieter) effects.SpawnPop(x, box.Y - 70, "QUIETER", Palette.Paper, 0.7f);    // THE WHOLE FLOOR
                 else if (e.Kind == TurnEventKind.Thorns) effects.SpawnPop(x, box.Y - 70, "DECREE", Palette.Accent, 0.8f);     // DECREE broken
+                //THE FIVE KITS (Beta1 29 Oct) : a word for each new move, in the colour of its SKILL KIND (until their VFX)
+                else if (e.Kind == TurnEventKind.Cut) effects.SpawnPop(x, box.Y - 70, "-" + NumberText.Get(e.Amount) + " NOTE", Palette.Paper, 0.8f);   // TURN OF THE HAND
+                else if (e.Kind == TurnEventKind.Shield) effects.SpawnPop(x, y, "SHIELD", Palette.KindDefend, 0.8f);         // SHIELD
+                else if (e.Kind == TurnEventKind.Lesson) effects.SpawnPop(x, y, "LESSON", Palette.KindBoost, 0.8f);          // THE LESSON
+                else if (e.Kind == TurnEventKind.Cue) effects.SpawnPop(x, y, "CUE", Palette.KindBoost, 0.8f);                // THE HUNTING CALL
+                else if (e.Kind == TurnEventKind.Revenge) effects.SpawnPop(x, y, "x2", Palette.KindAttack, 0.9f);            // LANCE
                 else if (e.Kind == TurnEventKind.Counter)
                 {
                     effects.SpawnPop(x, y, "COUNTER", Palette.Highlight, 0.9f);
@@ -1294,6 +1301,14 @@ namespace Tacetno433.Screens
             Ui.KeyChipRight(sb, "ESC", coachBox.Right - 14, coachBox.Y + 30, Palette.PaperDim);
         }
 
+        //Ally For : the first musician this skill can be played at (SHIELD and THE LESSON never at the one who plays it)
+        private Fighter AllyFor(Fighter who, Skill s)
+        {
+            for (int i = 0; i < battle.Party.Count; i++)
+                if (battle.CanAim(who, s, battle.Party[i])) return battle.Party[i];
+            return null;
+        }
+
         //Picture Hook : for --shots, jump straight to the moment the picture is about
         public void ShowForPicture(string name)
         {
@@ -1305,7 +1320,7 @@ namespace Tacetno433.Screens
                 battle.Breath = 10;
                 Fighter front = battle.Party[0];
                 Skill s = SkillList.First(front.Musician);
-                Fighter at = s.Target == SkillTarget.Enemy ? FirstStanding() : (s.Target == SkillTarget.Ally ? front : null);
+                Fighter at = s.Target == SkillTarget.Enemy ? FirstStanding() : (s.Target == SkillTarget.Ally ? AllyFor(front, s) : null);
                 battle.PlanSkill(front, s, at);
                 if (battle.Party.Count > 1) battle.PlanAttack(battle.Party[1], battle.Enemies[battle.Enemies.Count - 1]);
                 Select(NextUnwritten(battle.Party[0]));
@@ -1324,7 +1339,7 @@ namespace Tacetno433.Screens
                 battle.Breath = 10;
                 Fighter front = battle.Party[0];
                 Skill s = SkillList.First(front.Musician);
-                Fighter at = s.Target == SkillTarget.Enemy ? FirstStanding() : (s.Target == SkillTarget.Ally ? front : null);
+                Fighter at = s.Target == SkillTarget.Enemy ? FirstStanding() : (s.Target == SkillTarget.Ally ? AllyFor(front, s) : null);
                 battle.PlanSkill(front, s, at);
                 battle.PlayBar();
                 NextStep();
@@ -1421,6 +1436,21 @@ namespace Tacetno433.Screens
                 if (name == "battlefugue") battle.Party[0].Echo = 1f;
                 battle.Breath = 0;                                                      // BORROWED BREATH shows its price
                 battle.Events.Clear();
+            }
+            else if (name == "battlekit")
+            {
+                //THE FIVE KITS (29 Oct) : the new tags under the band's cards (SHIELD, LESSON) and the word each new move pops
+                //(-1 NOTE, SHIELD, LESSON, CUE, x2). The picture's band is PAGANINI QUANTZ PFUNDT, so PFUNDT stands in for DUPORT.
+                if (battle.Party.Count < 3) return;
+                battle.Party[0].Lesson = true;
+                battle.Party[1].CoveredBy = battle.Party[2];
+                battle.Events.Clear();
+                battle.Events.Add(new TurnEvent(TurnEventKind.Cut, battle.Enemies[0], 1));
+                battle.Events.Add(new TurnEvent(TurnEventKind.Shield, battle.Party[1], 0));
+                battle.Events.Add(new TurnEvent(TurnEventKind.Lesson, battle.Party[0], 0));
+                battle.Events.Add(new TurnEvent(TurnEventKind.Cue, battle.Party[2], 0));
+                battle.Events.Add(new TurnEvent(TurnEventKind.Revenge, battle.Party[2], 0));
+                ShowEvents();
             }
             else if (name == "battlestatus")
             {
@@ -1633,12 +1663,14 @@ namespace Tacetno433.Screens
                 if (f.Mute > 0) x = DrawTagRow(sb, "MUTE", 0, true, x, y);
                 if (f.Guard) x = DrawTagRow(sb, "GUARD", 0, false, x, y);
                 if (f.Echo > 0f) x = DrawTagRow(sb, "ECHO", 0, false, x, y);                  // FUGUE
+                if (f.CoveredBy != null) x = DrawTagRow(sb, "SHIELD", 0, false, x, y);        // SHIELD : someone stands in front of them
+                if (f.Lesson) x = DrawTagRow(sb, "LESSON", 0, false, x, y);                   // THE LESSON : their next skill
 
-                //Target Mark : the musician an enemy means to hit next
+                //Target Mark : the musician an enemy's next attack lands on (SHIELD : the one standing in front)
                 for (int e = 0; e < battle.Enemies.Count; e++)
                 {
                     Fighter enemy = battle.Enemies[e];
-                    bool aimed = enemy.IntentTarget == f || (enemy.IntentAll && !f.Down);                   // THE COURT : everybody
+                    bool aimed = battle.HitTarget(enemy) == f || (enemy.IntentAll && !f.Down);              // THE COURT : everybody
                     if (!enemy.Down && aimed && view != View.Swipe && view != View.Over)
                     {
                         float pulse = 0.6f + 0.4f * (float)Math.Sin(time * 5f);
@@ -1802,7 +1834,7 @@ namespace Tacetno433.Screens
                     //CLEAR FIGHT : a solid plate behind the attack, the number in plain upright figures, and who it is for
                     Gfx.Rect(sb, new Rectangle((int)(left - 8), (int)(cy - 17), (int)(NumberRoom + row + 14), 34), Palette.Void * (BattleRules.ClearPlate * ia));
                     Gfx.Text(sb, Game.Font, NumberText.Get(f.IntentNotes[0]), left, cy - Game.Font.LineSpacing * TextSize.Heading / 2f, Palette.Highlight * ia, TextSize.Heading);
-                    if (f.IntentTarget != null && !f.IntentAll) DrawAimedAt(sb, f.IntentTarget, r.Center.X, cy - lift, ia);
+                    if (f.IntentTarget != null && !f.IntentAll) DrawAimedAt(sb, battle.HitTarget(f), r.Center.X, cy - lift, ia);
                 }
                 else Gfx.Text(sb, Game.BigFont, NumberText.Get(f.IntentNotes[0]), left, cy - 16, Palette.Highlight * ia, TextSize.Small);
                 for (int n = 0; n < f.IntentNotes.Length; n++)
@@ -1814,7 +1846,7 @@ namespace Tacetno433.Screens
 
                 if (planning && hover == f && f.IntentTarget != null)
                 {
-                    Vector2 to = AimPoint(f.IntentTarget);
+                    Vector2 to = AimPoint(battle.HitTarget(f));
                     Gfx.Line(sb, r.Center.X, cy + 14, to.X, to.Y, Palette.Accent * (0.6f * ia), 2f);
                 }
             }
@@ -1994,7 +2026,7 @@ namespace Tacetno433.Screens
             for (int i = 0; i < battle.Party.Count; i++)
             {
                 Fighter m = battle.Party[i];
-                if (m != enemy.IntentTarget && !(enemy.IntentAll && !m.Down)) continue;
+                if (m != battle.HitTarget(enemy) && !(enemy.IntentAll && !m.Down)) continue;
                 Vector2 to = AimPoint(m);
                 Gfx.Line(sb, HitX - NoteGlyph.WellRadius, HitY, to.X, to.Y, Palette.Accent * 0.35f, 2f);
             }

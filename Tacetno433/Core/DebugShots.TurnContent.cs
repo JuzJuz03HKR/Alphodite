@@ -180,7 +180,7 @@ namespace Tacetno433.Core
             report += Same("bosses by movement", "REQUIEM,THE DEAF CROWN, / THE NAMELESS MASTER,THE STAFF, / THE DEVIL'S STRING,THE BLIND CANTOR,", movements);
 
             //BY TOUCH (THE BLIND CANTOR) : PAGANINI's seat first, then QUANTZ's. Both of its notes got through,
-            //so its next attack is its own 2 (L R) and those 2 again (D U), 6 x 1.95 = 11.7 -> 12 each on floor 1
+            //so its next attack is its own 2 (L R) and those 2 again (D U), 6 x 2 = 12 each on floor 1
             TurnBattle b = new TurnBattle(band, new List<Enemy> { EnemyNamed("THE BLIND CANTOR") }, 1, new Random(433));
             Sturdy(b);
             string first = b.Enemies[0].IntentTarget.Name;
@@ -198,7 +198,7 @@ namespace Tacetno433.Core
             b.Attack();
             string court = b.Enemies[0].Hp.ToString();
 
-            //THE COURT : its third attack is one note down that hits everybody, 7 x 1.95 = 13.65 -> 14, x1.5 = 21
+            //THE COURT : its third attack is one note down that hits everybody, 7 x 2 = 14, x1.5 = 21
             b = new TurnBattle(Duo(), new List<Enemy> { staffBoss }, 1, new Random(433));
             Tough(b);
             for (int i = 0; i < 80 && !b.Enemies[0].IntentAll; i++) Step(b, Grade.Good);
@@ -210,20 +210,20 @@ namespace Tacetno433.Core
             b.TakeEnemyAttack(null);
             report += Same("the court", "397 True 1 Down 21 21 21", court + " " + (anna - b.Party[0].Hp) + " " + (klara - b.Party[1].Hp));
 
-            //DECREE (THE DEAF CROWN) : bar 1 forbids skills, PAGANINI's QUICK BOW costs her 5 (45 -> 40). It CUTS IN after
+            //DECREE (THE DEAF CROWN) : bar 1 forbids skills, PAGANINI's CAPRICE costs her 5 (45 -> 40). It CUTS IN after
             //QUANTZ, every note is parried PERFECT and still no COUNTER. Bar 2 forbids attacks, PAGANINI's ATTACK costs 5 more.
-            Skill quickBow = SkillList.First(MusicianList.All[0]);
-            NoteResult[] goods = new NoteResult[quickBow.Notes.Length];
+            Skill caprice = SkillList.First(MusicianList.All[0]);
+            NoteResult[] goods = new NoteResult[caprice.Notes.Length];
             for (int i = 0; i < goods.Length; i++) goods[i] = new NoteResult(Grade.Good, 1f);
             b = new TurnBattle(band, new List<Enemy> { EnemyNamed("THE DEAF CROWN") }, 1, new Random(433));
             b.Breath = 10;
             string decree = b.Decree.ToString();
-            b.PlanSkill(b.Party[0], quickBow, b.Enemies[0]);
+            b.PlanSkill(b.Party[0], caprice, b.Enemies[0]);
             b.PlayBar();
             b.UseSkill(goods);
             decree += " " + b.Party[0].Hp;
             b.Attack();
-            b.Enemies[0].Dissonance = 0;                                               // QUICK BOW's DISSONANCE would tick at the end of its turn
+            b.Enemies[0].Dissonance = 0;                                               // CAPRICE's DISSONANCE would tick at the end of its turn
             int crownBefore = b.Enemies[0].Hp;
             b.TakeEnemyAttack(AllGrades(b.Current.IntentNotes.Length, Grade.Perfect));
             decree += " " + (crownBefore - b.Enemies[0].Hp);

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
+using System.Reflection;
 using Tacetno433.Battle;
 using Tacetno433.Data;
 
@@ -15,9 +17,15 @@ namespace Tacetno433.Core
     //COUNTS ALOUD, FASHIONABLY LATE, STEADY PULSE, CAPRICE) works as in the game.
     //ONE BAR : an ATTACK needs no swipe, so only skills, the SIGNATURE and the parries use the timing error.
     //One plain habit writes each bar (SimPlan) :
-    //   SIGNATURE as soon as it is full. Then for each musician : a heal when someone is under half life,
-    //   the dearest skill that hits enemies when 3 BREATH or more are free, otherwise ATTACK the enemy with the least life.
-    //   (Until 29 Oct it also CALLED the BENCH in.)
+    //   SIGNATURE as soon as it is full. Then for each musician, the first that fits :
+    //   a heal when someone is under half life,
+    //   a guard (SHIELD, THUNDER CALL) when a friend under half life is the one an enemy aims at and they themself are not,
+    //   the dearest skill that hits enemies when 3 BREATH or more are free (PAGANINI pays the rest in life while that leaves
+    //   them above three quarters, THE DEVIL'S BARGAIN), a CHAKRAM only against two enemies or more,
+    //   a boost (THE LESSON for the friend with the dearest skill that hits, FANFARE) when 4 or more are free,
+    //   otherwise ATTACK the enemy with the least life.
+    //   The band writes in field order, PUNTO first (THE HUNTING CALL : the musician after them gets the CUE).
+    //   (Until 29 Oct it also CALLED the BENCH in. The guards, the boosts and the bargain came with THE FIVE KITS, 29 Oct.)
     //Reports :
     //   FIGHTS      one fight at full life with the PACKS of the run (BattleRules ONE BAR), the band of three
     //   RANKS       the RANK of the won fights above (29 Oct, BattleState.RankScore), S / A / B / C percent and the shards' scale
@@ -26,8 +34,10 @@ namespace Tacetno433.Core
     //               random for each run, every weapon one tier up after each floor (WEAPON TIERS, as a rehearsal each per
     //               floor before), THE UNHEARING, no motifs, shops, luthier or events (so it is harder than a real run)
     //   CONDUCTORS  the same runs with each of the six conductors of the turn battle
+    //   MUSICIANS   the NORMAL STRONG runs above, won with each legend in the band and without them (THE FIVE KITS, 29 Oct)
     //How well real people swipe is a guess, so read the numbers side by side rather than as the truth.
     //Results move by a few percent between runs.
+    //TACET_SIM_SEED picks another seed, TACET_SIM_KIT another conductor, TACET_SIM_SET other numbers (SimSet, Beta1 29 Oct).
     public static partial class DebugShots
     {
         private class SimPlayer
@@ -57,6 +67,13 @@ namespace Tacetno433.Core
         private static long simSkillDamage;
         private const int SimRuns = 300;
 
+        //Musician Tally (THE FIVE KITS, 29 Oct) : while it is on, every run counts who was in its band and whether it was won
+        private static bool simTally;
+        private static int[] simRunsWith = new int[MusicianList.All.Length];
+        private static int[] simWinsWith = new int[MusicianList.All.Length];
+        private static int simTallyRuns;
+        private static int simTallyWins;
+
         //Sim Roster : who joins a simulated run, in this order (two of them start floor 1)
         //NO MORE ERAS (29 Oct) : the five legends a run can meet (MusicianList.Shown), was ANNA KLARA OTTO MALI CHAI NUAN
         private static int[] simRoster = { 0, 1, 2, 6, 7 };
@@ -75,10 +92,17 @@ namespace Tacetno433.Core
             TurnKit runKit = TurnKit.Beethoven;
             string kitText = Environment.GetEnvironmentVariable("TACET_SIM_KIT");
             if (kitText != null) Enum.TryParse(kitText, out runKit);
+            string changed = SimSet();
             simAttackDamage = 0;
             simSkillDamage = 0;
+            simTallyRuns = 0;
+            simTallyWins = 0;
+            Array.Clear(simRunsWith, 0, simRunsWith.Length);
+            Array.Clear(simWinsWith, 0, simWinsWith.Length);
             string report = "TACET TURN BATTLE BALANCE, ONE BAR  (" + SimFights + " fights per cell, " + SimRuns + " runs per player)\r\n";
-            report += "Players : timing spread FLAWLESS 0 / EXPERT 0.08 / STRONG 0.12 / AVERAGE 0.2 / NEWCOMER 0.3 seconds\r\n\r\n";
+            report += "Players : timing spread FLAWLESS 0 / EXPERT 0.08 / STRONG 0.12 / AVERAGE 0.2 / NEWCOMER 0.3 seconds\r\n";
+            if (changed.Length > 0) report += "TACET_SIM_SET :" + changed + "\r\n";
+            report += "\r\n";
 
             MusicianList.ResetRehearsals();
             List<Musician> three = SimBand(BattleRules.BandSize);
@@ -179,6 +203,7 @@ namespace Tacetno433.Core
                 {
                     int wins = 0;
                     int[] lostOn = new int[4];
+                    simTally = !maestro && p == 2;                                         // MUSICIANS : the NORMAL STRONG runs
                     for (int r = 0; r < SimRuns; r++)
                     {
                         int reached = SimRun(simPlayers[p], rng, runKit, maestro);
@@ -187,6 +212,7 @@ namespace Tacetno433.Core
                     }
                     report += "    " + simPlayers[p].Name.PadRight(9) + (wins * 100 / SimRuns).ToString().PadLeft(3) + "%    "
                             + (lostOn[1] * 100 / SimRuns) + "% / " + (lostOn[2] * 100 / SimRuns) + "% / " + (lostOn[3] * 100 / SimRuns) + "%\r\n";
+                    simTally = false;
                 }
             }
 
@@ -199,8 +225,58 @@ namespace Tacetno433.Core
                         + " / " + SimRunWins(simPlayers[3], rng, conductor.Turn) + "%\r\n";
             }
 
+            //MUSICIANS : the NORMAL STRONG runs above, won with each legend in the band, and without them
+            report += "\r\nMUSICIANS (the NORMAL STRONG runs above) : WIN PERCENT  WITH them in the band / WITHOUT them\r\n";
+            for (int i = 0; i < simRoster.Length; i++)
+            {
+                int m = simRoster[i];
+                int withRuns = Math.Max(1, simRunsWith[m]);
+                int withoutRuns = Math.Max(1, simTallyRuns - simRunsWith[m]);
+                report += "  " + MusicianList.All[m].Name.PadRight(10) + (simWinsWith[m] * 100 / withRuns + "%").PadLeft(5)
+                        + " / " + ((simTallyWins - simWinsWith[m]) * 100 / withoutRuns) + "%\r\n";
+            }
+
             MusicianList.ResetRehearsals();
             File.WriteAllText(Path.Combine(outDir, "turnsim.txt"), report);
+        }
+
+        //Sim Set (Beta1 29 Oct) : TACET_SIM_SET tries other numbers for one run of the simulator, without building the game
+        //again. "TurnLessonScale=1.2;IL CANNONE.Damage=1.5" sets a number of Data/BattleRules.cs by its name, or a number of a
+        //skill (Data/Skill.cs) by the skill's name, a dot and the field. The game itself never reads it. Returns what it set
+        //(a name it cannot find comes back with a ?), so the report says which numbers it played with.
+        //ADVANCED PART : reflection. typeof(BattleRules).GetField finds a field by its name while the program runs, SetValue
+        //writes it (null stands for "no object", the field is static), Convert.ChangeType turns the text into the field's own
+        //type (int, float or bool), always with a dot for the decimals (InvariantCulture).
+        private static string SimSet()
+        {
+            string text = Environment.GetEnvironmentVariable("TACET_SIM_SET");
+            if (string.IsNullOrEmpty(text)) return "";
+            string done = "";
+            string[] pairs = text.Split(';');
+            for (int i = 0; i < pairs.Length; i++)
+            {
+                int eq = pairs[i].IndexOf('=');
+                if (eq <= 0) continue;
+                string name = pairs[i].Substring(0, eq).Trim();
+                string value = pairs[i].Substring(eq + 1).Trim();
+                object owner = null;
+                FieldInfo field = typeof(BattleRules).GetField(name);
+                int dot = name.LastIndexOf('.');
+                if (field == null && dot > 0)
+                {
+                    for (int k = 0; k < SkillList.All.Length && owner == null; k++)
+                        if (SkillList.All[k].Name == name.Substring(0, dot)) owner = SkillList.All[k];
+                    field = owner != null ? typeof(Skill).GetField(name.Substring(dot + 1)) : null;
+                }
+                if (field == null || field.IsInitOnly)
+                {
+                    done += " " + name + "=?";
+                    continue;
+                }
+                field.SetValue(owner, Convert.ChangeType(value, field.FieldType, CultureInfo.InvariantCulture));
+                done += " " + name + "=" + value;
+            }
+            return done;
         }
 
         //Sim Band : the first count musicians of the simulated roster
@@ -269,7 +345,11 @@ namespace Tacetno433.Core
                     for (int m = 0; m < band.Count; m++) start[m] = life.ContainsKey(band[m]) ? life[band[m]] : -1;
 
                     TurnBattle b = SimFight(band, SimPack(path[i], floor, rng, rng.Next(10)), floor, player, start, rng, kit, maestro);
-                    if (b.Step != TurnStep.Won) return floor;
+                    if (b.Step != TurnStep.Won)
+                    {
+                        Tally(band, false);
+                        return floor;
+                    }
 
                     for (int m = 0; m < b.Party.Count; m++) life[b.Party[m].Musician] = b.HpAfterBattle(b.Party[m]);
                     SimHeal(band, life, BattleRules.RecoverAfterWin);                 // the result page's life back
@@ -277,7 +357,21 @@ namespace Tacetno433.Core
                 for (int m = 0; m < band.Count; m++)                                 // WEAPON TIERS : every weapon one tier up per floor
                     band[m].Rehearsed = Math.Min(BattleRules.RehearseMax, band[m].Rehearsed + 1);
             }
+            Tally(band, true);
             return 4;
+        }
+
+        //Tally : MUSICIANS, one run's band and whether it was won (only while simTally is on)
+        private static void Tally(List<Musician> band, bool won)
+        {
+            if (!simTally) return;
+            simTallyRuns++;
+            if (won) simTallyWins++;
+            for (int m = 0; m < band.Count; m++)
+            {
+                simRunsWith[band[m].Index]++;
+                if (won) simWinsWith[band[m].Index]++;
+            }
         }
 
         private static void SimHeal(List<Musician> band, Dictionary<Musician, int> life, float share)
@@ -369,33 +463,99 @@ namespace Tacetno433.Core
             for (int i = 0; i < b.Party.Count; i++)
                 if (!b.Party[i].Down && b.Party[i].Hp * 2 < b.Party[i].MaxHp && (hurt == null || b.Party[i].Hp < hurt.Hp)) hurt = b.Party[i];
 
-            for (int i = 0; i < b.Party.Count; i++)
+            //In Danger : a musician under half life that an enemy means to hit next (SHIELD and THUNDER CALL are for them).
+            //Standing : the enemies still up (a CHAKRAM is for a pack).
+            Fighter danger = null;
+            int standing = 0;
+            for (int i = 0; i < b.Enemies.Count; i++)
             {
-                Fighter me = b.Party[i];
+                Fighter e = b.Enemies[i];
+                if (e.Down) continue;
+                standing++;
+                Fighter t = e.IntentTarget;
+                if (e.IntentRest || t == null || t.Down || t.Hp * 2 >= t.MaxHp) continue;
+                if (danger == null || t.Hp < danger.Hp) danger = t;
+            }
+
+            //Write Order : the band in field order, but a musician with THE HUNTING CALL (PUNTO) writes first, so the one after
+            //them gets the CUE (a player learns that quickly)
+            List<Fighter> writeOrder = new List<Fighter>();
+            for (int i = 0; i < b.Party.Count; i++)
+                if (b.Party[i].Musician.Trait == MusicianTrait.HuntingCall) writeOrder.Add(b.Party[i]);
+            for (int i = 0; i < b.Party.Count; i++)
+                if (!writeOrder.Contains(b.Party[i])) writeOrder.Add(b.Party[i]);
+
+            for (int i = 0; i < writeOrder.Count; i++)
+            {
+                Fighter me = writeOrder[i];
                 if (!b.CanPlan(me)) continue;
 
                 Skill heal = null;
                 Skill hit = null;
+                Skill guard = null;
+                Skill boost = null;
                 Skill[] mine = { SkillList.First(me.Musician), SkillList.Second(me.Musician) };
                 for (int k = 0; k < mine.Length; k++)
                 {
-                    if (!b.CanPlanSkill(me, mine[k])) continue;
-                    if (mine[k].Heal > 0) heal = mine[k];
-                    if (mine[k].HitsEnemy && (hit == null || mine[k].Cost > hit.Cost)) hit = mine[k];
+                    Skill s = mine[k];
+                    if (!b.CanPlanSkill(me, s)) continue;
+                    if (s.Heal > 0) heal = s;
+                    else if (s.HitsEnemy && (s.Bounce == 0 || standing >= 2) && (hit == null || s.Cost > hit.Cost)) hit = s;
+                    else if (s.Kind == SkillKind.Defend) guard = s;
+                    else if (s.Kind == SkillKind.Boost) boost = s;
                 }
 
                 //DECREE (THE DEAF CROWN, step 14) : no skill in a NO SKILLS bar, a skill if there is BREATH for one in a NO ATTACKS bar
                 bool noSkills = b.Decree == DecreeKind.NoSkills;
                 bool noAttacks = b.Decree == DecreeKind.NoAttacks;
-                if (!noSkills && heal != null && hurt != null)
+                bool steady = me.Hp * 2 >= me.MaxHp;
+                bool written = false;
+                if (!noSkills && heal != null && hurt != null && b.PlanSkill(me, heal, heal.Target == SkillTarget.Ally ? hurt : me))
                 {
-                    b.PlanSkill(me, heal, heal.Target == SkillTarget.Ally ? hurt : me);
                     hurt = null;
+                    written = true;
                 }
-                else if (!noSkills && hit != null && (noAttacks || b.BreathFree >= 3)) b.PlanSkill(me, hit, weakest);
-                else if (noAttacks && heal != null) b.PlanSkill(me, heal, me);
-                else b.PlanAttack(me, weakest);
+                if (!written && !noSkills && guard != null && danger != null && danger != me && steady && b.PlanSkill(me, guard, guard.Shield ? danger : me))
+                {
+                    danger = null;
+                    written = true;
+                }
+                if (!written && !noSkills && hit != null && (noAttacks || b.BreathFree >= 3 || SimBargain(b, me, hit))) written = b.PlanSkill(me, hit, weakest);
+                if (!written && !noSkills && boost != null && (noAttacks || b.BreathFree >= 4)) written = b.PlanSkill(me, boost, boost.Lesson ? SimPupil(b, me) : me);
+                if (!written && noAttacks && heal != null) written = b.PlanSkill(me, heal, me);
+                if (!written) b.PlanAttack(me, weakest);
             }
+        }
+
+        //Sim Bargain : THE DEVIL'S BARGAIN, the skill is paid partly in life only while that leaves the musician above three
+        //quarters of their life (paying down to half lost more runs than it won : 61 percent of NORMAL STRONG runs, 65 without it)
+        private static bool SimBargain(TurnBattle b, Fighter me, Skill s)
+        {
+            if (!b.PaysInLife(me)) return false;
+            int price = (s.Cost - Math.Max(0, b.BreathFree)) * BattleRules.TurnPaganiniLife;
+            return (me.Hp - price) * 4 > me.MaxHp * 3;
+        }
+
+        //Sim Pupil : THE LESSON goes to the friend with the dearest skill that hits, who has no lesson waiting yet
+        private static Fighter SimPupil(TurnBattle b, Fighter teacher)
+        {
+            Fighter pupil = null;
+            int dearest = -1;
+            for (int i = 0; i < b.Party.Count; i++)
+            {
+                Fighter f = b.Party[i];
+                if (f == teacher || f.Down || f.Lesson) continue;
+                Skill[] two = { SkillList.First(f.Musician), SkillList.Second(f.Musician) };
+                int cost = 0;
+                for (int k = 0; k < two.Length; k++)
+                    if (two[k].HitsEnemy) cost = Math.Max(cost, two[k].Cost);
+                if (cost > dearest)
+                {
+                    pupil = f;
+                    dearest = cost;
+                }
+            }
+            return pupil;
         }
 
         private static NoteResult[] SimNotes(TurnBattle b, Skill s, SimPlayer player, Random rng)

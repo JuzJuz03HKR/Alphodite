@@ -237,7 +237,7 @@ namespace Tacetno433.Screens
             if (now != null)
             {
                 if (!now.IsEnemy) return now;
-                Fighter aimed = now.IntentTarget;
+                Fighter aimed = battle.HitTarget(now);                                 // SHIELD : the one standing in front
                 if (aimed != null && !aimed.IsEnemy && !aimed.Down) return aimed;     // TACET's turn : the one it aims at
             }
             if (fore != null && !fore.Down) return fore;
@@ -365,7 +365,8 @@ namespace Tacetno433.Screens
             {
                 Fighter enemy = battle.Current;
                 if (enemy == null || !enemy.IsEnemy) return EnemiesCenter();
-                Vector2 to = enemy.IntentTarget != null ? AimPoint(enemy.IntentTarget) : CenterOf(foreBox);
+                Fighter aimed = battle.HitTarget(enemy);
+                Vector2 to = aimed != null ? AimPoint(aimed) : CenterOf(foreBox);
                 return (CenterOf(BoxOf(enemy)) + to) / 2f;
             }
             if (swipeFor == SwipeFor.Skill)
@@ -454,7 +455,7 @@ namespace Tacetno433.Screens
             Vector2 toward = Vector2.Zero;
             if (enemy != null && enemy.IsEnemy && enemy.IntentTarget != null)
             {
-                toward = AimPoint(enemy.IntentTarget) - CenterOf(BoxOf(enemy));
+                toward = AimPoint(battle.HitTarget(enemy)) - CenterOf(BoxOf(enemy));
                 if (toward.LengthSquared() > 1f) toward.Normalize();
             }
 
