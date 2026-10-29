@@ -21,7 +21,6 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 29 ต.ค. 09:17 (เวลาไทย) | `BETA1_DIRECTION.md` ข้อ 5 ทั้งหมด : วาทยากร 3 คน + Gallery Detail → แผนที่ทั้งชั้นแบบวงซ้อน → หน้าจัดวงแบบเสา (Band Recruit) → รอบ 2–3 ที่เหลือ → เอายุคออก (ถามก่อน) → หน้าต่อสู้อ่านง่าย | `Data/Conductor.cs` `Data/RunState.cs` `Data/SaveFile.cs` `Data/BattleRules.cs` `Data/Musician.cs` `Data/Era.cs` `Core/DebugShots*.cs` `Core/Ui.cs` `Screens/` (Gallery Detail Route Band Recruit Chapter CurtainCall BandName Archive Settings Pause HowToPlay EraChoice) `docs/` |
 
 ---
 
@@ -64,20 +63,23 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 
 ## สถานะล่าสุด (29 ต.ค.)
 
-**29 ต.ค. (ล่าสุด กำลังทำ) : แชท `/system` แล้วผู้ใช้สั่ง "ทำข้อ 1 และข้อต่อๆไปได้เลย" = ทำ `BETA1_DIRECTION.md` ข้อ 5 ทีละข้อ (จองแถวในตารางแล้ว)**
-✅ ข้อ 1 วาทยากร 3 คน + Gallery + Detail : `SCREENS_LEVEL_UP.md` ข้อ 16 (แผง 3 แผ่นเอียงตัดจากภาพขนาดจริง ชี้แล้วตั้งตรงสีไล่ขึ้น ก้าวเข้าภาพแบบส่งภาพต่อกัน `ScreenManager.Cut` โปรไฟล์ภาพกลางจอ หน้าใกล้ 224×224) สีวาทยากร `Conductor.Spot` (แดงของ UNHEARING มาจากภาพของเขา ม่วงกับเขียวอมฟ้าเป็นสีชั่วคราว) build 0/0 turncheck 113/113 savecheck ผ่าน หน้าอื่นภาพเหมือนเดิม
-✅ ข้อ 2 แผนที่ทั้งชั้นแบบวงซ้อน : `SCREENS_LEVEL_UP.md` ข้อ 17 (`Data/FloorMap.cs` DAG แบบ STAIRCASE + BFS เซฟ `map=` `mappath=` หน้าแผนที่วงซ้อนรอบหลุม การ์ดด้านข้าง กล้องพุ่ง) savecheck ข้อใหม่ผ่าน หน้าอื่นภาพเหมือนเดิม
-✅ ข้อ 3 หน้าจัดวงแบบเสา + Recruit : `SCREENS_LEVEL_UP.md` ข้อ 18 (`Core/BandColumn.cs` `Core/UiArt.cs` อ่าน `Content/Art/Ui/` ลากสลับลำดับ `RunState.Order` เซฟ `order=` ฉากต่อสู้เอาคนแรกยืนหน้า ค่าเริ่มต้นเหมือนเดิม) การ์ดใต้เสายังเป็นแบบแรก รอไอเดียแถบการ์ดของผู้ใช้
-✅ ข้อ 4 ครึ่งแรก (รอบ 2 ที่เหลือ) : `SCREENS_LEVEL_UP.md` ข้อ 19 (Chapter หลุมจริง ชื่อโผล่จากขอบหลุม / CurtainCall ม่านผ้าจริง วงยืนโค้งเป็นเสา ตัวเลขนับขึ้น / BandName เสาเล็ก / Archive หัวข้อตั้ง menu1 ECHOES เลขใหญ่) build 0/0 turncheck 113/113 savecheck ผ่าน หน้าอื่นภาพเหมือนเดิม
-ผู้ใช้สั่ง (คำต่อคำ `USER_BRIEFS.md` 13.14) "บันทึกข้อมูลและอัพเดทเรียบร้อยก็ compact session แล้วทำต่อได้เลย" = ทำต่อหลัง compact ไม่ต้องรอ
-✅ ข้อ 4 ครึ่งหลัง (รอบ 3) หลัง compact : `SCREENS_LEVEL_UP.md` ข้อ 20 (Settings ห้องเดียวกับ Archive แถว `Ui.MenuItem` แถบเลื่อน `Ui.Fader` ตัวเลือก `Ui.Choice` / Pause แถบดำเฉียง FERMATA บนแถบขาว รายการเกาะวงแหวนรอบหลุมนิ่ง `Ornament.StillHole` / กล่องถาม `ConfirmBox` แผ่นเฉียงกับ `Ui.Command` / HOW TO PLAY กรอบวงกลมที่มุม `Ui.Steps`) แคปใหม่ `pausesettings@150` `pauseask@120` `battlepause` build 0/0 turncheck 113/113 savecheck ผ่าน หน้าอื่นภาพเหมือนเดิม
-✅ ข้อ 6 หน้าต่อสู้อ่านง่าย : ตัวเลือก CLEAR FIGHT ใน Settings แถว 08 (`SCREENS_LEVEL_UP.md` ข้อ 21) ป้ายทึบ เลขใหญ่ตัวตรง บอกชื่อเป้าหมาย มืดรอบวงแหวน QTE ปิดอยู่ = ภาพเหมือนเดิมทุกพิกเซล แคปเทียบเติม `clear` ท้ายชื่อหน้าต่อสู้
-**ถัดไปในแชทนี้** :
-1. ข้อ 5 เอายุคออก : ถามผู้ใช้ก่อนเขียนโค้ด (นักดนตรีคนไหนอยู่ 3 ถึง 5 คน MALI CHAI NUAN ของยุคไทยอยู่ไหม) แล้วทำตาม `BETA1_DIRECTION.md` 2 และ 3.3 ระวังเซฟ `era=` และลำดับรายการ
-2. จบ : อัปเดต `SCREENS_LEVEL_UP.md` (ข้อใหม่ 22) `BETA1_DIRECTION.md` ข้อ 5 `HANDOFF.md` ไฟล์นี้ แล้ว commit/push ขึ้น `Beta1` ตอนจบแชทเอาแถวของแชทนี้ออกจากตาราง "แชทที่กำลังทำงาน"
-เครื่องมือในแชทนี้ (scratchpad ของแชท ถ้าหายให้ทำใหม่ตาม `/build`) : `b.sh <ชื่อสำเนา>` build สำเนา Linux, `shots.sh <สำเนา> <โฟลเดอร์> <หน้า> [--steady --scale 1.5]`, `cmp.py <ก่อน> <หลัง>` เทียบทุกพิกเซล ภาพก่อนแก้ทั้งชุดอยู่ `shots_base/` (รายชื่อ `list_all.txt`) เช็ก BOM ของไฟล์ที่แก้ทุกครั้ง (Write ทับไฟล์ BOM แล้วต้องใส่ BOM กลับ)
+**29 ต.ค. (ล่าสุด) : /update ปิดแชท "ทำข้อ 1 และข้อต่อๆไปได้เลย" (`BETA1_DIRECTION.md` ข้อ 5) ผู้ใช้ Rebuild บน Windows แล้ว "rebuild ผ่านทุกอย่าง ไม่ติดขัดอะไร"**
+✅ งานของแชทนี้อยู่บน GitHub ครบ (`020a8d8` `7daf74f` `bf31d58` `d3bc3ae` `4587a70` `29b6b24` `c24f425` และ commit เอกสารปิดแชท) ตาราง "แชทที่กำลังทำงาน" ว่าง
+✅ ข้อ 1 วาทยากร 3 คน + Gallery + Detail (`SCREENS_LEVEL_UP.md` ข้อ 16) · ข้อ 2 แผนที่ทั้งชั้นแบบวงซ้อน `Data/FloorMap.cs` (ข้อ 17) · ข้อ 3 หน้าจัดวงแบบเสา + Recruit `Core/BandColumn.cs` `Core/UiArt.cs` (ข้อ 18) · ข้อ 4 Chapter CurtainCall BandName Archive (ข้อ 19) และรอบ 3 Settings Pause HOW TO PLAY กล่องถาม (ข้อ 20) · ข้อ 6 ตัวเลือก CLEAR FIGHT (ข้อ 21) ทุกข้อ build 0/0 turncheck 113/113 savecheck ผ่าน หน้าอื่นภาพเหมือนเดิมทุกพิกเซล
+✅ ผู้ใช้ตอบ (คำต่อคำ `USER_BRIEFS.md` 13.15 สรุปดีไซน์ `docs/CHARACTER_DESIGN.md`) :
+- ตัดนักดนตรียุคสยาม (MALI CHAI NUAN) เหลือราว 5 คน เป็นนักดนตรีในตำนานที่เก่งเครื่องนั้น มีฉายาแบบ "นักไวโอลินในตำนานผู้ถือครองธนูไวโอลินแห่งเทพ" เครื่องที่เหลือ เชลโล ไวโอลิน ฟลุต ฮอร์น ทิมปานี ไม่เพิ่มคนเล่นพิณ
+- ค่าเริ่มต้นของเกมคือแสง สี เสียงเต็มที่ ไม่ต้องปิด (ไอริสตีความว่า CLEAR FIGHT คงปิดไว้ตั้งต้นเหมือนเดิม บอกผู้ใช้แล้ว ถ้าผู้ใช้แก้ให้ทำตาม)
+- ธีมวาทยากร : Beethoven ฟ้าของสายฟ้า พายุ สายฟ้ากับพายุตอนชี้หรือเลือก / Fanny เปลี่ยนชื่อเป็น "FANNY MENDELSSOHN AND ???" สองคนในตัวเดียว Felix เป็นเงา ไม้บาตองคริสตัลสีรุ้ง ธีมผลึกสีรุ้ง / Bach แสงศักดิ์สิทธิ์สีทองกับความตาบอด ผ้าพันตา รอบตัวมืดมาก แสงทองส่องที่เขาคนเดียว
+- ดีไซน์ Beethoven กับ Fanny อยู่ Character Design.pdf ใน Google Drive ของผู้ใช้ (ห้าม commit ไฟล์หรือลิงก์) อ่านตัวหนังสือแล้ว ยังไม่ได้ดูภาพ
+⚠️ ค้าง : ภาพใน PDF ยังไม่ได้ดู (เครื่องมือได้แค่ตัวหนังสือ ไฟล์ 12.5 MB) · PLAYTEST SIGNATURE ยัง 1 (ผู้ใช้สั่งคงไว้) · การ์ดใต้เสาของหน้าวงยังเป็นแบบแรก (รอไอเดียแถบการ์ด) · ภาพจาก cloud ห้ามแทน `docs/screenshots/` จนผู้ใช้ดูบน Windows
+**งานถัดไป (แชทใหม่ ทำตามลำดับ)** :
+1. หน้าแผนที่แบบมองไกล (`SCREENS_LEVEL_UP.md` ข้อ 22) แก้เฉพาะ `Screens/RouteScreen.cs` (`PlaceAt` `RingOf` `Here` ตำแหน่งที่คำนวณใน `Load` การวาด `DrawBack` `DrawWorld` `Draw` กล้องพุ่ง) ให้เป็น perspective ไกลเล็กจาง ใกล้ใหญ่ชัด กล้องเดินจากแถวเดิมไปแถวใหม่ตอนเข้าหน้า ทางข้างหลังเลื่อนตกขอบ บอสใหญ่น่าเกรงขามหน้าหลุม TACET ตัวเลขใหม่ไว้ `BattleRules` UI Feel ข้อมูล `Data/FloorMap.cs` และเซฟไม่แตะ แคป `routestart route routeboss routedive@52` `--steady` และ `--scale 1.5`
+2. ธีมวาทยากร (`CHARACTER_DESIGN.md` ข้อ 4) : สีใหม่ใน `Core/Palette.cs` (ฟ้าสายฟ้า ผลึกสีรุ้ง ทอง) แล้วตั้ง `Conductor.Spot` ใน `Data/Conductor.cs` · เปลี่ยนชื่อที่โชว์ของ Fanny เป็น FANNY MENDELSSOHN AND ??? (ตัวที่ 8 ใน `ConductorList.All` ห้ามย้ายลำดับ ดูทุกที่ที่ใช้ชื่อ เช่น turnsim turncheck `DebugShots.TurnKits.cs`) · เอฟเฟกต์ตอนชี้และเลือกใน `Screens/ConductorSelectScreen.cs` กับ `ConductorDetailScreen.cs` (สายฟ้ากับพายุ / เศษผลึกสีรุ้งกับเงาของน้อง / แสงทองจากข้างบนกับความมืดรอบตัว) ใช้ pool ไม่ new ระหว่างเล่น มี LESS FLASHING ถ้าต้องการภาพตัวอย่าง VFX ให้ถามผู้ใช้
+3. นักดนตรี 5 คน : ค้นข้อมูลจริงแบบมีขอบเขต แล้วเสนอชื่อ ฉายา อาวุธ ให้ผู้ใช้เลือก (ไอเดียตั้งต้นใน `CHARACTER_DESIGN.md` ข้อ 5 ต้องตรวจก่อน) ได้คำตอบแล้วค่อยแก้ `Data/Musician.cs` : ห้ามลบหรือสลับ `MusicianList.All` ให้ซ่อน MALI CHAI NUAN BORIS แบบ `ConductorList.Shown` เปลี่ยนชื่อในช่องเดิม แล้วไล่แก้ที่ใช้ชื่อ (`Core/DebugShots.Turn.cs` คาดชื่อ ANNA KLARA ไว้ ภาพ `Content/Art/Ui/` `bust_<key>` `face_<key>` `docs/UI_ART_PLAN.md`)
+4. เอายุคออก (`BETA1_DIRECTION.md` ข้อ 2 และ 3.3) หลังข้อ 3 : `Data/Era.cs` `Screens/EraChoiceScreen.cs` `NodeType.Crossing` `RunState.ChooseEra` `RecruitAtOpening` `MusicianList.RollFromEra` `Enemy.Era` ฉากตามยุคใน `BattleScreen.Stage.cs` เซฟ `era=` (โหลดเซฟเก่าต้องไม่พัง)
+ทุกข้อ : build 0/0 turncheck savecheck แคปเทียบ `--steady` ทั้ง 1280×720 และ `--scale 1.5` อัปเดตเอกสาร บอกผู้ใช้ให้ Rebuild ใน Visual Studio
 
-**29 ต.ค. (ล่าสุด) : /update ปิดแชทคำในแผ่นเฉียง ม่านผ้าจริง รอบ 1 ผู้ใช้วางทิศทางเกมใหม่ : roguelike เต็มตัว** (คำต่อคำ `USER_BRIEFS.md` 13.12 13.13 รวมไว้ที่ `docs/BETA1_DIRECTION.md`)
+**29 ต.ค. (ก่อนหน้า) : /update ปิดแชทคำในแผ่นเฉียง ม่านผ้าจริง รอบ 1 ผู้ใช้วางทิศทางเกมใหม่ : roguelike เต็มตัว** (คำต่อคำ `USER_BRIEFS.md` 13.12 13.13 รวมไว้ที่ `docs/BETA1_DIRECTION.md`)
 ✅ งานของแชทนี้อยู่บน GitHub ครบ (`7dfc781` โค้ด ตามด้วย commit เอกสาร) ผู้ใช้ดูแล้วบอก "ค่อนข้างโอเคแล้ว" ตาราง "แชทที่กำลังทำงาน" ว่าง
 ✅ ผู้ใช้ตัดสิน : วาทยากร 3 คน Beethoven (THE UNHEARING) Fanny (THE UNSIGNED) Bach (THE METRONOME) = `ConductorList.All` ช่อง 3 8 1 · ระบบต่อสู้คงไว้ก่อน · อาร์ต UI เป็น pixel วาดขนาดจริงไม่ขยาย (`UI_ART_PLAN.md` แก้เป็นขนาดจริงหมดแล้ว ภาพ THE UNHEARING เป็น pixel อยู่แล้ว) · เอายุคออกทั้งหมดรวมยุคไทย แทนด้วยการได้หรือเลือกตัวละคร ปั้นทีมเดิม ท้ายเกมเวอร์ มอนโหดตาม · ธีมเครื่องดนตรีเป็นอาวุธ (ดาบไวโอลิน ธนูพิณ) · เปลี่ยนหน้าแผนที่และหน้าจัดวางวงตามที่ Claude แนะนำ
 ⚠️ ยังเปิด : นักดนตรีคนไหนอยู่ (MALI CHAI NUAN ของยุคไทยด้วยไหม) อาวุธของแต่ละคน แถบการ์ดของวง SIGNATURE ของ THE UNSIGNED กับ THE METRONOME (ถามตัวอย่าง VFX ก่อน) · PLAYTEST SIGNATURE ยัง 1 (ผู้ใช้สั่งคงไว้) · ยังไม่ได้แก้โค้ดตามทิศทางใหม่สักบรรทัด
