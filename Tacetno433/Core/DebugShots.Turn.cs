@@ -37,9 +37,9 @@ namespace Tacetno433.Core
             Enemy hush = EnemyList.All[0];
             Enemy deadAir = EnemyList.All[1];
             Enemy staticEnemy = EnemyList.All[3];
-            NoteResult good = new NoteResult(Grade.Good, true, 1f);
-            NoteResult perfect = new NoteResult(Grade.Perfect, true, 1f);
-            NoteResult miss = new NoteResult(Grade.Miss, true, 1f);
+            NoteResult good = new NoteResult(Grade.Good, 1f);
+            NoteResult perfect = new NoteResult(Grade.Perfect, 1f);
+            NoteResult miss = new NoteResult(Grade.Miss, 1f);
 
             //Life, and the bar being written first (THE BAND OF THREE, 29 Oct : the band's life x1.5, was 30/26/36)
             TurnBattle b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
@@ -63,14 +63,14 @@ namespace Tacetno433.Core
             int h3 = b.Attack();
             report += Same("attack", "7 6 4 63 9", h1 + " " + h2 + " " + h3 + " " + enemy.Hp + " " + b.Breath);
 
-            //Enemy turn : an ordinary enemy plays 1 or 2 notes on floor 1, HUSH's first phrase has 2 of 7
+            //Enemy turn : an ordinary enemy plays 1 or 2 notes on floor 1, HUSH's first phrase has 2 of 8 (TurnNoteDamage 1.95, Beta1 29 Oct)
             report += Same("enemy turn", "EnemyTurn HUSH", b.Step + " " + b.Current.Name);
             int notes = enemy.IntentNotes.Length;
-            bool intentOk = notes == 2 && enemy.IntentNotes[0] == 7 && enemy.IntentTarget != null && !enemy.IntentTarget.Down;
+            bool intentOk = notes == 2 && enemy.IntentNotes[0] == 8 && enemy.IntentTarget != null && !enemy.IntentTarget.Down;
             report += Same("intent", "True", intentOk.ToString());
-            bool marksOk = enemy.IntentWays.Length == notes && enemy.IntentSizes.Length == notes;
+            bool marksOk = enemy.IntentWays.Length == notes && enemy.IntentLate.Length == notes;
             for (int i = 0; i < notes && marksOk; i++)
-                marksOk = enemy.IntentWays[i] != Flick.None && enemy.IntentSizes[i] >= 0 && enemy.IntentSizes[i] <= 2;
+                marksOk = enemy.IntentWays[i] != Flick.None && !enemy.IntentLate[i];
             report += Same("intent marks", "True", marksOk.ToString());
 
             //PARRY every note PERFECT : no damage, 1 breath per note (9 + 2, the top is 10), the COUNTER hits HUSH for
@@ -79,11 +79,10 @@ namespace Tacetno433.Core
             int taken = b.TakeEnemyAttack(AllGrades(notes, Grade.Perfect));
             report += Same("parry perfect", "0 10 " + (63 - counter) + " Plan 2", taken + " " + b.Breath + " " + enemy.Hp + " " + b.Step + " " + b.Round);
 
-            //Swipe table
-            report += Same("swipe table", "1.3 1 0.7 0.4 0.4",
-                TurnBattle.SwipeScale(Grade.Perfect, true) + " " + TurnBattle.SwipeScale(Grade.Good, true) + " " +
-                TurnBattle.SwipeScale(Grade.Perfect, false) + " " + TurnBattle.SwipeScale(Grade.Miss, true) + " " +
-                TurnBattle.SwipeScale(Grade.Hesitate, true));
+            //Swipe table (ONE RULE, Beta1 29 Oct : no wrong size any more)
+            report += Same("swipe table", "1.3 1 0.4 0.4",
+                TurnBattle.SwipeScale(Grade.Perfect) + " " + TurnBattle.SwipeScale(Grade.Good) + " " +
+                TurnBattle.SwipeScale(Grade.Miss) + " " + TurnBattle.SwipeScale(Grade.Hesitate));
 
             //Judge : PERFECT within 0.10 s, GOOD within 0.22 s (NORMAL), the wrong way is a MISS
             report += Same("judge", "Perfect Good Miss Miss", b.Judge(0f, true) + " " + b.Judge(0.15f, true) + " " + b.Judge(0.3f, true) + " " + b.Judge(0f, false));
@@ -97,7 +96,7 @@ namespace Tacetno433.Core
             b.Enemies[0].Hp = 50;                                                      // so the band's ATTACKs never end HUSH first
             PlayToEnemy(b);
             notes = b.Current.IntentNotes.Length;
-            report += Same("no parry", (7 * notes).ToString(), b.TakeEnemyAttack(null).ToString());
+            report += Same("no parry", (8 * notes).ToString(), b.TakeEnemyAttack(null).ToString());
 
             //KNOCKED OUT : QUANTZ starts the fight down, has no move in the bar and gets up with 1 after it
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433), new int[] { 30, 0, 36 });
@@ -243,7 +242,7 @@ namespace Tacetno433.Core
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433), new int[] { 20, 37, 30 });
             b.PlanSkill(b.Party[1], softAir, null);
             b.PlayBar();
-            b.UseSkill(new NoteResult[] { perfect, new NoteResult(Grade.Good, false, 1f) });
+            b.UseSkill(new NoteResult[] { perfect, new NoteResult(Grade.Good, 1f) });
             report += Same("soft air", "26 39 36 1", b.Party[0].Hp + " " + b.Party[1].Hp + " " + b.Party[2].Hp + " " + b.Breath);
 
             //THE FLOOR (BORIS) : one held note hits every enemy. PERFECT held to the end : 7 x 2 x 1.3 x 1.4 = 25.48 -> 25 (80 -> 55 each)
@@ -254,10 +253,10 @@ namespace Tacetno433.Core
             b.UseSkill(new NoteResult[] { perfect });
             report += Same("the floor", "55 55 0", b.Enemies[0].Hp + " " + b.Enemies[1].Hp + " " + b.Breath);
 
-            //CADENZA : REQUIEM's third attack has one note more and each note x1.5 (6 x 1.85 = 11.1 -> 11, x1.5 = 16.5 -> 16, C# rounds to even)
+            //CADENZA : REQUIEM's third attack has one note more and each note x1.5 (6 x 1.95 = 11.7 -> 12, x1.5 = 18)
             b = new TurnBattle(band, new List<Enemy> { EnemyList.All[6] }, 1, new Random(433));
             for (int i = 0; i < 60 && !b.Enemies[0].IntentCadenza && b.Step != TurnStep.Lost; i++) Step(b, Grade.Good);
-            report += Same("cadenza", "True 16 2", b.Enemies[0].IntentCadenza + " " + b.Enemies[0].IntentNotes[0] + " " + b.Enemies[0].Attacks);
+            report += Same("cadenza", "True 18 2", b.Enemies[0].IntentCadenza + " " + b.Enemies[0].IntentNotes[0] + " " + b.Enemies[0].Attacks);
 
             //ROLL : 5 shakes PERFECT, 3 GOOD, fewer a MISS, none at all a HESITATE (NORMAL)
             report += Same("roll", "Perfect Good Miss Hesitate", b.RollGrade(5) + " " + b.RollGrade(3) + " " + b.RollGrade(1) + " " + b.RollGrade(0));
@@ -367,9 +366,9 @@ namespace Tacetno433.Core
             run.RestoreAllStamina();
             report += Same("band life", "True " + max, halved + " " + run.Stamina);
 
-            //ENEMIES (step 8) : HUSH plays its phrases in turn (Dp Up first), and floor 2 makes it tougher (50 x 2.1, notes 7.4 x 1.2 = 8.88 -> 9)
+            //ENEMIES (step 8) : HUSH plays its phrases in turn (D U first), and floor 2 makes it tougher (50 x 2.1, notes 7.4 x 1.2 = 8.88 -> 9)
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
-            report += Same("phrase", "Down Up 0 0", b.Enemies[0].IntentWays[0] + " " + b.Enemies[0].IntentWays[1] + " " + b.Enemies[0].IntentSizes[0] + " " + b.Enemies[0].IntentSizes[1]);
+            report += Same("phrase", "Down Up", b.Enemies[0].IntentWays[0] + " " + b.Enemies[0].IntentWays[1]);
             b = new TurnBattle(band, new List<Enemy> { hush }, 2, new Random(433));
             report += Same("floor 2", "105 2 9", b.Enemies[0].MaxHp + " " + b.Enemies[0].IntentNotes.Length + " " + b.Enemies[0].IntentNotes[0]);
 
@@ -415,20 +414,20 @@ namespace Tacetno433.Core
             for (int i = 0; i < 20 && b.Round < 2; i++) Step(b, Grade.Hesitate);
             report += Same("unfinished", "True Right Left", b.Enemies[0].IntentFast + " " + b.Enemies[0].IntentWays[0] + " " + b.Enemies[0].IntentWays[1]);
 
-            //FALSE NOTES (STATIC, floor 2) : exactly one note shows a size it is not
+            //FALSE NOTES (STATIC, floor 2) : exactly one note hides its arrow until late (Beta1 29 Oct : was a wrong size)
             b = new TurnBattle(band, new List<Enemy> { staticEnemy }, 2, new Random(433));
             int lies = 0;
             for (int i = 0; i < b.Enemies[0].IntentNotes.Length; i++)
-                if (b.Enemies[0].IntentShown[i] != b.Enemies[0].IntentSizes[i]) lies++;
+                if (b.Enemies[0].IntentLate[i]) lies++;
             report += Same("false notes", "1", lies.ToString());
 
-            //ANSWER BETTER (THE NAMELESS MASTER) : after QUANTZ's SOFT AIR (Dp Up) it plays those notes back
+            //ANSWER BETTER (THE NAMELESS MASTER) : after QUANTZ's SOFT AIR (D U) it plays those notes back
             b = new TurnBattle(band, new List<Enemy> { EnemyList.All[7] }, 1, new Random(433));
             b.PlanSkill(b.Party[1], softAir, null);
             b.PlayBar();
             b.UseSkill(new NoteResult[] { good, good });
             for (int i = 0; i < 20 && b.Round < 2; i++) Step(b, Grade.Hesitate);
-            report += Same("answer better", "Down Up 0 0", b.Enemies[0].IntentWays[0] + " " + b.Enemies[0].IntentWays[1] + " " + b.Enemies[0].IntentSizes[0] + " " + b.Enemies[0].IntentSizes[1]);
+            report += Same("answer better", "Down Up", b.Enemies[0].IntentWays[0] + " " + b.Enemies[0].IntentWays[1]);
 
             //ARCHIVE (step 7) : a lost run on floor 2 with 4 wins leaves 4 x 3 + 1 x 10 = 22 echoes, STRONGER BAND costs 30
             //and gives every musician 2 more life. FIRST CHAIR (29 Oct, was FULL STAGE) costs 120 and the first musician picked
@@ -531,7 +530,7 @@ namespace Tacetno433.Core
                 else
                 {
                     NoteResult[] all = new NoteResult[move.Skill.Notes.Length];
-                    for (int i = 0; i < all.Length; i++) all[i] = new NoteResult(grade, true, 1f);
+                    for (int i = 0; i < all.Length; i++) all[i] = new NoteResult(grade, 1f);
                     b.UseSkill(all);
                 }
             }

@@ -35,17 +35,17 @@ namespace Tacetno433.Battle
     }
 
     //NoteResult : how one note of a swipe went, handed in by the screen.
-    //Hold is the share of a held note's time the baton stayed still (1 for every other note).
+    //Hold is the share of a held note's time the button was kept down (1 for every other note).
+    //ONE RULE (Beta1, 29 Oct, docs/BETA1_DIRECTION.md 10) : a note only asks for the way and the moment, the sizes
+    //p mf f are gone (the user : too much to remember), so a note is right or wrong by its grade alone.
     public struct NoteResult
     {
         public Grade Grade;
-        public bool RightSize;
         public float Hold;
 
-        public NoteResult(Grade grade, bool rightSize, float hold)
+        public NoteResult(Grade grade, float hold)
         {
             Grade = grade;
-            RightSize = rightSize;
             Hold = hold;
         }
 
@@ -83,14 +83,13 @@ namespace Tacetno433.Battle
         public Fighter IntentTarget;
         public int[] IntentNotes = new int[0];   // how hard each note of the attack hits
         public Flick[] IntentWays = new Flick[0];  // the way to swipe back at each note
-        public int[] IntentSizes = new int[0];     // the size of each note : 0 p, 1 mf, 2 f (Baton.SizeOf order)
-        public int[] IntentShown = new int[0];     // the size each note SHOWS (FALSE NOTES can lie), the screen draws these
+        public bool[] IntentLate = new bool[0];    // FALSE NOTES (STATIC) : this note hides its arrow behind a ? until late
         public bool IntentRest;                    // LULLABY : this turn it hums and heals instead
         public bool IntentFast;                    // UNFINISHED : the notes come faster
         public bool IntentCadenza;                 // CADENZA : this attack is a boss's big move
         public bool IntentAll;                     // THE COURT (THE STAFF, step 14) : this attack hits every musician standing
         public List<Flick> MissedWays = new List<Flick>();   // BY TOUCH (THE BLIND CANTOR, step 14) : notes that got through,
-        public List<int> MissedSizes = new List<int>();      //          played again in its next attack
+                                                             //          played again in its next attack
         public int Attacks;                        // attacks made so far, a boss's every third is a CADENZA
         public bool Planned;                       // the intent is decided (step 10 : right after its last attack)
 
@@ -170,7 +169,6 @@ namespace Tacetno433.Battle
 
         //Last Skill : the swipe notes of the band's last skill, for ANSWER BETTER (THE NAMELESS MASTER)
         private List<Flick> lastWays = new List<Flick>();
-        private List<int> lastSizes = new List<int>();
 
         //Events : what happened since the screen last looked
         public List<TurnEvent> Events = new List<TurnEvent>();
@@ -536,28 +534,18 @@ namespace Tacetno433.Battle
                 enemy.IntentRest = true;
                 enemy.IntentNotes = new int[0];
                 enemy.IntentWays = new Flick[0];
-                enemy.IntentSizes = new int[0];
-                enemy.IntentShown = new int[0];
+                enemy.IntentLate = new bool[0];
                 return;
             }
 
             //Phrase : its phrases are played in turn, so they can be learned
             List<Flick> ways = new List<Flick>();
-            List<int> sizes = new List<int>();
-            if (e.Phrases.Length > 0) ReadPhrase(e.Phrases[enemy.Attacks % e.Phrases.Length], ways, sizes);
+            if (e.Phrases.Length > 0) ReadPhrase(e.Phrases[enemy.Attacks % e.Phrases.Length], ways);
 
             //ANSWER BETTER (THE NAMELESS MASTER) : it plays back the band's last skill
-            if (trait && e.Trait == EnemyTrait.Mirror && lastWays.Count > 0)
-            {
-                ways = new List<Flick>(lastWays);
-                sizes = new List<int>(lastSizes);
-            }
+            if (trait && e.Trait == EnemyTrait.Mirror && lastWays.Count > 0) ways = new List<Flick>(lastWays);
 
-            if (ways.Count == 0)                                             // no phrase written : one random note
-            {
-                ways.Add((Flick)(1 + random.Next(4)));
-                sizes.Add(random.Next(3));
-            }
+            if (ways.Count == 0) ways.Add((Flick)(1 + random.Next(4)));      // no phrase written : one random note
 
             //ONE BAR : ordinary enemies come in packs, so their attacks are shorter
             bool small = e.Kind == EnemyKind.Normal;
@@ -576,7 +564,6 @@ namespace Tacetno433.Battle
                 enemy.IntentAll = true;
                 count = 1;
                 ways = new List<Flick> { Flick.Down };
-                sizes = new List<int> { 2 };
                 hit = (int)Math.Round(hit * BattleRules.TurnStaffPower);
             }
 
@@ -592,27 +579,20 @@ namespace Tacetno433.Battle
 
             enemy.IntentNotes = new int[count + back];
             enemy.IntentWays = new Flick[count + back];
-            enemy.IntentSizes = new int[count + back];
-            enemy.IntentShown = new int[count + back];
+            enemy.IntentLate = new bool[count + back];
             for (int i = 0; i < count + back; i++)
             {
                 enemy.IntentNotes[i] = hit;
                 enemy.IntentWays[i] = i < count ? ways[i % ways.Count] : enemy.MissedWays[i - count];
-                enemy.IntentSizes[i] = i < count ? sizes[i % sizes.Count] : enemy.MissedSizes[i - count];
-                enemy.IntentShown[i] = enemy.IntentSizes[i];
             }
             enemy.MissedWays.Clear();
-            enemy.MissedSizes.Clear();
             count += back;
 
             Unfinished(enemy);
 
-            //FALSE NOTES (STATIC) : one note shows a size it is not
-            if (trait && e.Trait == EnemyTrait.FalseNotes)
-            {
-                int k = random.Next(count);
-                enemy.IntentShown[k] = (enemy.IntentSizes[k] + 1 + random.Next(2)) % 3;
-            }
+            //FALSE NOTES (STATIC) : one note keeps its arrow hidden behind a ? until its ring is half closed
+            //(Beta1 29 Oct : it used to show a wrong size, and the sizes are gone)
+            if (trait && e.Trait == EnemyTrait.FalseNotes) enemy.IntentLate[random.Next(count)] = true;
         }
 
         //UNFINISHED (REQUIEM) : below half life, left and right swap and the notes come faster.
@@ -630,7 +610,7 @@ namespace Tacetno433.Battle
         }
 
         //Mirror Refresh : ANSWER BETTER (THE NAMELESS MASTER) answers the band's newest skill. Its next
-        //attack keeps its length and takes the ways and sizes of the skill just played.
+        //attack keeps its length and takes the ways of the skill just played.
         private void RefreshMirror()
         {
             if (lastWays.Count == 0) return;
@@ -638,33 +618,22 @@ namespace Tacetno433.Battle
             {
                 Fighter f = Enemies[i];
                 if (f.Down || f.IntentRest || !TraitOn(f) || f.Enemy.Trait != EnemyTrait.Mirror) continue;
-                for (int n = 0; n < f.IntentWays.Length; n++)
-                {
-                    f.IntentWays[n] = lastWays[n % lastWays.Count];
-                    f.IntentSizes[n] = lastSizes[n % lastSizes.Count];
-                    f.IntentShown[n] = f.IntentSizes[n];
-                }
+                for (int n = 0; n < f.IntentWays.Length; n++) f.IntentWays[n] = lastWays[n % lastWays.Count];
             }
         }
 
-        //Read Phrase : "Lp Rmf Df" into ways and sizes
-        private static void ReadPhrase(string phrase, List<Flick> ways, List<int> sizes)
+        //Read Phrase : "L R D" into ways, one letter a note (Left Right Up Down)
+        private static void ReadPhrase(string phrase, List<Flick> ways)
         {
-            string[] notes = phrase.Split(' ');
+            string[] notes = phrase.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
             for (int i = 0; i < notes.Length; i++)
             {
-                string n = notes[i];
-                if (n.Length < 2) continue;
-
+                char n = notes[i][0];
                 Flick way = Flick.Down;
-                if (n[0] == 'L') way = Flick.Left;
-                if (n[0] == 'R') way = Flick.Right;
-                if (n[0] == 'U') way = Flick.Up;
-
-                string mark = n.Substring(1);
-                int size = mark == "p" ? 0 : (mark == "f" ? 2 : 1);
+                if (n == 'L') way = Flick.Left;
+                if (n == 'R') way = Flick.Right;
+                if (n == 'U') way = Flick.Up;
                 ways.Add(way);
-                sizes.Add(size);
             }
         }
 
@@ -915,12 +884,6 @@ namespace Tacetno433.Battle
             return (s.Cost - Breath) * BattleRules.TurnPaganiniLife;
         }
 
-        //Any Size : LOCKED TEMPO (THE METRONOME), every size the baton swings is the right size
-        public bool AnySize
-        {
-            get { return Kit == TurnKit.Bach; }
-        }
-
         //Player Attack : ONE BAR (step 12), the musician whose turn it is hits one enemy. No swipe : it always
         //lands at TurnAttackScale and adds TurnAttackOffBeat. A target that fell is swapped for Focus.
         //Returns the damage done.
@@ -979,68 +942,118 @@ namespace Tacetno433.Battle
             return move != null && move.Skill != null && UseSkill(move.Skill, move.Target, results);
         }
 
-        //Player Skill : the musician whose turn it is plays a skill. target is the enemy or the musician
-        //it was played at (ignored for skills that pick their own targets). results holds how each note
+        //Player Skill : the musician whose turn it is plays a skill, all of it at once. target is the enemy or the
+        //musician it was played at (ignored for skills that pick their own targets). results holds how each note
         //went, in order. EVERY NOTE THAT LANDS DOES THE SKILL ONCE (see Data/Skill.cs).
-        //Returns false when the skill could not be played.
+        //The screen plays the same three steps one swipe at a time (NOTE BY NOTE below), the simulator and the
+        //checks use this. Returns false when the skill could not be played.
         public bool UseSkill(Skill s, Fighter target, NoteResult[] results)
         {
-            if (!CanUse(s)) return false;
+            if (!BeginSkill(s, target)) return false;
+            for (int n = 0; n < s.Notes.Length; n++)
+                SkillNote(n, (results != null && n < results.Length) ? results[n] : new NoteResult(Grade.Hesitate, 1f));
+            EndSkill();
+            return true;
+        }
+
+        //NOTE BY NOTE (Beta1, 29 Oct) : every swipe hits the moment it lands (the user : "like we gave the order and
+        //it really does it"), so a skill is played in three steps, BeginSkill, SkillNote for each note, EndSkill.
+        //The skill being played is kept here between them.
+        private Skill playing;                                      // null while no skill is being played
+        private List<Fighter> playingTargets = new List<Fighter>();
+        private float playingScale;                                 // DOWNBEAT, ENTRANCE
+        private bool playingLanded;                                 // a note has landed (MOMENTUM, FUGUE, GUARD, TAUNT)
+        private NoteResult[] playingNotes = new NoteResult[0];      // how each note went, for the FUGUE echo
+
+        //Begin Skill : the move written for the musician who is up starts, its BREATH is paid now
+        public bool BeginSkill()
+        {
+            BarMove move = CurrentMove;
+            return move != null && move.Skill != null && BeginSkill(move.Skill, move.Target);
+        }
+
+        public bool BeginSkill(Skill s, Fighter target)
+        {
+            if (playing != null || !CanUse(s)) return false;
 
             Fighter user = Current;
             List<Fighter> targets = TargetsOf(s, target, user);
             if (targets.Count == 0) return false;
-            float moveScale = MoveScale(user, CurrentMove);                                        // DOWNBEAT, ENTRANCE
+
+            playing = s;
+            playingTargets = targets;
+            playingScale = MoveScale(user, CurrentMove);                                           // DOWNBEAT, ENTRANCE
+            playingLanded = false;
+            playingNotes = new NoteResult[s.Notes.Length];
+            for (int n = 0; n < playingNotes.Length; n++) playingNotes[n] = new NoteResult(Grade.Hesitate, 1f);
 
             int lifeCost = LifeCost(s);                                                            // BORROWED BREATH
             Breath = Math.Max(0, Breath - s.Cost);
             if (lifeCost > 0) Hurt(user, lifeCost);
-            bool anyLanded = false;
             OnCue(user);                                                                           // ON CUE
 
             //Last Skill : remembered for ANSWER BETTER
             lastWays.Clear();
-            lastSizes.Clear();
             for (int n = 0; n < s.Notes.Length; n++)
-            {
-                if (s.Notes[n].Kind != NoteKind.Swipe && s.Notes[n].Kind != NoteKind.Hold) continue;
-                lastWays.Add(s.Notes[n].Way);
-                lastSizes.Add(s.Notes[n].Size);
-            }
+                if (s.Notes[n].Kind == NoteKind.Swipe || s.Notes[n].Kind == NoteKind.Hold) lastWays.Add(s.Notes[n].Way);
             RefreshMirror();
+            return true;
+        }
 
-            for (int n = 0; n < s.Notes.Length; n++)
+        //Skill Note : note n of the skill being played, swiped this well. A note that lands does the skill once, now.
+        public void SkillNote(int n, NoteResult r)
+        {
+            if (playing == null || n < 0 || n >= playing.Notes.Length) return;
+            Fighter user = Current;
+            bool last = n == playing.Notes.Length - 1;
+            playingNotes[n] = r;
+            CountNote(r.Grade == Grade.Perfect);
+            if (!r.Lands)
             {
-                NoteResult r = (results != null && n < results.Length) ? results[n] : new NoteResult(Grade.Hesitate, true, 1f);
-                CountNote(r.Grade == Grade.Perfect && r.RightSize);
-                if (!r.Lands)
-                {
-                    user.Crescendo = 0;                                                     // CRESCENDO is lost on a MISS
-                    //RUBATO : a missed note still plays, at TurnRubatoMiss of a GOOD one and with no BREATH
-                    if (Has(MotifId.Rubato)) PlayNote(s, s.Notes[n], new NoteResult(Grade.Good, true, r.Hold), targets, user, BattleRules.TurnRubatoMiss * moveScale, false);
-                    continue;
-                }
-                anyLanded = true;
-                PlayNote(s, s.Notes[n], r, targets, user, moveScale, true);
+                user.Crescendo = 0;                                                         // CRESCENDO is lost on a MISS
+                //RUBATO : a missed note still plays, at TurnRubatoMiss of a GOOD one and with no BREATH
+                if (Has(MotifId.Rubato)) PlayNote(playing, playing.Notes[n], new NoteResult(Grade.Good, r.Hold), playingTargets, user, BattleRules.TurnRubatoMiss * playingScale, false, last);
+                return;
             }
-            CountHit(user, anyLanded);                                                      // MOMENTUM
+            playingLanded = true;
+            PlayNote(playing, playing.Notes[n], r, playingTargets, user, playingScale, true, last);
+        }
+
+        //Skill Targets Down : every enemy the skill being played is aimed at has fallen, so the screen can stop
+        //asking for the notes left (a skill for the band never stops early)
+        public bool SkillTargetsDown
+        {
+            get
+            {
+                if (playing == null || !playing.HitsEnemy) return false;
+                for (int i = 0; i < playingTargets.Count; i++)
+                    if (!playingTargets[i].Down) return false;
+                return true;
+            }
+        }
+
+        //End Skill : the skill being played is over, what follows its notes happens, then the next turn
+        public void EndSkill()
+        {
+            if (playing == null) return;
+            Skill s = playing;
+            Fighter user = Current;
+            playing = null;
+            CountHit(user, playingLanded);                                                  // MOMENTUM
 
             //FUGUE (THE METRONOME) : an echo waiting on this musician plays the notes that landed once more
-            if (user.Echo > 0f && anyLanded && Echoes(s))
+            if (user.Echo > 0f && playingLanded && Echoes(s))
             {
                 float echo = user.Echo;
                 user.Echo = 0f;
                 Events.Add(new TurnEvent(TurnEventKind.Echo, user, 0));
                 for (int n = 0; n < s.Notes.Length; n++)
-                {
-                    NoteResult r = (results != null && n < results.Length) ? results[n] : new NoteResult(Grade.Hesitate, true, 1f);
-                    if (r.Lands) PlayNote(s, s.Notes[n], r, targets, user, echo, false);
-                }
+                    if (playingNotes[n].Lands) PlayNote(s, s.Notes[n], playingNotes[n], playingTargets, user, echo, false, n == s.Notes.Length - 1);
             }
 
             //GUARD and TAUNT : the percussion stands in front, every enemy turns to them at once
-            if (anyLanded && s.Guard) user.Guard = true;
-            if (anyLanded && s.Taunt)
+            if (playingLanded && s.Guard) user.Guard = true;
+            if (playingLanded && s.Taunt)
             {
                 user.Taunt = true;
                 for (int i = 0; i < Enemies.Count; i++)
@@ -1050,19 +1063,19 @@ namespace Tacetno433.Battle
             BreaksDecree(user, DecreeKind.NoSkills);                                        // DECREE
 
             NextTurn();
-            return true;
         }
 
         //Play Note : one note of a skill that landed does the skill once on every target.
         //extra scales all of it (1, or the FUGUE echo's strength). withBreath is false for the echo,
         //which repeats what the notes do to the fighters but gives no BREATH (BREATH-saving gets strong fast).
-        private void PlayNote(Skill s, SkillNote note, NoteResult r, List<Fighter> targets, Fighter user, float extra, bool withBreath)
+        //last is the skill's last note (SFORZANDO, THE WHOLE FLOOR : the accent that ends it).
+        private void PlayNote(Skill s, SkillNote note, NoteResult r, List<Fighter> targets, Fighter user, float extra, bool withBreath, bool last)
         {
             float hold = 1f;
             if (note.Kind == NoteKind.Hold) hold = HoldScale(Has(MotifId.Tenuto) ? 1f : r.Hold);     // HOLD, TENUTO
-            float scale = Scale(r.Grade, r.RightSize) * hold * extra;
-            bool perfect = r.Grade == Grade.Perfect && r.RightSize;
-            if (Has(MotifId.Sforzando) && perfect && note.Size == 2) scale *= BattleRules.TurnSforzandoScale;   // SFORZANDO
+            float scale = Scale(r.Grade) * hold * extra;
+            bool perfect = r.Grade == Grade.Perfect;
+            if (Has(MotifId.Sforzando) && perfect && last) scale *= BattleRules.TurnSforzandoScale;     // SFORZANDO
 
             bool everyone = s.Target == SkillTarget.AllEnemies || s.Target == SkillTarget.AllAllies;
             float tutti = everyone && Has(MotifId.Tutti) ? BattleRules.TurnTuttiScale : 1f;               // TUTTI
@@ -1076,7 +1089,7 @@ namespace Tacetno433.Battle
             }
             int offBeat = (int)Math.Round(s.OffBeat * extra);
             if (user.Musician.Family == Family.Percussion && Has(MotifId.SpareSticks)) offBeat = (int)Math.Round(offBeat * BattleRules.TurnSpareSticksOffBeat);   // SPARE STICKS
-            bool thunder = user.Musician.Trait == MusicianTrait.Thunder && perfect && note.Size == 2;     // THE WHOLE FLOOR
+            bool thunder = user.Musician.Trait == MusicianTrait.Thunder && perfect && last;            // THE WHOLE FLOOR
 
             //GRACE NOTE : a spark that lands does the skill twice
             int times = note.Kind == NoteKind.Spark && Has(MotifId.GraceNote) ? BattleRules.TurnGraceTimes : 1;
@@ -1128,13 +1141,17 @@ namespace Tacetno433.Battle
             Events.Add(new TurnEvent(TurnEventKind.Quieter, enemy, BattleRules.TurnThunderSoften));
         }
 
-        //Shows Size : the enemy's next attack, as shown over its head, has a note of this size (0 p, 1 mf, 2 f)
-        private static bool ShowsSize(Fighter enemy, int size)
+        //Unwatched : the enemy's next attack is aimed at someone else, not at the musician (THE QUIET PART : the quiet one
+        //strikes where nobody is looking). Beta1 29 Oct : it read the size p before, and the sizes are gone.
+        private static bool Unwatched(Fighter enemy, Fighter musician)
         {
-            if (!enemy.IsEnemy || enemy.IntentRest) return false;
-            for (int i = 0; i < enemy.IntentShown.Length; i++)
-                if (enemy.IntentShown[i] == size) return true;
-            return false;
+            return enemy.IsEnemy && !enemy.IntentAll && enemy.IntentTarget != musician;
+        }
+
+        //Long Attack : the enemy's next attack has TurnLongNotes notes or more (ONE STEP BETTER, it read the size f before)
+        private static bool LongAttack(Fighter enemy)
+        {
+            return enemy.IsEnemy && !enemy.IntentRest && enemy.IntentNotes.Length >= BattleRules.TurnLongNotes;
         }
 
         //Targets Of : who a skill reaches. An enemy or a musician that is down cannot be picked.
@@ -1157,12 +1174,12 @@ namespace Tacetno433.Battle
             return list;
         }
 
-        //Swipe Scale : how much of the hit lands, from the table in ALPHA7_DESIGN 5.3
-        public static float SwipeScale(Grade grade, bool rightSize)
+        //Swipe Scale : how much of the hit lands, from the table in ALPHA7_DESIGN 5.3 (no sizes since Beta1 29 Oct)
+        public static float SwipeScale(Grade grade)
         {
-            if (grade != Grade.Perfect && grade != Grade.Good) return BattleRules.TurnMiss;
-            if (!rightSize) return BattleRules.TurnWrongSize;
-            return grade == Grade.Perfect ? BattleRules.TurnPerfect : BattleRules.TurnGood;
+            if (grade == Grade.Perfect) return BattleRules.TurnPerfect;
+            if (grade == Grade.Good) return BattleRules.TurnGood;
+            return BattleRules.TurnMiss;
         }
 
         //Hold Scale : a held note gives TurnHoldBase let go at once, up to TurnHoldBase + TurnHoldGain held to the end
@@ -1194,8 +1211,8 @@ namespace Tacetno433.Battle
         private static float TraitScale(Fighter attacker, Fighter target)
         {
             MusicianTrait trait = attacker.Musician.Trait;
-            if (trait == MusicianTrait.QuietPart && ShowsSize(target, 0)) return BattleRules.TurnQuietScale;          // THE QUIET PART (QUANTZ)
-            if (trait == MusicianTrait.OneStepBetter && ShowsSize(target, 2)) return BattleRules.TurnStepBetterScale; // ONE STEP BETTER (NUAN)
+            if (trait == MusicianTrait.QuietPart && Unwatched(target, attacker)) return BattleRules.TurnQuietScale;  // THE QUIET PART (QUANTZ)
+            if (trait == MusicianTrait.OneStepBetter && LongAttack(target)) return BattleRules.TurnStepBetterScale;  // ONE STEP BETTER (NUAN)
             if (trait == MusicianTrait.ByEar && target.Staggered) return BattleRules.TurnByEarScale;                  // BY EAR (MALI)
             return 1f;
         }
@@ -1239,7 +1256,7 @@ namespace Tacetno433.Battle
                 parried++;
                 bool noRest = TraitOn(enemy) && enemy.Enemy.Trait == EnemyTrait.NoRest;              // NO REST : no breath from it
                 if (!noRest) AddBreath(BattleRules.TurnBreathPerParry);
-                if (!noRest && Has(MotifId.Pianissimo) && enemy.IntentSizes[note] == 0) AddBreath(BattleRules.TurnPianissimoBreath);   // PIANISSIMO
+                if (!noRest && Has(MotifId.Pianissimo) && note == 0) AddBreath(BattleRules.TurnPianissimoBreath);   // PIANISSIMO : the first note of an attack
                 AddOffBeat(enemy, BattleRules.TurnParryOffBeat);
                 return 0;
             }
@@ -1248,7 +1265,6 @@ namespace Tacetno433.Battle
             if (Has(enemy, EnemyTrait.ByTouch) && g != Grade.Good && enemy.MissedWays.Count < BattleRules.TurnByTouchMost)
             {
                 enemy.MissedWays.Add(enemy.IntentWays[note]);
-                enemy.MissedSizes.Add(enemy.IntentSizes[note]);
             }
 
             //THE COURT (THE STAFF) : the floor is struck, every musician standing takes the note
@@ -1346,6 +1362,7 @@ namespace Tacetno433.Battle
                 perfect += BattleRules.TurnLullyWindow;
                 good += BattleRules.TurnLullyWindow;
             }
+            if (!parry && Kit == TurnKit.Bach) perfect = Math.Min(good, perfect + BattleRules.TurnLockedTempoWindow);   // LOCKED TEMPO (THE METRONOME)
             if (trait == MusicianTrait.KeepsCount) perfect = Math.Min(good, perfect + BattleRules.TurnCountsWindow);   // COUNTS ALOUD (PAGANINI)
 
             float gap = Math.Abs(offset);
@@ -1449,7 +1466,7 @@ namespace Tacetno433.Battle
             }
         }
 
-        //Signature Shape : the 4/4 pattern a conductor beats, down, left, right, up (any size)
+        //Signature Shape : the 4/4 pattern a conductor beats, down, left, right, up
         public static readonly Flick[] SignatureShape = { Flick.Down, Flick.Left, Flick.Right, Flick.Up };
 
         //Signature : the conductor's big move. It is played while the bar is written and costs
@@ -1464,8 +1481,8 @@ namespace Tacetno433.Battle
             int landed = 0;
             for (int i = 0; i < SignatureShape.Length; i++)
             {
-                NoteResult r = (strokes != null && i < strokes.Length) ? strokes[i] : new NoteResult(Grade.Hesitate, true, 1f);
-                strength += SwipeScale(r.Grade, true);
+                NoteResult r = (strokes != null && i < strokes.Length) ? strokes[i] : new NoteResult(Grade.Hesitate, 1f);
+                strength += SwipeScale(r.Grade);
                 if (r.Lands) landed++;
             }
             strength /= SignatureShape.Length;
@@ -1571,10 +1588,10 @@ namespace Tacetno433.Battle
             return power;
         }
 
-        //Scale : SwipeScale (RUBATO is played in UseSkill since step 12, ATTACK has no swipe to miss)
-        public float Scale(Grade grade, bool rightSize)
+        //Scale : SwipeScale (RUBATO is played in SkillNote, ATTACK has no swipe to miss)
+        public float Scale(Grade grade)
         {
-            return SwipeScale(grade, rightSize);
+            return SwipeScale(grade);
         }
 
         //======================================================================================

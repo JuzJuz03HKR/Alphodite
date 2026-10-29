@@ -33,9 +33,9 @@
 
         //Attack : damage = the musician's power x TurnAttackPerPower, then x how the swipe went
         public static float TurnAttackPerPower = 2f;
-        public static float TurnPerfect = 1.3f;     // right way, right size, on time
-        public static float TurnGood = 1f;          // right way, right size, a little off time
-        public static float TurnWrongSize = 0.7f;   // on time but the wrong size
+        //ONE RULE (Beta1, 29 Oct) : a note only asks for the way and the moment. The sizes p mf f and the wrong size (0.7) are gone.
+        public static float TurnPerfect = 1.3f;     // right way, on time
+        public static float TurnGood = 1f;          // right way, a little off time
         public static float TurnMiss = 0.4f;        // the wrong way, too early, too late or no swipe
 
         //ONE BAR (step 12, 24 Oct, the user played it and chose this) : each round is a BAR. The player gives
@@ -98,9 +98,11 @@
         public static int[] TurnNotesMax = { 2, 3, 4 };
         public static int[] TurnSmallNotesMin = { 1, 1, 2 };   // ordinary enemies
         public static int[] TurnSmallNotesMax = { 2, 2, 2 };
-        public static float TurnNoteDamage = 1.85f;          // step 12 : was 1.5, the user found NORMAL far too easy (turnsim STRONG 81 -> 57 percent).
+        public static float TurnNoteDamage = 1.95f;          // step 12 : was 1.5, the user found NORMAL far too easy (turnsim STRONG 81 -> 57 percent).
                                                              // Step 15 : was 2.2, longer fights give TACET more turns, so each note is softer and the run is as hard as before.
                                                              // Notes are rounded to whole numbers, so a small change can jump (1.9 made power 4 notes 8 instead of 7)
+                                                             // Beta1 29 Oct (ONE RULE) : was 1.85. Without the sizes swipes are easier to land and parry, turnsim
+                                                             // NORMAL STRONG went 48 -> 58 percent, 1.95 brings it back to 49 (MAESTRO EXPERT 70 -> 72), 2 was 45.
 
         //PARRY : swiping back at a note. PERFECT blocks all of it and gives breath back,
         //GOOD lets this share through, a MISS or no swipe lets all of it through.
@@ -157,7 +159,9 @@
         public static int TurnFeatherPerStroke = 2;    // FEATHER : free ATTACKs per stroke that lands (step 12, was 1 extra turn : 25 percent of STRONG runs won)
 
         //The other four of the lore (step 10, ALPHA7_DESIGN 5.9). Signatures are x their strength (0.4 to 1.3).
-        //THE METRONOME (Bach) : LOCKED TEMPO needs no number (any size is right), FUGUE echoes the next move at the strength.
+        //THE METRONOME (Bach) : LOCKED TEMPO widens the PERFECT window of the band's own swipes, FUGUE echoes the next move at the strength.
+        public static float TurnLockedTempoWindow = 0.05f;   // LOCKED TEMPO : seconds added to the PERFECT window of skills and the SIGNATURE, never
+                                                             // past GOOD (Beta1 29 Oct : was "any size is right", and the sizes are gone)
         public static float TurnFugueScale = 1.8f;     // FUGUE : the echo plays at the SIGNATURE's strength x this (step 13 : was 1, THE METRONOME was the weakest at 44 percent)
         public static int TurnPaganiniLife = 6;        // THE HEARTLESS's PASSIVE : life paid for each BREATH a skill is short of (step 15 : was 3, skills carry the fight now)
         public static float TurnCapricePrice = 0.2f;   // CAPRICE : when it ends, every musician pays this share of their life (never below 1, step 13 : was 0.1)
@@ -173,11 +177,13 @@
 
         //Musician Traits in the turn battle (step 10, the TurnTraitText of each musician in Data/Musician.cs)
         public static float TurnCountsWindow = 0.05f;  // COUNTS ALOUD (PAGANINI) : seconds added to their PERFECT window
-        public static float TurnQuietScale = 1.5f;     // THE QUIET PART (QUANTZ) : against an enemy showing a p note
+        public static float TurnQuietScale = 1.5f;     // THE QUIET PART (QUANTZ) : against an enemy whose next attack is aimed at someone else
+                                                       //   (Beta1 29 Oct : was an enemy showing a p note, the sizes are gone)
         public static int TurnMomentumMost = 3;        // MOMENTUM (PFUNDT) : power gained by hits in a row, at most
         public static float TurnByEarScale = 1.5f;     // BY EAR (MALI) : against an enemy that is OFF-BEAT
         public static float TurnHeldNoteShare = 0.4f;  // HELD NOTE (CHAI) : his ATTACK hits again for this share
-        public static float TurnStepBetterScale = 1.3f;   // ONE STEP BETTER (NUAN) : against an enemy showing an f note
+        public static float TurnStepBetterScale = 1.3f;   // ONE STEP BETTER (NUAN) : against an enemy whose next attack is long
+        public static int TurnLongNotes = 3;              //                           long = this many notes or more (Beta1 29 Oct : was an f note)
         public static int TurnFourBarsEvery = 4;       // FOUR BARS STRAIGHT (DUPORT) : every this many ATTACKs
         public static float TurnFourBarsScale = 2f;    //                             hits this much harder
         public static float TurnLateBonus = 0.12f;     // FASHIONABLY LATE (PUNTO) : seconds after the GOOD window a late stroke still counts
@@ -198,12 +204,12 @@
         //ROSIN keeps FamilyMotifPower, STEADY PULSE keeps SteadyWindowBonus, ENCORE and PATRON'S PURSE work on the result page.
         public static float TurnReedCaseHeal = 1.5f;      // REED CASE : wind players' healing
         public static float TurnSpareSticksOffBeat = 1.5f;// SPARE STICKS : percussion skills' OFF-BEAT
-        public static int TurnPianissimoBreath = 1;       // PIANISSIMO : more breath for a p note parried PERFECT
+        public static int TurnPianissimoBreath = 1;       // PIANISSIMO : more breath for the first note of an attack parried PERFECT (was a p note)
         public static int TurnBreathMarkStart = 2;        // BREATH MARK : more breath at the start of a fight
         public static float TurnTuttiScale = 1.25f;       // TUTTI : skills that reach everyone
         public static float TurnRubatoMiss = 0.6f;        // RUBATO : a skill note you MISS still plays at this (step 12)
         public static int TurnCrescendoStart = 1;         // CRESCENDO : stacks on every musician at the start
-        public static float TurnSforzandoScale = 1.3f;    // SFORZANDO : a PERFECT f note
+        public static float TurnSforzandoScale = 1.3f;    // SFORZANDO : the PERFECT last note of a skill (was an f note)
         public static float TurnOvertureScale = 2f;       // OVERTURE : the band's first hit of a fight
         public static float TurnCounterpointScale = 2f;   // COUNTERPOINT : the COUNTER
         public static int TurnAccelerandoShakes = 2;      // ACCELERANDO : each shake of a roll counts this many
@@ -222,6 +228,7 @@
         //Turn Feel (seconds) : how the battle page paces a swipe. The ring always closes at the same
         //speed, never eased, so the eye can count it (docs/research/ALPHA7_qte_parry.md).
         public static float TurnRingTime = 1.1f;          // from a note showing to the moment to swipe
+        public static float TurnLateReveal = 0.5f;        // FALSE NOTES (STATIC) : its hidden note shows its arrow once the ring is this far closed
         public static float MaestroTurnRingTime = 0.8f;   // MAESTRO
         public static float TurnNoteGap = 0.55f;          // between the notes of one enemy attack
         public static float TurnPause = 0.8f;             // after a turn, before the next one starts
@@ -238,8 +245,7 @@
         public static float TurnKillStop = 0.18f;         //           the freeze when an enemy falls silent
         public static float TurnEndTime = 2.2f;           // the win or lose banner stays this long
         public static float TurnSparkGap = 0.3f;          // a spark comes this soon after the note before it
-        public static float TurnHoldTime = 0.8f;          // how long a HOLD note wants holding
-        public static float TurnHoldStill = 260f;         // pixels per second the baton may drift and still count as still
+        public static float TurnHoldTime = 0.8f;          // how long a HOLD note wants holding (the button kept down, the baton may move : Beta1 29 Oct)
         public static float TurnRollTime = 1.2f;          // how long a ROLL note lasts
 
         //Stage Feel (Beta1) : how the battle page looks and moves, the conductor's view from behind the band
@@ -285,6 +291,34 @@
         public static float ClearFocusDim = 0.35f;        // CLEAR FIGHT (settings) : while a ring is up the whole picture goes this much darker
         public static float ClearFocusPool = 0.8f;        //   and the dark pool behind the ring is this deep (0.6 without CLEAR FIGHT)
         public static float ClearPlate = 0.9f;            //   the plates behind names, life and attacks are this solid (0.6 without)
+
+        //Camera Feel (Beta1, 29 Oct, docs/BETA1_DIRECTION.md 10) : the camera moves with the baton (Core/StageCamera.cs).
+        //The user : "zoom in and the screen shakes, so the action we do really shows" (Muse Dash, Chaos Zero Nightmare).
+        //Only the world's picture moves, the ring and the words stay still to be read. The user may find it zooms too
+        //often, but asked to see it whole first ("don't turn it down yet").
+        public static float CamNoteZoom = 0.04f;          // ZOOM STEPS : each note of a phrase that lands in a row pushes in this much more
+        public static float CamZoomMost = 0.2f;           //   never further than this (20 percent)
+        public static float CamFocusShare = 0.6f;         //   it pushes in toward the action, this share of the way from the middle of the screen
+        public static float CamPunch = 0.03f;             // a hit punches in this much for a moment (a PERFECT x CamPerfect)
+        public static float CamPerfect = 1.7f;
+        public static float CamFinishPunch = 0.08f;       // FINISHER : the last note of a skill punches in this much (the SIGNATURE's stroke too)
+        public static float CamPunchFade = 9f;            //   how fast a punch dies away (per second)
+        public static float CamKick = 22f;                // KICK : a swipe slides the world this many pixels the way the baton went
+        public static float CamTilt = 0.03f;              //   and leans it this far (radians, about 2 degrees) on a swing left or right
+        public static float CamSpring = 12f;              //   how stiff the camera's springs are (higher = snappier)
+        public static float CamShake = 0.3f;              // SHAKE : trauma a hit adds (a PERFECT x CamPerfect, the FINISHER x 2)
+        public static float CamShakeFade = 1.8f;          //   trauma lost per second
+        public static float CamShakeMost = 14f;           //   the tremble at full trauma (pixels)
+        public static float CamShakeTurn = 0.012f;        //   and its turn (radians)
+        public static float CamRollZoom = 0.012f;         // ROLL : each shake pushes in this much more (up to CamZoomMost)
+        public static float CamHoldZoom = 0.1f;           // HOLD : held to the end it has pushed in this much more
+        public static float CamHoldShake = 0.9f;          //   trauma per second while it is held, the attack goes on
+        public static float TurnHoldTickTime = 0.1f;      //   a quick blow this often while it is held (the user : "attacking again and again")
+        public static float CamCounterHold = 0.7f;        // COUNTER : the camera stays pushed in on the enemy this long
+        public static float StageFocusSkill = 0.35f;      // QTE FOCUS while the band swipes a skill or the SIGNATURE : the world dims only
+                                                          //   this much (1 = all the way, round 4) so the action shows (the user : see it happen)
+        public static float StageFocusParry = 0.6f;       //   and while TACET attacks
+        public static float StageJab = 46f;               // ACTION : the musician in front jumps this many pixels toward the enemy on every note that lands
 
         //Stage Void (Beta1 round 4) : TACET's dark, a black hole behind the enemies pouring over the floor towards the camera
         //(Core/TacetVoid.cs, Content/Effects/Void.fx). SHARE 0 = TACET beaten, 1 = the band beaten.

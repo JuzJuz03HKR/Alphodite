@@ -16,32 +16,34 @@ namespace Tacetno433.Core
             string report = "";
             MusicianList.ResetRehearsals();                                             // earlier checks rehearse some musicians
             Enemy staticEnemy = EnemyNamed("STATIC");
-            NoteResult[] fourPerfect = { new NoteResult(Grade.Perfect, true, 1f), new NoteResult(Grade.Perfect, true, 1f),
-                                         new NoteResult(Grade.Perfect, true, 1f), new NoteResult(Grade.Perfect, true, 1f) };
+            NoteResult[] fourPerfect = { new NoteResult(Grade.Perfect, 1f), new NoteResult(Grade.Perfect, 1f),
+                                         new NoteResult(Grade.Perfect, 1f), new NoteResult(Grade.Perfect, 1f) };
 
             //Conductors : the turn battle's gallery shows the three the user kept (Beta1, 29 Oct), Beethoven, Fanny, Bach
             report += Same("conductors shown", "3 THE UNHEARING FANNY MENDELSSOHN AND ??? THE METRONOME",
                 ConductorList.Shown.Length + " " + ConductorList.Shown[0].Name + " " + ConductorList.Shown[1].Name + " " + ConductorList.Shown[2].Name);
 
-            //Intent : decided again right after an attack, so HUSH now shows its second phrase (Lp Rp Dp, 2 notes on floor 1)
+            //Intent : decided again right after an attack, so HUSH now shows its second phrase (L R D, 2 notes on floor 1)
             TurnBattle b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             PlayToEnemy(b);
             b.TakeEnemyAttack(null);
             report += Same("intent after attack", "Left Right 1 True",
                 b.Enemies[0].IntentWays[0] + " " + b.Enemies[0].IntentWays[1] + " " + b.Enemies[0].Attacks + " " + b.Enemies[0].Planned);
 
-            //LOCKED TEMPO (THE METRONOME) : any size is the right size
-            b.Kit = TurnKit.Bach;
-            bool bachAny = b.AnySize;
-            b.Kit = TurnKit.None;
-            report += Same("locked tempo", "True False", bachAny + " " + b.AnySize);
+            //LOCKED TEMPO (THE METRONOME, Beta1 29 Oct) : the band's own swipes get a wider PERFECT window. A swipe half
+            //way into the extra time is GOOD for anyone else and PERFECT for him (a fresh battle, so no musician's trait counts).
+            TurnBattle tempo = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
+            float off = BattleRules.PerfectWindow + BattleRules.TurnLockedTempoWindow * 0.5f;
+            Grade others = tempo.Judge(off, true);
+            tempo.Kit = TurnKit.Bach;
+            report += Same("locked tempo", "Good Perfect", others + " " + tempo.Judge(off, true));
 
             //FUGUE : all four PERFECT give everybody an echo of 1.3 x TurnFugueScale 1.8 = 2.34. PAGANINI's QUICK BOW then lands more
             //than twice as hard as without it (once, then x2.34), and the echo is used up.
             List<Musician> anna = new List<Musician> { MusicianList.All[0] };
             Skill quickBow = SkillList.First(MusicianList.All[0]);
             NoteResult[] goods = new NoteResult[quickBow.Notes.Length];
-            for (int i = 0; i < goods.Length; i++) goods[i] = new NoteResult(Grade.Good, true, 1f);
+            for (int i = 0; i < goods.Length; i++) goods[i] = new NoteResult(Grade.Good, 1f);
             TurnBattle plain = new TurnBattle(anna, new List<Enemy> { deadAir }, 1, new Random(433));
             plain.Breath = 10;
             plain.PlanSkill(plain.Party[0], quickBow, plain.Enemies[0]);
@@ -66,8 +68,8 @@ namespace Tacetno433.Core
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             b.Kit = TurnKit.Paganini;
             b.Signature = b.SignatureNeed;
-            b.UseSignature(new NoteResult[] { new NoteResult(Grade.Perfect, true, 1f), new NoteResult(Grade.Perfect, true, 1f),
-                                              new NoteResult(Grade.Miss, true, 1f), new NoteResult(Grade.Miss, true, 1f) });
+            b.UseSignature(new NoteResult[] { new NoteResult(Grade.Perfect, 1f), new NoteResult(Grade.Perfect, 1f),
+                                              new NoteResult(Grade.Miss, 1f), new NoteResult(Grade.Miss, 1f) });
             string caprice = b.CapriceTurns + " " + b.Judge(0.5f, false) + " " + b.Judge(0.15f, true) + " " + b.RollGrade(1);
             b.PlayBar();
             b.Attack();
@@ -84,8 +86,8 @@ namespace Tacetno433.Core
             bool plainCan = b.CanPlanSkill(b.Party[1], longBreath);
             b.Kit = TurnKit.Paganini;
             int price = b.LifeCost(longBreath);
-            NoteResult[] fourGood = { new NoteResult(Grade.Good, true, 1f), new NoteResult(Grade.Good, true, 1f),
-                                      new NoteResult(Grade.Good, true, 1f), new NoteResult(Grade.Good, true, 1f) };
+            NoteResult[] fourGood = { new NoteResult(Grade.Good, 1f), new NoteResult(Grade.Good, 1f),
+                                      new NoteResult(Grade.Good, 1f), new NoteResult(Grade.Good, 1f) };
             b.PlanSkill(b.Party[1], longBreath, null);
             b.PlayBar();
             b.UseSkill(fourGood);
@@ -113,11 +115,12 @@ namespace Tacetno433.Core
             report += Same("the sun", "18 18 18 0 0", b.Party[0].Hp + " " + b.Party[1].Hp + " " + b.Party[2].Hp + " " + b.Party[0].Dissonance + " " + b.Party[1].Mute);
 
             //TWO VOICES (FANNY MENDELSSOHN AND ???) : QUANTZ (written first) in FANNY's voice 4 x 2 x 0.55 x 1.25 = 5.5 -> 6, then FELIX
-            //leads and PAGANINI hits a plain 5.5 -> 6, then FANNY again
+            //leads and PAGANINI hits a plain 5.5 -> 6, then FANNY again. DEAD AIR aims at QUANTZ, so THE QUIET PART stays out of it.
             b = new TurnBattle(band, new List<Enemy> { deadAir }, 1, new Random(433));
             b.Kit = TurnKit.Fanny;
             b.PlanAttack(b.Party[1], b.Enemies[0]);
             b.PlayBar();
+            b.Enemies[0].IntentTarget = b.Party[1];
             int fanny = b.Attack();
             bool felixNext = b.FelixVoice;
             int felix = b.Attack();
@@ -140,8 +143,9 @@ namespace Tacetno433.Core
             b.PlayBar();
             report += Same("counts aloud", "Perfect Good", counts + " " + b.Judge(0.13f, true));
 
-            //THE QUIET PART (QUANTZ) : ATTACK 4 x 2 x 0.55 = 4.4, x1.5 = 6.6 -> 7 against HUSH's p notes, 4 against DEAD AIR's mf
-            report += Same("the quiet part", "7 4", SoloAttacks(1, hush, 1) + " " + SoloAttacks(1, deadAir, 1));
+            //THE QUIET PART (QUANTZ, Beta1 29 Oct) : ATTACK 4 x 2 x 0.55 = 4.4, x1.5 = 6.6 -> 7 against DEAD AIR aiming at PAGANINI,
+            //4 when it aims at him (it was : against an enemy showing a p note)
+            report += Same("the quiet part", "7 4", QuietAttack(deadAir, false) + " " + QuietAttack(deadAir, true));
 
             //MOMENTUM (PFUNDT) : power 6, 7, 8, 9 x 1.1 = 7, 8, 9, 10 at most (power 6 + 3). A skill that misses every note starts again.
             string momentum = SoloAttacks(2, EnemyNamed("THE MUTE CHOIR"), 5);                      // 120 life, so PFUNDT gets five
@@ -152,7 +156,7 @@ namespace Tacetno433.Core
             while (b.Step != TurnStep.Plan) Step(b, Grade.Good);
             b.PlanSkill(b.Party[0], SkillList.First(MusicianList.All[2]), b.Enemies[0]);
             b.PlayBar();
-            b.UseSkill(new NoteResult[] { new NoteResult(Grade.Hesitate, true, 1f) });
+            b.UseSkill(new NoteResult[] { new NoteResult(Grade.Hesitate, 1f) });
             report += Same("momentum", "7 8 9 10 10 0", momentum + " " + b.Party[0].Momentum);
 
             //BY EAR (MALI) : ATTACK 5 x 2 x 0.55 = 5.5, OFF-BEAT x1.5 and BY EAR x1.5 = 12.375 -> 12
@@ -167,8 +171,14 @@ namespace Tacetno433.Core
             int held = b.Attack();
             report += Same("held note", "4 74", held + " " + b.Enemies[0].Hp);
 
-            //ONE STEP BETTER (NUAN) : STATIC shows Lf Rp (an f), so 6 x 2 x 0.55 x 1.3 = 8.58 -> 9, against DEAD AIR (mf only) 6.6 -> 7
-            report += Same("one step better", "9 7", SoloAttacks(5, staticEnemy, 1) + " " + SoloAttacks(5, deadAir, 1));
+            //ONE STEP BETTER (NUAN, Beta1 29 Oct) : against an attack of 3 notes, 6 x 2 x 0.55 x 1.3 = 8.58 -> 9, against DEAD AIR's
+            //own 2 notes 6.6 -> 7 (it was : against an enemy showing an f note)
+            b = new TurnBattle(Solo(5), new List<Enemy> { deadAir }, 1, new Random(433));
+            b.PlayBar();
+            b.Enemies[0].IntentNotes = new int[] { 1, 1, 1 };
+            b.Enemies[0].IntentWays = new Flick[] { Flick.Left, Flick.Right, Flick.Down };
+            b.Enemies[0].IntentLate = new bool[3];
+            report += Same("one step better", "9 7", b.Attack() + " " + SoloAttacks(5, deadAir, 1));
 
             //FOUR BARS STRAIGHT (DUPORT) : 6.6 -> 7 three times, then the fourth ATTACK x2 = 13.2 -> 13
             report += Same("four bars straight", "7 7 7 13", SoloAttacks(6, hush, 4));
@@ -178,12 +188,12 @@ namespace Tacetno433.Core
             b.PlayBar();
             report += Same("fashionably late", "Good Miss 0.34", b.Judge(0.3f, true) + " " + b.Judge(-0.3f, true) + " " + b.LateLimit.ToString("0.00"));
 
-            //THE WHOLE FLOOR (BORIS) : his THE FLOOR held PERFECT (an f note) takes 2 off each note of HUSH's next attack (7 -> 5)
+            //THE WHOLE FLOOR (BORIS) : his THE FLOOR held PERFECT (its last note) takes 2 off each note of HUSH's next attack (8 -> 6)
             b = new TurnBattle(Solo(8), new List<Enemy> { hush }, 1, new Random(433));
             b.PlanSkill(b.Party[0], SkillList.First(MusicianList.All[8]), null);
             b.PlayBar();
-            b.UseSkill(new NoteResult[] { new NoteResult(Grade.Perfect, true, 1f) });
-            report += Same("the whole floor", "5", b.Enemies[0].IntentNotes[0].ToString());
+            b.UseSkill(new NoteResult[] { new NoteResult(Grade.Perfect, 1f) });
+            report += Same("the whole floor", "6", b.Enemies[0].IntentNotes[0].ToString());
 
             //Review fixes (step 10) ---------------------------------------------------------------
 
@@ -228,7 +238,7 @@ namespace Tacetno433.Core
                 b.Breath = 10;
                 b.PlanSkill(b.Party[1], SkillList.Second(MusicianList.All[2]), null);
                 b.PlayBar();
-                b.UseSkill(new NoteResult[] { new NoteResult(Grade.Good, true, 1f) });   // PFUNDT : STAND FIRM
+                b.UseSkill(new NoteResult[] { new NoteResult(Grade.Good, 1f) });   // PFUNDT : STAND FIRM
                 b.Attack();                                                                // PAGANINI
                 b.TakeEnemyAttack(null);                                                   // HUSH hits PFUNDT, plans again at PFUNDT
                 b.PlayBar();
@@ -248,6 +258,16 @@ namespace Tacetno433.Core
 
         //Solo Attacks : musician i alone (and Sturdy) against the enemy, ATTACKing this many times, one a bar. The enemy's
         //turns in between are parried GOOD (no COUNTER). Returns the damage of each ATTACK, spaced.
+        //Quiet Attack : QUANTZ (written first, the fastest) ATTACKs DEAD AIR while it aims at him or at PAGANINI (THE QUIET PART)
+        private static int QuietAttack(Enemy deadAir, bool atHim)
+        {
+            TurnBattle b = new TurnBattle(new List<Musician> { MusicianList.All[1], MusicianList.All[0] }, new List<Enemy> { deadAir }, 1, new Random(433));
+            b.PlanAttack(b.Party[0], b.Enemies[0]);
+            b.PlayBar();
+            b.Enemies[0].IntentTarget = atHim ? b.Party[0] : b.Party[1];
+            return b.Attack();
+        }
+
         private static string SoloAttacks(int i, Enemy enemy, int count)
         {
             TurnBattle b = new TurnBattle(Solo(i), new List<Enemy> { enemy }, 1, new Random(433));

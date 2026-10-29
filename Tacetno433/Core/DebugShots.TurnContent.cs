@@ -180,14 +180,14 @@ namespace Tacetno433.Core
             report += Same("bosses by movement", "REQUIEM,THE DEAF CROWN, / THE NAMELESS MASTER,THE STAFF, / THE DEVIL'S STRING,THE BLIND CANTOR,", movements);
 
             //BY TOUCH (THE BLIND CANTOR) : PAGANINI's seat first, then QUANTZ's. Both of its notes got through,
-            //so its next attack is its own 2 (Lmf Rmf) and those 2 again (Df Umf), 6 x 1.85 = 11.1 -> 11 each on floor 1
+            //so its next attack is its own 2 (L R) and those 2 again (D U), 6 x 1.95 = 11.7 -> 12 each on floor 1
             TurnBattle b = new TurnBattle(band, new List<Enemy> { EnemyNamed("THE BLIND CANTOR") }, 1, new Random(433));
             Sturdy(b);
             string first = b.Enemies[0].IntentTarget.Name;
             PlayToEnemy(b);
             b.TakeEnemyAttack(null);
             Fighter cantor = b.Enemies[0];
-            report += Same("by touch", "PAGANINI QUANTZ 4 Left Right Down Up 11", first + " " + cantor.IntentTarget.Name + " " + cantor.IntentNotes.Length + " "
+            report += Same("by touch", "PAGANINI QUANTZ 4 Left Right Down Up 12", first + " " + cantor.IntentTarget.Name + " " + cantor.IntentNotes.Length + " "
                 + cantor.IntentWays[0] + " " + cantor.IntentWays[1] + " " + cantor.IntentWays[2] + " " + cantor.IntentWays[3] + " " + cantor.IntentNotes[3]);
 
             //THE COURT (THE STAFF) : with HUSH standing, PAGANINI's 6 is halved (250 x 1.6 = 400 -> 397)
@@ -198,7 +198,7 @@ namespace Tacetno433.Core
             b.Attack();
             string court = b.Enemies[0].Hp.ToString();
 
-            //THE COURT : its third attack is one note down that hits everybody, 7 x 1.85 = 12.95 -> 13, x1.5 = 19.5 -> 20 (C# rounds to even)
+            //THE COURT : its third attack is one note down that hits everybody, 7 x 1.95 = 13.65 -> 14, x1.5 = 21
             b = new TurnBattle(Duo(), new List<Enemy> { staffBoss }, 1, new Random(433));
             Tough(b);
             for (int i = 0; i < 80 && !b.Enemies[0].IntentAll; i++) Step(b, Grade.Good);
@@ -208,13 +208,13 @@ namespace Tacetno433.Core
             int anna = b.Party[0].Hp;
             int klara = b.Party[1].Hp;
             b.TakeEnemyAttack(null);
-            report += Same("the court", "397 True 1 Down 20 20 20", court + " " + (anna - b.Party[0].Hp) + " " + (klara - b.Party[1].Hp));
+            report += Same("the court", "397 True 1 Down 21 21 21", court + " " + (anna - b.Party[0].Hp) + " " + (klara - b.Party[1].Hp));
 
             //DECREE (THE DEAF CROWN) : bar 1 forbids skills, PAGANINI's QUICK BOW costs her 5 (45 -> 40). It CUTS IN after
             //QUANTZ, every note is parried PERFECT and still no COUNTER. Bar 2 forbids attacks, PAGANINI's ATTACK costs 5 more.
             Skill quickBow = SkillList.First(MusicianList.All[0]);
             NoteResult[] goods = new NoteResult[quickBow.Notes.Length];
-            for (int i = 0; i < goods.Length; i++) goods[i] = new NoteResult(Grade.Good, true, 1f);
+            for (int i = 0; i < goods.Length; i++) goods[i] = new NoteResult(Grade.Good, 1f);
             b = new TurnBattle(band, new List<Enemy> { EnemyNamed("THE DEAF CROWN") }, 1, new Random(433));
             b.Breath = 10;
             string decree = b.Decree.ToString();
@@ -256,7 +256,7 @@ namespace Tacetno433.Core
         private static NoteResult[] AllNotes(Skill s, Grade grade)
         {
             NoteResult[] all = new NoteResult[s.Notes.Length];
-            for (int i = 0; i < all.Length; i++) all[i] = new NoteResult(grade, true, 1f);
+            for (int i = 0; i < all.Length; i++) all[i] = new NoteResult(grade, 1f);
             return all;
         }
 

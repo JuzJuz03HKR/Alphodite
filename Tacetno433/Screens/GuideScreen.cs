@@ -55,7 +55,8 @@ namespace Tacetno433.Screens
                  : "Hold the LEFT MOUSE BUTTON and swing. That is the whole game. "
                    + "SPACE : signature. TAB : your band. ESC : pause.",
 
-            "ARROW : which way. LETTER : how far (p small, mf middle, f big). RING : stop as it closes.",
+            turnBattle ? "ARROW : which way to swing. RING : swing as it closes. That is all a note asks."
+                 : "ARROW : which way. LETTER : how far (p small, mf middle, f big). RING : stop as it closes.",
 
             turnBattle ? "Your bar : give each musician a move, ENTER plays them in order. ATTACK hits by itself, a skill asks for a swing. "
                    + "Their turn : swipe back at each note to block it. BREATH pays for skills."
@@ -78,6 +79,7 @@ namespace Tacetno433.Screens
 
         //Drawing Data : the made-up examples in the pictures, kept out of Draw so drawing never allocates
         private static string[] demoSizes = { "p", "mf", "f" };
+        private static string[] demoKinds = { "HOLD", "SHAKE", "AGAIN" };   // ONE RULE (Beta1 29 Oct) : the three notes that are not a plain swing
         private static string[] demoBeats = { "1", "2", "3", "4" };
         private static string[] keyNames = turnBattle ? new string[] { "1 2 3", "ENTER", "SPACE", "TAB", "ESC" } : new string[] { "SPACE", "TAB", "ESC" };
         private static string[] keyJobs = turnBattle
@@ -280,9 +282,17 @@ namespace Tacetno433.Screens
             }
         }
 
-        //Page 2 : one note with its arrow and letter, the three sizes along a ruler, and the ring
+        //Page 2 : one note with its arrow and letter, the three sizes along a ruler, and the ring.
+        //ONE RULE (Beta1, 29 Oct) : in the turn battle a note is only its arrow and its ring, the sizes are gone,
+        //so the page shows the arrow, the three notes that ask for something else, and the ring.
         private void DrawNote(SpriteBatch sb, float a)
         {
+            if (turnBattle)
+            {
+                DrawTurnNote(sb, a);
+                return;
+            }
+
             //The Note : a big one, its arrow on the edge, its letter inside
             float nx = ox + 200f;
             float ny = 230f;
@@ -322,6 +332,39 @@ namespace Tacetno433.Screens
                                    (ringT > 0.9f ? Palette.Highlight : Palette.PaperDim) * a, TextSize.Tiny, 2f);
 
             //Shape : the four ways of the bar, in beat order
+            DrawShape(sb, ox + 200f, 420f, 50f, a);
+        }
+
+        //Turn Note : the arrow says the way, HOLD SHAKE AGAIN say the rest, the ring says when (ONE RULE)
+        private void DrawTurnNote(SpriteBatch sb, float a)
+        {
+            //The Note : a big one, the arrow is all there is to read
+            float nx = ox + 200f;
+            float ny = 230f;
+            NoteGlyph.Note(sb, Game.BigFont, nx, ny, Flick.Right, 1.7f, a, false);
+            Gfx.TextSpacedCentered(sb, Game.Font, "ARROW : SWING THAT WAY", nx, ny + 74, Palette.Highlight * a, TextSize.Tiny, 2f);
+
+            //The Others : a held note, a roll and a spark, each with the word the fight shows under it
+            float kx = ox + 380f;
+            float ky = 210f;
+            NoteGlyph.Note(sb, Game.BigFont, kx, ky, Flick.Down, 0.9f, a, false);
+            NoteGlyph.FermataSign(sb, kx, ky - (NoteGlyph.NoteRadius + 18f) * 0.9f, 9f, Palette.Highlight * a);
+            NoteGlyph.RollNote(sb, kx + 110f, ky, 0.9f, a);
+            NoteGlyph.Spark(sb, kx + 220f, ky, 14f, Palette.Highlight * a);
+            for (int k = 0; k < demoKinds.Length; k++)
+                Gfx.TextSpacedCentered(sb, Game.Font, demoKinds[k], kx + 110f * k, ky + 44, Palette.Highlight * a, TextSize.Label, 2f);
+
+            //Ring : swing just as the ring meets the note
+            float cx = ox + 490f;
+            float cy = 400f;
+            float ringT = (time * 0.8f) % 1f;
+            Gfx.CircleOutline(sb, cx, cy, 30, Palette.Highlight * a, 3f);
+            Gfx.CircleOutline(sb, cx, cy, 90f - 60f * ringT, Palette.Paper * a, 2f);
+            Gfx.Diamond(sb, cx, cy, 5, Palette.Highlight * a);
+            Gfx.TextSpacedCentered(sb, Game.Font, ringT > 0.9f ? "PERFECT" : "SWING ON THE RING", cx, cy + 100,
+                                   (ringT > 0.9f ? Palette.Highlight : Palette.PaperDim) * a, TextSize.Tiny, 2f);
+
+            //Shape : the four ways of the SIGNATURE, in beat order
             DrawShape(sb, ox + 200f, 420f, 50f, a);
         }
 
@@ -376,11 +419,11 @@ namespace Tacetno433.Screens
             float cx = ox + 400f;
             float cy = 290f;
             NoteGlyph.TimingRing(sb, cx, cy, Math.Min(1f, t / 0.8f), 30f, 80f, 0f, a);
-            if (t < 0.8f) NoteGlyph.Note(sb, Game.BigFont, MathHelper.Lerp(ox + 480f, cx, t / 0.8f), cy, 1, Flick.Left, 1f, time, a);
+            if (t < 0.8f) NoteGlyph.Note(sb, Game.BigFont, MathHelper.Lerp(ox + 480f, cx, t / 0.8f), cy, Flick.Left, 1f, a, false);
             else Gfx.TextSpacedCentered(sb, Game.Font, "BLOCK", cx, cy + 50, Palette.Highlight * a, TextSize.Label, 3f);
 
             //BREATH : what skills spend and blocks give back
-            Gfx.TextSpaced(sb, Game.Font, "BREATH  :  SKILLS AND CALLS SPEND IT, HITS GIVE IT BACK", ox + 110, 440, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            Gfx.TextSpaced(sb, Game.Font, "BREATH  :  SKILLS SPEND IT, HITS GIVE IT BACK", ox + 110, 440, Palette.LineGrey * a, TextSize.Tiny, 2f);
             Ui.Pips(sb, ox + 116, 476, 3 + (int)(time * 0.8f) % 5, BattleRules.TurnBreathMax, 8f, 22f, a);
         }
 

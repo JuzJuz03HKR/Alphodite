@@ -172,7 +172,7 @@ namespace Tacetno433.Data
                 Turn = TurnKit.Bach,                // step 10
                 TurnRole = "PRECISION",
                 TurnPassiveName = "LOCKED TEMPO",
-                TurnPassiveText = "Any size you swing is the right size. You only keep time.",
+                TurnPassiveText = "On skills and the SIGNATURE, PERFECT is easier to hit.",
                 TurnSignatureName = "FUGUE",
                 TurnSignatureText = "The 4/4 shape : every musician's next move plays twice. Better strokes, louder echo.",
                 Stamina = 5, PushPower = 6, Perk = ConductorPerk.LockedTempo,        // round 15 : 10 -> 5, his size is never wrong and playing

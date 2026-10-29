@@ -69,6 +69,7 @@ namespace Tacetno433.Screens
         private GestureReader gesture = new GestureReader();
         private Baton baton = new Baton();
         private DuelEffects effects = new DuelEffects();
+        private readonly DuelEffects hudPops = new DuelEffects();      // words that belong to the panel (BREATH, SIGNATURE READY) : they never move with the camera
 
         //Plan : who the player is writing a move for, and what is under the pointer
         private Fighter selected;
@@ -106,13 +107,13 @@ namespace Tacetno433.Screens
         private string barHitsText = "";
         private string barDamageText = "";
 
-        //Swipe : the notes being played, when each is due, and how each went
+        //Swipe : the notes being played, when each is due, and how each went.
+        //ONE RULE (Beta1, 29 Oct) : a note asks for the way of its arrow as its ring closes, the sizes p mf f are gone.
         private class QteNote
         {
             public NoteKind Kind;
             public Flick Way;
-            public int Size;
-            public int Shown;          // the size drawn (FALSE NOTES can show a wrong one)
+            public bool Late;          // FALSE NOTES : the arrow hides behind a ? until the ring is half closed
             public float Due;
         }
         private List<QteNote> notes = new List<QteNote>();
@@ -127,18 +128,23 @@ namespace Tacetno433.Screens
         //the kept one only counts if none comes.
         private bool missKept;
         private Grade missGrade;
-        private bool missSize;
 
-        //HOLD : after a held note's swipe, the button stays down and the baton still
+        //HOLD : after a held note's swipe, the button stays down (Beta1 29 Oct : the baton may move, it had to stay still)
         private bool holding;
         private float holdTime;
-        private float holdStill;
+        private float holdDown;        // how long the button was kept down
         private Grade holdGrade;
-        private bool holdSize;
+        private float holdTick;        // ACTION : the next small blow while it is held
 
         //ROLL : shakes counted while a roll note lasts
         private bool rolling;
         private int shakes;
+
+        //ACTION (Beta1, 29 Oct) : a swipe that lands is the musician's blow, at once. The user : "like we gave the order and
+        //it really does it", the camera moving with every swipe (BattleScreen.Stage.cs, Core/StageCamera.cs).
+        private int streak;            // notes landed in a row this phrase, each one pushes the camera in a step
+        private Flick lastWay;         // the way of the last stroke, the blow's light follows it
+        private float jab;             // the musician in front jumps at the enemy for a moment (1 = just now)
 
         //Prepared Text : every word on this page is made in Load or Update, never in Draw
         private Dictionary<Fighter, string> shortName = new Dictionary<Fighter, string>();
@@ -152,10 +158,13 @@ namespace Tacetno433.Screens
         private const string HintPlan = "CLICK A MUSICIAN, THEN AN ENEMY OR A SKILL   /   ENTER = PLAY THE BAR";
         private const string HintEnemy = "CLICK AN ENEMY   /   RIGHT CLICK = BACK";
         private const string HintAlly = "CLICK A MUSICIAN   /   RIGHT CLICK = BACK";
-        private const string HintSwing = "SWIPE AS THE RING TOUCHES THE NOTE";
-        private const string HintParry = "SWIPE BACK AT EACH NOTE";
-        private const string HintHold = "HOLD STILL";
+        private const string HintSwing = "SWIPE THE WAY THE ARROW POINTS AS THE RING CLOSES";
+        private const string HintParry = "SWIPE THE ARROW'S WAY TO BLOCK EACH NOTE";
+        private const string HintHold = "KEEP HOLDING";
         private const string HintRoll = "SHAKE!";
+        private const string WordHold = "HOLD";                     // ONE RULE : the word under a note that is not a plain swipe
+        private const string WordRoll = "SHAKE";
+        private const string WordSpark = "AGAIN";
         private const string HintMute = "MUTE : NO SKILLS THIS BAR";
         private const string HintNoSkills = "DECREE : A SKILL THIS BAR HURTS WHOEVER PLAYS IT";
         private const string HintNoAttacks = "DECREE : AN ATTACK THIS BAR HURTS WHOEVER PLAYS IT (NO MOVE = ATTACK)";
@@ -167,7 +176,7 @@ namespace Tacetno433.Screens
         private const string CoachSkill = "Click a musician, then 2 or 3 for a skill. Skills cost BREATH.";
         private const string CoachSkillSwipe = "A skill is a few notes. Swing the way the arrow points as the ring meets it.";
         private const string CoachSignature = "The diamonds are full. Press SPACE for the SIGNATURE.";
-        private const string CoachSignatureSwipe = "Draw the 4/4 shape : DOWN, LEFT, RIGHT, UP. Any size.";
+        private const string CoachSignatureSwipe = "Draw the 4/4 shape : DOWN, LEFT, RIGHT, UP.";
         private const string CoachWin = "That is all of it. Now win the fight.";
         private static readonly Rectangle coachBox = new Rectangle(240, 64, 800, 60);
         private bool[] learned = new bool[4];              // one per Lesson
@@ -311,7 +320,7 @@ namespace Tacetno433.Screens
             if (holding)
             {
                 holding = false;
-                Land(holdGrade, holdSize, holdStill / BattleRules.TurnHoldTime);
+                Land(holdGrade, holdDown / BattleRules.TurnHoldTime);
             }
             Game.IsMouseVisible = view != View.Swipe;
         }
@@ -339,7 +348,9 @@ namespace Tacetno433.Screens
             else
             {
                 effects.Update(dt);
+                hudPops.Update(dt);
                 if (shake > 0f) shake = Math.Max(0f, shake - dt * 3.5f);
+                if (jab > 0f) jab = Math.Max(0f, jab - dt * 5f);                 // ACTION : the jump back from a blow
                 foreach (Look look in looks.Values)
                 {
                     look.Flash = Math.Max(0f, look.Flash - dt * 5f);
@@ -641,6 +652,9 @@ namespace Tacetno433.Screens
                 Rectangle to = BoxOf(strikeTarget);
                 battle.Attack(strikeTarget);
                 StageHit(new Vector2(to.Center.X, to.Center.Y), true, 0.8f);
+                actionCam.Punch(BattleRules.CamPunch);                          // ACTION : an ATTACK lands with a small punch too
+                actionCam.Kick(new Vector2(1f, 0f), 0.5f);
+                actionCam.Shake(BattleRules.CamShake * 0.6f);
                 hitStop = Math.Max(hitStop, BattleRules.TurnStrikeStop);
                 shake = Math.Max(shake, 0.35f);
                 ShowEvents();
@@ -662,21 +676,28 @@ namespace Tacetno433.Screens
         //======================================================================================
 
         //Skill : the notes written on the skill (Data/Skill.cs). Its target is in the bar's move.
+        //NOTE BY NOTE : the skill starts in the rules now (its BREATH is paid), each note lands as it is swiped.
         private void StartSkill(Skill s)
         {
             notes.Clear();
-            for (int i = 0; i < s.Notes.Length; i++) AddNote(s.Notes[i].Kind, s.Notes[i].Way, s.Notes[i].Size);
-            BeginSwipe(SwipeFor.Skill);
+            for (int i = 0; i < s.Notes.Length; i++) AddNote(s.Notes[i].Kind, s.Notes[i].Way, false);
             hitBy = battle.Current;
             hitSignature = false;
+            if (!battle.BeginSkill())                                                  // the rules turn a skill that cannot be played into
+            {                                                                          // an ATTACK first, this only keeps the bar moving
+                StartStrike(battle.CurrentMove);
+                return;
+            }
+            ShowEvents();                                                              // BORROWED BREATH may cost life
+            BeginSwipe(SwipeFor.Skill);
             PlayArt(battle.Current, "skill");
         }
 
-        //Signature : the 4/4 shape, any size (Size -1)
+        //Signature : the 4/4 shape
         private void StartSignature()
         {
             notes.Clear();
-            for (int i = 0; i < TurnBattle.SignatureShape.Length; i++) AddNote(NoteKind.Swipe, TurnBattle.SignatureShape[i], -1);
+            for (int i = 0; i < TurnBattle.SignatureShape.Length; i++) AddNote(NoteKind.Swipe, TurnBattle.SignatureShape[i], false);
             BeginSwipe(SwipeFor.Signature);
             cutIn = BattleRules.TurnCutInTime;                                         // CUT-IN first (BattleScreen.Show.cs)
             hitBy = null;
@@ -693,20 +714,16 @@ namespace Tacetno433.Screens
             PlayArt(enemy.IntentTarget, "parry");
             notes.Clear();
             for (int i = 0; i < enemy.IntentNotes.Length; i++)
-            {
-                AddNote(NoteKind.Swipe, enemy.IntentWays[i], enemy.IntentSizes[i]);
-                if (i < enemy.IntentShown.Length) notes[i].Shown = enemy.IntentShown[i];      // FALSE NOTES
-            }
+                AddNote(NoteKind.Swipe, enemy.IntentWays[i], i < enemy.IntentLate.Length && enemy.IntentLate[i]);   // FALSE NOTES
             BeginSwipe(SwipeFor.Parry);
         }
 
-        private void AddNote(NoteKind kind, Flick way, int size)
+        private void AddNote(NoteKind kind, Flick way, bool late)
         {
             QteNote n = new QteNote();
             n.Kind = kind;
             n.Way = way;
-            n.Size = size;
-            n.Shown = size;
+            n.Late = late;
             notes.Add(n);
         }
 
@@ -740,6 +757,9 @@ namespace Tacetno433.Screens
             viewTime = 0f;
             clock = 0f;
             missKept = false;
+            streak = 0;
+            lastWay = Flick.None;
+            actionCam.Hold(ActionPoint(), 0f);                         // ACTION : the camera turns toward where the phrase will land
 
             //Centre : the pointer is hidden while swiping and was left on a button (PLAY THE BAR is near the bottom right
             //corner), where the edge of the screen stops a swipe down or right short, or bends it into the wrong way.
@@ -786,10 +806,10 @@ namespace Tacetno433.Screens
                 float offset = now - n.Due;
                 if (offset < -BattleRules.EarlyTime) return;          // the hand getting ready, not the swipe
 
-                bool spark = n.Kind == NoteKind.Spark;                // a spark takes any way and any size
+                bool spark = n.Kind == NoteKind.Spark;                // a spark takes any way
                 bool rightWay = spark || gesture.Direction == n.Way;
-                bool rightSize = spark || n.Size < 0 || battle.AnySize || Baton.SizeOf(gesture.Length) == n.Size;   // LOCKED TEMPO : any size
                 baton.Whip(gesture.Direction);
+                lastWay = gesture.Direction;
 
                 //MISS WAIT : kept until the window closes, a better stroke may still come (CAPRICE has already made a MISS a GOOD)
                 Grade grade = battle.Judge(offset, rightWay);
@@ -797,11 +817,8 @@ namespace Tacetno433.Screens
                 {
                     missKept = true;
                     missGrade = grade;
-                    missSize = rightSize;
                     return;
                 }
-
-                if (swipeFor == SwipeFor.Parry && grade == Grade.Perfect && !rightSize) grade = Grade.Good;   // the wrong size only half blocks
 
                 qteEffects.SpawnSlash(gesture.From, gesture.To, grade == Grade.Perfect ? 1f : 0.55f);
 
@@ -810,36 +827,49 @@ namespace Tacetno433.Screens
                 {
                     holding = true;
                     holdTime = 0f;
-                    holdStill = 0f;
+                    holdDown = 0f;
+                    holdTick = 0f;
                     holdGrade = grade;
-                    holdSize = rightSize;
                     return;
                 }
-                Land(grade, rightSize, 1f);
+                Land(grade, 1f);
             }
             else if (now > n.Due + battle.LateLimit)
             {
-                if (missKept) Land(missGrade, missSize, 1f);           // only a stroke the wrong way or too early came
-                else Land(Grade.Hesitate, true, 0f);                   // no swipe at all
+                if (missKept) Land(missGrade, 1f);                     // only a stroke the wrong way or too early came
+                else Land(Grade.Hesitate, 0f);                         // no swipe at all
             }
         }
 
-        //HOLD : the button down and the baton still. Letting go or the time running out ends it.
+        //HOLD : the button kept down. Letting go or the time running out ends it. While it is held the musician
+        //keeps striking (ACTION : small blows, the camera pushing in), the user : a held note is fine "if something
+        //happens during it, like the character we command attacking again and again".
         private void UpdateHold(float dt)
         {
             gesture.Read();                                            // a stroke while holding is only the hand moving
             holdTime += dt;
             bool down = Input.MouseDown();
-            if (down && baton.Velocity.Length() < BattleRules.TurnHoldStill) holdStill += dt;
+            if (down) holdDown += dt;
+
+            holdTick -= dt;
+            if (down && holdTick <= 0f)
+            {
+                holdTick = BattleRules.TurnHoldTickTime;
+                RapidBlow(holdTime / BattleRules.TurnHoldTime);
+            }
+            float share = MathHelper.Clamp(holdTime / BattleRules.TurnHoldTime, 0f, 1f);
+            actionCam.Hold(ActionPoint(), StreakZoom() + BattleRules.CamHoldZoom * share);
+            if (down) actionCam.Shake(BattleRules.CamHoldShake * dt);
 
             if (!down || holdTime >= BattleRules.TurnHoldTime)
             {
                 holding = false;
-                Land(holdGrade, holdSize, holdStill / BattleRules.TurnHoldTime);
+                Land(holdGrade, holdDown / BattleRules.TurnHoldTime);
             }
         }
 
-        //ROLL : from the moment the ring closes, every stroke any way is one shake
+        //ROLL : from the moment the ring closes, every stroke any way is one shake, and each shake one quick blow
+        //(ACTION : the camera creeps in and trembles while it lasts, like Muse Dash when it asks for fast taps)
         private void UpdateRoll(QteNote n, float now)
         {
             bool stroke = gesture.Read();
@@ -854,26 +884,32 @@ namespace Tacetno433.Screens
             {
                 shakes++;
                 baton.Whip(gesture.Direction);
+                lastWay = gesture.Direction;
                 qteEffects.SpawnSparks(HitX, HitY, 2, 1f);
+                RapidBlow(Math.Min(1f, shakes / (float)BattleRules.TurnRollPerfect));
+                actionCam.Hold(ActionPoint(), StreakZoom() + BattleRules.CamRollZoom * shakes);
+                actionCam.Kick(NoteGlyph.Way(gesture.Direction), 0.35f);
             }
             if (now >= n.Due + BattleRules.TurnRollTime)
             {
                 rolling = false;
-                Land(battle.RollGrade(shakes), true, 1f);
+                Land(battle.RollGrade(shakes), 1f);
             }
         }
 
-        //Land : one note is done. A parried note counts at once, the notes of a skill or the SIGNATURE
-        //are handed in together when the last one is done.
-        private void Land(Grade grade, bool rightSize, float hold)
+        //Land : one note is done, and it counts at once. A parried note blocks (or not) now, a note of a skill
+        //hits now (NOTE BY NOTE), the SIGNATURE's strokes gather and strike together at the end.
+        private void Land(Grade grade, float hold)
         {
             missKept = false;
             notesPlayed++;                                                               // RANK
-            results[next] = new NoteResult(grade, rightSize, hold);
+            results[next] = new NoteResult(grade, hold);
             qteEffects.SpawnHit(HitX, HitY, grade);
             judgeLife = 1f;
 
-            bool perfect = grade == Grade.Perfect && rightSize;
+            bool perfect = grade == Grade.Perfect;
+            bool landed = perfect || grade == Grade.Good;
+            bool last = next == notes.Count - 1;
             if (perfect)
             {
                 perfects++;
@@ -884,21 +920,27 @@ namespace Tacetno433.Screens
             if (swipeFor == SwipeFor.Parry)
             {
                 battle.ParryNote(next, grade);
-                judgeWord = grade == Grade.Perfect ? "PARRY" : (grade == Grade.Good ? "GOOD" : "MISS");
-                if (grade == Grade.Perfect) qteEffects.SpawnSparks(HitX, HitY, 10, 1f);
-                if (grade == Grade.Perfect || grade == Grade.Good)                       // the parry's clash, in the colours of the one who parried
-                    qteHits.Clash(new Vector2(HitX, HitY), grade == Grade.Perfect && rightSize, SpotOf(battle.Current != null ? battle.Current.IntentTarget : null));
+                judgeWord = perfect ? "PARRY" : (landed ? "GOOD" : "MISS");
+                if (perfect) qteEffects.SpawnSparks(HitX, HitY, 10, 1f);
+                if (landed)                                                              // the parry's clash, in the colours of the one who parried
+                    qteHits.Clash(new Vector2(HitX, HitY), perfect, SpotOf(battle.Current != null ? battle.Current.IntentTarget : null));
                 ShowEvents();
+                ParryAction(grade);
             }
             else
             {
-                bool onTime = grade == Grade.Perfect || grade == Grade.Good;
-                if (onTime && !rightSize) judgeWord = "WRONG SIZE";
-                else if (grade == Grade.Perfect) judgeWord = "PERFECT";
-                else if (grade == Grade.Good) judgeWord = "GOOD";
-                else judgeWord = "MISS";
+                judgeWord = perfect ? "PERFECT" : (landed ? "GOOD" : "MISS");
+                if (swipeFor == SwipeFor.Skill)
+                {
+                    battle.SkillNote(next, results[next]);                               // NOTE BY NOTE : the blow lands now
+                    ShowEvents();
+                }
+                SwipeAction(grade, last);
             }
             next++;
+
+            //A skill whose enemies have all fallen stops asking for its other notes
+            if (swipeFor == SwipeFor.Skill && next < notes.Count && battle.SkillTargetsDown) next = notes.Count;
         }
 
         private void FinishSwipe()
@@ -909,7 +951,7 @@ namespace Tacetno433.Screens
             if (swipeFor == SwipeFor.Skill)
             {
                 if (practice) Learn(Lesson.Skill);
-                battle.UseSkill(results);
+                battle.EndSkill();
                 shake = Math.Max(shake, 0.4f);
             }
             else if (swipeFor == SwipeFor.Signature)
@@ -921,13 +963,18 @@ namespace Tacetno433.Screens
                 judgeLife = 1.6f;
                 qteEffects.SpawnFlare(HitX, HitY, 1f);
                 shake = 0.8f;
+                actionCam.Punch(BattleRules.CamFinishPunch * 1.5f);                      // ACTION : the whole phrase lands at once
+                actionCam.Shake(BattleRules.CamShake * 2f);
             }
             else
             {
                 if (practice) Learn(Lesson.Parry);
+                Fighter parried = battle.Current != null ? battle.Current.IntentTarget : null;
                 battle.FinishEnemyTurn();
+                if (parried != null) hitBy = parried;                                    // a COUNTER is the musician's blow, in their colours
             }
 
+            actionCam.Release();                                                         // ACTION : the camera eases back (a COUNTER holds it a moment)
             ShowEvents();
             view = View.Pause;
             viewTime = 0f;
@@ -955,7 +1002,7 @@ namespace Tacetno433.Screens
                 TurnEvent e = battle.Events[i];
                 if (e.Kind == TurnEventKind.Breath)
                 {
-                    effects.SpawnPop(BreathX + 90f, BreathY - 16f, "+" + NumberText.Get(e.Amount), Palette.Highlight, 0.9f);
+                    hudPops.SpawnPop(BreathX + 90f, BreathY - 16f, "+" + NumberText.Get(e.Amount), Palette.Highlight, 0.9f);
                     continue;
                 }
                 if (e.Kind == TurnEventKind.Saved && e.Who != null)
@@ -966,17 +1013,17 @@ namespace Tacetno433.Screens
                 }
                 if (e.Kind == TurnEventKind.Steal)
                 {
-                    effects.SpawnPop(BreathX + 90f, BreathY - 16f, "-" + NumberText.Get(e.Amount) + " BREATH", Palette.PaperDim, 0.8f);
+                    hudPops.SpawnPop(BreathX + 90f, BreathY - 16f, "-" + NumberText.Get(e.Amount) + " BREATH", Palette.PaperDim, 0.8f);
                     continue;
                 }
                 if (e.Kind == TurnEventKind.Ready)
                 {
-                    effects.SpawnPop(1120f, signatureBox.Y - 14f, "SIGNATURE READY", Palette.Highlight, 0.7f);
+                    hudPops.SpawnPop(1120f, signatureBox.Y - 14f, "SIGNATURE READY", Palette.Highlight, 0.7f);
                     continue;
                 }
                 if (e.Kind == TurnEventKind.Extra)
                 {
-                    effects.SpawnPop(HitX, HitY - 60f, "+" + NumberText.Get(e.Amount) + " ATTACKS", Palette.Highlight, 0.9f);   // FEATHER
+                    hudPops.SpawnPop(HitX, HitY - 60f, "+" + NumberText.Get(e.Amount) + " ATTACKS", Palette.Highlight, 0.9f);   // FEATHER
                     continue;
                 }
                 if (e.Who == null) continue;
@@ -1021,7 +1068,8 @@ namespace Tacetno433.Screens
                     else
                     {
                         int tier = !hitSignature && hitBy != null && !hitBy.IsEnemy ? hitBy.Musician.Rehearsed : 0;   // WEAPON TIERS
-                        hits.Hit(style, DrawBox(e.Who), power, colors, tier);
+                        Flick swing = view == View.Swipe && swipeFor == SwipeFor.Skill ? lastWay : Flick.None;     // ACTION : cut the way the baton swung
+                        hits.Hit(style, DrawBox(e.Who), power, colors, tier, swing);
                     }
 
                     //IMPACT FRAME : the world holds still through the turns and the flash
@@ -1069,6 +1117,13 @@ namespace Tacetno433.Screens
                 {
                     effects.SpawnPop(x, y, "COUNTER", Palette.Highlight, 0.9f);
                     effects.SpawnFlare(x, box.Center.Y, 1f);
+                    //ACTION : every note blocked, the musician answers. The camera snaps to the enemy and punches in.
+                    actionCam.HoldFor(new Vector2(box.Center.X, box.Center.Y), BattleRules.CamZoomMost * 0.6f, BattleRules.CamCounterHold);
+                    actionCam.Punch(BattleRules.CamFinishPunch);
+                    actionCam.Shake(BattleRules.CamShake * 2f);
+                    actionCam.Kick(new Vector2(1f, 0f), 1f);
+                    hitStop = Math.Max(hitStop, BattleRules.HitStopTime);
+                    jab = 1f;
                 }
                 else if (e.Kind == TurnEventKind.Break)
                 {
@@ -1111,6 +1166,11 @@ namespace Tacetno433.Screens
                     r.Y -= (int)(Math.Max(0f, lunge) * 14f);
                 }
                 r.Y += (int)(Math.Sin(worldTime * 2.2f) * 2f);                  // breathing, one pixel of the art
+                if (jab > 0f)                                                   // ACTION : a blow of a skill, a quick jump at the enemy
+                {
+                    r.X += (int)(jab * jab * BattleRules.StageJab);
+                    r.Y -= (int)(jab * jab * 10f);
+                }
             }
             return r;
         }
@@ -1270,6 +1330,70 @@ namespace Tacetno433.Screens
                 NextStep();
                 clock = RingTime * 0.6f;
             }
+            else if (name == "battlecombo" || name == "battlefinish" || name == "battleroll" || name == "battlehold")
+            {
+                //ACTION (Beta1, 29 Oct) : a skill in the middle of its notes. battlecombo = two notes landed PERFECT (two blows,
+                //the camera two steps in), battlefinish = every note (the FINISHER), battleroll = a ROLL being shaken,
+                //battlehold = a HOLD being held. The musician whose skill has that note plays it, the others ATTACK first.
+                NoteKind wanted = name == "battleroll" ? NoteKind.Roll : (name == "battlehold" ? NoteKind.Hold : NoteKind.Swipe);
+                Fighter player = null;
+                Skill s = null;
+                for (int i = 0; i < battle.Party.Count && s == null; i++)
+                {
+                    Skill[] two = { SkillList.First(battle.Party[i].Musician), SkillList.Second(battle.Party[i].Musician) };
+                    for (int k = 0; k < two.Length && s == null; k++)
+                        if (two[k].HitsEnemy && two[k].Notes.Length > 0 && two[k].Notes[0].Kind == wanted && (wanted != NoteKind.Swipe || two[k].Notes.Length >= 3))
+                        {
+                            player = battle.Party[i];
+                            s = two[k];
+                        }
+                }
+                if (s == null) return;
+                battle.Breath = 10;
+                battle.PlanSkill(player, s, s.Target == SkillTarget.Enemy ? FirstStanding() : null);
+                battle.PlayBar();
+                for (int guard = 0; guard < 12 && battle.Step != TurnStep.Plan && !(battle.Step == TurnStep.PlayerTurn && battle.Current == player); guard++)
+                {
+                    if (battle.Step == TurnStep.PlayerTurn) battle.Attack();
+                    else battle.TakeEnemyAttack(null);
+                }
+                battle.Events.Clear();
+                NextStep();
+                if (view != View.Swipe) return;
+
+                if (wanted == NoteKind.Swipe)
+                {
+                    int landing = name == "battlefinish" ? notes.Count : 2;
+                    clock = notes[landing - 1].Due;
+                    for (int i = 0; i < landing; i++)
+                    {
+                        lastWay = notes[i].Way;
+                        Land(Grade.Perfect, 1f);
+                    }
+                }
+                else
+                {
+                    clock = notes[0].Due + 0.45f;
+                    lastWay = Flick.Right;
+                    if (wanted == NoteKind.Roll)
+                    {
+                        rolling = true;
+                        shakes = 4;
+                        for (int i = 0; i < shakes; i++) RapidBlow(i / 5f);
+                        actionCam.Hold(ActionPoint(), BattleRules.CamRollZoom * shakes);
+                    }
+                    else
+                    {
+                        holding = true;
+                        holdGrade = Grade.Perfect;
+                        holdTime = 0.45f;
+                        holdDown = 0.45f;
+                        for (int i = 0; i < 4; i++) RapidBlow(i / 5f);
+                        actionCam.Hold(ActionPoint(), BattleRules.CamHoldZoom * 0.6f);
+                    }
+                }
+                ShowEvents();
+            }
             else if (name == "battlesig" || name == "battlecutin")
             {
                 battle.Kit = TurnKit.Beethoven;
@@ -1369,13 +1493,10 @@ namespace Tacetno433.Screens
             bool planning = view == View.Plan || view == View.Target;
 
             //The World : finished before the frame (BattleScreen.Stage.cs PreDraw, Core/PostChain.cs). The IMPACT FRAME
-            //punches the camera in round the blow for a moment.
-            if (PostChain.Final != null)
-            {
-                float zoom = 1f + hits.ImpactZoom * BattleRules.HitImpactZoom;
-                Vector2 at = ImpactOnScreen();
-                PostChain.ShowFinal(sb, at, zoom, Color.White);
-            }
+            //punches the camera in round the blow for a moment. ACTION (Beta1, 29 Oct) : the camera that moves with the
+            //baton frames it (Core/StageCamera.cs), worked out once here for all that is drawn through it this frame.
+            actionCam.Shown(Flashing, 1f + hits.ImpactZoom * BattleRules.HitImpactZoom, out camAt, out camZoom, out camTurn, out camShift);
+            if (PostChain.Final != null) PostChain.ShowFinal(sb, camAt, camZoom, camTurn, camShift, Color.White);
             else Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.StageDeep);
 
             //Panel : a dark band along the bottom, fading in from above, so the musician in front stands into it
@@ -1384,10 +1505,14 @@ namespace Tacetno433.Screens
             Gfx.Rect(sb, 0, PanelTop, TacetGame.ScreenW, TacetGame.ScreenH - PanelTop, Palette.Panel * 0.94f);
             Gfx.Rect(sb, 0, PanelTop, TacetGame.ScreenW, 1, Palette.LineGrey * 0.3f);
 
-            DrawBand(sb, planning);
+            //On The Enemies : their name plates and their next attack, through the same camera so they stay on them
+            BeginCameraBatch(sb);
             DrawEnemyPlates(sb);
-            DrawBarStrip(sb, planning);
             if (view != View.Over) DrawIntent(sb, planning, 1f - FocusEased);     // fades out as a ring comes up (round 4)
+            EndCameraBatch(sb);
+
+            DrawBand(sb, planning);
+            DrawBarStrip(sb, planning);
 
             //QTE FOCUS : the world behind is already dark, grey and soft (PostChain), the ring and the notes come on top
             if (swiping)
@@ -1402,8 +1527,11 @@ namespace Tacetno433.Screens
             }
             DrawQteLight(sb);
 
+            BeginCameraBatch(sb);                                            // the words and numbers stay on the fighter they came off
             effects.DrawPops(sb, Game.Font);
             DrawNumbers(sb);
+            EndCameraBatch(sb);
+            hudPops.DrawPops(sb, Game.Font);
 
             if (judgeLife > 0f)
                 Gfx.TextSpacedCentered(sb, Game.BigFont, judgeWord, HitX, HitY + 110f, Palette.Highlight * Math.Min(1f, judgeLife * 2f), TextSize.Subtitle, 3f);
@@ -1422,12 +1550,26 @@ namespace Tacetno433.Screens
             if (swiping)
             {
                 if (cutIn > 0f) DrawCutIn(sb);
-                else
-                {
-                    DrawRuler(sb);
-                    baton.Draw(sb, gesture);
-                }
+                else baton.Draw(sb, gesture);
             }
+        }
+
+        //Camera Batch : ACTION, what stands on a fighter (a name plate, an attack, a number) is drawn through the battle's
+        //camera so it moves with the fighter while the world zooms, slides and leans. The frame's own batch is put back after.
+        //ADVANCED PART : the same push as PostChain.ShowFinal, as a matrix : move the camera's point to the corner, zoom,
+        //turn, move it back and slide. Times Sharp.Transform, like every batch of a page (SHARP SCREEN).
+        private void BeginCameraBatch(SpriteBatch sb)
+        {
+            Matrix push = Matrix.CreateTranslation(-camAt.X, -camAt.Y, 0f) * Matrix.CreateScale(camZoom, camZoom, 1f)
+                        * Matrix.CreateRotationZ(camTurn) * Matrix.CreateTranslation(camAt.X + camShift.X, camAt.Y + camShift.Y, 0f);
+            sb.End();
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, null, null, null, push * Sharp.Transform);
+        }
+
+        private static void EndCameraBatch(SpriteBatch sb)
+        {
+            sb.End();
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, null, null, null, Sharp.Transform);
         }
 
         //THE BAND (Beta1) : everyone on the field as a card in a row under the bar strip, until the user's face GUI.
@@ -1551,7 +1693,8 @@ namespace Tacetno433.Screens
                 Rectangle r = BoxOf(f);
                 Rectangle plate = EnemyPlate(r);
                 float a = f.Down ? 0.35f * (1f - GoneOf(f)) : 1f;                     // SILENCED : the plate goes with it
-                if (battle.Current != f) a *= MathHelper.Lerp(1f, 0.35f, FocusEased);     // QTE FOCUS : only the one attacking stays bright
+                bool lit = battle.Current == f || (swipeFor == SwipeFor.Skill && SkillAims(f));   // ACTION : the band's target stays lit, its life drops blow by blow
+                if (!lit) a *= MathHelper.Lerp(1f, 0.35f, FocusEased);                  // QTE FOCUS : only the one attacking (or being hit) stays bright
 
                 if (aiming && hover == f)
                     Gfx.RectOutline(sb, new Rectangle(r.X - 5, r.Y - 5, r.Width + 10, r.Height + 10), Palette.Accent, 2);
@@ -1621,8 +1764,8 @@ namespace Tacetno433.Screens
             Gfx.TextRight(sb, Game.Font, maxLabel[f], x + width, y + 11, Palette.LineGrey * a, TextSize.Label);
         }
 
-        //Enemy Intent : over its head, how hard each note hits and the notes themselves, the way and the size
-        //of each, so a player can read the whole attack before it comes (like Slay the Spire).
+        //Enemy Intent : over its head, how hard each note hits and the notes themselves, the way of each (FALSE NOTES : a ?),
+        //so a player can read the whole attack before it comes (like Slay the Spire).
         //CADENZA : a boss's big move says so above it. In the plan, the enemy under the pointer draws a line to its target.
         private void DrawIntent(SpriteBatch sb, bool planning, float ia)
         {
@@ -1663,7 +1806,7 @@ namespace Tacetno433.Screens
                 }
                 else Gfx.Text(sb, Game.BigFont, NumberText.Get(f.IntentNotes[0]), left, cy - 16, Palette.Highlight * ia, TextSize.Small);
                 for (int n = 0; n < f.IntentNotes.Length; n++)
-                    NoteGlyph.Note(sb, Game.BigFont, left + NumberRoom + NoteStep * (n + 0.5f), cy, f.IntentShown[n], f.IntentWays[n], 0.46f, time, ia);
+                    NoteGlyph.Note(sb, Game.BigFont, left + NumberRoom + NoteStep * (n + 0.5f), cy, f.IntentWays[n], 0.46f, ia, n < f.IntentLate.Length && f.IntentLate[n]);
                 if (f.IntentCadenza || f.IntentAll)
                     Gfx.TextSpacedCentered(sb, Game.Font, f.IntentAll ? "EVERYONE" : "CADENZA", r.Center.X, cy - (Settings.ClearFight && f.IntentCadenza && !f.IntentAll ? lift + 22f : 40f), Palette.Highlight * (ia * (0.7f + 0.3f * (float)Math.Sin(time * 6f))), TextSize.Label, 3f);
                 if (f.Staggered)
@@ -1772,8 +1915,9 @@ namespace Tacetno433.Screens
             return 1f - (n.Due - clock) / RingTime;
         }
 
-        //Play Notes : the skill or the SIGNATURE. The note being played sits on the hit point with its ring,
-        //the ones after it wait in a small row above, so the whole phrase can be read before it comes.
+        //Play Notes : the skill or the SIGNATURE. The note being played sits on the hit point with its ring (and, when it is
+        //not a plain swipe, the one word that says what to do : HOLD, SHAKE, AGAIN), the ones after it wait in a small row
+        //above, so the whole phrase can be read before it comes.
         private void DrawPlayNotes(SpriteBatch sb)
         {
             if (next >= notes.Count) return;
@@ -1782,6 +1926,9 @@ namespace Tacetno433.Screens
             float a = MathHelper.Clamp(progress * 3f, 0f, 1f);
 
             DrawGlyph(sb, n, HitX, HitY, NoteGrow, a);
+            string word = n.Kind == NoteKind.Hold ? WordHold : (n.Kind == NoteKind.Roll ? WordRoll : (n.Kind == NoteKind.Spark ? WordSpark : null));
+            if (word != null && !holding && !rolling)
+                Gfx.TextSpacedCentered(sb, Game.Font, word, HitX, HitY + RingMark + 22f, Palette.Highlight * a, TextSize.Label, 4f);
             if (holding)
             {
                 //HOLD : the ring fills round the note as long as it is held
@@ -1809,16 +1956,15 @@ namespace Tacetno433.Screens
             }
         }
 
-        //Glyph : one note of any kind, see NoteGlyph
+        //Glyph : one note of any kind, see NoteGlyph. A SIGNATURE stroke is a plain note too (ONE RULE).
         private void DrawGlyph(SpriteBatch sb, QteNote n, float x, float y, float grow, float a)
         {
-            if (n.Size < 0) NoteGlyph.ShapeNote(sb, x, y, n.Way, grow, a);                    // a SIGNATURE stroke
-            else if (n.Kind == NoteKind.Spark) NoteGlyph.Spark(sb, x, y, 14f * grow, Palette.Highlight * a);
-            else if (n.Kind == NoteKind.Roll) NoteGlyph.RollNote(sb, Game.BigFont, x, y, grow, a);
+            if (n.Kind == NoteKind.Spark) NoteGlyph.Spark(sb, x, y, 14f * grow, Palette.Highlight * a);
+            else if (n.Kind == NoteKind.Roll) NoteGlyph.RollNote(sb, x, y, grow, a);
             else
             {
-                NoteGlyph.Note(sb, Game.BigFont, x, y, n.Size, n.Way, grow, time, a);
-                if (n.Kind == NoteKind.Hold) NoteGlyph.FermataSign(sb, x, y - 46f * grow, 10f * grow, Palette.Highlight * a);
+                NoteGlyph.Note(sb, Game.BigFont, x, y, n.Way, grow, a, false);
+                if (n.Kind == NoteKind.Hold) NoteGlyph.FermataSign(sb, x, y - (NoteGlyph.NoteRadius + 18f) * grow, 10f * grow, Palette.Highlight * a);
             }
         }
 
@@ -1839,7 +1985,8 @@ namespace Tacetno433.Screens
                 float x = MathHelper.Lerp(from.Center.X, HitX, p);
                 float y = MathHelper.Lerp(from.Center.Y, HitY, p);
                 float a = i == next ? 1f : 0.55f;
-                NoteGlyph.Note(sb, Game.BigFont, x, y, notes[i].Shown, notes[i].Way, MathHelper.Lerp(1f, NoteGrow, p), time, a);
+                bool hidden = notes[i].Late && progress < BattleRules.TurnLateReveal;                // FALSE NOTES
+                NoteGlyph.Note(sb, Game.BigFont, x, y, notes[i].Way, MathHelper.Lerp(1f, NoteGrow, p), a, hidden);
                 if (i == next) NoteGlyph.TimingRing(sb, HitX, HitY, progress, RingMark, RingStart, 0f, Math.Min(1f, progress * 3f));
             }
 
@@ -1860,20 +2007,6 @@ namespace Tacetno433.Screens
             if (m == fore) return new Vector2(foreBox.Center.X + 40f, foreBox.Y + 130f);
             Rectangle chip = ChipBox(m.Slot);
             return new Vector2(chip.Center.X, chip.Bottom + 2f);
-        }
-
-        //Ruler : from where the swipe began, the way the note wants, with the p / mf / f zones.
-        //A spark, a roll and a hold being held need no ruler.
-        private void DrawRuler(SpriteBatch sb)
-        {
-            if (!gesture.Held || holding || next >= notes.Count) return;
-            QteNote n = notes[next];
-            if (n.Kind == NoteKind.Spark || n.Kind == NoteKind.Roll) return;
-
-            Vector2 d = NoteGlyph.Way(n.Way);
-            Vector2 anchor = gesture.InStroke ? gesture.StrokeStart : Input.MousePos;
-            float along = Vector2.Dot(gesture.LiveVector, d);
-            Baton.DrawRuler(sb, anchor, d, along, gesture.InStroke ? Baton.SizeOf(along) : -1, n.Size >= 0);
         }
 
         //Bottom Bar : in the plan, the selected musician's commands, the BENCH and a line about what is under

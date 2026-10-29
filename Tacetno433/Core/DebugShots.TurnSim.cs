@@ -35,7 +35,6 @@ namespace Tacetno433.Core
             public string Name;
             public float Spread;        // timing error in seconds (one standard deviation)
             public float WrongWay;      // chance of swiping the wrong way
-            public float WrongSize;     // chance of the wrong size
         }
 
         //With the normal windows (PERFECT 0.10, GOOD 0.22 seconds) these come out at about
@@ -43,11 +42,11 @@ namespace Tacetno433.Core
         //EXPERT (step 12) shows who MAESTRO is for.
         private static SimPlayer[] simPlayers =
         {
-            new SimPlayer { Name = "FLAWLESS", Spread = 0f,    WrongWay = 0f,    WrongSize = 0f },
-            new SimPlayer { Name = "EXPERT",   Spread = 0.08f, WrongWay = 0.005f, WrongSize = 0.03f },
-            new SimPlayer { Name = "STRONG",   Spread = 0.12f, WrongWay = 0.01f, WrongSize = 0.05f },
-            new SimPlayer { Name = "AVERAGE",  Spread = 0.2f,  WrongWay = 0.03f, WrongSize = 0.15f },
-            new SimPlayer { Name = "NEWCOMER", Spread = 0.3f,  WrongWay = 0.08f, WrongSize = 0.3f },
+            new SimPlayer { Name = "FLAWLESS", Spread = 0f,    WrongWay = 0f },
+            new SimPlayer { Name = "EXPERT",   Spread = 0.08f, WrongWay = 0.005f },
+            new SimPlayer { Name = "STRONG",   Spread = 0.12f, WrongWay = 0.01f },
+            new SimPlayer { Name = "AVERAGE",  Spread = 0.2f,  WrongWay = 0.03f },
+            new SimPlayer { Name = "NEWCOMER", Spread = 0.3f,  WrongWay = 0.08f },
         };
 
         private const int SimFights = 200;
@@ -70,6 +69,12 @@ namespace Tacetno433.Core
             string seedText = Environment.GetEnvironmentVariable("TACET_SIM_SEED");
             if (seedText != null) int.TryParse(seedText, out seed);
             Random rng = new Random(seed);
+
+            //Kit : the runs are played as THE UNHEARING. TACET_SIM_KIT (Beta1 29 Oct) plays them as another conductor instead,
+            //Bach or Fanny, to compare the three kept ones (it is a TurnKit name).
+            TurnKit runKit = TurnKit.Beethoven;
+            string kitText = Environment.GetEnvironmentVariable("TACET_SIM_KIT");
+            if (kitText != null) Enum.TryParse(kitText, out runKit);
             simAttackDamage = 0;
             simSkillDamage = 0;
             string report = "TACET TURN BATTLE BALANCE, ONE BAR  (" + SimFights + " fights per cell, " + SimRuns + " runs per player)\r\n";
@@ -165,7 +170,7 @@ namespace Tacetno433.Core
             }
 
             //RUNS : three floors with life carried over, NORMAL and MAESTRO
-            report += "\r\nRUNS (3 floors, life carried over, no motifs) : WIN PERCENT  /  LOST ON FLOOR 1, 2, 3\r\n";
+            report += "\r\nRUNS (3 floors, life carried over, no motifs, " + runKit + ") : WIN PERCENT  /  LOST ON FLOOR 1, 2, 3\r\n";
             for (int m = 0; m < 2; m++)
             {
                 bool maestro = m == 1;
@@ -176,7 +181,7 @@ namespace Tacetno433.Core
                     int[] lostOn = new int[4];
                     for (int r = 0; r < SimRuns; r++)
                     {
-                        int reached = SimRun(simPlayers[p], rng, TurnKit.Beethoven, maestro);
+                        int reached = SimRun(simPlayers[p], rng, runKit, maestro);
                         if (reached > 3) wins++;
                         else lostOn[reached]++;
                     }
@@ -329,11 +334,7 @@ namespace Tacetno433.Core
                 else
                 {
                     Grade[] parries = new Grade[b.Current.IntentNotes.Length];
-                    for (int i = 0; i < parries.Length; i++)
-                    {
-                        NoteResult r = SimSwipe(b, player, rng);
-                        parries[i] = r.Grade == Grade.Perfect && !r.RightSize ? Grade.Good : r.Grade;   // the wrong size only half blocks
-                    }
+                    for (int i = 0; i < parries.Length; i++) parries[i] = SimSwipe(b, player, rng).Grade;
                     b.TakeEnemyAttack(parries);
                 }
             }
@@ -354,7 +355,7 @@ namespace Tacetno433.Core
             if (b.CanSignature)
             {
                 NoteResult[] four = new NoteResult[4];
-                for (int i = 0; i < 4; i++) four[i] = new NoteResult(SimSwipe(b, player, rng).Grade, true, 1f);
+                for (int i = 0; i < 4; i++) four[i] = new NoteResult(SimSwipe(b, player, rng).Grade, 1f);
                 b.UseSignature(four);
                 if (b.Step != TurnStep.Plan) return;
             }
@@ -403,7 +404,6 @@ namespace Tacetno433.Core
             for (int i = 0; i < results.Length; i++)
             {
                 NoteResult r = SimSwipe(b, player, rng);
-                if (s.Notes[i].Kind == NoteKind.Spark || s.Notes[i].Kind == NoteKind.Roll) r.RightSize = true;
                 if (s.Notes[i].Kind == NoteKind.Hold) r.Hold = r.Grade == Grade.Perfect ? 1f : 0.6f;
                 results[i] = r;
             }
@@ -424,10 +424,9 @@ namespace Tacetno433.Core
             if (offset > b.LateLimit) g = Grade.Hesitate;
             else if (offset < -BattleRules.EarlyTime) g = Grade.Miss;
             else g = b.Judge(offset, rightWay);
-            bool rightSize = b.AnySize || rng.NextDouble() >= player.WrongSize;              // LOCKED TEMPO
             simNotes++;                                                                      // RANK
-            if (g == Grade.Perfect && rightSize) simPerfects++;
-            return new NoteResult(g, rightSize, 1f);
+            if (g == Grade.Perfect) simPerfects++;
+            return new NoteResult(g, 1f);
         }
     }
 }

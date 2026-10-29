@@ -86,7 +86,9 @@ namespace Tacetno433.Screens
                 Body = "Hold, swing, stop. DOWN, LEFT, RIGHT, UP is the shape of the SIGNATURE.",
                 Goal = "Follow the arrow once round." },
 
-            new Lesson { Kind = Kind.Size, Title = "SMALL, MIDDLE, BIG", Need = 3,
+            //ONE RULE (Beta1, 29 Oct) : the turn battle has no sizes, so SMALL MIDDLE BIG and READ THE NOTE are the old duel's
+            //only. The turn battle reads the arrow and the ring (FOLLOW THE ARROW).
+            new Lesson { Kind = Kind.Size, Title = "SMALL, MIDDLE, BIG", Need = 3, For = For.Duel,
                 Body = "Short swing p, middle mf, long f.",
                 Goal = "Swing down : short, then middle, then long." },
 
@@ -98,9 +100,13 @@ namespace Tacetno433.Screens
                 Body = "Stop each stroke as the ring closes. That is how skills land, and how you block.",
                 Goal = "Four strokes GOOD or better." },
 
-            new Lesson { Kind = Kind.Loudness, Title = "READ THE NOTE", Need = 6, Bpm = 76,
+            new Lesson { Kind = Kind.Loudness, Title = "READ THE NOTE", Need = 6, Bpm = 76, For = For.Duel,
                 Body = "Swing where the arrow points, as far as the letter says : f BIG, mf MIDDLE, p SMALL.",
                 Goal = "Six notes on time, the right size." },
+
+            new Lesson { Kind = Kind.Loudness, Title = "FOLLOW THE ARROW", Need = 6, Bpm = 76, For = For.Turn,
+                Body = "Swing the way the arrow points as the ring closes. That is all a note asks.",
+                Goal = "Six notes on time, the right way." },
 
             new Lesson { Kind = Kind.Breath, Title = "BREATH", Need = 8, Bpm = BattleRules.TempoByFloor[0][0], For = For.Duel,
                 Body = "The top bar is your band's life. Lose a note, lose breath. Let silent beats pass to breathe.",
@@ -119,9 +125,13 @@ namespace Tacetno433.Screens
                 Body = "Zigzag bar = roll. Shake the baton as fast as you can.",
                 Goal = "Five shakes in one roll." },
 
-            new Lesson { Kind = Kind.Fermata, Title = "FERMATA", Need = 1, Bpm = 76,
+            new Lesson { Kind = Kind.Fermata, Title = "FERMATA", Need = 1, Bpm = 76, For = For.Duel,
                 Body = "Note under an arch = hold. Stroke it, then keep the baton STILL.",
                 Goal = "Hold one fermata to the end." },
+
+            new Lesson { Kind = Kind.Fermata, Title = "HOLD", Need = 1, Bpm = 76, For = For.Turn,
+                Body = "Note under an arch = HOLD. Swing it, then keep the button down.",
+                Goal = "Hold one to the end." },
 
             new Lesson { Kind = Kind.Spark, Title = "THE SPARK", Need = 2, Bpm = 70,
                 Body = "Note tied to a spark : flick once more, any way, half a beat later.",

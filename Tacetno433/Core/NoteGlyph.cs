@@ -87,37 +87,54 @@ namespace Tacetno433.Core
             Gfx.Circle(sb, cx, cy - size * 0.28f, size * 0.2f, color);
         }
 
-        //Note : a whole swipe note for the turn battle (Alpha 7). The ring is sized by its mark,
-        //the mark sits in the middle and the pointer shows the way to swing. size is 0 p, 1 mf,
-        //2 f, the order of Baton.SizeOf. grow scales the whole note (1 is the duel's size).
-        //The duel and the tutorial still draw their own lane notes the same way.
-        private static readonly string[] noteMark = { "p", "mf", "f" };
-        private static readonly float[] noteRadius = { 23f, 27f, 31f };
-        private static readonly float[] noteThick = { 1.5f, 2.5f, 4.5f };
-        private static readonly float[] noteMarkScale = { 0.9f, 0.72f, 1.15f };
+        //Note : a swipe note of the turn battle. ONE RULE (Beta1, 29 Oct) : the sizes p mf f are gone, so a note is a
+        //ring with ONE BIG ARROW in it, the way to swing, and nothing else to read (the user : a first touch should tell
+        //you what to do). grow scales the whole note (1 = the size on the hit point). hidden : FALSE NOTES, a ? until late.
+        public const float NoteRadius = 28f;
+        private const float NoteThick = 3f;
 
-        public static void Note(SpriteBatch sb, SpriteFont font, float cx, float cy, int size, Flick way, float grow, float time, float alpha)
+        public static void Note(SpriteBatch sb, SpriteFont font, float cx, float cy, Flick way, float grow, float alpha, bool hidden)
         {
-            float radius = noteRadius[size] * grow;
-            Hollow.Ring(sb, cx, cy, radius, noteThick[size] * grow, alpha);
-            if (size == 2) Crown(sb, cx, cy, radius, time, alpha);
-            Gfx.TextCentered(sb, font, noteMark[size], cx, cy - 2f * grow, Palette.Highlight * alpha, TextSize.Small * noteMarkScale[size] * grow);
-            Pointer(sb, way, cx, cy, radius, alpha);
+            float radius = NoteRadius * grow;
+            Hollow.Ring(sb, cx, cy, radius, NoteThick * grow, alpha);
+            if (hidden)
+            {
+                Gfx.TextCentered(sb, font, "?", cx + 1f, cy - 1f * grow, Palette.Void * alpha, TextSize.Small * grow);
+                Gfx.TextCentered(sb, font, "?", cx, cy - 2f * grow, Palette.Highlight * alpha, TextSize.Small * grow);
+                return;
+            }
+            BigArrow(sb, way, cx, cy, radius, alpha);
         }
 
-        //Roll Note : the roll of a skill (TREMOLO), a ring with "tr" in it, as music writes a trill
-        public static void RollNote(SpriteBatch sb, SpriteFont font, float cx, float cy, float grow, float alpha)
+        //Big Arrow : the arrow inside a note, as long as the ring is wide, outlined dark so it reads on any picture
+        public static void BigArrow(SpriteBatch sb, Flick way, float cx, float cy, float radius, float alpha)
         {
-            float radius = noteRadius[1] * grow;
-            Hollow.Ring(sb, cx, cy, radius, noteThick[1] * grow, alpha);
-            Gfx.TextCentered(sb, font, "tr", cx, cy - 2f * grow, Palette.Highlight * alpha, TextSize.Small * 0.8f * grow);
+            float length = radius * 1.3f;
+            float head = radius * 0.7f;
+            float thick = Math.Max(2f, radius * 0.17f);
+            Arrow(sb, way, cx, cy, length + 4f, head + 7f, Palette.Ink * alpha, thick + 4f);
+            Arrow(sb, way, cx, cy, length, head, Palette.Highlight * alpha, thick);
         }
 
-        //Shape Note : a stroke of the conductor's 4/4 SIGNATURE, a ring with an arrow and no mark, any size will do
-        public static void ShapeNote(SpriteBatch sb, float cx, float cy, Flick way, float grow, float alpha)
+        //Roll Note : the roll of a skill (TREMOLO). A ring with a zigzag in it, the shape of the hand shaking
+        //(it was "tr" as music writes a trill, which only a musician reads)
+        public static void RollNote(SpriteBatch sb, float cx, float cy, float grow, float alpha)
         {
-            Hollow.Ring(sb, cx, cy, noteRadius[1] * grow, noteThick[2] * grow, alpha);
-            Arrow(sb, way, cx, cy, 26f * grow, 12f * grow, Palette.Highlight * alpha, 3f * grow);
+            float radius = NoteRadius * grow;
+            Hollow.Ring(sb, cx, cy, radius, NoteThick * grow, alpha);
+
+            //Zigzag : seven short teeth, flat and wide, so it reads as a shaking line and not as a letter
+            const int Teeth = 7;
+            float w = radius * 1.4f;
+            float h = radius * 0.2f;
+            float step = w / Teeth;
+            for (int i = 0; i < Teeth; i++)
+            {
+                Vector2 a = new Vector2(cx - w / 2f + i * step, cy + (i % 2 == 0 ? h : -h));
+                Vector2 b = new Vector2(cx - w / 2f + (i + 1) * step, cy + (i % 2 == 0 ? -h : h));
+                Gfx.Line(sb, a, b, Palette.Ink * alpha, 2.5f * grow + 3f);
+                Gfx.Line(sb, a, b, Palette.Highlight * alpha, 2.5f * grow);
+            }
         }
 
         //Way : one step in the way a stroke goes, (0, 0) for none

@@ -132,7 +132,7 @@ namespace Tacetno433.Data
                            Power = 4, Sample = "flute", SampleNote = 72, ThemeColor = Palette.ToneC,
                            Trait = MusicianTrait.QuietPart, TraitName = "THE QUIET PART",
                            TraitText = "Against TACET's soft p notes, plays twice as hard.",
-                           TurnTraitText = "Hits 50 percent harder against an enemy showing a p note.",
+                           TurnTraitText = "Hits 50 percent harder against an enemy that is not aiming at QUANTZ.",
                            Line = "Taught a king the flute. Three hundred concertos, one listener." },
 
             //2 : timpani. Ernst Pfundt (1806 - 1871) : the timpanist of the Leipzig Gewandhaus, credited with the crank timpani
@@ -162,7 +162,7 @@ namespace Tacetno433.Data
                            Power = 6, Sample = "ranatek", SampleNote = 72, ThemeColor = Palette.ToneB,
                            Trait = MusicianTrait.OneStepBetter, TraitName = "ONE STEP BETTER",
                            TraitText = "Hits 30 percent harder when TACET plays loud (f).",
-                           TurnTraitText = "Hits 30 percent harder against an enemy showing an f note.",
+                           TurnTraitText = "Hits 30 percent harder against an enemy whose next attack has " + BattleRules.TurnLongNotes + " notes or more.",
                            Line = "Answers whatever she hears, faster and one step better." },
 
             //6 : cello. Jean-Louis Duport (1749 - 1819) : thought to have played the first Cello Sonatas Op. 5 with Beethoven in
@@ -192,7 +192,7 @@ namespace Tacetno433.Data
                            Power = 7, Sample = "bassdrum", SampleNote = 0, ThemeColor = Palette.ToneD,
                            Trait = MusicianTrait.Thunder, TraitName = "THE WHOLE FLOOR",
                            TraitText = "His big stroke on an f note knocks 2 off TACET's next note.",
-                           TurnTraitText = "A PERFECT f note of his skills takes 2 off each note of the enemy's next attack.",
+                           TurnTraitText = "The PERFECT last note of his skills takes 2 off each note of the enemy's next attack.",
                            Line = "One hit from him and the whole floor knows about it." },
         };
 

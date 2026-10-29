@@ -19,6 +19,10 @@
 | LESS FLASHING | `Core/Settings.cs` `ReduceFlashing` · หน้า `Screens/SettingsScreen.cs` แถว 07 · `BattleRules.LessFlash` |
 | CLEAR FIGHT (หน้าต่อสู้อ่านง่าย 29 ต.ค.) | `Core/Settings.cs` `ClearFight` เซฟ `clearfight=` · หน้า `Screens/SettingsScreen.cs` แถว 08 · วาดใน `Screens/BattleScreen.cs` (ค้น `CLEAR FIGHT` : `DrawClearPlate` `DrawAimedAt` `DrawIntent` `DrawBand` `DrawBottom`) · ตัวเลข `BattleRules.ClearFocusDim` `ClearFocusPool` `ClearPlate` |
 | PLAYTEST (SIGNATURE 1 แต้ม) | `BattleRules.PlaytestSignatureNeed` (0 = ค่าจริง) |
+| ระบบตวัดไม้ใหม่ ONE RULE (29 ต.ค.) : โน้ต = ลูกศรใหญ่ในวง + วงแหวน ไม่มีขนาด f mf p แล้ว, คำ HOLD SHAKE AGAIN ใต้โน้ตพิเศษ, โน้ตค้างแค่กดค้าง | หน้าตา `Core/NoteGlyph.cs` (`Note` `BigArrow` `RollNote`) · ตัดสินการตวัด `Screens/BattleScreen.cs` (`UpdateSwipe` `UpdateHold` `UpdateRoll` `Land`) · กติกา `Battle/TurnBattle.cs` (`NoteResult` `SwipeScale`) · `BETA1_DIRECTION.md` ข้อ 10 |
+| ตวัดแล้วตีทันที (NOTE BY NOTE) | `TurnBattle.BeginSkill` `SkillNote` `EndSkill` `SkillTargetsDown` (`UseSkill` เรียกทั้งสามต่อกัน ใช้ในตัวจำลองกับ turncheck) · หน้าจอ `BattleScreen.StartSkill` `Land` `FinishSwipe` |
+| กล้องที่ขยับตามไม้ (ACTION : ซูมทีละขั้น เตะ เอียง สั่น ท่าปิด ตีรัวตอนโน้ตรัวกับโน้ตค้าง ปัด COUNTER นักดนตรีพุ่ง JAB) | `Core/StageCamera.cs` · หัวข้อ ACTION ใน `Screens/BattleScreen.Stage.cs` (`SwipeAction` `ParryAction` `RapidBlow` `ActionPoint` `WorldFocus`) · โลกวาดผ่านกล้องด้วย `PostChain.ShowFinal` แบบหมุนได้ · ป้ายชื่อ ท่าถัดไป ตัวเลขบนตัวละครตามกล้องด้วย `BattleScreen.BeginCameraBatch` · ตัวเลข `BattleRules` หัวข้อ Camera Feel |
+| ภาพทดสอบกลางสกิล | `--shots battlecombo battlefinish battleroll battlehold` |
 | ภาพทดสอบ | `--shots battle battlewin battlelose battleslash battleshot battlesmash battlecross battleink battlegold battlefire battlecutin battlekill battlebolt battleboltsoft battleimpact` (`BattleScreen.ShowForPicture`) |
 
 **ยกระดับทุกหน้าจอ (28 ต.ค. รอบตัวอย่าง, 29 ต.ค. คำในแผ่นเฉียง ม่านผ้าจริง รอบ 1)** · เอกสาร `SCREENS_LEVEL_UP.md` ข้อ 10 13 14 · ตัวเลขใน `BattleRules` หัวข้อ UI Feel

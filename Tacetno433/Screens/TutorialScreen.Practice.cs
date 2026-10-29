@@ -263,9 +263,9 @@ namespace Tacetno433.Screens
                 return;
             }
 
-            //Right Size : only the LOUD AND SOFT lesson asks for it
+            //Right Size : only the LOUD AND SOFT lesson asks for it, and only in the old duel (ONE RULE : no sizes in the turn battle)
             bool counts = good;
-            if (l.Kind == Kind.Loudness && good && !SizeFits(MarkOf(n), size))
+            if (l.Kind == Kind.Loudness && !BattleRules.TurnBattleOn && good && !SizeFits(MarkOf(n), size))
             {
                 counts = false;
                 Hint(markHints[(int)MarkOf(n)]);
@@ -376,7 +376,7 @@ namespace Tacetno433.Screens
         private void UpdateHold(float now)
         {
             bool down = Input.MouseDown();
-            bool moving = baton.Velocity.Length() >= BattleRules.FermataStill;
+            bool moving = !BattleRules.TurnBattleOn && baton.Velocity.Length() >= BattleRules.FermataStill;   // the turn battle's HOLD only wants the button down
             if (down && !moving) heldTime += clock - holdClock;
             holdClock = clock;
             bool still = !moving || clock < holdSteady;
@@ -483,6 +483,15 @@ namespace Tacetno433.Screens
                     NoteGlyph.FermataSign(sb, x, RingY - 30f, 14f, Palette.Highlight);
                 }
                 if (k == NoteKind.Roll && rolling && n == pending) continue;
+
+                //ONE RULE (Beta1, 29 Oct) : in the turn battle a note is its arrow and nothing else, drawn as the fight draws it
+                if (BattleRules.TurnBattleOn)
+                {
+                    float grow = 0.85f + 0.25f * t;
+                    if (k == NoteKind.Roll) NoteGlyph.RollNote(sb, x, RingY, grow, focus);
+                    else NoteGlyph.Note(sb, Game.BigFont, x, RingY, WayOf(n), grow, focus, false);
+                    continue;
+                }
 
                 Choice mark = MarkOf(n);
                 float radius = (mark == Choice.Boost ? 31f : (mark == Choice.Ease ? 23f : 27f)) * (0.85f + 0.25f * t);
@@ -615,6 +624,7 @@ namespace Tacetno433.Screens
         //show in the two lessons where the size is the point. Drawn over the card and footer.
         private void DrawRuler(SpriteBatch sb, Lesson l)
         {
+            if (BattleRules.TurnBattleOn) return;                                    // ONE RULE : no sizes, so no ruler (the fight has none either)
             if (!gesture.Held || l.Kind == Kind.Hold || l.Kind == Kind.Finish || clearTimer >= 0f) return;
             if (rolling || holding || onSpark) return;
             if (l.Bpm > 0 && (!running || KindOf(pending) == NoteKind.None)) return;

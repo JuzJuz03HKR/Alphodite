@@ -56,6 +56,11 @@ namespace Tacetno433.Screens
         private bool hitSignature;         // the blows being shown are the SIGNATURE's (CROSS)
         private Vector2 stageCam;          // the camera of the frame being drawn
         private Vector2 kick;              // the camera's nudge after a hit
+        private readonly StageCamera actionCam = new StageCamera();   // ACTION : the camera that moves with the baton (Core/StageCamera.cs)
+        private Vector2 camAt;             //   this frame's push : the point, the zoom, the turn and the slide (Draw works them out once)
+        private float camZoom = 1f;
+        private float camTurn;
+        private Vector2 camShift;
         private int movement;              // which movement's backdrop (the floor, Data/Movement.cs, NO MORE ERAS 29 Oct)
         private string[] layerName = new string[0];   // LAYERS : the words in the empty frames, made once
 
@@ -100,6 +105,8 @@ namespace Tacetno433.Screens
             swap = 0f;
             dark.Reset();
             focus = 0f;
+            actionCam.Reset();
+            jab = 0f;
 
             //LAYERS : the movement's pictures, if the team has made them (Content/Art/Battle/Stages/<movement>_far.png ...)
             string movementKey = ArtBank.Key(key);
@@ -157,9 +164,10 @@ namespace Tacetno433.Screens
         {
             float want = view == View.Swipe ? 1f : 0f;
             focus = MoveTowards(focus, want, dt * BattleRules.StageFocusSpeed);
+            actionCam.Update(dt);                                      // ACTION : the camera moves on through a hit stop
             if (frozen) return;
 
-            float worldDt = dt * MathHelper.Lerp(1f, BattleRules.StageFocusSlow, FocusEased);
+            float worldDt = dt * MathHelper.Lerp(1f, BattleRules.StageFocusSlow, WorldFocus);
             worldTime += worldDt;
             UpdateArts(worldDt);
 
@@ -195,10 +203,22 @@ namespace Tacetno433.Screens
                 if (stageLights[i].Life > 0f) stageLights[i].Life -= worldDt;
         }
 
-        //Focus Eased : the QTE FOCUS eased in and out, so the world dims and comes back softly
+        //Focus Eased : the QTE FOCUS eased in and out, so the ring comes up and goes softly
         private float FocusEased
         {
             get { return focus * focus * (3f - 2f * focus); }
+        }
+
+        //World Focus : how far the world itself goes dark, grey and slow behind the ring. ACTION (Beta1, 29 Oct) : only a
+        //little while the band swipes, so its blows can be seen (StageFocusSkill), more while TACET attacks.
+        //CLEAR FIGHT keeps the whole dim of round 4 (nothing competes with the ring).
+        private float WorldFocus
+        {
+            get
+            {
+                if (Settings.ClearFight) return FocusEased;
+                return FocusEased * (swipeFor == SwipeFor.Parry ? BattleRules.StageFocusParry : BattleRules.StageFocusSkill);
+            }
         }
 
         private static float MoveTowards(float from, float to, float step)
@@ -325,6 +345,170 @@ namespace Tacetno433.Screens
         }
 
         //======================================================================================
+        //ACTION (Beta1, 29 Oct, docs/BETA1_DIRECTION.md 10) : the baton moves the world. The user : "like we gave the order
+        //and it really does it", the camera zooming and the screen shaking with what the player does (Muse Dash, Chaos
+        //Zero Nightmare). Every swipe that lands is the musician's blow at once (NOTE BY NOTE in Battle/TurnBattle.cs) and :
+        //   ZOOM STEPS  each note landed in a row pushes the camera in a step toward where the phrase lands, a MISS lets
+        //               it fall back, the phrase over it eases out (Core/StageCamera.cs)
+        //   KICK        the world slides and leans the way the baton swung
+        //   SHAKE       every blow shakes it, a PERFECT more, the FINISHER (a skill's last note) most
+        //   JAB         the musician in front jumps at the enemy with every blow
+        //   RAPID       a ROLL is a blow for each shake, a HOLD keeps striking while it is held, the camera creeping in
+        //The ring and the words on top never move with it, so the timing can always be read.
+        //======================================================================================
+
+        //Action Point : where the phrase being swiped lands. A skill at an enemy looks at it, a skill for the band at the
+        //musician in front, the SIGNATURE (and a skill at every enemy) at TACET, a parry between the enemy and its target.
+        private Vector2 ActionPoint()
+        {
+            if (swipeFor == SwipeFor.Parry)
+            {
+                Fighter enemy = battle.Current;
+                if (enemy == null || !enemy.IsEnemy) return EnemiesCenter();
+                Vector2 to = enemy.IntentTarget != null ? AimPoint(enemy.IntentTarget) : CenterOf(foreBox);
+                return (CenterOf(BoxOf(enemy)) + to) / 2f;
+            }
+            if (swipeFor == SwipeFor.Skill)
+            {
+                BarMove move = battle.CurrentMove;
+                if (move != null && move.Skill != null && !move.Skill.HitsEnemy) return new Vector2(foreBox.Center.X + 60f, foreBox.Y + 170f);
+                if (move != null && move.Skill != null && move.Skill.Target == SkillTarget.Enemy && move.Target != null && !move.Target.Down)
+                    return CenterOf(BoxOf(move.Target));
+            }
+            return EnemiesCenter();
+        }
+
+        //Enemies Center : the middle of every enemy standing (the middle of the screen when none is)
+        private Vector2 EnemiesCenter()
+        {
+            Vector2 sum = Vector2.Zero;
+            int count = 0;
+            for (int i = 0; i < battle.Enemies.Count; i++)
+            {
+                if (battle.Enemies[i].Down) continue;
+                sum += CenterOf(BoxOf(battle.Enemies[i]));
+                count++;
+            }
+            if (count == 0) return new Vector2(TacetGame.ScreenW / 2f, TacetGame.ScreenH / 2f);
+            return sum / count;
+        }
+
+        private static Vector2 CenterOf(Rectangle r)
+        {
+            return new Vector2(r.Center.X, r.Center.Y);
+        }
+
+        //Skill Aims : the skill being swiped is aimed at this enemy (every enemy for a skill at all of them)
+        private bool SkillAims(Fighter f)
+        {
+            BarMove move = battle.CurrentMove;
+            if (view != View.Swipe || move == null || move.Skill == null || !move.Skill.HitsEnemy || f.Down) return false;
+            return move.Skill.Target == SkillTarget.AllEnemies || move.Target == f;
+        }
+
+        //Streak Zoom : how far in the ZOOM STEPS are
+        private float StreakZoom()
+        {
+            return Math.Min(BattleRules.CamZoomMost, streak * BattleRules.CamNoteZoom);
+        }
+
+        //Swipe Action : a note of a skill or of the SIGNATURE was answered. One that lands steps the camera in, kicks it the
+        //way the baton went and shakes it, the last note of a skill punches hardest (FINISHER). A MISS lets it fall back.
+        private void SwipeAction(Grade grade, bool last)
+        {
+            bool landed = grade == Grade.Perfect || grade == Grade.Good;
+            if (!landed)
+            {
+                streak = 0;
+                actionCam.Hold(ActionPoint(), 0f);
+                return;
+            }
+
+            streak++;
+            float strength = grade == Grade.Perfect ? BattleRules.CamPerfect : 1f;
+            bool finisher = last && swipeFor == SwipeFor.Skill;
+            actionCam.Hold(ActionPoint(), StreakZoom());
+            actionCam.Kick(NoteGlyph.Way(lastWay), grade == Grade.Perfect ? 1f : 0.7f);
+            actionCam.Punch(finisher ? BattleRules.CamFinishPunch : BattleRules.CamPunch * strength);
+            actionCam.Shake(BattleRules.CamShake * strength * (finisher ? 2f : 1f));
+
+            if (swipeFor == SwipeFor.Skill)
+            {
+                jab = 1f;
+                PlayArt(battle.Current, "attack");
+            }
+            else
+            {
+                //SIGNATURE : each stroke of the 4/4 is a beat of the conductor's light on TACET, the strike comes after the fourth
+                HitColors c = SignatureColors();
+                AddStageLight(EnemiesCenter(), 520f, 0.25f * strength * streak, 0.3f, Color.Lerp(Color.White, c.Tint, 0.6f));
+                hits.Star(EnemiesCenter() - new Vector2(0f, 60f), BattleRules.HitSize * (0.5f + 0.25f * streak), c);
+            }
+        }
+
+        //Parry Action : a note of TACET's attack was answered. A block throws the camera back toward the enemy (the blow is
+        //turned away) and a block in a row steps it in, a blow that gets through throws it toward the musician and shakes more.
+        private void ParryAction(Grade grade)
+        {
+            Fighter enemy = battle.Current;
+            Vector2 toward = Vector2.Zero;
+            if (enemy != null && enemy.IsEnemy && enemy.IntentTarget != null)
+            {
+                toward = AimPoint(enemy.IntentTarget) - CenterOf(BoxOf(enemy));
+                if (toward.LengthSquared() > 1f) toward.Normalize();
+            }
+
+            if (grade == Grade.Perfect)
+            {
+                streak++;
+                actionCam.Hold(ActionPoint(), StreakZoom());
+                actionCam.Kick(-toward, 0.8f);
+                actionCam.Punch(BattleRules.CamPunch * BattleRules.CamPerfect);
+                actionCam.Shake(BattleRules.CamShake);
+                return;
+            }
+
+            streak = 0;
+            actionCam.Hold(ActionPoint(), 0f);
+            actionCam.Kick(toward, grade == Grade.Good ? 0.6f : 1.2f);
+            actionCam.Shake(BattleRules.CamShake * (grade == Grade.Good ? 1.2f : 2f));
+        }
+
+        //Rapid Blow : one quick blow of a ROLL's shake or a HOLD being held. It is only light and feel : the note's
+        //damage lands when the roll or the hold ends. build 0..1 grows the blows as the note goes on.
+        private void RapidBlow(float build)
+        {
+            if (swipeFor != SwipeFor.Skill) return;
+            BarMove move = battle.CurrentMove;
+            Fighter user = battle.Current;
+            if (move == null || move.Skill == null || user == null || user.IsEnemy) return;
+
+            HitColors colors = SpotOf(user);
+            jab = Math.Max(jab, 0.6f);
+            actionCam.Shake(BattleRules.CamShake * 0.35f);
+            if (!move.Skill.HitsEnemy)
+            {
+                //For the band (a heal) : the light gathers on the musician in front
+                Vector2 at = ActionPoint();
+                hits.Star(at + new Vector2(0f, -40f), BattleRules.HitSize * (0.35f + 0.3f * build), colors);
+                AddStageLight(at, 200f, 0.3f + 0.3f * build, 0.2f, Color.Lerp(Color.White, colors.Tint, 0.5f));
+                return;
+            }
+
+            for (int i = 0; i < battle.Enemies.Count; i++)
+            {
+                Fighter e = battle.Enemies[i];
+                if (e.Down) continue;
+                if (move.Skill.Target == SkillTarget.Enemy && e != move.Target) continue;
+                Rectangle box = DrawBox(e);
+                hits.Hit(StyleOf(user), box, 0.15f + 0.3f * build, colors, 0, lastWay);
+                StageHit(CenterOf(box), true, 0.2f + 0.25f * build, colors.Tint);
+                Look look;
+                if (looks.TryGetValue(e, out look)) look.Knock = Math.Max(look.Knock, 0.5f);
+            }
+        }
+
+        //======================================================================================
         //Boxes
         //======================================================================================
 
@@ -406,7 +590,7 @@ namespace Tacetno433.Screens
             impact.Flash = hits.ImpactFlash;
             impact.Blur = hits.ImpactBlur;
             impact.Center = ImpactOnScreen() / new Vector2(TacetGame.ScreenW, TacetGame.ScreenH);
-            PostChain.Finish(device, sb, time, FocusEased, dark.Engulf, impact, BattleRules.StageBloomThreshold, BattleRules.StageBloomStrength,
+            PostChain.Finish(device, sb, time, WorldFocus, dark.Engulf, impact, BattleRules.StageBloomThreshold, BattleRules.StageBloomStrength,
                              BattleRules.StageVignette, BattleRules.StageGrain);
         }
 

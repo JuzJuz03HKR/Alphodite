@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 29 ต.ค. (แชทตวัดไม้ใหม่) | ทำ `BETA1_DIRECTION.md` 8.8 ข้อ 5 ระบบตวัดไม้ใหม่ (ผู้ใช้ "ลองทำออกมาก่อนได้" `USER_BRIEFS.md` 13.23 13.24) : เอาขนาด f mf p ออก ตวัดแล้วตัวละครตีทันทีทีละโน้ต กล้องซูม เอียง สั่น ตามการตวัด | `TurnBattle` `BattleScreen*` `NoteGlyph` `Baton` `HitFx` `GestureReader` กล้องใหม่ใน `Core/` `Skill` `BattleRules` `Conductor` `Musician` `Motif` `Enemy` `TutorialScreen*` `GuideScreen` `DebugShots.Turn*` และเอกสาร |
+| 29 ต.ค. (แชทตวัดไม้ใหม่) | ทำ `BETA1_DIRECTION.md` 8.8 ข้อ 5 ระบบตวัดไม้ใหม่ (ผู้ใช้ "ลองทำออกมาก่อนได้" `USER_BRIEFS.md` 13.23 ถึง 13.25) : เอาขนาด f mf p ออก ตวัดแล้วตัวละครตีทันทีทีละโน้ต กล้องซูม เอียง สั่น ตามการตวัด · **เวอร์ชันแรกเสร็จ อยู่บน GitHub แล้ว รอผู้ใช้ Rebuild รีวิว (แชทนี้ยังทำต่อ)** | `TurnBattle` `BattleScreen*` `NoteGlyph` `Baton` `HitFx` `GestureReader` กล้องใหม่ใน `Core/` `Skill` `BattleRules` `Conductor` `Musician` `Motif` `Enemy` `TutorialScreen*` `GuideScreen` `DebugShots.Turn*` และเอกสาร |
 
 ---
 
@@ -63,6 +63,15 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 ---
 
 ## สถานะล่าสุด (29 ต.ค.)
+
+**29 ต.ค. คืน (ล่าสุด) : แชทตวัดไม้ใหม่ ทำ `BETA1_DIRECTION.md` 8.8 ข้อ 5 เวอร์ชันแรกเสร็จ รอผู้ใช้ Rebuild รีวิว** (คำต่อคำ `USER_BRIEFS.md` 13.23 ถึง 13.25 รายละเอียด `BETA1_DIRECTION.md` ข้อ 10)
+✅ กฎเดียว (ONE RULE) : เอาขนาด f mf p ออกทั้งเกม โน้ต = ลูกศรใหญ่ในวง + วงแหวน (คำ HOLD SHAKE AGAIN ใต้โน้ตพิเศษ) ใช้ทั้งสกิล การปัด SIGNATURE · โน้ตค้างแค่กดค้าง
+✅ ตวัดแล้วตีทันที : `TurnBattle.BeginSkill` `SkillNote` `EndSkill` (`UseSkill` เดิมยังอยู่ให้ตัวจำลอง)
+✅ ACTION : กล้องใหม่ `Core/StageCamera.cs` ซูมทีละขั้น เตะ เอียง สั่น ท่าปิด โน้ตรัวกับโน้ตค้างตีรัว ปัดกับ COUNTER ATTACK ชั้นทึบจางลง ป้ายและตัวเลขบนตัวละครตามกล้อง ตัวเลข `BattleRules` หัวข้อ Camera Feel
+✅ ข้อความ : หน้า HOW TO PLAY หน้า 2, Tutorial โหมดผลัดตา, ความสามารถและ Motif ที่เคยผูกกับขนาด (`BETA1_DIRECTION.md` 10.5)
+✅ ความยากชดเชยให้เท่าเดิม `TurnNoteDamage` 1.95 (STRONG ชนะทั้งรัน 49 เปอร์เซ็นต์ เดิม 48) · build 0/0 · turncheck 112/112 · savecheck 32/32 · `TACET_Balance.xlsx` อัปเดตแล้ว
+⚠️ PLAYTEST SIGNATURE ยัง 1 · ภาพจาก cloud ห้ามแทน `docs/screenshots/`
+**งานถัดไป** : ผู้ใช้ Rebuild ลองตามรายการ `BETA1_DIRECTION.md` 10.7 แล้วรีวิวกล้อง (ซูมบ่อยไปไหม) ปรับตัวเลข Camera Feel ตามที่บอก · จากนั้นหัวข้อที่เหลือ : balance กับ gameplay ให้สนุก (ผู้ใช้บอกว่าตอนนี้ง่าย) / VFX อาวุธขั้นสูงให้ชัด
 
 **29 ต.ค. คืน (ล่าสุด) : /update ปิดแชท "ทีม 3 คน ร้านใหม่ อาวุธขั้น" ผู้ใช้ Rebuild ลองเล่นแล้ว จะเปิดแชทใหม่คุยต่อ** (คำต่อคำ `USER_BRIEFS.md` 13.22)
 ✅ งานอยู่บน GitHub ครบ (commit ปิดแชทนี้) ตาราง "แชทที่กำลังทำงาน" ว่าง

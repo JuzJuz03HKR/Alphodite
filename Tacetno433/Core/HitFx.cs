@@ -250,7 +250,9 @@ namespace Tacetno433.Core
         //c is the striker's colours (Plain = white, for the SIGNATURE and TACET).
         //tier : WEAPON TIERS (29 Oct), the striker's weapon tier 0 to 3. Every tier makes the blow bigger with more sparks
         //(BattleRules.HitTierSize), tier II adds a ring of their colour, tier III a star where it lands, so an upgrade is seen.
-        public void Hit(HitStyle style, Rectangle box, float power, HitColors c, int tier = 0)
+        //swing : ACTION (Beta1, 29 Oct), the way the baton swung for this blow. A SLASH is cut that way and a SHOT flies that
+        //way, so the mark on the enemy follows the player's hand (Flick.None : the blow's own slant, as before).
+        public void Hit(HitStyle style, Rectangle box, float power, HitColors c, int tier = 0, Flick swing = Flick.None)
         {
             Vector2 at = new Vector2(box.Center.X, box.Y + box.Height * 0.45f);
             float size = (0.75f + 0.35f * power) * BattleRules.HitSize * (1f + BattleRules.HitTierSize * tier);
@@ -260,7 +262,7 @@ namespace Tacetno433.Core
             if (style == HitStyle.Slash)
             {
                 //SLASH : two crescents crossing a little, the second a moment later, and a long thin cut through both
-                float turn = -0.55f + lean;
+                float turn = swing != Flick.None ? SwingAngle(swing) + lean * 0.3f : -0.55f + lean;
                 AddCrescent(at, size * 1.25f, 0.42f, turn, 2.5f, 3.1f, 20f * (0.7f + 0.5f * power), 0f, c);
                 AddCrescent(at + new Vector2(14f, -10f), size * 1.0f, 0.38f, turn + 0.5f, 5.8f, -2.6f, 13f * (0.7f + 0.5f * power), -0.07f, c);
                 way = new Vector2((float)Math.Cos(turn), (float)Math.Sin(turn));
@@ -272,7 +274,7 @@ namespace Tacetno433.Core
             else if (style == HitStyle.Shot)
             {
                 //SHOT : the spikes stretched the way the shot went (from the band, left to right), a round glow, a ring
-                float angle = -0.12f + lean * 0.3f;
+                float angle = swing != Flick.None ? SwingAngle(swing) : -0.12f + lean * 0.3f;
                 AddBurst(at, size * 1.25f, angle, 1.9f, 18, 5f, 0.3f, c);
                 AddRing(at, size * 0.9f, 1f, 3f, 0.3f, c.Tint);
                 way = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
@@ -346,6 +348,15 @@ namespace Tacetno433.Core
             //FLAIR : the striker's own touch on top of the blow
             if (c.Flair == HitFlair.Sparkle) Sparkle(at, size, power, c);
             else if (c.Flair == HitFlair.Flame) Burn(at, size, power, way, style == HitStyle.Slash, c);
+        }
+
+        //Swing Angle : the way of a baton stroke as an angle, leaned a little off straight so a cut always reads as a cut
+        private static float SwingAngle(Flick way)
+        {
+            if (way == Flick.Left) return MathHelper.Pi - 0.35f;
+            if (way == Flick.Up) return -MathHelper.PiOver2 - 0.35f;
+            if (way == Flick.Down) return MathHelper.PiOver2 - 0.35f;
+            return -0.35f;
         }
 
         //Clash : a parry meets TACET's note at the ring. perfect = the blow is turned away whole (a star, spikes, a ring

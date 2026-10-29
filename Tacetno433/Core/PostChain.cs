@@ -222,7 +222,14 @@ namespace Tacetno433.Core
         //is drawn at one Dot per pixel of FINAL : its own pixels land one on one, nothing is stretched.
         public static void ShowFinal(SpriteBatch sb, Vector2 at, float zoom, Color tint)
         {
-            sb.Draw(Final, at, null, tint, 0f, at * Sharp.Scale, zoom * Sharp.Dot, SpriteEffects.None, 0f);
+            ShowFinal(sb, at, zoom, 0f, Vector2.Zero, tint);
+        }
+
+        //Show Final Turned : the same, also turned round at by turn (radians) and slid by shift (game pixels).
+        //The battle's camera that moves with the baton (Core/StageCamera.cs, Beta1 29 Oct) frames the world through this.
+        public static void ShowFinal(SpriteBatch sb, Vector2 at, float zoom, float turn, Vector2 shift, Color tint)
+        {
+            sb.Draw(Final, at + shift, null, tint, turn, at * Sharp.Scale, zoom * Sharp.Dot, SpriteEffects.None, 0f);
         }
 
         //Finish : SCENE and LIGHT MAP into FINAL. focus 0..1 is the QTE FOCUS, engulf 0..1 how far TACET's dark
