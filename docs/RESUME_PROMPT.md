@@ -34,9 +34,9 @@ Beta1 คือการทำเกมให้สุดเหมือนเ�
 
 ก่อนเริ่ม อ่านตามลำดับ
 1. CLAUDE.md ที่ราก repo (หัวข้อ 00 กับ 0 สำคัญที่สุด)
-2. docs/RESUME_PROMPT.md หัวข้อ "สถานะล่าสุด"
+2. docs/RESUME_PROMPT.md หัวข้อ "สถานะล่าสุด" และ docs/HANDOFF.md ข้อ 00 (ภาพรวมเกมตอนนี้ ความคืบหน้า งานที่เหลือ)
 3. docs/BATTLE_SCENE_2_3D_CHANGE.md ข้อ 9 ขึ้นไป และ docs/BATTLE_ART_PLAN.md
-4. docs/BETA1_DIRECTION.md (ทิศทางเกมใหม่ 29 ต.ค. ลำดับงานอยู่ข้อ 5) และ docs/CHARACTER_DESIGN.md (ดีไซน์วาทยากร 3 คน ข้อเสนอนักดนตรี 5 คน)
+4. docs/BETA1_DIRECTION.md (ทิศทางเกมใหม่ 29 ต.ค. รีวิวเกมเพลย์ข้อ 11 ก้อน 1 ทีละข้อข้อ 12) และ docs/CHARACTER_DESIGN.md (ดีไซน์วาทยากร 3 คน นักดนตรี 5 คน)
 5. docs/SCREENS_LEVEL_UP.md (งานยกระดับทุกหน้าจอ ทำถึงข้อ 23 แล้ว)
 เอกสารอื่นอ่านเมื่องานต้องใช้
 
@@ -63,7 +63,15 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 
 ## สถานะล่าสุด (29 ต.ค.)
 
-**29 ต.ค. ดึก (ล่าสุด) : แชทก้อน 1 ข้อ 2 ✅ ชุดสกิลใหม่ 5 คน (THE FIVE KITS) เสร็จ หยุดรอผู้ใช้สั่งข้อ 3** (ผู้ใช้ลองข้อ 1 แล้ว "ไม่มีอะไรต้องแก้ ทำข้อ 2 ต่อ" คำต่อคำ `USER_BRIEFS.md` 13.32 รายละเอียดทั้งหมด `BETA1_DIRECTION.md` 12.2)
+**29 ต.ค. ดึก (ล่าสุด) : /update ปิดแชทก้อน 1 ข้อ 2 ผู้ใช้จะเปิดแชทใหม่บนโน้ตบุ๊คอีกเครื่อง** (คำต่อคำ `USER_BRIEFS.md` 13.32 13.33)
+✅ งานอยู่บน GitHub ครบ (`a97e73e` ชุดสกิลใหม่ 5 คน และ commit ปิดแชทนี้) ตาราง "แชทที่กำลังทำงาน" ว่าง
+✅ `HANDOFF.md` มีข้อ 00 ใหม่ ภาพรวม Beta1 ทั้งเกม ความคืบหน้า ราว 60% ไม่นับอาร์ต (ตาราง 00.2) งานที่เหลือเรียงลำดับ (00.3) build กับเกณฑ์ทดสอบ (00.4) ที่ค้าง (00.5) ข้อ 1 ถึง 6 เดิมติดป้ายว่าเป็นประวัติ Alpha6
+⚠️ **เครื่องใหม่** : clone หรือ pull branch `Beta1` ล่าสุดก่อนเปิด Visual Studio แล้ว Rebuild ดูก้อน 1 ข้อ 2 (ผู้ใช้ยังไม่ได้ลอง)
+⚠️ รอผู้ใช้ส่งตัวอย่าง VFX ของ SHIELD CHAKRAM THE LESSON TURN OF THE HAND (ใช้ตอนก้อน 1 ข้อ 7) / PLAYTEST SIGNATURE ยัง 1 / ภาพจาก cloud ห้ามแทน `docs/screenshots/`
+หมายเหตุ : ตอนเปิดแชทนี้ไอริสบอกผู้ใช้ว่าไฟล์คำสั่ง `/system` ยังชี้ `ALPHA7_DESIGN.md` ซึ่งผิด ไฟล์ใน repo แก้ไว้แล้วตั้งแต่แชทก่อน (อ่านก่อน pull) ไม่ต้องแก้อะไร
+**งานถัดไป** : เหมือนรายการด้านล่าง (ก้อน 1 ข้อ 3 ศัตรู CHARGE กับ GUARD) ทำเมื่อผู้ใช้สั่ง แล้วหยุดรอ
+
+**29 ต.ค. ดึก (ก่อนหน้า) : แชทก้อน 1 ข้อ 2 ✅ ชุดสกิลใหม่ 5 คน (THE FIVE KITS) เสร็จ หยุดรอผู้ใช้สั่งข้อ 3** (ผู้ใช้ลองข้อ 1 แล้ว "ไม่มีอะไรต้องแก้ ทำข้อ 2 ต่อ" คำต่อคำ `USER_BRIEFS.md` 13.32 รายละเอียดทั้งหมด `BETA1_DIRECTION.md` 12.2)
 ✅ PAGANINI CAPRICE IL CANNONE + THE DEVIL'S BARGAIN · QUANTZ SOFT AIR THE LESSON + BREATH CONTROL · PFUNDT TIMPANI ROLL THUNDER CALL + TURN OF THE HAND · DUPORT SHIELD LANCE + THE SCAR · PUNTO FANFARE CHAKRAM + THE HUNTING CALL (โค้ด `TurnBattle` ค้นชื่อตัวพิมพ์ใหญ่ · ฟิลด์ใหม่ `Skill.Shield Lesson Bounce Revenge` · `TurnBattle.HitTarget CanAim PaysInLife`)
 ✅ ไอริสตัดสินเอง 11 ข้อ (12.2) สำคัญสุด : TURN OF THE HAND ตัดโน้ตเฉพาะตอนสกิลโดน เหลืออย่างน้อย 2 (แบบร่างทำให้วงที่มี PFUNDT ชนะ 67% ไม่มี 47%) · CAPRICE ยังใส่ DISSONANCE · IL CANNONE 1.5 CHAKRAM 1
 ✅ ความยากเท่าเดิม : ตัวจำลองมีนิสัยใหม่ (บัง สอน เสริม PUNTO เขียนก่อน) ชุดเดิมกับนิสัยใหม่ 52.4% ชุดใหม่ + `TurnNoteDamage` 1.95 → 2 = 54.2% (12 seed) MAESTRO EXPERT 76.8 → 74.7 · 5 คนห่างกันไม่เกิน 4.5% (เดิม 10%) · ตาราง MUSICIANS ใหม่ใน turnsim · `TACET_SIM_SET` ลองตัวเลขไม่ต้อง build
