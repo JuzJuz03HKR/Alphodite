@@ -21,7 +21,6 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 29 ต.ค. ดึก (แชทก้อน 1) | ทำก้อน 1 ตาม `BETA1_DIRECTION.md` 11.11 ทีละข้อ ผู้ใช้สั่ง "เริ่มทำทีละส่วนๆ เสร็จส่วนนึงแล้วหยุดก่อนแล้วฉันจะบอกให้ทำต่อเอง" (จบข้อไหนหยุดรอผู้ใช้สั่งต่อ) | `Data/Skill.cs` `Data/Musician.cs` `Data/Enemy.cs` `Data/BattleRules.cs` `Battle/TurnBattle.cs` `Core/Palette.cs` `Screens/BattleScreen*.cs` `Screens/GuideScreen.cs` `Screens/TutorialScreen.Practice.cs` `Core/DebugShots.Turn*.cs` `docs/UI_ART_PLAN.md` `docs/BETA1_DIRECTION.md` |
 
 ---
 
@@ -64,7 +63,20 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 
 ## สถานะล่าสุด (29 ต.ค.)
 
-**29 ต.ค. ดึก (ล่าสุด) : แชทก้อน 1 ทำทีละข้อ ✅ ข้อ 1 ชนิดสกิลเสร็จ หยุดรอผู้ใช้สั่งข้อ 2** (ผู้ใช้สั่ง "เริ่มทำทีละส่วนๆ เสร็จส่วนนึงแล้วหยุดก่อนแล้วฉันจะบอกให้ทำต่อเอง" รายละเอียด `BETA1_DIRECTION.md` ข้อ 12)
+**29 ต.ค. ดึก (ล่าสุด) : /update ปิดแชทก้อน 1 หลังจบข้อ 1 ผู้ใช้ : "บันทึกแล้วฉันจะไปขึ้นแชทใหม่"** (คำต่อคำ `USER_BRIEFS.md` 13.31)
+✅ งานอยู่บน GitHub ครบ (commit ปิดแชทนี้) ตาราง "แชทที่กำลังทำงาน" ว่าง
+✅ ก้อน 1 ข้อ 1 ชนิดสกิลเสร็จ (`ad7c265`, รายละเอียด `BETA1_DIRECTION.md` 12.1) build 0/0 turncheck 112/112 ไม่มีตัวเลขบาลานซ์ใหม่ `TACET_Balance.xlsx` ไม่ต้องแก้
+⚠️ ผู้ใช้ยังไม่ได้ Rebuild ดูข้อ 1 (แถบสีบนปุ่มคำสั่ง แดง ฟ้า เขียว ทอง) · PLAYTEST SIGNATURE ยัง 1 (`BattleRules.PlaytestSignatureNeed`) · ภาพจาก cloud ห้ามแทน `docs/screenshots/`
+**วิธีทำงานที่ผู้ใช้สั่ง** : ทำก้อน 1 ทีละข้อ จบข้อไหนบันทึก commit push แล้วหยุดรอ ผู้ใช้บอกเองว่าให้ทำข้อถัดไป (แชทใหม่ทำแบบเดิม ถ้า /system ไม่ได้สั่งต่างออกไป)
+**งานถัดไป : ข้อ 2 ชุดสกิลใหม่ 5 คน** (`BETA1_DIRECTION.md` 11.6 กับ 11.11 ข้อ 2)
+1. `Data/Skill.cs` `SkillList.All` ช่อง 0 1 (PAGANINI CAPRICE, IL CANNONE) 2 3 (QUANTZ SOFT AIR, THE LESSON) 4 5 (PFUNDT TIMPANI ROLL, THUNDER CALL) 12 13 (DUPORT SHIELD, LANCE) 14 15 (PUNTO FANFARE, CHAKRAM) ใส่ `Kind` ทุกสกิล ห้ามสลับลำดับ
+2. `Data/Musician.cs` ความสามารถติดตัวช่อง 0 1 2 6 7 (THE DEVIL'S BARGAIN, BREATH CONTROL, TURN OF THE HAND, THE SCAR, THE HUNTING CALL) ค่าใหม่ต่อท้าย `enum MusicianTrait` ข้อความ `TraitText` กับ `TurnTraitText`
+3. `Battle/TurnBattle.cs` ผลใหม่ ไม่มีโค้ดวาด (THE DEVIL'S BARGAIN ใช้โค้ด BORROWED BREATH ค้น `TurnPaganiniLife` เจอใน `CanUse` กับ `LifeCost`) ตัวเลขใหม่ลง `Data/BattleRules.cs`
+4. `Core/DebugShots.Turn.cs` `KindFits` เพิ่มผลใหม่ (SHIELD = ป้องกัน, THE LESSON = เสริม) turncheck แก้ค่าที่คาดของสกิลที่เปลี่ยน เพิ่มข้อของผลใหม่ (`Core/DebugShots.TurnKits.cs` `TurnContent.cs` ใช้สกิลเดิมหลายจุด)
+5. turnsim หลาย seed ชดเชยให้ NORMAL STRONG ใกล้ 49% แล้วอัปเดต `TACET_Balance.xlsx` · VFX ของสกิลใหม่ถามตัวอย่างจากผู้ใช้ก่อน
+จบข้อ 2 แล้วบันทึก commit push หยุดรอผู้ใช้
+
+**29 ต.ค. ดึก (ก่อนหน้า) : แชทก้อน 1 ทำทีละข้อ ✅ ข้อ 1 ชนิดสกิลเสร็จ หยุดรอผู้ใช้สั่งข้อ 2** (ผู้ใช้สั่ง "เริ่มทำทีละส่วนๆ เสร็จส่วนนึงแล้วหยุดก่อนแล้วฉันจะบอกให้ทำต่อเอง" รายละเอียด `BETA1_DIRECTION.md` ข้อ 12)
 ✅ `SkillKind` (Attack Defend Heal Boost) `Skill.Kind` ครบ 18 สกิล สี `Palette.KindAttack/KindDefend/KindHeal/KindBoost` กับ `Palette.Kind` แถบสีบนปุ่มคำสั่ง 3 ปุ่มของหน้าต่อสู้ (`Ui.Button` แบบรับสี) turncheck ตรวจว่าชนิดตรงกับผล (`KindFits`)
 ✅ build 0/0 turncheck 112/112 ไม่มีตัวเลขบาลานซ์ใหม่ แถว "แชทก้อน 1" ในตาราง "แชทที่กำลังทำงาน" ยังจองอยู่
 **งานถัดไป (เมื่อผู้ใช้สั่ง)** : ข้อ 2 ชุดสกิลใหม่ 5 คน ตาม 11.11 (เพิ่มผลใหม่ลง `KindFits` ด้วย) แล้วหยุดรออีกครั้ง
