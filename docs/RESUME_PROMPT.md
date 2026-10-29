@@ -21,6 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
+| 29 ต.ค. ดึก (แชทก้อน 1) | ทำก้อน 1 ตาม `BETA1_DIRECTION.md` 11.11 ทีละข้อ ผู้ใช้สั่ง "เริ่มทำทีละส่วนๆ เสร็จส่วนนึงแล้วหยุดก่อนแล้วฉันจะบอกให้ทำต่อเอง" (จบข้อไหนหยุดรอผู้ใช้สั่งต่อ) | `Data/Skill.cs` `Data/Musician.cs` `Data/Enemy.cs` `Data/BattleRules.cs` `Battle/TurnBattle.cs` `Core/Palette.cs` `Screens/BattleScreen*.cs` `Screens/GuideScreen.cs` `Screens/TutorialScreen.Practice.cs` `Core/DebugShots.Turn*.cs` `docs/UI_ART_PLAN.md` `docs/BETA1_DIRECTION.md` |
 
 ---
 
