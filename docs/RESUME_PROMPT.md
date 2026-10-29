@@ -21,6 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
+| 29 ต.ค. 20:30 | ทำ `BETA1_DIRECTION.md` 8.8 ข้อ 1 ถึง 4 : หน้าเลือกทีม 3 จาก 5, เอา CALL ม้านั่ง ที่นั่งออก, ร้านใหม่ REROLL เงินตามอันดับ, อาวุธขั้น I II III ห้อง LUTHIER TREASURE | หน้าใหม่ใน `Screens/` และไฟล์ตาม 8.7 (`TurnBattle` `BattleScreen*` `BandScreen` `Formation` `RecruitScreen` `ResultScreen` `RouteScreen` `ShopScreen` `MotifRewardScreen` `ChapterScreen` `RunFlow` `RunState` `SaveFile` `BattleRules` `Archive` `Motif` `Enemy` `GameEvent` `FloorMap` `RouteNode` `Musician` `MusicianArt` `DebugShots*`) และเอกสาร |
 
 ---
 
