@@ -21,6 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
+| 29 ต.ค. 14:44 (เวลาไทย) | ดูภาพ Character Design 6 ภาพ แล้วทำงานถัดไปตามสถานะล่าสุด : แผนที่แบบมองไกล → ธีมวาทยากร (สี + เอฟเฟกต์ตอนชี้และเลือก) → เสนอนักดนตรี 5 คนให้ผู้ใช้เลือก → เอายุคออก (หลังผู้ใช้ตอบ) | `Screens/RouteScreen.cs` `Data/BattleRules.cs` `Core/Palette.cs` `Data/Conductor.cs` `Screens/ConductorSelectScreen.cs` `Screens/ConductorDetailScreen.cs` `Core/` (VFX วาทยากรไฟล์ใหม่) `Core/DebugShots*.cs` `docs/` |
 
 ---
 
