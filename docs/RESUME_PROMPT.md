@@ -21,6 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
+| 29 ต.ค. 09:17 (เวลาไทย) | `BETA1_DIRECTION.md` ข้อ 5 ทั้งหมด : วาทยากร 3 คน + Gallery Detail → แผนที่ทั้งชั้นแบบวงซ้อน → หน้าจัดวงแบบเสา (Band Recruit) → รอบ 2–3 ที่เหลือ → เอายุคออก (ถามก่อน) → หน้าต่อสู้อ่านง่าย | `Data/Conductor.cs` `Data/RunState.cs` `Data/SaveFile.cs` `Data/BattleRules.cs` `Data/Musician.cs` `Data/Era.cs` `Core/DebugShots*.cs` `Core/Ui.cs` `Screens/` (Gallery Detail Route Band Recruit Chapter CurtainCall BandName Archive Settings Pause HowToPlay EraChoice) `docs/` |
 
 ---
 
