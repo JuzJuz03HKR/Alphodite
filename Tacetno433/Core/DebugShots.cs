@@ -828,6 +828,7 @@ namespace Tacetno433.Core
         //       wipeshop wiperest wipeevent wipereward wipechapter wipeband wipesettings (Beta1 screens : the wipe to that page,
         //       with its name, e.g. wipeshop@41) wipegallery (the stage curtain on its way to the conductor select page, e.g. wipegallery@30)
         //       routestart routeboss routedive (Beta1 map : at the way in, the boss next, diving into a place, e.g. routedive@52)
+        //       routewalk (the far view, 29 Oct : the camera walking to the new row, e.g. routewalk@20)
         //       gallery1 gallery2 gallerywalk galleryback detailcarry detailswap (Beta1 round 2 : another conductor pointed, stepping
         //       inside, coming back, the painting carried in, the next profile, e.g. gallerywalk@50 galleryback@10 detailcarry@12 detailswap@40)
         private static void Open(TacetGame game, string name)

@@ -368,6 +368,12 @@
         public static float UiProfileSwap = 0.32f;        //   the arrows slide one painting out and the next one in this long
         public static float UiRouteDive = 0.3f;           // ROUTE (the floor's map, 29 Oct) : choosing a place, the camera dives along the way into it this long
         public static float UiRouteDiveZoom = 0.16f;      //   and this far (0.16 = 16% closer) before the page changes
+        public static float UiRouteDiveWalk = 0.5f;       //   while it dives the camera also walks this many rows toward the place
+        public static float UiRouteWalk = 0.9f;           //   FAR VIEW (29 Oct) : back from a room the camera walks from the last row to the new one this long, slowing at the end
+        public static float UiRouteStartBack = 0.6f;      //   a new floor : it walks in to the way in from this many rows behind it
+        public static float UiRouteBoss = 3.4f;           //   the boss's circle is this many times a usual place at the same distance
+        public static float UiRouteFar = 0.2f;            //   the furthest rows are this bright (1 = as bright as the next row)
+        public static float UiRouteGloom = 0.25f;         //   the screen's edges darken this much more when the boss is next (added to the page's vignette)
 
         //Battle Shape
         public const int BeatsPerRound = 8;       // sub-turns in one round

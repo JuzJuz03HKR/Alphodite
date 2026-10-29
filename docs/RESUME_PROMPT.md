@@ -64,6 +64,10 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 
 ## สถานะล่าสุด (29 ต.ค.)
 
+**29 ต.ค. บ่าย (แชทนี้ยังทำอยู่ ดูแถวในตาราง "แชทที่กำลังทำงาน") : `/system` + ภาพ Character Design PNG 6 ภาพ (คำต่อคำ `USER_BRIEFS.md` 13.16)**
+✅ ดูภาพครบ สรุปไว้ `CHARACTER_DESIGN.md` หัวข้อ "ภาพเรฟ" · ✅ งานถัดไปข้อ 1 หน้าแผนที่แบบมองไกล เสร็จ (`SCREENS_LEVEL_UP.md` ข้อ 22.4 ถึง 22.6) build 0/0 turncheck 113/113 savecheck 31/31 หน้าอื่นเหมือนเดิมทุกพิกเซล
+⏳ กำลังทำข้อ 2 ธีมวาทยากร ต่อด้วยข้อ 3 เสนอนักดนตรี 5 คน (ข้อ 4 เอายุคออก รอผู้ใช้ตอบข้อ 3)
+
 **29 ต.ค. (ล่าสุด) : /update ปิดแชท "ทำข้อ 1 และข้อต่อๆไปได้เลย" (`BETA1_DIRECTION.md` ข้อ 5) ผู้ใช้ Rebuild บน Windows แล้ว "rebuild ผ่านทุกอย่าง ไม่ติดขัดอะไร"**
 ✅ งานของแชทนี้อยู่บน GitHub ครบ (`020a8d8` `7daf74f` `bf31d58` `d3bc3ae` `4587a70` `29b6b24` `c24f425` และ commit เอกสารปิดแชท) ตาราง "แชทที่กำลังทำงาน" ว่าง
 ✅ ข้อ 1 วาทยากร 3 คน + Gallery + Detail (`SCREENS_LEVEL_UP.md` ข้อ 16) · ข้อ 2 แผนที่ทั้งชั้นแบบวงซ้อน `Data/FloorMap.cs` (ข้อ 17) · ข้อ 3 หน้าจัดวงแบบเสา + Recruit `Core/BandColumn.cs` `Core/UiArt.cs` (ข้อ 18) · ข้อ 4 Chapter CurtainCall BandName Archive (ข้อ 19) และรอบ 3 Settings Pause HOW TO PLAY กล่องถาม (ข้อ 20) · ข้อ 6 ตัวเลือก CLEAR FIGHT (ข้อ 21) ทุกข้อ build 0/0 turncheck 113/113 savecheck ผ่าน หน้าอื่นภาพเหมือนเดิมทุกพิกเซล
