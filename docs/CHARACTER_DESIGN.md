@@ -189,3 +189,8 @@
 2. ~~ภาพเรฟใน PDF ยังไม่ได้ดู~~ ดูครบ 6 ภาพแล้ว 29 ต.ค. (หัวข้อภาพเรฟของข้อ 1 และ 2) ของ Bach ยังไม่มีภาพ
 3. แถบการ์ดของวง (ผู้ใช้เคยบอกว่ามีไอเดีย)
 4. ~~TWO VOICES เรียกน้องว่า FELIX~~ เปลี่ยนเป็น ??? แล้ว 29 ต.ค. (ผู้ใช้ตอบ "เปลี่ยน") น้องอยู่ขวาของภาพ (ผู้ใช้ตอบ "ข้างขวา")
+
+## 7. บอส (ผู้ใช้ 29 ต.ค.)
+- บอสทุกตัวเป็นปีศาจทางดนตรี เป็นร่าง alter ego ที่เราต้องสู้ (คำต่อคำ `USER_BRIEFS.md` 13.18)
+- จึงไม่ต้องเปลี่ยนบอสที่อ้างถึงนักดนตรีในวง เช่น THE DEVIL'S STRING ("One string, one bow, one bargain.") อยู่คู่กับ PAGANINI ได้
+- บอสตอนนี้ท่อนละ 2 ตัว : PRELUDE REQUIEM กับ THE DEAF CROWN, NOCTURNE THE NAMELESS MASTER กับ THE STAFF, CODA THE DEVIL'S STRING กับ THE BLIND CANTOR (`Data/Enemy.cs` `Movement`)

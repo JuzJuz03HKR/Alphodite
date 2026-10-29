@@ -735,7 +735,7 @@
         public static int SeatsPerFloor = 2;
         public static int TuningPrice = 30;          // stamina back
         public static float TuningRecover = 0.4f;
-        public static int HirePrice = 80;            // a musician from this era
+        public static int HirePrice = 80;            // a musician not in the band yet (NO MORE ERAS, 29 Oct : any of the five)
 
         //Rest
         public static float BreatheRecover = 0.4f;   // free
