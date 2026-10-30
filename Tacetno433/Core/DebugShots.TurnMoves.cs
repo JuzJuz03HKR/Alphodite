@@ -101,8 +101,8 @@ namespace Tacetno433.Core
             guard += " " + EventAmount(b, TurnEventKind.Blocked) + " " + (life - felt.Hp) + " " + felt.Block;
             report += Same("guard", "22 0 22 22 6 0 0", guard);
 
-            //PIERCE (IL CANNONE) : held GOOD to the end at THE DAMPER behind a BLOCK of 16, 5 x 2 x 1.5 x 1.4 = 21 goes through to its
-            //life (67 -> 46), the BLOCK keeps its 16 and a PIERCE is written down. CAPRICE's 4 cuts (4 each) all land in the BLOCK,
+            //PIERCE (IL CANNONE) : held GOOD to the end at THE DAMPER behind a BLOCK of 16, 5 x 2 x 1.8 x 1.4 = 25 goes through to its
+            //life (67 -> 42), the BLOCK keeps its 16 and a PIERCE is written down. CAPRICE's 4 cuts (4 each) all land in the BLOCK,
             //its life stays. (Read before EndSkill : the enemy's own turn comes right after and ends the BLOCK.)
             b = new TurnBattle(Solo(0), new List<Enemy> { damper }, 1, new Random(433));
             Sturdy(b);
@@ -126,7 +126,7 @@ namespace Tacetno433.Core
             for (int n = 0; n < 4; n++) b.SkillNote(n, good);
             pierce += " " + felt.Hp + " " + felt.Block + " " + felt.Dissonance;
             b.EndSkill();
-            report += Same("pierce", "46 16 1 67 0 4", pierce);
+            report += Same("pierce", "42 16 1 67 0 4", pierce);
 
             //DISSONANCE through a GUARD : CAPRICE in the bar THE DAMPER guards (4 DISSONANCE). Its turn raises the BLOCK of 22 and the
             //DISSONANCE still hurts at the end of it (4 off its life), it never strikes the BLOCK.

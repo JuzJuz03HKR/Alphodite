@@ -368,11 +368,11 @@ namespace Tacetno433.Core
             run.RestoreAllStamina();
             report += Same("band life", "True " + max, halved + " " + run.Stamina);
 
-            //ENEMIES (step 8) : HUSH plays its phrases in turn (D U first), and floor 2 makes it tougher (50 x 2.1, notes 4 x 2 x 1.2 = 9.6 -> 10)
+            //ENEMIES (step 8) : HUSH plays its phrases in turn (D U first), and floor 2 makes it tougher (50 x 3.6, notes 4 x 2 x 1.35 = 10.8 -> 11, PATH 30 Oct)
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             report += Same("phrase", "Down Up", b.Enemies[0].IntentWays[0] + " " + b.Enemies[0].IntentWays[1]);
             b = new TurnBattle(band, new List<Enemy> { hush }, 2, new Random(433));
-            report += Same("floor 2", "105 2 10", b.Enemies[0].MaxHp + " " + b.Enemies[0].IntentNotes.Length + " " + b.Enemies[0].IntentNotes[0]);
+            report += Same("floor 2", "180 2 11", b.Enemies[0].MaxHp + " " + b.Enemies[0].IntentNotes.Length + " " + b.Enemies[0].IntentNotes[0]);
 
             //ECHO FADES (HUSH, floor 2) : each of its 2 notes that gets through adds 1 DISSONANCE
             PlayToEnemy(b);
@@ -380,10 +380,10 @@ namespace Tacetno433.Core
             b.TakeEnemyAttack(null);
             report += Same("echo fades", "2", echoed.Dissonance.ToString());
 
-            //FILLS THE GAPS (DEAD AIR, floor 2) : a missed note hits x1.5, 10 -> 15, two notes
+            //FILLS THE GAPS (DEAD AIR, floor 2) : a missed note hits x1.5, 11 -> 16.5 -> 16, two notes
             b = new TurnBattle(band, new List<Enemy> { deadAir }, 2, new Random(433));
             PlayToEnemy(b);
-            report += Same("fills the gaps", "30", b.TakeEnemyAttack(null).ToString());
+            report += Same("fills the gaps", "32", b.TakeEnemyAttack(null).ToString());
 
             //LULLABY (THE LULL, floor 2) : its third turn is a rest that heals 12 (QUANTZ alone, so it lives that long)
             b = new TurnBattle(Solo(1), new List<Enemy> { EnemyList.All[2] }, 2, new Random(433));

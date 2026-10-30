@@ -321,7 +321,12 @@ namespace Tacetno433.Screens
                 return;
             }
 
-            if (offerMotif)
+            //PATH (Beta1 30 Oct) : the band's steps first (INSPIRED ones, then the win's card), the motif after them
+            RunState run = Game.CurrentRun;
+            run.MotifAfterSteps = offerMotif;
+            if (run.StepsWaiting)
+                Game.Screens.Change(new MotifRewardScreen(MotifRewardScreen.Kind.Path));
+            else if (offerMotif)
                 Game.Screens.Change(new MotifRewardScreen());
             else
                 RunFlow.NextStage(Game);

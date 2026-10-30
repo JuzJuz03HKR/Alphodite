@@ -22,8 +22,8 @@ namespace Tacetno433.Core
     //   a skill that breaks (TIMPANI ROLL) at an enemy whose CHARGE is coming (ENEMY MOVES, Beta1 30 Oct),
     //   a guard (SHIELD, THUNDER CALL) when a friend under half life is the one an enemy aims at and they themself are not
     //   (or any friend a CHARGE's blow would take all the life of),
-    //   the dearest skill that hits enemies when 3 BREATH or more are free (PAGANINI pays the rest in life while that leaves
-    //   them above three quarters, THE DEVIL'S BARGAIN), a CHAKRAM only against two enemies or more,
+    //   the skill that hits enemies hardest (SimHitValue, was the dearest until 30 Oct) when 3 BREATH or more are free (PAGANINI pays the rest in life while that leaves
+    //   them above three quarters, THE DEVIL'S BARGAIN),
     //   a boost (THE LESSON for the friend with the dearest skill that hits, FANFARE) when 4 or more are free,
     //   otherwise ATTACK the enemy with the least life (its BLOCK counted as life). A skill that pierces goes at an enemy behind a BLOCK.
     //   The band writes in field order, PUNTO first (THE HUNTING CALL : the musician after them gets the CUE).
@@ -32,7 +32,7 @@ namespace Tacetno433.Core
     //   FIGHTS      one fight at full life with the PACKS of the run (BattleRules ONE BAR), the band of three
     //   RANKS       the RANK of the won fights above (29 Oct, BattleState.RankScore), S / A / B / C percent and the shards' scale
     //   RUNS        three floors in a row with life carried over : N N E N N, a rest (40 percent back), then the boss,
-    //               after every win the result page's life back. THE BAND OF THREE (29 Oct) : 3 of the 5 legends picked at
+    //               after every win the result page's life back and one PATH step (30 Oct, a random open one, INSPIRED ones too). THE BAND OF THREE (29 Oct) : 3 of the 5 legends picked at
     //               random for each run, every weapon one tier up after each floor (WEAPON TIERS, as a rehearsal each per
     //               floor before), THE UNHEARING, no motifs, shops, luthier or events (so it is harder than a real run)
     //   CONDUCTORS  the same runs with each of the six conductors of the turn battle
@@ -196,7 +196,7 @@ namespace Tacetno433.Core
             }
 
             //RUNS : three floors with life carried over, NORMAL and MAESTRO
-            report += "\r\nRUNS (3 floors, life carried over, no motifs, " + runKit + ") : WIN PERCENT  /  LOST ON FLOOR 1, 2, 3\r\n";
+            report += "\r\nRUNS (3 floors, life carried over, no motifs, " + runKit + ") : WIN PERCENT  /  LOST ON FLOOR 1, 2, 3  /  BARS A FIGHT WON ON FLOOR 1, 2, 3\r\n";
             for (int m = 0; m < 2; m++)
             {
                 bool maestro = m == 1;
@@ -206,6 +206,8 @@ namespace Tacetno433.Core
                     int wins = 0;
                     int[] lostOn = new int[4];
                     simTally = !maestro && p == 2;                                         // MUSICIANS : the NORMAL STRONG runs
+                    Array.Clear(simBars, 0, simBars.Length);
+                    Array.Clear(simWonFights, 0, simWonFights.Length);
                     for (int r = 0; r < SimRuns; r++)
                     {
                         int reached = SimRun(simPlayers[p], rng, runKit, maestro);
@@ -213,7 +215,8 @@ namespace Tacetno433.Core
                         else lostOn[reached]++;
                     }
                     report += "    " + simPlayers[p].Name.PadRight(9) + (wins * 100 / SimRuns).ToString().PadLeft(3) + "%    "
-                            + (lostOn[1] * 100 / SimRuns) + "% / " + (lostOn[2] * 100 / SimRuns) + "% / " + (lostOn[3] * 100 / SimRuns) + "%\r\n";
+                            + (lostOn[1] * 100 / SimRuns) + "% / " + (lostOn[2] * 100 / SimRuns) + "% / " + (lostOn[3] * 100 / SimRuns) + "%    "
+                            + SimBarsOn(1) + " / " + SimBarsOn(2) + " / " + SimBarsOn(3) + "\r\n";
                     simTally = false;
                 }
             }
@@ -279,7 +282,15 @@ namespace Tacetno433.Core
                     done += " " + name + "=?";
                     continue;
                 }
-                field.SetValue(owner, Convert.ChangeType(value, field.FieldType, CultureInfo.InvariantCulture));
+                if (field.FieldType.IsArray)                                                         // a list (30 Oct) : "TurnFloorLife=1.6|2.4|3.3"
+                {
+                    string[] parts = value.Split('|');
+                    Type one = field.FieldType.GetElementType();
+                    Array list = Array.CreateInstance(one, parts.Length);
+                    for (int k = 0; k < parts.Length; k++) list.SetValue(Convert.ChangeType(parts[k], one, CultureInfo.InvariantCulture), k);
+                    field.SetValue(owner, list);
+                }
+                else field.SetValue(owner, Convert.ChangeType(value, field.FieldType, CultureInfo.InvariantCulture));
                 done += " " + name + "=" + value;
             }
             return done;
@@ -359,12 +370,68 @@ namespace Tacetno433.Core
 
                     for (int m = 0; m < b.Party.Count; m++) life[b.Party[m].Musician] = b.HpAfterBattle(b.Party[m]);
                     SimHeal(band, life, BattleRules.RecoverAfterWin);                 // the result page's life back
+                    simBars[floor] += b.Round;                                        // how long the fights won take (30 Oct)
+                    simWonFights[floor]++;
+                    for (int m = 0; m < b.Party.Count; m++)                           // PATH : INSPIRED steps left for the result page
+                        if (b.Party[m].InspirePending) SimStep(b.Party[m].Musician, floor, rng);
+                    SimWinStep(band, floor, rng);                                     // PATH : the step every won fight gives
                 }
                 for (int m = 0; m < band.Count; m++)                                 // WEAPON TIERS : every weapon one tier up per floor
                     band[m].Rehearsed = Math.Min(BattleRules.RehearseMax, band[m].Rehearsed + 1);
             }
             Tally(band, true);
             return 4;
+        }
+
+        //PATH (Beta1 30 Oct) : the simulated player takes the steps like a player who has no favourite, a random one of those
+        //open (the win's card is one of up to three, so it is taken among all of the band's open steps)
+        private static int SimPathOf(Musician m, int floor, Random rng)
+        {
+            bool first = PathList.StepOpen(m, 0, floor);
+            bool second = PathList.StepOpen(m, 1, floor);
+            if (simOnly[0] == m.Index) { first &= simOnly[1] == 0; second &= simOnly[1] == 1; }   // TACET_SIM_ONLY : one path of one musician
+            if (!first && !second) return -1;
+            if (first && second) return rng.Next(2);
+            return first ? 0 : 1;
+        }
+
+        private static void SimStep(Musician m, int floor, Random rng)
+        {
+            int p = simNoPath ? -1 : SimPathOf(m, floor, rng);
+            if (p >= 0) PathList.Take(m, p, floor);
+        }
+
+        //Only : TACET_SIM_ONLY="2:0" lets the musician at place 2 of MusicianList.All (PFUNDT) walk only their path 0 (30 Oct),
+        //to see what one path adds
+        private static int[] simOnly = SimOnly();
+
+        private static int[] SimOnly()
+        {
+            string text = Environment.GetEnvironmentVariable("TACET_SIM_ONLY");
+            int who, path;
+            if (text == null || text.IndexOf(':') < 0 || !int.TryParse(text.Split(':')[0], out who) || !int.TryParse(text.Split(':')[1], out path)) return new int[] { -1, -1 };
+            return new int[] { who, path };
+        }
+
+        //No Path : TACET_SIM_NOPATH=1 plays the runs without PATH steps, to see what they add (30 Oct)
+        private static bool simNoPath = Environment.GetEnvironmentVariable("TACET_SIM_NOPATH") == "1";
+
+        private static void SimWinStep(List<Musician> band, int floor, Random rng)
+        {
+            List<Musician> open = new List<Musician>();
+            for (int m = 0; m < band.Count; m++)
+                if (PathList.AnyOpen(band[m], floor) && SimPathOf(band[m], floor, rng) >= 0) open.Add(band[m]);
+            if (open.Count > 0) SimStep(open[rng.Next(open.Count)], floor, rng);
+        }
+
+        //Bars On : the bars a fight won took on this floor, on average (RUNS, 30 Oct : PATH makes the band stronger as it goes,
+        //so the fights of the deeper floors are watched for getting shorter)
+        private static int[] simBars = new int[4];
+        private static int[] simWonFights = new int[4];
+
+        private static string SimBarsOn(int floor)
+        {
+            return simWonFights[floor] > 0 ? (simBars[floor] / (float)simWonFights[floor]).ToString("0.0", CultureInfo.InvariantCulture) : "-";
         }
 
         //Tally : MUSICIANS, one run's band and whether it was won (only while simTally is on)
@@ -419,6 +486,11 @@ namespace Tacetno433.Core
             {
                 if (b.Step == TurnStep.Plan)
                 {
+                    for (Fighter f = b.InspiredWaiting; f != null && !simNoPath; f = b.InspiredWaiting)   // INSPIRED : a step of theirs at once
+                    {
+                        int p = SimPathOf(f.Musician, b.Floor, rng);
+                        if (p < 0 || !b.TakeStep(f, p)) f.InspirePending = false;
+                    }
                     SimPlan(b, player, rng);
                     if (b.Step == TurnStep.Plan) b.PlayBar();                              // the SIGNATURE may have won it
                 }
@@ -518,7 +590,7 @@ namespace Tacetno433.Core
                     Skill s = mine[k];
                     if (!b.CanPlanSkill(me, s)) continue;
                     if (s.Heal > 0) heal = s;
-                    else if (s.HitsEnemy && (s.Bounce == 0 || standing >= 2) && (hit == null || s.Cost > hit.Cost)) hit = s;
+                    else if (s.HitsEnemy && (hit == null || SimHitValue(me, s, standing) > SimHitValue(me, hit, standing))) hit = s;
                     else if (s.Kind == SkillKind.Defend) guard = s;
                     else if (s.Kind == SkillKind.Boost) boost = s;
                 }
@@ -549,6 +621,27 @@ namespace Tacetno433.Core
                 if (!written && noAttacks && heal != null) written = b.PlanSkill(me, heal, me);
                 if (!written) b.PlanAttack(me, weakest);
             }
+        }
+
+        //Sim Hit Value : how much a skill that hits deals, roughly, for picking between two (30 Oct : the dearest one was played
+        //before, so a CAPRICE that PATH made 6 cuts long was never used, and CHAKRAM only against two enemies or more). Every
+        //note's damage, a held note at 1.2 (held part way), 0.1 for each DISSONANCE it leaves, x the enemies it reaches. CHAKRAM : a new enemy each throw while there
+        //are some, the others at TurnChakramRepeat (whole with THE CATCH), WHIRLWIND's last throw at every enemy. CAPRICE No. 24's
+        //last cut x3.
+        private static float SimHitValue(Fighter me, Skill s, int standing)
+        {
+            float value = 0f;
+            for (int n = 0; n < s.Notes.Length; n++) value += s.Damage * (s.Notes[n].Kind == NoteKind.Hold ? 1.2f : 1f) + 0.1f * s.Dissonance;   // a stack of DISSONANCE, roughly
+            if (me.Musician.Has(PathRule.LastCut) && s.Name == SkillList.Plain(me.Musician, 0).Name) value += s.Damage * (BattleRules.TurnLastCutScale - 1f);
+            if (s.Target == SkillTarget.AllEnemies) value *= standing;
+            if (s.Bounce > 0)
+            {
+                int fresh = Math.Min(s.Notes.Length, Math.Min(s.Bounce, Math.Max(1, standing)));
+                float again = me.Musician.Has(PathRule.ChakramFull) ? 1f : BattleRules.TurnChakramRepeat;
+                value = s.Damage * (fresh + (s.Notes.Length - fresh) * again);
+                if (me.Musician.Has(PathRule.ChakramLast)) value += s.Damage * (standing - 1);
+            }
+            return value;
         }
 
         //Sim Bargain : THE DEVIL'S BARGAIN, the skill is paid partly in life only while that leaves the musician above three

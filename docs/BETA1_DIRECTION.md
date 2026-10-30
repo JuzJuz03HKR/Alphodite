@@ -768,3 +768,55 @@
 - เจอ DEAD AIR : ห้องที่ 2 มันขึ้น CHARGE กับตัวเลข ลองปล่อยไว้ ห้องถัดไปโน้ตเดียวลงคนที่มีกรอบกระพริบ / อีกรอบใช้ TIMPANI ROLL ใส่ตอนขึ้น CHARGE เห็น BROKEN / อีกรอบปัดโน้ตใหญ่ PERFECT ได้ COUNTER
 - เจอ THE DAMPER : ตอนมีป้าย GUARD ใต้ตัว ลอง ATTACK เห็น -6 GUARD เลือดไม่ลด แล้วลอง IL CANNONE เห็น PIERCE
 - โน้ตใหญ่แรงไปหรือเบาไป โล่ใหญ่ไปไหม คำบนหัวอ่านทันไหม
+
+## 13. ก้อน 2 ทำต่อเนื่อง (30 ต.ค. ค่ำ แชทข้อ 3 ถึงก้อน 2 ผู้ใช้สั่งทำต่อไม่หยุดรอ ไม่ทำ VFX คำต่อคำ `USER_BRIEFS.md` 13.34)
+
+### 13.1 ข้อ 5 กับ 6 PATH และ INSPIRED เสร็จ รอผู้ใช้ Rebuild ดู (รวมรางวัลไฟต์แบบ ก ที่ผู้ใช้เลือก 11.11 ข้อ 3)
+ระบบ (`Data/Path.cs` ที่เดียวสำหรับแก้การ์ด)
+- นักดนตรีในตำนานแต่ละคนมี 2 เส้นทาง เส้นละ 3 ขั้น (I II III) รวม 30 ใบ ทุกใบเปลี่ยนสิ่งที่สกิลทำให้เห็นบนจอ (โน้ตมากขึ้น โดนทุกตัว กฎใหม่) ไม่ใช่ตัวเลขที่มองไม่เห็นอย่างเดียว
+- **ขั้นเปิดตามชั้น** : ขั้น I ชั้น 1 ขั้น II ชั้น 2 ขั้น III ชั้น 3 (`PathList.StepOpen`) ช่วงแรกธรรมดา ท้ายเกมเวอร์ตามที่ผู้ใช้อยาก (13.13)
+- ได้ขั้นจาก 2 ทาง : **ชนะทุกไฟต์ได้เลือก 1 จาก 3** (สุ่มจากขั้นที่เปิดของทั้งวง ข้ามได้รับเงิน) และ **INSPIRED** (นักดนตรีที่ได้ PERFECT ของตัวเองครบ 4 ในไฟต์เดียว นับโน้ตสกิลของตัวเองกับโน้ตที่ตัวเองปัด ครั้งเดียวต่อไฟต์) ต้นห้องถัดไปขึ้นการ์ด 2 ใบของคนนั้นกลางจอ เลือกแล้วใช้ได้ทันทีในห้องนั้น คลิกขวา = ไว้ทีหลังไปเลือกหลังจบไฟต์ ถ้าไม่มีขั้นเปิดแล้ว INSPIRED ให้ลม +2 แทน
+- หลังชนะ : หน้าผล แล้วหน้าการ์ด (การ์ด 3D แบบเดียวกับ MOTIF `MotifRewardScreen` แบบ Path) ทีละหน้า คนที่ INSPIRED ค้างก่อน แล้วการ์ดของการชนะ แล้วค่อย MOTIF ของ ELITE หรือบอส / บอสสุดท้ายไม่มีหน้าการ์ด
+- เซฟเก็บขั้นของทุกคน (`paths=`) เซฟเก่าโหลดได้ (ไม่มีขั้น) / สกิลที่ถูกเขียนใหม่เป็นของนักดนตรีในรันนั้น (`Musician.Kit`) `SkillList.First/Second` ให้ตัวที่ถูกต้องเสมอ ตัวต้นแบบใน `SkillList.All` ไม่ถูกแตะ
+
+30 ใบ (ไอริสออกแบบจากตำนานของแต่ละคน ผู้ใช้เปลี่ยนได้ทุกใบ ข้อเท็จจริงที่ใช้ตั้งชื่อค้นยืนยันแล้ว 30 ต.ค. แหล่งท้ายหัวข้อ)
+| คน | เส้นทาง | I | II | III |
+|---|---|---|---|---|
+| PAGANINI | THE DEVIL | THE PACT ทุกสกิล x1.3 แลกเลือด 4 | DIABOLUS IN MUSICA CAPRICE 2 DISSONANCE ต่อครั้ง | THE DEVIL'S OWN IL CANNONE โดนทุกตัวที่มี DISSONANCE ด้วย |
+| | THE VIRTUOSO (24 Caprices Op. 1) | OP. 1 CAPRICE 5 ครั้ง | ON ONE STRING ทุกครั้งทิศเดียว ครั้งละ 0.5 | CAPRICE No. 24 6 ครั้ง ครั้งสุดท้าย x3 |
+| QUANTZ | THE TEACHER (ตำราฟลุต 1752) | THE METHOD LESSON x1.6 (เดิม 1.3) | THE CLASS LESSON ให้เพื่อนทุกคน ลม 3 | EVERY EVENING เพื่อนที่ได้ LESSON เล่นท่าถัดไปซ้ำอีกครึ่ง (ECHO) |
+| | THE COURT (คอนแชร์โตราว 300 บท ที่ Sanssouci) | EVENING CONCERT SOFT AIR ฮีล 4 ต่อโน้ต | 300 CONCERTOS SOFT AIR 3 โน้ต ลม 3 | SANSSOUCI SOFT AIR ล้าง DISSONANCE กับ MUTE |
+| PFUNDT | THE CRANK (ทิมปานีแบบหมุน) | ONE TURN TURN OF THE HAND เหลือน้อยสุด 1 โน้ต | RETUNED THUNDER CALL ตัดโน้ตทุกตัว 1 | DIE PAUKEN (ตำรา 1849) TURN OF THE HAND ตัด 2 |
+| | THE THUNDER | FORTISSIMO ROLL OFF-BEAT 40 | THE STORM ROLL โดนทุกตัว ลม 3 | THUNDERCLAP ROLL PERFECT ตัวแรกเสียศูนย์ทันที |
+| DUPORT | THE SHIELD (Duport Stradivarius 1711) | STRADIVARIUS SHIELD รับแค่ 1/3 | THE WALL SHIELD บังเพื่อนทุกคน | NAPOLEON'S DENT (ตำนาน 1812) ดาเมจที่รับแทนเพื่อนตีกลับศัตรูเท่ากัน |
+| | THE SCAR | OLD WOUNDS THE SCAR ให้ CRESCENDO 2 | RIPOSTE LANCE x3 หลังโดนตี | THE LAST LANCE LANCE 3 ครั้ง |
+| PUNTO | THE HUNT (แตรล่าสัตว์) | TALLY-HO HUNTING CALL x1.5 | THE WHOLE HUNT ทุกคนที่เล่นหลัง PUNTO ในห้อง | HAND HORN FANFARE 2 CRESCENDO ต่อโน้ต |
+| | THE CHAKRAM | WIDER ARC CHAKRAM 4 ครั้ง | THE CATCH ตีซ้ำไม่ลดครึ่ง | WHIRLWIND ครั้งสุดท้ายโดนทุกตัว |
+
+ที่ไอริสตัดสินเอง (ผู้ใช้เปลี่ยนได้ทุกข้อ)
+1. เปิดขั้นตามชั้น เพราะรันหนึ่งได้เลือกราว 1 ถึง 2 ใบต่อไฟต์ (ชนะ 1 + INSPIRED) มากกว่า 18 ใบของวง ถ้าไม่ล็อกตามชั้นจะได้ครบตั้งแต่ชั้น 2 ผลที่ตามมา : ผู้เล่นเก่งได้ขั้นของชั้นครบเร็ว แล้ว INSPIRED กลายเป็นลม +2 / หน้าการ์ดหลังชนะไม่ขึ้นถ้าไม่มีขั้นเปิด **ทางเลือกอื่นที่ผู้ใช้เลือกได้** : ก) แบบ Monster Train เลือกเส้นทางเดียวต่อคน (การเลือกมีน้ำหนักมากขึ้น) ข) INSPIRED ต้อง PERFECT มากขึ้น ค) เพิ่มขั้นต่อเส้น
+2. ทั้งสองเส้นทางเดินได้พร้อมกัน (ไม่ล็อกเส้นเดียว) ท้ายรันผู้เล่นเก่งได้ครบ 6 ใบต่อคน
+3. INSPIRED นับ PERFECT ของตัวเอง (โน้ตสกิลตัวเอง โน้ตที่ตัวเองปัดหรือบังแทน) ATTACK ไม่มีโน้ตจึงไม่นับ
+4. ปุ่มข้ามบนหน้าการ์ดให้เงินเท่าข้าม MOTIF (ทางเดิม `SkipMotifShards`)
+5. VFX ตัวเรืองตอน INSPIRED ยังไม่ทำ (รอภาพอ้างอิง) ตอนนี้มีคำ INSPIRED เด้งสีของตัวละคร และชื่อการ์ดเด้งตอนกฎของการ์ดทำงาน
+
+ความยาก (ไม่ได้ลด ชดเชยให้เท่าเดิม)
+- PATH ทำให้วงเก่งขึ้นมาก (ตัวจำลองไม่ชดเชย NORMAL STRONG 55.6 เป็น 90%) ชดเชยตามหลัก "มอนก็โหดตาม" : **ศัตรูชั้น 2 กับ 3 เลือด x3.6 กับ x5.4 (เดิม 2.1 กับ 2.7) ตี x1.35 กับ x1.65 (เดิม 1.2 กับ 1.4) ชั้น 1 คงเดิม** (`TurnFloorLife` `TurnFloorDamage`)
+- ตัวจำลองฉลาดขึ้น (นิสัยใหม่) : เลือกสกิลตีที่แรงสุดจริงจากจำนวนโน้ต ไม่ใช่ตัวแพงสุด (เดิม CAPRICE ที่อัปแล้วไม่เคยถูกใช้) / ใช้ CHAKRAM กับศัตรูตัวเดียวได้ / นับค่า DISSONANCE / เลือกขั้นแบบสุ่มเหมือนผู้เล่นที่ไม่มีเส้นโปรด ผลคือเกมเดิม (ไม่มี PATH) วัดได้ 63.8% (เครื่องมือเดิม 54.5%) **ต่อจากนี้เทียบกับ 63.8%**
+- เทียบด้วยเครื่องมือเดียวกัน 12 seed : ไม่มี PATH 63.8% / มี PATH กับศัตรูชุดใหม่ 62.1% / MAESTRO EXPERT 82.0 กับ 82.1 / ไฟต์ที่ชนะยาว 3.5 / 5.6 / 6.7 ห้องในชั้น 1 2 3 (เดิม 4.0 / 5.0 / 6.1) ชั้น 1 สั้นลงเพราะได้ขั้น I แต่ศัตรูชั้น 1 คงเดิม
+- ผลข้างเคียงที่ต้องให้ผู้ใช้ดู : ผู้เล่นระดับกลาง (AVERAGE) แพ้ชั้น 1 น้อยลงมาก (29% เป็น 10%) แต่ไปแพ้ชั้น 2 แทน (67% เป็น 85%) ชั้น 2 จึงเป็นกำแพงที่ชัดขึ้น
+- ปรับระหว่างทาง (ตัวจำลองบอก) : IL CANNONE 1.5 เป็น 1.8 (เทียบ CHAKRAM ราคาเดียวกัน) / THE STORM กับ THE CLASS กับ 300 CONCERTOS ราคา 3 ลม (ท่าใหญ่ราคาแพงขึ้น) / FORTISSIMO 40 / THUNDERCLAP ทุบตัวแรกตัวเดียว (เดิมทุกตัว ทำให้วงที่มี PFUNDT ชนะเกือบทุกรัน) / RETUNED ตัด 1 โน้ตเสมอ / THE PACT เดิม "จ่ายเลือดแทนลมแล้ว x1.5" แทบไม่เคยเกิด เปลี่ยนเป็นทุกสกิล x1.3 แลกเลือด 4
+- **ยังไม่สมดุลระหว่างคน** (วงที่มี / ไม่มี คนนั้น 12 seed) : PAGANINI 58.8 / 66.2, QUANTZ 65.3 / 57.0, PFUNDT 63.3 / 59.9, DUPORT 61.2 / 63.4, PUNTO 61.0 / 63.2 ห่างกันราว 8% (ก่อนมี PATH ราว 4.5%) วาทยากร THE UNHEARING 60.8 FANNY 58.2 THE METRONOME 54.3 ข้อ 7 (SIGNATURE โตที่บอส) จะช่วย Fanny กับ Bach ที่เหลือปรับตอนผู้ใช้สั่งลง balance
+- ตัวจำลองมีของใหม่ : `TACET_SIM_NOPATH=1` เล่นโดยไม่มี PATH / `TACET_SIM_ONLY="2:0"` ให้คนที่ช่อง 2 เดินเส้นเดียว / `TACET_SIM_SET` ตั้งค่าที่เป็นลิสต์ได้ (`TurnFloorLife=1.6|3.6|5.4`) และค่าของศัตรู / ตาราง RUNS มีคอลัมน์ห้องต่อไฟต์
+
+ทดสอบในแชท cloud : build 0/0 / turncheck 136/136 (ใหม่ `Core/DebugShots.TurnPaths.cs` 14 ข้อ : ชั้นที่เปิดขั้น, INSPIRED, INSPIRED ให้ลม, ทุกเส้นทางเดินจนสุด) / savecheck 33/33 (ใหม่ paths) / ภาพ `battleinspired` `rewardpath` `rewardinspired` / `TACET_Balance.xlsx` อัปเดต
+
+โค้ดที่แตะ : `Data/Path.cs` (ใหม่) / `Data/Musician.cs` (`PathLevel` `Kit` `Rules` `Has`) / `Data/Skill.cs` (`Copy` `Plain` First Second) / `Data/SaveFile.cs` (`paths=`) / `Data/RunState.cs` (`InspiredPending` `WinStepPending` `MotifAfterSteps` `StepsWaiting`) / `Data/BattleRules.cs` (หัวข้อ PATH INSPIRED และ Floor Scale) / `Battle/TurnBattle.cs` (`CountNote` `Inspire` `TakeStep` `InspiredWaiting` `IsSkill` `Retune` กฎทุกใบค้นชื่อใน `PathRule`) / `Screens/BattleScreen.cs` (หน้าเลือก INSPIRED `OpenStepPick` `UpdateStepPick` `DrawStepPick` คำเด้ง) / `Screens/MotifRewardScreen.cs` (แบบ Path) / `Screens/ResultScreen.cs` / `Core/MotifArt.cs` (`PathFace`) / `TacetGame.cs` / `Core/DebugShots*.cs`
+
+ให้ผู้ใช้ลองหลัง Rebuild
+- ชนะไฟต์แรก : หลังหน้าผลมีหน้า THE BAND GROWS การ์ด 3 ใบ เลือก 1 ใบ แล้วเข้าไฟต์ถัดไปดูว่าสกิลเปลี่ยนจริง (เช่น OP. 1 CAPRICE 5 โน้ต)
+- ในไฟต์ PERFECT ให้ได้ 4 ครั้งด้วยคนเดียว (สกิลกับการปัด) ห้องถัดไปมีการ์ดของคนนั้นขึ้นกลางจอ เลือกแล้วใช้ในห้องนั้นได้เลย / ลองคลิกขวาแล้วไปเลือกหลังจบไฟต์
+- ชั้น 2 ขั้น II เปิด ชั้น 3 ขั้น III เปิด ท้ายรันรู้สึกเวอร์ขึ้นไหม ศัตรูชั้น 2 กับ 3 โหดพอไหม
+- การ์ดใบไหนไม่สนุกหรือไม่ตรงตัวละคร บอกได้เลย
+
+แหล่งที่ใช้ยืนยันข้อเท็จจริง (30 ต.ค.) : [Pfundt (encyclopedia.com)](https://encyclopedia.com/arts/dictionaries-thesauruses-pictures-and-press-releases/pfundt-ernst-gotthold-benjamin) [Kolberg Museum (crank timpani)](https://kolberg.com/en/About/Kolberg-Museum/) [Die Pauken 1849 (IMSLP)](https://cn.imslp.org/wiki/Die_Pauken_(Pfundt%2C_Ernst)) [Duport Stradivarius](https://en.wikipedia.org/wiki/Duport_Stradivarius) [Jean-Louis Duport](https://en.wikipedia.org/wiki/Jean-Louis_Duport) [Quantz concertos (Classical Music)](https://classical-music.com/reviews/orchestral/quantz) [Quantz at court (jjquantz.org)](https://www.jjquantz.org/?p=2)

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -18,9 +19,13 @@ namespace Tacetno433.Screens
     //   BOSS      a great upgrade, 1 of 3 : REFORGE (every weapon of the band a tier up, MotifArt.ReforgeFace) and two
     //             treasured motifs. REFORGE sits in the middle while a weapon can still go up.
     //   TREASURE  a chest on the map : one card, one motif, free (from the place's own dice, RunState.PlaceSeed)
+    //PATH (Beta1 30 Oct, Data/Path.cs, BETA1_DIRECTION 12.4) : the same cards for the band's steps after a fight won, one page
+    //each, before the motif of an ELITE or a BOSS (RunState.StepsWaiting)
+    //   PATH      INSPIRED : the two next steps of a musician INSPIRED in the fight who did not pick at once, then the one card
+    //             every win gives : up to three of the band's open steps. A card shows the musician, the step's numeral and path.
     public class MotifRewardScreen : GameScreen
     {
-        public enum Kind { Fight, Treasure }
+        public enum Kind { Fight, Treasure, Path }
 
         //Reward Layout
         private const int CardW = 240;
@@ -36,6 +41,16 @@ namespace Tacetno433.Screens
         private int reforgeCard = -1;      // the card that is REFORGE, -1 for none. Its place in offer is null.
         private string reforgeText = "";
         private Motif[] offer = new Motif[0];
+
+        //PATH : the step each card offers (kept as it was when the page opened, so the face stays once it is taken), whose it
+        //is, on which path, and the page's words (made in Load)
+        private PathStep[] stepOf = new PathStep[0];
+        private Musician[] stepWho = new Musician[0];
+        private int[] stepPath = new int[0];
+        private int[] stepLevel = new int[0];
+        private string[] stepPathName = new string[0];
+        private string stepOver = "";
+        private string stepTitle = "";
         private Rectangle[] cards = new Rectangle[0];
         private int selected;
         private bool mouseOnCard;          // the mouse is over the selected card, so it leans toward it
@@ -67,14 +82,15 @@ namespace Tacetno433.Screens
         //Wipe Word : the page's name in the wipe on the way here (WIPE WORD), short for SPOILS OF THE FIGHT
         public override string WipeWord
         {
-            get { return kind == Kind.Treasure ? "THE TREASURE" : "THE SPOILS"; }
+            get { return kind == Kind.Treasure ? "THE TREASURE" : (kind == Kind.Path ? "A NEW STEP" : "THE SPOILS"); }
         }
 
         public override void Load()
         {
             RunState run = Game.CurrentRun;
 
-            if (kind == Kind.Treasure)
+            if (kind == Kind.Path) LoadSteps(run);
+            else if (kind == Kind.Treasure)
             {
                 //TREASURE : one motif of any rarity, from the place's dice so CONTINUE finds the same one
                 offer = MotifList.Roll(run.Motifs, 1, 1, run.Floor, new Random(run.PlaceSeed));
@@ -118,6 +134,62 @@ namespace Tacetno433.Screens
             Lens.Ambient = 0.36f;
             Lens.SpotPower = 0f;
             Lens.Vignette = 0.55f;
+        }
+
+        //Load Steps : PATH, an INSPIRED musician's two next steps first (one page each), else the win's card, up to three of the
+        //band's open steps in a random order (the run's dice). The cards are motif cards with no motif (offer holds nulls).
+        private void LoadSteps(RunState run)
+        {
+            List<Musician> who = new List<Musician>();
+            List<int> path = new List<int>();
+            Musician inspired = null;
+            while (inspired == null && run.InspiredPending.Count > 0)
+            {
+                Musician m = run.InspiredPending[0];
+                run.InspiredPending.RemoveAt(0);
+                if (PathList.AnyOpen(m, run.Floor)) inspired = m;
+            }
+            if (inspired != null)
+            {
+                for (int p = 0; p < 2; p++)
+                    if (PathList.StepOpen(inspired, p, run.Floor)) { who.Add(inspired); path.Add(p); }
+                stepOver = "INSPIRED";
+                stepTitle = inspired.Name + " : choose a step";
+            }
+            else
+            {
+                run.WinStepPending = false;
+                for (int i = 0; i < run.Roster.Count; i++)
+                    for (int p = 0; p < 2; p++)
+                        if (PathList.StepOpen(run.Roster[i], p, run.Floor)) { who.Add(run.Roster[i]); path.Add(p); }
+                for (int i = who.Count - 1; i > 0; i--)                                     // a shuffle with the run's dice
+                {
+                    int k = run.Rng.Next(i + 1);
+                    Musician w = who[i]; who[i] = who[k]; who[k] = w;
+                    int q = path[i]; path[i] = path[k]; path[k] = q;
+                }
+                while (who.Count > BattleRules.MotifChoices)
+                {
+                    who.RemoveAt(who.Count - 1);
+                    path.RemoveAt(path.Count - 1);
+                }
+                stepOver = "THE BAND GROWS";
+                stepTitle = "Choose a step";
+            }
+
+            int n = who.Count;
+            offer = new Motif[n];
+            stepOf = new PathStep[n];
+            stepWho = who.ToArray();
+            stepPath = path.ToArray();
+            stepLevel = new int[n];
+            stepPathName = new string[n];
+            for (int i = 0; i < n; i++)
+            {
+                stepLevel[i] = stepWho[i].PathLevel[stepPath[i]];
+                stepOf[i] = PathList.Next(stepWho[i], stepPath[i]);
+                stepPathName[i] = PathList.Of(stepWho[i])[stepPath[i]].Name;
+            }
         }
 
         //Leave : the card pictures are let go with the page
@@ -170,7 +242,12 @@ namespace Tacetno433.Screens
             {
                 picked = selected;
                 RunState run = Game.CurrentRun;
-                if (picked == reforgeCard)
+                if (kind == Kind.Path)
+                {
+                    PathList.Take(stepWho[picked], stepPath[picked], run.Floor);              // PATH : the step is theirs
+                    SoundBank.Play(Sfx.MotifGet);
+                }
+                else if (picked == reforgeCard)
                 {
                     for (int i = 0; i < run.Roster.Count; i++) run.Rehearse(run.Roster[i]);    // REFORGE : every weapon a tier up
                     SoundBank.Play(Sfx.Rehearse);
@@ -194,9 +271,21 @@ namespace Tacetno433.Screens
             }
         }
 
-        //Go On : the next stage
+        //Go On : the next stage. PATH : another step page while one waits, then the motif of an ELITE or a BOSS.
         private void GoOn()
         {
+            RunState run = Game.CurrentRun;
+            if (kind == Kind.Path && run.StepsWaiting)
+            {
+                Game.Screens.Change(new MotifRewardScreen(Kind.Path));
+                return;
+            }
+            if (kind == Kind.Path && run.MotifAfterSteps)
+            {
+                run.MotifAfterSteps = false;
+                Game.Screens.Change(new MotifRewardScreen());
+                return;
+            }
             RunFlow.NextStage(Game);
         }
 
@@ -291,7 +380,8 @@ namespace Tacetno433.Screens
             {
                 faces[i] = Card3D.Picture(device, faces[i], w, h);
                 Card3D.BeginPicture(device, sb, faces[i]);
-                if (i == reforgeCard) MotifArt.ReforgeFace(sb, card, Game.CurrentRun, reforgeText, lift[i] > 0.5f, 1f, time);   // REFORGE
+                if (kind == Kind.Path) MotifArt.PathFace(sb, card, stepWho[i], stepPathName[i], stepOf[i], stepLevel[i], lift[i] > 0.5f, 1f, time);   // PATH
+                else if (i == reforgeCard) MotifArt.ReforgeFace(sb, card, Game.CurrentRun, reforgeText, lift[i] > 0.5f, 1f, time);   // REFORGE
                 else MotifArt.CardFace(sb, card, offer[i], lift[i] > 0.5f, 1f, time);
                 sb.End();
 
@@ -392,9 +482,10 @@ namespace Tacetno433.Screens
             return lights[MathHelper.Clamp(RarityOf(i), 1, lights.Length) - 1];
         }
 
-        //Rarity Of : card i's rarity for its light, REFORGE is as bright as a treasured motif
+        //Rarity Of : card i's rarity for its light, REFORGE is as bright as a treasured motif, a PATH step as its numeral (I II III)
         private int RarityOf(int i)
         {
+            if (kind == Kind.Path) return Math.Min(3, stepLevel[i] + 1);
             return i == reforgeCard || offer[i] == null ? 3 : offer[i].Rarity;
         }
 
@@ -412,11 +503,16 @@ namespace Tacetno433.Screens
             float rise = (1f - head) * BattleRules.UiEnterSlide;
             string over = kind == Kind.Treasure ? "A CHEST IN THE WINGS" : (boss ? "SPOILS OF THE MOVEMENT" : (BattleRules.TurnBattleOn ? "SPOILS OF THE FIGHT" : "SPOILS OF THE DUEL"));
             string title = kind == Kind.Treasure ? "Take what is inside" : (boss ? "Choose a great upgrade" : "Choose a motif");
+            if (kind == Kind.Path)                                                         // PATH : made in Load
+            {
+                over = stepOver;
+                title = stepTitle;
+            }
             Gfx.TextSpacedCentered(sb, Game.Font, over, cx, 76 - rise, Palette.LineGrey * head, TextSize.Tiny, 5f);
             Gfx.TextCentered(sb, Game.BigFont, title, cx, 122 - rise, Palette.Paper * head, TextSize.Title);
 
             if (offer.Length == 0)
-                Gfx.TextCentered(sb, Game.StoryFont, "The band already carries every motif there is.", cx, 340, Palette.PaperDim * head, TextSize.Story);
+                Gfx.TextCentered(sb, Game.StoryFont, kind == Kind.Path ? "No step is open on this floor." : "The band already carries every motif there is.", cx, 340, Palette.PaperDim * head, TextSize.Story);
 
             DrawCards(sb);
 

@@ -186,6 +186,14 @@ namespace Tacetno433.Data
             for (int i = 0; i < MusicianList.All.Length; i++) rehearsed.Add(MusicianList.All[i].Rehearsed.ToString());
             lines.Add("rehearsed=" + string.Join(",", rehearsed));
 
+            List<string> paths = new List<string>();                // PATH (Beta1 30 Oct) : the steps of each musician's two paths
+            for (int i = 0; i < MusicianList.All.Length; i++)
+            {
+                paths.Add(MusicianList.All[i].PathLevel[0].ToString());
+                paths.Add(MusicianList.All[i].PathLevel[1].ToString());
+            }
+            lines.Add("paths=" + string.Join(",", paths));
+
             List<string> life = new List<string>();
             for (int i = 0; i < MusicianList.All.Length; i++) life.Add(MusicianList.All[i].Life.ToString());
             lines.Add("life=" + string.Join(",", life));      // Alpha 7 : each musician's life between turn battles, -1 full
@@ -276,6 +284,16 @@ namespace Tacetno433.Data
             int[] rehearsed = GetList(v, "rehearsed");
             for (int i = 0; i < rehearsed.Length && i < MusicianList.All.Length; i++)
                 MusicianList.All[i].Rehearsed = rehearsed[i];
+
+            int[] paths = GetList(v, "paths");                 // PATH : a save from before 30 Oct has none, no step taken
+            for (int i = 0; i < MusicianList.All.Length; i++)
+            {
+                Musician m = MusicianList.All[i];
+                int steps = PathList.Of(m).Length > 0 ? PathList.Of(m)[0].Steps.Length : 0;
+                m.PathLevel[0] = 2 * i < paths.Length ? Math.Max(0, Math.Min(steps, paths[2 * i])) : 0;
+                m.PathLevel[1] = 2 * i + 1 < paths.Length ? Math.Max(0, Math.Min(steps, paths[2 * i + 1])) : 0;
+                PathList.Rebuild(m);
+            }
 
             int[] life = GetList(v, "life");                   // a save from before Alpha 7 has none : everybody full
             for (int i = 0; i < MusicianList.All.Length; i++)

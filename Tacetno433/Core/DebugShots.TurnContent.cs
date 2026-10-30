@@ -97,7 +97,7 @@ namespace Tacetno433.Core
             b.Attack();
             report += Same("last word", "False True", b.Party[0].Guard + " " + b.Party[1].Guard);
 
-            //HOLDS THE ROOM (ROOM TONE, floor 2) : HUSH takes 70 percent while it stands (PAGANINI 6 -> 4.2 -> 4, 105 -> 101),
+            //HOLDS THE ROOM (ROOM TONE, floor 2) : HUSH takes 70 percent while it stands (PAGANINI 6 -> 4.2 -> 4, 180 -> 176),
             //ROOM TONE itself takes all of QUANTZ's 4. On floor 1 the trait is off (80 -> 74).
             Enemy roomTone = EnemyNamed("ROOM TONE");
             b = new TurnBattle(Duo(), new List<Enemy> { hush, roomTone }, 2, new Random(433));
@@ -111,7 +111,7 @@ namespace Tacetno433.Core
             b.PlanAttack(b.Party[0], b.Enemies[0]);
             b.PlayBar();
             b.Attack();
-            report += Same("holds the room", "101 4 74", room + " " + b.Enemies[0].Hp);
+            report += Same("holds the room", "176 4 74", room + " " + b.Enemies[0].Hp);
 
             //ON CUE (THE CUE, floor 2, 29 Oct) : it turns to the musician who plays a skill, the moment they play it
             Enemy cue = EnemyNamed("THE CUE");

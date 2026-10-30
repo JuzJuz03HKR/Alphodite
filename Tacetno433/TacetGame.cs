@@ -166,6 +166,7 @@ namespace Tacetno433
             MusicianList.PrepareText(StoryFont, MusicianWrapWidth);
             EnemyList.PrepareText(StoryFont, TraitWrapWidth);
             MotifList.PrepareText(StoryFont, MotifCardWidth, MotifTipWidth);
+            PathList.PrepareText(StoryFont, MotifCardWidth);                // PATH : the step cards are motif cards in size
             EventList.PrepareText(StoryFont, EventTextWidth, EventTextWidth);
             SongList.Prepare();
 

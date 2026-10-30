@@ -78,6 +78,19 @@ namespace Tacetno433.Data
         //RunState.Start sets it back to zero, so a new run starts clean. The save file keeps it (rehearsed=).
         public int Rehearsed = 0;
 
+        //PATH (Beta1 30 Oct, Data/Path.cs) : the steps of each of their two paths taken in THIS run (0 to 3), their two skills
+        //as those steps rewrote them (null : the plain ones, SkillList.First and Second give the right ones either way) and the
+        //rules the steps gave them. RunState.Start sets them back like Rehearsed, the save file keeps the steps (paths=).
+        public int[] PathLevel = new int[2];
+        public Skill[] Kit;
+        public bool[] Rules = new bool[32];
+
+        //Has : a PATH step gave them this rule (TurnBattle checks them by name)
+        public bool Has(PathRule rule)
+        {
+            return Rules[(int)rule];
+        }
+
         //Life (Alpha 7) : this musician's life during THIS run, kept from one turn battle to the next.
         //-1 means full. RunState.Start sets it back, see RunState.LifeOf.
         public int Life = -1;
@@ -238,6 +251,7 @@ namespace Tacetno433.Data
             {
                 All[i].Rehearsed = 0;
                 All[i].Life = -1;
+                PathList.Reset(All[i]);                  // PATH
             }
         }
 

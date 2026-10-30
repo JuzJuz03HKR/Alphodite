@@ -63,8 +63,12 @@
         public static int TurnShardsPerEscort = 6;            // shards for each enemy beyond the first
 
         //Floor Scale (step 8) : enemies are tougher deeper down, life and each note's damage, floor 1 / 2 / 3
-        public static float[] TurnFloorLife = { 1.6f, 2.1f, 2.7f };   // step 15 : was 1 / 1.3 / 1.6, fights about 1.5 times longer (the user asked for longer fights)
-        public static float[] TurnFloorDamage = { 1f, 1.2f, 1.4f };
+        public static float[] TurnFloorLife = { 1.6f, 3.6f, 5.4f };   // step 15 : was 1 / 1.3 / 1.6, fights about 1.5 times longer (the user asked for longer fights)
+        public static float[] TurnFloorDamage = { 1f, 1.35f, 1.65f }; // PATH (Beta1 30 Oct) : was 1.6 / 2.1 / 2.7 and 1 / 1.2 / 1.4. The band grows a step a
+                                                                      // floor now (Data/Path.cs), so TACET grows too, from floor 2 (the user : the monsters
+                                                                      // get tougher as well, 13.13). turnsim 12 seeds, the same tool before and after :
+                                                                      // NORMAL STRONG 63.8 -> 62.1 percent, MAESTRO EXPERT 82.0 -> 82.1, a fight won on
+                                                                      // floor 1 / 2 / 3 lasts 3.5 / 5.6 / 6.7 bars (4.0 / 5.0 / 6.1 before)
 
         //Enemy Traits in the turn battle (step 8, the TurnTraitText of each enemy in Data/Enemy.cs)
         public static float TurnFillsGapsScale = 1.5f;   // DEAD AIR : a missed note
@@ -203,6 +207,21 @@
         public static float TurnLessonScale = 1.3f;    //                               and the skill plays this much harder
         public static float TurnShieldKeep = 0.5f;     // SHIELD (DUPORT's skill) : the share of a hit on the friend that DUPORT takes instead
         public static float TurnChakramRepeat = 0.5f;  // CHAKRAM (PUNTO's skill) : an enemy the same throw already hit takes this share
+        //PATH (Beta1 30 Oct, Data/Path.cs) : the numbers of the steps that need one (the others rewrite a skill in Path.cs)
+        public static float TurnBloodScale = 1.3f;     // THE PACT (PAGANINI) : every skill of theirs plays this much harder
+        public static int TurnPactLife = 4;            //                      and costs this much life (never the last of it)
+        public static float TurnLastCutScale = 3f;     // CAPRICE No. 24 (PAGANINI) : the last cut of CAPRICE
+        public static float TurnLessonStrong = 1.6f;   // THE METHOD (QUANTZ) : a LESSON plays this much harder (TurnLessonScale without it)
+        public static float TurnLessonEcho = 0.5f;     // EVERY EVENING (QUANTZ) : a friend taught plays their next move again at this
+        public static float TurnShieldThird = 0.34f;   // STRADIVARIUS (DUPORT) : the share of a blow DUPORT takes for a friend (TurnShieldKeep without it)
+        public static float TurnCallStrong = 1.5f;     // TALLY-HO (PUNTO) : THE HUNTING CALL (TurnHuntingCallScale without it)
+        public static int TurnHandOneLeast = 1;        // ONE TURN (PFUNDT) : TURN OF THE HAND leaves this many notes at least (TurnHandLeast without it)
+        public static int TurnHandPaukenCut = 2;       // DIE PAUKEN (PFUNDT) : TURN OF THE HAND takes this many notes (TurnHandCut without it)
+        //INSPIRED (Beta1 30 Oct, BETA1_DIRECTION 11.7 point 6, the user chose way A in 11.11) : a musician with this many PERFECTs
+        //in one fight (their skill's notes and the notes they parry) is INSPIRED, once a fight, and walks one step of a path at
+        //the start of the next bar. With no step open on this floor they bring TurnInspiredBreath BREATH instead.
+        public static int TurnInspiredNeed = 4;
+        public static int TurnInspiredBreath = 2;
         //The hidden musicians (old saves only since 29 Oct)
         public static float TurnByEarScale = 1.5f;     // BY EAR (MALI) : against an enemy that is OFF-BEAT
         public static float TurnHeldNoteShare = 0.4f;  // HELD NOTE (CHAI) : his ATTACK hits again for this share

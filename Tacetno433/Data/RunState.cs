@@ -52,6 +52,36 @@ namespace Tacetno433.Data
         public int PlaceSeed;                // the dice of the place the band walked into (the shop's shelves, the treasure), saved with the run,
                                              // so leaving the game and coming back finds the same shelves (RunFlow.Enter)
         public int LastRounds;               // Alpha 7 : rounds the last turn battle took, for the result page
+
+        //PATH (Beta1 30 Oct, Data/Path.cs) : the steps the band earned in the last fight and has not picked yet, picked on the
+        //pages after the result (MotifRewardScreen Kind.Path, one page each) : the musicians INSPIRED in the fight who did not
+        //pick at once, then the one card every won fight gives. MotifAfterSteps : an ELITE or a BOSS also leaves its motif choice
+        //for after them. Not saved : leaving the game on those pages loses the picks.
+        public List<Musician> InspiredPending = new List<Musician>();
+        public bool WinStepPending;
+        public bool MotifAfterSteps;
+
+        //Steps Waiting : a step page is still to come
+        public bool StepsWaiting
+        {
+            get
+            {
+                for (int i = 0; i < InspiredPending.Count; i++)
+                    if (PathList.AnyOpen(InspiredPending[i], Floor)) return true;
+                return WinStepPending && AnyStepOpen;
+            }
+        }
+
+        //Any Step Open : a musician of the band has a step of a path open on this floor
+        public bool AnyStepOpen
+        {
+            get
+            {
+                for (int i = 0; i < Roster.Count; i++)
+                    if (PathList.AnyOpen(Roster[i], Floor)) return true;
+                return false;
+            }
+        }
         public bool EchoesPaid;              // ARCHIVE : this run's ECHOES are already given (Archive.Pay)
         public int EchoesEarned;
         public int Stamina = 100;

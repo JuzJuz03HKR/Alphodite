@@ -78,6 +78,12 @@ namespace Tacetno433.Data
         {
             get { return Shield || Lesson; }
         }
+
+        //Copy : a skill of its own to rewrite (PATH, Data/Path.cs). The notes are shared until a step gives new ones.
+        public Skill Copy()
+        {
+            return (Skill)MemberwiseClone();
+        }
     }
 
     //SkillList : THE PLACE TO EDIT SKILLS. Two per musician, in the order of MusicianList.All
@@ -90,7 +96,8 @@ namespace Tacetno433.Data
     //The hidden musicians (MALI, CHAI, NUAN, BORIS) keep their Alpha 7 skills for old saves.
     //Every skill starts on the musician's own arrow, so a player learns one shape per musician.
     //Numbers (29 Oct, turnsim 12 seeds) : IL CANNONE 1.8 and CHAKRAM 0.8 were the first guesses, 1.5 and 1 put the runs won
-    //with each legend in the band between 52 and 56 percent (47 to 57 with the old kits).
+    //with each legend in the band between 52 and 56 percent (47 to 57 with the old kits). 30 Oct : IL CANNONE 1.8 again, turnsim
+    //plays CHAKRAM at one enemy too now (2 for 3 BREATH, IL CANNONE 1.5 held was 2.1), PAGANINI's bands won 9 percent less.
     public static class SkillList
     {
         private const Flick L = Flick.Left;
@@ -111,7 +118,7 @@ namespace Tacetno433.Data
             new Skill { Name = "CAPRICE", Kind = SkillKind.Attack, Text = "4 quick cuts. Each adds 1 DISSONANCE.", Cost = 2, Target = SkillTarget.Enemy,
                         Notes = new[] { S(L), S(R), S(L), S(R) }, Damage = 0.4f, Dissonance = 1 },
             new Skill { Name = "IL CANNONE", Kind = SkillKind.Attack, Text = "One big held shot. Hold it = harder. Goes through GUARD.", Cost = 3, Target = SkillTarget.Enemy,
-                        Notes = new[] { H(L) }, Damage = 1.5f, Pierce = true },
+                        Notes = new[] { H(L) }, Damage = 1.8f, Pierce = true },
 
             //QUANTZ, flute (winds, centre) : taught Frederick the Great the flute and wrote the book on playing it (1752).
             //SOFT AIR when the band is hurt (the only healer of the five), THE LESSON so a friend's big skill lands.
@@ -169,8 +176,11 @@ namespace Tacetno433.Data
                         Notes = new[] { S(D), S(D), T() }, Damage = 0.8f, OffBeat = 15 },
         };
 
-        //Skills Of : the two skills of one musician
-        public static Skill First(Musician m) { return All[Array.IndexOf(MusicianList.All, m) * 2]; }
-        public static Skill Second(Musician m) { return All[Array.IndexOf(MusicianList.All, m) * 2 + 1]; }
+        //Skills Of : the two skills of one musician in this run, as their PATH steps rewrote them (Musician.Kit, Data/Path.cs)
+        public static Skill First(Musician m) { return m.Kit != null ? m.Kit[0] : Plain(m, 0); }
+        public static Skill Second(Musician m) { return m.Kit != null ? m.Kit[1] : Plain(m, 1); }
+
+        //Plain : skill k (0 or 1) of the musician before any PATH step
+        public static Skill Plain(Musician m, int k) { return All[Array.IndexOf(MusicianList.All, m) * 2 + k]; }
     }
 }

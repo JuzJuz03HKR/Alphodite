@@ -364,7 +364,19 @@ namespace Tacetno433.Core
             run.Order[0] = run.Order[1];
             run.Order[1] = first;
             run.RefreshLabels();
+            Musician walker = null;                                                     // PATH (Beta1 30 Oct) : two steps and one step
+            for (int i = 0; i < run.Roster.Count && walker == null; i++)
+                if (PathList.Of(run.Roster[i]).Length > 0) walker = run.Roster[i];
+            string walked = "none";
+            if (walker != null)
+            {
+                walker.PathLevel[0] = 2;
+                walker.PathLevel[1] = 1;
+                PathList.Rebuild(walker);
+                walked = walker.Name + " 2/1 " + SkillList.First(walker).Notes.Length + " " + SkillList.Second(walker).Notes.Length;
+            }
             SaveFile.SaveRun(run);
+            if (walker != null) PathList.Reset(walker);                                 // forgotten here, so only the file can bring it back
 
             RunState back = SaveFile.LoadRun(game);
             if (back == null)
@@ -383,6 +395,8 @@ namespace Tacetno433.Core
                 report += Same("roster", Names(run), Names(back));
                 report += Same("rehearsed", run.Roster[0].Rehearsed + "/" + run.Roster[1].Rehearsed, back.Roster[0].Rehearsed + "/" + back.Roster[1].Rehearsed);
                 report += Same("life", "7", back.Roster[0].Life.ToString());
+                report += Same("paths", walked, walker == null ? "none" : walker.Name + " " + walker.PathLevel[0] + "/" + walker.PathLevel[1] + " "
+                                                                   + SkillList.First(walker).Notes.Length + " " + SkillList.Second(walker).Notes.Length);
                 report += Same("seats", Seats(run), Seats(back));
                 report += Same("order", OrderNames(run), OrderNames(back));
                 report += Same("motifs", run.Motifs.Count + (run.Motifs.Count > 0 ? run.Motifs[0].Name : ""), back.Motifs.Count + (back.Motifs.Count > 0 ? back.Motifs[0].Name : ""));
@@ -833,7 +847,7 @@ namespace Tacetno433.Core
         //       duel duelcombo duelboss duelcutin duelpause dueldouble dueltremolo duelfermata duelfire duelrepeat finale
         //       result defeat reward shop shopleave event eventchair rest curtain curtainwin
         //       rewardpick rewardtilt shopbuy (Beta1 round 1 : a card picked, the pointed card leaning, a motif bought, e.g. rewardpick@80)
-        //       battle battleswing battleskill battleparry battlestatus (Alpha 7, use a few frames, e.g. battleswing@2) battlewin battlelose (Beta1, TACET's dark) battleslash battleshot battlesmash battlecross battleink (Beta1, one blow, e.g. battleslash@4) battlecutin battlekill battlebolt battleboltsoft battleimpact (Beta1 round 6) battlekit (THE FIVE KITS, 29 Oct : the SHIELD and LESSON tags, the new moves' words) battlemoves (ENEMY MOVES, 30 Oct : CHARGE, GUARD and the charged blow over the enemies)
+        //       battle battleswing battleskill battleparry battlestatus (Alpha 7, use a few frames, e.g. battleswing@2) battlewin battlelose (Beta1, TACET's dark) battleslash battleshot battlesmash battlecross battleink (Beta1, one blow, e.g. battleslash@4) battlecutin battlekill battlebolt battleboltsoft battleimpact (Beta1 round 6) battlekit (THE FIVE KITS, 29 Oct : the SHIELD and LESSON tags, the new moves' words) battlemoves (ENEMY MOVES, 30 Oct : CHARGE, GUARD and the charged blow over the enemies) battleinspired (PATH, 30 Oct : the INSPIRED step pick) rewardpath rewardinspired (the step cards after a win)
         //       teampick teampickfull luthier treasure rewardboss battletier (29 Oct : THE AUDITION empty and with three picked, the
         //       luthier, a chest, the boss's great upgrade with REFORGE, a tier III blow e.g. battletier@4)
         //       practice practiceskill practicesig (Alpha 7, the tutorial's practice fight, e.g. practice@60)
@@ -874,6 +888,14 @@ namespace Tacetno433.Core
             if (name == "luthier" || name == "luthierdone") screen = new LuthierScreen();   // 29 Oct : the luthier, the chest, the boss's great upgrade
             if (name == "treasure") screen = new MotifRewardScreen(MotifRewardScreen.Kind.Treasure);
             if (name == "rewardboss") screen = new MotifRewardScreen();
+            if (name == "rewardpath" || name == "rewardinspired")                         // PATH (30 Oct) : the win's step cards, an INSPIRED pick
+            {
+                RunState walking = game.CurrentRun;
+                walking.WinStepPending = true;
+                walking.InspiredPending.Clear();
+                if (name == "rewardinspired" && walking.Roster.Count > 0) walking.InspiredPending.Add(walking.Roster[0]);
+                screen = new MotifRewardScreen(MotifRewardScreen.Kind.Path);
+            }
             if (name == "bandname") screen = new BandNameScreen();
             if (name.StartsWith("route") || name.StartsWith("pause") || name.StartsWith("wipe") || name.StartsWith("sweep")) screen = new RouteScreen();
             if (name == "view" || name == "band") screen = new BandScreen();
