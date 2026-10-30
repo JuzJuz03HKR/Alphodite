@@ -126,6 +126,7 @@ namespace Tacetno433.Battle
         //Band only (step 10)
         public bool Entered;           // ENTRANCE (29 Oct) : their first move of the fight has been played
         public float Echo;             // FUGUE : the next skill plays again at this strength, 0 for none
+        public int EchoLeft;           // FUGUE : the moves it plays again on (THE ART OF FUGUE : more), 0 counts as one
 
         //Band only, THE FIVE KITS (Beta1 29 Oct)
         public Fighter CoveredBy;      // SHIELD (DUPORT) : who stands in front of this musician until their own next turn, null for nobody
@@ -1092,7 +1093,7 @@ namespace Tacetno433.Battle
             if (attacker.Echo > 0f && !target.Down)
             {
                 float echo = attacker.Echo;
-                attacker.Echo = 0f;
+                UseEcho(attacker);
                 Events.Add(new TurnEvent(TurnEventKind.Echo, attacker, 0));
                 Strike(target, Math.Max(1, (int)Math.Round(damage * echo)));
             }
@@ -1274,7 +1275,7 @@ namespace Tacetno433.Battle
             if (user.Echo > 0f && playingLanded && Echoes(s))
             {
                 float echo = user.Echo;
-                user.Echo = 0f;
+                UseEcho(user);
                 Events.Add(new TurnEvent(TurnEventKind.Echo, user, 0));
                 bounced.Clear();                                                            // CHAKRAM : the echo is a second throw
                 for (int n = 0; n < s.Notes.Length; n++)
@@ -1317,6 +1318,7 @@ namespace Tacetno433.Battle
                     if (user.Musician.Has(PathRule.LessonEcho))                                // EVERY EVENING : the lesson is played again
                     {
                         friend.Echo = Math.Max(friend.Echo, BattleRules.TurnLessonEcho);
+                        friend.EchoLeft = Math.Max(friend.EchoLeft, 1);
                         Events.Add(new TurnEvent(TurnEventKind.Echo, friend, 0));
                     }
                 }
@@ -1402,6 +1404,23 @@ namespace Tacetno433.Battle
 
                 if (withBreath && s.Breath > 0) AddBreath(s.Breath);
             }
+        }
+
+        //Use Echo : FUGUE, one move played again. THE ART OF FUGUE leaves the echo for more moves (EchoLeft).
+        private static void UseEcho(Fighter f)
+        {
+            f.EchoLeft--;
+            if (f.EchoLeft <= 0)
+            {
+                f.Echo = 0f;
+                f.EchoLeft = 0;
+            }
+        }
+
+        //Signature Level : SIGNATURE GROWS (Beta1 30 Oct), one level for each boss beaten, which is the floor reached (0 to 2)
+        public int SignatureLevel
+        {
+            get { return Math.Max(0, Math.Min(2, Floor - 1)); }
         }
 
         //Echoes : FUGUE only repeats what a skill does to the fighters, so a skill that only stands guard or helps
@@ -1919,14 +1938,15 @@ namespace Tacetno433.Battle
             }
             strength /= SignatureShape.Length;
 
-            //LIGHTNING (THE UNHEARING) : every enemy is struck, and thrown OFF-BEAT at full strength
+            //LIGHTNING (THE UNHEARING) : every enemy is struck, and thrown OFF-BEAT at full strength. STORM : a bolt more a level.
             if (Kit == TurnKit.Beethoven)
             {
                 for (int i = 0; i < Enemies.Count; i++)
                 {
                     Fighter e = Enemies[i];
                     if (e.Down) continue;
-                    Strike(e, Math.Max(1, (int)Math.Round(BattleRules.TurnBoltDamage * strength * BeethovenScale())));
+                    for (int bolt = 0; bolt <= SignatureLevel && !e.Down; bolt++)
+                        Strike(e, Math.Max(1, (int)Math.Round(BattleRules.TurnBoltDamage * strength * BeethovenScale())));
                     if (!e.Down) AddOffBeat(e, (int)Math.Round(BattleRules.TurnOffBeatMax * strength));
                 }
             }
@@ -1939,13 +1959,15 @@ namespace Tacetno433.Battle
                 Events.Add(new TurnEvent(TurnEventKind.Extra, null, Feather));
             }
 
-            //FUGUE (THE METRONOME) : every musician standing gets an echo, their next move (an ATTACK or a skill) plays again at this strength
+            //FUGUE (THE METRONOME) : every musician standing gets an echo, their next move (an ATTACK or a skill) plays again at this strength.
+            //THE ART OF FUGUE : on a move more a level.
             if (Kit == TurnKit.Bach)
             {
                 for (int i = 0; i < Party.Count; i++)
                 {
                     if (Party[i].Down) continue;
                     Party[i].Echo = strength * BattleRules.TurnFugueScale;
+                    Party[i].EchoLeft = 1 + SignatureLevel;
                     Events.Add(new TurnEvent(TurnEventKind.Echo, Party[i], 0));
                 }
             }
@@ -1967,13 +1989,19 @@ namespace Tacetno433.Battle
                 }
             }
 
-            //TWO VOICES (FANNY MENDELSSOHN AND ???) : FANNY strikes every enemy while FELIX heals every musician
+            //TWO VOICES (FANNY MENDELSSOHN AND ???) : FANNY strikes every enemy while FELIX heals every musician.
+            //DAS JAHR : every musician gets CRESCENDO too, and at level 2 the strike and the heal are TurnJahrScale times as much.
             if (Kit == TurnKit.Fanny)
             {
+                float year = SignatureLevel >= 2 ? BattleRules.TurnJahrScale : 1f;
                 for (int i = 0; i < Enemies.Count; i++)
-                    if (!Enemies[i].Down) Strike(Enemies[i], Math.Max(1, (int)Math.Round(BattleRules.TurnDuetDamage * strength)));
+                    if (!Enemies[i].Down) Strike(Enemies[i], Math.Max(1, (int)Math.Round(BattleRules.TurnDuetDamage * strength * year)));
                 for (int i = 0; i < Party.Count; i++)
-                    if (!Party[i].Down) Heal(Party[i], Math.Max(1, (int)Math.Round(BattleRules.TurnDuetHeal * strength)));
+                {
+                    if (Party[i].Down) continue;
+                    Heal(Party[i], Math.Max(1, (int)Math.Round(BattleRules.TurnDuetHeal * strength * year)));
+                    if (SignatureLevel >= 1) AddCrescendo(Party[i], BattleRules.TurnJahrCrescendo);
+                }
             }
 
             CheckEnd();

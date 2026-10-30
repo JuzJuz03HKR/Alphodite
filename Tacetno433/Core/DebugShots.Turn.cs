@@ -368,11 +368,11 @@ namespace Tacetno433.Core
             run.RestoreAllStamina();
             report += Same("band life", "True " + max, halved + " " + run.Stamina);
 
-            //ENEMIES (step 8) : HUSH plays its phrases in turn (D U first), and floor 2 makes it tougher (50 x 3.6, notes 4 x 2 x 1.35 = 10.8 -> 11, PATH 30 Oct)
+            //ENEMIES (step 8) : HUSH plays its phrases in turn (D U first), and floor 2 makes it tougher (50 x 3.8, notes 4 x 2 x 1.38 = 11.04 -> 11, PATH 30 Oct)
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             report += Same("phrase", "Down Up", b.Enemies[0].IntentWays[0] + " " + b.Enemies[0].IntentWays[1]);
             b = new TurnBattle(band, new List<Enemy> { hush }, 2, new Random(433));
-            report += Same("floor 2", "180 2 11", b.Enemies[0].MaxHp + " " + b.Enemies[0].IntentNotes.Length + " " + b.Enemies[0].IntentNotes[0]);
+            report += Same("floor 2", "190 2 11", b.Enemies[0].MaxHp + " " + b.Enemies[0].IntentNotes.Length + " " + b.Enemies[0].IntentNotes[0]);
 
             //ECHO FADES (HUSH, floor 2) : each of its 2 notes that gets through adds 1 DISSONANCE
             PlayToEnemy(b);

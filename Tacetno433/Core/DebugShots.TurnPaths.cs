@@ -5,7 +5,7 @@ using Tacetno433.Data;
 
 namespace Tacetno433.Core
 {
-    //DebugShots.TurnPaths : DEVELOPER TOOL, the checks of PATH and INSPIRED (Beta1 30 Oct, docs/BETA1_DIRECTION.md 12.4), part
+    //DebugShots.TurnPaths : DEVELOPER TOOL, the checks of PATH, INSPIRED and SIGNATURE GROWS (Beta1 30 Oct, docs/BETA1_DIRECTION.md 13), part
     //of --shots turncheck. Every path of the five legends walked to its end (Data/Path.cs), the floors that open the steps,
     //and INSPIRED. Like DebugShots.Turn.cs every line is PASS or FAIL with what was expected and what came out. The musicians'
     //traits are on here. Every musician is back to no step at the end (MusicianList.ResetRehearsals).
@@ -212,6 +212,42 @@ namespace Tacetno433.Core
             b.PlayBar();
             b.UseSkill(new NoteResult[] { good, good, good, good });
             report += Same("the chakram", "40 30 20", thrown + " " + (999 - b.Enemies[0].Hp) + " " + (999 - b.Enemies[1].Hp));
+
+            //SIGNATURE GROWS : 4 GOOD strokes (strength 1). LIGHTNING strikes HUSH once a bolt of 14 on floor 1, STORM twice on floor 2,
+            //three times on floor 3 / THE ART OF FUGUE's echo is still there after one move on floor 2 / DAS JAHR gives CRESCENDO 2 on
+            //floor 2, and on floor 3 strikes 12 x 1.5 = 18
+            string grows = "";
+            NoteResult[] strokes = { good, good, good, good };
+            for (int floor = 1; floor <= 3; floor++)
+            {
+                b = new TurnBattle(Solo(0), new List<Enemy> { hush }, floor, new Random(433));
+                Tough(b);
+                b.Kit = TurnKit.Beethoven;
+                b.Signature = b.SignatureNeed;
+                b.UseSignature(strokes);
+                grows += (floor > 1 ? " " : "") + (999 - b.Enemies[0].Hp);
+            }
+            b = new TurnBattle(Solo(0), new List<Enemy> { hush }, 2, new Random(433));
+            Tough(b);
+            b.Kit = TurnKit.Bach;
+            b.Signature = b.SignatureNeed;
+            b.UseSignature(strokes);
+            b.PlayBar();
+            b.Attack();
+            grows += " " + (b.Party[0].Echo > 0f);
+            b = new TurnBattle(Solo(0), new List<Enemy> { hush }, 2, new Random(433));
+            Tough(b);
+            b.Kit = TurnKit.Fanny;
+            b.Signature = b.SignatureNeed;
+            b.UseSignature(strokes);
+            grows += " " + b.Party[0].Crescendo;
+            b = new TurnBattle(Solo(0), new List<Enemy> { hush }, 3, new Random(433));
+            Tough(b);
+            b.Kit = TurnKit.Fanny;
+            b.Signature = b.SignatureNeed;
+            b.UseSignature(strokes);
+            grows += " " + (999 - b.Enemies[0].Hp);
+            report += Same("signature grows", "14 28 42 True 2 18", grows);
 
             MusicianList.ResetRehearsals();
             return report;

@@ -801,7 +801,7 @@
 5. VFX ตัวเรืองตอน INSPIRED ยังไม่ทำ (รอภาพอ้างอิง) ตอนนี้มีคำ INSPIRED เด้งสีของตัวละคร และชื่อการ์ดเด้งตอนกฎของการ์ดทำงาน
 
 ความยาก (ไม่ได้ลด ชดเชยให้เท่าเดิม)
-- PATH ทำให้วงเก่งขึ้นมาก (ตัวจำลองไม่ชดเชย NORMAL STRONG 55.6 เป็น 90%) ชดเชยตามหลัก "มอนก็โหดตาม" : **ศัตรูชั้น 2 กับ 3 เลือด x3.6 กับ x5.4 (เดิม 2.1 กับ 2.7) ตี x1.35 กับ x1.65 (เดิม 1.2 กับ 1.4) ชั้น 1 คงเดิม** (`TurnFloorLife` `TurnFloorDamage`)
+- PATH ทำให้วงเก่งขึ้นมาก (ตัวจำลองไม่ชดเชย NORMAL STRONG 55.6 เป็น 90%) ชดเชยตามหลัก "มอนก็โหดตาม" : ศัตรูชั้น 2 กับ 3 เลือด x3.6 กับ x5.4 ตี x1.35 กับ x1.65 ชั้น 1 คงเดิม (**ค่าสุดท้ายหลังข้อ 7 อยู่ 13.2** : x3.8 กับ x5.9 ตี x1.38 กับ x1.7)
 - ตัวจำลองฉลาดขึ้น (นิสัยใหม่) : เลือกสกิลตีที่แรงสุดจริงจากจำนวนโน้ต ไม่ใช่ตัวแพงสุด (เดิม CAPRICE ที่อัปแล้วไม่เคยถูกใช้) / ใช้ CHAKRAM กับศัตรูตัวเดียวได้ / นับค่า DISSONANCE / เลือกขั้นแบบสุ่มเหมือนผู้เล่นที่ไม่มีเส้นโปรด ผลคือเกมเดิม (ไม่มี PATH) วัดได้ 63.8% (เครื่องมือเดิม 54.5%) **ต่อจากนี้เทียบกับ 63.8%**
 - เทียบด้วยเครื่องมือเดียวกัน 12 seed : ไม่มี PATH 63.8% / มี PATH กับศัตรูชุดใหม่ 62.1% / MAESTRO EXPERT 82.0 กับ 82.1 / ไฟต์ที่ชนะยาว 3.5 / 5.6 / 6.7 ห้องในชั้น 1 2 3 (เดิม 4.0 / 5.0 / 6.1) ชั้น 1 สั้นลงเพราะได้ขั้น I แต่ศัตรูชั้น 1 คงเดิม
 - ผลข้างเคียงที่ต้องให้ผู้ใช้ดู : ผู้เล่นระดับกลาง (AVERAGE) แพ้ชั้น 1 น้อยลงมาก (29% เป็น 10%) แต่ไปแพ้ชั้น 2 แทน (67% เป็น 85%) ชั้น 2 จึงเป็นกำแพงที่ชัดขึ้น
@@ -820,3 +820,17 @@
 - การ์ดใบไหนไม่สนุกหรือไม่ตรงตัวละคร บอกได้เลย
 
 แหล่งที่ใช้ยืนยันข้อเท็จจริง (30 ต.ค.) : [Pfundt (encyclopedia.com)](https://encyclopedia.com/arts/dictionaries-thesauruses-pictures-and-press-releases/pfundt-ernst-gotthold-benjamin) [Kolberg Museum (crank timpani)](https://kolberg.com/en/About/Kolberg-Museum/) [Die Pauken 1849 (IMSLP)](https://cn.imslp.org/wiki/Die_Pauken_(Pfundt%2C_Ernst)) [Duport Stradivarius](https://en.wikipedia.org/wiki/Duport_Stradivarius) [Jean-Louis Duport](https://en.wikipedia.org/wiki/Jean-Louis_Duport) [Quantz concertos (Classical Music)](https://classical-music.com/reviews/orchestral/quantz) [Quantz at court (jjquantz.org)](https://www.jjquantz.org/?p=2)
+
+### 13.2 ข้อ 7 SIGNATURE โตที่บอส เสร็จ รอผู้ใช้ Rebuild ดู
+- ชนะบอสแต่ละชั้น SIGNATURE ได้ขั้นถัดไป (ขั้นคือชั้นที่ไปถึง `TurnBattle.SignatureLevel` ไม่ต้องเก็บในเซฟเพิ่ม) หน้าผลของบอสบอกว่า "THE SIGNATURE GROWS : STORM" ปุ่มกับ cut-in ใช้ชื่อใหม่
+| วาทยากร | ชั้น 1 | ชั้น 2 (ชนะบอสแรก) | ชั้น 3 (ชนะบอสที่สอง) |
+|---|---|---|---|
+| Beethoven | LIGHTNING สายฟ้า 1 ครั้งทุกตัว | STORM 2 ครั้ง (ท่อนพายุของ Symphony No. 6) | STORM II 3 ครั้ง |
+| Bach | FUGUE เสียงซ้ำท่าถัดไป 1 ท่า | THE ART OF FUGUE ซ้ำ 2 ท่า (งานชิ้นสุดท้ายที่ Bach เขียนไม่จบ) | THE ART OF FUGUE II ซ้ำ 3 ท่า |
+| Fanny | DUET ตีทุกตัวกับฮีลทุกคน | DAS JAHR + ทั้งวงได้ CRESCENDO 2 (ชุดเพลง 12 เดือนของ Fanny 1841) | DAS JAHR II ตีกับฮีล x1.5 ด้วย |
+- ที่ไอริสตัดสินเอง : ชื่อขั้น II ใช้เลขโรมันต่อท้ายแบบขั้นอาวุธ (ยังไม่มีชื่อเพลงที่ดีกว่า ผู้ใช้เปลี่ยนได้) / ข้อความ SIGNATURE ของทั้ง 3 คนต่อท้าย "Grows at each boss."
+- ความยาก : SIGNATURE ที่โตทำให้วาทยากร 3 คนใกล้กันขึ้นมาก (ก่อน 60.8 / 58.2 / 54.3 หลัง 62.5 / 66.0 / 63.7) และวงเก่งขึ้นอีก จึงชดเชยรอบสุดท้าย : **ศัตรูชั้น 2 กับ 3 เลือด x3.8 กับ x5.9 ตี x1.38 กับ x1.7 ชั้น 1 คงเดิม**
+- ผลสุดท้ายของก้อน 2 (24 seed เครื่องมือเดียวกันกับก่อนมี PATH) : NORMAL STRONG 63.8 เป็น 64.1% / MAESTRO EXPERT 82.0 เป็น 82.2 / ไฟต์ที่ชนะยาว 3.5 / 5.4 / 6.3 ห้อง (เดิม 4.0 / 5.0 / 6.1) / วงที่มี / ไม่มี แต่ละคน : PAGANINI 62.3 / 66.0, QUANTZ 65.7 / 61.2, PFUNDT 65.5 / 61.4, DUPORT 62.7 / 65.4, PUNTO 62.8 / 65.2 ห่างไม่เกิน 4.5% เท่าเกณฑ์ที่ใช้มาตลอด
+- ทดสอบ : turncheck 137/137 (ใหม่ signature grows) / `TACET_Balance.xlsx` อัปเดต
+- โค้ด : `Data/Conductor.cs` (`TurnSignatureGrown` `SignatureNameAt`) / `Battle/TurnBattle.cs` (`SignatureLevel` `UseEcho` `EchoLeft` ใน `UseSignature`) / `Data/BattleRules.cs` (`TurnJahrCrescendo` `TurnJahrScale` Floor Scale) / `Screens/BattleScreen.cs` / `Screens/ResultScreen.cs`
+- ให้ผู้ใช้ลอง : ชนะบอสชั้น 1 แล้วดูหน้าผล ไฟต์ชั้น 2 กด SIGNATURE ดูชื่อใหม่กับผลที่มากขึ้น (VFX ของขั้นใหม่ยังเป็นแบบเดิม รอภาพอ้างอิง)

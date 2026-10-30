@@ -91,6 +91,17 @@ namespace Tacetno433.Data
         public string TurnSignatureText = "";
         public string TurnRole = "";          // the role in the turn battle when it differs from Role
 
+        //SIGNATURE GROWS (Beta1 30 Oct, BETA1_DIRECTION 11.7 point 7) : the SIGNATURE's name after the first and the second boss
+        //(the floor reached, TurnBattle.SignatureLevel), none for a conductor whose SIGNATURE does not grow
+        public string[] TurnSignatureGrown = new string[0];
+
+        //Signature Name At : the SIGNATURE's name at this level (0 the plain one)
+        public string SignatureNameAt(int level)
+        {
+            if (level <= 0 || TurnSignatureGrown.Length == 0) return TurnSignatureName;
+            return TurnSignatureGrown[System.Math.Min(level, TurnSignatureGrown.Length) - 1];
+        }
+
         //Conductor Prepared Text : built ONCE at startup by PrepareText below.
         //Wrapping and joining strings inside Draw would make new strings 60 times a
         //second, which piles up rubbish for the garbage collector and makes a long
@@ -174,7 +185,8 @@ namespace Tacetno433.Data
                 TurnPassiveName = "LOCKED TEMPO",
                 TurnPassiveText = "On skills and the SIGNATURE, PERFECT is easier to hit.",
                 TurnSignatureName = "FUGUE",
-                TurnSignatureText = "The 4/4 shape : every musician's next move plays twice. Better strokes, louder echo.",
+                TurnSignatureText = "The 4/4 shape : every musician's next move plays twice. Better strokes, louder echo. Grows at each boss.",
+                TurnSignatureGrown = new[] { "THE ART OF FUGUE", "THE ART OF FUGUE II" },   // Bach's last great work (unfinished) : more echoes
                 Stamina = 5, PushPower = 6, Perk = ConductorPerk.LockedTempo,        // round 15 : 10 -> 5, his size is never wrong and playing
                                                                                      // is free, at 10 he won 91 to 94 percent (the others 80 to 89).
                                                                                      // Round 10 : 9 -> 7, no cheaper notes. Round 11a : 9,
@@ -233,7 +245,8 @@ namespace Tacetno433.Data
                 TurnPassiveName = "THE CLOSER THE LOUDER",
                 TurnPassiveText = "The less life the band has left, the harder it hits, up to 50 percent.",
                 TurnSignatureName = "LIGHTNING",
-                TurnSignatureText = "The 4/4 shape : strikes every enemy and throws it OFF-BEAT. Better strokes, bigger strike.",
+                TurnSignatureText = "The 4/4 shape : strikes every enemy and throws it OFF-BEAT. Better strokes, bigger strike. Grows at each boss.",
+                TurnSignatureGrown = new[] { "STORM", "STORM II" },   // the storm of the Pastoral (Symphony No. 6, its fourth movement) : more bolts
                 Stamina = 5, PushPower = 3, Perk = ConductorPerk.CloserLouder, Move = SignatureMove.DeafEars,
                                                                                      // round 10 : push 3 -> 4, perk up to 130 percent.
                                                                                      // Round 12.2 : rests breathe deeper when behind too.
@@ -380,7 +393,8 @@ namespace Tacetno433.Data
                 TurnPassiveName = "TWO VOICES",
                 TurnPassiveText = "The voices take turns, one musician each : FANNY hits 25 percent harder, ??? heals 50 percent more.",
                 TurnSignatureName = "DUET",
-                TurnSignatureText = "The 4/4 shape : FANNY strikes every enemy while ??? heals every musician.",
+                TurnSignatureText = "The 4/4 shape : FANNY strikes every enemy while ??? heals every musician. Grows at each boss.",
+                TurnSignatureGrown = new[] { "DAS JAHR", "DAS JAHR II" },   // The Year (1841), Fanny's twelve months for piano : CRESCENDO, then more
                 ThemeColor = Palette.ToneC,
                 Spot = Palette.SpotPrism,           // PRISM (29 Oct) : a crystal's white, the rainbow when it moves (SpotAt)
                 Aura = AuraKind.Prism,

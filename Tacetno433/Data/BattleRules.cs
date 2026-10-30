@@ -63,12 +63,13 @@
         public static int TurnShardsPerEscort = 6;            // shards for each enemy beyond the first
 
         //Floor Scale (step 8) : enemies are tougher deeper down, life and each note's damage, floor 1 / 2 / 3
-        public static float[] TurnFloorLife = { 1.6f, 3.6f, 5.4f };   // step 15 : was 1 / 1.3 / 1.6, fights about 1.5 times longer (the user asked for longer fights)
-        public static float[] TurnFloorDamage = { 1f, 1.35f, 1.65f }; // PATH (Beta1 30 Oct) : was 1.6 / 2.1 / 2.7 and 1 / 1.2 / 1.4. The band grows a step a
-                                                                      // floor now (Data/Path.cs), so TACET grows too, from floor 2 (the user : the monsters
-                                                                      // get tougher as well, 13.13). turnsim 12 seeds, the same tool before and after :
-                                                                      // NORMAL STRONG 63.8 -> 62.1 percent, MAESTRO EXPERT 82.0 -> 82.1, a fight won on
-                                                                      // floor 1 / 2 / 3 lasts 3.5 / 5.6 / 6.7 bars (4.0 / 5.0 / 6.1 before)
+        public static float[] TurnFloorLife = { 1.6f, 3.8f, 5.9f };   // step 15 : was 1 / 1.3 / 1.6, fights about 1.5 times longer (the user asked for longer fights)
+        public static float[] TurnFloorDamage = { 1f, 1.38f, 1.7f };  // PATH and SIGNATURE GROWS (Beta1 30 Oct) : was 1.6 / 2.1 / 2.7 and 1 / 1.2 / 1.4. The band
+                                                                      // grows a step a floor now (Data/Path.cs) and its SIGNATURE at each boss, so TACET grows
+                                                                      // too, from floor 2 (the user : the monsters get tougher as well, 13.13). turnsim 24
+                                                                      // seeds, the same tool before and after : NORMAL STRONG 63.8 -> 64.1 percent, MAESTRO
+                                                                      // EXPERT 82.0 -> 82.2, a fight won on floor 1 / 2 / 3 lasts 3.5 / 5.4 / 6.3 bars
+                                                                      // (4.0 / 5.0 / 6.1 before)
 
         //Enemy Traits in the turn battle (step 8, the TurnTraitText of each enemy in Data/Enemy.cs)
         public static float TurnFillsGapsScale = 1.5f;   // DEAD AIR : a missed note
@@ -191,6 +192,11 @@
         public static int TurnFelixCrescendo = 1;      //                          and gives this much more CRESCENDO
         public static int TurnDuetDamage = 12;         // TWO VOICES : damage to every enemy at full strength (step 13 : was 9 and 6, FANNY 46 percent)
         public static int TurnDuetHeal = 8;             //              and life back for every musician
+        //SIGNATURE GROWS (Beta1 30 Oct, BETA1_DIRECTION 11.7 point 7) : after each boss (the floor reached) the SIGNATURE gets
+        //a level : LIGHTNING becomes STORM (a bolt more each level), FUGUE THE ART OF FUGUE (the echo plays on a move more each
+        //level), DUET DAS JAHR (every musician gets TurnJahrCrescendo, and at level 2 the strike and the heal x TurnJahrScale)
+        public static int TurnJahrCrescendo = 2;
+        public static float TurnJahrScale = 1.5f;
 
         //Musician Traits in the turn battle (step 10, the TurnTraitText of each musician in Data/Musician.cs)
         //THE FIVE KITS (Beta1 29 Oct) : the five legends' traits and the new moves of their skills (Data/Skill.cs).

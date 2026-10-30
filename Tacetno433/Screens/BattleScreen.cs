@@ -264,7 +264,7 @@ namespace Tacetno433.Screens
             battle.Breath = Math.Min(BattleRules.TurnBreathMax, battle.Breath + Archive.Level(Archive.Breath) * BattleRules.ArchiveBreathPerLevel);
             if (battle.Kit != TurnKit.None)
                 battle.Signature = Math.Min(battle.SignatureNeed, Archive.Level(Archive.Signature) * BattleRules.ArchiveSignaturePerLevel);
-            signatureName = run.Conductor.TurnSignatureName;
+            signatureName = run.Conductor.SignatureNameAt(battle.SignatureLevel);           // SIGNATURE GROWS : STORM after the first boss
             Arrange();
             SoundBank.PlayMusic(RunFlow.FightMusic(run));
         }

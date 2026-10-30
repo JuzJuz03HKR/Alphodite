@@ -184,8 +184,10 @@ namespace Tacetno433.Screens
 
             footnote = "";
             if (offerMotif) footnote = "A MOTIF IS LEFT BEHIND";
-            if (battle.Enemy.Kind == EnemyKind.Boss)
-                footnote = run.Floor >= BattleRules.FloorsPerRun ? "THE LAST SILENCE IS BROKEN" : "FLOOR CLEARED  -  THE NEXT MOVEMENT IS WAITING";
+            if (battle.Enemy.Kind == EnemyKind.Boss)                                       // SIGNATURE GROWS : what it becomes on the next floor
+                footnote = run.Floor >= BattleRules.FloorsPerRun ? "THE LAST SILENCE IS BROKEN"
+                         : (run.Conductor.TurnSignatureGrown.Length > 0 ? "FLOOR CLEARED  -  THE SIGNATURE GROWS : " + run.Conductor.SignatureNameAt(run.Floor)
+                                                                        : "FLOOR CLEARED  -  THE NEXT MOVEMENT IS WAITING");
 
             SoundBank.Play(Sfx.Victory);
             SoundBank.PlayMusic(Music.Victory);
