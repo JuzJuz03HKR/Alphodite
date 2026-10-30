@@ -296,6 +296,7 @@ namespace Tacetno433.Screens
             baton.Reset(Input.MousePos);
             Game.IsMouseVisible = true;
             LoadStage();
+            LoadMarks();
 
             //The first bar starts after a moment, so the page can be seen first
             view = View.Pause;
@@ -403,6 +404,7 @@ namespace Tacetno433.Screens
             else if (view == View.Swipe) UpdateSwipe(dt);
             else if (view == View.Pause && viewTime >= BattleRules.TurnPause) NextStep();
             else if (view == View.Over && viewTime >= BattleRules.TurnEndTime) Finish();
+            UpdateMarks(dt);                                                             // MARKS AND AIM (BattleScreen.Marks.cs)
         }
 
         //Next Step : the fight ends, a new bar is written, or the next move of the bar plays
@@ -515,6 +517,7 @@ namespace Tacetno433.Screens
             selected = f;
             commandSkill[1] = f != null ? SkillList.First(f.Musician) : null;
             commandSkill[2] = f != null ? SkillList.Second(f.Musician) : null;
+            PrepareCommands();                                                           // MARKS AND AIM : their icons and who they are for
         }
 
         //Next Unwritten : the next musician on the field, after this one, who can still be given a move.
@@ -553,6 +556,7 @@ namespace Tacetno433.Screens
         {
             hover = null;
             hoverSkill = null;
+            hoverCommand = -1;
             if (stepFor != null)                                                           // INSPIRED : the pick comes first
             {
                 UpdateStepPick();
@@ -599,8 +603,12 @@ namespace Tacetno433.Screens
             }
 
             if (!battle.CanPlan(selected)) return;
-            for (int k = 1; k < 3; k++)
-                if (Input.MouseOver(commandBox[k])) hoverSkill = commandSkill[k];
+            for (int k = 0; k < 3; k++)
+                if (Input.MouseOver(commandBox[k]))
+                {
+                    hoverCommand = k;                                                    // MARKS AND AIM : its card and its marks
+                    if (k > 0) hoverSkill = commandSkill[k];
+                }
 
             if (Input.ClickedOn(commandBox[0]) || Input.KeyPressed(Keys.D1) || Input.KeyPressed(Keys.NumPad1))
             {
@@ -1416,6 +1424,7 @@ namespace Tacetno433.Screens
         public void ShowForPicture(string name)
         {
             NextStep();                                                                 // the first bar is being written
+            string pic = name.EndsWith("clear") ? name.Substring(0, name.Length - 5) : name;   // MARKS AND AIM : the same with CLEAR FIGHT on
 
             if (name == "battleplan")
             {
@@ -1597,6 +1606,41 @@ namespace Tacetno433.Screens
                 battle.Events.Add(new TurnEvent(TurnEventKind.Blocked, second, 6));
                 ShowEvents();
             }
+            else if (pic == "battleaim" || pic == "battlepick" || pic == "battleheal" || pic == "battletip" || pic == "battlechakram")
+            {
+                //MARKS AND AIM (Beta1 30 Oct, block 1 item 4). battleaim : the pointer on the front musician's first skill, its card
+                //and the rings of the enemies it could go to. battlepick : the second skill waiting for its target, the pointer on
+                //the middle enemy (the ring, the arc, the life it would take). battleheal : QUANTZ's SOFT AIR over a hurt band (the
+                //marks on the friends, the life they get back). battletip : statuses on both sides, the pointer on one. battlechakram :
+                //a CHAKRAM's line numbered 1 2 3 (PUNTO's skill lent to the one in front, for the picture only).
+                battle.Breath = 10;
+                battle.Events.Clear();
+                if (pic == "battleheal" && battle.Party.Count > 1)
+                {
+                    for (int i = 0; i < battle.Party.Count; i++) battle.Party[i].Hp = battle.Party[i].MaxHp * 3 / 5;
+                    Select(battle.Party[1]);
+                }
+                if (pic == "battlepick")
+                {
+                    battle.Breath = 1;                                                  // THE DEVIL'S BARGAIN : the card says the life it takes
+                    pending = commandSkill[2];
+                    view = View.Target;
+                }
+                if (pic == "battlechakram")
+                {
+                    pending = SkillList.Second(MusicianList.All[7]);
+                    view = View.Target;
+                }
+                if (pic == "battletip")
+                {
+                    battle.Enemies[0].Dissonance = 5;
+                    if (battle.Enemies.Count > 1) battle.Enemies[1].Block = 14;
+                    battle.Enemies[0].Staggered = true;
+                    battle.Party[0].Crescendo = 2;
+                    battle.Party[0].Lesson = true;
+                    if (battle.Party.Count > 2) battle.Party[2].Guard = true;
+                }
+            }
             else if (name == "battlestatus")
             {
                 battle.Enemies[0].Dissonance = 3;
@@ -1683,10 +1727,14 @@ namespace Tacetno433.Screens
             //On The Enemies : their name plates and their next attack, through the same camera so they stay on them
             BeginCameraBatch(sb);
             DrawEnemyPlates(sb);
-            if (view != View.Over) DrawIntent(sb, planning, 1f - FocusEased);     // fades out as a ring comes up (round 4)
+            if (view != View.Over) DrawIntent(sb, 1f - FocusEased);               // fades out as a ring comes up (round 4)
+            DrawIcons(sb, true);                                                  // MARKS AND AIM : TACET's statuses and intents
+            if (view != View.Over) DrawReticles(sb);                              //   and the rings on the ones a move is aimed at
             EndCameraBatch(sb);
 
             DrawBand(sb, planning);
+            DrawIcons(sb, false);                                                 // MARKS AND AIM : THE BAND's statuses
+            DrawForeMarks(sb);
             DrawBarStrip(sb, planning);
 
             //QTE FOCUS : the world behind is already dark, grey and soft (PostChain), the ring and the notes come on top
@@ -1712,10 +1760,13 @@ namespace Tacetno433.Screens
                 Gfx.TextSpacedCentered(sb, Game.BigFont, judgeWord, HitX, HitY + 110f, Palette.Highlight * Math.Min(1f, judgeLife * 2f), TextSize.Subtitle, 3f);
 
             if (!planning && !swiping && barHits > 0) DrawBarCount(sb);
+            DrawAimArc(sb);
             DrawBottom(sb, planning);
+            DrawSkillCard(sb);
             if (practice) DrawCoach(sb);
             if (stepFor != null && planning) DrawStepPick(sb);                             // INSPIRED
             if (bondLine.Length > 0 && bondTime < BattleRules.TurnBondLineTime) DrawBondLine(sb);   // BONDS
+            DrawTip(sb);                                                                             // MARKS AND AIM : what an icon is
 
             if (view == View.Over)
             {
@@ -1749,9 +1800,6 @@ namespace Tacetno433.Screens
             sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, null, null, null, Sharp.Transform);
         }
 
-        //THE BAND (Beta1) : everyone on the field as a card in a row under the bar strip, until the user's face GUI.
-        //The name, the life, the move written in the plan and its place in the bar, the statuses under the card.
-        //The card of the musician in front has a bright frame.
         //Draw Bond Line : BONDS, a tied legend's line over the stage while the first bar is written, fading in and out
         private void DrawBondLine(SpriteBatch sb)
         {
@@ -1778,6 +1826,9 @@ namespace Tacetno433.Screens
             Gfx.TextSpacedCentered(sb, Game.Font, "IT COUNTS IN THIS BAR   /   RIGHT CLICK = LATER", TacetGame.ScreenW / 2f, 548, Palette.PaperDim, TextSize.Tiny, 3f);
         }
 
+        //THE BAND (Beta1) : everyone on the field as a card in a row under the bar strip, until the user's face GUI.
+        //The name, the life, the move written in the plan and its place in the bar (the statuses under the card are icons,
+        //BattleScreen.Marks.cs). The card of the musician in front has a bright frame.
         private void DrawBand(SpriteBatch sb, bool planning)
         {
             bool picking = view == View.Target && pending != null && pending.Target == SkillTarget.Ally;
@@ -1798,23 +1849,29 @@ namespace Tacetno433.Screens
                     Gfx.RectOutline(sb, new Rectangle(r.X - 3, r.Y - 3, r.Width + 6, r.Height + 6), Palette.Accent, 2);
 
                 Gfx.TextSpaced(sb, Game.Font, f.Name, r.X + 8, r.Y + 6, Palette.Paper * a, TextSize.Label, 1f);
+                Rectangle bar = clear ? new Rectangle(r.X + 8, r.Y + 23, r.Width - 16, 4) : new Rectangle(r.X + 8, r.Y + 26, r.Width - 16, 5);
+                Gfx.Bar(sb, bar, f.Hp / (float)f.MaxHp, Palette.Stage * a, Palette.Paper * a);
+                DrawLifePreview(sb, bar, f, 0, GainOf(f), a);                              // MARKS AND AIM : the life a heal gives back
                 if (clear)
                 {
                     //CLEAR FIGHT : the life a size bigger, the bar a little higher to make room for it
                     string hp = NumberText.Get(f.Hp);
-                    Gfx.Bar(sb, new Rectangle(r.X + 8, r.Y + 23, r.Width - 16, 4), f.Hp / (float)f.MaxHp, Palette.Stage * a, Palette.Paper * a);
                     Gfx.Text(sb, Game.Font, hp, r.X + 8, r.Y + 27, Palette.Highlight * a, TextSize.Body);
                     Gfx.Text(sb, Game.Font, maxLabel[f], r.X + 12 + Gfx.TextWidth(Game.Font, hp, TextSize.Body), r.Y + 32, Palette.LineGrey * a, TextSize.Tiny);
                 }
                 else
                 {
-                    Gfx.Bar(sb, new Rectangle(r.X + 8, r.Y + 26, r.Width - 16, 5), f.Hp / (float)f.MaxHp, Palette.Stage * a, Palette.Paper * a);
                     Gfx.Text(sb, Game.Font, NumberText.Get(f.Hp), r.X + 8, r.Y + 33, Palette.Highlight * a, TextSize.Label);
                     Gfx.Text(sb, Game.Font, maxLabel[f], r.X + 40, r.Y + 34, Palette.LineGrey * a, TextSize.Tiny);
                 }
 
+                //FRIEND MARK : a skill for this musician (or one that could be picked) marks the card, where the move would show
+                bool fullMark;
+                bool marked = FriendAimed(f, out fullMark);
+                if (marked) DrawFriendMark(sb, r.Right - 36, r.Y + 15, 8f, fullMark, false);   // top right, clear of the life bar
+
                 //The Move : in the plan, what this musician will play and where in the bar
-                if (planning && !f.Down)
+                if (planning && !f.Down && !marked)
                 {
                     BarMove move = battle.MoveOf(f);
                     int at = previewMoves.IndexOf(move);
@@ -1828,47 +1885,20 @@ namespace Tacetno433.Screens
                         Gfx.TextRight(sb, Game.Font, WordAttack, r.Right - 8, r.Y + 35, Palette.LineGrey, TextSize.Tiny);   // nothing written : it ATTACKs
                 }
 
-                //Statuses : under the card, a filled tag hurts the one who has it, an outlined tag helps them
-                float x = r.X;
-                float y = r.Bottom + 5;
-                if (f.Dissonance > 0) x = DrawTagRow(sb, "DISSONANCE", f.Dissonance, true, x, y);
-                if (f.Crescendo > 0) x = DrawTagRow(sb, "CRESCENDO", f.Crescendo, false, x, y);
-                if (f.Mute > 0) x = DrawTagRow(sb, "MUTE", 0, true, x, y);
-                if (f.Guard) x = DrawTagRow(sb, "GUARD", 0, false, x, y);
-                if (f.Echo > 0f) x = DrawTagRow(sb, "ECHO", 0, false, x, y);                  // FUGUE
-                if (f.CoveredBy != null) x = DrawTagRow(sb, "SHIELD", 0, false, x, y);        // SHIELD : someone stands in front of them
-                if (f.Lesson) x = DrawTagRow(sb, "LESSON", 0, false, x, y);                   // THE LESSON : their next skill
-
-                //Target Mark : the musician an enemy's next attack lands on (SHIELD : the one standing in front)
-                for (int e = 0; e < battle.Enemies.Count; e++)
+                //Target Mark : the musician an enemy's next attack lands on (SHIELD : the one standing in front), a frame and a
+                //small target sign on top of the card. While it is parried, the one it is hitting now. The pointer on an enemy brings
+                //its own target forward and dims the others (MARKS AND AIM, the line that showed it is gone).
+                float mark = TargetMark(f);
+                if (mark > 0f)
                 {
-                    Fighter enemy = battle.Enemies[e];
-                    bool aimed = TurnBattle.Aims(enemy) && (battle.HitTarget(enemy) == f || (enemy.IntentAll && !f.Down));   // THE COURT : everybody
-                    if (!enemy.Down && aimed && view != View.Swipe && view != View.Over)
-                    {
-                        float pulse = 0.6f + 0.4f * (float)Math.Sin(time * 5f);
-                        Gfx.RectOutline(sb, r, Palette.Accent * pulse, 2);
-                        Gfx.Triangle(sb, r.Center.X, r.Bottom + 2, 8f, false, Palette.Accent * pulse);
-                        break;
-                    }
+                    float pulse = (0.6f + 0.4f * (float)Math.Sin(time * 5f)) * mark;
+                    Gfx.RectOutline(sb, r, Palette.Accent * pulse, mark >= 1f ? 2 : 1);
+                    DrawTargetSign(sb, r.Center.X, r.Y - 1f, 6f, Palette.Accent * pulse);
                 }
 
                 Look look;
                 if (looks.TryGetValue(f, out look) && look.Flash > 0f) Gfx.Rect(sb, r, Palette.Paper * (0.45f * look.Flash));
             }
-        }
-
-        //Tag Row : a status tag with its count, laid left to right. Returns where the next tag goes.
-        private float DrawTagRow(SpriteBatch sb, string word, int count, bool filled, float x, float y)
-        {
-            Ui.Tag(sb, word, x, y, filled, 1f);
-            float next = x + Ui.TagWidth(word) + 6f;
-            if (count > 0)
-            {
-                Gfx.Text(sb, Game.Font, NumberText.Get(count), next - 2f, y, Palette.Paper, TextSize.Label);
-                next += 16f;
-            }
-            return next;
         }
 
         //Order Number : a move's place among the band's moves of the bar (1, 2, 3 ...), enemies not counted
@@ -1880,6 +1910,28 @@ namespace Tacetno433.Screens
             return n;
         }
 
+        //Target Mark : how strongly the card of this musician is marked as the one an enemy will hit, 0 for not at all. In the plan
+        //every enemy's target (the pointer on an enemy : its own target full, the others faint), while an enemy attacks only its
+        //target, while the band plays nothing.
+        private float TargetMark(Fighter f)
+        {
+            if (f.Down || view == View.Over) return 0f;
+            bool parry = view == View.Swipe && swipeFor == SwipeFor.Parry;
+            if (view == View.Swipe && !parry) return 0f;                            // a skill or the SIGNATURE is being swiped
+            Fighter pointed = (view == View.Plan || view == View.Target) && hover != null && hover.IsEnemy ? hover : null;
+            float most = 0f;
+            for (int e = 0; e < battle.Enemies.Count; e++)
+            {
+                Fighter enemy = battle.Enemies[e];
+                if (enemy.Down || !TurnBattle.Aims(enemy)) continue;
+                if (parry && enemy != battle.Current) continue;
+                if (battle.HitTarget(enemy) != f && !enemy.IntentAll) continue;     // THE COURT : everybody
+                float strength = pointed == null || pointed == enemy ? 1f : 0.3f;
+                most = Math.Max(most, strength);
+            }
+            return most;
+        }
+
         //Enemy Plate (Beta1) : the name and life above an enemy (CZN style), never higher than the band row
         private Rectangle EnemyPlate(Rectangle r)
         {
@@ -1889,28 +1941,21 @@ namespace Tacetno433.Screens
             return new Rectangle(x, y, w, Settings.ClearFight ? 42 : 34);              // CLEAR FIGHT : taller, for the bigger life
         }
 
+        //Enemy Plates : the name, the life and the OFF-BEAT gauge over each enemy. MARKS AND AIM : the part of the life a move
+        //aimed at it would take blinks, the ring on it says it is aimed at (BattleScreen.Marks.cs), its statuses are icons.
         private void DrawEnemyPlates(SpriteBatch sb)
         {
-            bool aiming = view == View.Plan || (view == View.Target && !(pending != null && pending.Target == SkillTarget.Ally));
             for (int i = 0; i < battle.Enemies.Count; i++)
             {
                 Fighter f = battle.Enemies[i];
-                Rectangle r = BoxOf(f);
-                Rectangle plate = EnemyPlate(r);
-                float a = f.Down ? 0.35f * (1f - GoneOf(f)) : 1f;                     // SILENCED : the plate goes with it
-                bool lit = battle.Current == f || (swipeFor == SwipeFor.Skill && SkillAims(f));   // ACTION : the band's target stays lit, its life drops blow by blow
-                if (!lit) a *= MathHelper.Lerp(1f, 0.35f, FocusEased);                  // QTE FOCUS : only the one attacking (or being hit) stays bright
-
-                if (aiming && hover == f)
-                    Gfx.RectOutline(sb, new Rectangle(r.X - 5, r.Y - 5, r.Width + 10, r.Height + 10), Palette.Accent, 2);
+                Rectangle plate = EnemyPlate(BoxOf(f));
+                float a = PlateAlpha(f);
                 if (battle.Current == f) Gfx.Rect(sb, plate.X, plate.Bottom + 2, plate.Width, 3, Palette.Accent);
 
                 string name = f.Name.Length > 12 || plate.Width < 150 ? shortName[f] : f.Name;   // a long name, or a crowded row : the short one
                 if (Settings.ClearFight)
                 {
                     DrawClearPlate(sb, f, plate, name, a);
-                    if (f.Down) continue;
-                    DrawEnemyTags(sb, f, r);
                     continue;
                 }
                 Gfx.Rect(sb, plate, Palette.Void * 0.6f);
@@ -1922,24 +1967,14 @@ namespace Tacetno433.Screens
                     Gfx.TextRight(sb, Game.Font, NumberText.Get(f.Hp), plate.Right - 10 - maxWidth, plate.Y + 4, Palette.Highlight * a, TextSize.Label);
                 }
                 else Gfx.TextRight(sb, Game.Font, NumberText.Get(f.Hp), plate.Right - 6, plate.Y + 4, Palette.Highlight * a, TextSize.Label);   // a crowded row : no room for the most
-                Gfx.Bar(sb, new Rectangle(plate.X + 6, plate.Y + 21, plate.Width - 12, 5), f.Hp / (float)f.MaxHp, Palette.Stage * a, Palette.Paper * a);
+                Rectangle bar = new Rectangle(plate.X + 6, plate.Y + 21, plate.Width - 12, 5);
+                Gfx.Bar(sb, bar, f.Hp / (float)f.MaxHp, Palette.Stage * a, Palette.Paper * a);
                 if (f.Down) continue;
+                DrawLifePreview(sb, bar, f, LossOf(f), 0, a);
 
-                //OFF-BEAT : a thin gauge under the life, a filled tag once the enemy is thrown
+                //OFF-BEAT : a thin gauge under the life (the icon under the plate once the enemy is thrown)
                 Gfx.Bar(sb, new Rectangle(plate.X + 6, plate.Y + 28, plate.Width - 12, 3), f.OffBeat / (float)BattleRules.TurnOffBeatMax, Palette.Stage * a, Palette.PaperDim * a);
-                DrawEnemyTags(sb, f, r);
             }
-        }
-
-        //Enemy Tags : under the enemy, CUT IN, OFF-BEAT once it is thrown, DISSONANCE
-        private void DrawEnemyTags(SpriteBatch sb, Fighter f, Rectangle r)
-        {
-            float x = r.X + 10;
-            float y = r.Bottom + 8;
-            if (TurnBattle.CutsIn(f)) x = DrawTagRow(sb, "CUT IN", 0, false, x, y);
-            if (f.Block > 0) x = DrawTagRow(sb, "GUARD", f.Block, true, x, y);                      // GUARD : its BLOCK left
-            if (f.Staggered) x = DrawTagRow(sb, "OFF-BEAT", 0, true, x, y);
-            if (f.Dissonance > 0) x = DrawTagRow(sb, "DISSONANCE", f.Dissonance, true, x, y);
         }
 
         //Clear Plate (CLEAR FIGHT) : the enemy's plate solid with a thin edge, so it reads over TACET's light. The name on the
@@ -1957,8 +1992,10 @@ namespace Tacetno433.Screens
             }
             if (plate.Width >= 150) Gfx.TextRight(sb, Game.Font, NumberText.Get(f.Hp), right, plate.Y + 1, Palette.Highlight * a, TextSize.Heading);
             else Gfx.TextRight(sb, Game.Font, NumberText.Get(f.Hp), right, plate.Y + 4, Palette.Highlight * a, TextSize.Body);     // a crowded row : a size smaller
-            Gfx.Bar(sb, new Rectangle(plate.X + 6, plate.Y + 28, plate.Width - 12, 6), f.Hp / (float)f.MaxHp, Palette.Stage * a, Palette.Paper * a);
+            Rectangle bar = new Rectangle(plate.X + 6, plate.Y + 28, plate.Width - 12, 6);
+            Gfx.Bar(sb, bar, f.Hp / (float)f.MaxHp, Palette.Stage * a, Palette.Paper * a);
             if (f.Down) return;
+            DrawLifePreview(sb, bar, f, LossOf(f), 0, a);
             Gfx.Bar(sb, new Rectangle(plate.X + 6, plate.Y + 36, plate.Width - 12, 3), f.OffBeat / (float)BattleRules.TurnOffBeatMax, Palette.Stage * a, Palette.PaperDim * a);
         }
 
@@ -1970,75 +2007,51 @@ namespace Tacetno433.Screens
             Gfx.TextRight(sb, Game.Font, maxLabel[f], x + width, y + 11, Palette.LineGrey * a, TextSize.Label);
         }
 
-        //Enemy Intent : over its head, how hard each note hits and the notes themselves, the way of each (FALSE NOTES : a ?),
-        //so a player can read the whole attack before it comes (like Slay the Spire).
-        //CADENZA : a boss's big move says so above it. In the plan, the enemy under the pointer draws a line to its target.
-        private void DrawIntent(SpriteBatch sb, bool planning, float ia)
+        //Enemy Intent : over its head, the icon of its next move (MARKS AND AIM, BattleScreen.Marks.cs draws it), how hard each
+        //note hits and the notes themselves, the way of each (FALSE NOTES : a ?), so a player can read the whole attack before it
+        //comes (like Slay the Spire). GUARD and CHARGE show their one number (the BLOCK it raises, the blow to come next bar),
+        //LULLABY's rest and a broken CHARGE only their icon. CADENZA : a boss's big move says so above it. The musician it is
+        //for is marked on their card (Target Mark), the line from the enemy to them is gone.
+        private void DrawIntent(SpriteBatch sb, float ia)
         {
             if (ia <= 0.01f) return;
             for (int i = 0; i < battle.Enemies.Count; i++)
             {
                 Fighter f = battle.Enemies[i];
-                if (f.Down) continue;
+                if (f.Down || f.IntentRest || f.ChargeBroken) continue;
                 Rectangle r = EnemyPlate(BoxOf(f));                 // Beta1 : the intent sits above the name plate
-                float cy = r.Y - 22;
+                float left, cy;
+                IntentRow(f, out left, out cy);
+                float x = left + IntentIcon + 6f;                   // the number, after the icon
 
-                //LULLABY : this turn it rests
-                if (f.IntentRest)
+                //ENEMY MOVES (Beta1 30 Oct) : GUARD and the BLOCK it raises, CHARGE and the blow to come next bar
+                if (f.IntentGuard > 0 || f.IntentCharge)
                 {
-                    Gfx.TextSpacedCentered(sb, Game.Font, "REST", r.Center.X, cy - 6, Palette.Paper * ia, TextSize.Body, 3f);
-                    continue;
-                }
-
-                //ENEMY MOVES (Beta1 30 Oct) : GUARD and the BLOCK it raises, CHARGE and the blow to come next bar, a broken
-                //CHARGE that does nothing. A word and a number for now, item 4 of block 1 gives them icons.
-                if (f.IntentGuard > 0 || f.IntentCharge || f.ChargeBroken)
-                {
-                    string word = f.ChargeBroken ? "BROKEN" : (f.IntentCharge ? "CHARGE" : "GUARD");
-                    Gfx.TextSpacedCentered(sb, Game.Font, word, r.Center.X, cy - 6, Palette.Paper * ia, TextSize.Body, 3f);
-                    if (!f.ChargeBroken)
-                        Gfx.TextCentered(sb, Game.Font, NumberText.Get(f.IntentCharge ? f.ChargeHit : f.IntentGuard), r.Center.X, cy - 26, Palette.Highlight * ia, TextSize.Heading);
-                    if (f.IntentCharge && planning && hover == f && f.IntentTarget != null)
-                    {
-                        Vector2 to = AimPoint(battle.HitTarget(f));
-                        Gfx.Line(sb, r.Center.X, cy + 14, to.X, to.Y, Palette.Accent * (0.6f * ia), 2f);
-                    }
+                    string number = NumberText.Get(f.IntentCharge ? f.ChargeHit : f.IntentGuard);
+                    if (Settings.ClearFight) Gfx.Text(sb, Game.Font, number, x, cy - Game.Font.LineSpacing * TextSize.Heading / 2f, Palette.Highlight * ia, TextSize.Heading);
+                    else Gfx.Text(sb, Game.BigFont, number, x, cy - 16, Palette.Highlight * ia, TextSize.Small);
                     continue;
                 }
                 if (f.IntentNotes.Length == 0) continue;
 
-                const float NoteStep = 28f;
-                const float NumberRoom = 42f;                                          // the number, then room for a left pointer
-                float row = f.IntentNotes.Length * NoteStep;
-                float left = r.Center.X - (NumberRoom + row) / 2f;
+                float row = f.IntentNotes.Length * IntentNoteStep;
                 float lift = 44f;                                                      // CLEAR FIGHT : the name it is for sits this far above,
-                bool down = false;                                                     //   higher when a note's arrow points up, and the whole
-                for (int n = 0; n < f.IntentNotes.Length; n++)                         //   attack a little higher when one points down, so the
-                {                                                                      //   arrow stays off the life on the plate under it
+                for (int n = 0; n < f.IntentNotes.Length; n++)                         //   higher when a note's arrow points up
                     if (f.IntentWays[n] == Flick.Up) lift = 64f;
-                    if (f.IntentWays[n] == Flick.Down) down = true;
-                }
-                if (Settings.ClearFight && down) cy -= 14f;
                 if (Settings.ClearFight)
                 {
                     //CLEAR FIGHT : a solid plate behind the attack, the number in plain upright figures, and who it is for
-                    Gfx.Rect(sb, new Rectangle((int)(left - 8), (int)(cy - 17), (int)(NumberRoom + row + 14), 34), Palette.Void * (BattleRules.ClearPlate * ia));
-                    Gfx.Text(sb, Game.Font, NumberText.Get(f.IntentNotes[0]), left, cy - Game.Font.LineSpacing * TextSize.Heading / 2f, Palette.Highlight * ia, TextSize.Heading);
+                    Gfx.Rect(sb, new Rectangle((int)(left - 8), (int)(cy - 17), (int)(IntentIcon + 6f + IntentNumberRoom + row + 14), 34), Palette.Void * (BattleRules.ClearPlate * ia));
+                    Gfx.Text(sb, Game.Font, NumberText.Get(f.IntentNotes[0]), x, cy - Game.Font.LineSpacing * TextSize.Heading / 2f, Palette.Highlight * ia, TextSize.Heading);
                     if (f.IntentTarget != null && !f.IntentAll) DrawAimedAt(sb, battle.HitTarget(f), r.Center.X, cy - lift, ia);
                 }
-                else Gfx.Text(sb, Game.BigFont, NumberText.Get(f.IntentNotes[0]), left, cy - 16, Palette.Highlight * ia, TextSize.Small);
+                else Gfx.Text(sb, Game.BigFont, NumberText.Get(f.IntentNotes[0]), x, cy - 16, Palette.Highlight * ia, TextSize.Small);
                 for (int n = 0; n < f.IntentNotes.Length; n++)
-                    NoteGlyph.Note(sb, Game.BigFont, left + NumberRoom + NoteStep * (n + 0.5f), cy, f.IntentWays[n], 0.46f, ia, n < f.IntentLate.Length && f.IntentLate[n]);
+                    NoteGlyph.Note(sb, Game.BigFont, x + IntentNumberRoom + IntentNoteStep * (n + 0.5f), cy, f.IntentWays[n], 0.46f, ia, n < f.IntentLate.Length && f.IntentLate[n]);
                 if (f.IntentCadenza || f.IntentAll || f.IntentHeavy)                    // CHARGE : the charged blow says so like a CADENZA
                     Gfx.TextSpacedCentered(sb, Game.Font, f.IntentAll ? "EVERYONE" : (f.IntentHeavy ? "CHARGED" : "CADENZA"), r.Center.X, cy - (Settings.ClearFight && !f.IntentAll ? lift + 22f : 40f), Palette.Highlight * (ia * (0.7f + 0.3f * (float)Math.Sin(time * 6f))), TextSize.Label, 3f);
                 if (f.Staggered)
-                    Gfx.Line(sb, left - 6, cy, left + NumberRoom + 6f + row, cy, Palette.Highlight * ia, 2f);   // OFF-BEAT : it loses its next turn, this move waits for the one after
-
-                if (planning && hover == f && f.IntentTarget != null)
-                {
-                    Vector2 to = AimPoint(battle.HitTarget(f));
-                    Gfx.Line(sb, r.Center.X, cy + 14, to.X, to.Y, Palette.Accent * (0.6f * ia), 2f);
-                }
+                    Gfx.Line(sb, x - 6, cy, x + IntentNumberRoom + 6f + row, cy, Palette.Highlight * ia, 2f);   // OFF-BEAT : it loses its next turn, this move waits for the one after
             }
         }
 
@@ -2191,7 +2204,8 @@ namespace Tacetno433.Screens
         }
 
         //Parry Notes : each note flies from the enemy to the hit point, arriving as its ring closes.
-        //Only the next note to answer has a ring, so there is one thing to time at once.
+        //Only the next note to answer has a ring, so there is one thing to time at once. Who it hits is marked on their card and
+        //over their head (Target Mark, MARKS AND AIM), the line to them is gone.
         private void DrawParryNotes(SpriteBatch sb)
         {
             Fighter enemy = battle.Current;
@@ -2211,19 +2225,10 @@ namespace Tacetno433.Screens
                 NoteGlyph.Note(sb, Game.BigFont, x, y, notes[i].Way, MathHelper.Lerp(1f, NoteGrow, p), a, hidden);
                 if (i == next) NoteGlyph.TimingRing(sb, HitX, HitY, progress, RingMark, RingStart, 0f, Math.Min(1f, progress * 3f));
             }
-
-            //Target : a line from the hit point to the musician being attacked (THE COURT : to every one standing)
-            for (int i = 0; i < battle.Party.Count; i++)
-            {
-                Fighter m = battle.Party[i];
-                if (m != battle.HitTarget(enemy) && !(enemy.IntentAll && !m.Down)) continue;
-                Vector2 to = AimPoint(m);
-                Gfx.Line(sb, HitX - NoteGlyph.WellRadius, HitY, to.X, to.Y, Palette.Accent * 0.35f, 2f);
-            }
         }
 
-        //Aim Point (Beta1) : where a line aimed at a musician ends. The one in front is aimed at the chest,
-        //the others at the bottom of their card in THE BAND row.
+        //Aim Point (Beta1) : where on screen a musician is hit. The one in front at the chest, the others at the bottom of their
+        //card in THE BAND row. The camera looks there (ACTION) and a blow's light flies there.
         private Vector2 AimPoint(Fighter m)
         {
             if (m == fore) return new Vector2(foreBox.Center.X + 40f, foreBox.Y + 130f);
@@ -2247,8 +2252,17 @@ namespace Tacetno433.Screens
                         bool usable = k == 0 || battle.CanPlanSkill(selected, s);
                         bool lit = (move != null && move.Skill == s) || (view == View.Target && pending == s);
                         Color kind = Palette.Kind(k == 0 ? SkillKind.Attack : s.Kind);                 // SKILL KIND : ATTACK is an attack
-                        Ui.Button(sb, commandBox[k], k == 0 ? WordAttack : s.Name, commandKey[k], lit, usable, 1f, kind);
-                        if (k > 0) Ui.Pips(sb, commandBox[k].X + 26, commandBox[k].Bottom - 9, s.Cost, s.Cost, 4f, 11f, usable ? 1f : 0.35f);
+                        Rectangle box = commandBox[k];
+                        float a = usable ? 1f : 0.35f;
+                        Ui.Button(sb, box, k == 0 ? WordAttack : s.Name, commandKey[k], lit, usable, 1f, kind, CommandIconRoom);
+
+                        //MARKS AND AIM : the command's icon after the kind's band (leaning with the button under the pointer), who it
+                        //is for over it, its BREATH under the icon
+                        int lean = usable && Input.MouseOver(box) ? 4 : 0;
+                        Rectangle icon = new Rectangle(box.X + Ui.Slant + 8 + lean, box.Center.Y - 15, 24, 24);
+                        Ui.Icon(sb, icon, commandArt[k], commandCode[k], lit ? Palette.Ink : kind, false, 0, a);
+                        Gfx.TextSpaced(sb, Game.Font, commandFor[k], box.X + Ui.Slant + 2, box.Y - 13, Palette.LineGrey * a, TextSize.Tiny, 2f);
+                        if (k > 0) Ui.Pips(sb, icon.Center.X - (s.Cost - 1) * 4.5f, box.Bottom - 6, s.Cost, s.Cost, 3f, 9f, a);
                     }
                 }
 

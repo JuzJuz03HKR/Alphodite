@@ -409,6 +409,13 @@ namespace Tacetno433.Core
 
         public static void Button(SpriteBatch sb, Rectangle box, string label, string key, bool primary, bool enabled, float alpha, Color kind)
         {
+            Button(sb, box, label, key, primary, enabled, alpha, kind, 0f);
+        }
+
+        //Button (with an icon) : iconRoom pixels after the slanted left edge are kept for an icon the page draws there
+        //(the battle's skill buttons, block 1 item 4), the label is centred in what is left
+        public static void Button(SpriteBatch sb, Rectangle box, string label, string key, bool primary, bool enabled, float alpha, Color kind, float iconRoom)
+        {
             bool over = enabled && Input.MouseOver(box);
             float a = enabled ? alpha : alpha * 0.35f;
 
@@ -434,17 +441,22 @@ namespace Tacetno433.Core
             if (kind.A > 0) Gfx.SlantBox(sb, new Rectangle(r.X, r.Y, Slant + KindBand, r.Height), Slant, kind * a);
 
             //Label Area : between the slanted left edge and the key chip, if there is one
-            float left = r.X + Slant + 8;
+            float left = r.X + Slant + 8 + iconRoom;
             float right = r.Right - Slant - 8;
             float chipRight = r.Right - Slant - 6;
             if (key.Length > 0) right = chipRight - (Gfx.TextWidth(Font, key, TextSize.Tiny) + 10f) - 8;
 
-            //Label : centred in its area, dropped to a smaller size if it would not fit
+            //Label : centred in its area, dropped a size (then one more) if it would not fit
             float scale = TextSize.Heading;
             float width = Gfx.SpacedWidth(Font, label, scale, 1.5f);
             if (width > right - left)
             {
                 scale = TextSize.Body;
+                width = Gfx.SpacedWidth(Font, label, scale, 1.5f);
+            }
+            if (width > right - left)
+            {
+                scale = TextSize.Label;
                 width = Gfx.SpacedWidth(Font, label, scale, 1.5f);
             }
             float labelY = r.Center.Y - Font.LineSpacing * scale / 2f;
@@ -538,6 +550,26 @@ namespace Tacetno433.Core
                 Gfx.RectOutline(sb, box, Palette.LineGrey * alpha, 1);
                 Gfx.TextSpaced(sb, Font, text, box.X + 7, box.Y + 3, Palette.PaperDim * alpha, TextSize.Tiny, 1.5f);
             }
+        }
+
+        //Icon (Beta1 30 Oct, block 1 item 4) : one of the battle's icons in its square r. art is the team's picture (UiArt.IconOf),
+        //drawn at its real size in the middle. Until it exists (null) : a frame with a short code in it, the rule for icons drawn
+        //by code that look strange is letters. A filled frame is for what hurts. count sits on the bottom right corner, 0 for none.
+        public static void Icon(SpriteBatch sb, Rectangle r, Texture2D art, string code, Color frame, bool filled, int count, float alpha)
+        {
+            if (art != null) sb.Draw(art, new Vector2(r.Center.X - art.Width / 2, r.Center.Y - art.Height / 2), Color.White * alpha);
+            else
+            {
+                Gfx.Rect(sb, r, filled ? frame * alpha : Palette.Void * (0.8f * alpha));
+                Gfx.RectOutline(sb, r, frame * alpha, 1);
+                Gfx.TextCentered(sb, Font, code, r.Center.X, r.Center.Y, (filled ? Palette.Ink : frame) * alpha, TextSize.Tiny * 0.9f);
+            }
+            if (count <= 0) return;
+            string n = NumberText.Get(count);
+            float w = Gfx.TextWidth(Font, n, TextSize.Tiny);
+            Rectangle corner = new Rectangle((int)(r.Right - w - 3), r.Bottom - 10, (int)w + 5, 12);
+            Gfx.Rect(sb, corner, Palette.Void * (0.9f * alpha));
+            Gfx.TextCentered(sb, Font, n, corner.Center.X, corner.Center.Y, Palette.Highlight * alpha, TextSize.Tiny);
         }
 
         //Tag Width : so pages can line several tags up

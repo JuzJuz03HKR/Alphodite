@@ -60,7 +60,9 @@ namespace Tacetno433.Screens
 
             turnBattle ? "Your bar : give each musician a move, ENTER plays them in order. ATTACK hits by itself, a skill asks for a swing. "
                    + "Their turn : swipe back at each note to block it. BREATH pays for skills. "
-                   + "CHARGE : one big note next bar, OFF-BEAT breaks it. GUARD : it takes your hits first."   // ENEMY MOVES (Beta1 30 Oct)
+                   + "CHARGE : one big note next bar, OFF-BEAT breaks it. GUARD : it takes your hits first. "   // ENEMY MOVES (Beta1 30 Oct)
+                   + "A ring on an enemy : your move goes there. Point at an icon to read it. "                   // MARKS AND AIM (30 Oct)
+                   + "4 PERFECTs in a fight : INSPIRED, a new step for that musician."                            // INSPIRED (30 Oct)
                  : "Win a note, push the line. Lose a note, lose breath. "
                    + "Push the line all the way to win. Let silent beats pass to breathe."
         };
@@ -414,6 +416,16 @@ namespace Tacetno433.Screens
             Gfx.TextSpaced(sb, Game.Font, "BAND", ox + 110, 350, Palette.Paper * a, TextSize.Label, 3f);
             Gfx.RectOutline(sb, new Rectangle((int)(ox + 490), 220, 110, 130), Palette.Paper * a, 2);
             Gfx.TextSpaced(sb, Game.Font, "TACET", ox + 490, 360, Palette.Paper * a, TextSize.Label, 3f);
+
+            //MARKS AND AIM (Beta1 30 Oct) : the ring a move aimed at TACET puts on it, the attack's colour, as in the fight
+            float rx = ox + 545f;
+            Color aim = Palette.KindAttack * (a * (0.75f + 0.25f * (float)Math.Sin(time * 4f)));
+            Gfx.Ring(sb, rx, 285f, 26f, aim, 2f);
+            Gfx.Rect(sb, rx - 1f, 285f - 38f, 2f, 9f, aim);
+            Gfx.Rect(sb, rx - 1f, 285f + 29f, 2f, 9f, aim);
+            Gfx.Rect(sb, rx - 38f, 284f, 9f, 2f, aim);
+            Gfx.Rect(sb, rx + 29f, 284f, 9f, 2f, aim);
+            Gfx.Diamond(sb, rx, 285f, 3.5f, aim);
 
             //Block : a note flies from TACET to the ring, which closes as it arrives
             float t = (time % 1.4f) / 1.4f;

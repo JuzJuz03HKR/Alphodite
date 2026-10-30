@@ -157,7 +157,7 @@ namespace Tacetno433.Battle
     //   Won / Lost : the fight is over, HpAfterBattle gives each musician's life to keep
     //Every number comes from Data/BattleRules.cs (TURN BATTLE and ONE BAR).
     //Grade is the same enum the rhythm duel uses (Battle/BattleState.cs).
-    public class TurnBattle
+    public partial class TurnBattle
     {
         public List<Fighter> Party = new List<Fighter>();      // the musicians on the field, the whole band (THE BAND OF THREE)
         public List<Fighter> Enemies = new List<Fighter>();
@@ -1546,17 +1546,23 @@ namespace Tacetno433.Battle
             return BattleRules.TurnHoldBase + BattleRules.TurnHoldGain * MathF.Max(0f, MathF.Min(1f, held));
         }
 
-        //Hit Damage : power x TurnAttackPerPower x scale, harder with CRESCENDO and against an enemy OFF-BEAT
+        //Hit Damage : power x TurnAttackPerPower x scale, harder with CRESCENDO and against an enemy OFF-BEAT.
+        //OVERTURE (motif) is spent by the band's first hit of the fight, the rest is HitFor, which changes nothing (PREVIEW).
         public int HitDamage(Fighter attacker, Fighter target, float scale)
+        {
+            bool overture = !attacker.IsEnemy && !overtureDone && Has(MotifId.Overture);    // OVERTURE
+            if (overture) overtureDone = true;
+            return HitFor(attacker, target, scale, overture);
+        }
+
+        //Hit For : the damage of one hit, worked out only. The steps go in the same order as they always did, so the
+        //numbers stay the same to the last bit (a float rounded at .5 can turn on the order of the multiplications).
+        private int HitFor(Fighter attacker, Fighter target, float scale, bool overture)
         {
             float power = attacker.IsEnemy ? attacker.Enemy.SongNotePower() : PowerOf(attacker.Musician);
             float damage = power * BattleRules.TurnAttackPerPower * scale;
             if (target.IsEnemy && target.Hp < target.MaxHp * BattleRules.TurnCodaBelow && Has(MotifId.Coda)) damage *= BattleRules.TurnCodaScale;   // CODA
-            if (!attacker.IsEnemy && !overtureDone && Has(MotifId.Overture))                  // OVERTURE
-            {
-                damage *= BattleRules.TurnOvertureScale;
-                overtureDone = true;
-            }
+            if (overture) damage *= BattleRules.TurnOvertureScale;                             // OVERTURE
             damage *= 1f + attacker.Crescendo * BattleRules.TurnCrescendoStep;               // CRESCENDO
             if (!attacker.IsEnemy) damage *= BeethovenScale();                                 // THE CLOSER THE LOUDER
             if (!attacker.IsEnemy) damage *= TraitScale(attacker, target);                     // the musician's own trait

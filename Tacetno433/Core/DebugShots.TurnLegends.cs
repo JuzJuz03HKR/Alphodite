@@ -158,6 +158,7 @@ namespace Tacetno433.Core
 
             report += TurnCheckMoves();                                                // ENEMY MOVES (Beta1 30 Oct)
             report += TurnCheckPaths();                                                // PATH and INSPIRED (Beta1 30 Oct)
+            report += TurnCheckPreview();                                              // PREVIEW (Beta1 30 Oct, block 1 item 4)
             return report;
         }
 

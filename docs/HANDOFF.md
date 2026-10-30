@@ -3,38 +3,39 @@
 > **29 ต.ค. : Beta1** (branch `Beta1`) อ่านข้อ 00 ก่อน เป็นภาพรวมของเกมตอนนี้ แผนที่โค้ดอยู่ข้อ 0.0 (Beta1) กับข้อ 0 (Alpha 7)
 > ข้อ 1 ถึง 6 เป็นประวัติของเกม rhythm (`Alpha6` ถึง 6 ต.ค.) เก็บไว้อ้างอิง (เดิม 18 ต.ค. : Alpha 7 เปลี่ยนเป็น turn-based roguelike โครงโค้ดอยู่ข้อ 9 ของ [`ALPHA7_DESIGN.md`](ALPHA7_DESIGN.md))
 
-## 00. ภาพรวมตอนนี้ (Beta1, อัปเดต 29 ต.ค. ดึก)
+## 00. ภาพรวมตอนนี้ (Beta1, อัปเดต 30 ต.ค. ดึก)
 
 ### 00.1 เกมตอนนี้
 - roguelike แบบผลัดตา เลือกวาทยากร 1 ใน 3 (THE UNHEARING, FANNY MENDELSSOHN AND ???, THE METRONOME) แล้วเลือกนักดนตรี 3 จาก 5 คนในตำนาน (PAGANINI QUANTZ PFUNDT DUPORT PUNTO) เป็นทีมตายตัวทั้งรัน
 - รันมี 3 ชั้น (PRELUDE NOCTURNE CODA) แผนที่ทั้งชั้นแบบมองไกล ห้อง FIGHT ELITE BOSS ??? SHOP REST LUTHIER TREASURE ของถาวรหลังรันซื้อที่ THE ARCHIVE
 - การต่อสู้ ONE BAR : ทุกห้องให้แต่ละคนเลือก ATTACK หรือสกิล เรียงลำดับเอง แล้วกด ENTER สกิลกับ SIGNATURE ตวัดไม้ตามลูกศรตอนวงแหวนปิด (ONE RULE) ศัตรูตีแล้วปัดสวนได้ (parry, COUNTER)
 - ชุดสกิลใหม่ของ 5 คน (THE FIVE KITS 29 ต.ค. ดึก) ทุกสกิลมีชนิดและสี โจมตีแดง ป้องกันฟ้า ฮีลเขียว เสริมทอง
+- 30 ต.ค. : ศัตรูมีท่าชาร์จกับตั้งโล่ (CHARGE GUARD) / นักดนตรีโตตามเส้นทางของตัวเอง PATH คนละ 2 เส้น 3 ขั้น (30 ใบ) ได้จาก INSPIRED (PERFECT 4 ครั้งในไฟต์ เลือกทันที) กับชนะไฟต์ได้เลือก 1 ใบ / SIGNATURE โตทุกบอส / BONDS 5 สายจากประวัติจริง / หน้าต่อสู้แบบ GUI มาตรฐาน วงเล็ง เครื่องหมายบนเพื่อน การ์ดสกิลเป็นตัวเลข ไอคอนสถานะกับเจตนา ไม่มีเส้นบอกเป้าแล้ว (`BETA1_DIRECTION.md` 12.3 13.1 ถึง 13.5)
 - ฉากต่อสู้ Beta1 : มุมวาทยากร ความมืด TACET (shader) VFX ตอนตี impact frame กล้องขยับตามไม้ เต็มจอวาดที่ความละเอียดจอจริง
 - หน้าจอทุกหน้ายกระดับแล้ว (ฟอนต์ OFL ปุ่มแบบผสม แผ่นเฉียงบอกชื่อหน้า ม่านผ้าจริง การ์ด 3D)
-- เนื้อหา : MOTIF 27 ใบ ศัตรู 17 ตัว (บอส 6) เหตุการณ์ 10 สกิล 10 สกิลของ 5 คน
+- เนื้อหา : MOTIF 27 ใบ ศัตรู 17 ตัว (บอส 6) เหตุการณ์ 10 สกิล 10 สกิลของ 5 คน ขั้นเส้นทาง 30 ใบ
 - ยังไม่มีอาร์ตกับเสียงจริง ทุกช่องเป็นกรอบว่าง เกมเงียบ (โค้ดรองรับครบ)
 
-### 00.2 ความคืบหน้า (ประมาณการ 29 ต.ค. ไม่นับงานอาร์ต)
+### 00.2 ความคืบหน้า (ประมาณการ 30 ต.ค. ไม่นับงานอาร์ต)
 
 | ส่วน | น้ำหนัก | เสร็จ | ที่เหลือ |
 |---|---|---|---|
 | ระบบเกมพื้นฐานกับเครื่องมือ (หน้าจอ เปลี่ยนหน้า shader เต็มจอคม เซฟ ตั้งค่า ตัวทดสอบ) | 15% | 90% | ตั้งค่ากราฟิก ทำ build สำหรับขาย |
-| กติกาการต่อสู้ | 15% | 85% | ศัตรูชาร์จท่ากับตั้งโล่ (ก้อน 1 ข้อ 3) และเก็บรายละเอียด |
-| หน้าตาการต่อสู้ (ฉาก VFX GUI) | 15% | 65% | GUI แบบ HSR/CZN (ก้อน 1 ข้อ 4) VFX ของสกิลใหม่ SIGNATURE ของ Fanny กับ Bach |
-| ระบบรันและการโตของทีม | 15% | 50% | ก้อน 2 ถึง 5 : PATH INSPIRED MOTIF ที่เห็นผล อาวุธวิวัฒน์ บอสตามวาทยากร ENCORE ปลดของใหม่ |
-| หน้าจออื่นๆ | 10% | 85% | หน้าใหม่ที่ก้อน 2 ถึง 5 ต้องใช้ เช่นหน้าเลือก PATH |
-| เนื้อหา (สกิล ศัตรู MOTIF เหตุการณ์) | 10% | 50% | การ์ด PATH ปรับ MOTIF ท่าใหม่ของศัตรู |
-| Tutorial | 5% | 30% | ทำใหม่ให้ตรงระบบ Beta1 |
+| กติกาการต่อสู้ | 15% | 90% | ท่าใหม่ของบอส เก็บรายละเอียด |
+| หน้าตาการต่อสู้ (ฉาก VFX GUI) | 15% | 75% | VFX ของสกิลใหม่กับท่าใหม่ SIGNATURE ของ Fanny กับ Bach แถบการ์ดของวง (ผู้ใช้มีไอเดีย) ไอคอนจริง |
+| ระบบรันและการโตของทีม | 15% | 65% | ก้อน 3 ถึง 5 : MOTIF ที่เห็นผล อาวุธวิวัฒน์ บอสตามวาทยากร ENCORE ปลดของใหม่ |
+| หน้าจออื่นๆ | 10% | 88% | หน้าใหม่ที่ก้อน 3 ถึง 5 ต้องใช้ |
+| เนื้อหา (สกิล ศัตรู MOTIF เหตุการณ์) | 10% | 60% | ปรับ MOTIF ท่าใหม่ของบอส เหตุการณ์แบบทางเลือกเสี่ยง |
+| Tutorial | 5% | 35% | ทำใหม่ให้ตรงระบบ Beta1 (HOW TO PLAY อัปเดตแล้ว) |
 | เนื้อเรื่อง | 5% | 10% | มีแค่ lore ตัวละคร ยังไม่มีฉากเล่าเรื่อง |
 | บาลานซ์ เพลย์เทส QA | 10% | 30% | มีแค่ตัวจำลอง ยังไม่มีคนจริงลองหลายคน |
 
-รวมประมาณ **60%** (ช่วง 55 ถึง 65%) เป็นการประเมินจากรายการงานในเอกสาร ไม่ใช่ค่าที่วัดได้ 100% หมายถึงแผนตอนนี้ (ก้อน 1 ถึง 6 ของ `BETA1_DIRECTION.md` 11.7 กับ Tutorial เนื้อเรื่อง การทดสอบ) ถ้าแผนโตขึ้น % จะลดลง
+รวมประมาณ **68%** (ช่วง 63 ถึง 72%, 29 ต.ค. ประเมินไว้ 60%) เป็นการประเมินจากรายการงานในเอกสาร ไม่ใช่ค่าที่วัดได้ 100% หมายถึงแผนตอนนี้ (ก้อน 1 ถึง 6 ของ `BETA1_DIRECTION.md` 11.7 กับ Tutorial เนื้อเรื่อง การทดสอบ) ถ้าแผนโตขึ้น % จะลดลง
 ไม่นับไฟล์เสียง (เป็นงานแบบเดียวกับอาร์ต) และภาษาไทย ของเก่าตอนเป็นเกม rhythm (6 ต.ค.) อยู่ข้อ 2
 
 ### 00.3 งานที่เหลือ เรียงตามที่ตกลงกับผู้ใช้
-1. ก้อน 1 (ทำทีละข้อ หยุดรอผู้ใช้ทุกข้อ `BETA1_DIRECTION.md` 11.11 กับข้อ 12) : ✅ ข้อ 1 ชนิดสกิล ✅ ข้อ 2 ชุดสกิลใหม่ 5 คน แล้วต่อด้วยข้อ 3 ศัตรู CHARGE GUARD, ข้อ 4 หน้าต่อสู้แบบ HSR/CZN (วงเล็ง แถบศัตรู ไอคอน การ์ดสกิล เอาเส้นบอกเป้าออก), ข้อ 5 ข้อความ HOW TO PLAY กับไฟต์ฝึก, ข้อ 6 ทดสอบ, ข้อ 7 VFX สกิลใหม่ (ถามตัวอย่างผู้ใช้ก่อน)
-2. ก้อน 2 : PATH เส้นทางของนักดนตรี / INSPIRED กับรางวัลไฟต์แบบ ก / SIGNATURE โตที่บอส / BONDS
+1. ก้อน 1 (`BETA1_DIRECTION.md` 11.11 ข้อ 12 13) : ✅ ข้อ 1 ชนิดสกิล ✅ ข้อ 2 ชุดสกิลใหม่ 5 คน ✅ ข้อ 3 ศัตรู CHARGE GUARD ✅ ข้อ 4 หน้าต่อสู้แบบ HSR/CZN (13.4) ✅ ข้อ 5 ข้อความ ✅ ข้อ 6 ทดสอบ / เหลือข้อ 7 VFX สกิลใหม่ (ถามตัวอย่างผู้ใช้ก่อน)
+2. ก้อน 2 : ✅ PATH / ✅ INSPIRED กับรางวัลไฟต์แบบ ก / ✅ SIGNATURE โตที่บอส / ✅ BONDS (30 ต.ค. ผู้ใช้ยังไม่ได้ลองรัน ที่รอตัดสินอยู่ 13.6)
 3. ก้อน 3 : MOTIF ทำงานให้เห็น / อาวุธขั้น III วิวัฒน์ / ดอกเบี้ย
 4. ก้อน 4 : เห็นบอสตั้งแต่ต้นชั้น / บอสท้ายรันเป็นร่าง Hollow ของวาทยากรที่เลือก
 5. ก้อน 5 : ENCORE 1 ถึง 10 / ARCHIVE ปลดของใหม่ / MEMORY
@@ -44,17 +45,17 @@
 ### 00.4 build และทดสอบ
 - Visual Studio 2026 (.NET 9) เปิด `Tacetno433.sln` แล้ว Rebuild ต้องได้ 0 error 0 warning เครื่องใหม่ (เช่นโน้ตบุ๊คอีกเครื่อง) clone หรือ pull branch `Beta1` ล่าสุดก่อนเสมอ
 - แชท cloud : `/build` (เครื่องใหม่ลง dotnet-sdk-8.0 กับรัน `.claude/skills/build/shader_setup.sh` ก่อน ดู `.claude/skills/build/SKILL.md`)
-- `--shots turncheck` 116/116 / `--shots savecheck` 32/32 / `--shots turnsim` ใช้ 12 seed (`TACET_SIM_SEED` 4330 กับ 1 ถึง 11 รันพร้อมกันได้)
-- เกณฑ์ความยาก (29 ต.ค.) : NORMAL STRONG ราว 54% MAESTRO EXPERT ราว 75% กับตัวจำลองนิสัยใหม่ (บัง สอน เสริม PUNTO เขียนก่อน) ส่วน 49% เดิมเป็นของนิสัยเก่า
+- `--shots turncheck` 145/145 / `--shots savecheck` 33/33 / `--shots turnsim` ใช้ 12 หรือ 24 seed (`TACET_SIM_SEED` 4330 กับ 1 ถึง 23 รันพร้อมกันได้)
+- เกณฑ์ความยาก (30 ต.ค. หลังก้อน 2) : NORMAL STRONG ราว 63% MAESTRO EXPERT ราว 83% (24 seed) กับตัวจำลองนิสัยใหม่ที่เลือกสกิลตามค่าและเดินเส้นทาง ส่วน 54% ของ 29 ต.ค. เป็นของนิสัยก่อนหน้า วัดเทียบต้องใช้ตัวจำลองตัวเดียวกัน (`TACET_SIM_NOPATH=1` ปิดเส้นทาง)
 - `TACET_SIM_SET` ลองตัวเลขโดยไม่ build ใหม่ ตาราง MUSICIANS ในรายงานบอกว่าวงที่มีแต่ละคนชนะเท่าไร
 - ชีต `docs/TACET_Balance.xlsx` : หลังแก้ตัวเลข `python3 docs/turn_balance_tabs.py <turnsim.txt>` (แท็บ Turn ทั้งหมดกับ Turn Skills)
-- ภาพทดสอบหน้าต่อสู้ `battle*` (ใหม่ `battlekit`) ภาพจาก cloud ห้ามแทน `docs/screenshots/`
+- ภาพทดสอบหน้าต่อสู้ `battle*` (ใหม่ 30 ต.ค. `battlemoves` `battleinspired` `battleaim` `battlepick` `battleheal` `battletip` `battlechakram` ต่อท้าย clear ได้) ภาพจาก cloud ห้ามแทน `docs/screenshots/`
 
 ### 00.5 ที่ต้องรู้และที่ค้างอยู่
 - PLAYTEST : SIGNATURE ใช้ 1 PERFECT (`BattleRules.PlaytestSignatureNeed` = 1) ผู้ใช้สั่งคงไว้ ห้ามแก้จนผู้ใช้บอก ค่าจริง 6
-- ผู้ใช้ยังไม่ได้ Rebuild ดูก้อน 1 ข้อ 2 (ชุดสกิลใหม่) และยังไม่ได้ส่งตัวอย่าง VFX ของ SHIELD CHAKRAM THE LESSON TURN OF THE HAND
-- ตัวจำลองแทบไม่เลือก CAPRICE (มันเลือกสกิลตีที่แพงสุดคือ IL CANNONE) ค่าของ CAPRICE ยังไม่ได้ตรวจด้วยตัวจำลองตรงๆ
-- ราคาเลือดของ THE DEVIL'S BARGAIN บนปุ่มยังเป็นเพชรลม ไอคอนเลือดรอก้อน 1 ข้อ 4
+- ผู้ใช้ยังไม่ได้ Rebuild ดูตั้งแต่ก้อน 1 ข้อ 2 (ชุดสกิลใหม่) จะลองรันทีเดียว และยังไม่ได้ส่งตัวอย่าง VFX ของ SHIELD CHAKRAM THE LESSON TURN OF THE HAND INSPIRED CHARGE GUARD
+- ตัวจำลองเลือกสกิลตามค่าแล้ว (30 ต.ค.) CAPRICE ถูกเล่นและวัดได้ วงที่มี PAGANINI ยังต่ำกว่าเพื่อนราว 4.8%
+- ราคาเลือดของ THE DEVIL'S BARGAIN กับ THE PACT ขึ้นบนการ์ดสกิลแล้ว (PAYS 12 LIFE) แต่ใต้ปุ่มยังเป็นเพชรลม
 - โค้ดดวลเดิม (เกม rhythm `Battle/BattleState.cs` `Screens/DuelScreen*.cs`) ยังอยู่ ปิดด้วย `BattleRules.TurnBattleOn` ความสามารถเดิมของ 5 คนยังอยู่ใน `enum MusicianTrait` ให้ดวลเดิม
 - เอกสารหลัก : `CLAUDE.md` ข้อ 00 / `docs/RESUME_PROMPT.md` สถานะล่าสุด / `docs/BETA1_DIRECTION.md` (11 รีวิวเกมเพลย์ 12 ก้อน 1) / `docs/SCREENS_LEVEL_UP.md` / `docs/CHARACTER_DESIGN.md` / `docs/BATTLE_SCENE_2_3D_CHANGE.md` / แผนอาร์ต `docs/BATTLE_ART_PLAN.md` `docs/UI_ART_PLAN.md` / คำต่อคำ `docs/USER_BRIEFS.md` หัวข้อ 13
 
@@ -115,6 +116,9 @@
 | ร้านใหม่ : MOTIF 2 ช่อง WEAPON TUNING หรือ SECTIONAL + REROLL แพงขึ้นทีละครั้ง / ลูกเต๋าของห้องที่เซฟไว้ | `Screens/ShopScreen.cs` (`Stock` `Ware` `Reroll`) · ตัวเลข `BattleRules` หัวข้อ Shop / `RunState.PlaceSeed` ตั้งใน `RunFlow.Enter` เซฟ `placeseed=` |
 | เงินตามอันดับ (RANK = ครึ่ง PERFECT % ครึ่งเลือดที่เหลือ) หน้า Result 6 แถว | `BattleState.RankScore` `RankIndex` `RankScale` `ShardsBeforeRank` `ShardsEarned` (`NotesPlayed` `LifeKept` จาก `BattleScreen.Finish`) · `BattleRules.RankAt` `RankShards` · `Screens/ResultScreen.cs` (`ApplyWin` `DrawRank`) |
 | **ชุดสกิลใหม่ 5 คน THE FIVE KITS (29 ต.ค. ดึก `BETA1_DIRECTION.md` 12.2)** : สกิล / ความสามารถติดตัว / กติกา SHIELD THE LESSON CHAKRAM LANCE TURN OF THE HAND THE HUNTING CALL THE DEVIL'S BARGAIN BREATH CONTROL THE SCAR / คำเด้งกับป้ายบนจอ / ทดสอบ | `Data/Skill.cs` (`Shield` `Lesson` `Bounce` `Revenge` `OthersOnly`) / `Data/Musician.cs` (ท้าย `enum MusicianTrait`) / `Battle/TurnBattle.cs` (`CanAim` `PaysInLife` `HitTarget` `CoverOf` `StepAside` `NoteTargets` `TurnOfTheHand` `CueScale` `Taught` ค้นชื่อตัวพิมพ์ใหญ่) · ตัวเลข `BattleRules` หัวข้อ Musician Traits / `BattleScreen.ShowEvents` `DrawBand` / `Core/DebugShots.TurnLegends.cs` · ภาพ `battlekit` · ตัวจำลองนิสัยใหม่ + ตาราง MUSICIANS + `TACET_SIM_SET` ใน `Core/DebugShots.TurnSim.cs` · แท็บ Turn Skills ของ `TACET_Balance.xlsx` |
+| **ท่าใหม่ของศัตรู CHARGE GUARD (30 ต.ค. `BETA1_DIRECTION.md` 12.3)** : ลิสต์ท่า / ทุบท่าชาร์จ / ทะลุโล่ | `Data/Enemy.cs` (`EnemyMove` `Moves` `GuardBlock`) / `TurnBattle` ค้นคำ CHARGE GUARD BREAK PIERCE (`PlanIntent` `NextMove` `BreakCharge` `Strike` `Aims`) / ตัวเลข `BattleRules` หัวข้อ ENEMY MOVES / ทดสอบ `Core/DebugShots.TurnMoves.cs` |
+| **PATH INSPIRED ชนะได้เลือก SIGNATURE โต BONDS (30 ต.ค. 13.1 ถึง 13.3)** | การ์ด 30 ใบ `Data/Path.cs` (`PathList` แก้ที่นี่) / สายสัมพันธ์ `Data/Bond.cs` / กติกาใน `TurnBattle` ค้นคำ PATH INSPIRED SIGNATURE GROWS BONDS / หน้าเลือก `Screens/MotifRewardScreen.cs` (`Kind.Path`) กับในไฟต์ `BattleScreen` (`OpenStepPick`) / เซฟ `paths=` / ทดสอบ `Core/DebugShots.TurnPaths.cs` |
+| **หน้าต่อสู้ใหม่ MARKS AND AIM (30 ต.ค. 13.4)** : วงเล็ง เครื่องหมายบนเพื่อน เครื่องหมายเป้า เส้นโค้งเล็ง การ์ดสกิล ตัวอย่างเลือด ไอคอนกับคำอธิบาย | `Screens/BattleScreen.Marks.cs` (ทั้งหมดของหน้าจอ) / ตัวเลขจากกติกา `Battle/TurnBattle.Preview.cs` (`Preview` `MovePreview`) / ไอคอน `Ui.Icon` กับ `UiArt.IconOf` (โฟลเดอร์ `Content/Art/Ui/Icons/` รายชื่อ `UI_ART_PLAN.md` 2.5) / ตัวเลข `BattleRules` หัวข้อ Aim Feel (`AimArc` ปิดเส้นโค้ง) / ทดสอบ `Core/DebugShots.TurnPreview.cs` |
 | ความยากหลังเอา CALL ออก (เลือดวง x1.5 อาวุธขั้นละ 2 MAESTRO 1.3) | `BattleRules.TurnHp` `WeaponTierPower` `MaestroTurnDamage` · ผลตัวจำลอง `BETA1_DIRECTION.md` 9.6 · ตัวจำลองนับ RANK ด้วย (`--shots turnsim` หัวข้อ RANKS) |
 | รอบ 2 ที่เหลือ (29 ต.ค.) : การ์ดเปิดท่อน (หลุมจริง ชื่อโผล่จากขอบหลุม) / จบรัน (ม่านผ้าจริง วงยืนโค้งเป็นเสา ตัวเลขนับขึ้น) / ตั้งชื่อวง / Archive (หัวข้อตั้ง menu1 ECHOES เลขใหญ่) | `Screens/ChapterScreen.cs` / `CurtainCallScreen.cs` / `BandNameScreen.cs` / `ArchiveScreen.cs` · `SCREENS_LEVEL_UP.md` ข้อ 19 |
 | ภาพทดสอบ | `--shots titlereveal resultquiet wipe sweep sweepdark sweepclose` และ `result@3,result@30` (ชื่อซ้ำได้ ภาพชื่อ `ชื่อ_เฟรม`) · 29 ต.ค. : `wipeshop wiperest wipeevent wipereward wipechapter wipeband wipesettings` (แผ่นเฉียงไปหน้านั้น) `wipegallery` (ม่าน) `rewardpick rewardtilt shopbuy` · 29 ต.ค. ค่ำ : `teampick teampickfull luthier luthierdone@60 treasure rewardboss battletier@4` |

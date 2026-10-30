@@ -836,5 +836,12 @@
         //Event Checks
         public static int CheckPerPower = 5;         // each point of power adds this many percent
         public static int CheckFamilyBonus = 25;     // the family the check asks for adds this
+
+        //======================================================================================
+        //Aim Feel (Beta1 30 Oct, block 1 item 4) : the marks that say who a move is for (Screens/BattleScreen.Marks.cs)
+        //======================================================================================
+        public static bool AimArc = true;              // AIM ARC : dots from the command to the enemy being picked (false : no arc, the ring only)
+        public static float AimLockTime = 0.16f;       // RETICLE : seconds a ring takes to close in on a new target
+        public static float AimFaint = 0.32f;          // the ones that could still be picked, this bright
     }
 }
