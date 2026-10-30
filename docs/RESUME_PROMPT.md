@@ -21,6 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
+| 30 ต.ค. 22:30 (แชทข้อ 3 ถึงก้อน 2) | ก้อน 1 ข้อ 3 ศัตรู CHARGE GUARD แล้วก้อน 2 (PATH, INSPIRED, ชนะได้เลือก 1 ใบ, SIGNATURE โตที่บอส, BONDS) แล้วข้อ 4 หน้าต่อสู้ใหม่ ไม่ทำ VFX (ผู้ใช้ไม่อยู่หน้าคอม จะลองรันทีเดียว จบก้อน 2 กับข้อ 4 แล้วหยุดรายงาน) | `Data/Enemy.cs` `Data/Skill.cs` `Data/Musician.cs` `Data/BattleRules.cs` `Data/RunState.cs` `Data/SaveFile.cs` `Battle/TurnBattle.cs` `Screens/BattleScreen*.cs` `Screens/MotifRewardScreen.cs` `Screens/ResultScreen.cs` `Screens/GuideScreen.cs` `Screens/TutorialScreen.Practice.cs` `Core/DebugShots.Turn*.cs` `docs/TACET_Balance.xlsx` เอกสาร |
 
 ---
 
