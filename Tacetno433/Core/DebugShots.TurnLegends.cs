@@ -156,6 +156,7 @@ namespace Tacetno433.Core
             b.UseSkill(threeGood);
             report += Same("chakram", "10 10 10 20", thrown + " " + (999 - b.Enemies[0].Hp));
 
+            report += TurnCheckMoves();                                                // ENEMY MOVES (Beta1 30 Oct)
             return report;
         }
 

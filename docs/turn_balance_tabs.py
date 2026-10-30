@@ -1,7 +1,7 @@
 # Turn Tabs : rebuilds the Turn tabs of docs/TACET_Balance.xlsx from the code (Alpha 7 step 12, ONE BAR).
 #   python3 docs/turn_balance_tabs.py <folder of --shots turnsim>/turnsim.txt
 # Turn Battle     : every number of the TURN BATTLE section of Data/BattleRules.cs (section, code, value, note)
-# Turn Enemies    : the turn data of Data/Enemy.cs
+# Turn Enemies    : the turn data of Data/Enemy.cs (its MOVES too, Beta1 30 Oct)
 # Turn Skills     : every skill of Data/Skill.cs with its musician, and each musician's trait (Beta1 29 Oct, THE FIVE KITS)
 # Turn Conductors : each conductor's SIGNATURE text from Data/Conductor.cs, matched by kit
 # Turn Sim        : turnsim.txt as it is
@@ -57,6 +57,9 @@ clear(ws)
 if ws.cell(row=1, column=9).value is None:
     ws.cell(row=1, column=9).value = 'CUT IN (speed 5 or more)'
     ws.cell(row=1, column=9)._style = copy.copy(ws.cell(row=1, column=8)._style)
+if ws.cell(row=1, column=10).value is None:      # ENEMY MOVES (Beta1 30 Oct) : its Moves list, GUARD with its GuardBlock
+    ws.cell(row=1, column=10).value = 'MOVES in turn (GUARD block on floor 1 before x1.6)'
+    ws.cell(row=1, column=10)._style = copy.copy(ws.cell(row=1, column=8)._style)
 for block in re.findall(r'new Enemy \{ Name = "([^"]+)",(.*?)\},\s*(?=//|new Enemy|\};)', es, re.S):
     name, body = block
     def get(key, default=''):
@@ -71,7 +74,10 @@ for block in re.findall(r'new Enemy \{ Name = "([^"]+)",(.*?)\},\s*(?=//|new Ene
     trait = re.search(r'TraitName = "([^"]+)"', body).group(1)
     floor = get('TraitFloor', '1')
     text = re.search(r'TurnTraitText = "([^"]+)"', body).group(1)
-    ws.append([name, kind, hp, speed, power, phrases, f'{trait} ({floor})', text, 'yes' if int(speed) >= 5 else ''])
+    moves = re.search(r'Moves = new\[\] \{([^}]*)\}', body)
+    moves = ', '.join(m.strip().upper().replace('HIT', 'ATTACK') for m in moves.group(1).split(',')) if moves else 'ATTACK'
+    if 'GUARD' in moves: moves += f' (GUARD {get("GuardBlock", "0")})'
+    ws.append([name, kind, hp, speed, power, phrases, f'{trait} ({floor})', text, 'yes' if int(speed) >= 5 else '', moves])
 
 # --- Turn Skills (Beta1 29 Oct, THE FIVE KITS) : every skill of Data/Skill.cs with its musician (skills 2k and 2k + 1 belong
 #     to musician k of Data/Musician.cs), and each musician's trait on their first row. The legends of MusicianList.Shown first.

@@ -64,6 +64,10 @@ namespace Tacetno433.Data
         public int Bounce;                   // CHAKRAM : each note hits the next enemy in line, this many enemies at most (0 for a plain skill)
         public float Revenge;                // LANCE : x this when the player has been hit since their last move (0 for none)
 
+        //ENEMY MOVES (Beta1 30 Oct) : the answers to TACET's GUARD and CHARGE (Data/Enemy.cs EnemyMove)
+        public bool Pierce;                  // PIERCE : its damage goes through an enemy's BLOCK (IL CANNONE)
+        public bool Breaks;                  // BREAK : a note that lands on an enemy breaks its CHARGE (TIMPANI ROLL)
+
         public bool HitsEnemy
         {
             get { return Target == SkillTarget.Enemy || Target == SkillTarget.AllEnemies; }
@@ -103,11 +107,11 @@ namespace Tacetno433.Data
         {
             //PAGANINI, violin (strings, left) : rumour said they sold their soul to the devil and played faster than any hand
             //could (the 24 Caprices), on the violin they called their cannon. CAPRICE answers the enemy that must fall first,
-            //every cut leaves DISSONANCE (the devil's interval). IL CANNONE is one big shot.
+            //every cut leaves DISSONANCE (the devil's interval). IL CANNONE is one big shot, a cannon goes through any GUARD.
             new Skill { Name = "CAPRICE", Kind = SkillKind.Attack, Text = "4 quick cuts. Each adds 1 DISSONANCE.", Cost = 2, Target = SkillTarget.Enemy,
                         Notes = new[] { S(L), S(R), S(L), S(R) }, Damage = 0.4f, Dissonance = 1 },
-            new Skill { Name = "IL CANNONE", Kind = SkillKind.Attack, Text = "One big held shot. Hold it = harder.", Cost = 3, Target = SkillTarget.Enemy,
-                        Notes = new[] { H(L) }, Damage = 1.5f },
+            new Skill { Name = "IL CANNONE", Kind = SkillKind.Attack, Text = "One big held shot. Hold it = harder. Goes through GUARD.", Cost = 3, Target = SkillTarget.Enemy,
+                        Notes = new[] { H(L) }, Damage = 1.5f, Pierce = true },
 
             //QUANTZ, flute (winds, centre) : taught Frederick the Great the flute and wrote the book on playing it (1752).
             //SOFT AIR when the band is hurt (the only healer of the five), THE LESSON so a friend's big skill lands.
@@ -117,10 +121,10 @@ namespace Tacetno433.Data
                         Notes = new[] { S(U), S(D) }, Lesson = true },
 
             //PFUNDT, timpani (percussion, right) : the crank timpani that change key with one turn of the hand. The drum is the
-            //thunder that throws everything off the beat. TIMPANI ROLL against a big move, THUNDER CALL to save a friend
+            //thunder that throws everything off the beat. TIMPANI ROLL against a big move (it breaks a CHARGE), THUNDER CALL to save a friend
             //(the loudest sound on the stage, every enemy has to turn and look).
-            new Skill { Name = "TIMPANI ROLL", Kind = SkillKind.Attack, Text = "Shake fast. Big OFF-BEAT.", Cost = 2, Target = SkillTarget.Enemy,
-                        Notes = new[] { T() }, Damage = 1f, OffBeat = 30 },
+            new Skill { Name = "TIMPANI ROLL", Kind = SkillKind.Attack, Text = "Shake fast. Big OFF-BEAT. Breaks a CHARGE.", Cost = 2, Target = SkillTarget.Enemy,
+                        Notes = new[] { T() }, Damage = 1f, OffBeat = 30, Breaks = true },
             new Skill { Name = "THUNDER CALL", Kind = SkillKind.Defend, Text = "Enemies aim at PFUNDT, who takes half damage.", Cost = 2, Target = SkillTarget.Self,
                         Notes = new[] { S(R) }, Guard = true, Taunt = true },
 

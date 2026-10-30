@@ -85,6 +85,15 @@
         public static float TurnStaffPower = 1.5f;       //            that one note hits everyone this much harder
         public static int TurnThorns = 5;                // THE DEAF CROWN : life lost by a musician who breaks the DECREE (x the floor's note scale)
 
+        //ENEMY MOVES (Beta1 30 Oct, Data/Enemy.cs EnemyMove) : CHARGE and GUARD. Which enemy plays them is its Moves list,
+        //the BLOCK of a GUARD is its GuardBlock x TurnFloorLife (THE DAMPER 14 is 22 / 29 / 38 on floor 1 / 2 / 3, THE MUTE CHOIR
+        //22 is 35 / 46 / 59). turnsim 24 seeds : NORMAL STRONG 54.3 -> 55.6 percent, MAESTRO EXPERT 74.9 -> 75.5, inside the
+        //simulator's swing, so nothing else was changed for them. 4 for the blow made no difference there, but with FILLS THE
+        //GAPS a missed blow of DEAD AIR on floor 2 would take 60 life, more than any musician has.
+        public static float TurnChargePower = 3f;        // CHARGE : the charged blow is one note this many times as hard as one of its notes
+                                                         //          (DEAD AIR on floor 1 : 8 a note, a 2 note attack 16, the blow 24)
+        public static float TurnChargeCounter = 2f;      //          the COUNTER after parrying it PERFECT hits this much harder (like a CADENZA)
+
         //PRACTICE (step 9) : the soft enemy of the tutorial's practice fight (EnemyList.Practice).
         //Lots of life so the four lessons fit before it falls, and notes that barely hurt.
         public static int TurnPracticeHp = 60;           // x TurnFloorLife on floor 1 (1.6) = 96, step 15 (was 160 with the floor at 1)

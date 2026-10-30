@@ -17,8 +17,10 @@ namespace Tacetno433.Battle
     //The rules never draw, they only write down what happened (docs/research/ALPHA7_battle_ui.md).
     //THE FIVE KITS (Beta1 29 Oct) : Cut = TURN OF THE HAND took notes off an enemy's next attack, Shield = SHIELD went up in front
     //of a musician, Lesson = THE LESSON was given, Cue = THE HUNTING CALL made this move harder, Revenge = LANCE hits back twice as hard.
+    //ENEMY MOVES (Beta1 30 Oct) : Charge = an enemy wound up (Amount = the blow to come), Broken = its CHARGE was broken,
+    //Guard = it raised a BLOCK (Amount), Blocked = its BLOCK took this much of a blow, Pierce = a blow went through the BLOCK.
     public enum TurnEventKind { Damage, Heal, Breath, Dissonance, Crescendo, Mute, Break, Skip, Counter, Down, Ready, Extra, Saved, Steal, Echo, Quieter, Thorns,
-                                Cut, Shield, Lesson, Cue, Revenge }
+                                Cut, Shield, Lesson, Cue, Revenge, Charge, Broken, Guard, Blocked, Pierce }
 
     //DecreeKind : DECREE (THE DEAF CROWN, step 14), what the band may not do this bar
     public enum DecreeKind { None, NoSkills, NoAttacks }
@@ -95,6 +97,16 @@ namespace Tacetno433.Battle
                                                              //          played again in its next attack
         public int Attacks;                        // attacks made so far, a boss's every third is a CADENZA
         public bool Planned;                       // the intent is decided (step 10 : right after its last attack)
+
+        //ENEMY MOVES (Beta1 30 Oct, Data/Enemy.cs EnemyMove) : CHARGE and GUARD
+        public int MoveIndex;                      // the place of its next move in Enemy.Moves
+        public int Charge;                         // CHARGE : 0 none, 1 its next turn winds up, 2 its next turn is the charged blow
+        public bool ChargeBroken;                  // BREAK : the CHARGE was broken, its turns until the blow play nothing
+        public bool IntentCharge;                  // CHARGE : this turn it winds up and plays no note
+        public bool IntentHeavy;                   // CHARGE : this attack is the charged blow, one note TurnChargePower times as hard
+        public int ChargeHit;                      // CHARGE : how hard the blow will hit, shown while it winds up
+        public int IntentGuard;                    // GUARD : this turn it raises this much BLOCK and plays no note (0 for none)
+        public int Block;                          // GUARD : damage it takes before its life, until its own next turn
 
         //Statuses (ALPHA7_DESIGN 5.7) and the two short guards of the percussion
         public int Dissonance;         // DISSONANCE : loses this much life at the end of its turn, then one less
@@ -550,27 +562,47 @@ namespace Tacetno433.Battle
             return enemy.IsEnemy && enemy.Speed >= BattleRules.TurnCutInSpeed;
         }
 
+        //Aims : the enemy's next move hurts somebody (an attack, or a CHARGE winding up toward its blow), so the screen marks
+        //who. A GUARD, LULLABY's rest and a broken CHARGE hurt nobody (ENEMY MOVES, Beta1 30 Oct).
+        public static bool Aims(Fighter enemy)
+        {
+            return enemy != null && !enemy.IntentRest && enemy.IntentGuard == 0 && !enemy.ChargeBroken;
+        }
+
         //Enemy Intent (step 8) : the next of its PHRASES, fitted to the floor's length, at a musician.
         //CADENZA : every third attack of a boss is its big move, one note more and each note harder.
         //Its trait may change the plan, see the trait names below (from TraitFloor on).
+        //ENEMY MOVES (Beta1 30 Oct) : its Moves list may say GUARD or CHARGE instead (Data/Enemy.cs EnemyMove).
         private void PlanIntent(Fighter enemy)
         {
             Enemy e = enemy.Enemy;
             bool trait = TraitOn(enemy);
+            Fighter aimed = enemy.Charge == 2 ? enemy.IntentTarget : null;               // CHARGE : the blow goes where the wind up aimed
             enemy.Planned = true;
-            enemy.IntentTarget = PickTarget(enemy);
+            enemy.IntentTarget = aimed != null && !aimed.Down ? aimed : PickTarget(enemy);
             enemy.IntentRest = false;
             enemy.IntentFast = false;
             enemy.IntentCadenza = false;
             enemy.IntentAll = false;
+            enemy.IntentCharge = false;
+            enemy.IntentHeavy = false;
+            enemy.IntentGuard = 0;
 
             //LULLABY (THE LULL) : every third turn it hums instead of attacking, and heals
             if (trait && e.Trait == EnemyTrait.Lullaby && (enemy.Attacks + 1) % BattleRules.TurnLullEvery == 0)
             {
                 enemy.IntentRest = true;
-                enemy.IntentNotes = new int[0];
-                enemy.IntentWays = new Flick[0];
-                enemy.IntentLate = new bool[0];
+                NoNotes(enemy);
+                return;
+            }
+
+            //GUARD : this turn it raises a BLOCK and plays nothing. BREAK : a broken CHARGE plays nothing until its blow is past.
+            //The charged blow always follows its wind up, whatever the list says next.
+            EnemyMove move = enemy.Charge == 2 ? EnemyMove.Attack : e.MoveAt(enemy.MoveIndex);
+            if (move == EnemyMove.Guard || enemy.ChargeBroken)
+            {
+                if (move == EnemyMove.Guard) enemy.IntentGuard = Math.Max(1, (int)Math.Round(e.GuardBlock * BattleRules.TurnFloorLife[Floor - 1]));
+                NoNotes(enemy);
                 return;
             }
 
@@ -593,6 +625,27 @@ namespace Tacetno433.Battle
             int power = e.TurnPower > 0 ? e.TurnPower : e.SongNotePower();                  // SongNotePower = the average of its Pattern notes
             float maestroHit = Maestro ? BattleRules.MaestroTurnDamage : 1f;                 // MAESTRO
             int hit = Math.Max(1, (int)Math.Round(power * BattleRules.TurnNoteDamage * BattleRules.TurnFloorDamage[Floor - 1] * maestroHit));
+
+            //CHARGE : the wind up plays nothing and shows the blow to come. The blow is ONE note of its phrase, TurnChargePower
+            //times as hard (no CADENZA, no notes coming back), so a single parry decides it.
+            if (move == EnemyMove.Charge)
+            {
+                enemy.Charge = 1;
+                enemy.IntentCharge = true;
+                enemy.ChargeHit = Math.Max(1, (int)Math.Round(hit * BattleRules.TurnChargePower));
+                NoNotes(enemy);
+                return;
+            }
+            if (enemy.Charge == 2)
+            {
+                enemy.IntentHeavy = true;
+                enemy.ChargeHit = Math.Max(1, (int)Math.Round(hit * BattleRules.TurnChargePower));
+                enemy.IntentNotes = new int[] { enemy.ChargeHit };
+                enemy.IntentWays = new Flick[] { ways[0] };
+                enemy.IntentLate = new bool[1];
+                Unfinished(enemy);
+                return;
+            }
 
             //THE COURT (THE STAFF) : its big move is one heavy note down at the floor that hits everybody
             if (trait && e.Trait == EnemyTrait.TheCourt && (enemy.Attacks + 1) % BattleRules.TurnStaffEvery == 0)
@@ -629,6 +682,46 @@ namespace Tacetno433.Battle
             //FALSE NOTES (STATIC) : one note keeps its arrow hidden behind a ? until its ring is half closed
             //(Beta1 29 Oct : it used to show a wrong size, and the sizes are gone)
             if (trait && e.Trait == EnemyTrait.FalseNotes) enemy.IntentLate[random.Next(count)] = true;
+        }
+
+        //No Notes : the turn planned plays nothing (LULLABY, GUARD, the wind up of a CHARGE, a broken CHARGE)
+        private static void NoNotes(Fighter enemy)
+        {
+            enemy.IntentNotes = new int[0];
+            enemy.IntentWays = new Flick[0];
+            enemy.IntentLate = new bool[0];
+        }
+
+        //Next Move : one of its turns is over (played, or lost OFF-BEAT while its CHARGE was broken). The wind up leads to the
+        //blow, the blow ends the CHARGE, any other turn moves its list on. The blow's turn belongs to its CHARGE.
+        private static void NextMove(Fighter enemy)
+        {
+            if (enemy.Charge == 1)
+            {
+                enemy.Charge = 2;
+                enemy.MoveIndex++;
+                return;
+            }
+            if (enemy.Charge == 2)
+            {
+                enemy.Charge = 0;
+                enemy.ChargeBroken = false;
+                return;
+            }
+            enemy.MoveIndex++;
+        }
+
+        //BREAK (Beta1 30 Oct) : a TIMPANI ROLL that lands (Skill.Breaks) or a full OFF-BEAT breaks a CHARGE before its blow.
+        //The blow never comes : the turns until it was due play nothing. Its own turn is too late, the blow is landing already.
+        private void BreakCharge(Fighter enemy)
+        {
+            if (enemy.Down || enemy.Charge == 0 || enemy.ChargeBroken) return;
+            if (Step == TurnStep.EnemyTurn && Current == enemy) return;
+            enemy.ChargeBroken = true;
+            enemy.IntentCharge = false;
+            enemy.IntentHeavy = false;
+            NoNotes(enemy);
+            Events.Add(new TurnEvent(TurnEventKind.Broken, enemy, 0));
         }
 
         //UNFINISHED (REQUIEM) : below half life, left and right swap and the notes come faster.
@@ -730,6 +823,7 @@ namespace Tacetno433.Battle
                 bool free = OrderMoves[OrderIndex] != null && OrderMoves[OrderIndex].Free;   // FEATHER : not their turn
                 if (!free) f.Guard = false;
                 if (!free) StepAside(f);                                                     // SHIELD ends with its owner's next turn
+                if (f.IsEnemy) f.Block = 0;                                                  // GUARD : the BLOCK lasts until its next turn
                 if (f.Taunt && !free)
                 {
                     //TAUNT ends : an enemy that planned its next attack while taunted aims again
@@ -742,6 +836,11 @@ namespace Tacetno433.Battle
                 {
                     f.Staggered = false;
                     Events.Add(new TurnEvent(TurnEventKind.Skip, f, 0));
+                    if (f.ChargeBroken)                                                      // BREAK : the turn it loses is one of the
+                    {                                                                        //   broken CHARGE's, so the blow is still gone
+                        NextMove(f);                                                         //   and nothing more is lost than with an attack
+                        PlanIntent(f);
+                    }
                     EndOfTurn(f);
                     if (CheckEnd()) return;
                     if (!Advance())
@@ -1232,7 +1331,8 @@ namespace Tacetno433.Battle
 
                     if (f.IsEnemy)
                     {
-                        if (s.Damage > 0f) Strike(f, HitDamage(user, f, scale * s.Damage * tutti));
+                        if (s.Damage > 0f) Strike(f, HitDamage(user, f, scale * s.Damage * tutti), s.Pierce);   // PIERCE
+                        if (s.Breaks && !f.Down) BreakCharge(f);                                                // BREAK
                         if (s.Damage > 0f && user.Musician.Trait == MusicianTrait.TurnOfTheHand && !handStruck.Contains(f)) handStruck.Add(f);   // TURN OF THE HAND
                         if (s.Dissonance > 0 && !f.Down) AddDissonance(f, s.Dissonance);
                         if (offBeat > 0 && !f.Down) AddOffBeat(f, offBeat);
@@ -1489,6 +1589,14 @@ namespace Tacetno433.Battle
             //LULLABY : the humming turn heals it
             if (enemy.IntentRest) Heal(enemy, BattleRules.TurnLullHeal);
 
+            //GUARD : the BLOCK goes up now and stays until its next turn. CHARGE : wound up, the blow is its next attack.
+            if (enemy.IntentGuard > 0)
+            {
+                enemy.Block = enemy.IntentGuard;
+                Events.Add(new TurnEvent(TurnEventKind.Guard, enemy, enemy.Block));
+            }
+            if (enemy.IntentCharge) Events.Add(new TurnEvent(TurnEventKind.Charge, enemy, enemy.ChargeHit));
+
             //THE SCAR (DUPORT) : an attack that hurt them leaves CRESCENDO ("It plays louder for it")
             for (int i = 0; i < Party.Count; i++)
             {
@@ -1510,6 +1618,7 @@ namespace Tacetno433.Battle
             if (parried > 0 && parried == enemy.IntentNotes.Length && target != null && !target.Down && !enemy.Down && !deaf)
             {
                 float scale = BattleRules.TurnCounterScale * (enemy.IntentCadenza ? BattleRules.TurnCadenzaCounter : 1f);
+                if (enemy.IntentHeavy) scale *= BattleRules.TurnChargeCounter;                                 // CHARGE : the blow parried
                 if (Has(MotifId.Counterpoint)) scale *= BattleRules.TurnCounterpointScale;                     // COUNTERPOINT
                 int damage = HitDamage(target, enemy, scale);
                 Events.Add(new TurnEvent(TurnEventKind.Counter, target, damage));
@@ -1518,6 +1627,7 @@ namespace Tacetno433.Battle
 
             //The next attack is decided now, so its intent shows until it comes (a fallen enemy has none)
             enemy.IntentCadenza = false;
+            NextMove(enemy);                                                                 // ENEMY MOVES
             if (!enemy.Down) PlanIntent(enemy);
             NextTurn();
         }
@@ -1781,12 +1891,22 @@ namespace Tacetno433.Battle
         //Strike : the band's damage to an enemy (an ATTACK, a skill, a COUNTER, a SIGNATURE).
         //HOLDS THE ROOM (ROOM TONE) takes some off while another enemy has it, SEGUE (motif) carries what is
         //left over a SILENCE on to the next enemy standing. DISSONANCE is not a strike, it uses Hurt.
-        private void Strike(Fighter enemy, int amount)
+        //GUARD (Beta1 30 Oct) : the enemy's BLOCK takes the blow first, a PIERCE (IL CANNONE) goes through it.
+        private void Strike(Fighter enemy, int amount, bool pierce = false)
         {
             if (amount <= 0 || enemy.Down) return;
             if (HeldUp(enemy)) amount = Math.Max(1, (int)Math.Round(amount * BattleRules.TurnRoomToneKeep));   // HOLDS THE ROOM
             if (Has(enemy, EnemyTrait.TheCourt) && OthersStanding(enemy))                                     // THE COURT
                 amount = Math.Max(1, (int)Math.Round(amount * BattleRules.TurnCourtKeep));
+            if (enemy.Block > 0 && pierce) Events.Add(new TurnEvent(TurnEventKind.Pierce, enemy, 0));
+            else if (enemy.Block > 0)
+            {
+                int taken = Math.Min(enemy.Block, amount);
+                enemy.Block -= taken;
+                amount -= taken;
+                Events.Add(new TurnEvent(TurnEventKind.Blocked, enemy, taken));
+                if (amount <= 0) return;
+            }
             int over = amount - enemy.Hp;
             Hurt(enemy, amount);
             if (over <= 0 || !Has(MotifId.Segue)) return;
@@ -1923,7 +2043,7 @@ namespace Tacetno433.Battle
             Events.Add(new TurnEvent(TurnEventKind.Crescendo, f, f.Crescendo));
         }
 
-        //OFF-BEAT : fill the gauge, and when it is full the enemy is thrown off the beat
+        //OFF-BEAT : fill the gauge, and when it is full the enemy is thrown off the beat (and its CHARGE breaks, BREAK)
         private void AddOffBeat(Fighter enemy, int amount)
         {
             if (enemy.Staggered || enemy.Down) return;
@@ -1933,6 +2053,7 @@ namespace Tacetno433.Battle
                 enemy.OffBeat = 0;
                 enemy.Staggered = true;
                 Events.Add(new TurnEvent(TurnEventKind.Break, enemy, 0));
+                BreakCharge(enemy);
             }
         }
 

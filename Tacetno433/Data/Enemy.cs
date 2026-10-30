@@ -8,6 +8,15 @@ namespace Tacetno433.Data
 {
     public enum EnemyKind { Normal, Elite, Boss }
 
+    //EnemyMove : ENEMY MOVES (Beta1 30 Oct, docs/BETA1_DIRECTION.md 11.7 point 2). What an enemy does with one of its turns,
+    //so a fight asks more than "parry the next attack". Shown over its head before it happens, like its attacks.
+    //   Attack  the next of its PHRASES at a musician (every enemy did only this before)
+    //   Charge  CHARGE : this turn it winds up and plays nothing, its next turn is ONE big note TurnChargePower times as hard.
+    //           A TIMPANI ROLL that lands (Skill.Breaks) or a full OFF-BEAT breaks it, and the big note never comes
+    //   Guard   GUARD : this turn it raises a BLOCK (GuardBlock x the floor's life scale) instead of attacking. The BLOCK takes
+    //           the band's damage before its life until its next turn. IL CANNONE (Skill.Pierce) and DISSONANCE go through it
+    public enum EnemyMove { Attack, Charge, Guard }
+
     //EnemyTrait : the one rule a shape of TACET bends. BattleState and the duel check these by
     //name. A trait is always told to the player BEFORE it matters: the first banner of the duel
     //explains it the first time it is met (round 14), its name sits on the enemy's plate, and the
@@ -96,6 +105,18 @@ namespace Tacetno433.Data
         public string TurnTraitText = "";
         public string TurnTraitLine = "";     // "HUSH  ECHO FADES : ...", prepared, for the battle page
 
+        //ENEMY MOVES (Beta1 30 Oct) : the moves it plays in turn, round again at the end (only Attack for most). The charged
+        //blow after a Charge is not written here, it always follows. GuardBlock is the BLOCK of a Guard on floor 1 before the
+        //floor's life scale (TurnFloorLife), 0 for an enemy that never guards.
+        public EnemyMove[] Moves = { EnemyMove.Attack };
+        public int GuardBlock;
+
+        //Move At : the move of its list at this place, round again at the end
+        public EnemyMove MoveAt(int index)
+        {
+            return Moves.Length == 0 ? EnemyMove.Attack : Moves[index % Moves.Length];
+        }
+
         //Enemy Look : brightness stand-in until the real figure goes in
         public Color Tone = Palette.ToneC;
 
@@ -108,6 +129,16 @@ namespace Tacetno433.Data
     //EnemyList : THE PLACE TO EDIT ENEMIES.
     public static class EnemyList
     {
+        //ENEMY MOVES (Beta1 30 Oct) : short names for the lists of moves below. Each enemy's moves come from its name and its
+        //line (docs/BETA1_DIRECTION.md 11.5 principle 1), the others keep attacking every turn :
+        //   DEAD AIR        CHARGE  "It waits between your notes." It waits in the silence, then fills it with one note
+        //   THE ROUND       CHARGE  a round, the voices come in one by one, then all sing the one note together
+        //   THE DAMPER      GUARD   "A felt hand resting on every string." The felt soaks the blow up
+        //   THE MUTE CHOIR  GUARD   "A hundred mouths, open, making nothing." The band's sound falls into them
+        private const EnemyMove Hit = EnemyMove.Attack;
+        private const EnemyMove Charge = EnemyMove.Charge;
+        private const EnemyMove Guard = EnemyMove.Guard;
+
         public static Enemy[] All = new Enemy[]
         {
             //Normal : any movement. Round 11 : HUSH and THE LULL were given heavier parts, they were
@@ -121,6 +152,7 @@ namespace Tacetno433.Data
                         Kind = EnemyKind.Normal, Song = SongList.Twinkle, Pattern = new int[] { 4, 0, 3, 4, 0, 0, 5, 0 }, Tone = Palette.ToneD, Temper = 5 },
             new Enemy { Name = "DEAD AIR",
                         TurnHp = 50, TurnSpeed = 4, Phrases = new[] { "L R", "D D U" }, TurnTraitText = "A note you miss hits 50 percent harder.",  Title = "It waits between your notes.",
+                        Moves = new[] { Hit, Charge },
                         Trait = EnemyTrait.FillsGaps, TraitName = "FILLS THE GAPS", TraitFloor = 2,
                         TraitText = "A note you miss or let pass hits 50 percent harder.",
                         Kind = EnemyKind.Normal, Song = SongList.OdeToJoy, Pattern = new int[] { 0, 4, 0, 4, 0, 4, 0, 5 }, Tone = Palette.ToneE },
@@ -138,6 +170,7 @@ namespace Tacetno433.Data
             //Elite : any movement
             new Enemy { Name = "THE MUTE CHOIR",
                         TurnHp = 120, TurnSpeed = 4, Phrases = new[] { "D D U", "L R L R" }, TurnTraitText = "A note you miss takes the target's skills away for a turn.", Title = "A hundred mouths, open, making nothing.",
+                        Moves = new[] { Hit, Guard, Hit }, GuardBlock = 22,
                         Trait = EnemyTrait.SilentMouths, TraitName = "SILENT MOUTHS", TraitFloor = 1,
                         TraitText = "From round two it silences one section of your band each round, strings, winds or percussion: those players cannot play. Some notes stay hidden as ???",
                         Kind = EnemyKind.Elite, Song = SongList.FifthSymphony, Pattern = new int[] { 4, 0, 5, 0, 6, 0, 4, 6 }, Hidden = new int[] { 3, 7 }, Tone = Palette.ToneB },
@@ -193,6 +226,7 @@ namespace Tacetno433.Data
                         Kind = EnemyKind.Normal, Pattern = new int[] { 4, 0, 4, 0, 4, 0, 4, 0 }, Tone = Palette.ToneC },
             new Enemy { Name = "THE DAMPER",
                         TurnHp = 42, TurnSpeed = 3, Phrases = new[] { "D D", "L R" }, TurnTraitText = "While it stands, an ATTACK gives 1 less BREATH.", Title = "A felt hand resting on every string.",
+                        Moves = new[] { Hit, Guard }, GuardBlock = 14,
                         Trait = EnemyTrait.FeltHand, TraitName = "FELT HAND", TraitFloor = 2,
                         TraitText = "While it stands, an ATTACK gives 1 less BREATH.",
                         Kind = EnemyKind.Normal, Pattern = new int[] { 4, 0, 4, 0, 4, 0, 4, 0 }, Tone = Palette.ToneD },
@@ -203,6 +237,7 @@ namespace Tacetno433.Data
                         Kind = EnemyKind.Normal, Pattern = new int[] { 4, 4, 4, 4, 4, 4, 4, 4 }, Tone = Palette.ToneB },
             new Enemy { Name = "THE ROUND",
                         TurnHp = 115, TurnSpeed = 4, Phrases = new[] { "D D D", "L R L R" }, TurnTraitText = "It always strikes the musician who plays first in the bar.", Title = "It sings your bar back at you, in your own order.",
+                        Moves = new[] { Hit, Hit, Charge },
                         Trait = EnemyTrait.FirstInLine, TraitName = "FIRST IN LINE", TraitFloor = 1,
                         TraitText = "It always strikes the musician who plays first in the bar.",
                         Kind = EnemyKind.Elite, Pattern = new int[] { 5, 0, 5, 0, 5, 0, 5, 5 }, Tone = Palette.ToneB },

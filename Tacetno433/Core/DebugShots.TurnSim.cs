@@ -19,11 +19,13 @@ namespace Tacetno433.Core
     //One plain habit writes each bar (SimPlan) :
     //   SIGNATURE as soon as it is full. Then for each musician, the first that fits :
     //   a heal when someone is under half life,
-    //   a guard (SHIELD, THUNDER CALL) when a friend under half life is the one an enemy aims at and they themself are not,
+    //   a skill that breaks (TIMPANI ROLL) at an enemy whose CHARGE is coming (ENEMY MOVES, Beta1 30 Oct),
+    //   a guard (SHIELD, THUNDER CALL) when a friend under half life is the one an enemy aims at and they themself are not
+    //   (or any friend a CHARGE's blow would take all the life of),
     //   the dearest skill that hits enemies when 3 BREATH or more are free (PAGANINI pays the rest in life while that leaves
     //   them above three quarters, THE DEVIL'S BARGAIN), a CHAKRAM only against two enemies or more,
     //   a boost (THE LESSON for the friend with the dearest skill that hits, FANFARE) when 4 or more are free,
-    //   otherwise ATTACK the enemy with the least life.
+    //   otherwise ATTACK the enemy with the least life (its BLOCK counted as life). A skill that pierces goes at an enemy behind a BLOCK.
     //   The band writes in field order, PUNTO first (THE HUNTING CALL : the musician after them gets the CUE).
     //   (Until 29 Oct it also CALLED the BENCH in. The guards, the boosts and the bargain came with THE FIVE KITS, 29 Oct.)
     //Reports :
@@ -242,7 +244,8 @@ namespace Tacetno433.Core
 
         //Sim Set (Beta1 29 Oct) : TACET_SIM_SET tries other numbers for one run of the simulator, without building the game
         //again. "TurnLessonScale=1.2;IL CANNONE.Damage=1.5" sets a number of Data/BattleRules.cs by its name, or a number of a
-        //skill (Data/Skill.cs) by the skill's name, a dot and the field. The game itself never reads it. Returns what it set
+        //skill (Data/Skill.cs) or an enemy (Data/Enemy.cs, 30 Oct : "THE DAMPER.GuardBlock=12") by its name, a dot and the field.
+        //The game itself never reads it. Returns what it set
         //(a name it cannot find comes back with a ?), so the report says which numbers it played with.
         //ADVANCED PART : reflection. typeof(BattleRules).GetField finds a field by its name while the program runs, SetValue
         //writes it (null stands for "no object", the field is static), Convert.ChangeType turns the text into the field's own
@@ -267,6 +270,9 @@ namespace Tacetno433.Core
                     for (int k = 0; k < SkillList.All.Length && owner == null; k++)
                         if (SkillList.All[k].Name == name.Substring(0, dot)) owner = SkillList.All[k];
                     field = owner != null ? typeof(Skill).GetField(name.Substring(dot + 1)) : null;
+                    for (int k = 0; k < EnemyList.All.Length && owner == null; k++)                 // an enemy's number too (30 Oct),
+                        if (EnemyList.All[k].Name == name.Substring(0, dot)) owner = EnemyList.All[k];   // "THE DAMPER.GuardBlock=12"
+                    if (owner is Enemy) field = typeof(Enemy).GetField(name.Substring(dot + 1));
                 }
                 if (field == null || field.IsInitOnly)
                 {
@@ -454,9 +460,19 @@ namespace Tacetno433.Core
                 if (b.Step != TurnStep.Plan) return;
             }
 
+            //Weakest : the enemy with the least life and BLOCK together (GUARD). ENEMY MOVES (Beta1 30 Oct) : Charging is the enemy whose
+            //CHARGE is coming and not broken yet (the biggest blow first), Guarded the one with the least life behind a BLOCK.
             Fighter weakest = null;
+            Fighter charging = null;
+            Fighter guarded = null;
             for (int i = 0; i < b.Enemies.Count; i++)
-                if (!b.Enemies[i].Down && (weakest == null || b.Enemies[i].Hp < weakest.Hp)) weakest = b.Enemies[i];
+            {
+                Fighter e = b.Enemies[i];
+                if (e.Down) continue;
+                if (weakest == null || e.Hp + e.Block < weakest.Hp + weakest.Block) weakest = e;
+                if (e.Charge != 0 && !e.ChargeBroken && (charging == null || e.ChargeHit > charging.ChargeHit)) charging = e;
+                if (e.Block > 0 && (guarded == null || e.Hp < guarded.Hp)) guarded = e;
+            }
             if (weakest == null) return;
 
             Fighter hurt = null;
@@ -473,7 +489,9 @@ namespace Tacetno433.Core
                 if (e.Down) continue;
                 standing++;
                 Fighter t = e.IntentTarget;
-                if (e.IntentRest || t == null || t.Down || t.Hp * 2 >= t.MaxHp) continue;
+                if (!TurnBattle.Aims(e) || t == null || t.Down) continue;
+                bool blow = e.Charge != 0 && !e.ChargeBroken && t.Hp <= e.ChargeHit;      // CHARGE : its blow would take all they have
+                if (t.Hp * 2 >= t.MaxHp && !blow) continue;
                 if (danger == null || t.Hp < danger.Hp) danger = t;
             }
 
@@ -515,12 +533,18 @@ namespace Tacetno433.Core
                     hurt = null;
                     written = true;
                 }
+                if (!written && !noSkills && hit != null && hit.Breaks && charging != null && b.PlanSkill(me, hit, charging))   // BREAK : the CHARGE first
+                {
+                    charging = null;
+                    written = true;
+                }
                 if (!written && !noSkills && guard != null && danger != null && danger != me && steady && b.PlanSkill(me, guard, guard.Shield ? danger : me))
                 {
                     danger = null;
                     written = true;
                 }
-                if (!written && !noSkills && hit != null && (noAttacks || b.BreathFree >= 3 || SimBargain(b, me, hit))) written = b.PlanSkill(me, hit, weakest);
+                if (!written && !noSkills && hit != null && (noAttacks || b.BreathFree >= 3 || SimBargain(b, me, hit)))
+                    written = b.PlanSkill(me, hit, hit.Pierce && guarded != null ? guarded : weakest);                         // PIERCE : at a GUARD
                 if (!written && !noSkills && boost != null && (noAttacks || b.BreathFree >= 4)) written = b.PlanSkill(me, boost, boost.Lesson ? SimPupil(b, me) : me);
                 if (!written && noAttacks && heal != null) written = b.PlanSkill(me, heal, me);
                 if (!written) b.PlanAttack(me, weakest);

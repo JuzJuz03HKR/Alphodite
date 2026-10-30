@@ -1120,6 +1120,12 @@ namespace Tacetno433.Screens
                 else if (e.Kind == TurnEventKind.Lesson) effects.SpawnPop(x, y, "LESSON", Palette.KindBoost, 0.8f);          // THE LESSON
                 else if (e.Kind == TurnEventKind.Cue) effects.SpawnPop(x, y, "CUE", Palette.KindBoost, 0.8f);                // THE HUNTING CALL
                 else if (e.Kind == TurnEventKind.Revenge) effects.SpawnPop(x, y, "x2", Palette.KindAttack, 0.9f);            // LANCE
+                //ENEMY MOVES (Beta1 30 Oct) : words for TACET's CHARGE and GUARD and the band's answers (until their VFX)
+                else if (e.Kind == TurnEventKind.Charge) effects.SpawnPop(x, box.Y - 70, "CHARGE", Palette.Paper, 0.9f);      // CHARGE : wound up
+                else if (e.Kind == TurnEventKind.Broken) effects.SpawnPop(x, box.Y - 70, "BROKEN", Palette.Highlight, 1.1f);  // BREAK
+                else if (e.Kind == TurnEventKind.Guard) effects.SpawnPop(x, y, "GUARD " + NumberText.Get(e.Amount), Palette.Paper, 0.8f);   // GUARD
+                else if (e.Kind == TurnEventKind.Blocked) effects.SpawnPop(x, y, "-" + NumberText.Get(e.Amount) + " GUARD", Palette.PaperDim, 0.7f);
+                else if (e.Kind == TurnEventKind.Pierce) effects.SpawnPop(x, box.Y - 70, "PIERCE", Palette.KindAttack, 0.9f); // PIERCE
                 else if (e.Kind == TurnEventKind.Counter)
                 {
                     effects.SpawnPop(x, y, "COUNTER", Palette.Highlight, 0.9f);
@@ -1452,6 +1458,40 @@ namespace Tacetno433.Screens
                 battle.Events.Add(new TurnEvent(TurnEventKind.Revenge, battle.Party[2], 0));
                 ShowEvents();
             }
+            else if (name == "battlemoves")
+            {
+                //ENEMY MOVES (Beta1 30 Oct) : the first enemy winds up a CHARGE (the blow to come under the word), the second means
+                //to GUARD and already has a BLOCK, the third has its charged blow ready. One enemy shows the CHARGE and a BLOCK.
+                battle.Events.Clear();
+                Fighter first = battle.Enemies[0];
+                first.Charge = 1;
+                first.IntentCharge = true;
+                first.ChargeHit = 24;
+                first.IntentNotes = new int[0];
+                first.IntentWays = new Flick[0];
+                first.IntentLate = new bool[0];
+                Fighter second = battle.Enemies.Count > 1 ? battle.Enemies[1] : first;
+                second.Block = 22;
+                if (second != first)
+                {
+                    second.IntentGuard = 22;
+                    second.IntentNotes = new int[0];
+                    second.IntentWays = new Flick[0];
+                    second.IntentLate = new bool[0];
+                }
+                if (battle.Enemies.Count > 2)
+                {
+                    Fighter third = battle.Enemies[2];
+                    third.Charge = 2;
+                    third.IntentHeavy = true;
+                    third.IntentNotes = new int[] { 32 };
+                    third.IntentWays = new Flick[] { Flick.Left };
+                    third.IntentLate = new bool[1];
+                }
+                battle.Events.Add(new TurnEvent(TurnEventKind.Guard, second, 22));
+                battle.Events.Add(new TurnEvent(TurnEventKind.Blocked, second, 6));
+                ShowEvents();
+            }
             else if (name == "battlestatus")
             {
                 battle.Enemies[0].Dissonance = 3;
@@ -1670,7 +1710,7 @@ namespace Tacetno433.Screens
                 for (int e = 0; e < battle.Enemies.Count; e++)
                 {
                     Fighter enemy = battle.Enemies[e];
-                    bool aimed = battle.HitTarget(enemy) == f || (enemy.IntentAll && !f.Down);              // THE COURT : everybody
+                    bool aimed = TurnBattle.Aims(enemy) && (battle.HitTarget(enemy) == f || (enemy.IntentAll && !f.Down));   // THE COURT : everybody
                     if (!enemy.Down && aimed && view != View.Swipe && view != View.Over)
                     {
                         float pulse = 0.6f + 0.4f * (float)Math.Sin(time * 5f);
@@ -1764,6 +1804,7 @@ namespace Tacetno433.Screens
             float x = r.X + 10;
             float y = r.Bottom + 8;
             if (TurnBattle.CutsIn(f)) x = DrawTagRow(sb, "CUT IN", 0, false, x, y);
+            if (f.Block > 0) x = DrawTagRow(sb, "GUARD", f.Block, true, x, y);                      // GUARD : its BLOCK left
             if (f.Staggered) x = DrawTagRow(sb, "OFF-BEAT", 0, true, x, y);
             if (f.Dissonance > 0) x = DrawTagRow(sb, "DISSONANCE", f.Dissonance, true, x, y);
         }
@@ -1815,6 +1856,22 @@ namespace Tacetno433.Screens
                     Gfx.TextSpacedCentered(sb, Game.Font, "REST", r.Center.X, cy - 6, Palette.Paper * ia, TextSize.Body, 3f);
                     continue;
                 }
+
+                //ENEMY MOVES (Beta1 30 Oct) : GUARD and the BLOCK it raises, CHARGE and the blow to come next bar, a broken
+                //CHARGE that does nothing. A word and a number for now, item 4 of block 1 gives them icons.
+                if (f.IntentGuard > 0 || f.IntentCharge || f.ChargeBroken)
+                {
+                    string word = f.ChargeBroken ? "BROKEN" : (f.IntentCharge ? "CHARGE" : "GUARD");
+                    Gfx.TextSpacedCentered(sb, Game.Font, word, r.Center.X, cy - 6, Palette.Paper * ia, TextSize.Body, 3f);
+                    if (!f.ChargeBroken)
+                        Gfx.TextCentered(sb, Game.Font, NumberText.Get(f.IntentCharge ? f.ChargeHit : f.IntentGuard), r.Center.X, cy - 26, Palette.Highlight * ia, TextSize.Heading);
+                    if (f.IntentCharge && planning && hover == f && f.IntentTarget != null)
+                    {
+                        Vector2 to = AimPoint(battle.HitTarget(f));
+                        Gfx.Line(sb, r.Center.X, cy + 14, to.X, to.Y, Palette.Accent * (0.6f * ia), 2f);
+                    }
+                    continue;
+                }
                 if (f.IntentNotes.Length == 0) continue;
 
                 const float NoteStep = 28f;
@@ -1839,8 +1896,8 @@ namespace Tacetno433.Screens
                 else Gfx.Text(sb, Game.BigFont, NumberText.Get(f.IntentNotes[0]), left, cy - 16, Palette.Highlight * ia, TextSize.Small);
                 for (int n = 0; n < f.IntentNotes.Length; n++)
                     NoteGlyph.Note(sb, Game.BigFont, left + NumberRoom + NoteStep * (n + 0.5f), cy, f.IntentWays[n], 0.46f, ia, n < f.IntentLate.Length && f.IntentLate[n]);
-                if (f.IntentCadenza || f.IntentAll)
-                    Gfx.TextSpacedCentered(sb, Game.Font, f.IntentAll ? "EVERYONE" : "CADENZA", r.Center.X, cy - (Settings.ClearFight && f.IntentCadenza && !f.IntentAll ? lift + 22f : 40f), Palette.Highlight * (ia * (0.7f + 0.3f * (float)Math.Sin(time * 6f))), TextSize.Label, 3f);
+                if (f.IntentCadenza || f.IntentAll || f.IntentHeavy)                    // CHARGE : the charged blow says so like a CADENZA
+                    Gfx.TextSpacedCentered(sb, Game.Font, f.IntentAll ? "EVERYONE" : (f.IntentHeavy ? "CHARGED" : "CADENZA"), r.Center.X, cy - (Settings.ClearFight && !f.IntentAll ? lift + 22f : 40f), Palette.Highlight * (ia * (0.7f + 0.3f * (float)Math.Sin(time * 6f))), TextSize.Label, 3f);
                 if (f.Staggered)
                     Gfx.Line(sb, left - 6, cy, left + NumberRoom + 6f + row, cy, Palette.Highlight * ia, 2f);   // OFF-BEAT : it loses its next turn, this move waits for the one after
 
