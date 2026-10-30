@@ -168,6 +168,8 @@ namespace Tacetno433.Screens
         private float judgeLife;
         private string bannerText = "";
         private string signatureName = "";
+        private string bondLine = "";                       // BONDS (30 Oct) : what a tied legend says as the fight starts, "" for none
+        private float bondTime;                             //                  seconds it has shown
 
         private const string HintPlan = "CLICK A MUSICIAN, THEN AN ENEMY OR A SKILL   /   ENTER = PLAY THE BAR";
         private const string HintEnemy = "CLICK AN ENEMY   /   RIGHT CLICK = BACK";
@@ -265,6 +267,7 @@ namespace Tacetno433.Screens
             if (battle.Kit != TurnKit.None)
                 battle.Signature = Math.Min(battle.SignatureNeed, Archive.Level(Archive.Signature) * BattleRules.ArchiveSignaturePerLevel);
             signatureName = run.Conductor.SignatureNameAt(battle.SignatureLevel);           // SIGNATURE GROWS : STORM after the first boss
+            bondLine = BondList.OpeningLine(band, run.Conductor.Turn, enemies);              // BONDS
             Arrange();
             SoundBank.PlayMusic(RunFlow.FightMusic(run));
         }
@@ -393,6 +396,7 @@ namespace Tacetno433.Screens
                 UpdateCoach();
             }
 
+            if (view == View.Plan && bondLine.Length > 0) bondTime += dt;                  // BONDS : the line shows while the first bar is written
             if (view == View.Plan) UpdatePlan();
             else if (view == View.Target) UpdateTarget();
             else if (view == View.Strike) UpdateStrike(dt);
@@ -1711,6 +1715,7 @@ namespace Tacetno433.Screens
             DrawBottom(sb, planning);
             if (practice) DrawCoach(sb);
             if (stepFor != null && planning) DrawStepPick(sb);                             // INSPIRED
+            if (bondLine.Length > 0 && bondTime < BattleRules.TurnBondLineTime) DrawBondLine(sb);   // BONDS
 
             if (view == View.Over)
             {
@@ -1747,6 +1752,15 @@ namespace Tacetno433.Screens
         //THE BAND (Beta1) : everyone on the field as a card in a row under the bar strip, until the user's face GUI.
         //The name, the life, the move written in the plan and its place in the bar, the statuses under the card.
         //The card of the musician in front has a bright frame.
+        //Draw Bond Line : BONDS, a tied legend's line over the stage while the first bar is written, fading in and out
+        private void DrawBondLine(SpriteBatch sb)
+        {
+            float a = Math.Min(1f, bondTime * 3f) * Math.Min(1f, (BattleRules.TurnBondLineTime - bondTime) * 2f);
+            float w = Gfx.TextWidth(Game.StoryFont, bondLine, TextSize.Story);
+            Gfx.Rect(sb, new Rectangle((int)(TacetGame.ScreenW / 2f - w / 2f - 24), 132, (int)(w + 48), 38), Palette.Void * (0.7f * a));
+            Gfx.TextCentered(sb, Game.StoryFont, bondLine, TacetGame.ScreenW / 2f, 150, Palette.Paper * a, TextSize.Story);
+        }
+
         //Draw Step Pick : INSPIRED, the stage darkened, the musician's name, their step cards (the reward page's cards, flat here)
         //and how to choose or wait
         private void DrawStepPick(SpriteBatch sb)

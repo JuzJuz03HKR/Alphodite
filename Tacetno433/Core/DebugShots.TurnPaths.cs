@@ -5,7 +5,7 @@ using Tacetno433.Data;
 
 namespace Tacetno433.Core
 {
-    //DebugShots.TurnPaths : DEVELOPER TOOL, the checks of PATH, INSPIRED and SIGNATURE GROWS (Beta1 30 Oct, docs/BETA1_DIRECTION.md 13), part
+    //DebugShots.TurnPaths : DEVELOPER TOOL, the checks of PATH, INSPIRED, SIGNATURE GROWS and BONDS (Beta1 30 Oct, docs/BETA1_DIRECTION.md 13), part
     //of --shots turncheck. Every path of the five legends walked to its end (Data/Path.cs), the floors that open the steps,
     //and INSPIRED. Like DebugShots.Turn.cs every line is PASS or FAIL with what was expected and what came out. The musicians'
     //traits are on here. Every musician is back to no step at the end (MusicianList.ResetRehearsals).
@@ -248,6 +248,27 @@ namespace Tacetno433.Core
             b.UseSignature(strokes);
             grows += " " + (999 - b.Enemies[0].Hp);
             report += Same("signature grows", "14 28 42 True 2 18", grows);
+
+            //BONDS : with Bach, QUANTZ's first move of the fight is x1.5 (4 x 2 x 0.55 x 1.5 = 6.6 -> 7, the second 4.4 -> 4), with
+            //Beethoven plain (4). PAGANINI's ATTACK on THE DEVIL'S STRING (floor 1, x1.5) : 5 x 2 x 0.55 x 1.5 = 8.25 -> 8
+            Enemy devil = EnemyNamed("THE DEVIL'S STRING");
+            b = new TurnBattle(Solo(1), new List<Enemy> { hush }, 1, new Random(433));
+            Tough(b);
+            b.Kit = TurnKit.Bach;
+            b.PlayBar();
+            string bonds = b.Attack().ToString();
+            b.TakeEnemyAttack(null);
+            b.PlayBar();
+            bonds += " " + b.Attack();
+            b = new TurnBattle(Solo(1), new List<Enemy> { hush }, 1, new Random(433));
+            Tough(b);
+            b.Kit = TurnKit.Beethoven;
+            b.PlayBar();
+            bonds += " " + b.Attack();
+            b = new TurnBattle(Solo(0), new List<Enemy> { devil }, 1, new Random(433));
+            b.PlayBar();
+            bonds += " " + b.Attack();
+            report += Same("bonds", "7 4 4 8", bonds);
 
             MusicianList.ResetRehearsals();
             return report;

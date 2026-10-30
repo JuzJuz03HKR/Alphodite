@@ -63,13 +63,11 @@
         public static int TurnShardsPerEscort = 6;            // shards for each enemy beyond the first
 
         //Floor Scale (step 8) : enemies are tougher deeper down, life and each note's damage, floor 1 / 2 / 3
-        public static float[] TurnFloorLife = { 1.6f, 3.8f, 5.9f };   // step 15 : was 1 / 1.3 / 1.6, fights about 1.5 times longer (the user asked for longer fights)
-        public static float[] TurnFloorDamage = { 1f, 1.38f, 1.7f };  // PATH and SIGNATURE GROWS (Beta1 30 Oct) : was 1.6 / 2.1 / 2.7 and 1 / 1.2 / 1.4. The band
-                                                                      // grows a step a floor now (Data/Path.cs) and its SIGNATURE at each boss, so TACET grows
-                                                                      // too, from floor 2 (the user : the monsters get tougher as well, 13.13). turnsim 24
-                                                                      // seeds, the same tool before and after : NORMAL STRONG 63.8 -> 64.1 percent, MAESTRO
-                                                                      // EXPERT 82.0 -> 82.2, a fight won on floor 1 / 2 / 3 lasts 3.5 / 5.4 / 6.3 bars
-                                                                      // (4.0 / 5.0 / 6.1 before)
+        public static float[] TurnFloorLife = { 1.6f, 3.85f, 6f };    // step 15 : was 1 / 1.3 / 1.6, fights about 1.5 times longer (the user asked for longer fights)
+        public static float[] TurnFloorDamage = { 1f, 1.39f, 1.72f }; // PATH, SIGNATURE GROWS and BONDS (Beta1 30 Oct) : was 1.6 / 2.1 / 2.7 and 1 / 1.2 / 1.4. The
+                                                                      // band grows a step a floor now (Data/Path.cs) and its SIGNATURE at each boss, so TACET
+                                                                      // grows too, from floor 2 (the user : the monsters get tougher as well, 13.13). turnsim
+                                                                      // 24 seeds, the same tool before and after : see BETA1_DIRECTION 13.3 for the numbers
 
         //Enemy Traits in the turn battle (step 8, the TurnTraitText of each enemy in Data/Enemy.cs)
         public static float TurnFillsGapsScale = 1.5f;   // DEAD AIR : a missed note
@@ -197,6 +195,11 @@
         //level), DUET DAS JAHR (every musician gets TurnJahrCrescendo, and at level 2 the strike and the heal x TurnJahrScale)
         public static int TurnJahrCrescendo = 2;
         public static float TurnJahrScale = 1.5f;
+        //BONDS (Beta1 30 Oct, Data/Bond.cs) : a legend tied to the conductor plays their first move of every fight this much harder,
+        //a legend tied to an enemy hits it this much harder. (A SIGNATURE 1 PERFECT cheaper, the first try, took turnsim from 64 to
+        //76 percent, a gauge 1 or 2 fuller at the start to 69 and 73 : with STORM the SIGNATURE is the strongest thing there is.)
+        public static float TurnBondScale = 1.5f;
+        public static float TurnBondLineTime = 4f;     // seconds a tied legend's line shows as the fight starts
 
         //Musician Traits in the turn battle (step 10, the TurnTraitText of each musician in Data/Musician.cs)
         //THE FIVE KITS (Beta1 29 Oct) : the five legends' traits and the new moves of their skills (Data/Skill.cs).

@@ -834,3 +834,20 @@
 - ทดสอบ : turncheck 137/137 (ใหม่ signature grows) / `TACET_Balance.xlsx` อัปเดต
 - โค้ด : `Data/Conductor.cs` (`TurnSignatureGrown` `SignatureNameAt`) / `Battle/TurnBattle.cs` (`SignatureLevel` `UseEcho` `EchoLeft` ใน `UseSignature`) / `Data/BattleRules.cs` (`TurnJahrCrescendo` `TurnJahrScale` Floor Scale) / `Screens/BattleScreen.cs` / `Screens/ResultScreen.cs`
 - ให้ผู้ใช้ลอง : ชนะบอสชั้น 1 แล้วดูหน้าผล ไฟต์ชั้น 2 กด SIGNATURE ดูชื่อใหม่กับผลที่มากขึ้น (VFX ของขั้นใหม่ยังเป็นแบบเดิม รอภาพอ้างอิง)
+
+### 13.3 ข้อ 8 BONDS สายสัมพันธ์จากประวัติจริง เสร็จ รอผู้ใช้ Rebuild ดู (จบก้อน 2)
+- **ผล** : นักดนตรีที่ผูกกับวาทยากรที่เลือก ท่าแรกของทุกไฟต์แรง x1.5 (`TurnBondScale` ทั้ง ATTACK และสกิล) / PAGANINI ตี THE DEVIL'S STRING แรง x1.5
+- **บนจอ** : หน้า THE AUDITION มีชื่อสายสัมพันธ์เหนือเสาของคนที่ผูก (สีของตัวละคร) ตอนกดเลือกขึ้นข้อความข้างปุ่ม BEGIN เช่น "BOND OP. 5 : THE CELLO SONATAS, BERLIN 1796 - FIRST MOVE OF A FIGHT x1.5" / ต้นไฟต์มีบทพูดสั้นของคนนั้นกลางบนจอ 4 วินาทีขณะวางห้องแรก
+| วาทยากร หรือ ศัตรู | นักดนตรี | ชื่อ | ข้อเท็จจริง (ค้นยืนยัน 30 ต.ค.) | บทพูดต้นไฟต์ |
+|---|---|---|---|---|
+| Beethoven | DUPORT | OP. 5 | Cello Sonatas Op. 5 เล่นครั้งแรกที่เบอร์ลิน 1796 กับพี่น้อง Duport (แหล่งปัจจุบันว่าน่าจะ Jean-Louis เจ้าของเชลโลตัวนี้ บางแหล่งว่าพี่ชาย) | Berlin again, maestro. The cello remembers its part. |
+| Beethoven | PUNTO | OP. 17 | Horn Sonata Op. 17 แต่งให้ Punto เล่นครั้งแรกด้วยกันที่เวียนนา 18 เม.ย. 1800 | The horn first, maestro. As in Vienna. |
+| Bach | QUANTZ | THE ROYAL THEME | Quantz สอนฟลุตให้ Frederick the Great กษัตริย์ให้ธีมแก่ Bach จนเป็น Musical Offering (1747) | The king's theme. Play it as he never could. |
+| Fanny | PFUNDT | LEIPZIG | Pfundt มาที่ Gewandhaus ปี 1835 ตามคำเชิญของ Felix Mendelssohn น้องของ Fanny ที่เป็นวาทยากรวงนั้น | Felix kept the time in Leipzig. Tonight it is yours. |
+| THE DEVIL'S STRING (บอส) | PAGANINI | THE DEVIL | ตำนานว่าปีศาจสอน Paganini | So you are the one they meant. |
+- ที่ไอริสตัดสินเอง : ผลแบบแรกที่ร่างไว้ "SIGNATURE เติมเร็วขึ้น" แรงเกินในตัวจำลอง (SIGNATURE ถูกลง 1 PERFECT ทำให้ 64 เป็น 76% / เกจเริ่มเต็มขึ้น 1 หรือ 2 เป็น 69 และ 73%) เพราะ STORM ชั้น 2-3 แรงมาก จึงเปลี่ยนเป็นท่าแรกของไฟต์ x1.5 (67%) แล้วชดเชยชั้น 2-3 อีกนิด / บทพูดไม่ระบุเพศของนักดนตรี
+- **ผลสุดท้ายของก้อน 2 ทั้งก้อน** (24 seed เครื่องมือเดียวกับก่อนมี PATH) : NORMAL STRONG 63.8 เป็น 63.1% / MAESTRO EXPERT 82.0 เป็น 82.6 / ไฟต์ที่ชนะยาว 3.3 / 5.4 / 6.2 ห้องในชั้น 1 2 3 (เดิม 4.0 / 5.0 / 6.1) / วาทยากร THE UNHEARING 62.2 FANNY 65.1 THE METRONOME 59.4 / วงที่มี / ไม่มี : PAGANINI 61.1 / 65.9, QUANTZ 63.9 / 61.7, PFUNDT 64.3 / 61.1, DUPORT 62.4 / 64.0, PUNTO 63.3 / 62.6 (PAGANINI ต่ำกว่าเพื่อนราว 4.8% ที่เหลือไม่เกิน 3.2%)
+- **ศัตรูชั้น 2 กับ 3 ค่าสุดท้าย : เลือด x3.85 กับ x6 (เดิม 2.1 กับ 2.7) ตี x1.39 กับ x1.72 (เดิม 1.2 กับ 1.4) ชั้น 1 คงเดิม**
+- ทดสอบ : build 0/0 / turncheck 138/138 (ใหม่ bonds) / savecheck 33/33 / ภาพ `teampick` (ป้าย OP. 5 OP. 17) / `TACET_Balance.xlsx` อัปเดต
+- โค้ด : `Data/Bond.cs` (ใหม่) / `Battle/TurnBattle.cs` (`MoveScale` `HitDamage`) / `Data/BattleRules.cs` (`TurnBondScale` `TurnBondLineTime` Floor Scale) / `Screens/TeamPickScreen.cs` / `Screens/BattleScreen.cs` (`bondLine` `DrawBondLine`)
+- ให้ผู้ใช้ลอง : เลือก Beethoven แล้วดูป้ายเหนือ DUPORT กับ PUNTO กดเลือกดูข้อความ เข้าไฟต์แรกดูบทพูดด้านบน ท่าแรกของ DUPORT ขึ้นตัวเลขสูงกว่าปกติ / บทพูดกับชื่อเปลี่ยนได้ทุกอัน

@@ -1560,6 +1560,7 @@ namespace Tacetno433.Battle
             damage *= 1f + attacker.Crescendo * BattleRules.TurnCrescendoStep;               // CRESCENDO
             if (!attacker.IsEnemy) damage *= BeethovenScale();                                 // THE CLOSER THE LOUDER
             if (!attacker.IsEnemy) damage *= TraitScale(attacker, target);                     // the musician's own trait
+            if (!attacker.IsEnemy && target.IsEnemy && BondList.Against(attacker.Musician, target.Enemy) != null) damage *= BattleRules.TurnBondScale;   // BONDS : THE DEVIL
             if (!attacker.IsEnemy && Kit == TurnKit.Fanny && !FelixVoice) damage *= 1f + BattleRules.TurnFannyScale;   // TWO VOICES : FANNY hits
             if (target.Staggered) damage *= BattleRules.TurnOffBeatScale;                     // OFF-BEAT
             return Math.Max(1, (int)Math.Round(damage));
@@ -2119,7 +2120,8 @@ namespace Tacetno433.Battle
             return false;
         }
 
-        //Move Scale : how much stronger this musician's move is (1 for most). DOWNBEAT : the first move of the bar.
+        //Move Scale : how much stronger this musician's move is (1 for most). DOWNBEAT : the first move of the bar. BONDS : the first
+        //move of a fight of a legend tied to the conductor.
         //ENTRANCE : each musician's first move of the fight (NextTurn marks it played). UNISON : the last ATTACK of a bar
         //that all went at one enemy.
         private float MoveScale(Fighter who, BarMove move)
@@ -2128,6 +2130,7 @@ namespace Tacetno433.Battle
             bool free = move != null && move.Free;
             if (Has(MotifId.Downbeat) && !free && bandMovesDone == 0) scale *= BattleRules.TurnDownbeatScale;
             if (Has(MotifId.Entrance) && !free && !who.Entered) scale *= BattleRules.TurnEntranceScale;
+            if (!free && !who.Entered && BondList.Of(who.Musician, Kit) != null) scale *= BattleRules.TurnBondScale;   // BONDS : their first move for this conductor
             if (move != null && move.Unison) scale *= BattleRules.TurnUnisonScale;
             return scale;
         }

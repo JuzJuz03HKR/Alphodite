@@ -154,6 +154,8 @@ namespace Tacetno433.Screens
                 picked.Add(m);
                 pickedAt[i] = time;
                 SoundBank.Play(Sfx.Recruit);
+                Bond bond = BondList.Of(m, Game.CurrentRun.Conductor.Turn);              // BONDS : what ties them, said once
+                if (bond != null) Say(bond.Fact);
             }
             RefreshCount();
         }
@@ -298,6 +300,8 @@ namespace Tacetno433.Screens
                     Ui.Tag(sb, numbers[place], r.X + BandColumn.Slant + 6, r.Y + 8, true, a);
                     if (place == 0) Gfx.TextSpacedRight(sb, Game.Font, "IN FRONT", r.Right - 4, r.Y - 18, Palette.Highlight * a, TextSize.Tiny, 3f);
                 }
+                Bond bond = BondList.Of(m, run.Conductor.Turn);                            // BONDS : this legend is tied to the conductor
+                if (bond != null) Gfx.TextSpaced(sb, Game.Font, bond.Name, r.X + BandColumn.Slant + 2, r.Y - 18, BandColumn.SpotOf(m) * a, TextSize.Tiny, 3f);
             }
 
             //Detail : the pointed legend explained, or what the page is for
