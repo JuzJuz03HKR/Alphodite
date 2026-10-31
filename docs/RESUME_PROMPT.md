@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| (ว่าง) | | |
+| 31 ต.ค. (แชท /system Finalize7) | 16.14 ข้อ 4 บอส แบบ ก (ห้องก่อนบอสเป็นที่พักและที่อัปเกรด แบบ Limbus) + cut in คัตซีนของบอส ผู้เล่นตวัดไม้รับมือ (คำต่อคำ `USER_BRIEFS.md` 13.50) | `Tacetno433/Data/Enemy.cs` `Data/FloorMap.cs` `Data/RunState.cs` `Data/SaveFile.cs` `Data/Words.cs` `Data/BattleRules.cs` `Battle/TurnBattle*.cs` `Screens/BattleScreen*.cs` `Screens/RouteScreen.cs` `Screens/RestScreen.cs` `Core/ArtBank.cs` + `Core/DebugShots*.cs` |
 
 ---
 
