@@ -68,6 +68,9 @@ clear(ws)
 if ws.cell(row=1, column=9).value is None:
     ws.cell(row=1, column=9).value = 'CUT IN (speed 5 or more)'
     ws.cell(row=1, column=9)._style = copy.copy(ws.cell(row=1, column=8)._style)
+if ws.cell(row=1, column=11).value is None:      # BOSSES (Beta1 31 Oct) : the named BIG ATTACK of a boss
+    ws.cell(row=1, column=11).value = 'BIG ATTACK (bosses, every 3rd attack, every 2nd below half life)'
+    ws.cell(row=1, column=11)._style = copy.copy(ws.cell(row=1, column=8)._style)
 if ws.cell(row=1, column=10).value is None:      # ENEMY MOVES (Beta1 30 Oct) : its Moves list, GUARD with its GuardBlock
     ws.cell(row=1, column=10).value = 'MOVES in turn (GUARD block on floor 1 before x1.6)'
     ws.cell(row=1, column=10)._style = copy.copy(ws.cell(row=1, column=8)._style)
@@ -88,7 +91,9 @@ for block in re.findall(r'new Enemy \{ Name = "([^"]+)",(.*?)\},\s*(?=//|new Ene
     moves = re.search(r'Moves = new\[\] \{([^}]*)\}', body)
     moves = ', '.join(m.strip().upper().replace('HIT', 'ATTACK') for m in moves.group(1).split(',')) if moves else 'ATTACK'
     if 'GUARD' in moves: moves += f' (GUARD {get("GuardBlock", "0")})'
-    ws.append([name, kind, hp, speed, power, phrases, f'{trait} ({floor})', text, 'yes' if int(speed) >= 5 else '', moves])
+    big = re.search(r'BigName = "([^"]*)", BigText = "([^"]*)"', body)       # BOSSES (Beta1 31 Oct) : its named BIG ATTACK
+    big = f'{big.group(1)} : {big.group(2)}' if big else ''
+    ws.append([name, kind, hp, speed, power, phrases, f'{trait} ({floor})', text, 'yes' if int(speed) >= 5 else '', moves, big])
 
 # --- Turn Skills (Beta1 29 Oct, THE FIVE KITS) : every skill of Data/Skill.cs with its musician (skills 2k and 2k + 1 belong
 #     to musician k of Data/Musician.cs), and each musician's trait on their first row. The legends of MusicianList.Shown first.

@@ -31,7 +31,7 @@ namespace Tacetno433.Core
     //Reports :
     //   FIGHTS      one fight at full life with the PACKS of the run (BattleRules ONE BAR), the band of three
     //   RANKS       the RANK of the won fights above (29 Oct, BattleState.RankScore), S / A / B / C percent and the shards' scale
-    //   RUNS        three floors in a row with life carried over : N N E N N, a rest (40 percent back), then the boss,
+    //   RUNS        three floors in a row with life carried over : N N E N N, THE WINGS (40 percent back and a star, 31 Oct), then the boss,
     //               after every win the result page's life back and one REHEARSAL star (31 Oct, to a random button that can still get one,
     //               SimRehearse ; 30 Oct to 31 Oct a PATH step and the INSPIRED ones). THE BAND OF THREE (29 Oct) : 3 of the 5 legends picked at
     //               random for each run, every weapon one tier up after each floor (WEAPON TIERS, as a rehearsal each per
@@ -333,6 +333,38 @@ namespace Tacetno433.Core
             return pack;
         }
 
+        //Sim Bosses : BOSSES (Beta1 31 Oct), the run's three bosses as RunState.PickBosses picks them : the last floor's is the
+        //conductor's own hollow, the two before are two different ones of the other five
+        private static Enemy[] SimBosses(TurnKit kit, Random rng)
+        {
+            List<Enemy> others = new List<Enemy>();
+            Enemy own = null;
+            for (int i = 0; i < EnemyList.All.Length; i++)
+            {
+                Enemy e = EnemyList.All[i];
+                if (e.Kind != EnemyKind.Boss) continue;
+                if (e.HollowOf == kit && kit != TurnKit.None) own = e;
+                else others.Add(e);
+            }
+            Enemy[] picked = new Enemy[3];
+            for (int f = 0; f < 3; f++)
+            {
+                if (f == 2 && own != null) { picked[f] = own; continue; }
+                int k = rng.Next(others.Count);
+                picked[f] = others[k];
+                if (others.Count > 1) others.RemoveAt(k);
+            }
+            return picked;
+        }
+
+        //Sim Boss Pack : the boss and the escorts of its floor
+        private static List<Enemy> SimBossPack(Enemy boss, int floor, Random rng)
+        {
+            List<Enemy> pack = new List<Enemy> { boss };
+            for (int k = 0; k < SimEscorts("BOSS", floor); k++) pack.Add(EnemyList.PickOther(EnemyKind.Normal, 0, pack, rng));
+            return pack;
+        }
+
         //Sim Run Wins : the percent of SimRuns runs won (NORMAL)
         private static int SimRunWins(SimPlayer player, Random rng, TurnKit kit)
         {
@@ -352,17 +384,23 @@ namespace Tacetno433.Core
             //THE BAND OF THREE : 3 of the 5 legends, picked at random (the order they are picked in is the order they play in)
             List<Musician> band = new List<Musician>(SimBand(simRoster.Length));
             while (band.Count > BattleRules.BandSize) band.RemoveAt(rng.Next(band.Count));
+            Enemy[] bosses = SimBosses(kit, rng);                                    // BOSSES (Beta1 31 Oct) : RunState.PickBosses
 
             for (int floor = 1; floor <= 3; floor++)
             {
                 for (int i = 0; i < path.Length; i++)
                 {
-                    if (path[i] == "BOSS") SimHeal(band, life, BattleRules.BreatheRecover);   // a rest stop before the boss
+                    if (path[i] == "BOSS")                                            // THE WINGS (31 Oct) : rest, and the free star
+                    {
+                        SimHeal(band, life, BattleRules.WingsRecover);
+                        SimRehearse(band, rng);
+                    }
 
                     int[] start = new int[band.Count];
                     for (int m = 0; m < band.Count; m++) start[m] = life.ContainsKey(band[m]) ? life[band[m]] : -1;
 
-                    TurnBattle b = SimFight(band, SimPack(path[i], floor, rng, rng.Next(10)), floor, player, start, rng, kit, maestro);
+                    List<Enemy> pack = path[i] == "BOSS" ? SimBossPack(bosses[floor - 1], floor, rng) : SimPack(path[i], floor, rng, rng.Next(10));
+                    TurnBattle b = SimFight(band, pack, floor, player, start, rng, kit, maestro);
                     if (b.Step != TurnStep.Won)
                     {
                         Tally(band, false);

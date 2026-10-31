@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 31 ต.ค. (แชท /system Finalize7) | 16.14 ข้อ 4 บอส แบบ ก (ห้องก่อนบอสเป็นที่พักและที่อัปเกรด แบบ Limbus) + cut in คัตซีนของบอส ผู้เล่นตวัดไม้รับมือ (คำต่อคำ `USER_BRIEFS.md` 13.50) | `Tacetno433/Data/Enemy.cs` `Data/FloorMap.cs` `Data/RunState.cs` `Data/SaveFile.cs` `Data/Words.cs` `Data/BattleRules.cs` `Battle/TurnBattle*.cs` `Screens/BattleScreen*.cs` `Screens/RouteScreen.cs` `Screens/RestScreen.cs` `Core/ArtBank.cs` + `Core/DebugShots*.cs` |
+| (ว่าง) | | |
 
 ---
 
@@ -64,12 +64,14 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 
 ## สถานะล่าสุด (31 ต.ค.)
 
-**31 ต.ค. แชท /system (Finalize7) : กำลังทำ 16.14 ข้อ 4 บอส ตามแผน `BETA1_DIRECTION.md` 21 (คำต่อคำ `USER_BRIEFS.md` 13.50)** ผู้ใช้สั่งบันทึก commit push เป็นระยะ
+**31 ต.ค. แชท /system (Finalize7) : ✅ 16.14 ข้อ 4 บอส เสร็จ หยุดรอผู้ใช้ ตามแผน `BETA1_DIRECTION.md` 21 (คำต่อคำ `USER_BRIEFS.md` 13.50)** ผู้ใช้สั่งบันทึก commit push เป็นระยะ
 ✅ ขั้น 1 กติกา (`e6e6e07`) : ท่าไม้ตาย 6 ตัว `BossMove` ใน `Data/Enemy.cs` (LACRIMOSA THE NINTH ITALIEN TE DEUM ON ONE STRING IN THE DARK) `PlanBig` ใน `Battle/TurnBattle.cs` แทน CADENZA / THE TURN ครึ่งเลือด (`TurnOver` ใน `Hurt`) ท่าไม้ตายทุก 3 เป็นทุก 2 / ปัดครบ = STUNNED + สวน x3 (THE NINTH ยอมรับ COUNTER) / TE DEUM ไม้เท้าลงเท้าตัวเอง / ON ONE STRING ขโมย BREATH ทีละโน้ต / ตัวเลข `BattleRules` หัวข้อ BOSSES / turncheck 187/187 (ใหม่ `Core/DebugShots.TurnBosses.cs`) / ตัวจำลองดูโน้ตซ่อนกับจังหวะไม่เท่า (`SimLateSpread` `SimGapSpread`) / ตัวจำลองก่อนแก้ 24 seed NORMAL STRONG 59.8 MAESTRO EXPERT 80.4
 ✅ ขั้น 2 (`d2cb11c`) : `RunState.PickBosses` ตอนเริ่มรัน (ชั้น 3 = ร่างวาทยากร `Enemy.HollowOf` ชั้น 1-2 สุ่มจากอีก 5 ไม่ซ้ำ) `BossOfFloor` / แถวก่อนบอสเหลือ REST ห้องเดียว (`BuildMap`) = THE WINGS (`RunState.InWings` โหมดใน `Screens/RestScreen.cs` : เข้าแล้วพักเอง `WingsRecover` ซ้อมฟรี 1 ดาว ซื้อดาว `WingsStarPrice` 45 65 90 DEEP REST แล้ว WALK ON / `RehearsalScreen.From.Wings` กลับมาห้องเดิม) / แผนที่ชื่อบอส + BIG ATTACK บนแผ่นข้างบอส การ์ดบอกกฎกับท่าไม้ตาย (`Screens/RouteScreen.cs` `DrawBossName`) / เซฟ `bosses=` `wings=` / ท่าไม้ตายแรงขึ้นตามชั้น `TurnBigFloor` 1 1.15 1.3 ITALIEN x1 / savecheck 36/36 / ภาพ `wings` (ใหม่) `routeboss` `routestart`
 ตัวจำลองหลังขั้น 1 (ยังไม่มี WINGS ไม่มี `TurnBigFloor`) : NORMAL STRONG 59.8 → 50.4 MAESTRO EXPERT 80.4 → 73.2 (ใช้เทียบเท่านั้น)
 ✅ ขั้น 3 (`4454cb7`) การนำเสนอ `Screens/BattleScreen.Boss.cs` : ENTRANCE (ความมืดกลืน บอสลอยจากหลุม ชื่อบนเส้นห้าเส้น คลิกข้ามได้) / THE TELL (แถบเฉียงจากขวา ชื่อท่าไม้ตาย แล้ววงแหวนรอบบอสหดซ้ำตลอดตาวางแผน) / THE STRIKE (cut in จากขวาก่อนโน้ต ใช้ `cutIn` เดิม `bossCut`) / PRE (บอสยืดตัวโน้มเข้าก่อนตีธรรมดา) / THE TURN (กลับสี PHASE 2 ประโยคที่สอง) / แถบเลือดบอสบนขวา + เจตนากับไอคอนใต้แถบ (`BossPlate` `DrawIntentOf`) DECREE ย้ายมาแถวไอคอน / โน้ตปัดของ THE NINTH จังหวะไม่เท่า (`GapAt`) SHAKE ใน TE DEUM / ตัวเลข `BattleRules` หัวข้อ BOSS SHOW / ภาพใหม่ `battlebossbar` `battlebosstell` `battlebossstrike` `battlebossparry` `battlebossturn` (เลขท้าย 1-6 เลือกบอส) ตัวแคปเดินเวลาเร็ว ใช้เฟรมน้อย เช่น @6 @10
-⏳ ขั้น 4 ตัวจำลองเทียบก่อนหลัง (ใส่ WINGS ในตัวจำลอง) `TACET_Balance.xlsx` เอกสาร (HANDOFF ASSET_LIST CLAUDE.md BETA1_DIRECTION 21.12) สิ่งที่ให้ผู้ใช้ลอง ปิดแถวจอง
+✅ ขั้น 4 : ตัวจำลองมีบอสต่อชั้นแบบใหม่กับ THE WINGS / 24 seed ก่อนแก้ NORMAL STRONG 59.8 MAESTRO EXPERT 80.4 หลังครบ NORMAL STRONG 38.5 MAESTRO EXPERT 60.5 (ตัวจำลองเปลี่ยนวิธีจำลองด้วย : บอสชั้น 3 ของ Beethoven เป็น THE DEAF CROWN ทุกรัน, ห้องข้างเวที, โน้ตซ่อนกับจังหวะไม่เท่า / ปุ่มปรับถ้าเล่นจริงแล้วหนักไป : BattleRules หัวข้อ BOSSES TurnBigFloor TurnBigPower TurnBigEveryLate TurnBigCounter) (เทียบเท่านั้น ไม่ใช้บอกยากง่าย) / `TACET_Balance.xlsx` แท็บ Turn สร้างใหม่ (คอลัมน์ BIG ATTACK ใน Turn Enemies) / เอกสาร `BETA1_DIRECTION.md` 21.12 ถึง 21.16 `HANDOFF.md` 0.0 `ASSET_LIST.md` (ภาพ cut in บอส 6 ไฟล์) `CLAUDE.md` / ตาราง "แชทที่กำลังทำงาน" ว่างแล้ว
+⚠️ ผู้ใช้ยังไม่ได้ Rebuild ลอง (สิ่งที่ให้ลอง `BETA1_DIRECTION.md` 21.15) / **วิธีทำงานที่ผู้ใช้สั่ง (13.40)** : ทำ 16.14 ทีละข้อ จบข้อไหนบันทึก commit push แล้วหยุดรอ
+**งานถัดไป (เมื่อผู้ใช้สั่ง)** : ผลลองบอส แล้ว 16.14 ข้อ 5 แผนที่ (ป้ายรางวัลคำเดียว ลดแถวที่ไม่มีอะไรให้เลือก `Data/FloorMap.cs` `Screens/RouteScreen.cs`) / PLAYTEST FINALE ยัง 1 PERFECT (`PlaytestSignatureNeed` ห้ามแก้จนผู้ใช้บอก) / VFX หนักของบอสกับทุกอย่างรอทำทีเดียว
 
 **31 ต.ค. แชท /system (Finalize6) : /update ปิดแชท ผู้ใช้จะสั่งงานถัดไปในแชทใหม่** (คำต่อคำ `USER_BRIEFS.md` 13.49)
 ✅ ตัวเลขไม่มีลิมิตกับบั๊ก 2 ข้อของ 19.7 (`BETA1_DIRECTION.md` 20) ผู้ใช้ Rebuild ลองแล้ว "ได้ลองเล่นทุกอย่างแล้ว ยังไม่มีอะไรต้องแก้" / งานทั้งหมดอยู่บน GitHub (`9cb32b1` กับ commit ปิดแชทนี้) / ตาราง "แชทที่กำลังทำงาน" ว่าง / ไม่มีงานที่รอผู้ใช้ลองค้าง

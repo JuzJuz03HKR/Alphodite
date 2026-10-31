@@ -74,6 +74,17 @@
 | `enemy_the_staff.png` | THE STAFF | บอส Siam (ขั้น 14, Hollow ของ Lully) | It cannot walk. It beats time on the floor instead. |
 | `enemy_the_blind_cantor.png` | THE BLIND CANTOR | บอส Romantic (ขั้น 14, Hollow ของ Bach) | It plays by touch, one voice after another. |
 
+**ภาพ cut in ของบอส (Beta1 31 ต.ค. BOSS SHOW `BETA1_DIRECTION.md` 21.9)** : โฟลเดอร์ `Content/Art/Battle/Bosses/` ไฟล์ `<ชื่อ>_cutin.png` (ชื่อแบบ `ArtBank.Key`) ใช้ใน THE STRIKE (ช่อง 360 × 400 ทะลุแถบดำบนล่าง) และ THE TELL (ช่อง 230 × 220) ยังไม่มีไฟล์ = กรอบว่าง / แนะนำวาด 720 × 800 pixel art หน้าหรือครึ่งตัวของร่างปีศาจ ท่าทางกำลังจะปล่อยท่าไม้ตาย
+
+| ไฟล์ | บอส | ท่าไม้ตาย |
+|---|---|---|
+| `requiem_cutin.png` | REQUIEM | LACRIMOSA |
+| `the_deaf_crown_cutin.png` | THE DEAF CROWN | THE NINTH |
+| `the_nameless_master_cutin.png` | THE NAMELESS MASTER | ITALIEN |
+| `the_staff_cutin.png` | THE STAFF | TE DEUM |
+| `the_devil_s_string_cutin.png` | THE DEVIL'S STRING | ON ONE STRING |
+| `the_blind_cantor_cutin.png` | THE BLIND CANTOR | IN THE DARK |
+
 ### 3. ฉากหลังดวล ⭐⭐
 `Content/Art/Stage/` : `stage_classical.png` · `stage_siam.png` · `stage_romantic.png` — 1280 × 720 เต็มจอ
 ครึ่งขวาจะถูกความมืดของ TACET ทับระหว่างสู้ ของสำคัญควรอยู่ฝั่งซ้าย · พื้นเวทีเริ่มประมาณ y 452 (เท้าวงอยู่ y 506–554)
