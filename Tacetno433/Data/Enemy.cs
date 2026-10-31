@@ -17,6 +17,18 @@ namespace Tacetno433.Data
     //           the band's damage before its life until its next turn. IL CANNONE (Skill.Pierce) and DISSONANCE go through it
     public enum EnemyMove { Attack, Charge, Guard }
 
+    //BossMove : BOSSES (Beta1 31 Oct, docs/BETA1_DIRECTION.md 21.4). A boss's named BIG ATTACK, taken from the true story of the
+    //conductor it is the hollow of. It comes every TurnBigEvery attacks (TurnBigEveryLate after THE TURN, half life) and its notes
+    //are a shape of their own that the band must swipe back (TurnBattle PlanBig). Every note blocked PERFECT : the boss is STUNNED
+    //and the COUNTER hits TurnBigCounter times as hard. It took the place of the CADENZA (one note more, x1.5).
+    //   Lacrimosa    REQUIEM             eight fast notes : Mozart's own hand stops after the eighth bar of the Lacrimosa
+    //   TheNinth     THE DEAF CROWN      nine notes out of time : Beethoven could not hear the Ninth, nor the applause after it
+    //   Italien      THE NAMELESS MASTER every note of the band's last skills played back : Fanny's song printed under Felix's name
+    //   TeDeum       THE STAFF           the staff on everyone, then a SHAKE : Lully struck his own foot conducting a Te Deum (1687)
+    //   OnOneString  THE DEVIL'S STRING  ten fast notes all one way, a miss takes BREATH : the Moses Fantasy, played on the G string
+    //   InTheDark    THE BLIND CANTOR    five notes on everyone, every arrow hidden until late : Bach lost his sight at the end
+    public enum BossMove { None, Lacrimosa, TheNinth, Italien, TeDeum, OnOneString, InTheDark }
+
     //EnemyTrait : the one rule a shape of TACET bends. BattleState and the duel check these by
     //name. A trait is always told to the player BEFORE it matters: the first banner of the duel
     //explains it the first time it is met (round 14), its name sits on the enemy's plate, and the
@@ -111,6 +123,16 @@ namespace Tacetno433.Data
         public EnemyMove[] Moves = { EnemyMove.Attack };
         public int GuardBlock;
 
+        //BOSSES (Beta1 31 Oct, docs/BETA1_DIRECTION.md 21) : its named BIG ATTACK (BossMove), the line that says what it does,
+        //the words that pop when every note of it is blocked, what it says when its life falls to half (THE TURN), and the
+        //conductor it is the hollow of (the last floor's boss is the chosen conductor's own, RunState.PickBosses)
+        public BossMove Big = BossMove.None;
+        public string BigName = "";
+        public string BigText = "";
+        public string BigWin = "";
+        public string PhaseLine = "";
+        public TurnKit HollowOf = TurnKit.None;
+
         //Move At : the move of its list at this place, round again at the end
         public EnemyMove MoveAt(int index)
         {
@@ -195,11 +217,15 @@ namespace Tacetno433.Data
                         TurnHp = 250, TurnSpeed = 5, Phrases = new[] { "D L R U", "L R L R" }, TurnTraitText = "Below half life it swaps left and right and plays faster.",            Title = "The piece that was never finished.",
                         Trait = EnemyTrait.Unfinished, TraitName = "UNFINISHED", TraitFloor = 1,
                         TraitText = "In round three it plays backwards and faster, and your band is mirrored: the players on the left and right swap sides.",
+                        Big = BossMove.Lacrimosa, BigName = "LACRIMOSA", BigText = "Eight fast notes. Block all eight and the piece breaks off.",
+                        BigWin = "THE PIECE BREAKS OFF", PhaseLine = "It plays on, faster, the wrong way round.", HollowOf = TurnKit.Mozart,
                         Kind = EnemyKind.Boss, Movement = 0, Song = SongList.RondoAllaTurca, Pattern = new int[] { 6, 0, 4, 0, 8, 0, 4, 9 }, Hidden = new int[] { 2, 6 }, Tone = Palette.ToneA },
             new Enemy { Name = "THE NAMELESS MASTER",
                         TurnHp = 230, TurnSpeed = 4, Phrases = new[] { "D U L", "R L D U" }, TurnTraitText = "It answers with the notes of the last skill your band played.", Title = "He plays a phrase. You must answer better.",
                         Trait = EnemyTrait.Mirror, TraitName = "ANSWER BETTER", TraitFloor = 1,
                         TraitText = "From round two it plays your last round back at you.",
+                        Big = BossMove.Italien, BigName = "ITALIEN", BigText = "It plays back every note of your last skills, under its own name.",
+                        BigWin = "THE NAME COMES BACK", PhaseLine = "It signs your music with its own name.", HollowOf = TurnKit.Fanny,
                         Kind = EnemyKind.Boss, Movement = 1, Song = SongList.NachtMusik, Pattern = new int[] { 3, 0, 3, 5, 0, 3, 2, 7 }, Hidden = new int[] { 3, 7 }, Tone = Palette.ToneB },
                         // round 12.1, was 3 3 0 5 0 3 0 8 : a strong player lost to it on floor one 27 percent of the time,
                         // twice the hardest elite. Now about 15 percent, still the hardest boss. Round 12 : was 4 4 0 6 4 4 0 9
@@ -207,6 +233,8 @@ namespace Tacetno433.Data
                         TurnHp = 260, TurnSpeed = 6, Phrases = new[] { "R R L", "U D U D" }, TurnTraitText = "Each of its attacks steals 1 BREATH.",  Title = "One string, one bow, one bargain.",
                         Trait = EnemyTrait.Bargain, TraitName = "THE BARGAIN", TraitFloor = 1,
                         TraitText = "Before round two it offers a deal: more power now, less breath for ever.",
+                        Big = BossMove.OnOneString, BigName = "ON ONE STRING", BigText = "Ten fast notes, all one way. Each one that gets through takes 1 BREATH.",
+                        BigWin = "THE BARGAIN BREAKS", PhaseLine = "Three strings snap. It plays on with one.", HollowOf = TurnKit.Paganini,
                         Kind = EnemyKind.Boss, Movement = 2, Pattern = new int[] { 7, 0, 7, 0, 0, 9, 0, 9 }, Hidden = new int[] { 4 }, Tone = Palette.ToneA, Temper = 20 },
 
             //ONE BAR (Alpha 7 step 13, docs/ALPHA7_CONTENT_PROPOSALS.md) : any movement, added at the END because the
@@ -250,16 +278,22 @@ namespace Tacetno433.Data
                         TurnHp = 240, TurnSpeed = 5, TurnPower = 6, Phrases = new[] { "U U U D", "L R D" }, TurnTraitText = "Each turn it bans SKILLS or ATTACKS, and breaking the ban hurts. It never takes a COUNTER.", Title = "It cannot hear you. It only gives orders.",
                         Trait = EnemyTrait.Decree, TraitName = "DECREE", TraitFloor = 1,
                         TraitText = "Each turn it bans SKILLS or ATTACKS, and breaking the ban hurts. It never takes a COUNTER.",
+                        Big = BossMove.TheNinth, BigName = "THE NINTH", BigText = "Nine notes out of time, it cannot hear the beat. Block them all and it hears you.",
+                        BigWin = "IT HEARS YOU", PhaseLine = "It still cannot hear you. It only shouts louder.", HollowOf = TurnKit.Beethoven,
                         Kind = EnemyKind.Boss, Movement = 0, Pattern = new int[] { 6, 0, 6, 0, 6, 0, 6, 9 }, Tone = Palette.ToneA },
             new Enemy { Name = "THE STAFF",
-                        TurnHp = 250, TurnSpeed = 3, TurnPower = 7, Phrases = new[] { "D D D", "D L D R" }, TurnTraitText = "While its court stands it takes half. Every third attack it strikes the floor and hits everyone.", Title = "It cannot walk. It beats time on the floor instead.",
+                        TurnHp = 250, TurnSpeed = 3, TurnPower = 7, Phrases = new[] { "D D D", "D L D R" }, TurnTraitText = "While its court stands it takes half.", Title = "It cannot walk. It beats time on the floor instead.",
                         Trait = EnemyTrait.TheCourt, TraitName = "THE COURT", TraitFloor = 1,
-                        TraitText = "While its court stands it takes half. Every third attack it strikes the floor and hits everyone.",
+                        TraitText = "While its court stands it takes half.",
+                        Big = BossMove.TeDeum, BigName = "TE DEUM", BigText = "The staff comes down on everyone, then the floor shakes. Block the blow and it strikes its own foot.",
+                        BigWin = "THE STAFF FALLS", PhaseLine = "It beats the floor harder. The court bows.", HollowOf = TurnKit.Lully,
                         Kind = EnemyKind.Boss, Movement = 1, Pattern = new int[] { 6, 0, 6, 0, 6, 0, 6, 6 }, Tone = Palette.ToneB },
             new Enemy { Name = "THE BLIND CANTOR",
                         TurnHp = 240, TurnSpeed = 4, TurnPower = 6, Phrases = new[] { "D U D U", "L R L R" }, TurnTraitText = "It strikes the seats in turn, front to back. A note you miss comes back in its next attack.", Title = "It plays by touch, one voice after another.",
                         Trait = EnemyTrait.ByTouch, TraitName = "BY TOUCH", TraitFloor = 1,
                         TraitText = "It strikes the seats in turn, front to back. A note you miss comes back in its next attack.",
+                        Big = BossMove.InTheDark, BigName = "IN THE DARK", BigText = "Five notes on everyone, every arrow hidden until the last moment.",
+                        BigWin = "THE LIGHT COMES BACK", PhaseLine = "The candles go out, one by one.", HollowOf = TurnKit.Bach,
                         Kind = EnemyKind.Boss, Movement = 2, Pattern = new int[] { 6, 0, 6, 0, 6, 0, 6, 6 }, Tone = Palette.ToneA },
         };
 

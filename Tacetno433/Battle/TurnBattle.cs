@@ -24,9 +24,12 @@ namespace Tacetno433.Battle
     public enum TurnEventKind { Damage, Heal, Breath, Dissonance, Crescendo, Mute, Break, Skip, Counter, Down, Ready, Extra, Saved, Steal, Echo, Quieter, Thorns,
                                 Cut, Shield, Lesson, Cue, Revenge, Charge, Broken, Guard, Blocked, Pierce, Legend,
                                 Gift,                        // GIFTS (Beta1 31 Oct) : a gift worked, Amount is its MotifId (the screen pops its name)
-                                DissonanceTick, CrescendoLost, GuardUp }   // WORDS (31 Oct) : the moments the rule words work, so the screen
+                                DissonanceTick, CrescendoLost, GuardUp,    // WORDS (31 Oct) : the moments the rule words work, so the screen
                                                              // pops the word right then : BURN as it hurts (Amount = the damage), VOLUME as a
                                                              // MISS takes it (Amount = what is left), GUARD as THUNDER CALL lands
+                                BossTurn, BigParried, OwnFoot }   // BOSSES (Beta1 31 Oct) : THE TURN, a boss's life fell to half /
+                                                             // every note of its BIG ATTACK blocked PERFECT (Amount = its BossMove) /
+                                                             // TE DEUM, the staff struck its own foot (Amount = the life it will lose)
 
     //DecreeKind : DECREE (THE DEAF CROWN, step 14), what the band may not do this bar
     public enum DecreeKind { None, NoSkills, NoAttacks }
@@ -103,6 +106,14 @@ namespace Tacetno433.Battle
                                                              //          played again in its next attack
         public int Attacks;                        // attacks made so far, a boss's every third is a CADENZA
         public bool Planned;                       // the intent is decided (step 10 : right after its last attack)
+        public bool IntentSwapped;                 // UNFINISHED : left and right of this attack are swapped already
+
+        //BOSSES (Beta1 31 Oct, docs/BETA1_DIRECTION.md 21) : the named BIG ATTACK and the two halves of a boss's life
+        public bool IntentBig;                     // BIG ATTACK : this attack is the boss's named one (Enemy.Big, PlanBig)
+        public NoteKind[] IntentKinds = new NoteKind[0];  // the kind of each note (TE DEUM ends in a SHAKE), all swipes when empty
+        public float[] IntentGaps = new float[0];  // THE NINTH : the gap before each note x the usual one, even gaps when empty
+        public int BigIn;                          // its attacks until the next BIG ATTACK, counting the one it shows (1 : that one is it)
+        public bool SecondHalf;                    // THE TURN : its life fell to half, the BIG ATTACK comes more often
 
         //ENEMY MOVES (Beta1 30 Oct, Data/Enemy.cs EnemyMove) : CHARGE and GUARD
         public int MoveIndex;                      // the place of its next move in Enemy.Moves
@@ -209,6 +220,10 @@ namespace Tacetno433.Battle
         //Last Skill : the swipe notes of the band's last skill, for ANSWER BETTER (THE NAMELESS MASTER)
         private List<Flick> lastWays = new List<Flick>();
 
+        //Bar Ways : the swipe notes of every skill the band played this turn, for ITALIEN (THE NAMELESS MASTER's BIG ATTACK)
+        private List<Flick> barWays = new List<Flick>();
+        private int ownFoot;           // TE DEUM : the life THE STAFF loses once its BIG ATTACK is over (its first note was blocked)
+
         //Events : what happened since the screen last looked
         public List<TurnEvent> Events = new List<TurnEvent>();
 
@@ -271,6 +286,7 @@ namespace Tacetno433.Battle
                 f.MaxHp = (int)Math.Round(life * BattleRules.TurnFloorLife[Floor - 1]);       // deeper floors, tougher enemies
                 f.Hp = f.MaxHp;
                 f.Speed = e.TurnSpeed > 0 ? e.TurnSpeed : BattleRules.TurnEnemySpeed[(int)e.Kind];
+                f.BigIn = BattleRules.TurnBigEvery;                                           // BOSSES : its third attack is the first BIG ATTACK
                 Enemies.Add(f);
             }
 
@@ -305,6 +321,7 @@ namespace Tacetno433.Battle
             OrderMoves.Clear();
             OrderIndex = 0;
             Bar.Clear();
+            barWays.Clear();                                                             // ITALIEN : a new turn, no skill played in it yet
 
             //Intent : decided once at the start, then again right after each of its attacks (FinishEnemyTurn),
             //so what shows over its head is always the attack still to come (step 10, like Slay the Spire).
@@ -615,6 +632,10 @@ namespace Tacetno433.Battle
             enemy.IntentCharge = false;
             enemy.IntentHeavy = false;
             enemy.IntentGuard = 0;
+            enemy.IntentSwapped = false;
+            enemy.IntentBig = false;
+            enemy.IntentKinds = new NoteKind[0];
+            enemy.IntentGaps = new float[0];
 
             //LULLABY (THE LULL) : every third turn it hums instead of attacking, and heals
             if (trait && e.Trait == EnemyTrait.Lullaby && (enemy.Attacks + 1) % BattleRules.TurnLullEvery == 0)
@@ -675,8 +696,15 @@ namespace Tacetno433.Battle
                 return;
             }
 
-            //THE COURT (THE STAFF) : its big move is one heavy note down at the floor that hits everybody
-            if (trait && e.Trait == EnemyTrait.TheCourt && (enemy.Attacks + 1) % BattleRules.TurnStaffEvery == 0)
+            //BOSSES (Beta1 31 Oct) : its named BIG ATTACK takes the place of the CADENZA (and of THE COURT's floor strike)
+            if (e.Kind == EnemyKind.Boss && e.Big != BossMove.None && enemy.BigIn <= 1)
+            {
+                PlanBig(enemy, hit);
+                return;
+            }
+
+            //THE COURT (THE STAFF) : its big move is one heavy note down at the floor that hits everybody (a STAFF with no BIG ATTACK)
+            if (trait && e.Trait == EnemyTrait.TheCourt && e.Big == BossMove.None && (enemy.Attacks + 1) % BattleRules.TurnStaffEvery == 0)
             {
                 enemy.IntentAll = true;
                 count = 1;
@@ -684,7 +712,7 @@ namespace Tacetno433.Battle
                 hit = (int)Math.Round(hit * BattleRules.TurnStaffPower);
             }
 
-            enemy.IntentCadenza = e.Kind == EnemyKind.Boss && !enemy.IntentAll && (enemy.Attacks + 1) % BattleRules.TurnCadenzaEvery == 0;
+            enemy.IntentCadenza = e.Kind == EnemyKind.Boss && e.Big == BossMove.None && !enemy.IntentAll && (enemy.Attacks + 1) % BattleRules.TurnCadenzaEvery == 0;
             if (enemy.IntentCadenza)
             {
                 count++;
@@ -718,6 +746,75 @@ namespace Tacetno433.Battle
             enemy.IntentNotes = new int[0];
             enemy.IntentWays = new Flick[0];
             enemy.IntentLate = new bool[0];
+            enemy.IntentKinds = new NoteKind[0];
+            enemy.IntentGaps = new float[0];
+        }
+
+        //PLAN BIG (BOSSES, Beta1 31 Oct, docs/BETA1_DIRECTION.md 21.4) : the boss's named BIG ATTACK. hit is one of its usual
+        //notes on this floor. Each shape keeps to the true story it comes from (Data/Enemy.cs BossMove), the numbers are in
+        //BattleRules BOSSES. A musician who blocks every note throws the boss off the beat (FinishEnemyTurn).
+        private void PlanBig(Fighter enemy, int hit)
+        {
+            Enemy e = enemy.Enemy;
+            int big = (int)e.Big;
+            enemy.IntentBig = true;
+            int each = Math.Max(1, (int)Math.Round(hit * BattleRules.TurnBigPower[big]));
+
+            //Its phrases one after another, round again until it has all its notes (LACRIMOSA, THE NINTH, IN THE DARK)
+            List<Flick> own = new List<Flick>();
+            for (int p = 0; p < e.Phrases.Length; p++) ReadPhrase(e.Phrases[p], own);
+            if (own.Count == 0) own.Add(Flick.Down);
+
+            int count = BattleRules.TurnBigNotes[big];
+            List<Flick> ways = new List<Flick>();
+            if (e.Big == BossMove.Italien) ItalienWays(ways, own);                               // ITALIEN : the band's own notes
+            else if (e.Big == BossMove.OnOneString) for (int i = 0; i < count; i++) ways.Add(own[0]);   // ON ONE STRING : one way only
+            else if (e.Big == BossMove.TeDeum) { ways.Add(Flick.Down); ways.Add(Flick.None); }     // TE DEUM : the staff down, then a SHAKE
+            else for (int i = 0; i < count; i++) ways.Add(own[i % own.Count]);
+            SetBigNotes(enemy, ways, each);
+
+            //TE DEUM (THE STAFF) : the staff comes down on everyone, then the floor shakes under everyone
+            if (e.Big == BossMove.TeDeum)
+            {
+                enemy.IntentAll = true;
+                enemy.IntentNotes[0] = Math.Max(1, (int)Math.Round(hit * BattleRules.TurnTeDeumStrike));
+                enemy.IntentNotes[1] = Math.Max(1, (int)Math.Round(hit * BattleRules.TurnTeDeumShake));
+                enemy.IntentKinds[1] = NoteKind.Roll;
+            }
+
+            //IN THE DARK (THE BLIND CANTOR) : on everyone, and no arrow shows until its ring is half closed (like FALSE NOTES)
+            if (e.Big == BossMove.InTheDark)
+            {
+                enemy.IntentAll = true;
+                for (int i = 0; i < enemy.IntentLate.Length; i++) enemy.IntentLate[i] = true;
+            }
+
+            //THE NINTH (THE DEAF CROWN) : it cannot hear the beat, the gaps between its notes are uneven
+            if (e.Big == BossMove.TheNinth) enemy.IntentGaps = (float[])BattleRules.TurnNinthGaps.Clone();
+
+            Unfinished(enemy);                                                                   // UNFINISHED : below half, left and right swap
+            if (e.Big == BossMove.Lacrimosa || e.Big == BossMove.OnOneString) enemy.IntentFast = true;   // the fast ones
+        }
+
+        //Set Big Notes : the BIG ATTACK plays these ways, each note this hard, all swipes until PlanBig says otherwise
+        private static void SetBigNotes(Fighter enemy, List<Flick> ways, int each)
+        {
+            int count = ways.Count;
+            enemy.IntentNotes = new int[count];
+            enemy.IntentWays = ways.ToArray();
+            enemy.IntentKinds = new NoteKind[count];
+            enemy.IntentLate = new bool[count];
+            for (int i = 0; i < count; i++) enemy.IntentNotes[i] = each;
+        }
+
+        //Italien Ways : ITALIEN (THE NAMELESS MASTER) plays back the notes of the band's skills this turn, the newest
+        //TurnItalienMost of them, round again to at least its TurnBigNotes. A turn with no skill in it yet : its own phrases.
+        private void ItalienWays(List<Flick> ways, List<Flick> own)
+        {
+            List<Flick> from = barWays.Count > 0 ? barWays : own;
+            for (int i = Math.Max(0, from.Count - BattleRules.TurnItalienMost); i < from.Count; i++) ways.Add(from[i]);
+            int have = ways.Count;
+            for (int i = 0; ways.Count < BattleRules.TurnBigNotes[(int)BossMove.Italien]; i++) ways.Add(ways[i % have]);
         }
 
         //Next Move : one of its turns is over (played, or lost OFF-BEAT while its CHARGE was broken). The wind up leads to the
@@ -757,8 +854,9 @@ namespace Tacetno433.Battle
         private void Unfinished(Fighter enemy)
         {
             if (!TraitOn(enemy) || enemy.Enemy.Trait != EnemyTrait.Unfinished) return;
-            if (enemy.IntentFast || enemy.Hp * 2 >= enemy.MaxHp) return;
+            if (enemy.IntentSwapped || enemy.Hp * 2 >= enemy.MaxHp) return;
             enemy.IntentFast = true;
+            enemy.IntentSwapped = true;
             for (int i = 0; i < enemy.IntentWays.Length; i++)
             {
                 if (enemy.IntentWays[i] == Flick.Left) enemy.IntentWays[i] = Flick.Right;
@@ -774,7 +872,19 @@ namespace Tacetno433.Battle
             for (int i = 0; i < Enemies.Count; i++)
             {
                 Fighter f = Enemies[i];
-                if (f.Down || f.IntentRest || !TraitOn(f) || f.Enemy.Trait != EnemyTrait.Mirror) continue;
+                if (f.Down || f.IntentRest) continue;
+
+                //ITALIEN (BOSSES) : a BIG ATTACK still to come takes every note the band has played this turn
+                if (f.IntentBig)
+                {
+                    if (f.Enemy.Big != BossMove.Italien || barWays.Count == 0) continue;
+                    int each = f.IntentNotes.Length > 0 ? f.IntentNotes[0] : 1;
+                    List<Flick> ways = new List<Flick>();
+                    ItalienWays(ways, barWays);
+                    SetBigNotes(f, ways, each);
+                    continue;
+                }
+                if (!TraitOn(f) || f.Enemy.Trait != EnemyTrait.Mirror) continue;
                 for (int n = 0; n < f.IntentWays.Length; n++) f.IntentWays[n] = lastWays[n % lastWays.Count];
             }
         }
@@ -1278,6 +1388,7 @@ namespace Tacetno433.Battle
             lastWays.Clear();
             for (int n = 0; n < s.Notes.Length; n++)
                 if (s.Notes[n].Kind == NoteKind.Swipe || s.Notes[n].Kind == NoteKind.Hold) lastWays.Add(s.Notes[n].Way);
+            barWays.AddRange(lastWays);                                                            // ITALIEN : every skill of this turn
             RefreshMirror();
             return true;
         }
@@ -1766,7 +1877,23 @@ namespace Tacetno433.Battle
                 if (!noRest) AddBreath(BattleRules.TurnBreathPerParry);
                 if (!noRest && Has(MotifId.Pianissimo) && note == 0) AddBreath(BattleRules.TurnPianissimoBreath);   // PIANISSIMO : the first note of an attack
                 AddOffBeat(enemy, BattleRules.TurnParryOffBeat);
+
+                //TE DEUM (THE STAFF) : the staff's blow blocked, it comes down on its own foot (the life goes when its notes are done)
+                if (enemy.IntentBig && enemy.Enemy.Big == BossMove.TeDeum && note == 0)
+                {
+                    int foot = Math.Max(1, (int)Math.Round(enemy.MaxHp * BattleRules.TurnTeDeumSelf));
+                    ownFoot += foot;
+                    Events.Add(new TurnEvent(TurnEventKind.OwnFoot, enemy, foot));
+                }
                 return 0;
+            }
+
+            //ON ONE STRING (THE DEVIL'S STRING) : every note of its BIG ATTACK that gets through takes BREATH
+            if (enemy.IntentBig && enemy.Enemy.Big == BossMove.OnOneString && Breath > 0)
+            {
+                int stolen = Math.Min(Breath, BattleRules.TurnStringSteal);
+                Breath -= stolen;
+                Events.Add(new TurnEvent(TurnEventKind.Steal, enemy, stolen));
             }
 
             //BY TOUCH (THE BLIND CANTOR) : a note that gets through whole comes back in its next attack
@@ -1848,9 +1975,23 @@ namespace Tacetno433.Battle
             Fighter target = HitTarget(enemy);                                               // SHIELD : the one in front blocked it
             enemy.Attacks++;
 
+            //BOSSES : every note of its BIG ATTACK blocked PERFECT throws the boss off the beat (STUNNED : it loses its next turn).
+            //ON ONE STRING : the band takes its BREATH back. Before THUNDER SHEET, so the gift's life loss still comes now.
+            bool bigBlocked = enemy.IntentBig && parried > 0 && parried == enemy.IntentNotes.Length;
+            if (bigBlocked && !enemy.Down)
+            {
+                Events.Add(new TurnEvent(TurnEventKind.BigParried, enemy, (int)enemy.Enemy.Big));
+                AddOffBeat(enemy, BattleRules.TurnOffBeatMax);
+                if (enemy.Enemy.Big == BossMove.OnOneString) AddBreath(BattleRules.TurnStringBack);
+            }
+
             //THUNDER SHEET (GIFT) : thrown OFF-BEAT by a parry in the middle of its own attack, the life goes once its notes are done
             if (sheetLoss > 0 && !enemy.Down) Hurt(enemy, sheetLoss);
             sheetLoss = 0;
+
+            //TE DEUM (THE STAFF) : its blow was blocked, the staff came down on its own foot
+            if (ownFoot > 0 && !enemy.Down) Hurt(enemy, ownFoot);
+            ownFoot = 0;
 
             //LULLABY : the humming turn heals it
             if (enemy.IntentRest) Heal(enemy, BattleRules.TurnLullHeal);
@@ -1888,17 +2029,19 @@ namespace Tacetno433.Battle
             }
 
             //THE BARGAIN (THE DEVIL'S STRING) : every attack steals breath
-            if (TraitOn(enemy) && enemy.Enemy.Trait == EnemyTrait.Bargain && enemy.IntentNotes.Length > 0 && Breath > 0)
+            bool oneString = enemy.IntentBig && enemy.Enemy.Big == BossMove.OnOneString;                       // it took BREATH note by note
+            if (TraitOn(enemy) && enemy.Enemy.Trait == EnemyTrait.Bargain && enemy.IntentNotes.Length > 0 && Breath > 0 && !oneString)
             {
                 int stolen = Math.Min(Breath, BattleRules.TurnBargainSteal);
                 Breath -= stolen;
                 Events.Add(new TurnEvent(TurnEventKind.Steal, enemy, stolen));
             }
 
-            bool deaf = Has(enemy, EnemyTrait.Decree);                                                       // DECREE : it never takes a COUNTER
-            if (parried > 0 && parried == enemy.IntentNotes.Length && target != null && !target.Down && !enemy.Down && !deaf)
+            bool deaf = Has(enemy, EnemyTrait.Decree) && !enemy.IntentBig;                                   // DECREE : it never takes a COUNTER,
+            if (parried > 0 && parried == enemy.IntentNotes.Length && target != null && !target.Down && !enemy.Down && !deaf)   // but THE NINTH : it hears you
             {
                 float scale = BattleRules.TurnCounterScale * (enemy.IntentCadenza ? BattleRules.TurnCadenzaCounter : 1f);
+                if (enemy.IntentBig) scale *= BattleRules.TurnBigCounter;                                      // BOSSES : the BIG ATTACK blocked
                 if (enemy.IntentHeavy) scale *= BattleRules.TurnChargeCounter;                                 // CHARGE : the blow parried
                 if (Has(MotifId.Counterpoint)) scale *= BattleRules.TurnCounterpointScale;                     // COUNTERPOINT
                 int damage = HitDamage(target, enemy, scale);
@@ -1906,8 +2049,13 @@ namespace Tacetno433.Battle
                 Strike(enemy, damage);
             }
 
+            //BOSSES : the count to its next BIG ATTACK (THE TURN brings it closer, see Hurt)
+            if (enemy.Enemy.Big != BossMove.None)
+                enemy.BigIn = enemy.IntentBig ? (enemy.SecondHalf ? BattleRules.TurnBigEveryLate : BattleRules.TurnBigEvery) : enemy.BigIn - 1;
+
             //The next attack is decided now, so its intent shows until it comes (a fallen enemy has none)
             enemy.IntentCadenza = false;
+            enemy.IntentBig = false;
             NextMove(enemy);                                                                 // ENEMY MOVES
             if (!enemy.Down) PlanIntent(enemy);
             NextTurn();
@@ -2388,6 +2536,16 @@ namespace Tacetno433.Battle
                 if (!f.IsEnemy) StepAside(f);                                                // SHIELD : a fallen musician stands in front of nobody
                 Events.Add(new TurnEvent(TurnEventKind.Down, f, 0));
             }
+            else if (f.IsEnemy && !f.SecondHalf && f.Enemy.Kind == EnemyKind.Boss && f.Hp <= f.MaxHp * BattleRules.TurnBigPhase) TurnOver(f);
+        }
+
+        //THE TURN (BOSSES, Beta1 31 Oct) : a boss's life fell to half. The attack it shows stays (the player wrote the turn
+        //against it), the one after is its BIG ATTACK, then every TurnBigEveryLate attacks. The screen stops for a moment.
+        private void TurnOver(Fighter boss)
+        {
+            boss.SecondHalf = true;
+            if (boss.Enemy.Big != BossMove.None && !boss.IntentBig) boss.BigIn = Math.Min(boss.BigIn, 2);
+            Events.Add(new TurnEvent(TurnEventKind.BossTurn, boss, 0));
         }
 
         private void Heal(Fighter f, int amount)

@@ -162,6 +162,7 @@ namespace Tacetno433.Core
             report += TurnCheckPreview();                                              // PREVIEW (Beta1 30 Oct, block 1 item 4)
             report += TurnCheckWords();                                                // WORDS (Beta1 31 Oct, 16.14 item 3)
             report += TurnCheckNumbers();                                              // NO LIMIT (Beta1 31 Oct, numbers past 999)
+            report += TurnCheckBigs();                                                 // BOSSES (Beta1 31 Oct, the named BIG ATTACKs)
             return report;
         }
 

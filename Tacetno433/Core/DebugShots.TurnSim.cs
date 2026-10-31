@@ -474,8 +474,17 @@ namespace Tacetno433.Core
                 }
                 else
                 {
-                    Grade[] parries = new Grade[b.Current.IntentNotes.Length];
-                    for (int i = 0; i < parries.Length; i++) parries[i] = SimSwipe(b, player, rng).Grade;
+                    //BOSSES (Beta1 31 Oct) : an arrow that shows late (FALSE NOTES, IN THE DARK) and the uneven gaps of THE NINTH are
+                    //read worse, the swipe's timing spreads SimLateSpread / SimGapSpread times as wide
+                    Fighter enemy = b.Current;
+                    Grade[] parries = new Grade[enemy.IntentNotes.Length];
+                    for (int i = 0; i < parries.Length; i++)
+                    {
+                        float hard = 1f;
+                        if (i < enemy.IntentLate.Length && enemy.IntentLate[i]) hard *= SimLateSpread;
+                        if (enemy.IntentGaps.Length > 0) hard *= SimGapSpread;
+                        parries[i] = SimSwipe(b, player, rng, hard).Grade;
+                    }
                     b.TakeEnemyAttack(parries);
                 }
             }
@@ -659,12 +668,17 @@ namespace Tacetno433.Core
 
         //Sim Swipe : one swipe, graded by the battle's own Judge. Later than LateLimit is no swipe at all,
         //earlier than EarlyTime is the hand getting ready and the note is missed.
-        private static NoteResult SimSwipe(TurnBattle b, SimPlayer player, Random rng)
+        //Sim Late Spread, Sim Gap Spread : how much wider a player's timing spreads on a note whose arrow shows late, and on the
+        //uneven notes of THE NINTH (a guess for the simulator only, not a rule of the game)
+        private const float SimLateSpread = 1.3f;
+        private const float SimGapSpread = 1.2f;
+
+        private static NoteResult SimSwipe(TurnBattle b, SimPlayer player, Random rng, float hard = 1f)
         {
             //ADVANCED PART : Box-Muller, two even random numbers make one on a bell curve
             double u1 = 1.0 - rng.NextDouble();
             double u2 = rng.NextDouble();
-            float offset = (float)(Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Cos(2.0 * Math.PI * u2)) * player.Spread;
+            float offset = (float)(Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Cos(2.0 * Math.PI * u2)) * player.Spread * hard;
 
             bool rightWay = rng.NextDouble() >= player.WrongWay;
             Grade g;

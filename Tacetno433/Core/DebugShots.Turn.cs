@@ -255,10 +255,11 @@ namespace Tacetno433.Core
             b.UseSkill(new NoteResult[] { perfect });
             report += Same("the floor", "55 55 0", b.Enemies[0].Hp + " " + b.Enemies[1].Hp + " " + b.Breath);
 
-            //CADENZA : REQUIEM's third attack has one note more and each note x1.5 (6 x 2 = 12, x1.5 = 18)
+            //BIG ATTACK (BOSSES, Beta1 31 Oct, was the CADENZA : one note more x1.5 = 18) : REQUIEM's third attack is LACRIMOSA,
+            //8 notes of 6 x 2 = 12 x 0.8 = 9.6 -> 10
             b = new TurnBattle(band, new List<Enemy> { EnemyList.All[6] }, 1, new Random(433));
-            for (int i = 0; i < 60 && !b.Enemies[0].IntentCadenza && b.Step != TurnStep.Lost; i++) Step(b, Grade.Good);
-            report += Same("cadenza", "True 18 2", b.Enemies[0].IntentCadenza + " " + b.Enemies[0].IntentNotes[0] + " " + b.Enemies[0].Attacks);
+            for (int i = 0; i < 60 && !b.Enemies[0].IntentBig && b.Step != TurnStep.Lost; i++) Step(b, Grade.Good);
+            report += Same("big attack", "True 10 2 8", b.Enemies[0].IntentBig + " " + b.Enemies[0].IntentNotes[0] + " " + b.Enemies[0].Attacks + " " + b.Enemies[0].IntentNotes.Length);
 
             //ROLL : 5 shakes PERFECT, 3 GOOD, fewer a MISS, none at all a HESITATE (NORMAL)
             report += Same("roll", "Perfect Good Miss Hesitate", b.RollGrade(5) + " " + b.RollGrade(3) + " " + b.RollGrade(1) + " " + b.RollGrade(0));
@@ -413,6 +414,8 @@ namespace Tacetno433.Core
             //UNFINISHED (REQUIEM) : below half life its next phrase (Lf Rf) comes mirrored and faster
             b = new TurnBattle(band, new List<Enemy> { EnemyList.All[6] }, 1, new Random(433));
             b.Enemies[0].Hp = 100;
+            b.Enemies[0].SecondHalf = true;                                            // BOSSES : no THE TURN here and no BIG ATTACK for a while,
+            b.Enemies[0].BigIn = 99;                                                   //   so its next attack is a plain phrase
             for (int i = 0; i < 20 && b.Round < 2; i++) Step(b, Grade.Hesitate);
             report += Same("unfinished", "True Right Left", b.Enemies[0].IntentFast + " " + b.Enemies[0].IntentWays[0] + " " + b.Enemies[0].IntentWays[1]);
 

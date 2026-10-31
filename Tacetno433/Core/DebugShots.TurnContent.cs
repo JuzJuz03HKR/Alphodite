@@ -199,7 +199,8 @@ namespace Tacetno433.Core
             b.Attack();
             string court = b.Enemies[0].Hp.ToString();
 
-            //THE COURT : its third attack is one note down that hits everybody, 7 x 2 = 14, x1.5 = 21
+            //TE DEUM (BOSSES, Beta1 31 Oct, was THE COURT's floor strike, one note of 21) : its third attack is the staff down on
+            //everyone, 7 x 2 = 14, x2.5 = 35, then a SHAKE of 14. Nothing blocked : 49 to each
             b = new TurnBattle(Duo(), new List<Enemy> { staffBoss }, 1, new Random(433));
             Tough(b);
             for (int i = 0; i < 80 && !b.Enemies[0].IntentAll; i++) Step(b, Grade.Good);
@@ -209,7 +210,7 @@ namespace Tacetno433.Core
             int anna = b.Party[0].Hp;
             int klara = b.Party[1].Hp;
             b.TakeEnemyAttack(null);
-            report += Same("the court", "397 True 1 Down 21 21 21", court + " " + (anna - b.Party[0].Hp) + " " + (klara - b.Party[1].Hp));
+            report += Same("court te deum", "397 True 2 Down 35 49 49", court + " " + (anna - b.Party[0].Hp) + " " + (klara - b.Party[1].Hp));
 
             //DECREE (THE DEAF CROWN) : bar 1 forbids skills, PAGANINI's CAPRICE costs her 5 (45 -> 40). It CUTS IN after
             //QUANTZ, every note is parried PERFECT and still no COUNTER. Bar 2 forbids attacks, PAGANINI's ATTACK costs 5 more.

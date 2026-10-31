@@ -84,9 +84,32 @@
         //Bosses of step 14
         public static int TurnByTouchMost = 2;           // THE BLIND CANTOR : missed notes that come back in its next attack, at most
         public static float TurnCourtKeep = 0.5f;        // THE STAFF : the share of the band's damage it takes while another enemy stands
-        public static int TurnStaffEvery = 3;            //            every this many attacks it strikes the floor (instead of a CADENZA)
-        public static float TurnStaffPower = 1.5f;       //            that one note hits everyone this much harder
+        public static int TurnStaffEvery = 3;            //            every this many attacks it strikes the floor (instead of a CADENZA). Beta1 31 Oct :
+        public static float TurnStaffPower = 1.5f;       //            TE DEUM took its place, these two are left for a STAFF with no BIG ATTACK
         public static int TurnThorns = 5;                // THE DEAF CROWN : life lost by a musician who breaks the DECREE (x the floor's note scale)
+
+        //BOSSES (Beta1 31 Oct, docs/BETA1_DIRECTION.md 21, Data/Enemy.cs BossMove) : a boss's named BIG ATTACK takes the place of
+        //the CADENZA. It comes every TurnBigEvery attacks, and every TurnBigEveryLate once its life fell to half (THE TURN, whose
+        //next attack is a BIG ATTACK at once). Each note hits TurnBigPower x one of its usual notes. Every note blocked PERFECT :
+        //the boss is STUNNED and the COUNTER hits TurnBigCounter times as hard (a CADENZA's was 2).
+        //The CADENZA was one note more x1.5 : REQUIEM on floor 1, 3 notes of 18 = 54 if none was blocked. LACRIMOSA is
+        //8 notes of 10 = 80, THE NINTH 9 of 9 = 81 (THE DEAF CROWN 12 a note), so a boss is harder unless its notes are blocked.
+        public static float TurnBigPhase = 0.5f;         // THE TURN : the share of its life where the second half starts
+        public static int TurnBigEvery = 3;
+        public static int TurnBigEveryLate = 2;
+        public static float TurnBigCounter = 3f;
+        //In the order of BossMove : None, LACRIMOSA, THE NINTH, ITALIEN, TE DEUM, ON ONE STRING, IN THE DARK
+        public static int[] TurnBigNotes = { 0, 8, 9, 5, 2, 10, 5 };                     // ITALIEN : at least this many (TurnItalienMost at most)
+        public static float[] TurnBigPower = { 1f, 0.8f, 0.75f, 0.75f, 1f, 0.6f, 0.55f }; // TE DEUM : TurnTeDeumStrike and TurnTeDeumShake instead
+        public static int TurnItalienMost = 10;          // ITALIEN : the band's skill notes it plays back, at most (the newest ones)
+        public static float TurnTeDeumStrike = 2.5f;     // TE DEUM : the staff comes down on everyone, x one note (THE COURT's floor was 1.5)
+        public static float TurnTeDeumShake = 1f;        //           then the floor shakes (a SHAKE, a ROLL note), everyone, x one note
+        public static float TurnTeDeumSelf = 0.08f;      //           its first note blocked PERFECT : the staff strikes its own foot, this share of its life
+        public static int TurnStringSteal = 1;           // ON ONE STRING : each note that gets through takes this much BREATH (no BARGAIN steal on top)
+        public static int TurnStringBack = 2;            //                every note blocked PERFECT : the band takes this much BREATH back
+        //THE NINTH : the gap before each note, x the usual TurnNoteGap. It cannot hear the beat, so the gaps are uneven and two
+        //long waits come in the middle (a swipe too early is a MISS). The first number is the ring's own time and is not used.
+        public static float[] TurnNinthGaps = { 1f, 0.6f, 1.8f, 0.6f, 0.6f, 2.2f, 0.7f, 0.6f, 1.6f };
 
         //ENEMY MOVES (Beta1 30 Oct, Data/Enemy.cs EnemyMove) : CHARGE and GUARD. Which enemy plays them is its Moves list,
         //the BLOCK of a GUARD is its GuardBlock x TurnFloorLife (THE DAMPER 14 is 22 / 29 / 38 on floor 1 / 2 / 3, THE MUTE CHOIR
