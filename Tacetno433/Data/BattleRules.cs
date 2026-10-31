@@ -94,13 +94,15 @@
         //the boss is STUNNED and the COUNTER hits TurnBigCounter times as hard (a CADENZA's was 2).
         //The CADENZA was one note more x1.5 : REQUIEM on floor 1, 3 notes of 18 = 54 if none was blocked. LACRIMOSA is
         //8 notes of 10 = 80, THE NINTH 9 of 9 = 81 (THE DEAF CROWN 12 a note), so a boss is harder unless its notes are blocked.
+        //A deeper floor's CADENZA had more notes (5 on floor 3), so the BIG ATTACK hits TurnBigFloor harder there to stay above it.
         public static float TurnBigPhase = 0.5f;         // THE TURN : the share of its life where the second half starts
         public static int TurnBigEvery = 3;
         public static int TurnBigEveryLate = 2;
         public static float TurnBigCounter = 3f;
         //In the order of BossMove : None, LACRIMOSA, THE NINTH, ITALIEN, TE DEUM, ON ONE STRING, IN THE DARK
         public static int[] TurnBigNotes = { 0, 8, 9, 5, 2, 10, 5 };                     // ITALIEN : at least this many (TurnItalienMost at most)
-        public static float[] TurnBigPower = { 1f, 0.8f, 0.75f, 0.75f, 1f, 0.6f, 0.55f }; // TE DEUM : TurnTeDeumStrike and TurnTeDeumShake instead
+        public static float[] TurnBigPower = { 1f, 0.8f, 0.75f, 1f, 1f, 0.6f, 0.55f };    // TE DEUM : TurnTeDeumStrike and TurnTeDeumShake instead
+        public static float[] TurnBigFloor = { 1f, 1.15f, 1.3f };                          // floor 1, 2, 3 : every note of a BIG ATTACK x this
         public static int TurnItalienMost = 10;          // ITALIEN : the band's skill notes it plays back, at most (the newest ones)
         public static float TurnTeDeumStrike = 2.5f;     // TE DEUM : the staff comes down on everyone, x one note (THE COURT's floor was 1.5)
         public static float TurnTeDeumShake = 1f;        //           then the floor shakes (a SHAKE, a ROLL note), everyone, x one note
@@ -864,6 +866,10 @@
         //Rest
         public static float BreatheRecover = 0.4f;   // free
         public static int DeepRestPrice = 35;        // full stamina
+        //THE WINGS (BOSSES, Beta1 31 Oct, docs/BETA1_DIRECTION.md 21.7) : the one room before each boss. The band rests there by
+        //itself (WingsRecover of its life), takes one star free, and can buy more stars, each dearer than the one before.
+        public static float WingsRecover = 0.4f;
+        public static int[] WingsStarPrice = { 45, 65, 90 };   // the 1st, 2nd and 3rd star bought there, no more after that
         public static int RehearseMax = 3;           // WEAPON TIERS (29 Oct) : the top tier of a weapon, I II III, the stars of the ATTACK (REHEARSAL, RehearsalList.Most)
         public static int WeaponTierPower = 2;       // each tier adds this much power (a rehearsal added 1 until the band of three, 29 Oct :
                                                      // an upgrade has to be felt, and three legends carry the whole run, BETA1_DIRECTION 9.6)

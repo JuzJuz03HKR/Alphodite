@@ -74,6 +74,13 @@ namespace Tacetno433.Screens
         private UiMotion[] optionMotion = new UiMotion[0];
         private UiMotion bandMotion = new UiMotion();
         private string[] cardLines = new string[0];   // each kind's line wrapped for the card, made in Load
+
+        //BOSSES (Beta1 31 Oct, docs/BETA1_DIRECTION.md 21.3 point 1) : the floor's boss stands at the end of the map from the
+        //first step, its name over it and its BIG ATTACK under the name. The card says its rule and what its BIG ATTACK does.
+        private Enemy boss;
+        private string bossName = "";
+        private string bossBig = "";
+        private string bossCardLine = "";
         private float cardShown;                      // the card eases in and out
         private RouteNode cardNode;                   // the place the card shows
         private bool[][] ahead = new bool[0][];       // the places the band can still get to from where it stands, made in Load
@@ -153,6 +160,17 @@ namespace Tacetno433.Screens
             cardLines = new string[RouteNodeInfo.Captions.Length];
             for (int t = 0; t < cardLines.Length; t++)
                 cardLines[t] = Gfx.WrapText(Game.StoryFont, RouteNodeInfo.Captions[t], CardW - 28, TextSize.StorySmall, 4);
+
+            //BOSSES : its words, made once
+            boss = run.BossOfFloor;
+            if (boss != null)
+            {
+                bossName = boss.Name;
+                bossBig = boss.BigName.Length > 0 ? Words.BigAttack + "   " + boss.BigName : "";
+                string rule = boss.TraitName.Length > 0 ? Gfx.WrapText(Game.StoryFont, boss.TraitName + " : " + boss.TurnTraitText, CardW - 28, TextSize.StorySmall, 3) : "";
+                string big = boss.BigName.Length > 0 ? Gfx.WrapText(Game.StoryFont, boss.BigName + " : " + boss.BigText, CardW - 28, TextSize.StorySmall, 4) : "";
+                bossCardLine = rule.Length > 0 && big.Length > 0 ? rule + "\n" + big : rule + big;
+            }
 
             //TACET : the hole the whole floor closes in on, and the page's light
             Dark = new TacetVoid();
@@ -739,6 +757,7 @@ namespace Tacetno433.Screens
             RunState run = Game.CurrentRun;
 
             DrawCard(sb, run);
+            DrawBossName(sb, run);
 
             //Top Bar
             bool warn = run.BossIsNext && run.Stage < run.StagesThisFloor;
@@ -783,12 +802,40 @@ namespace Tacetno433.Screens
                 if (d < RouteNodeInfo.Danger[type]) Gfx.Diamond(sb, px, art.Bottom + 21, 4, Palette.Paper * a);
                 else Gfx.DiamondOutline(sb, px, art.Bottom + 21, 4, Palette.LineGrey * a, 1f);
             }
-            Gfx.Text(sb, Game.BigFont, cardNode.Title, tx, art.Bottom + 38, Palette.Highlight * a, TextSize.Subtitle);
-            Gfx.Text(sb, Game.StoryFont, cardLines[type], tx, art.Bottom + 70, Palette.PaperDim * a, TextSize.StorySmall);
+            bool isBoss = cardNode.Type == NodeType.Boss && boss != null;                // BOSSES : its name, rule and BIG ATTACK
+            Gfx.Text(sb, Game.BigFont, isBoss ? bossName : cardNode.Title, tx, art.Bottom + 38, Palette.Highlight * a, TextSize.Subtitle);
+            Gfx.Text(sb, Game.StoryFont, isBoss ? bossCardLine : cardLines[type], tx, art.Bottom + 70, Palette.PaperDim * a, TextSize.StorySmall);
 
             //Reach : what the band can do about it now
             string reach = Array.IndexOf(run.Options, cardNode) >= 0 ? "CLICK OR ENTER TO GO" : (cardNode.Row > run.Stage ? "FURTHER ON" : "OUT OF REACH");
             Gfx.TextSpaced(sb, Game.Font, reach, tx, card.Bottom - 26, Palette.LineGrey * a, TextSize.Tiny, 2f);
+        }
+
+        //Boss Name (BOSSES) : the floor's boss stands at the end of the map, its name over its crown of thorns and its BIG ATTACK
+        //under the name, so the player knows from the first step what waits. Crisp words on top of the map's light.
+        private void DrawBossName(SpriteBatch sb, RunState run)
+        {
+            if (boss == null || bossName.Length == 0) return;
+            int last = run.Map.LastRow;
+            if (last >= spots.Length || spots[last].Length == 0) return;
+            float depth = depths[last][0];
+            if (depth <= NearestZ) return;
+            float a = UiMotion.Between(time, 0.6f, 0.5f) * MathHelper.Clamp(1.4f - depth * 0.08f, 0.55f, 1f);
+            if (a <= 0f) return;
+            //Beside it on the right, on a dark plate : over it the hole's light is too bright to read on
+            float r = PlaceR * BattleRules.UiRouteBoss * Size(depth);
+            Vector2 foot = spots[last][0];
+            float size = MathHelper.Clamp(Size(depth) * 1.1f, 0.7f, 1.2f);
+            float nameSize = TextSize.Small * size;
+            float x = foot.X + r * 1.5f + 14f;
+            float y = foot.Y - BossLift(depth) - 22f * size;
+            float wide = Math.Max(Gfx.SpacedWidth(Game.BigFont, bossName, nameSize, 3f), bossBig.Length > 0 ? Gfx.SpacedWidth(Game.Font, bossBig, TextSize.Tiny, 2f) : 0f);
+            Rectangle plate = new Rectangle((int)(x - 10f), (int)(y - 6f), (int)(wide + 20f), (int)(46f * size + 12f));
+            Gfx.Rect(sb, plate, Palette.Void * (0.85f * a));
+            Gfx.Rect(sb, plate.X, plate.Y, 2, plate.Height, Palette.Paper * (0.7f * a));
+            Gfx.Line(sb, foot.X + r * 1.2f, foot.Y - BossLift(depth), plate.X, plate.Center.Y, Palette.LineGrey * (0.6f * a), 1f);
+            Gfx.TextSpaced(sb, Game.BigFont, bossName, x, y, Palette.Highlight * a, nameSize, 3f);
+            if (bossBig.Length > 0) Gfx.TextSpaced(sb, Game.Font, bossBig, x, y + 28f * size, Palette.PaperDim * a, TextSize.Tiny, 2f);
         }
 
         //Footer : the stage number, the band button and the keys

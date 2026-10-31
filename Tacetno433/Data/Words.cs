@@ -40,7 +40,8 @@ namespace Tacetno433.Data
         public const string CutIn = "CUT IN";
         public const string Heal = "HEAL";            // LULLABY (THE LULL) : REST until 31 Oct, the route's REST is a place
         public const string Everyone = "EVERYONE";    // THE COURT (THE STAFF)
-        public const string BigAttack = "BIG ATTACK"; // CADENZA in the code : every third attack of a boss
+        public const string BigAttack = "BIG ATTACK"; // a boss's named BIG ATTACK (Enemy.Big, Beta1 31 Oct, the CADENZA's place), every third
+        public const string PhaseTwo = "PHASE 2";     // THE TURN (BOSSES) : a boss's life fell to half, its BIG ATTACK comes more often
 
         //The fight
         public const string Finale = "FINALE";        // SIGNATURE in the code : the conductor's big move, PERFECTs fill its diamonds
@@ -51,6 +52,7 @@ namespace Tacetno433.Data
 
         //The run
         public const string Workshop = "WORKSHOP";    // LUTHIER in the code : a place where one ATTACK gets a star, free
+        public const string Wings = "THE WINGS";      // BOSSES (Beta1 31 Oct) : the REST just before the boss, rest and rehearse in one
         public const string Applause = "APPLAUSE";    // ECHOES in the code : what a run leaves behind, spent in THE ARCHIVE
         public const string Shards = "SHARDS";
 
@@ -74,6 +76,7 @@ namespace Tacetno433.Data
         public static readonly string CutInLine = "it moves in the middle of your turn";
         public static readonly string HealLine = "this turn it heals instead of attacking";
         public static readonly string EveryoneLine = "its notes hit every musician standing";
+        public static readonly string BigAttackLine = "the boss's own big move. Block every note and it is " + Stunned;
         public static readonly string FinaleLine = "the conductor's big move. PERFECTs fill the diamonds, SPACE plays it";
 
         //Keywords : the words a skill's line can use, with their lines, for the skill card (KeywordsIn). STUNNED before STUN.

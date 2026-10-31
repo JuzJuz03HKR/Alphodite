@@ -59,6 +59,17 @@ namespace Tacetno433.Data
         public bool RehearsalPending;
         public bool MotifAfterRehearsal;
 
+        //BOSSES (Beta1 31 Oct, docs/BETA1_DIRECTION.md 21.8) : the boss of each floor, picked when the run starts so the map shows
+        //it from the floor's first step. The last floor's is the chosen conductor's own hollow (Enemy.HollowOf), the other two
+        //are two of the other five, never the same one twice. Places in EnemyList.All, kept by the save (bosses=).
+        public int[] Bosses = new int[0];
+
+        //THE WINGS (BOSSES, the user's pick 21.7) : the one room before the boss rests the band and rehearses it. WingsRested : the
+        //band has rested there (once), WingsFreeStar : the free star was taken, WingsBought : the stars bought there (the save's wings=)
+        public bool WingsRested;
+        public bool WingsFreeStar;
+        public int WingsBought;
+
         //Rehearsal Waiting : the rehearsal page is still to come
         public bool RehearsalWaiting
         {
@@ -167,7 +178,53 @@ namespace Tacetno433.Data
             Stamina = MaxStamina;
             PowerMultiplier = BattleRules.PowerBase + conductor.PushPower * BattleRules.PowerPerPoint;
 
+            PickBosses();                                                                                // BOSSES : all three floors' at once
             BeginFloor();
+        }
+
+        //Pick Bosses : BOSSES (21.8), the last floor's boss is the conductor's own hollow, the floors before take two of the others
+        public void PickBosses()
+        {
+            int floors = BattleRules.FloorsPerRun;
+            Bosses = new int[floors];
+            List<int> others = new List<int>();
+            int own = -1;
+            for (int i = 0; i < EnemyList.All.Length; i++)
+            {
+                Enemy e = EnemyList.All[i];
+                if (e.Kind != EnemyKind.Boss) continue;
+                if (Conductor != null && e.HollowOf != TurnKit.None && e.HollowOf == Conductor.Turn) own = i;
+                else others.Add(i);
+            }
+            for (int f = 0; f < floors; f++)
+            {
+                if (f == floors - 1 && own >= 0)
+                {
+                    Bosses[f] = own;
+                    continue;
+                }
+                int k = random.Next(others.Count);
+                Bosses[f] = others[k];
+                if (others.Count > 1) others.RemoveAt(k);                                               // never the same one twice
+            }
+        }
+
+        //Boss Of Floor : the boss waiting at the end of this floor, null for a run with no picks (it is picked as before then)
+        public Enemy BossOfFloor
+        {
+            get
+            {
+                int f = Floor - 1;
+                if (f < 0 || f >= Bosses.Length || Bosses[f] < 0 || Bosses[f] >= EnemyList.All.Length) return null;
+                Enemy e = EnemyList.All[Bosses[f]];
+                return e.Kind == EnemyKind.Boss ? e : null;
+            }
+        }
+
+        //In Wings : THE WINGS, the band is in the rest room of the row just before the boss
+        public bool InWings
+        {
+            get { return Chosen != null && Chosen.Type == NodeType.Rest && Chosen.Row == StagesThisFloor - 1; }
         }
 
         //Floor Begin : a new floor opens on its locked stage one, where its movement's card shows, and its whole map is made
@@ -176,6 +233,9 @@ namespace Tacetno433.Data
             Stage = 1;
             StagesThisFloor = 7 + random.Next(4);   // 7 to 10
             Options = new RouteNode[0];
+            WingsRested = false;                    // THE WINGS : a new floor, a new room before its boss
+            WingsFreeStar = false;
+            WingsBought = 0;
             BuildMap();
             RefreshLabels();
         }
@@ -445,7 +505,9 @@ namespace Tacetno433.Data
             if (Chosen != null && Chosen.Type == NodeType.Elite) kind = EnemyKind.Elite;
             if (Chosen != null && Chosen.Type == NodeType.Boss) kind = EnemyKind.Boss;
 
-            Enemy enemy = known != null ? known : EnemyList.Pick(kind, Movement, random);
+            Enemy enemy = known;
+            if (enemy == null && kind == EnemyKind.Boss) enemy = BossOfFloor;                     // BOSSES : the one the map showed
+            if (enemy == null) enemy = EnemyList.Pick(kind, Movement, random);
             Battle = new BattleState(this, enemy, random);
 
             //PACKS (Alpha 7 step 12) : the turn battle brings ordinary enemies along, more on deeper floors
@@ -555,6 +617,7 @@ namespace Tacetno433.Data
 
         //Map Build : the whole floor at once (Data/FloorMap.cs). Each row's kinds come from the same weights the paths
         //were rolled with before the map, the last row is the boss, then the rows are joined by the STAIRCASE.
+        //THE WINGS (BOSSES, Beta1 31 Oct) : the row before the boss is one REST that every way walks into (21.7).
         private void BuildMap()
         {
             int stages = StagesThisFloor;
@@ -564,9 +627,10 @@ namespace Tacetno433.Data
             Map.Rows[1] = new RouteNode[0];                                  // the opening holds no places
             for (int s = 2; s <= stages; s++)
             {
-                int count = s == stages ? 1 : (s == 2 ? 3 + mapDice.Next(2) : 2 + mapDice.Next(3));   // the first row is wide, 3 or 4
+                bool wings = s == stages - 1;
+                int count = s == stages || wings ? 1 : (s == 2 ? 3 + mapDice.Next(2) : 2 + mapDice.Next(3));   // the first row is wide, 3 or 4
                 RouteNode[] row = new RouteNode[count];
-                for (int c = 0; c < count; c++) row[c] = MakeNode(s == stages ? NodeType.Boss : PickType(s), s, c);
+                for (int c = 0; c < count; c++) row[c] = MakeNode(s == stages ? NodeType.Boss : (wings ? NodeType.Rest : PickType(s)), s, c);
 
                 //Variety Guard : if every place of a row rolled the same, change the first one,
                 //otherwise the player is not really being offered a choice

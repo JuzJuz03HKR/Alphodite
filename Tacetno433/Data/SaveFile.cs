@@ -226,6 +226,10 @@ namespace Tacetno433.Data
             //Route : the floor's whole map and the way the band came (Beta1), the paths on offer, and the one picked if the
             //band has walked into it. The paths are made again from the map when the run loads.
             lines.Add("map=" + run.Map.Write());
+            List<string> bosses = new List<string>();                                     // BOSSES (Beta1 31 Oct) : each floor's boss
+            for (int i = 0; i < run.Bosses.Length; i++) bosses.Add(run.Bosses[i].ToString());
+            lines.Add("bosses=" + string.Join(",", bosses));
+            lines.Add("wings=" + (run.WingsRested ? 1 : 0) + "," + (run.WingsFreeStar ? 1 : 0) + "," + run.WingsBought);   // THE WINGS
             List<string> path = new List<string>();
             for (int i = 0; i < run.MapPath.Count; i++) path.Add(run.MapPath[i].ToString());
             lines.Add("mappath=" + string.Join(",", path));
@@ -336,6 +340,17 @@ namespace Tacetno433.Data
             }
 
             run.RestoreMap(GetText(v, "map"), GetList(v, "mappath"));        // the map, the way the band came, the paths on offer
+
+            //BOSSES (Beta1 31 Oct) : each floor's boss. A save from before has none, Start picked them again for the loaded run.
+            int[] bosses = GetList(v, "bosses");
+            bool bossesFit = bosses.Length == BattleRules.FloorsPerRun;
+            for (int i = 0; i < bosses.Length; i++)
+                if (bosses[i] < 0 || bosses[i] >= EnemyList.All.Length || EnemyList.All[bosses[i]].Kind != EnemyKind.Boss) bossesFit = false;
+            if (bossesFit) run.Bosses = bosses;
+            int[] wings = GetList(v, "wings");                               // THE WINGS : what the band did in the room before the boss
+            run.WingsRested = wings.Length > 0 && wings[0] == 1;
+            run.WingsFreeStar = wings.Length > 1 && wings[1] == 1;
+            run.WingsBought = wings.Length > 2 ? Math.Max(0, wings[2]) : 0;
 
             int chosen = GetInt(v, "chosen", -1);
             run.Chosen = chosen >= 0 && chosen < run.Options.Length ? run.Options[chosen] : null;

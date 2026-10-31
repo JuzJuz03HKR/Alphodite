@@ -20,7 +20,7 @@ namespace Tacetno433.Screens
     //Its look is a first one : the VFX of a new star and of a legend wait for the user's references (16.14 point 5).
     public class RehearsalScreen : GameScreen
     {
-        public enum From { Fight, Rest }
+        public enum From { Fight, Rest, Wings }                  // Wings : THE WINGS (BOSSES), back to its room after the star
 
         //Rehearsal Layout
         public const float LineWidth = 340f;            // the legends' lines are wrapped to this (RehearsalList.PrepareText)
@@ -225,6 +225,11 @@ namespace Tacetno433.Screens
             {
                 run.MotifAfterRehearsal = false;
                 Game.Screens.Change(new MotifRewardScreen());
+                return;
+            }
+            if (from == From.Wings)
+            {
+                Game.Screens.Change(new RestScreen());                              // THE WINGS : more to do before the boss
                 return;
             }
             RunFlow.NextStage(Game);

@@ -18,8 +18,8 @@ namespace Tacetno433.Core
             MusicianList.ResetRehearsals();
 
             //Shapes : the six BIG ATTACKs on floor 1, notes / the first note / fast / on everyone / arrows hidden / uneven gaps /
-            //the SHAKE's place. REQUIEM 12 x 0.8 = 10, THE DEAF CROWN 12 x 0.75 = 9, THE NAMELESS MASTER 8 x 0.75 = 6 (no skill
-            //played : its own 7 notes), THE STAFF 14 x 2.5 = 35, THE DEVIL'S STRING 16 x 0.6 = 10 all one way, THE BLIND CANTOR 12 x 0.55 = 7
+            //the SHAKE's place. REQUIEM 12 x 0.8 = 10, THE DEAF CROWN 12 x 0.75 = 9, THE NAMELESS MASTER (no skill
+            //played : its own 7 notes, 8 x 1 = 8), THE STAFF 14 x 2.5 = 35, THE DEVIL'S STRING 16 x 0.6 = 10 all one way, THE BLIND CANTOR 12 x 0.55 = 7
             string shapes = "";
             string[] names = { "REQUIEM", "THE DEAF CROWN", "THE NAMELESS MASTER", "THE STAFF", "THE DEVIL'S STRING", "THE BLIND CANTOR" };
             for (int k = 0; k < names.Length; k++)
@@ -31,7 +31,7 @@ namespace Tacetno433.Core
                 if (k > 0) shapes += " / ";
                 shapes += BigShape(boss);
             }
-            report += Same("big shapes", "8 10 True False 0 0 -1 mixed / 9 9 False False 0 9 -1 mixed / 7 6 False False 0 0 -1 mixed / "
+            report += Same("big shapes", "8 10 True False 0 0 -1 mixed / 9 9 False False 0 9 -1 mixed / 7 8 False False 0 0 -1 mixed / "
                 + "2 35 False True 0 0 1 mixed / 10 10 True False 0 0 -1 one way / 5 7 False True 5 0 -1 mixed", shapes);
 
             //Every Third : its third attack is the first BIG ATTACK, then the sixth (BigIn back to 3 after it)

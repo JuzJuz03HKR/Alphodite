@@ -8,6 +8,13 @@ using Tacetno433.Data;
 
 namespace Tacetno433.Screens
 {
+    //THE WINGS (BOSSES, Beta1 31 Oct, docs/BETA1_DIRECTION.md 21.7, the user's pick : rest and upgrade in one room, like the rest
+    //stop before a boss in Limbus Company) : the REST of the row just before the boss (RunState.InWings) is the side of the stage.
+    //The band rests by itself as it walks in (WingsRecover), then the three cards are
+    //   REHEARSE        one star, free, once
+    //   REHEARSE MORE   one more star, paid, dearer each time (WingsStarPrice)
+    //   DEEP REST       all of its life, paid
+    //and the button WALK ON goes out to the boss. A star opens the rehearsal page, which comes back here (RehearsalScreen.From.Wings).
     //RestScreen : a quiet room. The band sits around a lamp and the player picks ONE thing:
     //   BREATHE    some stamina back, free
     //   REHEARSE   one move of the band gets a star, on the rehearsal page (REHEARSAL, 31 Oct, Screens/RehearsalScreen.cs).
@@ -24,8 +31,21 @@ namespace Tacetno433.Screens
         private const int Breathe = 0;
         private const int Rehearse = 1;
         private const int DeepRest = 2;
-        private static string[] optionNames = { BattleRules.TurnBattleOn ? "RECOVER" : "BREATHE", "REHEARSE", "DEEP REST" };   // step 15 : BREATH is the fight's skill points, rest gives LIFE
+        private static string[] restNames = { BattleRules.TurnBattleOn ? "RECOVER" : "BREATHE", "REHEARSE", "DEEP REST" };   // step 15 : BREATH is the fight's skill points, rest gives LIFE
+        private static string[] wingsNames = { "REHEARSE", "ONE MORE", "DEEP REST" };                                      // THE WINGS
+        private string[] optionNames = restNames;
         private static string[] optionNumerals = { "I", "II", "III" };
+
+        //THE WINGS : the cards' places in the room before the boss
+        private const int WingsFree = 0;
+        private const int WingsMore = 1;
+        private const int WingsDeep = 2;
+        private bool wings;
+        private string titleText = "A quiet room";
+        private string introText = "There is time for one thing before moving on.";
+        private string restedLine = "";
+        private string moveText = "MOVE ON";
+        private string hudWord = "REST";
 
         //Rest Layout
         private const int CardW = 300;
@@ -39,7 +59,7 @@ namespace Tacetno433.Screens
         //Wipe Word : the page's name in the wipe on the way here (WIPE WORD, the user's pick)
         public override string WipeWord
         {
-            get { return "A QUIET ROOM"; }
+            get { return Game.CurrentRun != null && Game.CurrentRun.InWings ? Words.Wings : "A QUIET ROOM"; }
         }
 
         private int hoverOption = -1;
@@ -63,6 +83,12 @@ namespace Tacetno433.Screens
         {
             RunState run = Game.CurrentRun;
             stageLine = "REST   /   " + run.StageLabel;
+            wings = run.InWings;
+            if (wings)
+            {
+                LoadWings(run);
+                return;
+            }
 
             optionTexts[Breathe] = Gfx.WrapText(Game.StoryFont, "Sit down, close your eyes. The band gets back "
                                    + (int)(BattleRules.BreatheRecover * 100) + " percent of its " + BattleRules.LifeWordLower + ".", CardW - 40, TextSize.StorySmall);
@@ -91,9 +117,62 @@ namespace Tacetno433.Screens
             return new Rectangle((TacetGame.ScreenW - total) / 2 + i * (CardW + 30), CardsY, CardW, CardH);
         }
 
+        //Load Wings : THE WINGS. The band rests as it walks in (once a floor), then the cards are made for what is left to do.
+        private void LoadWings(RunState run)
+        {
+            optionNames = wingsNames;
+            Enemy boss = run.BossOfFloor;
+            string bossName = boss != null ? boss.Name : "The boss";
+            stageLine = Words.Wings + "   /   " + run.StageLabel;
+            titleText = "The wings";
+            introText = bossName + " waits on the other side of the curtain.";
+            moveText = "WALK ON";
+            hudWord = Words.Wings;
+            if (!run.WingsRested)
+            {
+                int before = run.Stamina;
+                run.ChangeStamina((int)(run.MaxStamina * BattleRules.WingsRecover));
+                run.WingsRested = true;
+                restedLine = "The band rests in the wings.   " + BattleRules.LifeWord + " " + NumberText.Signed(run.Stamina - before);
+                SoundBank.Play(Sfx.RestRecover);
+            }
+            else restedLine = "The band has rested.   " + run.StaminaLabel;
+            WingsCards(run);
+
+            phase = Phase.Choose;
+            SoundBank.PlayMusic(Music.Rest);
+            Lens.Ambient = 0.36f;                                                    // a darker room than REST, the stage light past the curtain
+            Lens.SpotPower = 0f;
+            Lens.Vignette = 0.5f;
+            Lens.BloomThreshold = 0.7f;
+            Lens.BloomStrength = 0.4f;
+        }
+
+        //Wings Cards : the cards' lines and prices, made again after each choice (never in Draw)
+        private void WingsCards(RunState run)
+        {
+            optionTexts[WingsFree] = Gfx.WrapText(Game.StoryFont, run.WingsFreeStar ? "Taken. The free star of this room is gone."
+                                     : "One move of the band gets a star. Free, once.", CardW - 40, TextSize.StorySmall);
+            bool more = run.WingsBought < BattleRules.WingsStarPrice.Length;
+            optionTexts[WingsMore] = Gfx.WrapText(Game.StoryFont, more ? "One more star for SHARDS. Each one costs more than the last."
+                                     : "No more stars to buy before this boss.", CardW - 40, TextSize.StorySmall);
+            optionTexts[WingsDeep] = Gfx.WrapText(Game.StoryFont, "Pay for a real bed. The band gets back all of its " + BattleRules.LifeWordLower + ".",
+                                     CardW - 40, TextSize.StorySmall);
+            optionPrices[WingsFree] = "FREE";
+            optionPrices[WingsMore] = more ? BattleRules.WingsStarPrice[run.WingsBought] + " " + Words.Shards : "SOLD OUT";
+            optionPrices[WingsDeep] = BattleRules.DeepRestPrice + " " + Words.Shards;
+        }
+
         private bool OptionAllowed(int i)
         {
             RunState run = Game.CurrentRun;
+            if (wings)
+            {
+                if (i == WingsFree) return !run.WingsFreeStar && run.AnyStarLeft;
+                if (i == WingsMore) return run.AnyStarLeft && run.WingsBought < BattleRules.WingsStarPrice.Length
+                                           && run.Shards >= BattleRules.WingsStarPrice[run.WingsBought];
+                return run.Shards >= BattleRules.DeepRestPrice && run.Stamina < run.MaxStamina;
+            }
             if (i == DeepRest) return run.Shards >= BattleRules.DeepRestPrice && run.Stamina < run.MaxStamina;
             if (i == Breathe) return run.Stamina < run.MaxStamina;
             return run.AnyStarLeft;                                                  // REHEARSE : a move can still get a star
@@ -143,6 +222,11 @@ namespace Tacetno433.Screens
                 return;
             }
             optionMotion[option].Press();
+            if (wings)
+            {
+                ChooseInWings(run, option);
+                return;
+            }
 
             if (option == Breathe)
             {
@@ -163,6 +247,28 @@ namespace Tacetno433.Screens
                 SoundBank.Play(Sfx.UiConfirm);                                           // REHEARSE : the rehearsal page, then the map
                 Game.Screens.Change(new RehearsalScreen(RehearsalScreen.From.Rest));
             }
+        }
+
+        //Choose In Wings : THE WINGS, a star opens the rehearsal page (which comes back here), the bed stays in the room
+        private void ChooseInWings(RunState run, int option)
+        {
+            if (option == WingsDeep)
+            {
+                run.SpendShards(BattleRules.DeepRestPrice);
+                run.RestoreAllStamina();
+                SoundBank.Play(Sfx.RestRecover);
+                restedLine = "A real bed, a long night.   " + run.StaminaLabel;
+                WingsCards(run);
+                return;
+            }
+            if (option == WingsFree) run.WingsFreeStar = true;
+            else
+            {
+                run.SpendShards(BattleRules.WingsStarPrice[run.WingsBought]);
+                run.WingsBought++;
+            }
+            SoundBank.Play(Sfx.UiConfirm);
+            Game.Screens.Change(new RehearsalScreen(RehearsalScreen.From.Wings));
         }
 
         private void Done(string title, string text)
@@ -241,13 +347,19 @@ namespace Tacetno433.Screens
             float c = UiMotion.Between(time, 0.15f + BattleRules.UiEnterStagger * 2f, BattleRules.UiEnterTime);
             float slide = BattleRules.UiEnterSlide;
             Gfx.TextSpacedCentered(sb, Game.Font, stageLine, cx, 76 - (1f - a) * slide, Palette.LineGrey * a, TextSize.Tiny, 4f);
-            Gfx.TextCentered(sb, Game.BigFont, "A quiet room", cx, 122 - (1f - b) * slide, Palette.Paper * b, TextSize.Title);
-            Gfx.TextCentered(sb, Game.StoryFont, "There is time for one thing before moving on.", cx, 158 - (1f - c) * slide, Palette.PaperDim * c, TextSize.Story);
+            Gfx.TextCentered(sb, Game.BigFont, titleText, cx, 122 - (1f - b) * slide, Palette.Paper * b, TextSize.Title);
+            Gfx.TextCentered(sb, Game.StoryFont, introText, cx, 158 - (1f - c) * slide, Palette.PaperDim * c, TextSize.Story);
+            if (wings)                                                                   // THE WINGS : what the rest did, on a plate over the picture
+            {
+                float lineW = Gfx.SpacedWidth(Game.Font, restedLine, TextSize.Label, 2f);
+                Gfx.Rect(sb, new Rectangle((int)(cx - lineW / 2f - 18f), 394, (int)(lineW + 36f), 28), Palette.Void * (0.85f * c));
+                Gfx.TextSpacedCentered(sb, Game.Font, restedLine, cx, 400 - (1f - c) * slide, Palette.Highlight * c, TextSize.Label, 2f);
+            }
 
             if (phase == Phase.Choose) DrawOptions(sb);
             if (phase == Phase.Done) DrawDone(sb);
 
-            RunHud.DrawTop(sb, run, "REST");
+            RunHud.DrawTop(sb, run, hudWord);
             RunHud.DrawTips(sb, run);
         }
 
@@ -281,12 +393,12 @@ namespace Tacetno433.Screens
                 Gfx.Rect(sb, r.X + 20, r.Y + 50, r.Width - 40, 1, Palette.LineGrey * a);
                 Gfx.Text(sb, Game.StoryFont, optionTexts[i], r.X + 20, r.Y + 62, Palette.Paper * a, TextSize.StorySmall);
 
-                Ui.Tag(sb, optionPrices[i], r.X + 20, r.Bottom - 30, i == DeepRest, a);
+                Ui.Tag(sb, optionPrices[i], r.X + 20, r.Bottom - 30, wings ? i != WingsFree : i == DeepRest, a);
                 if (optionMotion[i].Flash > 0f) Gfx.DrawGlow(sb, r.Center.X, r.Center.Y, r.Width * 0.7f, Color.White * (0.5f * optionMotion[i].Flash));
             }
 
             float button = UiMotion.Between(time, 0.9f, BattleRules.UiEnterTime);
-            Ui.Command(sb, moveButton, "MOVE ON", "", moveMotion, button, false);
+            Ui.Command(sb, moveButton, moveText, "", moveMotion, button, false);
         }
 
         //Done : what the rest did

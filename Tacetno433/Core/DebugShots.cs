@@ -369,6 +369,9 @@ namespace Tacetno433.Core
             run.Chosen = run.Options[Math.Min(1, run.Options.Length - 1)];
             run.CurrentEvent = EventList.All[2];
             run.Maestro = true;                                                         // MAESTRO MODE is kept too
+            run.WingsRested = true;                                                     // THE WINGS (BOSSES) : rested, the free star taken, 2 bought
+            run.WingsFreeStar = true;
+            run.WingsBought = 2;
             run.Roster[0].Life = 7;                                                     // Alpha 7 : life between turn battles
             run.SyncOrder();                                                            // Beta1 : the band page's order, two traded
             Musician first = run.Order[0];
@@ -418,6 +421,8 @@ namespace Tacetno433.Core
                 report += Same("enemy", run.Battle.Enemy.Name, SaveFile.LoadedEnemy != null ? SaveFile.LoadedEnemy.Name : "none");
                 report += Same("pack", PackNames(run.Battle.Pack), PackNames(SaveFile.LoadedPack));      // PACKS (Alpha 7 step 12)
                 report += Same("event", run.CurrentEvent.Title, SaveFile.LoadedEvent != null ? SaveFile.LoadedEvent.Title : "none");
+                report += Same("bosses", string.Join(",", run.Bosses), string.Join(",", back.Bosses));                // BOSSES (Beta1 31 Oct)
+                report += Same("wings", "True True 2", back.WingsRested + " " + back.WingsFreeStar + " " + back.WingsBought);
                 report += Same("summary", run.Conductor.Name + "  /  FLOOR 2  /  STAGE 5", SaveFile.RunSummary());
 
                 //NO MORE ERAS (29 Oct) : a save from before can still hold a CROSSING (6) on its map, it loads as a ??? (Event)
@@ -487,7 +492,8 @@ namespace Tacetno433.Core
                 if (map.LastRow != run.StagesThisFloor || map.Count(map.LastRow) != 1 || map.Rows[map.LastRow][0].Type != NodeType.Boss) rowsWrong++;
                 for (int s = 2; s < map.LastRow; s++)
                 {
-                    if (map.Count(s) < 2 || map.Count(s) > 4) rowsWrong++;
+                    if (s == map.LastRow - 1) { if (map.Count(s) != 1 || map.Rows[s][0].Type != NodeType.Rest) rowsWrong++; }   // THE WINGS
+                    else if (map.Count(s) < 2 || map.Count(s) > 4) rowsWrong++;
                     for (int c = 0; c < map.Count(s); c++)
                     {
                         if (map.Rows[s][c].Next.Count == 0) deadEnds++;
@@ -499,6 +505,29 @@ namespace Tacetno433.Core
                 }
             }
             string report = Same("map reach", "0 0 0 0", unreached + " " + deadEnds + " " + crossings + " " + rowsWrong);
+
+            //BOSSES (Beta1 31 Oct) : the last floor's boss is the conductor's own hollow, the other two floors' are two different
+            //ones of the other five, 100 runs of each conductor shown
+            string finals = "";
+            string want = "";
+            int repeats = 0;
+            for (int c = 0; c < ConductorList.Shown.Length; c++)
+            {
+                Conductor conductor = ConductorList.Shown[c];
+                if (c > 0) { finals += " / "; want += " / "; }
+                want += conductor.Turn == TurnKit.Beethoven ? "THE DEAF CROWN" : (conductor.Turn == TurnKit.Fanny ? "THE NAMELESS MASTER" : (conductor.Turn == TurnKit.Bach ? "THE BLIND CANTOR" : "?"));
+                string last = "";
+                for (int m = 0; m < 100; m++)
+                {
+                    RunState run = new RunState();
+                    run.Start(conductor, game.StoryFont, RouteNodeInfo.CaptionWrapWidth);
+                    last = EnemyList.All[run.Bosses[run.Bosses.Length - 1]].Name;
+                    if (run.Bosses[0] == run.Bosses[1] || run.Bosses[0] == run.Bosses[2] || run.Bosses[1] == run.Bosses[2]) repeats++;
+                    if (EnemyList.All[run.Bosses[0]].HollowOf == conductor.Turn || EnemyList.All[run.Bosses[1]].HollowOf == conductor.Turn) repeats++;
+                }
+                finals += last;
+            }
+            report += Same("last boss", want + " 0", finals + " " + repeats);
 
             //Elite : the event's fight takes the spot and the ways of the place it happened in
             RunState walk = new RunState();
@@ -927,6 +956,12 @@ namespace Tacetno433.Core
             if (name == "shop" || name == "shopleave" || name == "shopbuy") screen = new ShopScreen();
             if (name.StartsWith("event")) screen = new EventScreen();
             if (name == "rest") screen = new RestScreen();
+            if (name == "wings")                                                       // THE WINGS (BOSSES, Beta1 31 Oct) : the room before the boss
+            {
+                game.CurrentRun.Chosen = game.CurrentRun.Map.Rows[game.CurrentRun.StagesThisFloor - 1][0];
+                game.CurrentRun.Shards = 120;
+                screen = new RestScreen();
+            }
             if (name == "curtain" || name == "curtainwin") screen = new CurtainCallScreen(name == "curtainwin");
 
             game.Screens.ChangeNow(screen);

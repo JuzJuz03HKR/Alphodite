@@ -758,6 +758,7 @@ namespace Tacetno433.Battle
             Enemy e = enemy.Enemy;
             int big = (int)e.Big;
             enemy.IntentBig = true;
+            hit = (int)Math.Round(hit * BattleRules.TurnBigFloor[Floor - 1]);                       // deeper floors, a harder BIG ATTACK
             int each = Math.Max(1, (int)Math.Round(hit * BattleRules.TurnBigPower[big]));
 
             //Its phrases one after another, round again until it has all its notes (LACRIMOSA, THE NINTH, IN THE DARK)
