@@ -179,6 +179,7 @@ namespace Tacetno433.Screens
         private void UpdateMarks(float dt)
         {
             UpdateAim(dt);
+            UpdateFriendRow(dt);                                                         // FRIEND PICK (BattleScreen.Friends.cs)
             BuildMarks();
 
             //The pointer on an icon : its line, only while the bar is written (nothing to read while it plays)
@@ -737,7 +738,7 @@ namespace Tacetno433.Screens
         private void DrawSkillCard(SpriteBatch sb)
         {
             if (!aimOn || aimPlaying || aimCommand < 0 || stepFor != null) return;
-            Rectangle r = cardBox;
+            Rectangle r = cardShown;                                                     // FRIEND PICK : over the row while it is open
             float rise = Smooth(Math.Min(1f, aimTime / 0.12f));
             r.Y += (int)((1f - rise) * 8f);
             float a = rise;

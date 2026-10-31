@@ -173,7 +173,7 @@ namespace Tacetno433.Screens
 
         private const string HintPlan = "CLICK A MUSICIAN, THEN AN ENEMY OR A SKILL   /   ENTER = PLAY THE BAR";
         private const string HintEnemy = "CLICK AN ENEMY   /   RIGHT CLICK = BACK";
-        private const string HintAlly = "CLICK A MUSICIAN   /   RIGHT CLICK = BACK";
+        private const string HintAlly = "CLICK A FRIEND OR PRESS ITS NUMBER   /   RIGHT CLICK = BACK";
         private const string HintSwing = "SWIPE THE WAY THE ARROW POINTS AS THE RING CLOSES";
         private const string HintParry = "SWIPE THE ARROW'S WAY TO BLOCK EACH NOTE";
         private const string HintHold = "KEEP HOLDING";
@@ -662,6 +662,18 @@ namespace Tacetno433.Screens
 
             bool forAlly = pending != null && pending.Target == SkillTarget.Ally;
             hover = forAlly ? MusicianUnderPointer(false) : EnemyUnderPointer();
+            if (forAlly)
+            {
+                //FRIEND PICK (BattleScreen.Friends.cs) : the big cards over the commands, a click or a number
+                Fighter card = FriendUnderPointer();
+                if (card != null) hover = card;
+                Fighter keyed = FriendByKey();
+                if (keyed != null)
+                {
+                    if (battle.PlanSkill(selected, pending, keyed)) AfterWrite();
+                    return;
+                }
+            }
             if (forAlly && hover != null && !battle.CanAim(selected, pending, hover)) hover = null;   // SHIELD, THE LESSON : never at themself
             if (hover == null || !Input.MouseClicked()) return;
 
@@ -1606,7 +1618,7 @@ namespace Tacetno433.Screens
                 battle.Events.Add(new TurnEvent(TurnEventKind.Blocked, second, 6));
                 ShowEvents();
             }
-            else if (pic == "battleaim" || pic == "battlepick" || pic == "battleheal" || pic == "battletip" || pic == "battlechakram")
+            else if (pic == "battleaim" || pic == "battlepick" || pic == "battleheal" || pic == "battletip" || pic == "battlechakram" || pic == "battlefriend")
             {
                 //MARKS AND AIM (Beta1 30 Oct, block 1 item 4). battleaim : the pointer on the front musician's first skill, its card
                 //and the rings of the enemies it could go to. battlepick : the second skill waiting for its target, the pointer on
@@ -1630,6 +1642,17 @@ namespace Tacetno433.Screens
                 {
                     pending = SkillList.Second(MusicianList.All[7]);
                     view = View.Target;
+                }
+                if (pic == "battlefriend" && battle.Party.Count > 2)
+                {
+                    //FRIEND PICK (31 Oct) : QUANTZ's THE LESSON waits for its friend, the row is up over the commands with PAGANINI
+                    //and PFUNDT, PAGANINI is hurt and has IL CANNONE written, the pointer is on PAGANINI's card
+                    battle.Party[0].Hp = battle.Party[0].MaxHp * 3 / 5;
+                    battle.PlanSkill(battle.Party[0], SkillList.Second(battle.Party[0].Musician), FirstStanding());
+                    Select(battle.Party[1]);
+                    pending = commandSkill[2];
+                    view = View.Target;
+                    RefreshPreview();
                 }
                 if (pic == "battletip")
                 {
@@ -1762,6 +1785,7 @@ namespace Tacetno433.Screens
             if (!planning && !swiping && barHits > 0) DrawBarCount(sb);
             DrawAimArc(sb);
             DrawBottom(sb, planning);
+            DrawFriendRow(sb);                                                    // FRIEND PICK : the friends a skill can go to, over the commands
             DrawSkillCard(sb);
             if (practice) DrawCoach(sb);
             if (stepFor != null && planning) DrawStepPick(sb);                             // INSPIRED
@@ -2254,7 +2278,8 @@ namespace Tacetno433.Screens
                         Color kind = Palette.Kind(k == 0 ? SkillKind.Attack : s.Kind);                 // SKILL KIND : ATTACK is an attack
                         Rectangle box = commandBox[k];
                         float a = usable ? 1f : 0.35f;
-                        Ui.Button(sb, box, k == 0 ? WordAttack : s.Name, commandKey[k], lit, usable, 1f, kind, CommandIconRoom);
+                        string key = friendOpen > 0f ? "" : commandKey[k];                              // FRIEND PICK : 1 2 3 pick a friend now
+                        Ui.Button(sb, box, k == 0 ? WordAttack : s.Name, key, lit, usable, 1f, kind, CommandIconRoom);
 
                         //MARKS AND AIM : the command's icon after the kind's band (leaning with the button under the pointer), who it
                         //is for over it, its BREATH under the icon
