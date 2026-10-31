@@ -181,7 +181,8 @@ namespace Tacetno433.Screens
         private const string CoachSignature = "The diamonds are full. Press SPACE for the " + Words.Finale + ".";
         private const string CoachSignatureSwipe = "Draw the 4/4 shape : DOWN, LEFT, RIGHT, UP.";
         private const string CoachWin = "That is all of it. Now win the fight.";
-        private static readonly Rectangle coachBox = new Rectangle(240, 64, 800, 60);
+        private static readonly Rectangle coachBox = new Rectangle(240, 64, 800, 74);   // 60 until 31 Oct : as tall as THE BAND's cards now
+        private const int CoachDown = 7;                   //   its words this much lower, to stay in the middle
         private bool[] learned = new bool[4];              // one per Lesson
         private int learnedCount;
         private string coachLine = CoachPlay;
@@ -1345,10 +1346,10 @@ namespace Tacetno433.Screens
         private void DrawCoach(SpriteBatch sb)
         {
             Ui.Panel(sb, coachBox, 1f);
-            Ui.Tag(sb, "PRACTICE", coachBox.X + 18, coachBox.Y + 10, true, 1f);
-            Ui.Pips(sb, coachBox.X + 26, coachBox.Y + 44, learnedCount, learned.Length, 5f, 15f, 1f);
-            Gfx.Text(sb, Game.StoryFont, coachLine, coachBox.X + 130, coachBox.Y + 16, Palette.Paper, TextSize.StorySmall);
-            Ui.KeyChipRight(sb, "ESC", coachBox.Right - 14, coachBox.Y + 30, Palette.PaperDim);
+            Ui.Tag(sb, "PRACTICE", coachBox.X + 18, coachBox.Y + CoachDown + 10, true, 1f);
+            Ui.Pips(sb, coachBox.X + 26, coachBox.Y + CoachDown + 44, learnedCount, learned.Length, 5f, 15f, 1f);
+            Gfx.Text(sb, Game.StoryFont, coachLine, coachBox.X + 130, coachBox.Y + CoachDown + 16, Palette.Paper, TextSize.StorySmall);
+            Ui.KeyChipRight(sb, "ESC", coachBox.Right - 14, coachBox.Y + CoachDown + 30, Palette.PaperDim);
         }
 
         //Ally For : the first musician this skill can be played at (SHIELD and THE LESSON never at the one who plays it)
@@ -1547,7 +1548,61 @@ namespace Tacetno433.Screens
                 battle.Events.Add(new TurnEvent(TurnEventKind.Blocked, second, 6));
                 ShowEvents();
             }
-            else if (pic == "battleaim" || pic == "battlepick" || pic == "battleheal" || pic == "battletip" || pic == "battlechakram" || pic == "battlefriend")
+            else if (pic == "battlelong")
+            {
+                //THE BAND row (31 Oct, docs/BETA1_DIRECTION.md 19.7) : each musician writes the skill with the longer name (PFUNDT's
+                //THUNDER CALL ran into "/ 54" until the move had a line of its own under the life)
+                battle.Breath = 10;
+                for (int i = 0; i < battle.Party.Count; i++)
+                {
+                    Fighter m = battle.Party[i];
+                    Skill one = SkillList.First(m.Musician);
+                    Skill two = SkillList.Second(m.Musician);
+                    Skill s = one.Name.Length >= two.Name.Length ? one : two;
+                    battle.PlanSkill(m, s, s.Target == SkillTarget.Enemy ? FirstStanding() : (s.Target == SkillTarget.Ally ? AllyFor(m, s) : null));
+                }
+                Select(battle.Party[0]);
+                RefreshPreview();
+            }
+            else if (pic == "battlebig" || pic == "battlebigturn")
+            {
+                //NO LIMIT (31 Oct, docs/BETA1_DIRECTION.md 20) : numbers past 999 wherever a fight shows one. battlebig : the plan, the
+                //enemies with 4 and 5 digit life, the front one hurt and about to hit for 1250 a note, PAGANINI with 1234 of 1500.
+                //battlebigturn : the same while the turn plays, its TURN TOTAL at 12345 (it stopped at 999 until then).
+                int[] life = { 12345, 2345, 1560, 99999 };
+                for (int i = 0; i < battle.Enemies.Count; i++)
+                {
+                    Fighter e = battle.Enemies[i];
+                    e.MaxHp = life[i % life.Length];
+                    e.Hp = e.MaxHp - (i == 0 ? 1111 : 0);
+                    Name(e);                                                            // its "/ 12345"
+                }
+                Fighter first = battle.Enemies[0];
+                first.IntentNotes = new int[] { 1250, 1250 };
+                first.IntentWays = new Flick[] { Flick.Left, Flick.Right };
+                first.IntentLate = new bool[2];
+                battle.Party[0].MaxHp = 1500;
+                battle.Party[0].Hp = 1234;
+                Name(battle.Party[0]);
+                battle.Events.Clear();
+                if (pic == "battlebigturn")
+                {
+                    battle.PlayBar();
+                    NextStep();
+                    battle.Events.Clear();
+                    barHits = 12;
+                    barDamage = 12345;
+                    barHitsText = NumberText.Get(barHits);
+                    barDamageText = NumberText.Get(barDamage);
+                }
+                else
+                {
+                    battle.Breath = 10;
+                    Select(battle.Party[0]);
+                    RefreshPreview();
+                }
+            }
+            else if (pic == "battleaim" || pic == "battlepick" || pic == "battleheal" || pic == "battletip" || pic == "battlechakram" || pic == "battlefriend" || pic == "battleshield")
             {
                 //MARKS AND AIM (Beta1 30 Oct, block 1 item 4). battleaim : the pointer on the front musician's first skill, its card
                 //and the rings of the enemies it could go to. battlepick : the second skill waiting for its target, the pointer on
@@ -1580,6 +1635,16 @@ namespace Tacetno433.Screens
                     battle.PlanSkill(battle.Party[0], SkillList.Second(battle.Party[0].Musician), FirstStanding());
                     Select(battle.Party[1]);
                     pending = commandSkill[2];
+                    view = View.Target;
+                    RefreshPreview();
+                }
+                if (pic == "battleshield" && battle.Party.Count > 2)
+                {
+                    //SHIELD on the FRIEND ROW (31 Oct, docs/BETA1_DIRECTION.md 19.7) : DUPORT's SHIELD lent to QUANTZ for the picture,
+                    //waiting for its friend, the pointer on PAGANINI's card. Its line HITS GO TO ... ran out of the card until then.
+                    battle.Party[0].Hp = battle.Party[0].MaxHp * 3 / 5;
+                    Select(battle.Party[1]);
+                    pending = SkillList.First(MusicianList.All[6]);                     // DUPORT's SHIELD
                     view = View.Target;
                     RefreshPreview();
                 }
@@ -1796,8 +1861,10 @@ namespace Tacetno433.Screens
                 }
                 else
                 {
-                    Gfx.Text(sb, Game.Font, NumberText.Get(f.Hp), r.X + 8, r.Y + 33, Palette.Highlight * a, TextSize.Label);
-                    Gfx.Text(sb, Game.Font, maxLabel[f], r.X + 40, r.Y + 34, Palette.LineGrey * a, TextSize.Tiny);
+                    //NO LIMIT : the most stays where it was, and moves right only for a life of 4 digits or more
+                    string hp = NumberText.Get(f.Hp);
+                    Gfx.Text(sb, Game.Font, hp, r.X + 8, r.Y + 33, Palette.Highlight * a, TextSize.Label);
+                    Gfx.Text(sb, Game.Font, maxLabel[f], Math.Max(r.X + 40, r.X + 12 + Gfx.TextWidth(Game.Font, hp, TextSize.Label)), r.Y + 34, Palette.LineGrey * a, TextSize.Tiny);
                 }
 
                 //FRIEND MARK : a skill for this musician (or one that could be picked) marks the card, where the move would show
@@ -1805,19 +1872,20 @@ namespace Tacetno433.Screens
                 bool marked = FriendAimed(f, out fullMark);
                 if (marked) DrawFriendMark(sb, r.Right - 36, r.Y + 15, 8f, fullMark, false);   // top right, clear of the life bar
 
-                //The Move : in the plan, what this musician will play and where in the bar
+                //The Move : in the plan, what this musician will play (on its own line under the life, so a long name such as
+                //THUNDER CALL or NAPOLEON'S DENT never runs into "/ 54") and where in the bar (the number at the top right)
                 if (planning && !f.Down && !marked)
                 {
                     BarMove move = battle.MoveOf(f);
                     int at = previewMoves.IndexOf(move);
                     if (move != null)
                     {
-                        Gfx.TextRight(sb, Game.Font, move.Skill == null ? WordAttack : move.Skill.Name, r.Right - 8, r.Y + 35, Palette.Highlight, TextSize.Tiny);
+                        Gfx.TextRight(sb, Game.Font, move.Skill == null ? WordAttack : move.Skill.Name, r.Right - 8, r.Y + ChipMoveY, Palette.Highlight, TextSize.Tiny);
                         if (at >= 0 && clear) Gfx.TextRight(sb, Game.Font, NumberText.Get(OrderNumber(at)), r.Right - 8, r.Y + 3, Palette.Highlight, TextSize.Body);
                         else if (at >= 0) Gfx.TextRight(sb, Game.BigFont, NumberText.Get(OrderNumber(at)), r.Right - 8, r.Y + 2, Palette.Highlight, TextSize.Small);
                     }
                     else if (battle.CanPlan(f))
-                        Gfx.TextRight(sb, Game.Font, WordAttack, r.Right - 8, r.Y + 35, Palette.LineGrey, TextSize.Tiny);   // nothing written : it ATTACKs
+                        Gfx.TextRight(sb, Game.Font, WordAttack, r.Right - 8, r.Y + ChipMoveY, Palette.LineGrey, TextSize.Tiny);   // nothing written : it ATTACKs
                 }
 
                 //Target Mark : the musician an enemy's next attack lands on (SHIELD : the one standing in front), a frame and a
@@ -1887,21 +1955,25 @@ namespace Tacetno433.Screens
                 float a = PlateAlpha(f);
                 if (battle.Current == f) Gfx.Rect(sb, plate.X, plate.Bottom + 2, plate.Width, 3, Palette.Accent);
 
-                string name = f.Name.Length > 12 || plate.Width < 150 ? shortName[f] : f.Name;   // a long name, or a crowded row : the short one
+                string life = NumberText.Get(f.Hp);
+                float lifeSize = !Settings.ClearFight ? TextSize.Label : (plate.Width >= 150 ? TextSize.Heading : TextSize.Body);
+                bool most;
+                float nameSize;
+                string name = PlateName(f, plate, Gfx.TextWidth(Game.Font, life, lifeSize), out most, out nameSize);
                 if (Settings.ClearFight)
                 {
-                    DrawClearPlate(sb, f, plate, name, a);
+                    DrawClearPlate(sb, f, plate, name, nameSize, life, lifeSize, most, a);
                     continue;
                 }
                 Gfx.Rect(sb, plate, Palette.Void * 0.6f);
-                Gfx.TextSpaced(sb, Game.Font, name, plate.X + 6, plate.Y + 4, Palette.Paper * a, TextSize.Label, 1f);
-                if (plate.Width >= 150)
+                Gfx.TextSpaced(sb, Game.Font, name, plate.X + 6, plate.Y + 4, Palette.Paper * a, nameSize, 1f);
+                if (most)
                 {
                     float maxWidth = Gfx.TextWidth(Game.Font, maxLabel[f], TextSize.Tiny);
                     Gfx.TextRight(sb, Game.Font, maxLabel[f], plate.Right - 6, plate.Y + 6, Palette.LineGrey * a, TextSize.Tiny);
-                    Gfx.TextRight(sb, Game.Font, NumberText.Get(f.Hp), plate.Right - 10 - maxWidth, plate.Y + 4, Palette.Highlight * a, TextSize.Label);
+                    Gfx.TextRight(sb, Game.Font, life, plate.Right - 10 - maxWidth, plate.Y + 4, Palette.Highlight * a, lifeSize);
                 }
-                else Gfx.TextRight(sb, Game.Font, NumberText.Get(f.Hp), plate.Right - 6, plate.Y + 4, Palette.Highlight * a, TextSize.Label);   // a crowded row : no room for the most
+                else Gfx.TextRight(sb, Game.Font, life, plate.Right - 6, plate.Y + 4, Palette.Highlight * a, lifeSize);   // a crowded row : no room for the most
                 Rectangle bar = new Rectangle(plate.X + 6, plate.Y + 21, plate.Width - 12, 5);
                 Gfx.Bar(sb, bar, f.Hp / (float)f.MaxHp, Palette.Stage * a, Palette.Paper * a);
                 if (f.Down) continue;
@@ -1912,21 +1984,41 @@ namespace Tacetno433.Screens
             }
         }
 
+        //Plate Name (NO LIMIT, 31 Oct) : what fits on an enemy's plate beside its life, so a long name never runs into a big
+        //number (THE DAMPER beside 2345 / 2345 did, and a 3 digit life could already on a plate of 150). In this order : the full
+        //name, the short one (a long name and a crowded row always take it), the most ("/ 2345") left out, the name a size
+        //smaller. The most shows on a wide plate only. Measured while drawing (no text is made), at most four times a plate.
+        private string PlateName(Fighter f, Rectangle plate, float lifeWidth, out bool most, out float nameSize)
+        {
+            float room = plate.Width - 18;                                            // 6 at each side, 6 between name and life
+            most = plate.Width >= 150;
+            nameSize = TextSize.Label;
+            string name = f.Name.Length > 12 || plate.Width < 150 ? shortName[f] : f.Name;   // a long name, or a crowded row : the short one
+            float numbers = lifeWidth + (most ? Gfx.TextWidth(Game.Font, maxLabel[f], TextSize.Tiny) + 4f : 0f);
+            if (Gfx.SpacedWidth(Game.Font, name, nameSize, 1f) + numbers > room) name = shortName[f];
+            if (most && Gfx.SpacedWidth(Game.Font, name, nameSize, 1f) + numbers > room)
+            {
+                most = false;
+                numbers = lifeWidth;
+            }
+            if (Gfx.SpacedWidth(Game.Font, name, nameSize, 1f) + numbers > room) nameSize = TextSize.Tiny;
+            return name;
+        }
+
         //Clear Plate (CLEAR FIGHT) : the enemy's plate solid with a thin edge, so it reads over TACET's light. The name on the
         //left, the life big on the right in plain upright figures (its most beside it when there is room), the bar under them.
-        private void DrawClearPlate(SpriteBatch sb, Fighter f, Rectangle plate, string name, float a)
+        private void DrawClearPlate(SpriteBatch sb, Fighter f, Rectangle plate, string name, float nameSize, string life, float lifeSize, bool most, float a)
         {
             Gfx.Rect(sb, plate, Palette.Void * (BattleRules.ClearPlate * Math.Max(a, 0.5f)));
             Gfx.RectOutline(sb, plate, Palette.LineGrey * (0.5f * a), 1);
-            Gfx.TextSpaced(sb, Game.Font, name, plate.X + 6, plate.Y + 6, Palette.Paper * a, TextSize.Label, 1f);
+            Gfx.TextSpaced(sb, Game.Font, name, plate.X + 6, plate.Y + 6, Palette.Paper * a, nameSize, 1f);
             float right = plate.Right - 6;
-            if (plate.Width >= 150)
+            if (most)
             {
                 Gfx.TextRight(sb, Game.Font, maxLabel[f], right, plate.Y + 9, Palette.LineGrey * a, TextSize.Tiny);
                 right -= Gfx.TextWidth(Game.Font, maxLabel[f], TextSize.Tiny) + 4;
             }
-            if (plate.Width >= 150) Gfx.TextRight(sb, Game.Font, NumberText.Get(f.Hp), right, plate.Y + 1, Palette.Highlight * a, TextSize.Heading);
-            else Gfx.TextRight(sb, Game.Font, NumberText.Get(f.Hp), right, plate.Y + 4, Palette.Highlight * a, TextSize.Body);     // a crowded row : a size smaller
+            Gfx.TextRight(sb, Game.Font, life, right, plate.Y + (plate.Width >= 150 ? 1 : 4), Palette.Highlight * a, lifeSize);   // a crowded row : a size smaller
             Rectangle bar = new Rectangle(plate.X + 6, plate.Y + 28, plate.Width - 12, 6);
             Gfx.Bar(sb, bar, f.Hp / (float)f.MaxHp, Palette.Stage * a, Palette.Paper * a);
             if (f.Down) return;
@@ -1970,23 +2062,24 @@ namespace Tacetno433.Screens
                 if (f.IntentNotes.Length == 0) continue;
 
                 float row = f.IntentNotes.Length * IntentNoteStep;
+                float room = IntentRoom(f);                                            // NO LIMIT : wider for a number of 4 digits or more
                 float lift = 44f;                                                      // CLEAR FIGHT : the name it is for sits this far above,
                 for (int n = 0; n < f.IntentNotes.Length; n++)                         //   higher when a note's arrow points up
                     if (f.IntentWays[n] == Flick.Up) lift = 64f;
                 if (Settings.ClearFight)
                 {
                     //CLEAR FIGHT : a solid plate behind the attack, the number in plain upright figures, and who it is for
-                    Gfx.Rect(sb, new Rectangle((int)(left - 8), (int)(cy - 17), (int)(IntentIcon + 6f + IntentNumberRoom + row + 14), 34), Palette.Void * (BattleRules.ClearPlate * ia));
+                    Gfx.Rect(sb, new Rectangle((int)(left - 8), (int)(cy - 17), (int)(IntentIcon + 6f + room + row + 14), 34), Palette.Void * (BattleRules.ClearPlate * ia));
                     Gfx.Text(sb, Game.Font, NumberText.Get(f.IntentNotes[0]), x, cy - Game.Font.LineSpacing * TextSize.Heading / 2f, Palette.Highlight * ia, TextSize.Heading);
                     if (f.IntentTarget != null && !f.IntentAll) DrawAimedAt(sb, battle.HitTarget(f), r.Center.X, cy - lift, ia);
                 }
                 else Gfx.Text(sb, Game.BigFont, NumberText.Get(f.IntentNotes[0]), x, cy - 16, Palette.Highlight * ia, TextSize.Small);
                 for (int n = 0; n < f.IntentNotes.Length; n++)
-                    NoteGlyph.Note(sb, Game.BigFont, x + IntentNumberRoom + IntentNoteStep * (n + 0.5f), cy, f.IntentWays[n], 0.46f, ia, n < f.IntentLate.Length && f.IntentLate[n]);
+                    NoteGlyph.Note(sb, Game.BigFont, x + room + IntentNoteStep * (n + 0.5f), cy, f.IntentWays[n], 0.46f, ia, n < f.IntentLate.Length && f.IntentLate[n]);
                 if (f.IntentCadenza || f.IntentAll || f.IntentHeavy)                    // CHARGE : the charged blow says so like a CADENZA (BIG ATTACK)
                     Gfx.TextSpacedCentered(sb, Game.Font, f.IntentAll ? Words.Everyone : (f.IntentHeavy ? Words.Charged : Words.BigAttack), r.Center.X, cy - (Settings.ClearFight && !f.IntentAll ? lift + 22f : 40f), Palette.Highlight * (ia * (0.7f + 0.3f * (float)Math.Sin(time * 6f))), TextSize.Label, 3f);
                 if (f.Staggered)
-                    Gfx.Line(sb, x - 6, cy, x + IntentNumberRoom + 6f + row, cy, Palette.Highlight * ia, 2f);   // OFF-BEAT : it loses its next turn, this move waits for the one after
+                    Gfx.Line(sb, x - 6, cy, x + room + 6f + row, cy, Palette.Highlight * ia, 2f);   // OFF-BEAT : it loses its next turn, this move waits for the one after
             }
         }
 

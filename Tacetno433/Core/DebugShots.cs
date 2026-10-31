@@ -96,13 +96,14 @@ namespace Tacetno433.Core
                 Input.MousePos = shot == "teampickfull" ? new Vector2(640f + (mouseClock > 0.2f ? 1f : 0f), 300f) : new Vector2(900f, 300f);
                 return;
             }
-            if (shot.StartsWith("battleaim") || shot.StartsWith("battleheal") || shot.StartsWith("battlepick") || shot.StartsWith("battlechakram") || shot.StartsWith("battletip") || shot.StartsWith("battlefriend"))
+            if (shot.StartsWith("battleaim") || shot.StartsWith("battleheal") || shot.StartsWith("battlepick") || shot.StartsWith("battlechakram") || shot.StartsWith("battletip") || shot.StartsWith("battlefriend")
+                || shot.StartsWith("battleshield"))
             {
                 //MARKS AND AIM (block 1 item 4) : on the first skill's command, on the middle enemy, on the first enemy's status.
-                //FRIEND PICK (31 Oct) : on the first friend's card over the commands.
+                //FRIEND PICK (31 Oct) : on the first friend's card over the commands (SHIELD's row too).
                 if (shot.StartsWith("battleaim") || shot.StartsWith("battleheal")) Input.MousePos = new Vector2(680f, 627f);
                 else if (shot.StartsWith("battletip")) Input.MousePos = new Vector2(743f, 281f);
-                else if (shot.StartsWith("battlefriend")) Input.MousePos = new Vector2(535f, 520f);
+                else if (shot.StartsWith("battlefriend") || shot.StartsWith("battleshield")) Input.MousePos = new Vector2(535f, 520f);
                 else Input.MousePos = new Vector2(995f, 380f);
                 return;
             }
@@ -856,7 +857,7 @@ namespace Tacetno433.Core
         //       duel duelcombo duelboss duelcutin duelpause dueldouble dueltremolo duelfermata duelfire duelrepeat finale
         //       result defeat reward shop shopleave event eventchair rest curtain curtainwin
         //       rewardpick rewardtilt shopbuy (Beta1 round 1 : a card picked, the pointed card leaning, a motif bought, e.g. rewardpick@80)
-        //       battle battleswing battleskill battleparry battlestatus (Alpha 7, use a few frames, e.g. battleswing@2) battlewin battlelose (Beta1, TACET's dark) battleslash battleshot battlesmash battlecross battleink (Beta1, one blow, e.g. battleslash@4) battlecutin battlekill battlebolt battleboltsoft battleimpact (Beta1 round 6) battlekit (THE FIVE KITS, 29 Oct : the SHIELD and LESSON tags, the new moves' words) battlemoves (ENEMY MOVES, 30 Oct : CHARGE, GUARD and the charged blow over the enemies) battlestars (REHEARSAL, 31 Oct : stars on the commands, a legend's name) battleaim battlepick battleheal battletip battlechakram (MARKS AND AIM, 30 Oct : the skill card, the rings, the marks on friends, an icon's line) battlefriend (FRIEND PICK, 31 Oct : the friends a skill for one friend can go to, over the commands) battlegift (GIFTS, 31 Oct : three gifts' names popping) rehearsal rehearsalrest (REHEARSAL, 31 Oct : the star after a win, from the rest stop)
+        //       battle battleswing battleskill battleparry battlestatus (Alpha 7, use a few frames, e.g. battleswing@2) battlewin battlelose (Beta1, TACET's dark) battleslash battleshot battlesmash battlecross battleink (Beta1, one blow, e.g. battleslash@4) battlecutin battlekill battlebolt battleboltsoft battleimpact (Beta1 round 6) battlekit (THE FIVE KITS, 29 Oct : the SHIELD and LESSON tags, the new moves' words) battlemoves (ENEMY MOVES, 30 Oct : CHARGE, GUARD and the charged blow over the enemies) battlestars (REHEARSAL, 31 Oct : stars on the commands, a legend's name) battleaim battlepick battleheal battletip battlechakram (MARKS AND AIM, 30 Oct : the skill card, the rings, the marks on friends, an icon's line) battlefriend (FRIEND PICK, 31 Oct : the friends a skill for one friend can go to, over the commands) battlegift (GIFTS, 31 Oct : three gifts' names popping) rehearsal rehearsalrest (REHEARSAL, 31 Oct : the star after a win, from the rest stop) battleshield battlelong (31 Oct : SHIELD's friend cards, the band's longest move names) battlebig battlebigturn (NO LIMIT, 31 Oct : numbers past 999 in the plan and in a turn's TURN TOTAL)
         //       teampick teampickfull luthier treasure rewardboss battletier (29 Oct : THE AUDITION empty and with three picked, the
         //       luthier, a chest, the boss's great upgrade with REFORGE, a tier III blow e.g. battletier@4)
         //       practice practiceskill practicesig (Alpha 7, the tutorial's practice fight, e.g. practice@60)

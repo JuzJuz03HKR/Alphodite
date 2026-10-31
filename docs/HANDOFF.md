@@ -50,7 +50,8 @@
 - **ผู้ใช้ 31 ต.ค. : คนจริงเล่นแล้วเกมง่ายมาก ห้ามใช้ตัวเลขตัวจำลองตัดสินหรือรายงานว่ายากง่าย** (`BETA1_DIRECTION.md` 14.6) ใช้เทียบก่อนหลังเท่านั้น / ค่าล่าสุด (30 ต.ค. หลังก้อน 2) : NORMAL STRONG ราว 63% MAESTRO EXPERT ราว 83% (24 seed) กับตัวจำลองนิสัยใหม่ที่เลือกสกิลตามค่าและเดินเส้นทาง ส่วน 54% ของ 29 ต.ค. เป็นของนิสัยก่อนหน้า วัดเทียบต้องใช้ตัวจำลองตัวเดียวกัน (`TACET_SIM_NOPATH=1` ปิดเส้นทาง)
 - `TACET_SIM_SET` ลองตัวเลขโดยไม่ build ใหม่ ตาราง MUSICIANS ในรายงานบอกว่าวงที่มีแต่ละคนชนะเท่าไร
 - ชีต `docs/TACET_Balance.xlsx` : หลังแก้ตัวเลข `python3 docs/turn_balance_tabs.py <turnsim.txt>` (แท็บ Turn ทั้งหมดกับ Turn Skills)
-- ภาพทดสอบหน้าต่อสู้ `battle*` (ใหม่ 30 ต.ค. `battlemoves` `battleaim` `battlepick` `battleheal` `battletip` `battlechakram` 31 ต.ค. `battlefriend` `battlestars` ต่อท้าย clear ได้) หน้าซ้อม `rehearsal` `rehearsalrest` ภาพจาก cloud ห้ามแทน `docs/screenshots/`
+- ภาพทดสอบหน้าต่อสู้ `battle*` (ใหม่ 30 ต.ค. `battlemoves` `battleaim` `battlepick` `battleheal` `battletip` `battlechakram` 31 ต.ค. `battlefriend` `battlestars` `battleshield` `battlelong` `battlebig` `battlebigturn@4` ต่อท้าย clear ได้) หน้าซ้อม `rehearsal` `rehearsalrest` ภาพจาก cloud ห้ามแทน `docs/screenshots/`
+- ตัวเลขบนจอ (31 ต.ค. NO LIMIT `BETA1_DIRECTION.md` 20) : `Core/NumberText.cs` ไม่มีลิมิตแล้ว (0 ถึง 9999 สร้างตอนเริ่มเกม เกินนั้นสร้างครั้งแรกแล้วเก็บ) ที่ที่เลขกว้างขึ้นวัดความกว้างก่อนวาง (`PlateName` ป้ายศัตรู `IntentRoom` เลขท่าศัตรู การ์ด THE BAND หน้าวง)
 
 ### 00.5 ที่ต้องรู้และที่ค้างอยู่
 - PLAYTEST : SIGNATURE ใช้ 1 PERFECT (`BattleRules.PlaytestSignatureNeed` = 1) ผู้ใช้สั่งคงไว้ ห้ามแก้จนผู้ใช้บอก ค่าจริง 6

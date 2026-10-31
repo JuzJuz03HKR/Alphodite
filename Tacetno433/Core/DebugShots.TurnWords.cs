@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Tacetno433.Battle;
 using Tacetno433.Data;
 
@@ -9,6 +10,7 @@ namespace Tacetno433.Core
     //--shots turncheck. Every line the player reads uses the new rule words (Data/Words.cs) and none of the old ones, the skill
     //card finds the words a skill's line uses, and the moments the words work are written down for the screen to pop them
     //(BURN as it hurts, VOLUME as a MISS takes it, GUARD as THUNDER CALL lands). Every line is PASS or FAIL like DebugShots.Turn.cs.
+    //Also NO LIMIT (31 Oct) : the numbers the screen shows past 999 (Turn Check Numbers).
     public static partial class DebugShots
     {
         //Old Words : rule words the player must not read any more (the code and the save keep them as names)
@@ -98,6 +100,33 @@ namespace Tacetno433.Core
             report += Same("guard pops", "1 True", CountEvents(b, TurnEventKind.GuardUp) + " " + pf.Guard);
 
             MusicianList.ResetRehearsals();
+            return report;
+        }
+
+        //Turn Check Numbers : NO LIMIT (Beta1 31 Oct, docs/BETA1_DIRECTION.md 20). The screen shows every number as it really is,
+        //past the table made at startup (9999) and below zero. A number past the table is made once and kept, so asking again
+        //gives the very same string (no new rubbish every frame). The biggest life an enemy really has on floor 3 (a boss after
+        //the floor's scale, 1560 today) shows as it is : it showed 999 until then.
+        private static string TurnCheckNumbers()
+        {
+            string report = "";
+            report += Same("numbers", "0 7 999 1000 1560 9999 10000 12345 2147483647",
+                NumberText.Get(0) + " " + NumberText.Get(7) + " " + NumberText.Get(999) + " " + NumberText.Get(1000) + " " + NumberText.Get(1560) + " "
+                + NumberText.Get(9999) + " " + NumberText.Get(10000) + " " + NumberText.Get(12345) + " " + NumberText.Get(int.MaxValue));
+            report += Same("signed numbers", "+0 +7 -7 +1000 -1000 +12345 -12345 -2147483648",
+                NumberText.Signed(0) + " " + NumberText.Signed(7) + " " + NumberText.Signed(-7) + " " + NumberText.Signed(1000) + " "
+                + NumberText.Signed(-1000) + " " + NumberText.Signed(12345) + " " + NumberText.Signed(-12345) + " " + NumberText.Signed(int.MinValue));
+            report += Same("kept once", "True True True",
+                ReferenceEquals(NumberText.Get(12345), NumberText.Get(12345)) + " " + ReferenceEquals(NumberText.Signed(-54321), NumberText.Signed(-54321))
+                + " " + ReferenceEquals(NumberText.Get(1560), NumberText.Get(1560)));
+
+            int most = 0;
+            for (int i = 0; i < EnemyList.All.Length; i++)
+            {
+                TurnBattle b = new TurnBattle(Solo(0), new List<Enemy> { EnemyList.All[i] }, 3, new Random(433));
+                most = Math.Max(most, b.Enemies[0].MaxHp);
+            }
+            report += Same("floor 3 life", most.ToString(CultureInfo.InvariantCulture), NumberText.Get(most));
             return report;
         }
 

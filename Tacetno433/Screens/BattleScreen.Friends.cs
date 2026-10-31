@@ -23,10 +23,13 @@ namespace Tacetno433.Screens
     //======================================================================================
     public partial class BattleScreen
     {
-        private const int FriendW = 288;          // a friend's card : the face (112 x 112, drawn at the size it was drawn) and the words
+        private const int FriendW = 312;          // a friend's card : the face (112 x 112, drawn at the size it was drawn) and the words
+                                                  //   (288 until 31 Oct : SHIELD's HITS GO TO DUPORT ran out of the card, 19.7)
         private const int FriendH = 144;          //   tall enough for the two lines of the foot (The Foot), the face in the middle
         private const int FriendGap = 12;
         private const int FriendFace = 112;
+        private const int FriendText = 12 + FriendFace + 12;   // the words start this far into the card, after the face
+        private const int FriendRoom = FriendW - FriendText - 10;   //   and have this much room, to 10 short of the right edge
         private const int FriendLine = 16;        // the foot's two lines of small words, this far apart
         private const int FriendBottom = 584;     // the row's foot, over the words above the commands
         private const float FriendRise = 0.16f;   // seconds for the row to slide up (and down again)
@@ -37,6 +40,7 @@ namespace Tacetno433.Screens
         private MovePreview[] friendAim = new MovePreview[0];               // what each would get
         private Rectangle[] friendBox = new Rectangle[0];
         private string[] friendGets = new string[0];                        // what they get, in the kind's colour
+        private float[] friendGetsSize = new float[0];                      //   its size : Label, or Tiny when Label would not fit (Fit Line)
         private string[] friendMore = new string[0];                        //   the line under it ("" for none)
         private string[] friendMove = new string[0];                        // the move they have written ("" for none)
         private string[] friendIncoming = new string[0];                    // the attack aimed at them ("" for none)
@@ -112,6 +116,7 @@ namespace Tacetno433.Screens
                 for (int k = 0; k < n; k++) friendAim[k] = new MovePreview();
                 friendBox = new Rectangle[n];
                 friendGets = new string[n];
+                friendGetsSize = new float[n];
                 friendMore = new string[n];
                 friendMove = new string[n];
                 friendIncoming = new string[n];
@@ -129,6 +134,7 @@ namespace Tacetno433.Screens
                 battle.Preview(selected, pending, f, friendAim[k]);
                 string more;
                 friendGets[k] = GetsLine(pending, friendAim[k], selected, out more);
+                friendGetsSize[k] = FitLine(friendGets[k], FriendRoom - (friendIconOn ? IconSize + 6 : 0));
                 friendMore[k] = more;
 
                 BarMove move = battle.MoveOf(f);
@@ -158,6 +164,13 @@ namespace Tacetno433.Screens
             }
             if (s.Guard) return Words.Guard + " : HITS x" + Share(p.Share);
             return s.Name;
+        }
+
+        //Fit Line : the size for the line of what a friend gets, Label when it fits in the room, Tiny when it does not (a name
+        //longer than any today, or a big number). Measured when the row is made, so Draw never measures it.
+        private float FitLine(string line, float room)
+        {
+            return Gfx.TextWidth(Game.Font, line, TextSize.Label) <= room ? TextSize.Label : TextSize.Tiny;
         }
 
         //Incoming To : the life TACET's next attacks would take off this musician if none of their notes were blocked (the numbers
@@ -227,8 +240,8 @@ namespace Tacetno433.Screens
                 ArtBank.DrawOrSlot(sb, UiArt.FaceOf(f.Musician), face, Palette.Paper, a);
 
                 //The Name, a stroke of their own colour under it, and the number to press
-                float x = face.Right + 12;
-                float room = r.Right - 10 - x;
+                float x = r.X + FriendText;                                                        // just after the face
+                float room = FriendRoom;
                 Gfx.TextSpaced(sb, Game.Font, f.Name, x, r.Y + 9, Palette.Highlight * a, TextSize.Label, 2f);
                 Gfx.Rect(sb, x, r.Y + 27, Math.Min(room - 30f, Gfx.SpacedWidth(Game.Font, f.Name, TextSize.Label, 2f)), 2f, SpotOf(f).Tint * a);
                 if (k < friendKey.Length) Ui.KeyChipRight(sb, friendKey[k], r.Right - 10, r.Y + 17, (over ? Palette.Highlight : Palette.PaperDim) * a);
@@ -250,7 +263,7 @@ namespace Tacetno433.Screens
                     Ui.Icon(sb, new Rectangle((int)gx, (int)gy - 2, IconSize, IconSize), icoArt.Length > (int)friendIcon ? icoArt[(int)friendIcon] : null, IcoCode[(int)friendIcon], aimColor, false, 0, a);
                     gx += IconSize + 6f;
                 }
-                Gfx.Text(sb, Game.Font, friendGets[k], gx, gy, gets * a, TextSize.Label);
+                Gfx.Text(sb, Game.Font, friendGets[k], gx, gy, gets * a, friendGetsSize[k]);
                 if (friendMore[k].Length > 0) Gfx.Text(sb, Game.Font, friendMore[k], gx, gy + 17, Palette.PaperDim * a, TextSize.Tiny);
 
                 //The Foot : the move they have written on the right, and on the line under it TACET's mark and the attack aimed at

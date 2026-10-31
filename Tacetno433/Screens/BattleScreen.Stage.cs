@@ -32,7 +32,8 @@ namespace Tacetno433.Screens
         private const int ChipX = 24;                       // THE BAND : the row of cards under the bar strip
         private const int ChipY = 66;
         private const int ChipW = 150;
-        private const int ChipH = 50;
+        private const int ChipH = 68;                       // 50 until 31 Oct : the move written in the plan now has a line of its own
+        private const int ChipMoveY = 48;                   //   this far down, under the life (a long one ran into "/ 54", 19.7)
         private const int ChipStep = 156;
 
         //Enemy Feet : where each enemy stands for 1 to 4 enemies, the front one first. The floor goes away up to the right.

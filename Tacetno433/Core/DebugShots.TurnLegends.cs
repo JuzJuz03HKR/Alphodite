@@ -161,6 +161,7 @@ namespace Tacetno433.Core
             report += TurnCheckGifts();                                                // GIFTS (Beta1 31 Oct, was the motifs)
             report += TurnCheckPreview();                                              // PREVIEW (Beta1 30 Oct, block 1 item 4)
             report += TurnCheckWords();                                                // WORDS (Beta1 31 Oct, 16.14 item 3)
+            report += TurnCheckNumbers();                                              // NO LIMIT (Beta1 31 Oct, numbers past 999)
             return report;
         }
 

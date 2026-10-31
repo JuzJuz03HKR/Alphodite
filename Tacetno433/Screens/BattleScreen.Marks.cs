@@ -488,13 +488,24 @@ namespace Tacetno433.Screens
 
         //Intent Row : where an enemy's intent sits over its plate, the icon at left, then the number, then the notes.
         //cy is the middle of the row. CLEAR FIGHT : the whole attack a little higher when a note's arrow points down.
+        //Intent Room : the room for the number of an enemy's intent before its notes. IntentNumberRoom, or the number's own width
+        //when it is wider (NO LIMIT, 31 Oct : 1250 in CLEAR FIGHT's big figures sat on the first arrow). Measured, no text made.
+        private float IntentRoom(Fighter f)
+        {
+            int value = f.IntentGuard > 0 || f.IntentCharge ? (f.IntentCharge ? f.ChargeHit : f.IntentGuard)
+                      : (f.IntentNotes.Length > 0 ? f.IntentNotes[0] : 0);
+            float width = Settings.ClearFight ? Gfx.TextWidth(Game.Font, NumberText.Get(value), TextSize.Heading)
+                                              : Gfx.TextWidth(Game.BigFont, NumberText.Get(value), TextSize.Small);
+            return Math.Max(IntentNumberRoom, width + 6f);
+        }
+
         private void IntentRow(Fighter f, out float left, out float cy)
         {
             Rectangle r = EnemyPlate(BoxOf(f));
             cy = r.Y - 22;
             int notes = PlaysNotes(f) ? f.IntentNotes.Length : 0;
             bool number = notes > 0 || f.IntentCharge || f.IntentGuard > 0;
-            float width = IntentIcon + (number ? 6f + IntentNumberRoom : 0f) + notes * IntentNoteStep;
+            float width = IntentIcon + (number ? 6f + IntentRoom(f) : 0f) + notes * IntentNoteStep;
             left = r.Center.X - width / 2f;
             if (!Settings.ClearFight || notes == 0) return;
             for (int n = 0; n < f.IntentNotes.Length; n++)

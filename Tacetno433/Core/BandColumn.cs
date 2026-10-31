@@ -111,8 +111,10 @@ namespace Tacetno433.Core
                 MotifArt.Keyword(sb, m.Key, x + Gfx.TextWidth(Ui.BigFont, m.NameTag, TextSize.Subtitle) + 18f, y + 12, 20, a);
             Gfx.TextSpaced(sb, Ui.Font, m.Epithet.Length > 0 ? m.Epithet : m.FamilyLabel, x, y + 30, Palette.PaperDim * a, TextSize.Tiny, 2f);
             Gfx.TextSpaced(sb, Ui.Font, "LIFE", x, y + 56, Palette.LineGrey * a, TextSize.Tiny, 2f);
-            Gfx.Text(sb, Ui.Font, NumberText.Get(run.LifeOf(m)), x + 44, y + 52, Palette.Paper * a, TextSize.Body);
-            Gfx.Text(sb, Ui.Font, NumberText.Get(run.MaxLifeOf(m)), x + 84, y + 56, Palette.LineGrey * a, TextSize.Tiny);
+            string life = NumberText.Get(run.LifeOf(m));
+            Gfx.Text(sb, Ui.Font, life, x + 44, y + 52, Palette.Paper * a, TextSize.Body);
+            float mostX = Math.Max(x + 84, x + 48 + Gfx.TextWidth(Ui.Font, life, TextSize.Body));      // NO LIMIT : a life of 5 digits pushes it right
+            Gfx.Text(sb, Ui.Font, NumberText.Get(run.MaxLifeOf(m)), mostX, y + 56, Palette.LineGrey * a, TextSize.Tiny);
             Gfx.TextSpaced(sb, Ui.Font, "POWER", x + 130, y + 56, Palette.LineGrey * a, TextSize.Tiny, 2f);
             Gfx.Text(sb, Ui.Font, NumberText.Get(run.PowerOf(m)), x + 186, y + 52, Palette.Paper * a, TextSize.Body);
             Gfx.TextSpaced(sb, Ui.Font, "WEAPON", x, y + 80, Palette.LineGrey * a, TextSize.Tiny, 2f);
