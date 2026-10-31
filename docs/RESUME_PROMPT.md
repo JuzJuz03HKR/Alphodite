@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| (ว่าง) | | |
+| 31 ต.ค. (แชท /system Finalize8) | ด่านเทสระบบ TEST ROOM (คำต่อคำ `USER_BRIEFS.md` 13.52) : F2 ที่หน้า Title เปิด / อยู่ทุก build มีสวิตช์ปิดจุดเดียว / จบหน้าแล้วเล่นต่อตามปกติ เซฟปิด F2 กลับ / บอส 6 ตัว ห้องบนแผนที่ ไฟต์กับศัตรูพิเศษ หน้าอื่นของรัน | `Tacetno433/Screens/TestRoomScreen.cs` (ใหม่) `Screens/TitleScreen.cs` `TacetGame.cs` `Data/SaveFile.cs` `Data/RunState.cs` `Screens/BattleScreen*.cs` + `Core/DebugShots*.cs` |
 
 ---
 
