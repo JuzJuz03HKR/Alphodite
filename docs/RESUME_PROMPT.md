@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 31 ต.ค. (แชท /system Finalize5) | 16.14 ข้อ 3 ภาษาทั้งเกม (คำกติกาตาราง 16.7 ที่คิดใหม่ คำอธิบายคำง่าย) | ข้อความบนจอเกือบทุกไฟล์ใน `Tacetno433/Data/` `Screens/` `Core/` (Skill Enemy Musician Conductor Motif Rehearsal Bond RouteNode Guide BattleScreen*) + `Core/DebugShots.Turn*.cs` |
+| (ว่าง) | | |
 
 ---
 
@@ -63,6 +63,14 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 ---
 
 ## สถานะล่าสุด (31 ต.ค.)
+
+**31 ต.ค. แชท /system (Finalize5) : ✅ 16.14 ข้อ 3 ภาษาทั้งเกม เสร็จ หยุดรอผู้ใช้** (ผู้ใช้ : "เอาตามแนะนำ แต่โปรดลองคิดอีกรอบ..." คำต่อคำ `USER_BRIEFS.md` 13.45 รายละเอียด `BETA1_DIRECTION.md` ข้อ 19)
+✅ คำกติกาทั้งเกมอยู่ `Data/Words.cs` ที่เดียว (เปลี่ยนคำที่นี่เปลี่ยนทั้งเกม ชื่อในโค้ดกับเซฟยังเป็นคำเดิม) : DISSONANCE เป็น BURN (คิดใหม่จาก CRACK) / CRESCENDO เป็น VOLUME / OFF-BEAT เป็น STUN กับ STUNNED / MUTE เป็น MUTED / GUARD แยกเป็น GUARD ARMOR ARMOR UP / LESSON เป็น FOCUS / SIGNATURE เป็น FINALE (ป้ายบอสบนแผนที่เป็น LAST FIGHT) / BAR เป็น TURN ปุ่ม PLAY / LUTHIER เป็น WORKSHOP (W) / ECHOES เป็น APPLAUSE / เจตนา REST เป็น HEAL / CADENZA เป็น BIG ATTACK / REST บนแผนที่คงไว้ (คิดใหม่แล้ว BACKSTAGE ไม่ชัด)
+✅ พ่วงกับ GUI : การ์ดสกิลมีบรรทัดอธิบายคำใต้ตัวเลข (`BURN = ...`) คำเด้งพร้อมตัวเลขตอนเกิดจริง (BURN ตอนไฟเผา VOLUME 0 ตอน MISS GUARD ตอน THUNDER CALL) เหตุการณ์ใหม่ `DissonanceTick` `CrescendoLost` `GuardUp` / บรรทัดทั้งเกมเขียนใหม่ด้วยคำง่าย
+✅ build 0/0 turncheck 174/174 (ใหม่ `Core/DebugShots.TurnWords.cs`) savecheck 33/33 ไม่มีตัวเลขบาลานซ์เปลี่ยน / ภาพแคป 11 หน้าไม่มีข้อความล้นกรอบ
+⚠️ ผู้ใช้ยังไม่ได้ Rebuild ลอง (สิ่งที่ให้ลอง 19.6) / เจอปัญหาเก่า : การ์ดเพื่อน FRIEND PICK ตัวที่โดนเล็ง INCOMING ทับชื่อท่ายาว (19.7 ยังไม่แก้)
+**วิธีทำงานที่ผู้ใช้สั่ง (13.40)** : ทำ 16.14 ทีละข้อ จบข้อไหนบันทึก commit push แล้วหยุดรอผู้ใช้สั่งข้อต่อไป
+**งานถัดไป (เมื่อผู้ใช้สั่ง) : 16.14 ข้อ 4 บอส** (แถบเลือด 2 เฟส ท่าไม้ตายมีชื่อแทน BIG ATTACK เห็นบอสบนแผนที่ บอสสุดท้ายเป็นร่างของวาทยากร `Data/Enemy.cs` `Battle/TurnBattle.cs` `Data/FloorMap.cs` `Screens/RouteScreen.cs` คำใหม่ใส่ `Data/Words.cs`) แล้วข้อ 5 แผนที่ / PLAYTEST FINALE ยัง 1 PERFECT / VFX ทุกชนิดรอภาพอ้างอิง / ตาราง "แชทที่กำลังทำงาน" ว่างแล้ว
 
 **31 ต.ค. แชท /system : /update ปิดแชท ผู้ใช้จะเปิดแชทใหม่** (คำต่อคำ `USER_BRIEFS.md` 13.44)
 ✅ ของ GIFT (16.14 ข้อ 2 `BETA1_DIRECTION.md` 18) ผู้ใช้ Rebuild ลองแล้ว "ยังไม่ต้องแก้อะไร" / งานทั้งหมดอยู่บน GitHub (`4fde789` กับ commit ปิดแชทนี้) / ตาราง "แชทที่กำลังทำงาน" ว่าง

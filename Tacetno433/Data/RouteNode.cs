@@ -45,7 +45,7 @@ namespace Tacetno433.Data
             "REST",        // Rest
             "BOSS",        // Boss
             "CROSSING",    // EraShift : NO MORE ERAS (29 Oct), never made now, an old save's CROSSING loads as a ??? (RunState.RestoreMap)
-            "LUTHIER",     // Luthier
+            Words.Workshop,// Luthier (WORDS 31 Oct : LUTHIER was a word only musicians know)
             "TREASURE"     // Treasure
         };
 
@@ -55,22 +55,22 @@ namespace Tacetno433.Data
             "Something is waiting here. A person, a gift, or a fight.",
             BattleRules.TurnBattleOn ? "Spend shards to make the whole band stronger." : "Trade shards for motifs, breath and seats.",
             "Harder than it looks. More shards, and a gift to choose.",
-            BattleRules.TurnBattleOn ? "Recover, or train one weapon a tier up. The band chooses one." : "Breathe, or rehearse. The ensemble chooses one.",
+            BattleRules.TurnBattleOn ? "Heal up, or rehearse one move for a star. The band chooses one." : "Breathe, or rehearse. The ensemble chooses one.",
             "The last room of this floor. It has been waiting for you.",
             "A door out of this era. The world changes around you.",
-            "A maker of instruments. One weapon gets a tier sharper, free.",
+            "An instrument maker. One ATTACK gets a star, free.",
             "A chest left in the wings. One gift inside, free."
         };
 
         //Tags : the small words on the panel that say what kind of place it is
         public static string[] Tags =
         {
-            "DUEL",
+            "FIGHT",
             "CHANCE",
             "TRADE",
-            "DUEL  +",
+            "HARD FIGHT",
             "RECOVER",
-            "FINALE",
+            "LAST FIGHT",          // WORDS (31 Oct) : FINALE is the conductor's big move now
             "TRAVEL",
             "UPGRADE",
             "FREE"
@@ -80,7 +80,7 @@ namespace Tacetno433.Data
         public static int[] Danger = { 1, 0, 0, 2, 0, 3, 0, 0, 0 };
 
         //Marks : one letter per kind of place, on the route's road and tiles and in the curtain call
-        public static string[] Marks = { "E", "?", "$", "!", "R", "B", "X", "L", "T" };
+        public static string[] Marks = { "E", "?", "$", "!", "R", "B", "X", "W", "T" };   // W : WORKSHOP
 
         //Caption Wrap : the route's detail box prints the whole caption at this width (round 12.2)
         public const float CaptionWrapWidth = 470f;

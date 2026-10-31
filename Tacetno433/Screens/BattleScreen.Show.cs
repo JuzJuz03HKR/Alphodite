@@ -150,8 +150,8 @@ namespace Tacetno433.Screens
 
             //Names : the tag, the conductor, the marking in italian, and the move
             int nx = x + 560;
-            Ui.Tag(sb, "SIGNATURE", nx, 292, true, dim);
-            Gfx.TextSpaced(sb, Game.Font, c.Name, nx + Ui.TagWidth("SIGNATURE") + 16, 297, Palette.PaperDim * dim, TextSize.Tiny, 4f);
+            Ui.Tag(sb, Words.Finale, nx, 292, true, dim);
+            Gfx.TextSpaced(sb, Game.Font, c.Name, nx + Ui.TagWidth(Words.Finale) + 16, 297, Palette.PaperDim * dim, TextSize.Tiny, 4f);
             Gfx.Text(sb, Game.BigFont, c.SignatureMark, nx, 318, Palette.Paper * dim, TextSize.Title);
             Gfx.Text(sb, Game.LogoFont, signatureName, nx - 4, 360, Palette.Highlight * dim, TextSize.Banner * 0.85f);
 

@@ -177,7 +177,7 @@ namespace Tacetno433.Data
                            Power = 5, Sample = "soduang", SampleNote = 60, ThemeColor = Palette.ToneA,
                            Trait = MusicianTrait.ByEar, TraitName = "BY EAR",
                            TraitText = "Hits 50 percent harder on TACET's hidden ??? beats.",
-                           TurnTraitText = "Hits 50 percent harder against an enemy that is OFF-BEAT.",
+                           TurnTraitText = "Hits 50 percent harder against an enemy that is " + Words.Stunned + ".",
                            Line = "Learned by ear in a courtyard and has never read a page." },
             new Musician { Name = "CHAI",  Instrument = "PI NAI",    Culture = "SIAM",     Family = Family.Wind,       Cue = 2, Spot = SpotLook.Red,
                            Power = 4, Sample = "pinai", SampleNote = 62, ThemeColor = Palette.ToneC,
@@ -199,7 +199,7 @@ namespace Tacetno433.Data
                            Epithet = "SCARRED BY AN EMPEROR", Weapon = "THE SCARRED SHIELD",
                            Power = 6, Sample = "cello", SampleNote = 48, ThemeColor = Palette.ToneC,
                            Key = GiftKey.Shield, Trait = MusicianTrait.TheScar, TraitName = "THE SCAR",
-                           TurnTraitText = "Every attack that hurts them gives " + BattleRules.TurnScarCrescendo + " CRESCENDO.",
+                           TurnTraitText = "Every attack that hurts them gives " + BattleRules.TurnScarCrescendo + " " + Words.Volume + ".",
                            Line = "An emperor once tried this cello and left a scar. It plays louder for it." },
 
             //7 : horn. Giovanni Punto (1746 - 1803, born Jan Vaclav Stich in Bohemia) : Beethoven wrote the Horn Sonata Op. 17
@@ -209,7 +209,7 @@ namespace Tacetno433.Data
                            Epithet = "LOUDER THAN BEETHOVEN", Weapon = "HORN CHAKRAM",
                            Power = 5, Sample = "horn", SampleNote = 48, ThemeColor = Palette.ToneA,
                            Key = GiftKey.Crescendo, Trait = MusicianTrait.HuntingCall, TraitName = "THE HUNTING CALL",
-                           TurnTraitText = "The musician who plays right after them in the bar hits harder.",
+                           TurnTraitText = "The musician who plays right after them in the turn hits harder.",
                            Line = "Once more famous than Beethoven, and plays like nobody said otherwise." },
 
             //8 : bass drum, hidden since 29 Oct (Shown)

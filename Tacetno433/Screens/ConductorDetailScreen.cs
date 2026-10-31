@@ -494,7 +494,7 @@ namespace Tacetno433.Screens
             //Section 2 : Signature, with the key that lets it loose. Their own move, so their own colour.
             y = 262;
             sx = RightX + (1f - Arrived(0.1f)) * slide;
-            DrawSection(sb, "II", "SIGNATURE", sx, y, b);
+            DrawSection(sb, "II", Tacetno433.Data.Words.Finale, sx, y, b);    // WORDS : this page has its own Words() (the text's fade)
             Ui.KeyBox(sb, "SPACE", sx + RightW - 70, y + 13, Palette.Paper, Palette.Ink, b);
             Gfx.Text(sb, Game.BigFont, c.SignatureName, sx, y + 40, Color.Lerp(Palette.Highlight, c.SpotAt(time), 0.75f) * b, TextSize.Subtitle);
             Gfx.Text(sb, Game.StoryFont, c.SignatureWrapped, sx, y + 76, Palette.Paper * b, TextSize.Story);

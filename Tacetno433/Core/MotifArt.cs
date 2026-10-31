@@ -19,7 +19,7 @@ namespace Tacetno433.Core
         //status icons of a fight (docs/UI_ART_PLAN.md 2.5), so a gift and the legend it is for show the same picture. HEAL and
         //THE BAND have their own files (2.6). A short code in a frame until the art exists, the frame in the colour of the status.
         private static readonly string[] keyFile = { "keyword_band", "status_dissonance", "keyword_heal", "status_off_beat", "status_shield", "status_crescendo" };
-        private static readonly string[] keyCode = { "ALL", "DIS", "HEL", "OFF", "SHD", "CRE" };
+        private static readonly string[] keyCode = { "ALL", "BRN", "HEL", "STN", "SHD", "VOL" };   // WORDS (31 Oct) : BURN, STUN, VOLUME
         private static readonly bool[] keyFilled = { false, true, false, true, false, false };     // it hurts the one who has it
         private static Texture2D[] keyArt = new Texture2D[0];
 

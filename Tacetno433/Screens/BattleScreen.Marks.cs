@@ -33,33 +33,38 @@ namespace Tacetno433.Screens
     {
         //Icons : the statuses and the intents over TACET's heads. Code shows until the art exists (Content/Art/Ui/Icons/<File>.png),
         //Name and Line are what the pointer on it shows.
+        //WORDS (31 Oct) : the names and lines are the rule words of Data/Words.cs, the same words the skill lines and pops use
         private enum Ico { Dissonance, Crescendo, Mute, Guard, Echo, Shield, Lesson, Block, OffBeat, CutIn, Hit, Charge, Raise, Rest, Broken, Court }
-        private static readonly string[] IcoCode = { "DIS", "CRE", "MUT", "GRD", "ECH", "SHD", "LES", "GRD", "OFF", "CUT", "HIT", "CHG", "GRD", "RST", "BRK", "ALL" };
+        private static readonly string[] IcoCode = { "BRN", "VOL", "MUT", "GRD", "ECH", "SHD", "FOC", "ARM", "STN", "CUT", "ATK", "CHG", "AR+", "HEA", "BRK", "ALL" };
         private static readonly string[] IcoFile =
         {
             "status_dissonance", "status_crescendo", "status_mute", "status_guard", "status_echo", "status_shield", "status_lesson",
             "status_block", "status_off_beat", "status_cut_in", "intent_attack", "intent_charge", "intent_guard", "intent_rest",
             "intent_broken", "intent_everyone",
         };
-        private static readonly string[] IcoName = { "DISSONANCE", "CRESCENDO", "MUTE", "GUARD", "ECHO", "SHIELD", "LESSON", "GUARD", "OFF-BEAT", "CUT IN", "ATTACK", "CHARGE", "GUARD", "REST", "BROKEN", "EVERYONE" };
+        private static readonly string[] IcoName =
+        {
+            Words.Burn, Words.Volume, Words.Muted, Words.Guard, Words.Echo, Words.Shield, Words.Focus, Words.Armor, Words.Stunned,
+            Words.CutIn, Words.Attack, Words.Charge, Words.ArmorUp, Words.Heal, Words.Broken, Words.Everyone,
+        };
         private static readonly string[] IcoLine =
         {
-            "= loses this much life at the end of its turn, then 1 less",
-            "= every stack hits harder. A MISS loses them all",
-            "= no skills for this many turns",
-            "= takes half of every hit until their next turn",
-            "= their next move plays again",
-            "= DUPORT stands in front and takes their hits",
-            "= their next skill : wider PERFECT, harder hits",
-            "= takes the band's damage before its life. IL CANNONE goes through",
-            "= it loses its next turn and takes more damage",
-            "= it plays in the middle of the band's part of the bar",
-            "= its notes hit the marked musician. Swipe back to block them",
-            "= next bar one big note. OFF-BEAT or TIMPANI ROLL breaks it",
-            "= it raises this much GUARD and plays no note",
-            "= it hums this turn and heals instead of attacking",
-            "= its CHARGE was broken, the blow will not come",
-            "= its notes hit every musician standing",
+            "= " + Words.BurnLine,
+            "= " + Words.VolumeLine,
+            "= " + Words.MutedLine,
+            "= " + Words.GuardLine,
+            "= " + Words.EchoLine,
+            "= " + Words.ShieldLine,
+            "= " + Words.FocusLine,
+            "= " + Words.ArmorLine,
+            "= " + Words.StunnedLine,
+            "= " + Words.CutInLine,
+            "= " + Words.AttackLine,
+            "= " + Words.ChargeLine,
+            "= " + Words.ArmorUpLine,
+            "= " + Words.HealLine,
+            "= " + Words.BrokenLine,
+            "= " + Words.EveryoneLine,
         };
         private static Texture2D[] icoArt = new Texture2D[0];
 
@@ -110,6 +115,13 @@ namespace Tacetno433.Screens
         private string cardLine = "";
         private int cardCost;
         private Rectangle cardBox;
+
+        //Card Keywords (WORDS, 31 Oct) : the rule words the skill's line uses, each with what it does under the numbers
+        //("BURN = loses this much life ..."), so the word is read with its meaning the first time (USER_BRIEFS 13.45)
+        private const int CardKeywordMost = 2;
+        private const int CardKeywordStep = 18;
+        private readonly int[] cardKeys = new int[CardKeywordMost];
+        private int cardKeyCount;
 
         //Command Icons : each command's icon and the word for who it is for, made in Select
         private readonly Texture2D[] commandArt = new Texture2D[3];
@@ -330,17 +342,17 @@ namespace Tacetno433.Screens
                     if (s.Target == SkillTarget.AllEnemies) line += " EACH";
                 }
                 if (cardAim.Heal > 0) line = Join(line, "+" + cardAim.Heal + " LIFE" + (s.Target == SkillTarget.AllAllies ? " EACH" : ""));
-                if (cardAim.Crescendo > 0) line = Join(line, "+" + cardAim.Crescendo + " CRESCENDO" + (s.Target == SkillTarget.AllAllies ? " EACH" : ""));
-                if (cardAim.Dissonance > 0) line = Join(line, "+" + cardAim.Dissonance + " DISSONANCE");
-                if (cardAim.OffBeat > 0) line = Join(line, "+" + cardAim.OffBeat + " OFF-BEAT");
+                if (cardAim.Crescendo > 0) line = Join(line, "+" + cardAim.Crescendo + " " + Words.Volume + (s.Target == SkillTarget.AllAllies ? " EACH" : ""));
+                if (cardAim.Dissonance > 0) line = Join(line, "+" + cardAim.Dissonance + " " + Words.Burn);
+                if (cardAim.OffBeat > 0) line = Join(line, "+" + cardAim.OffBeat + " " + Words.Stun);
                 if (cardAim.Breath > 0) line = Join(line, "+" + cardAim.Breath + " BREATH");
-                if (s.Pierce) line = Join(line, "THROUGH GUARD");
-                if (s.Breaks) line = Join(line, "BREAKS CHARGE");
+                if (s.Pierce) line = Join(line, "THROUGH " + Words.Armor);
+                if (s.Breaks) line = Join(line, "BREAKS " + Words.Charge);
                 if (s.Revenge > 0f) line = Join(line, (who != null && who.Wounded ? "x" : "AFTER A HIT x") + Share(s.Revenge) + (who != null && who.Wounded ? " NOW" : ""));
                 if (s.Taunt) line = Join(line, "ENEMIES AIM HERE");
-                if (s.Guard) line = Join(line, "HITS x" + Share(cardAim.Share));
+                if (s.Guard) line = Join(line, Words.Guard + " : HITS x" + Share(cardAim.Share));
                 if (s.Shield) line = Join(line, "THEIR HITS ON " + (who != null ? who.Name : "DUPORT") + " x" + Share(cardAim.Share));
-                if (s.Lesson) line = Join(line, "NEXT SKILL x" + Share(cardAim.Share) + "  WIDER PERFECT");
+                if (s.Lesson) line = Join(line, Words.Focus + " : NEXT SKILL x" + Share(cardAim.Share));
 
                 //Paid in life : THE DEVIL'S BARGAIN short of BREATH (as it stands while the bar is written), THE PACT every time
                 int life = 0;
@@ -350,13 +362,17 @@ namespace Tacetno433.Screens
                 if (life > 0) line = Join(line, "PAYS " + life + " LIFE");
             }
             cardLine = line;
+            cardKeyCount = s == null ? 0 : Words.KeywordsIn(s.Text, cardKeys, CardKeywordMost);      // WORDS : what its rule words do
 
             float w = Math.Max(Gfx.TextWidth(Game.BigFont, cardName, TextSize.Small) + 90f, Gfx.TextWidth(Game.Font, cardLine, TextSize.Label));
             w = Math.Max(w, Gfx.SpacedWidth(Game.Font, cardKind, TextSize.Tiny, 2f) + Gfx.SpacedWidth(Game.Font, cardFor, TextSize.Tiny, 2f) + 24f);
+            for (int k = 0; k < cardKeyCount; k++)
+                w = Math.Max(w, Gfx.TextWidth(Game.Font, Words.KeywordLines[cardKeys[k]], TextSize.Tiny));
             Rectangle box = commandBox[command];
             int width = (int)Math.Max(230f, w + 30f);
+            int height = 72 + (cardKeyCount > 0 ? 9 + cardKeyCount * CardKeywordStep : 0);
             int x = Math.Min(box.X, TacetGame.ScreenW - 8 - width);
-            cardBox = new Rectangle(x, box.Y - 18 - 72, width, 72);
+            cardBox = new Rectangle(x, box.Y - 18 - height, width, height);
         }
 
         private static string Join(string line, string part)
@@ -753,6 +769,16 @@ namespace Tacetno433.Screens
             Gfx.TextSpaced(sb, Game.Font, cardKind, r.X + 16, r.Y + 31, aimColor * a, TextSize.Tiny, 2f);
             Gfx.TextSpaced(sb, Game.Font, cardFor, r.X + 24 + Gfx.SpacedWidth(Game.Font, cardKind, TextSize.Tiny, 2f), r.Y + 31, Palette.LineGrey * a, TextSize.Tiny, 2f);
             Gfx.Text(sb, Game.Font, cardLine, r.X + 16, r.Y + 47, Palette.Paper * a, TextSize.Label);
+
+            //WORDS : each rule word of its line with what it does, under a thin rule
+            if (cardKeyCount > 0) Gfx.Rect(sb, r.X + 16, r.Y + 72, r.Width - 32, 1, Palette.LineGrey * (0.6f * a));
+            for (int k = 0; k < cardKeyCount; k++)
+            {
+                string word = Words.KeywordNames[cardKeys[k]];
+                float ky = r.Y + 78 + k * CardKeywordStep;
+                Gfx.Text(sb, Game.Font, word, r.X + 16, ky, Palette.Paper * a, TextSize.Tiny);
+                Gfx.Text(sb, Game.Font, Words.KeywordRests[cardKeys[k]], r.X + 16 + Gfx.TextWidth(Game.Font, word, TextSize.Tiny) + 8, ky, Palette.PaperDim * a, TextSize.Tiny);
+            }
         }
     }
 }

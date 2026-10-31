@@ -146,7 +146,7 @@ namespace Tacetno433.Data
             //Round 15 : the roadside enemies play ODE TO JOY for now (the first song). In the month
             //after the 29 Sep hand in, each should get a piece of its own.
             new Enemy { Name = "HUSH",
-                        TurnHp = 50, TurnSpeed = 4, Phrases = new[] { "D U", "L R D" }, TurnTraitText = "Each note that gets through adds 1 DISSONANCE.",      Title = "The first thing to go is the echo.",
+                        TurnHp = 50, TurnSpeed = 4, Phrases = new[] { "D U", "L R D" }, TurnTraitText = "Each note that gets through adds 1 " + Words.Burn + ".",      Title = "The first thing to go is the echo.",
                         Trait = EnemyTrait.EchoFades, TraitName = "ECHO FADES", TraitFloor = 2,
                         TraitText = "The f, mf and p marks on its notes fade before they reach you. Remember them.",
                         Kind = EnemyKind.Normal, Song = SongList.Twinkle, Pattern = new int[] { 4, 0, 3, 4, 0, 0, 5, 0 }, Tone = Palette.ToneD, Temper = 5 },
@@ -169,7 +169,7 @@ namespace Tacetno433.Data
 
             //Elite : any movement
             new Enemy { Name = "THE MUTE CHOIR",
-                        TurnHp = 120, TurnSpeed = 4, Phrases = new[] { "D D U", "L R L R" }, TurnTraitText = "A note you miss takes the target's skills away for a turn.", Title = "A hundred mouths, open, making nothing.",
+                        TurnHp = 120, TurnSpeed = 4, Phrases = new[] { "D D U", "L R L R" }, TurnTraitText = "A note you miss leaves the target " + Words.Muted + " for a turn.", Title = "A hundred mouths, open, making nothing.",
                         Moves = new[] { Hit, Guard, Hit }, GuardBlock = 22,
                         Trait = EnemyTrait.SilentMouths, TraitName = "SILENT MOUTHS", TraitFloor = 1,
                         TraitText = "From round two it silences one section of your band each round, strings, winds or percussion: those players cannot play. Some notes stay hidden as ???",
@@ -231,15 +231,15 @@ namespace Tacetno433.Data
                         TraitText = "While it stands, an ATTACK gives 1 less BREATH.",
                         Kind = EnemyKind.Normal, Pattern = new int[] { 4, 0, 4, 0, 4, 0, 4, 0 }, Tone = Palette.ToneD },
             new Enemy { Name = "STUTTER",
-                        TurnHp = 36, TurnSpeed = 7, Phrases = new[] { "L", "R", "U" }, TurnTraitText = "It cuts in twice a bar, after the 1st and the 3rd move, one note each time.", Title = "It cannot finish a word, so it never stops starting.",
-                        Trait = EnemyTrait.TwiceABar, TraitName = "TWICE A BAR", TraitFloor = 2,
-                        TraitText = "It cuts in twice a bar, after the 1st and the 3rd move, one note each time.",
+                        TurnHp = 36, TurnSpeed = 7, Phrases = new[] { "L", "R", "U" }, TurnTraitText = "It cuts in twice a turn, after the 1st and the 3rd move, one note each time.", Title = "It cannot finish a word, so it never stops starting.",
+                        Trait = EnemyTrait.TwiceABar, TraitName = "TWICE A TURN", TraitFloor = 2,
+                        TraitText = "It cuts in twice a turn, after the 1st and the 3rd move, one note each time.",
                         Kind = EnemyKind.Normal, Pattern = new int[] { 4, 4, 4, 4, 4, 4, 4, 4 }, Tone = Palette.ToneB },
             new Enemy { Name = "THE ROUND",
-                        TurnHp = 115, TurnSpeed = 4, Phrases = new[] { "D D D", "L R L R" }, TurnTraitText = "It always strikes the musician who plays first in the bar.", Title = "It sings your bar back at you, in your own order.",
+                        TurnHp = 115, TurnSpeed = 4, Phrases = new[] { "D D D", "L R L R" }, TurnTraitText = "It always strikes the musician who plays first in the turn.", Title = "It sings your turn back at you, in your own order.",
                         Moves = new[] { Hit, Hit, Charge },
                         Trait = EnemyTrait.FirstInLine, TraitName = "FIRST IN LINE", TraitFloor = 1,
-                        TraitText = "It always strikes the musician who plays first in the bar.",
+                        TraitText = "It always strikes the musician who plays first in the turn.",
                         Kind = EnemyKind.Elite, Pattern = new int[] { 5, 0, 5, 0, 5, 0, 5, 5 }, Tone = Palette.ToneB },
 
             //Bosses of step 14 (option B : each movement picks one of its two bosses at random, they were the eras' until
@@ -247,9 +247,9 @@ namespace Tacetno433.Data
             //of three conductors from the lore (docs/USER_BRIEFS.md) : Bach with no eyes, Lully with no legs and a cane,
             //Beethoven with no ears and a crown of black thorns. The names are stand-ins until the story is written.
             new Enemy { Name = "THE DEAF CROWN",
-                        TurnHp = 240, TurnSpeed = 5, TurnPower = 6, Phrases = new[] { "U U U D", "L R D" }, TurnTraitText = "Each bar it forbids SKILLS or ATTACKS, and breaking it hurts. It never takes a COUNTER.", Title = "It cannot hear you. It only gives orders.",
+                        TurnHp = 240, TurnSpeed = 5, TurnPower = 6, Phrases = new[] { "U U U D", "L R D" }, TurnTraitText = "Each turn it bans SKILLS or ATTACKS, and breaking the ban hurts. It never takes a COUNTER.", Title = "It cannot hear you. It only gives orders.",
                         Trait = EnemyTrait.Decree, TraitName = "DECREE", TraitFloor = 1,
-                        TraitText = "Each bar it forbids SKILLS or ATTACKS, and breaking it hurts. It never takes a COUNTER.",
+                        TraitText = "Each turn it bans SKILLS or ATTACKS, and breaking the ban hurts. It never takes a COUNTER.",
                         Kind = EnemyKind.Boss, Movement = 0, Pattern = new int[] { 6, 0, 6, 0, 6, 0, 6, 9 }, Tone = Palette.ToneA },
             new Enemy { Name = "THE STAFF",
                         TurnHp = 250, TurnSpeed = 3, TurnPower = 7, Phrases = new[] { "D D D", "D L D R" }, TurnTraitText = "While its court stands it takes half. Every third attack it strikes the floor and hits everyone.", Title = "It cannot walk. It beats time on the floor instead.",

@@ -158,7 +158,7 @@ namespace Tacetno433.Screens
         private string bondLine = "";                       // BONDS (30 Oct) : what a tied legend says as the fight starts, "" for none
         private float bondTime;                             //                  seconds it has shown
 
-        private const string HintPlan = "CLICK A MUSICIAN, THEN AN ENEMY OR A SKILL   /   ENTER = PLAY THE BAR";
+        private const string HintPlan = "CLICK A MUSICIAN, THEN AN ENEMY OR A SKILL   /   ENTER = " + Words.Play;
         private const string HintEnemy = "CLICK AN ENEMY   /   RIGHT CLICK = BACK";
         private const string HintAlly = "CLICK A FRIEND OR PRESS ITS NUMBER   /   RIGHT CLICK = BACK";
         private const string HintSwing = "SWIPE THE WAY THE ARROW POINTS AS THE RING CLOSES";
@@ -168,17 +168,17 @@ namespace Tacetno433.Screens
         private const string WordHold = "HOLD";                     // ONE RULE : the word under a note that is not a plain swipe
         private const string WordRoll = "SHAKE";
         private const string WordSpark = "AGAIN";
-        private const string HintMute = "MUTE : NO SKILLS THIS BAR";
-        private const string HintNoSkills = "DECREE : A SKILL THIS BAR HURTS WHOEVER PLAYS IT";
-        private const string HintNoAttacks = "DECREE : AN ATTACK THIS BAR HURTS WHOEVER PLAYS IT (NO MOVE = ATTACK)";
-        private const string WordAttack = "ATTACK";
+        private const string HintMute = Words.Muted + " : NO SKILLS THIS TURN, ATTACK STILL WORKS";
+        private const string HintNoSkills = "DECREE : A SKILL THIS TURN HURTS WHOEVER PLAYS IT";
+        private const string HintNoAttacks = "DECREE : AN ATTACK THIS TURN HURTS WHOEVER PLAYS IT (NO MOVE = ATTACK)";
+        private const string WordAttack = Words.Attack;
 
         //PRACTICE : what the card at the top says, and which of the four lessons are done
-        private const string CoachPlay = "Your bar. Press ENTER (PLAY) and the whole band attacks.";
+        private const string CoachPlay = "Your turn. Press ENTER (" + Words.Play + ") and the whole band attacks.";
         private const string CoachParry = "Its turn. Swipe back at each note to block it. PERFECT blocks it all.";
         private const string CoachSkill = "Click a musician, then 2 or 3 for a skill. Skills cost BREATH.";
         private const string CoachSkillSwipe = "A skill is a few notes. Swing the way the arrow points as the ring meets it.";
-        private const string CoachSignature = "The diamonds are full. Press SPACE for the SIGNATURE.";
+        private const string CoachSignature = "The diamonds are full. Press SPACE for the " + Words.Finale + ".";
         private const string CoachSignatureSwipe = "Draw the 4/4 shape : DOWN, LEFT, RIGHT, UP.";
         private const string CoachWin = "That is all of it. Now win the fight.";
         private static readonly Rectangle coachBox = new Rectangle(240, 64, 800, 60);
@@ -1045,7 +1045,7 @@ namespace Tacetno433.Screens
                 }
                 if (e.Kind == TurnEventKind.Ready)
                 {
-                    hudPops.SpawnPop(1120f, signatureBox.Y - 14f, "SIGNATURE READY", Palette.Highlight, 0.7f);
+                    hudPops.SpawnPop(1120f, signatureBox.Y - 14f, Words.FinaleReady, Palette.Highlight, 0.7f);
                     continue;
                 }
                 if (e.Kind == TurnEventKind.Extra)
@@ -1139,24 +1139,29 @@ namespace Tacetno433.Screens
                     else effects.SpawnPop(x, box.Y - 90, "DOWN", Palette.PaperDim, 1f);
                 }
                 else if (e.Kind == TurnEventKind.Heal) SpawnNumber(new Vector2(x, y), e.Amount, true, false, Palette.Highlight);
-                else if (e.Kind == TurnEventKind.Dissonance) effects.SpawnPop(x, y, "DISSONANCE", Palette.PaperDim, 0.6f);
-                else if (e.Kind == TurnEventKind.Crescendo) effects.SpawnPop(x, y, "CRESCENDO", Palette.Paper, 0.6f);
-                else if (e.Kind == TurnEventKind.Mute) effects.SpawnPop(x, y, "MUTE", Palette.PaperDim, 0.7f);
-                else if (e.Kind == TurnEventKind.Skip) effects.SpawnPop(x, y, "OFF-BEAT", Palette.PaperDim, 0.7f);
+                //WORDS (31 Oct) : every rule word pops with its count the moment it changes, the same word as its icon and the
+                //skill card (Data/Words.cs), so the word and what it does are seen together
+                else if (e.Kind == TurnEventKind.Dissonance) effects.SpawnPop(x, y, Words.Burn + " " + NumberText.Get(e.Amount), e.Who.IsEnemy ? Palette.KindAttack : Palette.PaperDim, 0.6f);
+                else if (e.Kind == TurnEventKind.DissonanceTick) effects.SpawnPop(x, box.Y - 70, Words.Burn, e.Who.IsEnemy ? Palette.KindAttack : Palette.PaperDim, 0.7f);
+                else if (e.Kind == TurnEventKind.Crescendo) effects.SpawnPop(x, y, Words.Volume + " " + NumberText.Get(e.Amount), Palette.KindBoost, 0.6f);
+                else if (e.Kind == TurnEventKind.CrescendoLost) effects.SpawnPop(x, box.Y - 70, Words.Volume + " " + NumberText.Get(e.Amount), Palette.PaperDim, 0.7f);
+                else if (e.Kind == TurnEventKind.GuardUp) effects.SpawnPop(x, y, Words.Guard, Palette.KindDefend, 0.8f);
+                else if (e.Kind == TurnEventKind.Mute) effects.SpawnPop(x, y, Words.Muted, Palette.PaperDim, 0.7f);
+                else if (e.Kind == TurnEventKind.Skip) effects.SpawnPop(x, y, Words.Stunned, Palette.PaperDim, 0.7f);
                 else if (e.Kind == TurnEventKind.Echo) effects.SpawnPop(x, box.Y - 60, "ECHO", Palette.Highlight, 0.7f);       // FUGUE
                 else if (e.Kind == TurnEventKind.Quieter) effects.SpawnPop(x, box.Y - 70, "QUIETER", Palette.Paper, 0.7f);    // THE WHOLE FLOOR
                 else if (e.Kind == TurnEventKind.Thorns) effects.SpawnPop(x, box.Y - 70, "DECREE", Palette.Accent, 0.8f);     // DECREE broken
                 //THE FIVE KITS (Beta1 29 Oct) : a word for each new move, in the colour of its SKILL KIND (until their VFX)
                 else if (e.Kind == TurnEventKind.Cut) effects.SpawnPop(x, box.Y - 70, "-" + NumberText.Get(e.Amount) + " NOTE", Palette.Paper, 0.8f);   // TURN OF THE HAND
-                else if (e.Kind == TurnEventKind.Shield) effects.SpawnPop(x, y, "SHIELD", Palette.KindDefend, 0.8f);         // SHIELD
-                else if (e.Kind == TurnEventKind.Lesson) effects.SpawnPop(x, y, "LESSON", Palette.KindBoost, 0.8f);          // THE LESSON
-                else if (e.Kind == TurnEventKind.Cue) effects.SpawnPop(x, y, "CUE", Palette.KindBoost, 0.8f);                // THE HUNTING CALL
+                else if (e.Kind == TurnEventKind.Shield) effects.SpawnPop(x, y, Words.Shield, Palette.KindDefend, 0.8f);     // SHIELD
+                else if (e.Kind == TurnEventKind.Lesson) effects.SpawnPop(x, y, Words.Focus, Palette.KindBoost, 0.8f);       // THE LESSON
+                else if (e.Kind == TurnEventKind.Cue) effects.SpawnPop(x, y, "HUNTING CALL", Palette.KindBoost, 0.8f);       // THE HUNTING CALL : its name, as gifts do
                 else if (e.Kind == TurnEventKind.Revenge) effects.SpawnPop(x, y, "x" + NumberText.Get(Math.Max(2, e.Amount)), Palette.KindAttack, 0.9f);   // LANCE (x3 with its first star)
                 //ENEMY MOVES (Beta1 30 Oct) : words for TACET's CHARGE and GUARD and the band's answers (until their VFX)
-                else if (e.Kind == TurnEventKind.Charge) effects.SpawnPop(x, box.Y - 70, "CHARGE", Palette.Paper, 0.9f);      // CHARGE : wound up
-                else if (e.Kind == TurnEventKind.Broken) effects.SpawnPop(x, box.Y - 70, "BROKEN", Palette.Highlight, 1.1f);  // BREAK
-                else if (e.Kind == TurnEventKind.Guard) effects.SpawnPop(x, y, "GUARD " + NumberText.Get(e.Amount), Palette.Paper, 0.8f);   // GUARD
-                else if (e.Kind == TurnEventKind.Blocked) effects.SpawnPop(x, y, "-" + NumberText.Get(e.Amount) + " GUARD", Palette.PaperDim, 0.7f);
+                else if (e.Kind == TurnEventKind.Charge) effects.SpawnPop(x, box.Y - 70, Words.Charge, Palette.Paper, 0.9f);  // CHARGE : wound up
+                else if (e.Kind == TurnEventKind.Broken) effects.SpawnPop(x, box.Y - 70, Words.Broken, Palette.Highlight, 1.1f);   // BREAK
+                else if (e.Kind == TurnEventKind.Guard) effects.SpawnPop(x, y, "+" + NumberText.Get(e.Amount) + " " + Words.Armor, Palette.Paper, 0.8f);   // ARMOR UP
+                else if (e.Kind == TurnEventKind.Blocked) effects.SpawnPop(x, y, "-" + NumberText.Get(e.Amount) + " " + Words.Armor, Palette.PaperDim, 0.7f);
                 else if (e.Kind == TurnEventKind.Pierce) effects.SpawnPop(x, box.Y - 70, "PIERCE", Palette.KindAttack, 0.9f); // PIERCE
                 //REHEARSAL (Beta1 31 Oct) : the legend's name when the rule of a third star works, in the musician's colour
                 else if (e.Kind == TurnEventKind.Legend && RehearsalList.RuleWords[e.Amount].Length > 0) effects.SpawnPop(x, y, RehearsalList.RuleWords[e.Amount], SpotOf(e.Who).Tint, 0.8f);
@@ -1176,8 +1181,8 @@ namespace Tacetno433.Screens
                 }
                 else if (e.Kind == TurnEventKind.Break)
                 {
-                    //OFF-BEAT : thrown off the beat, a big moment too
-                    effects.SpawnPop(x, y, "OFF-BEAT", Palette.Highlight, 1.2f);
+                    //OFF-BEAT : thrown off the beat (STUNNED on screen), a big moment too
+                    effects.SpawnPop(x, y, Words.Stunned, Palette.Highlight, 1.2f);
                     effects.SpawnSparks(x, box.Center.Y, 30, 0f);
                     shake = 0.9f;
                     hitStop = Math.Max(hitStop, BattleRules.HitStopTime);
@@ -1978,8 +1983,8 @@ namespace Tacetno433.Screens
                 else Gfx.Text(sb, Game.BigFont, NumberText.Get(f.IntentNotes[0]), x, cy - 16, Palette.Highlight * ia, TextSize.Small);
                 for (int n = 0; n < f.IntentNotes.Length; n++)
                     NoteGlyph.Note(sb, Game.BigFont, x + IntentNumberRoom + IntentNoteStep * (n + 0.5f), cy, f.IntentWays[n], 0.46f, ia, n < f.IntentLate.Length && f.IntentLate[n]);
-                if (f.IntentCadenza || f.IntentAll || f.IntentHeavy)                    // CHARGE : the charged blow says so like a CADENZA
-                    Gfx.TextSpacedCentered(sb, Game.Font, f.IntentAll ? "EVERYONE" : (f.IntentHeavy ? "CHARGED" : "CADENZA"), r.Center.X, cy - (Settings.ClearFight && !f.IntentAll ? lift + 22f : 40f), Palette.Highlight * (ia * (0.7f + 0.3f * (float)Math.Sin(time * 6f))), TextSize.Label, 3f);
+                if (f.IntentCadenza || f.IntentAll || f.IntentHeavy)                    // CHARGE : the charged blow says so like a CADENZA (BIG ATTACK)
+                    Gfx.TextSpacedCentered(sb, Game.Font, f.IntentAll ? Words.Everyone : (f.IntentHeavy ? Words.Charged : Words.BigAttack), r.Center.X, cy - (Settings.ClearFight && !f.IntentAll ? lift + 22f : 40f), Palette.Highlight * (ia * (0.7f + 0.3f * (float)Math.Sin(time * 6f))), TextSize.Label, 3f);
                 if (f.Staggered)
                     Gfx.Line(sb, x - 6, cy, x + IntentNumberRoom + 6f + row, cy, Palette.Highlight * ia, 2f);   // OFF-BEAT : it loses its next turn, this move waits for the one after
             }
@@ -2030,7 +2035,7 @@ namespace Tacetno433.Screens
                 }
             }
 
-            Gfx.TextSpacedRight(sb, Game.Font, "BAR", TacetGame.ScreenW - 64, 22, Palette.LineGrey, TextSize.Label, 3f);
+            Gfx.TextSpacedRight(sb, Game.Font, Words.Turn, TacetGame.ScreenW - 64, 22, Palette.LineGrey, TextSize.Label, 3f);
             if (Settings.ClearFight) Gfx.Text(sb, Game.Font, NumberText.Get(battle.Round), TacetGame.ScreenW - 52, 14, Palette.Highlight, TextSize.Heading);   // CLEAR FIGHT
             else Gfx.Text(sb, Game.BigFont, NumberText.Get(battle.Round), TacetGame.ScreenW - 52, 12, Palette.Highlight, TextSize.Small);
 
@@ -2063,7 +2068,7 @@ namespace Tacetno433.Screens
             float grow = 1f + 0.25f * barPulse;
             Gfx.TextSpacedRight(sb, Game.Font, "HITS", 600, 82, Palette.LineGrey, TextSize.Label, 3f);
             Gfx.Text(sb, Game.BigFont, barHitsText, 612, 70, Palette.Paper, TextSize.Small * grow);
-            Gfx.TextSpacedRight(sb, Game.Font, "BAR TOTAL", 760, 82, Palette.LineGrey, TextSize.Label, 3f);
+            Gfx.TextSpacedRight(sb, Game.Font, "TURN TOTAL", 760, 82, Palette.LineGrey, TextSize.Label, 3f);
             Gfx.Text(sb, Game.BigFont, barDamageText, 772, 66, Palette.Highlight, TextSize.Subtitle * grow);
         }
 
@@ -2222,7 +2227,7 @@ namespace Tacetno433.Screens
                 Gfx.Text(sb, Game.Font, line, 40, 700, ink, TextSize.Label);
 
                 //PLAY : the bar is written
-                Ui.Button(sb, playBox, "PLAY THE BAR", "ENTER", true, true, 1f);
+                Ui.Button(sb, playBox, Words.Play, "ENTER", true, true, 1f);
             }
             else
             {
@@ -2244,7 +2249,7 @@ namespace Tacetno433.Screens
                 }
             }
 
-            //BREATH : the big number is what is free to write more moves with, the skills written already wait in "IN THE BAR"
+            //BREATH : the big number is what is free to write more moves with, the skills written already wait in "THIS TURN"
             int free = Math.Max(0, battle.BreathFree);
             Gfx.TextSpaced(sb, Game.Font, "BREATH", BreathX, BreathY, Palette.LineGrey, TextSize.Label, 3f);
             Ui.Pips(sb, BreathX + 6, BreathY + 24, planning ? free : battle.Breath, BattleRules.TurnBreathMax, 7f, 20f, 1f);
@@ -2252,7 +2257,7 @@ namespace Tacetno433.Screens
             else Gfx.Text(sb, Game.BigFont, NumberText.Get(planning ? free : battle.Breath), BreathX + 214, BreathY + 4, Palette.Highlight, TextSize.Small);
             if (planning && battle.Reserved > 0)
             {
-                Gfx.TextSpacedRight(sb, Game.Font, "IN THE BAR", BreathX + 180, BreathY, Palette.PaperDim, TextSize.Label, 2f);
+                Gfx.TextSpacedRight(sb, Game.Font, "THIS TURN", BreathX + 180, BreathY, Palette.PaperDim, TextSize.Label, 2f);
                 Gfx.Text(sb, Game.Font, NumberText.Get(battle.Reserved), BreathX + 188, BreathY, Palette.Paper, TextSize.Label);
             }
 

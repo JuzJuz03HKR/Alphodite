@@ -62,7 +62,7 @@ namespace Tacetno433.Screens
         public override void Load()
         {
             RunState run = Game.CurrentRun;
-            stageLine = "REST STOP   /   " + run.StageLabel;
+            stageLine = "REST   /   " + run.StageLabel;
 
             optionTexts[Breathe] = Gfx.WrapText(Game.StoryFont, "Sit down, close your eyes. The band gets back "
                                    + (int)(BattleRules.BreatheRecover * 100) + " percent of its " + BattleRules.LifeWordLower + ".", CardW - 40, TextSize.StorySmall);

@@ -41,7 +41,7 @@ namespace Tacetno433.Core
             stars += " " + RehearsalList.AnyLeft(paganini) + " " + SkillList.Second(paganini).Name;
             MusicianList.ResetRehearsals();
             stars += " / " + SkillList.First(paganini).Name + " " + paganini.Rehearsed + " " + paganini.Has(StarRule.AttackDissonance) + " " + paganini.Has(StarRule.LastCut);
-            report += Same("stars", "True True 5 4 1 DISSONANCE False 3 CAPRICE No. 24 True 3 True False False DEVIL'S CANNON / CAPRICE 0 False False", stars);
+            report += Same("stars", "True True 5 4 1 " + Words.Burn + " False 3 CAPRICE No. 24 True 3 True False False DEVIL'S CANNON / CAPRICE 0 False False", stars);   // WORDS : BURN was DISSONANCE
 
             //Star Words : what the page and the shop show. The ATTACK : the power (5 to 7). IL CANNONE's first star : its held hit
             //(5 x 2 x 1.8 x 1.4 = 25.2 -> 25, x2.2 : 30.8 -> 31). Its third : the name becoming the legend's.

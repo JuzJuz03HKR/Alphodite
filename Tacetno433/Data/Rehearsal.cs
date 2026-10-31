@@ -109,20 +109,20 @@ namespace Tacetno433.Data
             new Star[][]
             {
                 new Star[] { new Star(), new Star(),
-                    new Star { Name = "DIABOLUS IN MUSICA", Line = "ATTACK adds " + BattleRules.TurnAttackDissonance + " DISSONANCE.", Rule = StarRule.AttackDissonance } },
+                    new Star { Name = "DIABOLUS IN MUSICA", Line = "ATTACK adds " + BattleRules.TurnAttackDissonance + " " + Words.Burn + ".", Rule = StarRule.AttackDissonance } },
                 new Star[]
                 {
-                    new Star { From = "4 CUTS", To = "5 CUTS", Notes = new[] { S(L), S(R), S(L), S(R), S(L) }, SkillText = "5 quick cuts. Each adds 1 DISSONANCE." },
-                    new Star { From = "1 DISSONANCE", To = "2 DISSONANCE", Dissonance = 2, SkillText = "5 quick cuts. Each adds 2 DISSONANCE." },
+                    new Star { From = "4 CUTS", To = "5 CUTS", Notes = new[] { S(L), S(R), S(L), S(R), S(L) }, SkillText = "5 quick cuts. Each adds 1 " + Words.Burn + "." },
+                    new Star { From = "1 " + Words.Burn, To = "2 " + Words.Burn, Dissonance = 2, SkillText = "5 quick cuts. Each adds 2 " + Words.Burn + "." },
                     new Star { Name = "CAPRICE No. 24", Line = "6 cuts, all one way. The last one x3.", Notes = new[] { S(L), S(L), S(L), S(L), S(L), S(L) },
-                               Rule = StarRule.LastCut, SkillText = "6 cuts all one way, 2 DISSONANCE each. The last one x3." },
+                               Rule = StarRule.LastCut, SkillText = "6 cuts all one way, 2 " + Words.Burn + " each. The last one x3." },
                 },
                 new Star[]
                 {
                     new Star { Hit = true, Damage = 2.2f },
                     new Star { Hit = true, Damage = 2.6f },
-                    new Star { Name = "DEVIL'S CANNON", Line = "Also hits every enemy that has DISSONANCE.", Rule = StarRule.MarkedSouls,
-                               SkillText = "One big held shot. Goes through GUARD. Also hits every enemy with DISSONANCE." },
+                    new Star { Name = "DEVIL'S CANNON", Line = "Also hits every enemy that has " + Words.Burn + ".", Rule = StarRule.MarkedSouls,
+                               SkillText = "One big held shot. Goes through " + Words.Armor + ". Also hits every enemy with " + Words.Burn + "." },
                 },
             },
 
@@ -135,16 +135,16 @@ namespace Tacetno433.Data
                 {
                     new Star { From = "HEAL 3", To = "HEAL 4", Heal = 4, SkillText = "Heals the whole band 4 per note." },
                     new Star { From = "2 NOTES", To = "3 NOTES, 3 BREATH", Notes = new[] { S(D), S(U), S(D) }, Cost = 3, SkillText = "3 notes. Heals the whole band 4 per note." },
-                    new Star { Name = "SANSSOUCI", Line = "Also clears DISSONANCE and MUTE.", Rule = StarRule.Sanssouci,
-                               SkillText = "Heals the whole band 4 per note. Clears DISSONANCE and MUTE." },
+                    new Star { Name = "SANSSOUCI", Line = "Also clears " + Words.Burn + " and " + Words.Muted + ".", Rule = StarRule.Sanssouci,
+                               SkillText = "Heals the whole band 4 per note. Clears " + Words.Burn + " and " + Words.Muted + "." },
                 },
                 new Star[]
                 {
-                    new Star { From = "FRIEND " + X(BattleRules.TurnLessonScale), To = "FRIEND " + X(BattleRules.TurnLessonStrong), Rule = StarRule.LessonStrong,
-                               SkillText = "A friend's next skill : wider PERFECT, " + X(BattleRules.TurnLessonStrong) + "." },
-                    new Star { From = "1 FRIEND", To = "EVERY FRIEND, 3 BREATH", Everyone = true, Cost = 3, SkillText = "Every friend's next skill : wider PERFECT, " + X(BattleRules.TurnLessonStrong) + "." },
+                    new Star { From = Words.Focus + " " + X(BattleRules.TurnLessonScale), To = Words.Focus + " " + X(BattleRules.TurnLessonStrong), Rule = StarRule.LessonStrong,
+                               SkillText = "A friend gets " + Words.Focus + " : their next skill " + X(BattleRules.TurnLessonStrong) + "." },
+                    new Star { From = "1 FRIEND", To = "EVERY FRIEND, 3 BREATH", Everyone = true, Cost = 3, SkillText = "Every friend gets " + Words.Focus + " : their next skill " + X(BattleRules.TurnLessonStrong) + "." },
                     new Star { Name = "KING'S LESSON", Line = "A friend taught plays their next move again, at half.", Rule = StarRule.LessonEcho,
-                               SkillText = "Every friend's next skill : wider PERFECT, " + X(BattleRules.TurnLessonStrong) + ", played again at half." },
+                               SkillText = "Every friend gets " + Words.Focus + " : their next skill " + X(BattleRules.TurnLessonStrong) + ", played again at half." },
                 },
             },
 
@@ -155,19 +155,19 @@ namespace Tacetno433.Data
                     new Star { Name = "TWIN THUNDER", Line = "ATTACK hits twice.", Rule = StarRule.AttackTwice } },
                 new Star[]
                 {
-                    new Star { From = "OFF-BEAT 30", To = "OFF-BEAT 40", OffBeat = 40, SkillText = "Shake fast. OFF-BEAT 40. Breaks a CHARGE." },
-                    new Star { From = "1 ENEMY", To = "EVERY ENEMY, 3 BREATH", Everyone = true, Cost = 3, SkillText = "Shake fast. OFF-BEAT 40 on every enemy. Breaks a CHARGE." },
-                    new Star { Name = "THUNDERCLAP", Line = "PERFECT : the first enemy is OFF-BEAT at once.", Rule = StarRule.RollThrows,
-                               SkillText = "Every enemy, OFF-BEAT 40. PERFECT : the first one is OFF-BEAT at once." },
+                    new Star { From = "+30 " + Words.Stun, To = "+40 " + Words.Stun, OffBeat = 40, SkillText = "Shake fast. +40 " + Words.Stun + ". Breaks a " + Words.Charge + "." },
+                    new Star { From = "1 ENEMY", To = "EVERY ENEMY, 3 BREATH", Everyone = true, Cost = 3, SkillText = "Shake fast. +40 " + Words.Stun + " on every enemy. Breaks a " + Words.Charge + "." },
+                    new Star { Name = "THUNDERCLAP", Line = "PERFECT : the first enemy is " + Words.Stunned + " at once.", Rule = StarRule.RollThrows,
+                               SkillText = "Every enemy, +40 " + Words.Stun + ". PERFECT : the first one is " + Words.Stunned + " at once." },
                 },
                 new Star[]
                 {
                     new Star { From = "ENEMY NOTES -0", To = "ENEMY NOTES -" + BattleRules.TurnHandCut, Rule = StarRule.CallRetunes,
-                               SkillText = "Enemies aim at PFUNDT, who takes half. Their next attacks lose " + BattleRules.TurnHandCut + " note." },
+                               SkillText = "Every enemy aims at PFUNDT, who gets " + Words.Guard + ". Their next attacks lose " + BattleRules.TurnHandCut + " note." },
                     new Star { From = "TAKES 1/2", To = "TAKES 1/3", Rule = StarRule.GuardThird,
-                               SkillText = "Enemies aim at PFUNDT, who takes a third. Their next attacks lose " + BattleRules.TurnHandCut + " note." },
+                               SkillText = "Every enemy aims at PFUNDT, who takes only a third. Their next attacks lose " + BattleRules.TurnHandCut + " note." },
                     new Star { Name = "DIE PAUKEN", Line = "Every enemy's next attack loses " + BattleRules.TurnHandPaukenCut + " notes.", Rule = StarRule.CallTwo,
-                               SkillText = "Enemies aim at PFUNDT, who takes a third. Their next attacks lose " + BattleRules.TurnHandPaukenCut + " notes." },
+                               SkillText = "Every enemy aims at PFUNDT, who takes only a third. Their next attacks lose " + BattleRules.TurnHandPaukenCut + " notes." },
                 },
             },
 
@@ -177,13 +177,13 @@ namespace Tacetno433.Data
             new Star[][]
             {
                 new Star[] { new Star(), new Star(),
-                    new Star { Name = "STRADIVARIUS", Line = "ATTACK puts DUPORT on GUARD : half damage.", Rule = StarRule.AttackGuards } },
+                    new Star { Name = "STRADIVARIUS", Line = "ATTACK gives DUPORT " + Words.Guard + " : half damage.", Rule = StarRule.AttackGuards } },
                 new Star[]
                 {
-                    new Star { From = "TAKES 1/2", To = "TAKES 1/3", Rule = StarRule.ShieldThird, SkillText = "Guard a friend : their hits land on DUPORT, a third." },
-                    new Star { From = "1 FRIEND", To = "EVERY FRIEND", Everyone = true, SkillText = "Guard every friend : their hits land on DUPORT, a third." },
+                    new Star { From = "TAKES 1/2", To = "TAKES 1/3", Rule = StarRule.ShieldThird, SkillText = "Protect a friend : their hits land on DUPORT, a third." },
+                    new Star { From = "1 FRIEND", To = "EVERY FRIEND", Everyone = true, SkillText = "Protect every friend : their hits land on DUPORT, a third." },
                     new Star { Name = "NAPOLEON'S DENT", Line = "A blow taken for a friend hits back as hard.", Rule = StarRule.DentStrikesBack,
-                               SkillText = "Guard every friend, take a third. Every blow taken hits back." },
+                               SkillText = "Protect every friend, take a third. Every blow taken hits back." },
                 },
                 new Star[]
                 {
@@ -200,10 +200,10 @@ namespace Tacetno433.Data
                     new Star { Name = "WIDER ARC", Line = "ATTACK hits the next enemy too.", Rule = StarRule.AttackBounces } },
                 new Star[]
                 {
-                    new Star { From = "1 CRESCENDO", To = "2 CRESCENDO", Crescendo = 2, SkillText = "The band hits harder : 2 CRESCENDO per note." },
+                    new Star { From = "1 " + Words.Volume, To = "2 " + Words.Volume, Crescendo = 2, SkillText = "Every musician gets 2 " + Words.Volume + " per note." },
                     new Star { From = "AFTER PUNTO " + X(BattleRules.TurnHuntingCallScale), To = "AFTER PUNTO " + X(BattleRules.TurnCallStrong), Rule = StarRule.CallStrong },
-                    new Star { Name = "THE WHOLE HUNT", Line = "After FANFARE, everyone after PUNTO in the bar hits " + X(BattleRules.TurnCallStrong) + ".", Rule = StarRule.CallAll,
-                               SkillText = "The band hits harder : 2 CRESCENDO per note. Everyone after PUNTO hits " + X(BattleRules.TurnCallStrong) + "." },
+                    new Star { Name = "THE WHOLE HUNT", Line = "After FANFARE, everyone after PUNTO in the turn hits " + X(BattleRules.TurnCallStrong) + ".", Rule = StarRule.CallAll,
+                               SkillText = "Every musician gets 2 " + Words.Volume + " per note. Everyone after PUNTO hits " + X(BattleRules.TurnCallStrong) + "." },
                 },
                 new Star[]
                 {

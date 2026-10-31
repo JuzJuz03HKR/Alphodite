@@ -47,7 +47,7 @@ namespace Tacetno433.Screens
         {
             "Your baton",
             "The note says it all",
-            turnBattle ? "One bar at a time" : "Push back the silence"
+            turnBattle ? "One turn at a time" : "Push back the silence"
         };
         private static string[] bodies =
         {
@@ -58,9 +58,9 @@ namespace Tacetno433.Screens
             turnBattle ? "ARROW : which way to swing. RING : swing as it closes. That is all a note asks."
                  : "ARROW : which way. LETTER : how far (p small, mf middle, f big). RING : stop as it closes.",
 
-            turnBattle ? "Your bar : give each musician a move, ENTER plays them in order. ATTACK hits by itself, a skill asks for a swing. "
-                   + "Their turn : swipe back at each note to block it. BREATH pays for skills. "
-                   + "CHARGE : one big note next bar, OFF-BEAT breaks it. GUARD : it takes your hits first. "   // ENEMY MOVES (Beta1 30 Oct)
+            turnBattle ? "Your turn : give each musician a move, ENTER (" + Words.Play + ") plays them in order. ATTACK hits by itself, a skill asks for a swing. "
+                   + "TACET's notes : swipe back at each one to block it. BREATH pays for skills. "
+                   + Words.Charge + " : one big note next turn, a full " + Words.Stun + " bar breaks it. " + Words.Armor + " : it takes your hits first. "   // ENEMY MOVES (Beta1 30 Oct), WORDS (31 Oct)
                    + "A ring on an enemy : your move goes there. Point at an icon to read it. "                   // MARKS AND AIM (30 Oct)
                    + "Win a fight : one move gets a star. Three stars : its legend. "                             // REHEARSAL (31 Oct)
                    + "Gifts stay all run. Same icon as a legend : made for them."                                 // GIFTS (31 Oct)
@@ -87,7 +87,7 @@ namespace Tacetno433.Screens
         private static string[] demoBeats = { "1", "2", "3", "4" };
         private static string[] keyNames = turnBattle ? new string[] { "1 2 3", "ENTER", "SPACE", "TAB", "ESC" } : new string[] { "SPACE", "TAB", "ESC" };
         private static string[] keyJobs = turnBattle
-            ? new string[] { "ATTACK AND SKILLS", "PLAY THE BAR", "SIGNATURE  (WHEN THE DIAMONDS ARE FULL)", "THE BAND  (ON THE ROUTE)", "PAUSE" }
+            ? new string[] { "ATTACK AND SKILLS", Words.Play, Words.Finale + "  (WHEN THE DIAMONDS ARE FULL)", "THE BAND  (ON THE ROUTE)", "PAUSE" }
             : new string[] { "SIGNATURE  (WHEN ITS RECIPE IS FULL)", "THE BAND  (ON THE ROUTE)", "PAUSE" };
         private static string[] demoOrder = { "1", "2", "TACET", "3" };
 
@@ -394,12 +394,12 @@ namespace Tacetno433.Screens
             Gfx.Circle(sb, tip.X, tip.Y, 6f, Palette.Highlight * a);
         }
 
-        //Page 3 (turn battle) : the bar (ONE BAR, a CUT IN in the middle), the band and TACET, one of its notes
+        //Page 3 (turn battle) : the turn (ONE BAR, a CUT IN in the middle), the band and TACET, one of its notes
         //flying in to be blocked on the ring, and the BREATH pips
         private void DrawFight(SpriteBatch sb, float a)
         {
             //The Bar : the band are filled plates, TACET an outline, like the fight page
-            Gfx.TextSpaced(sb, Game.Font, "THE BAR", ox + 110, 140, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            Gfx.TextSpaced(sb, Game.Font, "ONE " + Words.Turn, ox + 110, 140, Palette.LineGrey * a, TextSize.Tiny, 2f);
             int now = (int)(time / 1.6f) % demoOrder.Length;
             for (int i = 0; i < demoOrder.Length; i++)
             {

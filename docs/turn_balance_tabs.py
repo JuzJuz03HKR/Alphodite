@@ -49,6 +49,17 @@ for l in src[start:end + 1]:
 ws = wb['Turn Battle']
 clear(ws)
 for r in rows: ws.append(list(r))
+values = {r[1]: r[2] for r in rows}
+
+# CS Text (WORDS, Beta1 31 Oct) : a line of the code written as "..." + Words.X + "..." + BattleRules.Y read back as the
+# player sees it, the rule words from Data/Words.cs and the numbers from BattleRules above
+words = dict(re.findall(r'public const string (\w+) = "([^"]*)";', open(f'{repo}/Tacetno433/Data/Words.cs', encoding='utf-8-sig').read()))
+CS_EXPR = r'((?:"[^"]*"|\s*\+\s*|BattleRules\.\w+|Words\.\w+)+)'
+def cs_text(expr):
+    text = ''
+    for lit, rule, word in re.findall(r'"([^"]*)"|BattleRules\.(\w+)|Words\.(\w+)', expr):
+        text += values.get(rule, rule) if rule else (words.get(word, word) if word else lit)
+    return text
 
 # --- Turn Enemies
 es = open(f'{repo}/Tacetno433/Data/Enemy.cs', encoding='utf-8-sig').read()
@@ -73,7 +84,7 @@ for block in re.findall(r'new Enemy \{ Name = "([^"]+)",(.*?)\},\s*(?=//|new Ene
     phrases = ', '.join(re.findall(r'"([^"]+)"', re.search(r'Phrases = new\[\] \{([^}]*)\}', body).group(1)))
     trait = re.search(r'TraitName = "([^"]+)"', body).group(1)
     floor = get('TraitFloor', '1')
-    text = re.search(r'TurnTraitText = "([^"]+)"', body).group(1)
+    text = cs_text(re.search(r'TurnTraitText = ' + CS_EXPR, body).group(1))
     moves = re.search(r'Moves = new\[\] \{([^}]*)\}', body)
     moves = ', '.join(m.strip().upper().replace('HIT', 'ATTACK') for m in moves.group(1).split(',')) if moves else 'ATTACK'
     if 'GUARD' in moves: moves += f' (GUARD {get("GuardBlock", "0")})'
@@ -81,17 +92,13 @@ for block in re.findall(r'new Enemy \{ Name = "([^"]+)",(.*?)\},\s*(?=//|new Ene
 
 # --- Turn Skills (Beta1 29 Oct, THE FIVE KITS) : every skill of Data/Skill.cs with its musician (skills 2k and 2k + 1 belong
 #     to musician k of Data/Musician.cs), and each musician's trait on their first row. The legends of MusicianList.Shown first.
-values = {r[1]: r[2] for r in rows}
 ms = open(f'{repo}/Tacetno433/Data/Musician.cs', encoding='utf-8-sig').read()
 musicians = []
 for block in re.findall(r'new Musician \{ Name = "([^"]+)",(.*?)\},\s*(?=//|new Musician|\};)', ms, re.S):
     name, body = block
     trait = re.search(r'TraitName = "([^"]+)"', body)
-    turn = re.search(r'TurnTraitText = ((?:"[^"]*"|\s*\+\s*|BattleRules\.\w+)+),', body)
-    text = ''
-    if turn:                                       # "..." + BattleRules.X + "..." : the numbers read from BattleRules above
-        for part in re.findall(r'"([^"]*)"|BattleRules\.(\w+)', turn.group(1)):
-            text += part[0] if part[0] or not part[1] else values.get(part[1], part[1])
+    turn = re.search(r'TurnTraitText = ' + CS_EXPR + ',', body)
+    text = cs_text(turn.group(1)) if turn else ''   # "..." + BattleRules.X + Words.Y : as the player reads it
     family = re.search(r'Family = Family\.(\w+)', body).group(1)
     power = re.search(r'Power = (\d+)', body).group(1)
     musicians.append((name, family, power, trait.group(1) if trait else '', text))
@@ -133,7 +140,7 @@ for k in order:
         ws.append([label if j == 0 else None, re.search(r'Name = "([^"]+)"', body).group(1), get('Kind').replace('SkillKind.', ''),
                    int(get('Cost', '2')), get('Target').replace('SkillTarget.', ''), notes, num(get('Damage')),
                    num(get('Dissonance')), num(get('Heal')), num(get('Crescendo')), num(get('Breath')),
-                   num(get('OffBeat')), special.strip() or None, re.search(r'Text = "([^"]+)"', body).group(1),
+                   num(get('OffBeat')), special.strip() or None, cs_text(re.search(r'\bText = ' + CS_EXPR, body).group(1)),
                    f'{trait} : {trait_text}' if j == 0 and trait else None])
 
 # --- Turn Conductors : the signature texts from the code, matched by kit
@@ -142,12 +149,12 @@ ws = wb['Turn Conductors']
 for row in ws.iter_rows(min_row=2):
     kit = row[2].value
     if not kit: continue
-    m = re.search(r'Turn = TurnKit\.' + kit + r'\b(.*?)TurnSignatureText = "([^"]+)"', cs, re.S)
+    m = re.search(r'Turn = TurnKit\.' + kit + r'\b(.*?)TurnSignatureText = ' + CS_EXPR, cs, re.S)
     if not m:
-        m = re.search(r'TurnSignatureText = "([^"]+)"(?:(?!new Conductor).)*?Turn = TurnKit\.' + kit + r'\b', cs, re.S)
-        text = m.group(1) if m else None
+        m = re.search(r'TurnSignatureText = ' + CS_EXPR + r'(?:(?!new Conductor).)*?Turn = TurnKit\.' + kit + r'\b', cs, re.S)
+        text = cs_text(m.group(1)) if m else None
     else:
-        text = m.group(2)
+        text = cs_text(m.group(2))
     if text: row[6].value = text
 
 # --- Turn Sim

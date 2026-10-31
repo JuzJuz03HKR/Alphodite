@@ -43,7 +43,7 @@ namespace Tacetno433.Screens
         //Wipe Word : the page's name in the wipe on the way here (WIPE WORD)
         public override string WipeWord
         {
-            get { return "THE LUTHIER"; }
+            get { return "THE " + Words.Workshop; }
         }
 
         public override void Load()
@@ -63,7 +63,7 @@ namespace Tacetno433.Screens
             {
                 nothingToDo = true;
                 run.AddShards(BattleRules.SkipMotifShards);
-                resultLine = "Every weapon is already at its best. The luthier pays you for a look at them : +" + BattleRules.SkipMotifShards + " SHARDS.";
+                resultLine = "Every weapon is already at its best. The maker pays you for a look at them : +" + BattleRules.SkipMotifShards + " SHARDS.";
             }
 
             SoundBank.PlayMusic(Music.Rest);
@@ -85,7 +85,7 @@ namespace Tacetno433.Screens
             {
                 Musician m = run.Roster[i];
                 nowLabel[i] = "POWER " + run.PowerOf(m);
-                nextLabel[i] = run.CanRehearse(m) ? "TO " + (run.PowerOf(m) + BattleRules.WeaponTierPower) : "TOP TIER";
+                nextLabel[i] = run.CanRehearse(m) ? "TO " + (run.PowerOf(m) + BattleRules.WeaponTierPower) : "3 STARS";
             }
         }
 
@@ -239,7 +239,7 @@ namespace Tacetno433.Screens
             //Heading : over the band
             float head = UiMotion.Between(time, 0.1f, BattleRules.UiEnterTime);
             float rise = (1f - head) * BattleRules.UiEnterSlide;
-            Gfx.TextSpacedCentered(sb, Game.Font, "A LUTHIER'S WORKSHOP", rightX, 78 - rise, Palette.LineGrey * head, TextSize.Tiny, 5f);
+            Gfx.TextSpacedCentered(sb, Game.Font, "AN INSTRUMENT MAKER'S " + Words.Workshop, rightX, 78 - rise, Palette.LineGrey * head, TextSize.Tiny, 5f);
             Gfx.TextCentered(sb, Game.BigFont, Done ? "Sharper than before" : "One weapon, made sharper", rightX, 116 - rise, Palette.Paper * head, TextSize.Subtitle);
 
             //Columns : the name, the weapon now, power now and after, and the tier's diamonds over the column
@@ -263,7 +263,7 @@ namespace Tacetno433.Screens
             else Gfx.TextSpaced(sb, Game.Font, "CLICK A MUSICIAN   /   FREE, ONE WEAPON PER VISIT", artBox.Right + 24, 610, Palette.LineGrey * foot, TextSize.Tiny, 2f);
             Ui.Command(sb, moveButton, "MOVE ON", "ENTER", moveMotion, Done ? foot : foot * 0.35f, false);
 
-            RunHud.DrawTop(sb, run, "LUTHIER");
+            RunHud.DrawTop(sb, run, Words.Workshop);
             RunHud.DrawTips(sb, run);
         }
 

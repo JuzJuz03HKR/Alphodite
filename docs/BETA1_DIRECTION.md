@@ -1360,3 +1360,70 @@
 
 ### 18.8 ผลที่ผู้ใช้ลอง (31 ต.ค. คำต่อคำ `USER_BRIEFS.md` 13.44)
 - ผู้ใช้ Rebuild ลองแล้ว "ลองแล้ว ยังไม่ต้องแก้อะไร" แล้วสั่ง /update ไปเปิดแชทใหม่ทำข้อถัดไป (16.14 ข้อ 3 ภาษาทั้งเกม) ทีละข้อแล้วหยุดรอเหมือนเดิม
+
+## 19. ภาษาทั้งเกม (16.14 ข้อ 3) เสร็จ รอผู้ใช้ Rebuild ดู (31 ต.ค. แชท /system Finalize5 คำต่อคำ `USER_BRIEFS.md` 13.45)
+
+ผู้ใช้ : "เอาตามแนะนำ แต่โปรดลองคิดอีกรอบว่าควรเอาแบบไหนหากอิงจากผู้เล่นอ่านครั้งเดียวแล้วเข้าใจว่าอะไรคืออะไร พ่วงกับการกระทำหรือ GUI ให้เห็นภาพด้วยก็ดี"
+ก่อนเริ่ม ไอริสเช็กโค้ดแล้วเจอคำในตาราง 16.7 ซ้ำกับคำที่เกมใช้อยู่ 4 คำ (FINALE เป็นป้ายห้องบอส / ROUND ชนศัตรู THE ROUND / SILENCED เป็นคำตอนศัตรูตายและหน้าจอแพ้ / POWER เป็นพลังอาวุธ) ผู้ใช้ให้เอาตามคำแนะนำ แล้วคิดใหม่ทุกคำด้วยเกณฑ์ข้างบน
+
+### 19.1 หลัก
+- คำกติกา (คำที่บอกว่าอะไรทำงานยังไง) ต้องเป็นคำที่คนรู้จากเกมอื่นอยู่แล้ว หรือคำธรรมดาที่ทุกคนรู้ ไม่ใช่ศัพท์ห้องเรียนดนตรี ชื่อสกิล ของ บอส ท่อน และ FINALE ของวาทยากรยังเป็นชื่อดนตรีได้
+- คำเดียว ความหมายเดียว ทุกที่ (เดิม GUARD มี 3 ความหมาย REST มี 2)
+- คำกติกาทั้งเกมอยู่ `Data/Words.cs` ที่เดียว เหมือนตัวเลขอยู่ `BattleRules` สีอยู่ `Palette` เปลี่ยนคำที่นี่แล้วเปลี่ยนทั้งเกม (บรรทัดสกิล ไอคอน คำเด้ง HOW TO PLAY) พร้อมบรรทัดอธิบายของแต่ละคำ (`BurnLine` ...)
+- ชื่อในโค้ดและเซฟยังเป็นคำเดิม (Dissonance Crescendo OffBeat Mute Block Lesson Signature Bar Luthier Echoes) กติกาไม่ขยับ เซฟเก่าโหลดได้
+
+### 19.2 คำที่เปลี่ยน (ไอริสคิดใหม่ตามเกณฑ์ ผู้ใช้เปลี่ยนได้ทุกคำ)
+| เดิม | ใหม่ | ทำไม |
+|---|---|---|
+| DISSONANCE | **BURN** | ตาราง 16.7 เสนอ CRACK แต่คิดใหม่แล้วเปลี่ยน : CRACK ไม่ใช่คำที่เกมอื่นใช้กับ "เสียเลือดทุกตา" อ่านครั้งแรกอาจคิดว่าเกราะแตกหรือโดนแรงขึ้น และรอยร้าวไม่หดลง แต่กติกานี้ลดลง 1 ทุกตา BURN ทุกคนรู้ว่าไหม้แล้วเสียเลือดทุกตา และไฟมอดลงตรงกับกติกา เข้ากับ PAGANINI นักไวโอลินของปีศาจ |
+| CRESCENDO | **VOLUME** | POWER ชนพลังอาวุธ ส่วน CRESCENDO เป็นเปอร์เซ็นต์ต่อขั้นคนละอย่างกัน VOLUME ทุกคนรู้จักปุ่มเสียง เกมนี้เสียงคืออาวุธ ดังขึ้นคือแรงขึ้น (ตรงกับ THE CLOSER THE LOUDER ของ Beethoven) มีเพดาน 5 ขั้นเหมือนแถบเสียง MISS แล้วหายเหมือนเสียงหลุด |
+| OFF-BEAT | **STUN** (แถบ) / **STUNNED** (แถบเต็ม) | คำสากลของแถบที่เติมแล้วเสียตา |
+| MUTE | **MUTED** | SILENCED ชน (ศัตรูตาย หน้าจอแพ้) รูปแบบเดียวกับ STUNNED อ่านแล้วรู้ว่าโดนปิดเสียง ใช้สกิลไม่ได้ เข้ากับ THE MUTE CHOIR |
+| GUARD 3 อย่าง | **GUARD** (นักดนตรีรับครึ่ง) / **ARMOR** (โล่ตัวเลขของศัตรู) / **ARMOR UP** (เจตนาตั้งโล่) | แยก 3 อย่างออกจากกัน ARMOR คือคำที่เกมการ์ดและ RPG ใช้กับโล่ที่ซับดาเมจก่อนเลือด |
+| LESSON (สถานะ) | **FOCUS** | ชื่อสกิลยังเป็น THE LESSON สถานะที่มันทิ้งไว้คือ FOCUS สกิลถัดไปง่ายขึ้นแรงขึ้น |
+| SIGNATURE | **FINALE** | ทุกคนรู้ว่าเป็นท่าปิดใหญ่ ป้ายห้องบอสบนแผนที่ที่เคยเป็น FINALE เปลี่ยนเป็น **LAST FIGHT** |
+| BAR / PLAY THE BAR | **TURN** / **PLAY** | ROUND ชนศัตรู THE ROUND / TURN คือคำที่ทุกเกมผลัดตาใช้ ปุ่มเล่นเหลือคำเดียว |
+| LUTHIER | **WORKSHOP** | ตัวอักษรบนแผนที่ L เป็น **W** หัวหน้า AN INSTRUMENT MAKER'S WORKSHOP |
+| ECHOES (ข้ามรัน) | **APPLAUSE** | ไม่ชนสถานะ ECHO และรู้ทันทีว่าได้จากการเล่น |
+| REST (เจตนาศัตรู THE LULL ฮัมเพลงแล้วฮีล) | **HEAL** | บอกสิ่งที่มันทำตรงๆ |
+| CADENZA (ท่าใหญ่ทุกครั้งที่ 3 ของบอส) | **BIG ATTACK** | ศัพท์ดนตรีที่คนไม่รู้ ท่าบอสที่มีชื่อจริงรอข้อ 4 |
+| ป้ายแผนที่ DUEL / DUEL + | **FIGHT** / **HARD FIGHT** | DUEL เป็นคำของเกมดวลเดิม |
+| "The 4/4 shape :" ในบรรทัด FINALE | **"4 swipes :"** | บอกสิ่งที่ต้องทำ ไม่ต้องรู้จังหวะ 4/4 (ชื่อบทใน Tutorial ยังเป็น THE 4/4 SHAPE) |
+| คำเด้ง CUE | **HUNTING CALL** | ชื่อความสามารถของ PUNTO เด้งตอนทำงาน แบบเดียวกับที่ GIFT เด้งชื่อของ |
+| TWICE A BAR (STUTTER) | **TWICE A TURN** | ตาม TURN |
+
+**คิดใหม่แล้วไม่เปลี่ยน** : REST (ที่พักบนแผนที่) คงไว้ ไม่เปลี่ยนเป็น BACKSTAGE ตาม 16.7 เพราะ BACKSTAGE ต้องอ่านคำอธิบายก่อนถึงรู้ว่าทำอะไรที่นั่น REST ทุกคนรู้ทันที และเมื่อเจตนาของศัตรูเปลี่ยนเป็น HEAL แล้ว REST เหลือความหมายเดียว ตัวอักษร R บนแผนที่ก็ไม่ชน B ของ BOSS
+คงไว้ : BREATH ATTACK PERFECT GOOD MISS PARRY BLOCK COUNTER CHARGE BROKEN CUT IN SHIELD ECHO HEAL SHARDS ELITE BOSS TREASURE RANK DOWN SILENCED
+
+### 19.3 คำพ่วงกับการกระทำและ GUI (ผู้ใช้ : "พ่วงกับการกระทำหรือ GUI ให้เห็นภาพด้วยก็ดี")
+1. **การ์ดสกิล** : ใต้ตัวเลขมีบรรทัดอธิบายคำของสกิลนั้น เช่น `BURN  =  loses this much life at the end of its turn, then 1 less` (คำสว่าง ความหมายจาง สูงสุด 2 คำ) หาเองจากบรรทัดของสกิล (`Words.KeywordsIn`) ผู้เล่นเห็นคำกับความหมายพร้อมกันตั้งแต่ครั้งแรกที่จะกด แบบที่เกมการ์ดขึ้นคำอธิบายคำสำคัญข้างการ์ด
+2. **ไอคอนสถานะ** : ชื่อกับบรรทัดตอนชี้มาจาก `Words` ชุดเดียวกัน รหัสในกรอบรออาร์ต BRN VOL MUT GRD ECH SHD FOC ARM STN CUT ATK CHG AR+ HEA BRK ALL
+3. **คำเด้งตอนเกิดจริง พร้อมตัวเลข** : `BURN 4` ตอนติด / `BURN` ตอนไฟเผาท้ายตาพร้อมเลขเลือดที่หาย / `VOLUME 3` ตอนได้ / `VOLUME 0` ตอน MISS แล้วหาย / `GUARD` ตอน THUNDER CALL ลง / `+12 ARMOR` ตอนตั้งโล่ `-5 ARMOR` ตอนตีโดนโล่ / `STUNNED` / `MUTED` / `FOCUS`
+   กติกาเพิ่มเหตุการณ์ให้หน้าจอรู้จังหวะ 3 ชนิด `TurnEventKind.DissonanceTick` `CrescendoLost` `GuardUp` (ไม่เปลี่ยนผลไฟต์)
+4. **การ์ดเพื่อน FRIEND PICK** : `+FOCUS` (บรรทัดล่าง NEXT SKILL x1.3) / `+2 VOLUME` / `GUARD : HITS x0.5`
+5. **ดาวซ้อม** : `FOCUS x1.3 → FOCUS x1.6` / `+30 STUN → +40 STUN` / `1 BURN → 2 BURN` / `1 VOLUME → 2 VOLUME`
+6. **คำใบ้ล่างจอ** : `MUTED : NO SKILLS THIS TURN, ATTACK STILL WORKS` / `ENTER = PLAY` / ข้าง BREATH `THIS TURN`
+
+### 19.4 ข้อความที่เขียนใหม่ด้วยคำง่าย (ไฟล์)
+- สกิล `Data/Skill.cs` (เช่น THE LESSON "A friend gets FOCUS for their next skill." / THUNDER CALL "Every enemy aims at PFUNDT, who gets GUARD." / SHIELD "Protect a friend ..." เลิกใช้ Guard เป็นคำกริยา / FANFARE "Every musician gets 1 VOLUME per note.")
+- ดาวซ้อม `Data/Rehearsal.cs` / ของ `Data/Motif.cs` (SNAPPED STRINGS "At 9 BURN an enemy bursts ...") / ความสามารถศัตรู `Data/Enemy.cs` (THE MUTE CHOIR "A note you miss leaves the target MUTED for a turn." / DECREE "Each turn it bans SKILLS or ATTACKS ...") / นักดนตรี `Data/Musician.cs` / วาทยากร `Data/Conductor.cs` / ARCHIVE `Data/Archive.cs` (FIRST CHAIR "starts with 1 star on their ATTACK")
+- แผนที่ `Data/RouteNode.cs` : คำอธิบายที่พักเดิมยังพูดถึงขั้นอาวุธก่อนมี REHEARSAL แก้เป็น "Heal up, or rehearse one move for a star." / WORKSHOP "An instrument maker. One ATTACK gets a star, free."
+- หน้าจอ : `BattleScreen` (.cs .Marks .Friends .Show) `GuideScreen` (หน้า 03 "One turn at a time") `TutorialScreen` `TitleScreen` (คำแนะนำ f mf p ที่ล้าสมัยแล้วเปลี่ยนเป็น "Point at any icon in a fight to read what it does.") `ResultScreen` (TURNS) `CurtainCallScreen` `ArchiveScreen` `LuthierScreen` `RestScreen` `ConductorDetailScreen` / รหัสเครื่องหมายของ GIFT `Core/MotifArt.cs` (BRN STN VOL)
+- ไฟล์ภาพไอคอนชื่อเดิม (`status_dissonance` ...) ความหมายใหม่เขียนไว้ `UI_ART_PLAN.md` 2.5
+
+### 19.5 ทดสอบในแชท cloud
+- build 0 error 0 warning / turncheck 174/174 (ใหม่ `Core/DebugShots.TurnWords.cs` 5 ข้อ : ข้อความที่ผู้เล่นอ่านไม่มีคำเก่าเหลือ / การ์ดหาคำเจอถูก (STUNNED ไม่ถูกอ่านเป็น STUN) / BURN เด้งตอนเผา / VOLUME เด้งตอน MISS / GUARD เด้งตอน THUNDER CALL) / savecheck 33/33
+- ภาพ battleaim battletip battlefriend battlechakram rehearsal luthier route archive guide3 detail result ไม่มีข้อความล้นกรอบ (แก้แล้ว 1 จุดบนการ์ดเพื่อน)
+- ไม่มีตัวเลขบาลานซ์เปลี่ยน กติกาไม่เปลี่ยน ไม่ได้รันตัวจำลอง
+
+### 19.6 ให้ผู้ใช้ลองหลัง Rebuild
+- ชี้ปุ่ม CAPRICE TIMPANI ROLL THE LESSON FANFARE : บรรทัดอธิบายคำใต้การ์ด อ่านครั้งเดียวเข้าใจไหม
+- ในไฟต์ : BURN เด้งตอนไฟเผา VOLUME 0 เด้งตอน MISS GUARD เด้งบน PFUNDT แถบ STUN เต็มแล้ว STUNNED
+- ชี้ไอคอนสถานะ แผนที่ (W = WORKSHOP ป้าย FIGHT HARD FIGHT LAST FIGHT) หน้า ARCHIVE (APPLAUSE)
+- คำไหนยังไม่ชอบ บอกได้เลย แก้ที่ `Data/Words.cs` คำเดียวเปลี่ยนทั้งเกม (เช่นถ้าอยากได้ CRACK แทน BURN)
+
+### 19.7 เจอระหว่างทำ (นอกขอบงาน ยังไม่แก้)
+- FRIEND PICK : การ์ดเพื่อนที่ศัตรูเล็งอยู่ (INCOMING 16) กับชื่อท่ายาว (IL CANNONE) ทับกันมุมขวาล่างของการ์ด เห็นในภาพ battlefriend
+
+### 19.8 ถัดไป (ผู้ใช้สั่งทีละข้อ หยุดรอหลังจบแต่ละข้อ)
+- 16.14 ข้อ 4 บอส (แถบเลือด 2 เฟส ท่าไม้ตายมีชื่อ แทน BIG ATTACK) แล้วข้อ 5 แผนที่ (ป้ายรางวัลคำเดียว ตอนนี้ป้ายเป็น FIGHT CHANCE TRADE HARD FIGHT RECOVER LAST FIGHT UPGRADE FREE) / PLAYTEST : FINALE ยังใช้ 1 PERFECT (`PlaytestSignatureNeed`) / VFX ทุกชนิดรอภาพอ้างอิง

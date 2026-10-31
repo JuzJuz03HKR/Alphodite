@@ -183,9 +183,9 @@ namespace Tacetno433.Data
                 Turn = TurnKit.Bach,                // step 10
                 TurnRole = "PRECISION",
                 TurnPassiveName = "LOCKED TEMPO",
-                TurnPassiveText = "On skills and the SIGNATURE, PERFECT is easier to hit.",
+                TurnPassiveText = "On skills and the " + Words.Finale + ", PERFECT is easier to hit.",
                 TurnSignatureName = "FUGUE",
-                TurnSignatureText = "The 4/4 shape : every musician's next move plays twice. Better strokes, louder echo. Grows at each boss.",
+                TurnSignatureText = "4 swipes : every musician gets " + Words.Echo + ", their next move plays again. Better swipes, stronger " + Words.Echo + ". Grows at each boss.",
                 TurnSignatureGrown = new[] { "THE ART OF FUGUE", "THE ART OF FUGUE II" },   // Bach's last great work (unfinished) : more echoes
                 Stamina = 5, PushPower = 6, Perk = ConductorPerk.LockedTempo,        // round 15 : 10 -> 5, his size is never wrong and playing
                                                                                      // is free, at 10 he won 91 to 94 percent (the others 80 to 89).
@@ -245,7 +245,7 @@ namespace Tacetno433.Data
                 TurnPassiveName = "THE CLOSER THE LOUDER",
                 TurnPassiveText = "The less life the band has left, the harder it hits, up to 50 percent.",
                 TurnSignatureName = "LIGHTNING",
-                TurnSignatureText = "The 4/4 shape : strikes every enemy and throws it OFF-BEAT. Better strokes, bigger strike. Grows at each boss.",
+                TurnSignatureText = "4 swipes : strikes every enemy and fills its " + Words.Stun + " bar. Better swipes, bigger strike. Grows at each boss.",
                 TurnSignatureGrown = new[] { "STORM", "STORM II" },   // the storm of the Pastoral (Symphony No. 6, its fourth movement) : more bolts
                 Stamina = 5, PushPower = 3, Perk = ConductorPerk.CloserLouder, Move = SignatureMove.DeafEars,
                                                                                      // round 10 : push 3 -> 4, perk up to 130 percent.
@@ -308,7 +308,7 @@ namespace Tacetno433.Data
                 TurnPassiveName = "PRODIGY",
                 TurnPassiveText = "3 PERFECTs in a row give 1 BREATH back.",
                 TurnSignatureName = "FEATHER",
-                TurnSignatureText = "The 4/4 shape : two free ATTACKs at the end of the bar per stroke that lands.",
+                TurnSignatureText = "4 swipes : two free ATTACKs at the end of the turn per swipe that lands.",
                 ThemeColor = Palette.ToneB,
                 Unlocked = true
             },
@@ -338,7 +338,7 @@ namespace Tacetno433.Data
                 TurnPassiveName = "BORROWED BREATH",
                 TurnPassiveText = "A skill short of BREATH can still be played. Each missing BREATH costs " + BattleRules.TurnPaganiniLife + " life.",
                 TurnSignatureName = "CAPRICE",
-                TurnSignatureText = "The 4/4 shape : for two turns per stroke that lands, a MISS is GOOD and a GOOD is PERFECT. Then every musician pays " + (int)System.Math.Round(BattleRules.TurnCapricePrice * 100) + " percent of their life.",
+                TurnSignatureText = "4 swipes : for two turns per swipe that lands, a MISS is GOOD and a GOOD is PERFECT. Then every musician pays " + (int)System.Math.Round(BattleRules.TurnCapricePrice * 100) + " percent of their life.",
                 ThemeColor = Palette.ToneA,
                 Unlocked = true
             },
@@ -364,7 +364,7 @@ namespace Tacetno433.Data
                 TurnPassiveName = "STEADY HAND",
                 TurnPassiveText = "Blocking TACET's notes is easier : both windows are wider.",
                 TurnSignatureName = "THE SUN",
-                TurnSignatureText = "The 4/4 shape : life back for every musician, and DISSONANCE and MUTE are gone. Better strokes, more life.",
+                TurnSignatureText = "4 swipes : life back for every musician, and " + Words.Burn + " and " + Words.Muted + " are gone. Better swipes, more life.",
                 ThemeColor = Palette.ToneD,
                 Unlocked = true
             },
@@ -393,7 +393,7 @@ namespace Tacetno433.Data
                 TurnPassiveName = "TWO VOICES",
                 TurnPassiveText = "The voices take turns, one musician each : FANNY hits 25 percent harder, ??? heals 50 percent more.",
                 TurnSignatureName = "DUET",
-                TurnSignatureText = "The 4/4 shape : FANNY strikes every enemy while ??? heals every musician. Grows at each boss.",
+                TurnSignatureText = "4 swipes : FANNY strikes every enemy while ??? heals every musician. Grows at each boss.",
                 TurnSignatureGrown = new[] { "DAS JAHR", "DAS JAHR II" },   // The Year (1841), Fanny's twelve months for piano : CRESCENDO, then more
                 ThemeColor = Palette.ToneC,
                 Spot = Palette.SpotPrism,           // PRISM (29 Oct) : a crystal's white, the rainbow when it moves (SpotAt)

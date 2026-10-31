@@ -23,7 +23,10 @@ namespace Tacetno433.Battle
     //pops the name of its legend (RehearsalList.RuleWords).
     public enum TurnEventKind { Damage, Heal, Breath, Dissonance, Crescendo, Mute, Break, Skip, Counter, Down, Ready, Extra, Saved, Steal, Echo, Quieter, Thorns,
                                 Cut, Shield, Lesson, Cue, Revenge, Charge, Broken, Guard, Blocked, Pierce, Legend,
-                                Gift }                       // GIFTS (Beta1 31 Oct) : a gift worked, Amount is its MotifId (the screen pops its name)
+                                Gift,                        // GIFTS (Beta1 31 Oct) : a gift worked, Amount is its MotifId (the screen pops its name)
+                                DissonanceTick, CrescendoLost, GuardUp }   // WORDS (31 Oct) : the moments the rule words work, so the screen
+                                                             // pops the word right then : BURN as it hurts (Amount = the damage), VOLUME as a
+                                                             // MISS takes it (Amount = what is left), GUARD as THUNDER CALL lands
 
     //DecreeKind : DECREE (THE DEAF CROWN, step 14), what the band may not do this bar
     public enum DecreeKind { None, NoSkills, NoAttacks }
@@ -1033,6 +1036,7 @@ namespace Tacetno433.Battle
         {
             if (f.Dissonance > 0 && !f.Down)
             {
+                Events.Add(new TurnEvent(TurnEventKind.DissonanceTick, f, f.Dissonance));   // WORDS : BURN pops as it hurts
                 Hurt(f, f.Dissonance);
                 f.Dissonance--;
             }
@@ -1378,7 +1382,11 @@ namespace Tacetno433.Battle
             }
 
             //GUARD and TAUNT : the percussion stands in front, every enemy turns to them at once
-            if (playingLanded && s.Guard) user.Guard = true;
+            if (playingLanded && s.Guard)
+            {
+                user.Guard = true;
+                Events.Add(new TurnEvent(TurnEventKind.GuardUp, user, 0));                       // WORDS : GUARD pops on them
+            }
             if (playingLanded && s.Taunt)
             {
                 user.Taunt = true;
@@ -2214,9 +2222,11 @@ namespace Tacetno433.Battle
             if (!Has(MotifId.HandStopping))
             {
                 f.Crescendo = 0;
+                Events.Add(new TurnEvent(TurnEventKind.CrescendoLost, f, 0));                   // WORDS : "VOLUME 0" pops with the MISS
                 return;
             }
             f.Crescendo = (f.Crescendo + 1) / 2;
+            Events.Add(new TurnEvent(TurnEventKind.CrescendoLost, f, f.Crescendo));
             GiftWorks(MotifId.HandStopping, f);
         }
 

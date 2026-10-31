@@ -83,7 +83,7 @@ namespace Tacetno433.Screens
                 Goal = "Follow the arrow once round." },
 
             new Lesson { Kind = Kind.Pattern, Title = "THE 4/4 SHAPE", Need = 4, For = For.Turn,
-                Body = "Hold, swing, stop. DOWN, LEFT, RIGHT, UP is the shape of the SIGNATURE.",
+                Body = "Hold, swing, stop. DOWN, LEFT, RIGHT, UP is the shape of the " + Words.Finale + ".",
                 Goal = "Follow the arrow once round." },
 
             //ONE RULE (Beta1, 29 Oct) : the turn battle has no sizes, so SMALL MIDDLE BIG and READ THE NOTE are the old duel's

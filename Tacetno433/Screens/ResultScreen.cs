@@ -167,7 +167,7 @@ namespace Tacetno433.Screens
                 int perfectShare = battle.NotesPlayed > 0 ? (int)Math.Round(100f * battle.PerfectCount / battle.NotesPlayed) : 100;
                 SetNumber(0, "PERFECT %", perfectShare, false);
                 SetNumber(1, BattleRules.LifeWord + " KEPT %", (int)Math.Round(100f * battle.LifeKept), false);
-                SetNumber(2, "BARS", run.LastRounds, false);
+                SetNumber(2, Words.Turns, run.LastRounds, false);
                 SetNumber(3, BattleRules.LifeWord + " BACK", recovered, true);
                 SetNumber(4, "SHARDS", beforeRank, true);
                 SetNumber(5, "RANK BONUS", shards - beforeRank, true);
@@ -187,7 +187,7 @@ namespace Tacetno433.Screens
             if (offerMotif) footnote = "A GIFT IS LEFT BEHIND";
             if (battle.Enemy.Kind == EnemyKind.Boss)                                       // SIGNATURE GROWS : what it becomes on the next floor
                 footnote = run.Floor >= BattleRules.FloorsPerRun ? "THE LAST SILENCE IS BROKEN"
-                         : (run.Conductor.TurnSignatureGrown.Length > 0 ? "FLOOR CLEARED  -  THE SIGNATURE GROWS : " + run.Conductor.SignatureNameAt(run.Floor)
+                         : (run.Conductor.TurnSignatureGrown.Length > 0 ? "FLOOR CLEARED  -  THE " + Words.Finale + " GROWS : " + run.Conductor.SignatureNameAt(run.Floor)
                                                                         : "FLOOR CLEARED  -  THE NEXT MOVEMENT IS WAITING");
 
             SoundBank.Play(Sfx.Victory);
@@ -208,7 +208,7 @@ namespace Tacetno433.Screens
             statNames[1] = "CONDUCTOR";     statValues[1] = run.Conductor.Name;
             statNames[2] = "REACHED";       statValues[2] = run.StageLabel + "  /  FLOOR " + run.Floor;
             statNames[3] = "FINAL LINE";    statValues[3] = NumberText.Signed((int)battle.Line);
-            if (BattleRules.TurnBattleOn) { statNames[3] = "BARS"; statValues[3] = NumberText.Get(run.LastRounds); }   // TURN BATTLE
+            if (BattleRules.TurnBattleOn) { statNames[3] = Words.Turns; statValues[3] = NumberText.Get(run.LastRounds); }   // TURN BATTLE
             statCount = 4;
 
             //Run Record : the fight that ended the run counts too (step 15, the curtain call left its PERFECTs out)

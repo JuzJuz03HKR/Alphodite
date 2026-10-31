@@ -144,7 +144,7 @@ namespace Tacetno433.Screens
         {
             more = "";
             if (p.Heal > 0) return "+" + p.Heal + " LIFE";
-            if (p.Crescendo > 0) return "+" + p.Crescendo + " CRESCENDO";
+            if (p.Crescendo > 0) return "+" + p.Crescendo + " " + Words.Volume;
             if (s.Shield)
             {
                 more = "x" + Share(p.Share) + " DAMAGE";                                  // SHIELD : the share DUPORT takes
@@ -152,10 +152,10 @@ namespace Tacetno433.Screens
             }
             if (s.Lesson)
             {
-                more = "WIDER PERFECT";                                                   // THE LESSON
-                return "NEXT SKILL x" + Share(p.Share);
+                more = "NEXT SKILL x" + Share(p.Share);                                  // THE LESSON leaves FOCUS (the card says the rest)
+                return "+" + Words.Focus;
             }
-            if (s.Guard) return "HITS x" + Share(p.Share);
+            if (s.Guard) return Words.Guard + " : HITS x" + Share(p.Share);
             return s.Name;
         }
 

@@ -41,10 +41,10 @@ namespace Tacetno433.Data
         {
             new ArchiveUpgrade { Name = "STRONGER BAND", Text = "Every musician has 2 more life.",            Prices = new int[] { 30, 60, 90 } },
             new ArchiveUpgrade { Name = "DEEP BREATH",   Text = "Every fight starts with 1 more BREATH.",     Prices = new int[] { 40, 80 } },
-            new ArchiveUpgrade { Name = "WARM UP",       Text = "The SIGNATURE starts 2 diamonds fuller.",    Prices = new int[] { 40, 80 } },
+            new ArchiveUpgrade { Name = "WARM UP",       Text = "The " + Words.Finale + " starts 2 diamonds fuller.",    Prices = new int[] { 40, 80 } },
             new ArchiveUpgrade { Name = "SAVINGS",       Text = "Every run starts with 20 more shards.",      Prices = new int[] { 25, 50, 75 } },
             new ArchiveUpgrade { Name = "KEEPSAKE",      Text = "Every run starts with a gift for the band.",      Prices = new int[] { 100 } },
-            new ArchiveUpgrade { Name = "FIRST CHAIR",   Text = "The first musician you pick starts with a tier I weapon.", Prices = new int[] { 120 } },
+            new ArchiveUpgrade { Name = "FIRST CHAIR",   Text = "The first musician you pick starts with 1 star on their ATTACK.", Prices = new int[] { 120 } },
         };
 
         public static int Echoes;           // ECHOES to spend (saved in archive.txt)

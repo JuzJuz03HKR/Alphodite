@@ -73,7 +73,7 @@ namespace Tacetno433.Screens
             if (BattleRules.TurnBattleOn)
             {
                 counts[3] = Archive.Pay(run, won);                 // given once, maybe already when the last fight was lost
-                countNames[3] = "ECHOES";
+                countNames[3] = Words.Applause;
             }
 
             run.SyncOrder();

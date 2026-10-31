@@ -113,7 +113,7 @@ namespace Tacetno433.Data
             //WOODEN STICKS (GIFT, was SPARE STICKS) : the hardest timpani sticks, the loudest blow. The same rule, PFUNDT is the only drummer.
             new Motif { Id = MotifId.SpareSticks,  Name = "WOODEN STICKS", Mark = "x",    Rarity = 1, Key = GiftKey.OffBeat,
                         Text = "Percussion players hit 30 percent harder on TACET's f notes.",
-                        TurnText = "PFUNDT's skills fill OFF-BEAT " + Percent(BattleRules.TurnSpareSticksOffBeat) + " percent more." },
+                        TurnText = "PFUNDT's skills fill " + Words.Stun + " " + Percent(BattleRules.TurnSpareSticksOffBeat) + " percent more." },
             new Motif { Id = MotifId.Pianissimo,   Name = "PIANISSIMO",    Mark = "pp",   Rarity = 1,
                         Text = "A small stroke on a p note gives back 3 breath.",
                         TurnText = "The first note of an attack parried PERFECT gives 1 more BREATH." },
@@ -141,7 +141,7 @@ namespace Tacetno433.Data
             //Rarity 3
             new Motif { Id = MotifId.Crescendo,    Name = "CRESCENDO",     Mark = "<",    Rarity = 3,
                         Text = "The COMBO bonus grows twice as fast.",
-                        TurnText = "Every fight starts with 1 CRESCENDO on each musician." },
+                        TurnText = "Every fight starts with 1 " + Words.Volume + " on each musician." },
             new Motif { Id = MotifId.Sforzando,    Name = "SFORZANDO",     Mark = "sfz",  Rarity = 3,
                         Text = "A big stroke on an f note hits 20 percent harder.",
                         TurnText = "The last note of a skill, PERFECT, hits 30 percent harder." },
@@ -170,10 +170,10 @@ namespace Tacetno433.Data
                         TurnText = "A spark that lands does its skill twice." },
             new Motif { Id = MotifId.Marcato,      Name = "MARCATO",       Mark = "^",    Rarity = 2,
                         Text = "A COUNTER can push the line up to 16 in one beat, not just 8.",
-                        TurnText = "An ATTACK fills OFF-BEAT twice as much." },
+                        TurnText = "An ATTACK fills " + Words.Stun + " twice as much." },
             new Motif { Id = MotifId.ConBrio,      Name = "CON BRIO",      Mark = "brio", Rarity = 3,
                         Text = "FORTISSIMO lights after 6 PERFECTs in a row instead of 8.",
-                        TurnText = "The SIGNATURE needs 4 PERFECTs instead of 6." },
+                        TurnText = "The " + Words.Finale + " needs 4 PERFECTs instead of 6." },
             new Motif { Id = MotifId.Coda,         Name = "CODA",          Mark = "coda", Rarity = 3,
                         Text = "The FINALE is offered from +60 on the line instead of +80.",
                         TurnText = "Enemies under a quarter of their life take 50 percent more." },
@@ -183,7 +183,7 @@ namespace Tacetno433.Data
             //ENTRANCE (was : a CALLED musician twice as strong in their first bar) and GREEN ROOM (was : the BENCH heals) changed.
             new Motif { Id = MotifId.Downbeat,     Name = "DOWNBEAT",      Mark = "1",    Rarity = 1,
                         Text = "The first move of every bar is 50 percent stronger.",
-                        TurnText = "The first move of every bar is 50 percent stronger." },
+                        TurnText = "The first move of every turn is 50 percent stronger." },
             new Motif { Id = MotifId.Entrance,     Name = "ENTRANCE",      Mark = "ent.", Rarity = 1, Initials = "ET",
                         Text = "Each musician's first move of a fight is twice as strong.",
                         TurnText = "Each musician's first move of a fight is twice as strong." },
@@ -191,16 +191,16 @@ namespace Tacetno433.Data
             //flute concertos for the king's evening concerts. While QUANTZ stands, everyone gets life back after every bar.
             new Motif { Id = MotifId.GreenRoom,    Name = "300 CONCERTOS", Mark = "gr",   Rarity = 3, Key = GiftKey.Heal, Initials = "300",
                         Text = "After every bar, the most hurt musician gets back 3 life.",
-                        TurnText = "While QUANTZ stands, every musician heals " + BattleRules.TurnGreenRoomHeal + " after every bar." },
+                        TurnText = "While QUANTZ stands, every musician heals " + BattleRules.TurnGreenRoomHeal + " after every turn." },
             new Motif { Id = MotifId.Unison,       Name = "UNISON",        Mark = "unis.", Rarity = 2,
                         Text = "When every move of a bar is an ATTACK at one enemy, the last one hits twice as hard.",
-                        TurnText = "When every move of a bar is an ATTACK at one enemy, the last one hits twice as hard." },
+                        TurnText = "When every move of a turn is an ATTACK at one enemy, the last one hits twice as hard." },
             new Motif { Id = MotifId.Segue,        Name = "SEGUE",         Mark = "segue", Rarity = 2,
                         Text = "Damage left over when an enemy falls silent goes on to the next one.",
                         TurnText = "Damage left over when an enemy falls silent goes on to the next one." },
             new Motif { Id = MotifId.LastWord,     Name = "LAST WORD",     Mark = "fine", Rarity = 2,
                         Text = "The last musician to play in a bar gets GUARD.",
-                        TurnText = "The last musician to play in a bar gets GUARD." },
+                        TurnText = "The last musician to play in a turn gets " + Words.Guard + "." },
 
             //GIFTS (Beta1 31 Oct) : three for each legend and two for the band, the rules are in TurnBattle (search the names).
             //PAGANINI (DISSONANCE) : rumour said the devil taught those hands, DISSONANCE is the devil's mark in this game.
@@ -208,11 +208,11 @@ namespace Tacetno433.Data
             //   THE PACT        the deal with the devil the rumour told of : blood for every skill, and the skill plays harder
             //   SNAPPED STRINGS the story that their strings broke one by one and they played on : a full crack bursts
             new Motif { Id = MotifId.LaCampanella, Name = "LA CAMPANELLA", Rarity = 1, Key = GiftKey.Dissonance,
-                        Text = "Every hit on an enemy with DISSONANCE adds " + BattleRules.TurnCampanellaAdd + " more DISSONANCE." },
+                        Text = "Every hit on an enemy with " + Words.Burn + " adds " + BattleRules.TurnCampanellaAdd + " more " + Words.Burn + "." },
             new Motif { Id = MotifId.ThePact,      Name = "THE PACT",      Rarity = 2, Key = GiftKey.Dissonance,
                         Text = "PAGANINI's skills cost " + BattleRules.TurnPactLife + " life and hit " + Percent(BattleRules.TurnBloodScale) + " percent harder." },
             new Motif { Id = MotifId.SnappedStrings, Name = "SNAPPED STRINGS", Rarity = 3, Key = GiftKey.Dissonance, Initials = "SN",
-                        Text = "At " + BattleRules.TurnDissonanceMost + " DISSONANCE an enemy cracks : " + BattleRules.TurnSnapDamage + " damage, then its DISSONANCE is gone." },
+                        Text = "At " + BattleRules.TurnDissonanceMost + " " + Words.Burn + " an enemy bursts : " + BattleRules.TurnSnapDamage + " damage, then its " + Words.Burn + " is gone." },
 
             //QUANTZ (HEAL) : the teacher of Frederick the Great, the only healer of the five.
             //   THE KING'S FAVOUR  the king's protection : healed to full is safe for a while
@@ -225,7 +225,7 @@ namespace Tacetno433.Data
             new Motif { Id = MotifId.TheCrank,     Name = "THE CRANK",     Rarity = 2, Key = GiftKey.OffBeat, Initials = "CR",
                         Text = "PFUNDT's skills take " + BattleRules.TurnHandPaukenCut + " notes off an enemy's next attack, down to " + BattleRules.TurnHandOneLeast + "." },
             new Motif { Id = MotifId.ThunderSheet, Name = "THUNDER SHEET", Rarity = 3, Key = GiftKey.OffBeat,
-                        Text = "An enemy thrown OFF-BEAT loses " + (int)Math.Round(BattleRules.TurnThunderSheetShare * 100f) + " percent of its life at once." },
+                        Text = "An enemy that gets " + Words.Stunned + " loses " + (int)Math.Round(BattleRules.TurnThunderSheetShare * 100f) + " percent of its life at once." },
 
             //DUPORT (SHIELD) : the guardian, the cello a shield with the dent Napoleon left (the story says his spurs did it, 1812).
             //   HARD CASE           a cello case : DUPORT takes a little less from every note
@@ -236,18 +236,18 @@ namespace Tacetno433.Data
             new Motif { Id = MotifId.TourteBow,    Name = "TOURTE BOW",    Rarity = 2, Key = GiftKey.Shield,
                         Text = "DUPORT's LANCE hits every enemy." },
             new Motif { Id = MotifId.EmperorsSpur, Name = "THE EMPEROR'S SPUR", Rarity = 3, Key = GiftKey.Shield,
-                        Text = "When THE SCAR gives DUPORT CRESCENDO, the whole band gets it too." },
+                        Text = "When THE SCAR gives DUPORT " + Words.Volume + ", the whole band gets it too." },
 
             //PUNTO (CRESCENDO) : the horn player Beethoven wrote a sonata for.
             //   HAND STOPPING    the hand in the bell that Punto was famous for, it saves a note the horn would lose
             //   THE SILVER HORN  the silver horn Raoux of Paris made for them : louder than any other
             //   HALLALI          the call of the hunting horn when the hunt ends : the loudest blow, then the horn is quiet again
             new Motif { Id = MotifId.HandStopping, Name = "HAND STOPPING", Rarity = 1, Key = GiftKey.Crescendo,
-                        Text = "A MISS takes only half of a musician's CRESCENDO." },
+                        Text = "A MISS takes only half of a musician's " + Words.Volume + "." },
             new Motif { Id = MotifId.SilverHorn,   Name = "THE SILVER HORN", Rarity = 2, Key = GiftKey.Crescendo,
-                        Text = "CRESCENDO goes up to " + BattleRules.TurnSilverHornMost + ", not " + BattleRules.TurnCrescendoMost + "." },
+                        Text = Words.Volume + " goes up to " + BattleRules.TurnSilverHornMost + ", not " + BattleRules.TurnCrescendoMost + "." },
             new Motif { Id = MotifId.Hallali,      Name = "HALLALI",       Rarity = 3, Key = GiftKey.Crescendo,
-                        Text = "At full CRESCENDO a musician's next hit is twice as hard, then their CRESCENDO is gone." },
+                        Text = "At full " + Words.Volume + " a musician's next hit is twice as hard, then their " + Words.Volume + " is gone." },
 
             //THE BAND : for whoever plays, they change the ring (docs/BETA1_DIRECTION.md 16.4 point 8)
             //   SPARE STRINGS  a string snaps, a spare goes on : the first MISS of a fight is let off

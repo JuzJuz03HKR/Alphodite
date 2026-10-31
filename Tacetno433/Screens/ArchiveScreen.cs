@@ -74,7 +74,7 @@ namespace Tacetno433.Screens
             for (int i = 0; i < Archive.All.Length; i++)
             {
                 ArchiveUpgrade u = Archive.All[i];
-                priceLabel[i] = u.Maxed ? "TOP LEVEL" : NumberText.Get(u.NextPrice) + " ECHOES";
+                priceLabel[i] = u.Maxed ? "TOP LEVEL" : NumberText.Get(u.NextPrice) + " " + Words.Applause;
             }
         }
 
@@ -141,7 +141,7 @@ namespace Tacetno433.Screens
             else
             {
                 SoundBank.Play(Sfx.UiDenied);
-                message = u.Maxed ? "ALREADY AT THE TOP LEVEL" : "NOT ENOUGH ECHOES";
+                message = u.Maxed ? "ALREADY AT THE TOP LEVEL" : "NOT ENOUGH " + Words.Applause;
             }
             messageLife = 2f;
             Refresh();
@@ -250,7 +250,7 @@ namespace Tacetno433.Screens
 
             //Echoes : the big number of what there is to spend, its thin line full (menu7)
             float low = UiMotion.Between(time, 0.6f, BattleRules.UiEnterTime);
-            Ui.Number(sb, "ECHOES AVAILABLE", shownEchoes, false, 860, 566, 320, 1f, Palette.Highlight, Palette.PaperDim, low);
+            Ui.Number(sb, Words.Applause + " TO SPEND", shownEchoes, false, 860, 566, 320, 1f, Palette.Highlight, Palette.PaperDim, low);
 
             if (messageLife > 0f)
                 Gfx.TextSpacedCentered(sb, Game.Font, message, 640, 620, Palette.Highlight * Math.Min(1f, messageLife), TextSize.Body, 3f);
@@ -265,7 +265,7 @@ namespace Tacetno433.Screens
             float a = UiMotion.Between(time, 0f, 0.45f);
             int x = 40 + (int)Math.Round((1f - a) * -40f);
             Ui.TitleBar(sb, new Rectangle(x, 80, 96, 540), 24, "THE ARCHIVE", a);
-            Gfx.TextSpaced(sb, Game.Font, "EVERY RUN LEAVES ECHOES BEHIND", x + 4, 630, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            Gfx.TextSpaced(sb, Game.Font, "EVERY RUN EARNS " + Words.Applause, x + 4, 630, Palette.LineGrey * a, TextSize.Tiny, 2f);
         }
     }
 }

@@ -160,6 +160,7 @@ namespace Tacetno433.Core
             report += TurnCheckRehearsal();                                            // REHEARSAL (Beta1 31 Oct, was PATH and INSPIRED)
             report += TurnCheckGifts();                                                // GIFTS (Beta1 31 Oct, was the motifs)
             report += TurnCheckPreview();                                              // PREVIEW (Beta1 30 Oct, block 1 item 4)
+            report += TurnCheckWords();                                                // WORDS (Beta1 31 Oct, 16.14 item 3)
             return report;
         }
 
