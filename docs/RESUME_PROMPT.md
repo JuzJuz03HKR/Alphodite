@@ -64,6 +64,13 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 
 ## สถานะล่าสุด (31 ต.ค.)
 
+**31 ต.ค. แชท /system (Finalize5) : /update ปิดแชท ผู้ใช้จะเปิดแชทใหม่** (คำต่อคำ `USER_BRIEFS.md` 13.46)
+✅ ภาษาทั้งเกม (16.14 ข้อ 3 `BETA1_DIRECTION.md` 19) ผู้ใช้ Rebuild ลองแล้ว "ยังไม่ต้องแก้อะไร" / งานทั้งหมดอยู่บน GitHub (`536462b` กับ commit ปิดแชทนี้) / ตาราง "แชทที่กำลังทำงาน" ว่าง
+**งานถัดไป (ผู้ใช้สั่งแล้ว ทำก่อนข้อ 4) : ตัวเลขเกิน 999 ได้** ทั้งเลือดศัตรู ดาเมจของตัวละคร ดาเมจรวมของเทิร์น และที่อื่น (`BETA1_DIRECTION.md` 19.9) /
+ต้นเหตุ `Core/NumberText.cs` `Max = 999` กับ `Clamp` (ทุกตัวเลขที่ผ่าน `NumberText.Get` `Signed` หยุดที่ 999 เช่นเลือดบนป้ายศัตรู TURN TOTAL `barDamageText` ใน `Screens/BattleScreen.cs` HUD หน้าผล) / `Core/PixelDigits.cs` ไม่ติด / ห้ามสร้าง string ใน Draw ยังใช้ / ตรวจภาพแคปทุกจุดที่ตัวเลขกว้างขึ้น / เพิ่มบรรทัด turncheck / จบแล้วบันทึก commit push หยุดรอ
+ต่อจากนั้น 16.14 ข้อ 4 บอส (ท่าไม้ตายมีชื่อแทน BIG ATTACK คำใหม่ใส่ `Data/Words.cs`) แล้วข้อ 5 แผนที่ / PLAYTEST FINALE ยัง 1 PERFECT / VFX ทุกชนิดรอภาพอ้างอิง /
+บั๊กเล็กที่เจอ (ยังไม่แก้ `BETA1_DIRECTION.md` 19.7) : การ์ดเพื่อน FRIEND PICK ตัวที่โดนเล็ง INCOMING ทับชื่อท่ายาว (`Screens/BattleScreen.Friends.cs`)
+
 **31 ต.ค. แชท /system (Finalize5) : ✅ 16.14 ข้อ 3 ภาษาทั้งเกม เสร็จ หยุดรอผู้ใช้** (ผู้ใช้ : "เอาตามแนะนำ แต่โปรดลองคิดอีกรอบ..." คำต่อคำ `USER_BRIEFS.md` 13.45 รายละเอียด `BETA1_DIRECTION.md` ข้อ 19)
 ✅ คำกติกาทั้งเกมอยู่ `Data/Words.cs` ที่เดียว (เปลี่ยนคำที่นี่เปลี่ยนทั้งเกม ชื่อในโค้ดกับเซฟยังเป็นคำเดิม) : DISSONANCE เป็น BURN (คิดใหม่จาก CRACK) / CRESCENDO เป็น VOLUME / OFF-BEAT เป็น STUN กับ STUNNED / MUTE เป็น MUTED / GUARD แยกเป็น GUARD ARMOR ARMOR UP / LESSON เป็น FOCUS / SIGNATURE เป็น FINALE (ป้ายบอสบนแผนที่เป็น LAST FIGHT) / BAR เป็น TURN ปุ่ม PLAY / LUTHIER เป็น WORKSHOP (W) / ECHOES เป็น APPLAUSE / เจตนา REST เป็น HEAL / CADENZA เป็น BIG ATTACK / REST บนแผนที่คงไว้ (คิดใหม่แล้ว BACKSTAGE ไม่ชัด)
 ✅ พ่วงกับ GUI : การ์ดสกิลมีบรรทัดอธิบายคำใต้ตัวเลข (`BURN = ...`) คำเด้งพร้อมตัวเลขตอนเกิดจริง (BURN ตอนไฟเผา VOLUME 0 ตอน MISS GUARD ตอน THUNDER CALL) เหตุการณ์ใหม่ `DissonanceTick` `CrescendoLost` `GuardUp` / บรรทัดทั้งเกมเขียนใหม่ด้วยคำง่าย
