@@ -1287,3 +1287,73 @@
 ### 17.8 ผลที่ผู้ใช้ลอง (31 ต.ค. คำต่อคำ `USER_BRIEFS.md` 13.41)
 - ผู้ใช้ Rebuild ลองแล้ว "ตอนนี้ยังไม่ต้องแก้อะไร" แล้วสั่ง /update ไปเปิดแชทใหม่ทำข้อถัดไป (16.14 ข้อ 2 GIFT) ทีละข้อแล้วหยุดรอเหมือนเดิม
 - ไอริสทวนคำถามเรื่อง FRIEND PICK (15.1) ผู้ใช้ตอบว่าลองแล้ว ใช้ได้ปกติ เห็นภาพชัด ยังไม่ต้องแก้ (13.42)
+
+## 18. ของ GIFT แทน MOTIF เสร็จ (16.14 ข้อ 2) รอผู้ใช้ Rebuild ลอง (31 ต.ค. ค่ำ แชท /system ผู้ใช้สั่ง "ทำงานต่อได้เลย" คำต่อคำ `USER_BRIEFS.md` 13.43)
+
+### 18.1 ระบบ
+- บนจอเรียก MOTIF ว่า GIFT ทุกที่ (การ์ดรางวัล หลังการ์ด แถบบน ร้าน เหตุการณ์ หน้าจบรัน HOW TO PLAY คำใบ้หน้า Title ห้องบนแผนที่ ARCHIVE) ในโค้ดยังชื่อ Motif แบบ BREATH กับ Stamina
+- ของในกองสุ่มเหลือ 19 ชิ้น (เดิม 27) นักดนตรีคนละ 3 ชิ้น (ธรรมดา หายาก ล้ำค่า) กับของทั้งวง 4 ชิ้น ทุกชิ้นเห็นผลบนจอ ไม่มีชิ้นที่เป็นเปอร์เซ็นต์มองไม่เห็นแล้ว
+- ทุกชิ้นติดเครื่องหมายของนักดนตรี (`GiftKey` แบบคำสำคัญของ E.G.O Gift ใน Limbus) : PAGANINI = DISSONANCE (แดง) QUANTZ = HEAL (เขียว) PFUNDT = OFF-BEAT (ขาว) DUPORT = SHIELD (ฟ้า) PUNTO = CRESCENDO (ทอง) ของทั้งวง = ALL (เทา) ไอคอนเป็นไฟล์เดียวกับสถานะในไฟต์ (`status_dissonance` ...) HEAL กับ ALL มีช่องอาร์ตใหม่ (`UI_ART_PLAN.md` 2.6)
+- เห็นเครื่องหมายที่ : การ์ดของ (ไอคอนกับชื่อคนที่ของเหมาะ) / ร้าน ("PAGANINI / RARE") / แถบบน (กรอบเพชรเป็นสีของคนนั้น) / ชี้ที่ของ ("FOR PAGANINI.") / หน้า THE AUDITION ข้างชื่อแต่ละคน ในกล่องรายละเอียด และบรรทัดสอน "The small icon is their mark. Gifts with the same icon are made for them."
+- รันหนึ่งเจอแค่ของของคนในวงกับของทั้งวง (13 ชิ้น) ทุกชิ้นที่เห็นใช้ได้จริง / ELITE เลือก 1 ใน 3 (หายากขึ้นไป) บอสล้ำค่า 2 ใบกับ REFORGE / TREASURE 1 ชิ้น / ร้าน 2 ช่อง / เหตุการณ์ / KEEPSAKE ของ ARCHIVE ได้ของทั้งวงแบบธรรมดา (ตอนเริ่มรันยังไม่ได้เลือกวง)
+- ของทำงานแล้วชื่อเด้งเหนือตัวที่มันทำงานด้วยสีของเครื่องหมาย ท่าละครั้งต่อตัว (CHAKRAM โดน 3 ตัวเด้ง 3 ที่ CAPRICE 4 ครั้งที่ตัวเดียวเด้งครั้งเดียว) VFX ทำทีหลังพร้อมกัน (16.14 ข้อ 5)
+
+### 18.2 ของทั้ง 19 ชิ้น (ไอริสออกแบบ ผู้ใช้เปลี่ยนได้ทุกชิ้น แก้ที่ `Data/Motif.cs` ตัวเลขที่ `BattleRules` หัวข้อ GIFTS)
+| คน | ของ | ระดับ | บรรทัดบนการ์ด | ที่มาของชื่อ |
+|---|---|---|---|---|
+| PAGANINI | LA CAMPANELLA | ธรรมดา | Every hit on an enemy with DISSONANCE adds 1 more DISSONANCE. | "ระฆังเล็ก" ท่อนสุดท้ายของไวโอลินคอนแชร์โตหมายเลข 2 ตีทีไรรอยร้าวดังซ้ำ |
+| | THE PACT | หายาก | PAGANINI's skills cost 4 life and hit 30 percent harder. | ข่าวลือว่าขายวิญญาณให้ปีศาจ (เดิมกฎดาว PaidInBlood ที่ไม่มีดาวให้) |
+| | SNAPPED STRINGS | ล้ำค่า | At 9 DISSONANCE an enemy cracks : 27 damage, then its DISSONANCE is gone. | เรื่องเล่าว่าสายขาดทีละเส้นแล้วเล่นต่อ |
+| QUANTZ | ON PLAYING THE FLUTE | ธรรมดา | QUANTZ heals 50 percent more. | หนังสือสอนเป่าฟลุตของ Quantz (1752) ช่อง REED CASE เดิม กฎเดิม |
+| | THE KING'S FAVOUR | หายาก | A musician healed to full gets GUARD until their next turn. | ครูฟลุตของ Frederick the Great คนโปรดของกษัตริย์ |
+| | 300 CONCERTOS | ล้ำค่า | While QUANTZ stands, every musician heals 3 after every bar. | ฟลุตคอนแชร์โตราว 300 บทที่เขียนให้กษัตริย์ ช่อง GREEN ROOM เดิม ผลใหม่ |
+| PFUNDT | WOODEN STICKS | ธรรมดา | PFUNDT's skills fill OFF-BEAT 50 percent more. | ไม้ทิมปานีหัวไม้ เสียงแข็งสุด ช่อง SPARE STICKS เดิม กฎเดิม |
+| | THE CRANK | หายาก | PFUNDT's skills take 2 notes off an enemy's next attack, down to 1. | ทิมปานีแบบหมุนจูนด้วยมือหมุนเดียว (เดิมกฎดาว ONE TURN กับ HandTwo) |
+| | THUNDER SHEET | ล้ำค่า | An enemy thrown OFF-BEAT loses 10 percent of its life at once. | แผ่นโลหะที่โรงละครเขย่าทำเสียงฟ้าร้อง |
+| DUPORT | HARD CASE | ธรรมดา | DUPORT takes 2 less from every enemy note, 1 at least. | กล่องแข็งของเชลโล |
+| | TOURTE BOW | หายาก | DUPORT's LANCE hits every enemy. | คันชักของ François Tourte ผู้ทำคันชักแบบสมัยใหม่ (คันชักของ DUPORT คือหอก) |
+| | THE EMPEROR'S SPUR | ล้ำค่า | When THE SCAR gives DUPORT CRESCENDO, the whole band gets it too. | เดือยรองเท้าของ Napoleon ที่เล่ากันว่าทำรอยบุบบนเชลโล (1812) |
+| PUNTO | HAND STOPPING | ธรรมดา | A MISS takes only half of a musician's CRESCENDO. | เทคนิคใช้มือในปากแตรที่ Punto เป็นผู้บุกเบิก เก็บโน้ตที่แตรธรรมชาติจะเสีย |
+| | THE SILVER HORN | หายาก | CRESCENDO goes up to 8, not 5. | ฮอร์นเงินที่ Raoux แห่งปารีสทำให้ Punto |
+| | HALLALI | ล้ำค่า | At full CRESCENDO a musician's next hit is twice as hard, then their CRESCENDO is gone. | เสียงแตรล่าสัตว์ตอนจบการล่า |
+| THE BAND | OPENING NIGHT | ธรรมดา | The band's first hit of every fight is twice as hard. | คืนเปิดการแสดง ช่อง OVERTURE เดิม กฎเดิม |
+| | SPARE STRINGS | ธรรมดา | The first MISS of every fight counts as GOOD. | สายสำรอง ตัวอย่างของผู้ใช้ 16.7 |
+| | LUCKY BOW | หายาก | The first note of every skill is twice as strong. | ตัวอย่างของผู้ใช้ 16.7 |
+| | FRONT ROW ROSES | ล้ำค่า | Once a fight, a musician who would fall stays up with 1 life. | ช่อดอกไม้จากแถวหน้า ตัวอย่างของผู้ใช้ 16.7 ช่อง SECOND WIND เดิม กฎเดิม |
+
+### 18.3 ที่ไอริสตัดสินเอง (ผู้ใช้เปลี่ยนได้ทุกข้อ)
+1. เครื่องหมาย 1 คน 1 คำ (จุดเด่นของคนนั้น) เพราะ 5 คนมีกลไกไม่ซ้ำกัน คนเล่นครั้งแรกอ่านได้ทันทีว่าไอคอนนี้คือคนนี้ ส่วนความนุ่มลึก (16.6) อยู่ที่บางชิ้นช่วยคนอื่นด้วย เช่น LA CAMPANELLA ให้ทุกคนที่ตีเพิ่ม DISSONANCE THE EMPEROR'S SPUR ให้ CRESCENDO ทั้งวง HALLALI ใช้ได้กับทุกคนที่ CRESCENDO เต็ม
+2. ของของคนที่ไม่อยู่ในวงไม่ถูกเสนอเลย ทุกชิ้นที่เห็นจึงใช้ได้ และเก็บของของคนที่ชอบครบ 3 ชิ้นได้จริง (ปั้นตัวโปรดแบบ Limbus)
+3. ชื่อเป็นของจริงจากชีวิตนักดนตรี ไม่ใช้ศัพท์บนโน้ตเพลง ชื่อเดิม 4 ชิ้นเปลี่ยน (REED CASE เป็น ON PLAYING THE FLUTE เพราะฟลุตไม่มีลิ้น / SPARE STICKS เป็น WOODEN STICKS กันสับสนกับ SPARE STRINGS / OVERTURE เป็น OPENING NIGHT / SECOND WIND เป็น FRONT ROW ROSES) ชิ้นล้ำค่าของ PUNTO ตอนแรกชื่อ OPUS 17 แต่ชนกับ BONDS "OP. 17" ที่มีอยู่ จึงเป็น HALLALI
+4. กฎดาวที่ว่าง 4 ข้อ : THE PACT เป็นของ / ONE TURN กับ HandTwo รวมเป็น THE CRANK / OLD WOUNDS (THE SCAR x2) ไม่ใช้ (THE EMPEROR'S SPUR แทน) ค่าใน `StarRule` คงไว้ให้ลำดับไม่เลื่อน
+5. ช่องของ 27 ช่องเดิม : 5 ช่องเป็นของ (4 ช่องกฎเดิม GREEN ROOM ผลใหม่) อีก 22 ช่องไม่อยู่ในกองสุ่ม แต่กฎยังทำงานถ้าเซฟเก่ามี / ของใหม่ 14 ชิ้นต่อท้ายลิสต์ (ห้ามสลับลำดับ เพราะเซฟเก็บเป็นลำดับ)
+6. ตัวเลขเป็นค่าแรกทั้งหมด ปรับตอน balance จากการเล่นจริง (14.6) ราคาร้านคงเดิม 45 70 100
+7. คำอธิบายใช้คำกติกาที่จอใช้ตอนนี้ (DISSONANCE CRESCENDO OFF-BEAT GUARD) ไว้เปลี่ยนพร้อมกันทั้งเกมในข้อ 3 ภาษา ถ้าเปลี่ยนแค่ของ คำจะไม่ตรงกับหน้าต่อสู้
+8. ON PLAYING THE FLUTE : 3 x 1.5 = 4.5 เกมปัดครึ่งเข้าเลขคู่ (แบบเดิมของทุกการฮีล) จอจึงเห็น 3 เป็น 4 ถ้าอยากให้เป็น 5 บอกได้
+9. THUNDER SHEET : ถ้าปัด PERFECT แล้วศัตรูเสียศูนย์กลางท่าโจมตีของมันเอง เลือดหายตอนท่านั้นจบ ไม่ให้ศัตรูตายกลางท่า
+10. HARD CASE ลดแล้วเหลืออย่างน้อย 1 เพื่อให้ THE SCAR ยังทำงาน (ถ้าลดเป็น 0 DUPORT จะไม่ได้ CRESCENDO)
+11. หน้าตาของเครื่องหมายตอนนี้เป็นกรอบกับตัวย่อ (DIS HEL OFF SHD CRE ALL) จนกว่าจะมีไอคอนจริง
+
+### 18.4 ทดสอบในแชท cloud
+- build 0 error 0 warning / turncheck 169/169 (ไฟล์ใหม่ `Core/DebugShots.TurnGifts.cs` 20 ข้อ : กองสุ่มกับเครื่องหมาย ของทุกชิ้นในไฟต์พร้อมคำเด้ง / ข้อ GREEN ROOM เดิมเป็น 300 CONCERTOS / ลิสต์ของ 41 ช่อง) / savecheck 33/33 (ของใหม่ช่อง 27 เซฟโหลดได้)
+- ตัวจำลอง 3 seed ผลเหมือนก่อนแก้ทุกบรรทัด (ตัวจำลองไม่ถือของ แปลว่ากติกาเดิมไม่ได้เปลี่ยน) ของทุกชิ้นทำให้วงแรงขึ้น ไม่ได้วัดหรือชดเชยความยาก (14.6)
+- ภาพ `reward` `treasure` `shop` `teampick` `teampickfull` `guide3` `battlegift` (ใหม่ : ชื่อของ 3 ชิ้นเด้ง) ที่ 1280 กับ `--scale 1.5` (ภาพจาก cloud ไม่ commit) / ชีต `TACET_Balance.xlsx` แท็บ Turn Battle มีหัวข้อ GIFTS แล้ว
+- ข้อเท็จจริงของชื่อ (ค้น 31 ต.ค.) : Pfundt เป็นนักทิมปานีของ Gewandhaus และพิพิธภัณฑ์ Kolberg ให้เครดิตทิมปานีแบบหมุน แต่ encyclopedia.com ว่าแบบเหยียบ (แหล่งขัดกัน ชื่อ THE CRANK จึงเขียนว่า credited) / Punto บุกเบิก hand stopping (เรียนจาก Hampel) เล่นฮอร์นเงินของ Raoux และเล่น Op. 17 กับ Beethoven 18 เม.ย. 1800 / รอยบุบกับเดือยของ Napoleon เป็นเรื่องเล่า ไม่มีหลักฐานร่วมสมัย / La Campanella, หนังสือ Quantz 1752, คอนแชร์โตราว 300 บท, Tourte เป็นความรู้ทั่วไปที่ไอริสมั่นใจ ไม่ได้ค้นซ้ำ
+- แหล่ง : [Giovanni Punto (Wikipedia)](https://en.wikipedia.org/wiki/Giovanni_Punto) [Punto dissertation (Leiden)](https://scholarlypublications.universiteitleiden.nl/access/item%3A3644051/view) [Kolberg Museum](https://kolberg.com/en/About/Kolberg-Museum/) [Pfundt (encyclopedia.com)](https://encyclopedia.com/arts/dictionaries-thesauruses-pictures-and-press-releases/pfundt-ernst-gotthold-benjamin) [Duport Stradivarius (Wikipedia)](https://en.wikipedia.org/wiki/Duport_Stradivarius) [the 'Duport' (Tarisio)](https://tarisio.com/cozio-archive/property/?ID=40274)
+
+### 18.5 โค้ดที่แตะ
+- `Data/Motif.cs` (`GiftKey` `Pool` `Fits` `AnyLeft` `LegendOf` `Roll` แบบใหม่รับวง ของใหม่ 14 ชิ้นท้ายลิสต์ `ForLabel` `WareLabel`) / `Data/Musician.cs` (`Key`) / `Data/BattleRules.cs` (หัวข้อ GIFTS) / `Data/Rehearsal.cs` (คอมเมนต์ 4 กฎ) / `Data/RunState.cs` (KEEPSAKE `MotifsLabel`) / `Data/Archive.cs` `Data/RouteNode.cs` (คำ)
+- `Battle/TurnBattle.cs` (`TurnEventKind.Gift` `GiftWorks` `Forgive` `Pacts` `FluteHeal` `LoseCrescendo` `CrescendoMost` `Cranks` `Bows` กฎแต่ละชิ้นอยู่ตรงที่มันทำงาน สารบัญในคอมเมนต์หัวข้อ GIFTS) / `Battle/TurnBattle.Preview.cs` (THE PACT LUCKY BOW)
+- `Core/MotifArt.cs` (`Keyword` `KeyColor` `PopColor` `Load` การ์ดมีเครื่องหมาย ชื่อยาวย่อเอง) / `Core/RunHud.cs` / `Core/BandColumn.cs` (`Detail`) / `TacetGame.cs` (`MotifArt.Load`)
+- `Screens/BattleScreen.cs` (คำเด้ง `Land` เรียก `Forgive` ภาพ `battlegift`) / `BattleScreen.Marks.cs` / `MotifRewardScreen.cs` `ShopScreen.cs` `EventScreen.cs` `ResultScreen.cs` `CurtainCallScreen.cs` `TeamPickScreen.cs` `GuideScreen.cs` `TitleScreen.cs`
+- ทดสอบ : `Core/DebugShots.TurnGifts.cs` (ใหม่) `DebugShots.TurnContent.cs` `DebugShots.TurnLegends.cs` `DebugShots.cs` (ของในภาพแคปเป็นของใหม่)
+
+### 18.6 ให้ผู้ใช้ลองหลัง Rebuild
+- THE AUDITION : ไอคอนเล็กข้างชื่อแต่ละคน
+- ELITE บอส TREASURE ร้าน : การ์ดของมีไอคอนกับชื่อคนที่เหมาะ ตรงกับที่ AUDITION ไหม เห็นแล้วรู้ทันทีไหมว่าของชิ้นนี้ของใคร
+- ในไฟต์ : ชื่อของเด้งตอนทำงาน (LA CAMPANELLA ตอนตีศัตรูที่มี DISSONANCE / SPARE STRINGS ตอน MISS ครั้งแรก / LUCKY BOW โน้ตแรกของสกิล)
+- เก็บของของคนที่ชอบ 2 ถึง 3 ชิ้น รู้สึกว่าคนนั้นเวอร์ขึ้นไหม
+- ชื่อไหนไม่เท่ ไม่ตรงตัวละคร หรืออ่านแล้วไม่เข้าใจ บอกได้เลย
+
+### 18.7 ถัดไป (ผู้ใช้สั่งทีละข้อ หยุดรอหลังจบแต่ละข้อ)
+- 16.14 ข้อ 3 ภาษาทั้งเกม (คำกติกาตามตาราง 16.7 รวมคำบนของ) แล้วข้อ 4 บอส ข้อ 5 แผนที่ / ตัวจำลองยังไม่ถือของ ถ้าจะใช้เทียบว่าชิ้นไหนแรงเกินต้องเพิ่มทีหลัง / VFX ของทุกชิ้นรอภาพอ้างอิง / PLAYTEST SIGNATURE ยัง 1 PERFECT

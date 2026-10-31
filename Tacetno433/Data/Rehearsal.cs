@@ -7,24 +7,25 @@ namespace Tacetno433.Data
 {
     //StarRule : a rule a star of REHEARSAL gives a musician, checked in Battle/TurnBattle.cs by name (search the name). A star
     //that only changes a number of a skill needs no rule, it rewrites the skill (Star below). New rules go at the end.
-    //Until 31 Oct these were the rules of the PATH cards. Four of them no star gives now (marked "no star") : they wait for the
-    //GIFTS (docs/BETA1_DIRECTION.md 16.14 point 2), the code that reads them stays.
+    //Until 31 Oct these were the rules of the PATH cards. Four of them no star gives now (marked "no star"). GIFTS (31 Oct) : THE PACT
+    //and THE CRANK (ONE TURN with HandTwo) are gifts now (Data/Motif.cs, TurnBattle checks the gift), OLD WOUNDS is not used.
+    //The four stay in the list so the places after them keep their numbers.
     public enum StarRule
     {
         None,
-        PaidInBlood,     // THE PACT          (PAGANINI) no star : every skill of theirs costs TurnPactLife life and plays TurnBloodScale times as hard
+        PaidInBlood,     // (no star, not used : the gift THE PACT since 31 Oct)
         MarkedSouls,     // DEVIL'S CANNON  IL CANNONE 3 : IL CANNONE also hits every other enemy with DISSONANCE
         LastCut,         // CAPRICE No. 24      CAPRICE 3 : the last cut of CAPRICE hits TurnLastCutScale times as hard
         LessonStrong,    //                     THE LESSON 1 : a LESSON plays TurnLessonStrong instead of TurnLessonScale
         LessonEcho,      // KING'S LESSON   THE LESSON 3 : a friend given a LESSON plays their next move again (an ECHO)
         Sanssouci,       // SANSSOUCI           SOFT AIR 3 : SOFT AIR also clears DISSONANCE and MUTE off the band
-        HandToOne,       // ONE TURN          (PFUNDT) no star : TURN OF THE HAND leaves 1 note at least (not TurnHandLeast)
+        HandToOne,       // (no star, not used : part of the gift THE CRANK since 31 Oct)
         CallRetunes,     //                     THUNDER CALL 1 : THUNDER CALL takes notes off every enemy's next attack too
-        HandTwo,         //                   (PFUNDT) no star : TURN OF THE HAND takes TurnHandPaukenCut notes (not TurnHandCut)
+        HandTwo,         // (no star, not used : part of the gift THE CRANK since 31 Oct)
         RollThrows,      // THUNDERCLAP         TIMPANI ROLL 3 : a PERFECT TIMPANI ROLL throws the first enemy it reaches OFF-BEAT at once
         ShieldThird,     //                     SHIELD 1 : DUPORT takes TurnShieldThird of a blow (not TurnShieldKeep)
         DentStrikesBack, // NAPOLEON'S DENT     SHIELD 3 : a blow DUPORT takes for a friend strikes its enemy back as hard
-        ScarTwo,         // OLD WOUNDS        (DUPORT) no star : THE SCAR gives twice the CRESCENDO
+        ScarTwo,         // (no star, not used : OLD WOUNDS, THE SCAR twice, until 31 Oct)
         CallStrong,      //                     FANFARE 2 : THE HUNTING CALL plays TurnCallStrong (not TurnHuntingCallScale), after any move of PUNTO
         CallAll,         // THE WHOLE HUNT      FANFARE 3 : after FANFARE, everyone who plays after PUNTO in the bar gets THE HUNTING CALL
         ChakramFull,     //                     CHAKRAM 2 : an enemy the same CHAKRAM hits again takes it whole

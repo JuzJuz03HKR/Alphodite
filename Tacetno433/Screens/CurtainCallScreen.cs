@@ -330,7 +330,7 @@ namespace Tacetno433.Screens
             //Motifs : every badge the band carried
             float me = UiMotion.Between(time, 1.5f, BattleRules.UiEnterTime);
             int my = 532;
-            Gfx.TextSpaced(sb, Game.Font, "MOTIFS", LedgerX, my, Palette.PaperDim * me, TextSize.Label, 3f);
+            Gfx.TextSpaced(sb, Game.Font, "GIFTS", LedgerX, my, Palette.PaperDim * me, TextSize.Label, 3f);
             for (int i = 0; i < run.Motifs.Count; i++)
                 MotifArt.Badge(sb, run.Motifs[i], LedgerX + 110 + i * 26, my + 8, 11, me);
             if (run.Motifs.Count == 0)

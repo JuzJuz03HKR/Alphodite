@@ -248,7 +248,7 @@ namespace Tacetno433.Screens
 
             if (reward == Reward.Motif)
             {
-                Motif[] found = MotifList.Roll(run.Motifs, 1, amount, run.Floor, run.Rng);
+                Motif[] found = MotifList.Roll(run.Motifs, run.Roster, 1, amount, run.Rng);       // GIFTS : one that fits the band
                 if (found.Length == 0)
                 {
                     run.AddShards(BattleRules.SkipMotifShards);
@@ -257,7 +257,7 @@ namespace Tacetno433.Screens
                 gotMotif = found[0];
                 run.AddMotif(gotMotif);
                 SoundBank.Play(Sfx.MotifGet);
-                return "MOTIF  /  " + gotMotif.Name;
+                return "GIFT  /  " + gotMotif.Name;
             }
 
             //Rehearse : a weapon goes up one tier, the one who took the check, or without a check the band's least trained

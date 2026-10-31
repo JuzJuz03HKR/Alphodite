@@ -13,7 +13,7 @@
 - 30 ต.ค. : ศัตรูมีท่าชาร์จกับตั้งโล่ (CHARGE GUARD) / นักดนตรีโตตามเส้นทางของตัวเอง PATH คนละ 2 เส้น 3 ขั้น (30 ใบ) ได้จาก INSPIRED (PERFECT 4 ครั้งในไฟต์ เลือกทันที) กับชนะไฟต์ได้เลือก 1 ใบ / SIGNATURE โตทุกบอส / BONDS 5 สายจากประวัติจริง / หน้าต่อสู้แบบ GUI มาตรฐาน วงเล็ง เครื่องหมายบนเพื่อน การ์ดสกิลเป็นตัวเลข ไอคอนสถานะกับเจตนา ไม่มีเส้นบอกเป้าแล้ว (`BETA1_DIRECTION.md` 12.3 13.1 ถึง 13.5)
 - ฉากต่อสู้ Beta1 : มุมวาทยากร ความมืด TACET (shader) VFX ตอนตี impact frame กล้องขยับตามไม้ เต็มจอวาดที่ความละเอียดจอจริง
 - หน้าจอทุกหน้ายกระดับแล้ว (ฟอนต์ OFL ปุ่มแบบผสม แผ่นเฉียงบอกชื่อหน้า ม่านผ้าจริง การ์ด 3D)
-- เนื้อหา : MOTIF 27 ใบ ศัตรู 17 ตัว (บอส 6) เหตุการณ์ 10 สกิล 10 สกิลของ 5 คน ขั้นเส้นทาง 30 ใบ
+- เนื้อหา : ของ GIFT 19 ชิ้น (31 ต.ค. แทน MOTIF 27 ใบ คนละ 3 + ทั้งวง 4) ศัตรู 17 ตัว (บอส 6) เหตุการณ์ 10 สกิล 10 สกิลของ 5 คน ดาวซ้อม 45 ดวง (15 ปุ่ม)
 - ยังไม่มีอาร์ตกับเสียงจริง ทุกช่องเป็นกรอบว่าง เกมเงียบ (โค้ดรองรับครบ)
 
 ### 00.2 ความคืบหน้า (ประมาณการ 30 ต.ค. ไม่นับงานอาร์ต)
@@ -34,7 +34,7 @@
 ไม่นับไฟล์เสียง (เป็นงานแบบเดียวกับอาร์ต) และภาษาไทย ของเก่าตอนเป็นเกม rhythm (6 ต.ค.) อยู่ข้อ 2
 
 ### 00.3 งานที่เหลือ เรียงตามที่ตกลงกับผู้ใช้
-0. **แชทถัดไป (31 ต.ค. แผน `BETA1_DIRECTION.md` 16.14 ทำทีละข้อแล้วหยุดรอ)** : ✅ FRIEND PICK (15.1 ผู้ใช้ลองแล้วผ่าน) ✅ ข้อ 1 การซ้อม REHEARSAL แทน PATH INSPIRED ขั้นอาวุธ (17 ผู้ใช้ลองแล้วยังไม่ต้องแก้) / ถัดไปข้อ 2 GIFT แทน MOTIF แล้วข้อ 3 ภาษา ข้อ 4 บอส ข้อ 5 แผนที่ (เป้าหมาย : เล่นครั้งแรกเข้าใจทันที)
+0. **แชทถัดไป (31 ต.ค. แผน `BETA1_DIRECTION.md` 16.14 ทำทีละข้อแล้วหยุดรอ)** : ✅ FRIEND PICK (15.1 ผู้ใช้ลองแล้วผ่าน) ✅ ข้อ 1 การซ้อม REHEARSAL แทน PATH INSPIRED ขั้นอาวุธ (17 ผู้ใช้ลองแล้วยังไม่ต้องแก้) ✅ ข้อ 2 GIFT แทน MOTIF (18 รอผู้ใช้ลอง) / ถัดไปข้อ 3 ภาษา ข้อ 4 บอส ข้อ 5 แผนที่ (เป้าหมาย : เล่นครั้งแรกเข้าใจทันที)
 1. ก้อน 1 (`BETA1_DIRECTION.md` 11.11 ข้อ 12 13) : ✅ ข้อ 1 ชนิดสกิล ✅ ข้อ 2 ชุดสกิลใหม่ 5 คน ✅ ข้อ 3 ศัตรู CHARGE GUARD ✅ ข้อ 4 หน้าต่อสู้แบบ HSR/CZN (13.4) ✅ ข้อ 5 ข้อความ ✅ ข้อ 6 ทดสอบ / เหลือข้อ 7 VFX สกิลใหม่ (ถามตัวอย่างผู้ใช้ก่อน)
 2. ก้อน 2 : ✅ PATH / ✅ INSPIRED กับรางวัลไฟต์แบบ ก (31 ต.ค. ทั้งสองแทนด้วยการซ้อม REHEARSAL 17) / ✅ SIGNATURE โตที่บอส / ✅ BONDS
 3. ก้อน 3 : MOTIF ทำงานให้เห็น (กลายเป็น 16.14 ข้อ 2 GIFT) / อาวุธขั้น III วิวัฒน์ (ทำแล้วเป็นดาว 3 ของ ATTACK 17) / ดอกเบี้ย
@@ -46,7 +46,7 @@
 ### 00.4 build และทดสอบ
 - Visual Studio 2026 (.NET 9) เปิด `Tacetno433.sln` แล้ว Rebuild ต้องได้ 0 error 0 warning เครื่องใหม่ (เช่นโน้ตบุ๊คอีกเครื่อง) clone หรือ pull branch `Beta1` ล่าสุดก่อนเสมอ
 - แชท cloud : `/build` (เครื่องใหม่ลง dotnet-sdk-8.0 กับรัน `.claude/skills/build/shader_setup.sh` ก่อน ดู `.claude/skills/build/SKILL.md`)
-- `--shots turncheck` 149/149 (31 ต.ค. REHEARSAL) / `--shots savecheck` 33/33 / `--shots turnsim` ใช้ 12 หรือ 24 seed (`TACET_SIM_SEED` 4330 กับ 1 ถึง 23 รันพร้อมกันได้)
+- `--shots turncheck` 169/169 (31 ต.ค. GIFT) / `--shots savecheck` 33/33 / `--shots turnsim` ใช้ 12 หรือ 24 seed (`TACET_SIM_SEED` 4330 กับ 1 ถึง 23 รันพร้อมกันได้)
 - **ผู้ใช้ 31 ต.ค. : คนจริงเล่นแล้วเกมง่ายมาก ห้ามใช้ตัวเลขตัวจำลองตัดสินหรือรายงานว่ายากง่าย** (`BETA1_DIRECTION.md` 14.6) ใช้เทียบก่อนหลังเท่านั้น / ค่าล่าสุด (30 ต.ค. หลังก้อน 2) : NORMAL STRONG ราว 63% MAESTRO EXPERT ราว 83% (24 seed) กับตัวจำลองนิสัยใหม่ที่เลือกสกิลตามค่าและเดินเส้นทาง ส่วน 54% ของ 29 ต.ค. เป็นของนิสัยก่อนหน้า วัดเทียบต้องใช้ตัวจำลองตัวเดียวกัน (`TACET_SIM_NOPATH=1` ปิดเส้นทาง)
 - `TACET_SIM_SET` ลองตัวเลขโดยไม่ build ใหม่ ตาราง MUSICIANS ในรายงานบอกว่าวงที่มีแต่ละคนชนะเท่าไร
 - ชีต `docs/TACET_Balance.xlsx` : หลังแก้ตัวเลข `python3 docs/turn_balance_tabs.py <turnsim.txt>` (แท็บ Turn ทั้งหมดกับ Turn Skills)
@@ -119,6 +119,7 @@
 | **ชุดสกิลใหม่ 5 คน THE FIVE KITS (29 ต.ค. ดึก `BETA1_DIRECTION.md` 12.2)** : สกิล / ความสามารถติดตัว / กติกา SHIELD THE LESSON CHAKRAM LANCE TURN OF THE HAND THE HUNTING CALL THE DEVIL'S BARGAIN BREATH CONTROL THE SCAR / คำเด้งกับป้ายบนจอ / ทดสอบ | `Data/Skill.cs` (`Shield` `Lesson` `Bounce` `Revenge` `OthersOnly`) / `Data/Musician.cs` (ท้าย `enum MusicianTrait`) / `Battle/TurnBattle.cs` (`CanAim` `PaysInLife` `HitTarget` `CoverOf` `StepAside` `NoteTargets` `TurnOfTheHand` `CueScale` `Taught` ค้นชื่อตัวพิมพ์ใหญ่) · ตัวเลข `BattleRules` หัวข้อ Musician Traits / `BattleScreen.ShowEvents` `DrawBand` / `Core/DebugShots.TurnLegends.cs` · ภาพ `battlekit` · ตัวจำลองนิสัยใหม่ + ตาราง MUSICIANS + `TACET_SIM_SET` ใน `Core/DebugShots.TurnSim.cs` · แท็บ Turn Skills ของ `TACET_Balance.xlsx` |
 | **ท่าใหม่ของศัตรู CHARGE GUARD (30 ต.ค. `BETA1_DIRECTION.md` 12.3)** : ลิสต์ท่า / ทุบท่าชาร์จ / ทะลุโล่ | `Data/Enemy.cs` (`EnemyMove` `Moves` `GuardBlock`) / `TurnBattle` ค้นคำ CHARGE GUARD BREAK PIERCE (`PlanIntent` `NextMove` `BreakCharge` `Strike` `Aims`) / ตัวเลข `BattleRules` หัวข้อ ENEMY MOVES / ทดสอบ `Core/DebugShots.TurnMoves.cs` |
 | **การซ้อม REHEARSAL (31 ต.ค. `BETA1_DIRECTION.md` 17 แทน PATH INSPIRED ของ 13.1) SIGNATURE โต BONDS (13.2 13.3)** | ดาว 15 ปุ่ม `Data/Rehearsal.cs` (`RehearsalList` แก้ที่นี่ กฎ `StarRule`) / หน้าซ้อม `Screens/RehearsalScreen.cs` / ดาวบนปุ่มต่อสู้ `BattleScreen.DrawBottom` (`Ui.Stars`) / กฎใน `TurnBattle` ค้นชื่อร่างหรือคำ REHEARSAL (`WeaponLegend` ดาว 3 ของ ATTACK) / สายสัมพันธ์ `Data/Bond.cs` / เซฟ `stars=` (เซฟ 30 ต.ค. `paths=` โหลดได้) / ทดสอบ `Core/DebugShots.TurnRehearsal.cs` / ตัวจำลอง `SimRehearse` |
+| **ของ GIFT (31 ต.ค. `BETA1_DIRECTION.md` 18 แทน MOTIF)** : ของ 19 ชิ้น เครื่องหมายของคน กองสุ่มตามวง คำเด้ง | ของ ชื่อ บรรทัด กองสุ่ม `Data/Motif.cs` (`MotifList.All` ห้ามสลับลำดับ `Pool` `Fits` `Roll` `GiftKey`) / เครื่องหมายของคน `Musician.Key` / กฎ `TurnBattle` ค้นชื่อของ (สารบัญในคอมเมนต์หัวข้อ GIFTS ของ `TurnBattle.cs`) / ตัวเลข `BattleRules` หัวข้อ GIFTS กับ Turn Motifs / ไอคอนกับสี `Core/MotifArt.cs` (`Keyword` `KeyColor`) / คำเด้ง `BattleScreen.ShowEvents` (`TurnEventKind.Gift`) / ทดสอบ `Core/DebugShots.TurnGifts.cs` / ภาพ `battlegift` |
 | **หน้าต่อสู้ใหม่ MARKS AND AIM (30 ต.ค. 13.4)** : วงเล็ง เครื่องหมายบนเพื่อน เครื่องหมายเป้า เส้นโค้งเล็ง การ์ดสกิล ตัวอย่างเลือด ไอคอนกับคำอธิบาย | `Screens/BattleScreen.Marks.cs` (ทั้งหมดของหน้าจอ) / ตัวเลขจากกติกา `Battle/TurnBattle.Preview.cs` (`Preview` `MovePreview`) / ไอคอน `Ui.Icon` กับ `UiArt.IconOf` (โฟลเดอร์ `Content/Art/Ui/Icons/` รายชื่อ `UI_ART_PLAN.md` 2.5) / ตัวเลข `BattleRules` หัวข้อ Aim Feel (`AimArc` ปิดเส้นโค้ง) / ทดสอบ `Core/DebugShots.TurnPreview.cs` |
 | **FRIEND PICK (31 ต.ค. 15.1)** : สกิลที่ใช้กับเพื่อนคนเดียว (SHIELD THE LESSON) ขึ้นการ์ดเพื่อนใบใหญ่เหนือปุ่มคำสั่ง คลิกหรือกดเลข | `Screens/BattleScreen.Friends.cs` (ทั้งหมดของแถว) / ต่อเข้า `BattleScreen.UpdateTarget` กับ `DrawBottom` (ซ่อนเลขบนปุ่มระหว่างเลือก) / การ์ดสกิลเลื่อนขึ้นเหนือแถว (`cardShown` ใน `BattleScreen.Marks.cs`) / ภาพ `battlefriend` |
 | ความยากหลังเอา CALL ออก (เลือดวง x1.5 อาวุธขั้นละ 2 MAESTRO 1.3) | `BattleRules.TurnHp` `WeaponTierPower` `MaestroTurnDamage` · ผลตัวจำลอง `BETA1_DIRECTION.md` 9.6 · ตัวจำลองนับ RANK ด้วย (`--shots turnsim` หัวข้อ RANKS) |
@@ -144,7 +145,7 @@
 | ความสามารถติดตัวนักดนตรีในโหมดผลัดตา | ข้อความ `Data/Musician.cs` `TurnTraitText` · ผล `TurnBattle.cs` (ค้นชื่อความสามารถ) |
 | วาทยากร 6 คน (PASSIVE / SIGNATURE) และคนที่โชว์ในแกลเลอรี | `Data/Conductor.cs` (`TurnKit`, `Turn*` text, `ConductorList.Shown`) · ผลอยู่ `TurnBattle.cs` (`UseSignature`, `Judge`, `CanUse`) |
 | ศัตรู 9 ตัว (เลือด ความเร็ว ท่อนโจมตี กลไก) + ศัตรูฝึก | `Data/Enemy.cs` (`TurnHp` `TurnSpeed` `Phrases` `TurnTraitText` `TurnPower` · `EnemyList.Practice`) |
-| Motif 21 ใบในโหมดผลัดตา | `Data/Motif.cs` `TurnText` · ผลอยู่ `TurnBattle.cs` (ค้นชื่อ Motif) |
+| Motif 21 ใบในโหมดผลัดตา (31 ต.ค. เป็นของ GIFT ดูแถว GIFT ข้างบน) | `Data/Motif.cs` `TurnText` · ผลอยู่ `TurnBattle.cs` (ค้นชื่อ Motif) |
 | เลือดนักดนตรีข้ามการต่อสู้ / เหตุการณ์ ร้าน พัก | `Data/RunState.cs` (`ChangeStamina` `LifeOf` `SetLife`) · เซฟ `Data/SaveFile.cs` บรรทัด `life=` |
 | ของถาวรหลังรัน THE ARCHIVE | `Data/Archive.cs` · `Screens/ArchiveScreen.cs` · ได้ ECHOES ที่ `Screens/CurtainCallScreen.cs` · เซฟ `archive.txt` |
 | Tutorial / HOW TO PLAY / ข้อความหน้าแรก | `Screens/TutorialScreen.cs` (`For.Turn`) · `Screens/GuideScreen.cs` · `Screens/TitleScreen.cs` `turnTips` |

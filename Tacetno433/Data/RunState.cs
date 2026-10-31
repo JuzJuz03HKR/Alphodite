@@ -155,10 +155,10 @@ namespace Tacetno433.Data
             Shards = Archive.Level(Archive.Savings) * BattleRules.ArchiveShardsPerLevel;                 // SAVINGS
             if (Archive.Level(Archive.Keepsake) > 0)                                                     // KEEPSAKE
             {
-                //One common motif from floor 1 (MotifList.Roll would let a rarer one in)
+                //One common gift for THE BAND (GIFTS, 31 Oct : the band is picked after this, so only a gift for everyone is sure to fit)
                 List<Motif> commons = new List<Motif>();
-                for (int i = 0; i < MotifList.All.Length; i++)
-                    if (MotifList.All[i].Rarity == 1 && MotifList.All[i].FromFloor <= 1) commons.Add(MotifList.All[i]);
+                for (int i = 0; i < MotifList.Pool.Length; i++)
+                    if (MotifList.Pool[i].Rarity == 1 && MotifList.Pool[i].Key == GiftKey.Band) commons.Add(MotifList.Pool[i]);
                 if (commons.Count > 0) Motifs.Add(commons[random.Next(commons.Count)]);
             }
 
@@ -493,7 +493,7 @@ namespace Tacetno433.Data
             SyncBandLife();
             StaminaLabel = BattleRules.LifeWord + "  " + Stamina + " / " + MaxStamina;
             StaminaValue = Stamina + " / " + MaxStamina;
-            MotifsLabel = "MOTIFS  " + Motifs.Count;
+            MotifsLabel = "GIFTS  " + Motifs.Count;
         }
 
         //Boss Next : true when the boss is the very next stage, used to warn the player

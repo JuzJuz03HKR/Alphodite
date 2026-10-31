@@ -294,6 +294,7 @@ namespace Tacetno433.Screens
                 float a = Bright(i);
                 BandColumn.Words(sb, r, m.NameTag, m.Instrument, SkillList.First(m).Name, SkillList.First(m).Cost, SkillList.Second(m).Name, SkillList.Second(m).Cost,
                                  BandColumn.SpotOf(m), Math.Max(UiMotion.EaseOut(lit[i]), UiMotion.EaseOut(chosen[i])), a);
+                MotifArt.Keyword(sb, m.Key, r.Right - 12, r.Bottom + 47, 18, a);              // GIFTS : their mark, on the gifts made for them
                 int place = picked.IndexOf(m);
                 if (place >= 0)
                 {
@@ -314,6 +315,7 @@ namespace Tacetno433.Screens
                 Gfx.TextSpaced(sb, Game.Font, "THE AUDITION", detailBox.X + 18, detailBox.Y + 12, Palette.LineGrey * d, TextSize.Tiny, 3f);
                 Gfx.Text(sb, Game.StoryFont, "Three of them play with you for the whole run. Every one of them is in every fight.", detailBox.X + 18, detailBox.Y + 34, Palette.Paper * d, TextSize.StorySmall);
                 Gfx.Text(sb, Game.StoryFont, "Point at a column to read it. The first one you pick stands in front.", detailBox.X + 18, detailBox.Y + 58, Palette.PaperDim * d, TextSize.StorySmall);
+                Gfx.Text(sb, Game.StoryFont, "The small icon is their mark. Gifts with the same icon are made for them.", detailBox.X + 18, detailBox.Y + 82, Palette.PaperDim * d, TextSize.StorySmall);
             }
 
             //Footer : how many, how to, and the button

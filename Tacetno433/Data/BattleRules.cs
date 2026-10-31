@@ -273,6 +273,19 @@
                                                           // bar. Was : 2 for each musician on the BENCH
         public static float TurnUnisonScale = 2f;         // UNISON : the last ATTACK of a bar that all goes at one enemy
 
+        //GIFTS (Beta1 31 Oct, Data/Motif.cs, docs/BETA1_DIRECTION.md 18) : the numbers of the gifts that are new. The gifts that took
+        //the place of a motif keep its number : ON PLAYING THE FLUTE TurnReedCaseHeal, WOODEN STICKS TurnSpareSticksOffBeat,
+        //300 CONCERTOS TurnGreenRoomHeal, OPENING NIGHT TurnOvertureScale. THE PACT is TurnPactLife and TurnBloodScale, THE CRANK
+        //TurnHandPaukenCut and TurnHandOneLeast (they were PATH rules), THE EMPEROR'S SPUR gives THE SCAR's TurnScarCrescendo.
+        //First guesses, the real balance comes from playing (docs/BETA1_DIRECTION.md 14.6).
+        public static int TurnCampanellaAdd = 1;          // LA CAMPANELLA : DISSONANCE a hit adds to an enemy that has some
+        public static int TurnSnapDamage = 27;            // SNAPPED STRINGS : the crack at TurnDissonanceMost DISSONANCE
+        public static float TurnThunderSheetShare = 0.1f; // THUNDER SHEET : the share of its life an enemy thrown OFF-BEAT loses
+        public static int TurnHardCase = 2;               // HARD CASE : less from every enemy note on DUPORT (1 at least)
+        public static int TurnSilverHornMost = 8;         // THE SILVER HORN : CRESCENDO stacks this high (TurnCrescendoMost without it)
+        public static float TurnHallaliScale = 2f;        // HALLALI : the hit at full CRESCENDO
+        public static float TurnLuckyBowScale = 2f;       // LUCKY BOW : the first note of every skill
+
         //Turn Feel (seconds) : how the battle page paces a swipe. The ring always closes at the same
         //speed, never eased, so the eye can count it (docs/research/ALPHA7_qte_parry.md).
         public static float TurnRingTime = 1.1f;          // from a note showing to the moment to swipe

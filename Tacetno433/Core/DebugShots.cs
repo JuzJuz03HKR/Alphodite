@@ -856,7 +856,7 @@ namespace Tacetno433.Core
         //       duel duelcombo duelboss duelcutin duelpause dueldouble dueltremolo duelfermata duelfire duelrepeat finale
         //       result defeat reward shop shopleave event eventchair rest curtain curtainwin
         //       rewardpick rewardtilt shopbuy (Beta1 round 1 : a card picked, the pointed card leaning, a motif bought, e.g. rewardpick@80)
-        //       battle battleswing battleskill battleparry battlestatus (Alpha 7, use a few frames, e.g. battleswing@2) battlewin battlelose (Beta1, TACET's dark) battleslash battleshot battlesmash battlecross battleink (Beta1, one blow, e.g. battleslash@4) battlecutin battlekill battlebolt battleboltsoft battleimpact (Beta1 round 6) battlekit (THE FIVE KITS, 29 Oct : the SHIELD and LESSON tags, the new moves' words) battlemoves (ENEMY MOVES, 30 Oct : CHARGE, GUARD and the charged blow over the enemies) battlestars (REHEARSAL, 31 Oct : stars on the commands, a legend's name) battleaim battlepick battleheal battletip battlechakram (MARKS AND AIM, 30 Oct : the skill card, the rings, the marks on friends, an icon's line) battlefriend (FRIEND PICK, 31 Oct : the friends a skill for one friend can go to, over the commands) rehearsal rehearsalrest (REHEARSAL, 31 Oct : the star after a win, from the rest stop)
+        //       battle battleswing battleskill battleparry battlestatus (Alpha 7, use a few frames, e.g. battleswing@2) battlewin battlelose (Beta1, TACET's dark) battleslash battleshot battlesmash battlecross battleink (Beta1, one blow, e.g. battleslash@4) battlecutin battlekill battlebolt battleboltsoft battleimpact (Beta1 round 6) battlekit (THE FIVE KITS, 29 Oct : the SHIELD and LESSON tags, the new moves' words) battlemoves (ENEMY MOVES, 30 Oct : CHARGE, GUARD and the charged blow over the enemies) battlestars (REHEARSAL, 31 Oct : stars on the commands, a legend's name) battleaim battlepick battleheal battletip battlechakram (MARKS AND AIM, 30 Oct : the skill card, the rings, the marks on friends, an icon's line) battlefriend (FRIEND PICK, 31 Oct : the friends a skill for one friend can go to, over the commands) battlegift (GIFTS, 31 Oct : three gifts' names popping) rehearsal rehearsalrest (REHEARSAL, 31 Oct : the star after a win, from the rest stop)
         //       teampick teampickfull luthier treasure rewardboss battletier (29 Oct : THE AUDITION empty and with three picked, the
         //       luthier, a chest, the boss's great upgrade with REFORGE, a tier III blow e.g. battletier@4)
         //       practice practiceskill practicesig (Alpha 7, the tutorial's practice fight, e.g. practice@60)
@@ -975,13 +975,13 @@ namespace Tacetno433.Core
             if (name != "teampick")
                 run.PickBand(new List<Musician> { MusicianList.All[0], MusicianList.All[1], MusicianList.All[2] });
 
-            //Extras : a few motifs, some shards and one rehearsed player, so the bars have content.
-            //The balance check skips these so its numbers stay plain.
+            //Extras : a few gifts (GIFTS 31 Oct : ones the band of the shots can find), some shards and one rehearsed player, so the
+            //bars have content. The balance check skips these so its numbers stay plain.
             if (name != "sim")
             {
-                run.AddMotif(MotifList.Get(MotifId.BreathMark));
-                run.AddMotif(MotifList.Get(MotifId.Sforzando));
-                run.AddMotif(MotifList.Get(MotifId.Resin));
+                run.AddMotif(MotifList.Get(MotifId.LaCampanella));
+                run.AddMotif(MotifList.Get(MotifId.KingsFavour));
+                run.AddMotif(MotifList.Get(MotifId.SpareStrings));
                 run.AddShards(120);
                 if (run.Roster.Count > 0) run.Rehearse(run.Roster[0]);                // the audition (teampick) has nobody yet
                 run.CurrentEvent = EventList.All[name == "eventchair" ? EventList.All.Length - 1 : 1];   // eventchair : THE EMPTY CHAIR

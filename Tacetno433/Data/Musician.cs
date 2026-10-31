@@ -98,6 +98,10 @@ namespace Tacetno433.Data
         //-1 means full. RunState.Start sets it back, see RunState.LifeOf.
         public int Life = -1;
 
+        //Key : GIFTS (Beta1 31 Oct, Data/Motif.cs GiftKey), what this legend is best at. A gift with the same mark is for them,
+        //and only the gifts of the band's legends (and THE BAND's) are offered in a run.
+        public GiftKey Key = GiftKey.Band;
+
         //Trait : what makes them different in a duel, see MusicianTrait
         public MusicianTrait Trait = MusicianTrait.None;
         public string TraitName = "";
@@ -146,7 +150,7 @@ namespace Tacetno433.Data
             new Musician { Name = "PAGANINI", Instrument = "VIOLIN",    Culture = "EUROPEAN", Family = Family.String,     Cue = 0, Spot = SpotLook.Gold,
                            Epithet = "THE DEVIL'S VIOLINIST", Weapon = "IL CANNONE",
                            Power = 5, Sample = "violin", SampleNote = 60, ThemeColor = Palette.ToneB,
-                           Trait = MusicianTrait.DevilsBargain, TraitName = "THE DEVIL'S BARGAIN",
+                           Key = GiftKey.Dissonance, Trait = MusicianTrait.DevilsBargain, TraitName = "THE DEVIL'S BARGAIN",
                            TurnTraitText = "Short of BREATH, their skills take " + BattleRules.TurnPaganiniLife + " life for each BREATH missing.",
                            Line = "They say the devil taught those hands. Nobody asks twice." },
 
@@ -155,7 +159,7 @@ namespace Tacetno433.Data
             new Musician { Name = "QUANTZ",   Instrument = "FLUTE",     Culture = "EUROPEAN", Family = Family.Wind,       Cue = 1, Spot = SpotLook.Red,
                            Epithet = "THE KING'S FLUTE MASTER", Weapon = "FLUTE RAPIER",
                            Power = 4, Sample = "flute", SampleNote = 72, ThemeColor = Palette.ToneC,
-                           Trait = MusicianTrait.BreathControl, TraitName = "BREATH CONTROL",
+                           Key = GiftKey.Heal, Trait = MusicianTrait.BreathControl, TraitName = "BREATH CONTROL",
                            TurnTraitText = "Their ATTACK gives " + BattleRules.TurnBreathControl + " BREATH more.",
                            Line = "Taught a king the flute. Three hundred concertos, one listener." },
 
@@ -164,7 +168,7 @@ namespace Tacetno433.Data
             new Musician { Name = "PFUNDT",   Instrument = "TIMPANI",   Culture = "EUROPEAN", Family = Family.Percussion, Cue = 2, Spot = SpotLook.Gold,
                            Epithet = "WHO TUNES THE THUNDER", Weapon = "TWIN HAMMERS",
                            Power = 6, Sample = "timpani", SampleNote = 0, ThemeColor = Palette.ToneD,
-                           Trait = MusicianTrait.TurnOfTheHand, TraitName = "TURN OF THE HAND",
+                           Key = GiftKey.OffBeat, Trait = MusicianTrait.TurnOfTheHand, TraitName = "TURN OF THE HAND",
                            TurnTraitText = "An enemy their skill hits plays " + BattleRules.TurnHandCut + " note fewer next time (" + BattleRules.TurnHandLeast + " at least).",
                            Line = "One turn of the hand, and the thunder changes key." },
 
@@ -194,7 +198,7 @@ namespace Tacetno433.Data
             new Musician { Name = "DUPORT",   Instrument = "CELLO",     Culture = "EUROPEAN", Family = Family.String,     Cue = 2, Spot = SpotLook.Gold,
                            Epithet = "SCARRED BY AN EMPEROR", Weapon = "THE SCARRED SHIELD",
                            Power = 6, Sample = "cello", SampleNote = 48, ThemeColor = Palette.ToneC,
-                           Trait = MusicianTrait.TheScar, TraitName = "THE SCAR",
+                           Key = GiftKey.Shield, Trait = MusicianTrait.TheScar, TraitName = "THE SCAR",
                            TurnTraitText = "Every attack that hurts them gives " + BattleRules.TurnScarCrescendo + " CRESCENDO.",
                            Line = "An emperor once tried this cello and left a scar. It plays louder for it." },
 
@@ -204,7 +208,7 @@ namespace Tacetno433.Data
             new Musician { Name = "PUNTO",    Instrument = "HORN",      Culture = "EUROPEAN", Family = Family.Wind,       Cue = 0, Spot = SpotLook.Red,
                            Epithet = "LOUDER THAN BEETHOVEN", Weapon = "HORN CHAKRAM",
                            Power = 5, Sample = "horn", SampleNote = 48, ThemeColor = Palette.ToneA,
-                           Trait = MusicianTrait.HuntingCall, TraitName = "THE HUNTING CALL",
+                           Key = GiftKey.Crescendo, Trait = MusicianTrait.HuntingCall, TraitName = "THE HUNTING CALL",
                            TurnTraitText = "The musician who plays right after them in the bar hits harder.",
                            Line = "Once more famous than Beethoven, and plays like nobody said otherwise." },
 

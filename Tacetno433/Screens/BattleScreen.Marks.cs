@@ -346,7 +346,7 @@ namespace Tacetno433.Screens
                 int life = 0;
                 if (who != null && battle.PaysInLife(who) && battle.BreathFree < s.Cost)
                     life += (s.Cost - Math.Max(0, battle.BreathFree)) * BattleRules.TurnPaganiniLife;
-                if (who != null && who.Musician.Has(StarRule.PaidInBlood)) life += Math.Max(0, Math.Min(BattleRules.TurnPactLife, who.Hp - 1));
+                if (battle.Pacts(who)) life += Math.Max(0, Math.Min(BattleRules.TurnPactLife, who.Hp - 1));     // THE PACT (GIFT)
                 if (life > 0) line = Join(line, "PAYS " + life + " LIFE");
             }
             cardLine = line;

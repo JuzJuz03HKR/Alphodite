@@ -29,7 +29,8 @@ namespace Tacetno433.Battle
     //before it is played, the skill card's numbers and the life a target would lose or get back on its bar. The move is worked
     //out as if every note lands GOOD and every hold is held to the end. Nothing changes : no event, no stack, no OVERTURE spent.
     //Left out because they hang on what happens before the move in the bar or on the swipe : DOWNBEAT, UNISON, THE HUNTING CALL,
-    //OVERTURE, a PERFECT's TurnPerfect, so a move that lands often does a little more than its preview.
+    //OVERTURE (OPENING NIGHT), HALLALI, a PERFECT's TurnPerfect, so a move that lands often does a little more than its preview.
+    //GIFTS (31 Oct) that are in it : THE PACT, LUCKY BOW (the first note), TOURTE BOW (TargetsOf), ON PLAYING THE FLUTE, WOODEN STICKS.
     public partial class TurnBattle
     {
         private readonly List<Fighter> previewLine = new List<Fighter>();
@@ -91,19 +92,20 @@ namespace Tacetno433.Battle
             float scale = first;
             if (who.Lesson) scale *= who.LessonScale > 0f ? who.LessonScale : BattleRules.TurnLessonScale;
             if (s.Revenge > 0f && (who.Wounded || who.Musician.Has(StarRule.LanceAlways))) scale *= s.Revenge;
-            if (who.Musician.Has(StarRule.PaidInBlood)) scale *= BattleRules.TurnBloodScale;
+            if (Pacts(who)) scale *= BattleRules.TurnBloodScale;                                                // THE PACT (GIFT)
             bool everyone = s.Target == SkillTarget.AllEnemies || s.Target == SkillTarget.AllAllies;
             float tutti = everyone && Has(MotifId.Tutti) ? BattleRules.TurnTuttiScale : 1f;                  // TUTTI
             bool felix = Kit == TurnKit.Fanny && FelixVoice;                                                   // TWO VOICES
             bool lastCut = IsSkill(who, s, 0) && who.Musician.Has(StarRule.LastCut);                           // CAPRICE No. 24
             int offBeat = s.OffBeat;
-            if (who.Musician.Family == Family.Percussion && Has(MotifId.SpareSticks)) offBeat = (int)Math.Round(offBeat * BattleRules.TurnSpareSticksOffBeat);   // SPARE STICKS
+            if (who.Musician.Family == Family.Percussion && Has(MotifId.SpareSticks)) offBeat = (int)Math.Round(offBeat * BattleRules.TurnSpareSticksOffBeat);   // WOODEN STICKS (GIFT)
 
             into.Notes = s.Notes.Length;
             for (int n = 0; n < s.Notes.Length; n++)
             {
                 float hold = s.Notes[n].Kind == NoteKind.Hold ? HoldScale(1f) : 1f;
-                float noteScale = SwipeScale(Grade.Good) * hold * scale;
+                float lucky = n == 0 && Has(MotifId.LuckyBow) ? BattleRules.TurnLuckyBowScale : 1f;            // LUCKY BOW (GIFT) : the first note
+                float noteScale = SwipeScale(Grade.Good) * hold * scale * lucky;
                 bool last = n == s.Notes.Length - 1;
                 if (lastCut && last) noteScale *= BattleRules.TurnLastCutScale;
                 float repeat;
@@ -124,12 +126,12 @@ namespace Tacetno433.Battle
                         if (f == into.Targets[0])
                         {
                             into.Dissonance += s.Dissonance;
-                            into.OffBeat += (int)Math.Round(offBeat * repeat);
+                            into.OffBeat += (int)Math.Round(offBeat * repeat * lucky);
                         }
                         continue;
                     }
-                    float heal = s.Heal * hold * tutti * repeat;
-                    if (who.Musician.Family == Family.Wind && Has(MotifId.ReedCase)) heal *= BattleRules.TurnReedCaseHeal;   // REED CASE
+                    float heal = s.Heal * hold * tutti * repeat * lucky;
+                    if (who.Musician.Family == Family.Wind && Has(MotifId.ReedCase)) heal *= BattleRules.TurnReedCaseHeal;   // ON PLAYING THE FLUTE (GIFT, was REED CASE)
                     if (felix) heal *= BattleRules.TurnFelixHeal;
                     int gain = Math.Min((int)Math.Round(heal), f.MaxHp - f.Hp - into.Gain[f.Slot]);
                     if (gain > 0) into.Gain[f.Slot] += gain;

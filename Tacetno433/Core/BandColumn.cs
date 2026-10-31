@@ -107,6 +107,8 @@ namespace Tacetno433.Core
             int x = box.X + 18;
             int y = box.Y + 12;
             Gfx.Text(sb, Ui.BigFont, m.NameTag, x, y - 2, SpotOf(m) * a, TextSize.Subtitle);
+            if (m.Key != GiftKey.Band)                                                       // GIFTS : their mark, the icon of the gifts for them
+                MotifArt.Keyword(sb, m.Key, x + Gfx.TextWidth(Ui.BigFont, m.NameTag, TextSize.Subtitle) + 18f, y + 12, 20, a);
             Gfx.TextSpaced(sb, Ui.Font, m.Epithet.Length > 0 ? m.Epithet : m.FamilyLabel, x, y + 30, Palette.PaperDim * a, TextSize.Tiny, 2f);
             Gfx.TextSpaced(sb, Ui.Font, "LIFE", x, y + 56, Palette.LineGrey * a, TextSize.Tiny, 2f);
             Gfx.Text(sb, Ui.Font, NumberText.Get(run.LifeOf(m)), x + 44, y + 52, Palette.Paper * a, TextSize.Body);

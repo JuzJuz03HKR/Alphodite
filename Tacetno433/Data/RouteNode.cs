@@ -54,12 +54,12 @@ namespace Tacetno433.Data
             BattleRules.TurnBattleOn ? "A fight with TACET. The better you play, the more shards." : "A duel with TACET. Win and take whatever it leaves behind.",
             "Something is waiting here. A person, a gift, or a fight.",
             BattleRules.TurnBattleOn ? "Spend shards to make the whole band stronger." : "Trade shards for motifs, breath and seats.",
-            "Harder than it looks. More shards, and a motif to choose.",
+            "Harder than it looks. More shards, and a gift to choose.",
             BattleRules.TurnBattleOn ? "Recover, or train one weapon a tier up. The band chooses one." : "Breathe, or rehearse. The ensemble chooses one.",
             "The last room of this floor. It has been waiting for you.",
             "A door out of this era. The world changes around you.",
             "A maker of instruments. One weapon gets a tier sharper, free.",
-            "A chest left in the wings. One motif inside, free."
+            "A chest left in the wings. One gift inside, free."
         };
 
         //Tags : the small words on the panel that say what kind of place it is

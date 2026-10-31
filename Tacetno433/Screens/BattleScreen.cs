@@ -927,6 +927,7 @@ namespace Tacetno433.Screens
         //hits now (NOTE BY NOTE), the SIGNATURE's strokes gather and strike together at the end.
         private void Land(Grade grade, float hold)
         {
+            grade = battle.Forgive(grade);                                               // SPARE STRINGS (GIFT) : the first MISS is a GOOD
             missKept = false;
             notesPlayed++;                                                               // RANK
             results[next] = new NoteResult(grade, hold);
@@ -1034,7 +1035,7 @@ namespace Tacetno433.Screens
                 if (e.Kind == TurnEventKind.Saved && e.Who != null)
                 {
                     Rectangle saved = BoxOf(e.Who);
-                    effects.SpawnPop(saved.Center.X, saved.Y - 60, "SECOND WIND", Palette.Highlight, 0.8f);
+                    effects.SpawnPop(saved.Center.X, saved.Y - 60, MotifList.Get(MotifId.SecondWind).Name, Palette.Highlight, 0.8f);   // GIFT : FRONT ROW ROSES
                     continue;
                 }
                 if (e.Kind == TurnEventKind.Steal)
@@ -1050,6 +1051,12 @@ namespace Tacetno433.Screens
                 if (e.Kind == TurnEventKind.Extra)
                 {
                     hudPops.SpawnPop(HitX, HitY - 60f, "+" + NumberText.Get(e.Amount) + " ATTACKS", Palette.Highlight, 0.9f);   // FEATHER
+                    continue;
+                }
+                if (e.Kind == TurnEventKind.Gift && e.Who == null)                                  // GIFTS : SPARE STRINGS on a SIGNATURE stroke
+                {
+                    Motif gift = MotifList.All[e.Amount];
+                    hudPops.SpawnPop(HitX, HitY - 80f, gift.Name, MotifArt.PopColor(gift.Key), 0.8f);
                     continue;
                 }
                 if (e.Who == null) continue;
@@ -1153,6 +1160,8 @@ namespace Tacetno433.Screens
                 else if (e.Kind == TurnEventKind.Pierce) effects.SpawnPop(x, box.Y - 70, "PIERCE", Palette.KindAttack, 0.9f); // PIERCE
                 //REHEARSAL (Beta1 31 Oct) : the legend's name when the rule of a third star works, in the musician's colour
                 else if (e.Kind == TurnEventKind.Legend && RehearsalList.RuleWords[e.Amount].Length > 0) effects.SpawnPop(x, y, RehearsalList.RuleWords[e.Amount], SpotOf(e.Who).Tint, 0.8f);
+                //GIFTS (Beta1 31 Oct) : a gift worked, its name over who it worked on, in the colour of its legend's mark (until its VFX)
+                else if (e.Kind == TurnEventKind.Gift) effects.SpawnPop(x, y, MotifList.All[e.Amount].Name, MotifArt.PopColor(MotifList.All[e.Amount].Key), 0.75f);
                 else if (e.Kind == TurnEventKind.Counter)
                 {
                     effects.SpawnPop(x, y, "COUNTER", Palette.Highlight, 0.9f);
@@ -1487,6 +1496,16 @@ namespace Tacetno433.Screens
                 battle.Events.Add(new TurnEvent(TurnEventKind.Lesson, battle.Party[0], 0));
                 battle.Events.Add(new TurnEvent(TurnEventKind.Cue, battle.Party[2], 0));
                 battle.Events.Add(new TurnEvent(TurnEventKind.Revenge, battle.Party[2], 0));
+                ShowEvents();
+            }
+            else if (name == "battlegift")
+            {
+                //GIFTS (Beta1 31 Oct) : three gifts working at once, their names popping in the colour of their legend's mark (LA CAMPANELLA
+                //on the front enemy, THE KING'S FAVOUR on QUANTZ, SPARE STRINGS over the ring, THE BAND's)
+                battle.Events.Clear();
+                battle.Events.Add(new TurnEvent(TurnEventKind.Gift, battle.Enemies[0], (int)MotifId.LaCampanella));
+                if (battle.Party.Count > 1) battle.Events.Add(new TurnEvent(TurnEventKind.Gift, battle.Party[1], (int)MotifId.KingsFavour));
+                battle.Events.Add(new TurnEvent(TurnEventKind.Gift, null, (int)MotifId.SpareStrings));
                 ShowEvents();
             }
             else if (name == "battlemoves")

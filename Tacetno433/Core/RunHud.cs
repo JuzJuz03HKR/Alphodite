@@ -8,8 +8,8 @@ namespace Tacetno433.Core
     //
     //Left   band name and conductor
     //Centre the page title
-    //Right  life, shards and motif count (the seats went with the band of three, 29 Oct)
-    //Under the bar on the right, one badge per motif. Point at a badge to read it.
+    //Right  life, shards and gift count (the seats went with the band of three, 29 Oct. GIFTS 31 Oct : a motif is a GIFT on screen)
+    //Under the bar on the right, one badge per gift, framed in the colour of the legend it is for. Point at a badge to read it.
     //
     //Pages call DrawTop early and DrawTips last, so the tooltip sits above everything.
     public static class RunHud
@@ -62,7 +62,7 @@ namespace Tacetno433.Core
 
             //Motif Chip
             int motifX = 1210;
-            Gfx.TextSpaced(sb, Ui.Font, "MOTIF", motifX, 12, Palette.LineGrey, TextSize.Tiny, 2f);
+            Gfx.TextSpaced(sb, Ui.Font, "GIFTS", motifX, 12, Palette.LineGrey, TextSize.Tiny, 2f);
             Gfx.Text(sb, Ui.Font, NumberText.Get(run.Motifs.Count), motifX, 28, Palette.Paper, TextSize.Body);
 
             DrawBadges(sb, run);

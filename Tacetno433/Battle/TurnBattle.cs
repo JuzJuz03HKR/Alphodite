@@ -22,7 +22,8 @@ namespace Tacetno433.Battle
     //REHEARSAL (Beta1 31 Oct, was PATH and INSPIRED) : Legend = the rule of a star just worked (Amount = the StarRule), the screen
     //pops the name of its legend (RehearsalList.RuleWords).
     public enum TurnEventKind { Damage, Heal, Breath, Dissonance, Crescendo, Mute, Break, Skip, Counter, Down, Ready, Extra, Saved, Steal, Echo, Quieter, Thorns,
-                                Cut, Shield, Lesson, Cue, Revenge, Charge, Broken, Guard, Blocked, Pierce, Legend }
+                                Cut, Shield, Lesson, Cue, Revenge, Charge, Broken, Guard, Blocked, Pierce, Legend,
+                                Gift }                       // GIFTS (Beta1 31 Oct) : a gift worked, Amount is its MotifId (the screen pops its name)
 
     //DecreeKind : DECREE (THE DEAF CROWN, step 14), what the band may not do this bar
     public enum DecreeKind { None, NoSkills, NoAttacks }
@@ -192,8 +193,15 @@ namespace Tacetno433.Battle
 
         //Motifs (step 6) : what the band carries, see GiveMotifs and Data/Motif.cs (TurnText)
         private bool[] motif = new bool[64];
-        private bool overtureDone;     // OVERTURE : the band's first hit is done (a MISS still hits, so it counts too)
-        private bool secondWindUsed;   // SECOND WIND : once per fight
+        private bool overtureDone;     // OVERTURE (OPENING NIGHT) : the band's first hit is done (a MISS still hits, so it counts too)
+        private bool secondWindUsed;   // SECOND WIND (FRONT ROW ROSES) : once per fight
+        private bool spareUsed;        // SPARE STRINGS : the first MISS of the fight has been let off
+        private int sheetLoss;         // THUNDER SHEET : the life the enemy playing now loses once its attack is over
+
+        //Gift Shown : GIFTS, the gift's name pops once a move for each fighter it worked on (a CHAKRAM on three cracked enemies
+        //pops three times, four cuts on one enemy once). Cleared when a turn starts (BeginTurn) and when a bar starts.
+        private readonly bool[] giftShown = new bool[64];
+        private readonly Fighter[] giftShownFor = new Fighter[64];
 
         //Last Skill : the swipe notes of the band's last skill, for ANSWER BETTER (THE NAMELESS MASTER)
         private List<Flick> lastWays = new List<Flick>();
@@ -287,6 +295,7 @@ namespace Tacetno433.Battle
         //Round Start : a new bar. The plan is empty, and every enemy decides its move so the player can write the bar against it.
         private void StartRound()
         {
+            ClearGiftShown();
             if (Round > 0) GreenRoom();
             Round++;
             Order.Clear();
@@ -314,19 +323,26 @@ namespace Tacetno433.Battle
             AimFirstInLine();
         }
 
-        //GREEN ROOM (motif, 29 Oct) : at the end of every bar the musician standing with the least of their life gets some back.
-        //Until the BENCH went away it healed the musicians waiting on it.
+        //300 CONCERTOS (GIFT, Beta1 31 Oct, the place of GREEN ROOM) : at the end of every bar, while QUANTZ stands, every musician
+        //standing gets TurnGreenRoomHeal life back (ON PLAYING THE FLUTE does not add to it, it is not a skill of QUANTZ).
+        //GREEN ROOM (29 to 31 Oct) gave it to the most hurt musician only, and until the BENCH went away healed the ones on it.
         private void GreenRoom()
         {
             if (!Has(MotifId.GreenRoom)) return;
-            Fighter tired = null;
+            Fighter flute = null;
+            for (int i = 0; i < Party.Count; i++)
+                if (!Party[i].Down && Party[i].Musician.Key == GiftKey.Heal) flute = Party[i];
+            if (flute == null) return;
+
+            bool healed = false;
             for (int i = 0; i < Party.Count; i++)
             {
                 Fighter f = Party[i];
                 if (f.Down || f.Hp >= f.MaxHp) continue;
-                if (tired == null || f.Hp * tired.MaxHp < tired.Hp * f.MaxHp) tired = f;      // the smallest share of their life
+                Heal(f, BattleRules.TurnGreenRoomHeal);
+                healed = true;
             }
-            if (tired != null) Heal(tired, BattleRules.TurnGreenRoomHeal);
+            if (healed) GiftWorks(MotifId.GreenRoom, flute);
         }
 
         //======================================================================================
@@ -817,6 +833,7 @@ namespace Tacetno433.Battle
         //and a move whose target fell goes to another one.
         private void BeginTurn()
         {
+            ClearGiftShown();
             while (true)
             {
                 if (OrderIndex >= Order.Count || Order[OrderIndex].Down)
@@ -1122,7 +1139,7 @@ namespace Tacetno433.Battle
                 Fighter hurt = MostHurt();
                 if (hurt != null)
                 {
-                    Heal(hurt, BattleRules.TurnAttackHeal);
+                    Heal(hurt, FluteHeal(attacker, BattleRules.TurnAttackHeal));                         // ON PLAYING THE FLUTE
                     Events.Add(new TurnEvent(TurnEventKind.Legend, attacker, (int)StarRule.AttackHeals));
                 }
             }
@@ -1244,12 +1261,13 @@ namespace Tacetno433.Battle
             int lifeCost = LifeCost(s);                                                            // BORROWED BREATH, THE DEVIL'S BARGAIN
             Breath = Math.Max(0, Breath - s.Cost);
             if (lifeCost > 0) Hurt(user, lifeCost);
-            if (user.Musician.Has(StarRule.PaidInBlood))                                           // THE PACT (no star gives it now) : blood for every skill
-            {
+            if (Pacts(user))                                                                       // THE PACT (GIFT, a PATH rule until 31 Oct) : blood
+            {                                                                                      //   for every skill of PAGANINI
                 Hurt(user, Math.Min(BattleRules.TurnPactLife, user.Hp - 1));
                 playingScale *= BattleRules.TurnBloodScale;
-                Events.Add(new TurnEvent(TurnEventKind.Legend, user, (int)StarRule.PaidInBlood));
+                GiftWorks(MotifId.ThePact, user);
             }
+            if (targets.Count > 1 && Bows(user, s)) GiftWorks(MotifId.TourteBow, user);           // TOURTE BOW : the LANCE sweeps
             OnCue(user);                                                                           // ON CUE
 
             //Last Skill : remembered for ANSWER BETTER
@@ -1266,11 +1284,12 @@ namespace Tacetno433.Battle
             if (playing == null || n < 0 || n >= playing.Notes.Length) return;
             Fighter user = Current;
             bool last = n == playing.Notes.Length - 1;
+            r.Grade = Forgive(r.Grade);                                                     // SPARE STRINGS
             playingNotes[n] = r;
             CountNote(r.Grade == Grade.Perfect);
             if (!r.Lands)
             {
-                user.Crescendo = 0;                                                         // CRESCENDO is lost on a MISS
+                LoseCrescendo(user);                                                        // CRESCENDO is lost on a MISS (HAND STOPPING : half)
                 //RUBATO : a missed note still plays, at TurnRubatoMiss of a GOOD one and with no BREATH
                 if (Has(MotifId.Rubato))
                 {
@@ -1283,7 +1302,13 @@ namespace Tacetno433.Battle
             playingLanded = true;
             float repeat;
             List<Fighter> reached = NoteTargets(playing, n, out repeat);                    // CHAKRAM : one enemy a note
-            PlayNote(playing, playing.Notes[n], r, reached, user, playingScale * repeat, true, last);
+            float lucky = 1f;
+            if (n == 0 && Has(MotifId.LuckyBow))                                            // LUCKY BOW : the first note of every skill
+            {
+                lucky = BattleRules.TurnLuckyBowScale;
+                GiftWorks(MotifId.LuckyBow, user);
+            }
+            PlayNote(playing, playing.Notes[n], r, reached, user, playingScale * repeat * lucky, true, last);
         }
 
         //Note Targets : who note n of a skill reaches. A plain skill reaches all of its targets with every note.
@@ -1421,7 +1446,11 @@ namespace Tacetno433.Battle
             bool everyone = s.Target == SkillTarget.AllEnemies || s.Target == SkillTarget.AllAllies;
             float tutti = everyone && Has(MotifId.Tutti) ? BattleRules.TurnTuttiScale : 1f;               // TUTTI
             float heal = s.Heal * hold * tutti * extra;
-            if (user.Musician.Family == Family.Wind && Has(MotifId.ReedCase)) heal *= BattleRules.TurnReedCaseHeal;   // REED CASE
+            if (heal > 0f && user.Musician.Family == Family.Wind && Has(MotifId.ReedCase))              // ON PLAYING THE FLUTE (GIFT, was REED CASE)
+            {
+                heal *= BattleRules.TurnReedCaseHeal;
+                GiftWorks(MotifId.ReedCase, user);
+            }
             int crescendo = s.Crescendo;
             if (Kit == TurnKit.Fanny && FelixVoice)                                                       // TWO VOICES : FELIX helps
             {
@@ -1429,7 +1458,11 @@ namespace Tacetno433.Battle
                 if (crescendo > 0) crescendo += BattleRules.TurnFelixCrescendo;
             }
             int offBeat = (int)Math.Round(s.OffBeat * extra);
-            if (user.Musician.Family == Family.Percussion && Has(MotifId.SpareSticks)) offBeat = (int)Math.Round(offBeat * BattleRules.TurnSpareSticksOffBeat);   // SPARE STICKS
+            if (offBeat > 0 && user.Musician.Family == Family.Percussion && Has(MotifId.SpareSticks))   // WOODEN STICKS (GIFT, was SPARE STICKS)
+            {
+                offBeat = (int)Math.Round(offBeat * BattleRules.TurnSpareSticksOffBeat);
+                GiftWorks(MotifId.SpareSticks, user);
+            }
             bool thunder = user.Musician.Trait == MusicianTrait.Thunder && perfect && last;            // THE WHOLE FLOOR
 
             //GRACE NOTE : a spark that lands does the skill twice
@@ -1502,8 +1535,9 @@ namespace Tacetno433.Battle
         //ONE TURN and HandTwo (PATH rules no star gives since 31 Oct, kept for the GIFTS) : fewer notes left at least, more notes taken.
         private void TurnOfTheHand(Fighter user)
         {
-            int least = user.Musician.Has(StarRule.HandToOne) ? BattleRules.TurnHandOneLeast : BattleRules.TurnHandLeast;   // ONE TURN
-            int cut = user.Musician.Has(StarRule.HandTwo) ? BattleRules.TurnHandPaukenCut : BattleRules.TurnHandCut;        // DIE PAUKEN
+            bool crank = Cranks(user);                                                      // THE CRANK (GIFT, was the PATH rules ONE TURN
+            int least = crank ? BattleRules.TurnHandOneLeast : BattleRules.TurnHandLeast;  //   and HandTwo) : more notes off, down to fewer
+            int cut = crank ? BattleRules.TurnHandPaukenCut : BattleRules.TurnHandCut;
             for (int i = 0; i < handStruck.Count; i++)
             {
                 Fighter enemy = handStruck[i];
@@ -1514,15 +1548,22 @@ namespace Tacetno433.Battle
                 Array.Resize(ref enemy.IntentWays, keep);
                 Array.Resize(ref enemy.IntentLate, keep);
                 Events.Add(new TurnEvent(TurnEventKind.Cut, enemy, now - keep));
+                if (crank) GiftWorks(MotifId.TheCrank, enemy);
             }
             handStruck.Clear();
         }
 
+        //Cranks : THE CRANK (GIFT) works for this musician, PFUNDT (the one whose mark it is) with the gift in the band's bag
+        private bool Cranks(Fighter who)
+        {
+            return who != null && !who.IsEnemy && who.Musician.Trait == MusicianTrait.TurnOfTheHand && Has(MotifId.TheCrank);
+        }
+
         //Retune : THUNDER CALL's first star, TurnHandCut notes off an enemy's next attack (DIE PAUKEN, its third : TurnHandPaukenCut),
-        //never fewer left than TURN OF THE HAND leaves
+        //never fewer left than TURN OF THE HAND leaves (THE CRANK : fewer)
         private void Retune(Fighter enemy, Fighter user)
         {
-            int least = user.Musician.Has(StarRule.HandToOne) ? BattleRules.TurnHandOneLeast : BattleRules.TurnHandLeast;
+            int least = Cranks(user) ? BattleRules.TurnHandOneLeast : BattleRules.TurnHandLeast;
             int cut = user.Musician.Has(StarRule.CallTwo) ? BattleRules.TurnHandPaukenCut : BattleRules.TurnHandCut;   // DIE PAUKEN
             int now = enemy.IntentNotes.Length;
             int keep = Math.Max(least, now - cut);
@@ -1581,6 +1622,10 @@ namespace Tacetno433.Battle
             if (s.Target == SkillTarget.Enemy && list.Count > 0 && IsSkill(user, s, 1) && user.Musician.Has(StarRule.MarkedSouls))
                 for (int i = 0; i < Enemies.Count; i++)
                     if (!Enemies[i].Down && Enemies[i].Dissonance > 0 && !list.Contains(Enemies[i])) list.Add(Enemies[i]);
+            //TOURTE BOW (GIFT) : DUPORT's LANCE reaches every other enemy standing too
+            if (s.Target == SkillTarget.Enemy && list.Count > 0 && Bows(user, s))
+                for (int i = 0; i < Enemies.Count; i++)
+                    if (!Enemies[i].Down && !list.Contains(Enemies[i])) list.Add(Enemies[i]);
             if (s.Target == SkillTarget.Self) list.Add(user);
             if (s.Target == SkillTarget.Ally && target != null && !target.IsEnemy && !target.Down) list.Add(target);
 
@@ -1593,6 +1638,12 @@ namespace Tacetno433.Battle
                     if (!Party[i].Down) list.Add(Party[i]);
 
             return list;
+        }
+
+        //Bows : TOURTE BOW (GIFT) works on this skill, the LANCE of DUPORT (the one whose mark it is, their second skill)
+        private bool Bows(Fighter who, Skill s)
+        {
+            return who != null && !who.IsEnemy && who.Musician.Key == GiftKey.Shield && IsSkill(who, s, 1) && Has(MotifId.TourteBow);
         }
 
         //Is Skill : s is skill k (0 the first, 1 the second) of this musician, as their stars rewrote it or not. A legend's third
@@ -1621,9 +1672,22 @@ namespace Tacetno433.Battle
         //OVERTURE (motif) is spent by the band's first hit of the fight, the rest is HitFor, which changes nothing (PREVIEW).
         public int HitDamage(Fighter attacker, Fighter target, float scale)
         {
-            bool overture = !attacker.IsEnemy && !overtureDone && Has(MotifId.Overture);    // OVERTURE
-            if (overture) overtureDone = true;
-            return HitFor(attacker, target, scale, overture);
+            bool overture = !attacker.IsEnemy && !overtureDone && Has(MotifId.Overture);    // OVERTURE (GIFT : OPENING NIGHT)
+            if (overture)
+            {
+                overtureDone = true;
+                GiftWorks(MotifId.Overture, attacker);
+            }
+
+            //HALLALI (GIFT) : a musician at full CRESCENDO hits TurnHallaliScale times as hard, and the CRESCENDO is spent on it
+            bool burst = !attacker.IsEnemy && attacker.Crescendo > 0 && attacker.Crescendo >= CrescendoMost && Has(MotifId.Hallali);
+            int damage = HitFor(attacker, target, burst ? scale * BattleRules.TurnHallaliScale : scale, overture);
+            if (burst)
+            {
+                attacker.Crescendo = 0;
+                GiftWorks(MotifId.Hallali, attacker);
+            }
+            return damage;
         }
 
         //Hit For : the damage of one hit, worked out only. The steps go in the same order as they always did, so the
@@ -1683,6 +1747,7 @@ namespace Tacetno433.Battle
             Fighter enemy = Current;
             Fighter target = enemy.IntentTarget;
             if (note < 0 || note >= enemy.IntentNotes.Length || target == null) return 0;
+            g = Forgive(g);                                                                  // SPARE STRINGS
 
             //PARRY : a PERFECT swipe blocks the note, gives breath back and shakes the enemy (OFF-BEAT)
             CountNote(g == Grade.Perfect);
@@ -1728,6 +1793,11 @@ namespace Tacetno433.Battle
                 damage = (int)Math.Ceiling(damage * (cover.Musician.Has(StarRule.ShieldThird) ? BattleRules.TurnShieldThird : BattleRules.TurnShieldKeep));   // SHIELD's first star
             }
             if (target.Guard) damage = (int)Math.Ceiling(damage * (target.Musician.Has(StarRule.GuardThird) ? BattleRules.TurnShieldThird : BattleRules.TurnGuardKeep));   // GUARD (THUNDER CALL's second star : a third)
+            if (damage > 1 && target.Musician.Key == GiftKey.Shield && Has(MotifId.HardCase))       // HARD CASE (GIFT) : DUPORT takes less, 1 at least
+            {
+                damage = Math.Max(1, damage - BattleRules.TurnHardCase);
+                GiftWorks(MotifId.HardCase, target);
+            }
             Hurt(target, damage);
             if (covering && damage > 0 && target.Musician.Has(StarRule.DentStrikesBack)) dentBack += damage;   // NAPOLEON'S DENT
             if (damage > 0)
@@ -1740,7 +1810,7 @@ namespace Tacetno433.Battle
 
             if (g != Grade.Good)
             {
-                target.Crescendo = 0;                                                        // CRESCENDO is lost on a MISS
+                LoseCrescendo(target);                                                       // CRESCENDO is lost on a MISS (HAND STOPPING : half)
 
                 //SILENT MOUTHS : THE MUTE CHOIR's notes that get through take the target's skills away
                 if (enemy.Enemy.Trait == EnemyTrait.SilentMouths && !target.Down)
@@ -1770,6 +1840,10 @@ namespace Tacetno433.Battle
             Fighter target = HitTarget(enemy);                                               // SHIELD : the one in front blocked it
             enemy.Attacks++;
 
+            //THUNDER SHEET (GIFT) : thrown OFF-BEAT by a parry in the middle of its own attack, the life goes once its notes are done
+            if (sheetLoss > 0 && !enemy.Down) Hurt(enemy, sheetLoss);
+            sheetLoss = 0;
+
             //LULLABY : the humming turn heals it
             if (enemy.IntentRest) Heal(enemy, BattleRules.TurnLullHeal);
 
@@ -1781,13 +1855,19 @@ namespace Tacetno433.Battle
             }
             if (enemy.IntentCharge) Events.Add(new TurnEvent(TurnEventKind.Charge, enemy, enemy.ChargeHit));
 
-            //THE SCAR (DUPORT) : an attack that hurt them leaves CRESCENDO ("It plays louder for it")
+            //THE SCAR (DUPORT) : an attack that hurt them leaves CRESCENDO ("It plays louder for it").
+            //THE EMPEROR'S SPUR (GIFT) : the whole band gets it too. (OLD WOUNDS, a PATH rule until 31 Oct, gave twice as much.)
             for (int i = 0; i < Party.Count; i++)
             {
                 Fighter scarred = Party[i];
                 if (!scarred.Scarred) continue;
                 scarred.Scarred = false;
-                if (!scarred.Down) AddCrescendo(scarred, BattleRules.TurnScarCrescendo * (scarred.Musician.Has(StarRule.ScarTwo) ? 2 : 1));   // OLD WOUNDS
+                if (scarred.Down) continue;
+                AddCrescendo(scarred, BattleRules.TurnScarCrescendo);
+                if (!Has(MotifId.EmperorsSpur)) continue;
+                GiftWorks(MotifId.EmperorsSpur, scarred);
+                for (int k = 0; k < Party.Count; k++)
+                    if (Party[k] != scarred && !Party[k].Down) AddCrescendo(Party[k], BattleRules.TurnScarCrescendo);
             }
 
             //NAPOLEON'S DENT (SHIELD's third star) : what DUPORT took for friends in this attack strikes the enemy back, as hard
@@ -1966,6 +2046,7 @@ namespace Tacetno433.Battle
             for (int i = 0; i < SignatureShape.Length; i++)
             {
                 NoteResult r = (strokes != null && i < strokes.Length) ? strokes[i] : new NoteResult(Grade.Hesitate, 1f);
+                r.Grade = Forgive(r.Grade);                                                  // SPARE STRINGS
                 strength += SwipeScale(r.Grade);
                 if (r.Lands) landed++;
             }
@@ -2073,6 +2154,78 @@ namespace Tacetno433.Battle
             return motif[(int)id];
         }
 
+        //======================================================================================
+        //GIFTS (Beta1 31 Oct, Data/Motif.cs, docs/BETA1_DIRECTION.md 18) : the helpers the gifts share. Each gift's rule sits where
+        //it works (search its name) :
+        //   LA CAMPANELLA Strike   THE PACT BeginSkill   SNAPPED STRINGS AddDissonance   ON PLAYING THE FLUTE PlayNote, FluteHeal
+        //   THE KING'S FAVOUR Heal   300 CONCERTOS GreenRoom   WOODEN STICKS PlayNote   THE CRANK TurnOfTheHand, Retune
+        //   THUNDER SHEET AddOffBeat   HARD CASE NoteHits   TOURTE BOW TargetsOf   THE EMPEROR'S SPUR FinishEnemyTurn
+        //   HAND STOPPING LoseCrescendo   THE SILVER HORN AddCrescendo   HALLALI HitDamage   OPENING NIGHT HitDamage
+        //   SPARE STRINGS Forgive   LUCKY BOW SkillNote   FRONT ROW ROSES Hurt
+        //======================================================================================
+
+        //Gift Works : a gift did something, the screen pops its name over who it worked on (once a move for each fighter, giftShown)
+        private void GiftWorks(MotifId id, Fighter who)
+        {
+            int i = (int)id;
+            if (giftShown[i] && giftShownFor[i] == who) return;
+            giftShown[i] = true;
+            giftShownFor[i] = who;
+            Events.Add(new TurnEvent(TurnEventKind.Gift, who, i));
+        }
+
+        private void ClearGiftShown()
+        {
+            Array.Clear(giftShown, 0, giftShown.Length);
+            Array.Clear(giftShownFor, 0, giftShownFor.Length);
+        }
+
+        //SPARE STRINGS : the first MISS of the fight (the wrong way, too early, too late or no swipe at all) counts as GOOD.
+        //The screen asks when a note is done (Land) so it shows GOOD, the rules ask again where a grade comes in (SkillNote,
+        //ParryNote, UseSignature) for the checks and the simulator. The second time there is nothing left to forgive.
+        public Grade Forgive(Grade g)
+        {
+            if (g == Grade.Perfect || g == Grade.Good || spareUsed || !Has(MotifId.SpareStrings)) return g;
+            spareUsed = true;
+            Fighter who = Step == TurnStep.EnemyTurn && Current != null ? Current.IntentTarget : Current;
+            GiftWorks(MotifId.SpareStrings, who);
+            return Grade.Good;
+        }
+
+        //Pacts : THE PACT works for this musician, PAGANINI (the legend whose mark it is). The screen asks too, for the life it costs.
+        public bool Pacts(Fighter who)
+        {
+            return who != null && !who.IsEnemy && who.Musician.Key == GiftKey.Dissonance && Has(MotifId.ThePact);
+        }
+
+        //Flute Heal : ON PLAYING THE FLUTE on a heal that is not a note of a skill (EVENING CONCERT, the ATTACK's third star)
+        private int FluteHeal(Fighter healer, int amount)
+        {
+            if (healer.Musician.Family != Family.Wind || !Has(MotifId.ReedCase)) return amount;
+            GiftWorks(MotifId.ReedCase, healer);
+            return (int)Math.Round(amount * BattleRules.TurnReedCaseHeal);
+        }
+
+        //Lose Crescendo : a MISS takes all of a musician's CRESCENDO. HAND STOPPING : only half of it, the bigger half stays
+        //(5 keeps 3, 1 keeps 1).
+        private void LoseCrescendo(Fighter f)
+        {
+            if (f.Crescendo <= 0) return;
+            if (!Has(MotifId.HandStopping))
+            {
+                f.Crescendo = 0;
+                return;
+            }
+            f.Crescendo = (f.Crescendo + 1) / 2;
+            GiftWorks(MotifId.HandStopping, f);
+        }
+
+        //Crescendo Most : the most CRESCENDO a musician can have, more with THE SILVER HORN
+        public int CrescendoMost
+        {
+            get { return Has(MotifId.SilverHorn) ? BattleRules.TurnSilverHornMost : BattleRules.TurnCrescendoMost; }
+        }
+
         //Power Of : a musician's power with their weapon's tier, and ROSIN for the strings (the same number every page shows)
         public int PowerOf(Musician m)
         {
@@ -2098,6 +2251,7 @@ namespace Tacetno433.Battle
         private void Strike(Fighter enemy, int amount, bool pierce = false)
         {
             if (amount <= 0 || enemy.Down) return;
+            bool cracked = enemy.Dissonance > 0;                                                              // LA CAMPANELLA
             if (HeldUp(enemy)) amount = Math.Max(1, (int)Math.Round(amount * BattleRules.TurnRoomToneKeep));   // HOLDS THE ROOM
             if (Has(enemy, EnemyTrait.TheCourt) && OthersStanding(enemy))                                     // THE COURT
                 amount = Math.Max(1, (int)Math.Round(amount * BattleRules.TurnCourtKeep));
@@ -2112,6 +2266,11 @@ namespace Tacetno433.Battle
             }
             int over = amount - enemy.Hp;
             Hurt(enemy, amount);
+            if (cracked && !enemy.Down && Has(MotifId.LaCampanella))                                          // LA CAMPANELLA (GIFT) : the bell
+            {                                                                                                 //   rings the crack once more
+                GiftWorks(MotifId.LaCampanella, enemy);
+                AddDissonance(enemy, BattleRules.TurnCampanellaAdd);
+            }
             if (over <= 0 || !Has(MotifId.Segue)) return;
 
             //SEGUE : the next enemy standing after this one in the line, round to the start
@@ -2202,7 +2361,7 @@ namespace Tacetno433.Battle
         {
             if (amount <= 0 || f.Down) return;
 
-            //SECOND WIND : once per fight, a musician who would fall stays up with 1 life
+            //SECOND WIND (GIFT : FRONT ROW ROSES) : once per fight, a musician who would fall stays up with 1 life (Saved pops its name)
             if (!f.IsEnemy && amount >= f.Hp && Has(MotifId.SecondWind) && !secondWindUsed)
             {
                 secondWindUsed = true;
@@ -2227,6 +2386,13 @@ namespace Tacetno433.Battle
             int before = f.Hp;
             f.Hp = Math.Min(f.MaxHp, f.Hp + amount);
             if (f.Hp > before) Events.Add(new TurnEvent(TurnEventKind.Heal, f, f.Hp - before));
+
+            //THE KING'S FAVOUR (GIFT) : a musician healed to full stands GUARD until their next turn (BeginTurn takes it off)
+            if (!f.IsEnemy && f.Hp > before && f.Hp >= f.MaxHp && !f.Guard && Has(MotifId.KingsFavour))
+            {
+                f.Guard = true;
+                GiftWorks(MotifId.KingsFavour, f);
+            }
         }
 
         private void AddBreath(int amount)
@@ -2240,12 +2406,23 @@ namespace Tacetno433.Battle
         {
             f.Dissonance = Math.Min(BattleRules.TurnDissonanceMost, f.Dissonance + stacks);
             Events.Add(new TurnEvent(TurnEventKind.Dissonance, f, f.Dissonance));
+
+            //SNAPPED STRINGS (GIFT) : an enemy at the most DISSONANCE cracks, it takes TurnSnapDamage and its DISSONANCE is gone
+            if (f.IsEnemy && !f.Down && f.Dissonance >= BattleRules.TurnDissonanceMost && Has(MotifId.SnappedStrings))
+            {
+                f.Dissonance = 0;
+                GiftWorks(MotifId.SnappedStrings, f);
+                Hurt(f, BattleRules.TurnSnapDamage);
+            }
         }
 
+        //Add Crescendo : THE SILVER HORN (GIFT) lets it go past TurnCrescendoMost, its name pops when it does
         private void AddCrescendo(Fighter f, int stacks)
         {
-            f.Crescendo = Math.Min(BattleRules.TurnCrescendoMost, f.Crescendo + stacks);
+            int before = f.Crescendo;
+            f.Crescendo = Math.Min(CrescendoMost, f.Crescendo + stacks);
             Events.Add(new TurnEvent(TurnEventKind.Crescendo, f, f.Crescendo));
+            if (f.Crescendo > before && f.Crescendo > BattleRules.TurnCrescendoMost) GiftWorks(MotifId.SilverHorn, f);
         }
 
         //OFF-BEAT : fill the gauge, and when it is full the enemy is thrown off the beat (and its CHARGE breaks, BREAK)
@@ -2259,6 +2436,16 @@ namespace Tacetno433.Battle
                 enemy.Staggered = true;
                 Events.Add(new TurnEvent(TurnEventKind.Break, enemy, 0));
                 BreakCharge(enemy);
+
+                //THUNDER SHEET (GIFT) : thrown off the beat, it loses a share of its life at once. A parry in the middle of its own
+                //attack throws it too, then the life goes when its notes are done (FinishEnemyTurn), so no attack stops half way.
+                if (Has(MotifId.ThunderSheet))
+                {
+                    int loss = Math.Max(1, (int)Math.Round(enemy.MaxHp * BattleRules.TurnThunderSheetShare));
+                    GiftWorks(MotifId.ThunderSheet, enemy);
+                    if (Step == TurnStep.EnemyTurn && enemy == Current) sheetLoss += loss;
+                    else Hurt(enemy, loss);
+                }
             }
         }
 

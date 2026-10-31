@@ -16,7 +16,7 @@ namespace Tacetno433.Screens
     //
     //THE SHOP OF THE BAND OF THREE (29 Oct, docs/BETA1_DIRECTION.md 8.5, the user : "the important place that makes the whole
     //team stronger, the wares are random and can be rolled again for shards, so early shards matter a lot") :
-    //   MOTIF x2    rolled from the motifs the band does not carry
+    //   MOTIF x2    rolled from the motifs the band does not carry (GIFTS 31 Oct : the gifts of the band's legends and THE BAND's)
     //   REHEARSAL   a star for one button of the band (REHEARSAL, 31 Oct, Data/Rehearsal.cs), rolled among the buttons that can
     //               still get one, dearer for the second and third star (until 31 Oct : WEAPON, one weapon up a tier)
     //   THE BAND    TUNING (life back for everyone) or, now and then, SECTIONAL (every weapon up a tier : a star on every ATTACK)
@@ -157,7 +157,7 @@ namespace Tacetno433.Screens
             RunState run = Game.CurrentRun;
             Random dice = new Random(run.PlaceSeed + rerolls * 7919);
 
-            Motif[] motifs = MotifList.Roll(run.Motifs, 2, 1, run.Floor, dice);
+            Motif[] motifs = MotifList.Roll(run.Motifs, run.Roster, 2, 1, dice);
             for (int i = 0; i < 2; i++)
                 wares[i] = i < motifs.Length ? MotifWare(motifs[i]) : EmptyWare();
 
@@ -194,7 +194,7 @@ namespace Tacetno433.Screens
             w.Motif = m;
             w.Price = MotifList.Price(m);
             w.Name = m.Name;
-            w.KindLabel = m.RarityLabel;
+            w.KindLabel = m.WareLabel;                                                       // GIFTS : "PAGANINI  /  RARE"
             w.Note = BattleRules.TurnBattleOn && m.TurnText.Length > 0 ? m.TurnText : m.Text;   // step 15 : the turn battle's words, like the cards
             w.PriceLabel = w.Price.ToString();
             return w;

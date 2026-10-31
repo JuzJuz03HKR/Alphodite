@@ -154,6 +154,7 @@ namespace Tacetno433
             //Still Art : stage backgrounds, portraits, faces, places, signature pictures
             ArtBank.Load(Content);
             UiArt.Load(GraphicsDevice);                     // Beta1 screens : the pages' pixel art, straight from Content/Art/Ui
+            MotifArt.Load();                                // GIFTS : the marks of the legends, from the icons UiArt found
 
             //Pixel Musicians : the animated band on the duel stage
             CharacterArt.Load(Content);

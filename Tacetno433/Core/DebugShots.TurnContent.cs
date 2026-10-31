@@ -21,8 +21,9 @@ namespace Tacetno433.Core
                 MusicianList.All[i].Trait = MusicianTrait.None;
             }
 
-            //Lists : 21 + 6 motifs, 9 + 5 + 3 enemies, 7 + 3 events, the new ones at the end (the save keeps their places)
-            report += Same("content", "27 17 10 ROOM TONE", MotifList.All.Length + " " + EnemyList.All.Length + " " + EventList.All.Length + " " + EnemyList.All[9].Name);
+            //Lists : 21 + 6 + 14 motifs (the last 14 GIFTS, 31 Oct), 9 + 5 + 3 enemies, 7 + 3 events, the new ones at the end (the save
+            //keeps their places)
+            report += Same("content", "41 17 10 ROOM TONE", MotifList.All.Length + " " + EnemyList.All.Length + " " + EventList.All.Length + " " + EnemyList.All[9].Name);
 
             //DOWNBEAT : the first move of the bar x1.5 (PAGANINI 5.5 x 1.5 = 8.25 -> 8), the second plain (QUANTZ 4)
             TurnBattle b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
@@ -43,22 +44,22 @@ namespace Tacetno433.Core
             b.PlayBar();
             report += Same("entrance", "11 9 13 6", entrance + " " + b.Attack());
 
-            //GREEN ROOM (29 Oct) : after the bar the most hurt musician (PFUNDT at half his life) gets 3 back, nobody else.
-            //Until the BENCH went away it healed the BENCH.
+            //300 CONCERTOS (GIFT 31 Oct, the place of GREEN ROOM) : after a bar with every note of TACET parried PERFECT, every hurt
+            //musician gets 3 back while QUANTZ stands (PAGANINI and PFUNDT 500 -> 503, QUANTZ at full nothing). Without QUANTZ nobody.
+            //GREEN ROOM (29 to 31 Oct) gave 3 to the most hurt only, until the BENCH went away it healed the BENCH.
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             Tough(b);
+            b.Party[0].Hp = 500;
             b.Party[2].Hp = 500;
             b.GiveMotifs(new List<Motif> { MotifList.Get(MotifId.GreenRoom) });
-            PlayWholeBar(b);
-            int roomHeal = 0;
-            int otherHeal = 0;
-            for (int i = 0; i < b.Events.Count; i++)
-                if (b.Events[i].Kind == TurnEventKind.Heal)
-                {
-                    if (b.Events[i].Who == b.Party[2]) roomHeal += b.Events[i].Amount;
-                    else otherHeal += b.Events[i].Amount;
-                }
-            report += Same("green room", "3 0", roomHeal + " " + otherHeal);
+            PlayBarPerfect(b);
+            string concertos = b.Party[0].Hp + " " + b.Party[1].Hp + " " + b.Party[2].Hp + " " + CountGift(b, MotifId.GreenRoom);
+            b = new TurnBattle(new List<Musician> { band[0], band[2] }, new List<Enemy> { hush }, 1, new Random(433));
+            Tough(b);
+            b.Party[0].Hp = 500;
+            b.GiveMotifs(new List<Motif> { MotifList.Get(MotifId.GreenRoom) });
+            PlayBarPerfect(b);
+            report += Same("300 concertos", "503 999 503 1 / 500", concertos + " / " + b.Party[0].Hp);
 
             //UNISON : the whole bar ATTACKs HUSH (PAGANINI 6), so QUANTZ's last ATTACK is x2 (8.8 -> 9). QUANTZ at DEAD AIR instead : no unison (4)
             b = new TurnBattle(Duo(), new List<Enemy> { hush, deadAir }, 1, new Random(433));

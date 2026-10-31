@@ -11,6 +11,8 @@ namespace Tacetno433.Screens
 {
     //MotifRewardScreen : after a win, pick one motif out of three, or take shards instead.
     //The motif stays with the band for the rest of the run.
+    //GIFTS (Beta1 31 Oct) : a motif is a GIFT on screen, and only the gifts of the band's legends and THE BAND's are offered
+    //(MotifList.Roll with the band, Data/Motif.cs).
     //Beta1 screens round 1 (29 Oct, docs/SCREENS_LEVEL_UP.md 14) : THE SPOILS. Three cards lie face down under three
     //stage lights, flip up one after another and lean toward the mouse like the cards of Balatro (Core/Card3D.cs). The
     //rarer the motif, the stronger its light. A picked card jumps and flashes, the others turn back over.
@@ -80,7 +82,7 @@ namespace Tacetno433.Screens
             if (kind == Kind.Treasure)
             {
                 //TREASURE : one motif of any rarity, from the place's dice so CONTINUE finds the same one
-                offer = MotifList.Roll(run.Motifs, 1, 1, run.Floor, new Random(run.PlaceSeed));
+                offer = MotifList.Roll(run.Motifs, run.Roster, 1, 1, new Random(run.PlaceSeed));
             }
             else
             {
@@ -90,7 +92,7 @@ namespace Tacetno433.Screens
                 if (run.Battle != null && run.Battle.Enemy.Kind == EnemyKind.Boss) minRarity = 3;
                 boss = minRarity == 3;
                 bool reforge = boss && run.AnyToTrain;
-                Motif[] motifs = MotifList.Roll(run.Motifs, BattleRules.MotifChoices - (reforge ? 1 : 0), minRarity, run.Floor, run.Rng);
+                Motif[] motifs = MotifList.Roll(run.Motifs, run.Roster, BattleRules.MotifChoices - (reforge ? 1 : 0), minRarity, run.Rng);
                 if (reforge)
                 {
                     offer = new Motif[motifs.Length + 1];
@@ -414,12 +416,12 @@ namespace Tacetno433.Screens
             float head = UiMotion.Between(time, 0.05f, BattleRules.UiEnterTime);
             float rise = (1f - head) * BattleRules.UiEnterSlide;
             string over = kind == Kind.Treasure ? "A CHEST IN THE WINGS" : (boss ? "SPOILS OF THE MOVEMENT" : (BattleRules.TurnBattleOn ? "SPOILS OF THE FIGHT" : "SPOILS OF THE DUEL"));
-            string title = kind == Kind.Treasure ? "Take what is inside" : (boss ? "Choose a great upgrade" : "Choose a motif");
+            string title = kind == Kind.Treasure ? "Take what is inside" : (boss ? "Choose a great upgrade" : "Choose a gift");
             Gfx.TextSpacedCentered(sb, Game.Font, over, cx, 76 - rise, Palette.LineGrey * head, TextSize.Tiny, 5f);
             Gfx.TextCentered(sb, Game.BigFont, title, cx, 122 - rise, Palette.Paper * head, TextSize.Title);
 
             if (offer.Length == 0)
-                Gfx.TextCentered(sb, Game.StoryFont, "The band already carries every motif there is.", cx, 340, Palette.PaperDim * head, TextSize.Story);
+                Gfx.TextCentered(sb, Game.StoryFont, "The band already carries every gift there is for them.", cx, 340, Palette.PaperDim * head, TextSize.Story);
 
             DrawCards(sb);
 
@@ -441,7 +443,7 @@ namespace Tacetno433.Screens
             }
 
             float foot = UiMotion.Between(time, FlipStart(offer.Length) + 0.2f, BattleRules.UiEnterTime);
-            Gfx.TextCentered(sb, Game.StoryFont, "It stays with the band until the run ends.", cx, 594, Palette.PaperDim * foot, TextSize.StorySmall);
+            Gfx.TextCentered(sb, Game.StoryFont, "It stays with the band until the run ends. The icon shows who it is for.", cx, 594, Palette.PaperDim * foot, TextSize.StorySmall);
             float leaving = picked == -1 ? 1f : 1f - MathHelper.Clamp(leaveTimer / 0.3f, 0f, 1f);
             Ui.Command(sb, skipButton, skipLabel, "", skipMotion, foot * leaving, false);
 

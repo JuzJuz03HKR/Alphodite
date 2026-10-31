@@ -152,7 +152,7 @@ namespace Tacetno433.Screens
             //Motif Offer : elites and bosses always. The turn battle's normal fights pay shards only (29 Oct, the user : fighting
             //is fighting, BETA1_DIRECTION 8.2), the old duel's sometimes offer one.
             offerMotif = battle.Enemy.Kind != EnemyKind.Normal || (!BattleRules.TurnBattleOn && run.RollPercent() < BattleRules.MotifChanceNormal);
-            if (run.Motifs.Count >= MotifList.All.Length && battle.Enemy.Kind != EnemyKind.Boss) offerMotif = false;
+            if (!MotifList.AnyLeft(run.Motifs, run.Roster) && battle.Enemy.Kind != EnemyKind.Boss) offerMotif = false;   // GIFTS : none left for this band
 
             //Final Boss : the run ends straight after, so there is nothing left to hand out
             bool lastBoss = battle.Enemy.Kind == EnemyKind.Boss && run.Floor >= BattleRules.FloorsPerRun;
@@ -184,7 +184,7 @@ namespace Tacetno433.Screens
             }
 
             footnote = "";
-            if (offerMotif) footnote = "A MOTIF IS LEFT BEHIND";
+            if (offerMotif) footnote = "A GIFT IS LEFT BEHIND";
             if (battle.Enemy.Kind == EnemyKind.Boss)                                       // SIGNATURE GROWS : what it becomes on the next floor
                 footnote = run.Floor >= BattleRules.FloorsPerRun ? "THE LAST SILENCE IS BROKEN"
                          : (run.Conductor.TurnSignatureGrown.Length > 0 ? "FLOOR CLEARED  -  THE SIGNATURE GROWS : " + run.Conductor.SignatureNameAt(run.Floor)

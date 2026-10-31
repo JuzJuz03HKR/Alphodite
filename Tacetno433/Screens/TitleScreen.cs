@@ -98,7 +98,7 @@ namespace Tacetno433.Screens
             "Swing a player's way (their arrow) and they hit harder.",
             "f big, mf middle, p small. The wrong size plays weaker.",
             "A ??? beat hides its strength until the clash.",
-            "Motifs last the whole run. Pick the ones that suit your conductor.",
+            "Gifts last the whole run. A gift with a legend's icon makes that legend stronger.",
             "A PERFECT f against a real f note is a COUNTER. It throws part of the note back.",
             "A note tied to a spark : flick once more, half a beat later.",
             "Zigzag bar = roll. Shake as fast as you can.",
