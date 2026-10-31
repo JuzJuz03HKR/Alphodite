@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| (ว่าง) | | |
+| 31 ต.ค. แชท /system | `BETA1_DIRECTION.md` 16.14 ข้อ 1 การซ้อม REHEARSAL (แทน PATH INSPIRED ขั้นอาวุธ) ทำข้อเดียวแล้วหยุดรอ | `Data/Path.cs` `Data/Musician.cs` `Data/Skill.cs` `Data/RunState.cs` `Data/SaveFile.cs` `Data/BattleRules.cs` `Battle/TurnBattle*.cs` `Screens/BattleScreen*.cs` `Screens/MotifRewardScreen.cs` `Screens/ResultScreen.cs` `Screens/LuthierScreen.cs` `Screens/RestScreen.cs` `Screens/ShopScreen.cs` `Screens/GuideScreen.cs` `Core/DebugShots*.cs` เอกสาร |
 
 ---
 
