@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| (ว่าง) | | |
+| 31 ต.ค. (แชท /system Finalize6) | บั๊ก 2 ข้อของ 19.7 (SHIELD `HITS GO TO DUPORT` ล้นการ์ดเพื่อน / แถว THE BAND ชื่อท่ายาวทับ `/ 54`) แล้วตัวเลขบนจอเกิน 999 ไม่มีลิมิต (19.9) | `Tacetno433/Core/NumberText.cs` `Screens/BattleScreen.cs` `Screens/BattleScreen.Friends.cs` จุดที่แสดงตัวเลข (`Screens/` `Core/RunHud.cs`) + `Core/DebugShots*.cs` |
 
 ---
 
