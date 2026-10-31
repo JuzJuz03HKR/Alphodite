@@ -64,6 +64,11 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 
 ## สถานะล่าสุด (31 ต.ค.)
 
+**31 ต.ค. แชทแก้บั๊ก : ✅ การ์ดเพื่อน FRIEND PICK ตัวที่โดนเล็ง INCOMING ไม่ทับชื่อท่าแล้ว (`BETA1_DIRECTION.md` 19.7) รอผู้ใช้ Rebuild ดู**
+✅ การ์ดสูงขึ้น 1 บรรทัด ชื่อท่าอยู่บรรทัดของตัวเอง INCOMING อยู่บรรทัดล่างสุด (`Screens/BattleScreen.Friends.cs`) / build 0/0 turncheck 174/174 ภาพ battlefriend@40 / ชื่อยาวสุดกับ INCOMING 3 หลักไม่ล้นกรอบ
+⚠️ เจอเพิ่ม ยังไม่แก้ รอผู้ใช้ตัดสิน (19.7) : SHIELD บรรทัด `HITS GO TO DUPORT` ล้นขอบขวาการ์ดเพื่อน / แถว THE BAND ซ้ายบน ชื่อท่ายาวทับ `/ 54` (เช่น THUNDER CALL)
+งานถัดไปเหมือนรายการด้านล่าง (16.14 ข้อ 4 บอส เมื่อผู้ใช้สั่ง)
+
 **31 ต.ค. แชท /system (Finalize5) : ✅ 16.14 ข้อ 3 ภาษาทั้งเกม เสร็จ หยุดรอผู้ใช้** (ผู้ใช้ : "เอาตามแนะนำ แต่โปรดลองคิดอีกรอบ..." คำต่อคำ `USER_BRIEFS.md` 13.45 รายละเอียด `BETA1_DIRECTION.md` ข้อ 19)
 ✅ คำกติกาทั้งเกมอยู่ `Data/Words.cs` ที่เดียว (เปลี่ยนคำที่นี่เปลี่ยนทั้งเกม ชื่อในโค้ดกับเซฟยังเป็นคำเดิม) : DISSONANCE เป็น BURN (คิดใหม่จาก CRACK) / CRESCENDO เป็น VOLUME / OFF-BEAT เป็น STUN กับ STUNNED / MUTE เป็น MUTED / GUARD แยกเป็น GUARD ARMOR ARMOR UP / LESSON เป็น FOCUS / SIGNATURE เป็น FINALE (ป้ายบอสบนแผนที่เป็น LAST FIGHT) / BAR เป็น TURN ปุ่ม PLAY / LUTHIER เป็น WORKSHOP (W) / ECHOES เป็น APPLAUSE / เจตนา REST เป็น HEAL / CADENZA เป็น BIG ATTACK / REST บนแผนที่คงไว้ (คิดใหม่แล้ว BACKSTAGE ไม่ชัด)
 ✅ พ่วงกับ GUI : การ์ดสกิลมีบรรทัดอธิบายคำใต้ตัวเลข (`BURN = ...`) คำเด้งพร้อมตัวเลขตอนเกิดจริง (BURN ตอนไฟเผา VOLUME 0 ตอน MISS GUARD ตอน THUNDER CALL) เหตุการณ์ใหม่ `DissonanceTick` `CrescendoLost` `GuardUp` / บรรทัดทั้งเกมเขียนใหม่ด้วยคำง่าย
