@@ -3,7 +3,7 @@
 > **29 ต.ค. : Beta1** (branch `Beta1`) อ่านข้อ 00 ก่อน เป็นภาพรวมของเกมตอนนี้ แผนที่โค้ดอยู่ข้อ 0.0 (Beta1) กับข้อ 0 (Alpha 7)
 > ข้อ 1 ถึง 6 เป็นประวัติของเกม rhythm (`Alpha6` ถึง 6 ต.ค.) เก็บไว้อ้างอิง (เดิม 18 ต.ค. : Alpha 7 เปลี่ยนเป็น turn-based roguelike โครงโค้ดอยู่ข้อ 9 ของ [`ALPHA7_DESIGN.md`](ALPHA7_DESIGN.md))
 
-## 00. ภาพรวมตอนนี้ (Beta1, อัปเดต 30 ต.ค. ดึก)
+## 00. ภาพรวมตอนนี้ (Beta1, อัปเดต 31 ต.ค.)
 
 ### 00.1 เกมตอนนี้
 - roguelike แบบผลัดตา เลือกวาทยากร 1 ใน 3 (THE UNHEARING, FANNY MENDELSSOHN AND ???, THE METRONOME) แล้วเลือกนักดนตรี 3 จาก 5 คนในตำนาน (PAGANINI QUANTZ PFUNDT DUPORT PUNTO) เป็นทีมตายตัวทั้งรัน
@@ -34,6 +34,7 @@
 ไม่นับไฟล์เสียง (เป็นงานแบบเดียวกับอาร์ต) และภาษาไทย ของเก่าตอนเป็นเกม rhythm (6 ต.ค.) อยู่ข้อ 2
 
 ### 00.3 งานที่เหลือ เรียงตามที่ตกลงกับผู้ใช้
+0. **แชทถัดไป (31 ต.ค. ผู้ใช้ลองรันแล้ว)** : `BETA1_DIRECTION.md` 14.7 ตัดสิน INSPIRED กับจังหวะการโต / เป้าของสกิลที่ใช้กับเพื่อนให้เห็นตรงที่มอง / ท่าบอสถ้าผู้ใช้เลือก / ทบทวนรอบแรกของผู้เล่นใหม่ (เป้าหมาย : เล่นครั้งแรกเข้าใจทันที)
 1. ก้อน 1 (`BETA1_DIRECTION.md` 11.11 ข้อ 12 13) : ✅ ข้อ 1 ชนิดสกิล ✅ ข้อ 2 ชุดสกิลใหม่ 5 คน ✅ ข้อ 3 ศัตรู CHARGE GUARD ✅ ข้อ 4 หน้าต่อสู้แบบ HSR/CZN (13.4) ✅ ข้อ 5 ข้อความ ✅ ข้อ 6 ทดสอบ / เหลือข้อ 7 VFX สกิลใหม่ (ถามตัวอย่างผู้ใช้ก่อน)
 2. ก้อน 2 : ✅ PATH / ✅ INSPIRED กับรางวัลไฟต์แบบ ก / ✅ SIGNATURE โตที่บอส / ✅ BONDS (30 ต.ค. ผู้ใช้ยังไม่ได้ลองรัน ที่รอตัดสินอยู่ 13.6)
 3. ก้อน 3 : MOTIF ทำงานให้เห็น / อาวุธขั้น III วิวัฒน์ / ดอกเบี้ย
@@ -46,14 +47,14 @@
 - Visual Studio 2026 (.NET 9) เปิด `Tacetno433.sln` แล้ว Rebuild ต้องได้ 0 error 0 warning เครื่องใหม่ (เช่นโน้ตบุ๊คอีกเครื่อง) clone หรือ pull branch `Beta1` ล่าสุดก่อนเสมอ
 - แชท cloud : `/build` (เครื่องใหม่ลง dotnet-sdk-8.0 กับรัน `.claude/skills/build/shader_setup.sh` ก่อน ดู `.claude/skills/build/SKILL.md`)
 - `--shots turncheck` 145/145 / `--shots savecheck` 33/33 / `--shots turnsim` ใช้ 12 หรือ 24 seed (`TACET_SIM_SEED` 4330 กับ 1 ถึง 23 รันพร้อมกันได้)
-- เกณฑ์ความยาก (30 ต.ค. หลังก้อน 2) : NORMAL STRONG ราว 63% MAESTRO EXPERT ราว 83% (24 seed) กับตัวจำลองนิสัยใหม่ที่เลือกสกิลตามค่าและเดินเส้นทาง ส่วน 54% ของ 29 ต.ค. เป็นของนิสัยก่อนหน้า วัดเทียบต้องใช้ตัวจำลองตัวเดียวกัน (`TACET_SIM_NOPATH=1` ปิดเส้นทาง)
+- **ผู้ใช้ 31 ต.ค. : คนจริงเล่นแล้วเกมง่ายมาก ห้ามใช้ตัวเลขตัวจำลองตัดสินหรือรายงานว่ายากง่าย** (`BETA1_DIRECTION.md` 14.6) ใช้เทียบก่อนหลังเท่านั้น / ค่าล่าสุด (30 ต.ค. หลังก้อน 2) : NORMAL STRONG ราว 63% MAESTRO EXPERT ราว 83% (24 seed) กับตัวจำลองนิสัยใหม่ที่เลือกสกิลตามค่าและเดินเส้นทาง ส่วน 54% ของ 29 ต.ค. เป็นของนิสัยก่อนหน้า วัดเทียบต้องใช้ตัวจำลองตัวเดียวกัน (`TACET_SIM_NOPATH=1` ปิดเส้นทาง)
 - `TACET_SIM_SET` ลองตัวเลขโดยไม่ build ใหม่ ตาราง MUSICIANS ในรายงานบอกว่าวงที่มีแต่ละคนชนะเท่าไร
 - ชีต `docs/TACET_Balance.xlsx` : หลังแก้ตัวเลข `python3 docs/turn_balance_tabs.py <turnsim.txt>` (แท็บ Turn ทั้งหมดกับ Turn Skills)
 - ภาพทดสอบหน้าต่อสู้ `battle*` (ใหม่ 30 ต.ค. `battlemoves` `battleinspired` `battleaim` `battlepick` `battleheal` `battletip` `battlechakram` ต่อท้าย clear ได้) ภาพจาก cloud ห้ามแทน `docs/screenshots/`
 
 ### 00.5 ที่ต้องรู้และที่ค้างอยู่
 - PLAYTEST : SIGNATURE ใช้ 1 PERFECT (`BattleRules.PlaytestSignatureNeed` = 1) ผู้ใช้สั่งคงไว้ ห้ามแก้จนผู้ใช้บอก ค่าจริง 6
-- ผู้ใช้ยังไม่ได้ Rebuild ดูตั้งแต่ก้อน 1 ข้อ 2 (ชุดสกิลใหม่) จะลองรันทีเดียว และยังไม่ได้ส่งตัวอย่าง VFX ของ SHIELD CHAKRAM THE LESSON TURN OF THE HAND INSPIRED CHARGE GUARD
+- ผู้ใช้ลองรันแล้ว 31 ต.ค. ทุกอย่างโอเค ยกเว้น INSPIRED เข้าใจยาก กับเป้าของสกิลที่ใช้กับเพื่อนไม่ชัด (`BETA1_DIRECTION.md` 14.4 14.5) ยังไม่ได้ส่งตัวอย่าง VFX ของ SHIELD CHAKRAM THE LESSON TURN OF THE HAND INSPIRED CHARGE GUARD
 - ตัวจำลองเลือกสกิลตามค่าแล้ว (30 ต.ค.) CAPRICE ถูกเล่นและวัดได้ วงที่มี PAGANINI ยังต่ำกว่าเพื่อนราว 4.8%
 - ราคาเลือดของ THE DEVIL'S BARGAIN กับ THE PACT ขึ้นบนการ์ดสกิลแล้ว (PAYS 12 LIFE) แต่ใต้ปุ่มยังเป็นเพชรลม
 - โค้ดดวลเดิม (เกม rhythm `Battle/BattleState.cs` `Screens/DuelScreen*.cs`) ยังอยู่ ปิดด้วย `BattleRules.TurnBattleOn` ความสามารถเดิมของ 5 คนยังอยู่ใน `enum MusicianTrait` ให้ดวลเดิม
