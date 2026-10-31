@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| (ว่าง) | | |
+| 31 ต.ค. ค่ำ แชท /system | `BETA1_DIRECTION.md` 16.14 ข้อ 2 ของ GIFT แทน MOTIF ทำข้อเดียวแล้วหยุดรอ | `Data/Motif.cs` `Data/Musician.cs` `Data/Rehearsal.cs` `Data/RunState.cs` `Data/SaveFile.cs` `Data/BattleRules.cs` `Battle/TurnBattle*.cs` `Screens/BattleScreen*.cs` `Screens/MotifRewardScreen.cs` `Screens/ShopScreen.cs` `Screens/EventScreen.cs` `Screens/GuideScreen.cs` `Screens/TeamPickScreen.cs` `Core/RunHud.cs` `Core/MotifArt.cs` `Core/DebugShots*.cs` เอกสาร |
 
 ---
 
