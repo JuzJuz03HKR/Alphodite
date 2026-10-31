@@ -62,7 +62,7 @@ namespace Tacetno433.Screens
                    + "Their turn : swipe back at each note to block it. BREATH pays for skills. "
                    + "CHARGE : one big note next bar, OFF-BEAT breaks it. GUARD : it takes your hits first. "   // ENEMY MOVES (Beta1 30 Oct)
                    + "A ring on an enemy : your move goes there. Point at an icon to read it. "                   // MARKS AND AIM (30 Oct)
-                   + "4 PERFECTs in a fight : INSPIRED, a new step for that musician."                            // INSPIRED (30 Oct)
+                   + "Win a fight : one move gets a star. Three stars : its legend."                              // REHEARSAL (31 Oct)
                  : "Win a note, push the line. Lose a note, lose breath. "
                    + "Push the line all the way to win. Let silent beats pass to breathe."
         };

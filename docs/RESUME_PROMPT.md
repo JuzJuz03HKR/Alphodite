@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 31 ต.ค. แชท /system | `BETA1_DIRECTION.md` 16.14 ข้อ 1 การซ้อม REHEARSAL (แทน PATH INSPIRED ขั้นอาวุธ) ทำข้อเดียวแล้วหยุดรอ | `Data/Path.cs` `Data/Musician.cs` `Data/Skill.cs` `Data/RunState.cs` `Data/SaveFile.cs` `Data/BattleRules.cs` `Battle/TurnBattle*.cs` `Screens/BattleScreen*.cs` `Screens/MotifRewardScreen.cs` `Screens/ResultScreen.cs` `Screens/LuthierScreen.cs` `Screens/RestScreen.cs` `Screens/ShopScreen.cs` `Screens/GuideScreen.cs` `Core/DebugShots*.cs` เอกสาร |
+| (ว่าง) | | |
 
 ---
 
@@ -63,6 +63,13 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 ---
 
 ## สถานะล่าสุด (31 ต.ค.)
+
+**31 ต.ค. แชท /system : ✅ 16.14 ข้อ 1 การซ้อม REHEARSAL เสร็จ หยุดรอผู้ใช้** (คำต่อคำ `USER_BRIEFS.md` 13.40 รายละเอียด `BETA1_DIRECTION.md` ข้อ 17)
+✅ ชนะไฟต์ได้ 1 ดาว 1 ใน 9 ปุ่มของวง (ATTACK สกิล 1 สกิล 2) ดาว 3 = ร่างในตำนาน ชื่อปุ่มเปลี่ยน ดาวของ ATTACK = ขั้นอาวุธเดิม ที่พัก ร้าน LUTHIER REFORGE ให้ดาวด้วย เอาการ์ด PATH กับ INSPIRED ออกทั้งระบบ (`Data/Rehearsal.cs` `Screens/RehearsalScreen.cs`)
+✅ build 0/0 turncheck 149/149 savecheck 33/33 ชีต balance อัปเดต / ตัวจำลองเทียบก่อนหลัง 63.1% เป็น 59.8% ไม่ได้ทำให้ง่ายลง ไม่ชดเชย / วงที่มีแต่ละคนห่างกันขึ้น (ปรับตอน balance)
+⚠️ ผู้ใช้ยังไม่ได้ Rebuild ลอง (รวม FRIEND PICK ของแชทก่อน)
+**วิธีทำงานที่ผู้ใช้สั่ง (13.40)** : ทำ 16.14 ทีละข้อ จบข้อไหนบันทึก commit push แล้วหยุดรอผู้ใช้สั่งข้อต่อไป
+**งานถัดไป (เมื่อผู้ใช้สั่ง)** : 16.14 ข้อ 2 GIFT แทน MOTIF (`Data/Motif.cs` ห้ามสลับลำดับ `MotifList` กฎดาวที่ว่าง 4 ข้อ THE PACT ONE TURN HandTwo OLD WOUNDS ใช้เป็นของได้) แล้วข้อ 3 ภาษา ข้อ 4 บอส ข้อ 5 แผนที่ / PLAYTEST SIGNATURE ยัง 1 PERFECT / VFX รอภาพอ้างอิง / ตาราง "แชทที่กำลังทำงาน" ว่างแล้ว
 
 **31 ต.ค. แชท /system : /update ปิดแชท ผู้ใช้จะเปิดแชทใหม่** (คำต่อคำ `USER_BRIEFS.md` 13.36 ถึง 13.39 รายละเอียด `BETA1_DIRECTION.md` ข้อ 15 กับ 16)
 ✅ FRIEND PICK การ์ดเพื่อนใบใหญ่เหนือปุ่มคำสั่ง (`Screens/BattleScreen.Friends.cs` 15.1) build 0/0 turncheck 145/145 savecheck 33/33 อยู่บน GitHub แล้ว (`985b77c`)

@@ -1222,3 +1222,64 @@
 5. **นอกไฟต์ให้เร็วและมีความหมาย** : จุดบนแผนที่บอกรางวัลด้วยคำเดียว (ซ้อม ของ เงิน ฟื้นเลือด) ลดแถวที่ไม่มีอะไรให้เลือก (`Data/FloorMap.cs` `Screens/RouteScreen.cs`)
 6. **ความโหดแบบทวีคูณกับช่วงเบิร์ส** : ปรับตอน balance จากการเล่นจริง (14.6) ตัวจำลองใช้เทียบก่อนหลังเท่านั้น
 - ทำทีหลังพร้อมกัน (การนำเสนอ) : COMBO สีกลืนความมืด SOLO เกรดสด เปิดตัวบอส VFX ของดาวขั้นสูง เสียงเครื่องดนตรีผสมเสียงอาวุธ (รอไฟล์เสียงจริง กติกาไม่มีเสียงชั่วคราว)
+
+## 17. การซ้อม REHEARSAL เสร็จ (16.14 ข้อ 1) รอผู้ใช้ Rebuild ดู (31 ต.ค. แชท /system ผู้ใช้สั่งทำทีละข้อแล้วหยุดรอ คำต่อคำ `USER_BRIEFS.md` 13.40)
+
+### 17.1 ระบบ
+- ชนะไฟต์ (ยกเว้นบอสสุดท้าย) ขึ้นหน้า THE REHEARSAL (`Screens/RehearsalScreen.cs`) : 3 คอลัมน์ คนละคอลัมน์ ภาพหน้า ชื่อ POWER แล้ว 3 ปุ่มที่กดในไฟต์อยู่แล้ว (ATTACK สกิล 1 สกิล 2 แถบสีชนิดสกิลเหมือนปุ่มต่อสู้) ปุ่มละ 3 ดาว
+- ใต้ปุ่มบอกว่าดาวถัดไปเปลี่ยนอะไร ก่อน ลูกศร หลัง (4 CUTS > 5 CUTS / HIT 25 > HIT 31 / POWER 10 > POWER 12) ดาว 3 บอกชื่อร่างในตำนานกับสิ่งที่ทำบรรทัดเดียว คลิก (หรือลูกศรกับ ENTER) ได้ดาว ดาวเติมสีของตัวละคร แล้วไปต่อเอง ELITE กับบอสต่อด้วยหน้า MOTIF เหมือนเดิม
+- ATTACK : ดาว = ขั้นอาวุธเดิม (`Musician.Rehearsed` ดาวละ +2 พลัง ทุกท่าของคนนั้นแรงขึ้น) ดาว 3 ได้ร่างในตำนานของอาวุธเป็นกฎบน ATTACK
+- สกิล : ดาว 1 กับ 2 เปลี่ยนตัวเลขที่เห็น ดาว 3 = ร่างในตำนาน ชื่อปุ่มเปลี่ยนเป็นชื่อร่าง (CAPRICE เป็น CAPRICE No. 24) คำอธิบายตอนชี้ปุ่มเปลี่ยนตามดาวทุกดวง
+- ได้ดาวจาก : ชนะไฟต์ / ที่พัก REHEARSE เปิดหน้าซ้อม ได้ดาวปุ่มไหนก็ได้ (เดิมอาวุธ 1 ขั้น) / ร้าน ช่อง REHEARSAL ดาวของปุ่มที่สุ่มมา 50 70 95 ตามดาวที่ได้ (เดิม WEAPON) / เฉพาะ ATTACK : LUTHIER, REFORGE ของบอส, SECTIONAL ในร้าน, เหตุการณ์, ARCHIVE เหมือนเดิม
+- หน้าต่อสู้ : ดาวเล็กมุมขวาบนของปุ่มคำสั่งทั้ง 3 / ชื่อร่างเด้งตอนกฎดาว 3 ทำงาน / LANCE เด้ง x3 ตามจริง
+- เอาออก : การ์ด PATH 30 ใบ / INSPIRED ทั้งระบบ (หน้าเลือกกลางไฟต์ ตัวนับ PERFECT ของแต่ละคน `TurnInspiredNeed` `TurnInspiredBreath`) / หน้าการ์ด PATH หลังชนะ / HOW TO PLAY เปลี่ยนเป็น "Win a fight : one move gets a star. Three stars : its legend."
+
+### 17.2 ดาวทั้ง 15 ปุ่ม (ไอริสออกแบบ ผู้ใช้เปลี่ยนได้ทุกดวง แก้ที่ `Data/Rehearsal.cs` ที่เดียว)
+| คน | ปุ่ม | ดาว 1 | ดาว 2 | ดาว 3 ร่างในตำนาน |
+|---|---|---|---|---|
+| PAGANINI | ATTACK (IL CANNONE) | POWER +2 | POWER +2 | POWER +2 และ DIABOLUS IN MUSICA : ATTACK ใส่ DISSONANCE 1 |
+| | CAPRICE | 4 > 5 ครั้ง | DISSONANCE 1 > 2 ต่อครั้ง | CAPRICE No. 24 : 6 ครั้งทิศเดียว ครั้งสุดท้าย x3 |
+| | IL CANNONE | x1.8 > x2.2 (บนหน้าเป็น HIT) | x2.2 > x2.6 | DEVIL'S CANNON : โดนทุกตัวที่มี DISSONANCE ด้วย |
+| QUANTZ | ATTACK (FLUTE RAPIER) | POWER +2 | POWER +2 | EVENING CONCERT : ATTACK ฮีลคนที่เจ็บสุดในวง 4 |
+| | SOFT AIR | ฮีล 3 > 4 ต่อโน้ต | 2 > 3 โน้ต ราคา 3 ลม | SANSSOUCI : ล้าง DISSONANCE กับ MUTE ด้วย |
+| | THE LESSON | เพื่อน x1.3 > x1.6 | 1 คน > ทุกคน ราคา 3 ลม | KING'S LESSON : เพื่อนที่สอนเล่นท่าถัดไปซ้ำอีกครึ่ง |
+| PFUNDT | ATTACK (TWIN HAMMERS) | POWER +2 | POWER +2 | TWIN THUNDER : ATTACK ตี 2 ครั้ง |
+| | TIMPANI ROLL | OFF-BEAT 30 > 40 | 1 ตัว > ทุกตัว ราคา 3 ลม | THUNDERCLAP : PERFECT ตัวแรกเสียศูนย์ทันที |
+| | THUNDER CALL | ท่าถัดไปของศัตรูทุกตัว -1 โน้ต | PFUNDT รับ 1/2 > 1/3 | DIE PAUKEN : -2 โน้ต (เหลืออย่างน้อย 2 เท่าเดิม) |
+| DUPORT | ATTACK (THE SCARRED SHIELD) | POWER +2 | POWER +2 | STRADIVARIUS : ATTACK แล้ว DUPORT ตั้ง GUARD รับครึ่ง |
+| | SHIELD | DUPORT รับ 1/2 > 1/3 | 1 คน > ทุกคน | NAPOLEON'S DENT : แรงที่รับแทนเพื่อนตีกลับเท่ากัน |
+| | LANCE | x2 > x3 หลังโดนตี | 2 > 3 ครั้ง | THE LAST LANCE : x3 เสมอ ไม่ต้องโดนก่อน |
+| PUNTO | ATTACK (HORN CHAKRAM) | POWER +2 | POWER +2 | WIDER ARC : ATTACK โดนศัตรูตัวถัดไปด้วย |
+| | FANFARE | CRESCENDO 1 > 2 ต่อโน้ต | คนที่เล่นต่อจาก PUNTO x1.3 > x1.5 | THE WHOLE HUNT : หลัง FANFARE ทุกคนที่เล่นหลัง PUNTO ในห้อง x1.5 |
+| | CHAKRAM | 3 > 4 ครั้ง | ซ้ำตัวเดิม ครึ่ง > เต็ม | WHIRLWIND : ครั้งสุดท้ายโดนทุกตัว |
+
+### 17.3 ที่ไอริสตัดสินเอง (ผู้ใช้เปลี่ยนได้ทุกข้อ)
+1. ดาวไม่ล็อกตามชั้น (PATH เดิมเปิดขั้นตามชั้น) : ปั้นปุ่มเดียวถึงดาว 3 ได้ตั้งแต่ชั้น 1 ถ้าอยาก (ปั้นตัวโปรดแบบ Limbus) และกติกาเหลือคำเดียว ไม่มีเงื่อนไขซ่อน
+2. ATTACK ดาว 3 เป็นกฎใหม่บน ATTACK เอง ไม่ใช่แค่พลัง เพื่อให้ทุกปุ่ม "ดาว 3 = ร่างในตำนาน" เหมือนกันหมด
+3. ใช้กฎของการ์ด PATH เดิม 13 กฎ เพิ่มกฎใหม่ 8 (`GuardThird` `CallTwo` `LanceAlways` และ ATTACK 5 คน) / กฎที่ไม่มีดาวให้แล้ว 4 (THE PACT, ONE TURN, `HandTwo`, OLD WOUNDS) โค้ดยังอยู่ เก็บไว้ใช้กับ GIFT (16.14 ข้อ 2) / ON ONE STRING ตัดทิ้ง
+4. FANFARE ดาว 2 เป็น "คนเล่นต่อจาก PUNTO x1.5" แทน "3 โน้ต" เพราะ CRESCENDO ตันที่ 5 (2 โน้ต x 2 = 4 ใกล้เต็มแล้ว ดาว 3 โน้ตจะได้แค่ +1)
+5. ท่าใหญ่ที่ได้จากดาว (THE LESSON ทุกคน TIMPANI ROLL ทุกตัว SOFT AIR 3 โน้ต) ราคา 3 ลมตามที่ PATH จูนไว้
+6. ชื่อร่างที่ยาวสุดย่อให้พอดีปุ่ม (DEVIL'S CANNON, KING'S LESSON) และปุ่มย่อตัวอักษรเองเมื่อชื่อยาวเกินช่อง (`Ui.Button`) ไม่ทับไอคอนกับเลขปุ่ม ทั้ง 1280 และเต็มจอ
+7. หน้าซ้อมไม่มีปุ่มข้าม (ดาวมีแต่ได้) ครบ 27 ดาวแล้วหน้านี้ไม่ขึ้น ที่พักปิดตัวเลือก REHEARSE
+8. ดาวของการชนะไม่ได้เซฟระหว่างหน้า (ออกเกมตอนอยู่หน้าซ้อม = เสียดาวนั้น เหมือน PATH เดิม) ดาวที่ได้แล้วเซฟใน `stars=` / เซฟ 30 ต.ค. ที่มี `paths=` โหลดได้ ขั้นของเส้นที่ 1 และ 2 กลายเป็นดาวของสกิล 1 และ 2
+9. หน้าตาหน้าซ้อมเป็นแบบแรก VFX ตอนได้ดาวและตอนเป็นร่างในตำนานรอภาพอ้างอิง (16.14 ข้อ 5)
+
+### 17.4 ทดสอบในแชท cloud
+- build 0 error 0 warning / turncheck 149/149 (ไฟล์ใหม่ `Core/DebugShots.TurnRehearsal.cs` 20 ข้อแทนชุด PATH 16 ข้อ : การให้ดาวกับคำบนหน้า ทุกดาว 3 ของสกิลในไฟต์ ATTACK 5 ร่าง ทุกปุ่มเดินถึงดาว 3) / savecheck 33/33 (ข้อ stars) / ภาพ `rehearsal` `rehearsalrest` `battlestars` ที่ 1280 กับ `--scale 1.5` (ภาพจาก cloud ไม่ commit) / ชีต `TACET_Balance.xlsx` อัปเดตแล้ว
+- ตัวจำลองเทียบก่อนหลัง (24 seed เครื่องมือเดียวกัน ตัวจำลองให้ดาวแบบสุ่มหลังชนะทุกไฟต์ อาวุธขึ้น 1 ขั้นต่อชั้นเหมือนเดิม) : NORMAL STRONG 63.1% > 59.8% / MAESTRO EXPERT 82.6 > 80.4 / ระบบใหม่ไม่ได้ทำให้วงแรงกว่าเดิม จึงไม่ได้ทำให้ง่ายลง ไม่ได้ชดเชยอะไร ความยากจริงรอปรับตอน balance (14.6)
+- วงที่มีแต่ละคน (มี / ไม่มี) : PAGANINI 56.8 / 63.5, QUANTZ 62.6 / 55.1, PFUNDT 57.5 / 62.8, DUPORT 62.2 / 55.8, PUNTO 58.8 / 60.8 ห่างกันมากขึ้น (เดิมไม่เกิน 4.8) ส่วนหนึ่งมาจากตัวจำลองที่ให้ดาวแบบสุ่มและใช้ THUNDER CALL ตามนิสัยเดียว ปรับตอน balance
+
+### 17.5 โค้ดที่แตะ
+- ใหม่ : `Data/Rehearsal.cs` (แทน `Data/Path.cs` : `StarRule` `Star` `RehearsalList`) / `Screens/RehearsalScreen.cs` / `Core/DebugShots.TurnRehearsal.cs` (แทน `DebugShots.TurnPaths.cs`)
+- `Data/Musician.cs` (`SkillStars`, `Has` อ่านดาว 3 ของ ATTACK จากขั้นอาวุธ) / `Data/RunState.cs` (`RehearsalPending` `MotifAfterRehearsal` `RehearsalWaiting` `AnyStarLeft` `Raise`) / `Data/SaveFile.cs` (`stars=`) / `Data/BattleRules.cs` (`TurnAttackDissonance` `TurnAttackHeal` `ShopStarPrice` เอา INSPIRED ออก) / `Data/Skill.cs` (คอมเมนต์)
+- `Battle/TurnBattle.cs` (`WeaponLegend` `MostHurt` `NextInLine` / `IsSkill` เทียบตัวสกิลแทนชื่อเพราะดาว 3 เปลี่ยนชื่อ / เอา INSPIRED ออก / `TurnEventKind.Legend` / THE WHOLE HUNT ติดเฉพาะหลัง FANFARE) / `Battle/TurnBattle.Preview.cs`
+- `Screens/BattleScreen.cs` (เอาหน้าเลือก INSPIRED ออก ดาวบนปุ่ม คำเด้งชื่อร่าง) `BattleScreen.Marks.cs` (ไอคอนของร่างใช้ไอคอนสกิลเดิมจนกว่าจะมีของตัวเอง) `BattleScreen.Friends.cs` / `Screens/ResultScreen.cs` `MotifRewardScreen.cs` (เอาแบบ Path ออก REFORGE ใช้คำดาว) `RestScreen.cs` `ShopScreen.cs` `GuideScreen.cs` / `Core/Gfx.cs` (`Star`) `Core/Ui.cs` (`Stars` ปุ่มย่อชื่อยาว) `Core/MotifArt.cs` (เอา `PathFace` ออก) `TacetGame.cs` / `Core/DebugShots.cs` (ภาพใหม่ savecheck) `Core/DebugShots.TurnSim.cs` (`SimRehearse`, `TACET_SIM_NOSTARS=1` เล่นโดยไม่มีดาวของการชนะ แทน `TACET_SIM_NOPATH` `TACET_SIM_ONLY`)
+
+### 17.6 ให้ผู้ใช้ลองหลัง Rebuild
+- ชนะไฟต์แรก : หน้า THE REHEARSAL เลือก 1 ปุ่ม แล้วดูไฟต์ถัดไปว่าเปลี่ยนจริง (เช่น CAPRICE 5 ครั้ง ดาวบนปุ่ม คำอธิบายตอนชี้)
+- ปั้นปุ่มเดียวให้ถึงดาว 3 ดูชื่อเปลี่ยน (CAPRICE No. 24) กับคำเด้งตอนกฎทำงาน / ลอง ATTACK ดาว 3 ของแต่ละคน
+- ที่พัก REHEARSE / ร้านช่อง REHEARSAL / LUTHIER กับ REFORGE (ดาว ATTACK)
+- อ่านแล้วเข้าใจไหมว่าแต่ละดาวได้อะไร ดาวไหนไม่น่าเลือกหรือไม่ตรงตัวละคร บอกได้เลย
+
+### 17.7 ถัดไป (ผู้ใช้สั่งทีละข้อ หยุดรอหลังจบแต่ละข้อ)
+- 16.14 ข้อ 2 GIFT แทน MOTIF (กฎที่ไม่มีดาวให้แล้ว 4 ข้อใช้เป็นของที่ติดจุดเด่นของนักดนตรีได้) แล้วข้อ 3 ภาษา ข้อ 4 บอส ข้อ 5 แผนที่ / VFX ทุกชนิดรอภาพอ้างอิง / PLAYTEST SIGNATURE ยัง 1 PERFECT

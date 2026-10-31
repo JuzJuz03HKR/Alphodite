@@ -73,22 +73,25 @@ namespace Tacetno433.Data
         //Musician Battle Stats
         public int Power = 4;                 // how hard one note pushes (round 15 : playing costs no stamina, there is no cost)
 
-        //Rehearsed : the TIER of their weapon in THIS run, 0 to BattleRules.RehearseMax (WEAPON TIERS, 29 Oct : shown as
-        //I II III, each tier hits harder). Earned at rest stops, the luthier, the shop, events and bosses.
+        //Rehearsed : the TIER of their weapon in THIS run, 0 to BattleRules.RehearseMax (WEAPON TIERS, 29 Oct, each tier hits
+        //harder). REHEARSAL (31 Oct, Data/Rehearsal.cs) : it is the stars of their ATTACK too, the third adds the weapon's legend.
+        //Earned after fights won, at rest stops, the luthier, the shop, events and bosses.
         //RunState.Start sets it back to zero, so a new run starts clean. The save file keeps it (rehearsed=).
         public int Rehearsed = 0;
 
-        //PATH (Beta1 30 Oct, Data/Path.cs) : the steps of each of their two paths taken in THIS run (0 to 3), their two skills
-        //as those steps rewrote them (null : the plain ones, SkillList.First and Second give the right ones either way) and the
-        //rules the steps gave them. RunState.Start sets them back like Rehearsed, the save file keeps the steps (paths=).
-        public int[] PathLevel = new int[2];
+        //REHEARSAL (Beta1 31 Oct, Data/Rehearsal.cs) : the stars of each of their two skills in THIS run (0 to 3), the two skills
+        //as those stars rewrote them (null : the plain ones, SkillList.First and Second give the right ones either way) and the
+        //rules the stars gave them. RunState.Start sets them back like Rehearsed, the save file keeps the stars (stars=).
+        public int[] SkillStars = new int[2];
         public Skill[] Kit;
         public bool[] Rules = new bool[32];
 
-        //Has : a PATH step gave them this rule (TurnBattle checks them by name)
-        public bool Has(PathRule rule)
+        //Has : a star gave them this rule (TurnBattle checks them by name). The ATTACK's third star is read from the weapon's tier,
+        //so a tier set anywhere (the luthier, an event, the save file) counts at once.
+        public bool Has(StarRule rule)
         {
-            return Rules[(int)rule];
+            if (Rules[(int)rule]) return true;
+            return rule != StarRule.None && Rehearsed >= RehearsalList.Most && RehearsalList.WeaponLegend(this) == rule;
         }
 
         //Life (Alpha 7) : this musician's life during THIS run, kept from one turn battle to the next.
@@ -251,7 +254,7 @@ namespace Tacetno433.Data
             {
                 All[i].Rehearsed = 0;
                 All[i].Life = -1;
-                PathList.Reset(All[i]);                  // PATH
+                RehearsalList.Reset(All[i]);             // REHEARSAL : no star on any skill
             }
         }
 

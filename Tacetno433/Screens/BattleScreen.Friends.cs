@@ -50,7 +50,7 @@ namespace Tacetno433.Screens
         //Friend Row Wanted : a skill for one friend is waiting for its friend
         private bool FriendRowWanted
         {
-            get { return view == View.Target && pending != null && pending.Target == SkillTarget.Ally && selected != null && stepFor == null; }
+            get { return view == View.Target && pending != null && pending.Target == SkillTarget.Ally && selected != null; }
         }
 
         //Friend Row Ready : the row was made for the skill waiting now, so its cards can be clicked (while it slides up too)

@@ -53,34 +53,33 @@ namespace Tacetno433.Data
                                              // so leaving the game and coming back finds the same shelves (RunFlow.Enter)
         public int LastRounds;               // Alpha 7 : rounds the last turn battle took, for the result page
 
-        //PATH (Beta1 30 Oct, Data/Path.cs) : the steps the band earned in the last fight and has not picked yet, picked on the
-        //pages after the result (MotifRewardScreen Kind.Path, one page each) : the musicians INSPIRED in the fight who did not
-        //pick at once, then the one card every won fight gives. MotifAfterSteps : an ELITE or a BOSS also leaves its motif choice
-        //for after them. Not saved : leaving the game on those pages loses the picks.
-        public List<Musician> InspiredPending = new List<Musician>();
-        public bool WinStepPending;
-        public bool MotifAfterSteps;
+        //REHEARSAL (Beta1 31 Oct, Data/Rehearsal.cs) : the star a won fight gives, picked on the page after the result
+        //(RehearsalScreen). MotifAfterRehearsal : an ELITE or a BOSS also leaves its motif choice for after it.
+        //Not saved : leaving the game on that page loses the star.
+        public bool RehearsalPending;
+        public bool MotifAfterRehearsal;
 
-        //Steps Waiting : a step page is still to come
-        public bool StepsWaiting
+        //Rehearsal Waiting : the rehearsal page is still to come
+        public bool RehearsalWaiting
         {
-            get
-            {
-                for (int i = 0; i < InspiredPending.Count; i++)
-                    if (PathList.AnyOpen(InspiredPending[i], Floor)) return true;
-                return WinStepPending && AnyStepOpen;
-            }
+            get { return RehearsalPending && AnyStarLeft; }
         }
 
-        //Any Step Open : a musician of the band has a step of a path open on this floor
-        public bool AnyStepOpen
+        //Any Star Left : a button of the band can still get a star
+        public bool AnyStarLeft
         {
             get
             {
                 for (int i = 0; i < Roster.Count; i++)
-                    if (PathList.AnyOpen(Roster[i], Floor)) return true;
+                    if (RehearsalList.AnyLeft(Roster[i])) return true;
                 return false;
             }
+        }
+
+        //Raise : REHEARSAL, button b of musician m gets a star (0 the ATTACK : the weapon's tier, Rehearse below)
+        public bool Raise(Musician m, int button)
+        {
+            return RehearsalList.Raise(m, button);
         }
         public bool EchoesPaid;              // ARCHIVE : this run's ECHOES are already given (Archive.Pay)
         public int EchoesEarned;
@@ -309,7 +308,8 @@ namespace Tacetno433.Data
         }
 
         //Rehearse : WEAPON TIERS (29 Oct), one musician's weapon goes up a tier for the rest of the run (it was 1 power,
-        //and still is : BattleRules.WeaponTierPower). The rest stop, the luthier, the shop, events and the bosses all use it.
+        //and still is : BattleRules.WeaponTierPower). REHEARSAL (31 Oct) : a tier is a star of their ATTACK, the third gives the
+        //weapon's legend (Musician.Has reads it from the tier). The luthier, the shop, events and the bosses use it.
         public bool CanRehearse(Musician m)
         {
             return m != null && m.Rehearsed < BattleRules.RehearseMax;

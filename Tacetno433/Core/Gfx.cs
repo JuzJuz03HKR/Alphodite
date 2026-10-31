@@ -343,6 +343,20 @@ namespace Tacetno433.Core
             }
         }
 
+        //Draw Star : a four pointed star (REHEARSAL, 31 Oct), a diamond whose sides curve in, drawn in rows like the diamond
+        public static void Star(SpriteBatch sb, float cx, float cy, float size, Color color)
+        {
+            float dot = Sharp.Dot;
+            int rows = (int)(size * Sharp.Scale);
+            for (int k = -rows; k <= rows; k++)
+            {
+                float y = k * dot;
+                float t = 1f - Math.Abs(y) / size;                         // 1 in the middle row, 0 at the top and bottom points
+                float half = size * t * t * t;
+                Rect(sb, cx - half, cy + y, half * 2f + dot, dot, color);
+            }
+        }
+
         //Draw Diamond Outline : the same shape, only the edge
         public static void DiamondOutline(SpriteBatch sb, float cx, float cy, float size, Color color, float thickness)
         {

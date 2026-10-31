@@ -34,7 +34,7 @@ namespace Tacetno433.Battle
     {
         private readonly List<Fighter> previewLine = new List<Fighter>();
 
-        //Targets For : who a skill would reach, the way it is played (a CHAKRAM's line, THE DEVIL'S OWN, every enemy ...)
+        //Targets For : who a skill would reach, the way it is played (a CHAKRAM's line, DEVIL'S CANNON, every enemy ...)
         public void TargetsFor(Skill s, Fighter target, Fighter who, List<Fighter> into)
         {
             into.Clear();
@@ -74,18 +74,28 @@ namespace Tacetno433.Battle
                 PreviewStrike(into, enemy, into.PerNote, false);
                 into.OffBeat = BattleRules.TurnAttackOffBeat * (Has(MotifId.Marcato) ? BattleRules.TurnMarcatoOffBeat : 1);   // MARCATO
                 into.Breath = AttackBreath + (who.Musician.Trait == MusicianTrait.BreathControl ? BattleRules.TurnBreathControl : 0);
+                //REHEARSAL : the ATTACK's third star (WeaponLegend), the ones that hit or mark
+                if (who.Musician.Has(StarRule.AttackTwice)) PreviewStrike(into, enemy, into.PerNote, false);                     // TWIN THUNDER
+                if (who.Musician.Has(StarRule.AttackDissonance)) into.Dissonance = BattleRules.TurnAttackDissonance;             // DIABOLUS IN MUSICA
+                if (who.Musician.Has(StarRule.AttackGuards)) into.Share = BattleRules.TurnGuardKeep;                             // STRADIVARIUS
+                Fighter next = who.Musician.Has(StarRule.AttackBounces) ? NextInLine(enemy) : null;                              // WIDER ARC
+                if (next != null)
+                {
+                    into.Targets.Add(next);
+                    PreviewStrike(into, next, HitFor(who, next, BattleRules.TurnAttackScale * first, false), false);
+                }
                 return;
             }
 
-            //The skill's own scale, as BeginSkill works it out : THE LESSON on them, LANCE after a blow, THE PACT
+            //The skill's own scale, as BeginSkill works it out : THE LESSON on them, LANCE after a blow (THE LAST LANCE : always), THE PACT
             float scale = first;
             if (who.Lesson) scale *= who.LessonScale > 0f ? who.LessonScale : BattleRules.TurnLessonScale;
-            if (s.Revenge > 0f && who.Wounded) scale *= s.Revenge;
-            if (who.Musician.Has(PathRule.PaidInBlood)) scale *= BattleRules.TurnBloodScale;
+            if (s.Revenge > 0f && (who.Wounded || who.Musician.Has(StarRule.LanceAlways))) scale *= s.Revenge;
+            if (who.Musician.Has(StarRule.PaidInBlood)) scale *= BattleRules.TurnBloodScale;
             bool everyone = s.Target == SkillTarget.AllEnemies || s.Target == SkillTarget.AllAllies;
             float tutti = everyone && Has(MotifId.Tutti) ? BattleRules.TurnTuttiScale : 1f;                  // TUTTI
             bool felix = Kit == TurnKit.Fanny && FelixVoice;                                                   // TWO VOICES
-            bool lastCut = IsSkill(who, s, 0) && who.Musician.Has(PathRule.LastCut);                           // CAPRICE No. 24
+            bool lastCut = IsSkill(who, s, 0) && who.Musician.Has(StarRule.LastCut);                           // CAPRICE No. 24
             int offBeat = s.OffBeat;
             if (who.Musician.Family == Family.Percussion && Has(MotifId.SpareSticks)) offBeat = (int)Math.Round(offBeat * BattleRules.TurnSpareSticksOffBeat);   // SPARE STICKS
 
@@ -132,10 +142,10 @@ namespace Tacetno433.Battle
                 into.Breath += s.Breath;
             }
 
-            //What a skill that only stands by someone does : GUARD (THUNDER CALL), SHIELD (STRADIVARIUS : less), THE LESSON
-            if (s.Guard) into.Share = BattleRules.TurnGuardKeep;
-            if (s.Shield) into.Share = who.Musician.Has(PathRule.ShieldThird) ? BattleRules.TurnShieldThird : BattleRules.TurnShieldKeep;
-            if (s.Lesson) into.Share = who.Musician.Has(PathRule.LessonStrong) ? BattleRules.TurnLessonStrong : BattleRules.TurnLessonScale;
+            //What a skill that only stands by someone does : GUARD (THUNDER CALL, its second star : less), SHIELD (its first star : less), THE LESSON
+            if (s.Guard) into.Share = who.Musician.Has(StarRule.GuardThird) ? BattleRules.TurnShieldThird : BattleRules.TurnGuardKeep;
+            if (s.Shield) into.Share = who.Musician.Has(StarRule.ShieldThird) ? BattleRules.TurnShieldThird : BattleRules.TurnShieldKeep;
+            if (s.Lesson) into.Share = who.Musician.Has(StarRule.LessonStrong) ? BattleRules.TurnLessonStrong : BattleRules.TurnLessonScale;
         }
 
         //Preview Note : who note n of a skill reaches into previewLine, the way NoteTargets throws a CHAKRAM, without its
@@ -149,7 +159,7 @@ namespace Tacetno433.Battle
                 previewLine.AddRange(line);
                 return;
             }
-            if (who.Musician.Has(PathRule.ChakramLast) && n == s.Notes.Length - 1)                // WHIRLWIND
+            if (who.Musician.Has(StarRule.ChakramLast) && n == s.Notes.Length - 1)                // WHIRLWIND
             {
                 for (int i = 0; i < Enemies.Count; i++)
                     if (!Enemies[i].Down) previewLine.Add(Enemies[i]);
@@ -157,7 +167,7 @@ namespace Tacetno433.Battle
             }
             if (line.Count == 0) return;
             previewLine.Add(line[n % line.Count]);
-            if (n >= line.Count) repeat = who.Musician.Has(PathRule.ChakramFull) ? 1f : BattleRules.TurnChakramRepeat;   // THE CATCH
+            if (n >= line.Count) repeat = who.Musician.Has(StarRule.ChakramFull) ? 1f : BattleRules.TurnChakramRepeat;   // CHAKRAM's second star
         }
 
         //Preview Strike : Strike worked out only. HOLDS THE ROOM and THE COURT take some off, the BLOCK left takes the rest

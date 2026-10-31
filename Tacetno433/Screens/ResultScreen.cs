@@ -157,6 +157,7 @@ namespace Tacetno433.Screens
             //Final Boss : the run ends straight after, so there is nothing left to hand out
             bool lastBoss = battle.Enemy.Kind == EnemyKind.Boss && run.Floor >= BattleRules.FloorsPerRun;
             if (lastBoss) offerMotif = false;
+            if (lastBoss) run.RehearsalPending = false;                                   // REHEARSAL : no star after the last fight
 
             //Numbers : TURN BATTLE has no beats or combo. RANK (29 Oct) : the two things the rank is made of come first (the
             //PERFECT share and the life kept, in percent), and the shards are split into the fight's own and what the rank adds,
@@ -323,11 +324,11 @@ namespace Tacetno433.Screens
                 return;
             }
 
-            //PATH (Beta1 30 Oct) : the band's steps first (INSPIRED ones, then the win's card), the motif after them
+            //REHEARSAL (Beta1 31 Oct) : the band rehearses first (a star for one button, RehearsalScreen), the motif after it
             RunState run = Game.CurrentRun;
-            run.MotifAfterSteps = offerMotif;
-            if (run.StepsWaiting)
-                Game.Screens.Change(new MotifRewardScreen(MotifRewardScreen.Kind.Path));
+            run.MotifAfterRehearsal = offerMotif;
+            if (run.RehearsalWaiting)
+                Game.Screens.Change(new RehearsalScreen(RehearsalScreen.From.Fight));
             else if (offerMotif)
                 Game.Screens.Change(new MotifRewardScreen());
             else

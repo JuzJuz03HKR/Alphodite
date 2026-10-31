@@ -459,8 +459,24 @@ namespace Tacetno433.Core
                 scale = TextSize.Label;
                 width = Gfx.SpacedWidth(Font, label, scale, 1.5f);
             }
+
+            //Long Label (REHEARSAL, 31 Oct) : a legend's name on a skill's button (CAPRICE No. 24) is longer than the rest. It goes
+            //down to the smallest size with closer letters, then as small as it has to, so it never runs over the icon or the key.
+            float spacing = 1.5f;
+            if (width > right - left)
+            {
+                scale = TextSize.Tiny;
+                spacing = 0.5f;
+                width = Gfx.SpacedWidth(Font, label, scale, spacing);
+            }
+            if (width > right - left)
+            {
+                spacing = 0f;
+                scale *= (right - left) / Math.Max(1f, Gfx.SpacedWidth(Font, label, scale, spacing));
+                width = Gfx.SpacedWidth(Font, label, scale, spacing);
+            }
             float labelY = r.Center.Y - Font.LineSpacing * scale / 2f;
-            Gfx.TextSpaced(sb, Font, label, (left + right) / 2f - width / 2f, labelY, text, scale, 1.5f);
+            Gfx.TextSpaced(sb, Font, label, (left + right) / 2f - width / 2f, labelY, text, scale, spacing);
 
             if (key.Length > 0)
                 KeyChipRight(sb, key, chipRight, r.Center.Y, primary ? Palette.InkSoft * a : Palette.PaperDim * a);
@@ -607,6 +623,17 @@ namespace Tacetno433.Core
                 float px = x + i * gap;
                 if (i < filled) Gfx.Diamond(sb, px, cy, size, Palette.Paper * alpha);
                 else Gfx.DiamondOutline(sb, px, cy, size, Palette.LineGrey * alpha, 1f);
+            }
+        }
+
+        //Stars : REHEARSAL (31 Oct), a button's stars in a row, the ones it has in the musician's colour, the rest dim
+        public static void Stars(SpriteBatch sb, float x, float cy, int filled, int total, float size, float gap, Color colour, float alpha)
+        {
+            for (int i = 0; i < total; i++)
+            {
+                float px = x + i * gap;
+                if (i < filled) Gfx.Star(sb, px, cy, size, colour * alpha);
+                else Gfx.Star(sb, px, cy, size * 0.7f, Palette.LineGrey * (0.6f * alpha));
             }
         }
 

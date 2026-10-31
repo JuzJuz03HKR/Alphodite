@@ -17,8 +17,9 @@ namespace Tacetno433.Screens
     //THE SHOP OF THE BAND OF THREE (29 Oct, docs/BETA1_DIRECTION.md 8.5, the user : "the important place that makes the whole
     //team stronger, the wares are random and can be rolled again for shards, so early shards matter a lot") :
     //   MOTIF x2    rolled from the motifs the band does not carry
-    //   WEAPON      one musician's weapon up a tier (WEAPON TIERS), the musician is rolled among the ones that can still train
-    //   THE BAND    TUNING (life back for everyone) or, now and then, SECTIONAL (every weapon up a tier)
+    //   REHEARSAL   a star for one button of the band (REHEARSAL, 31 Oct, Data/Rehearsal.cs), rolled among the buttons that can
+    //               still get one, dearer for the second and third star (until 31 Oct : WEAPON, one weapon up a tier)
+    //   THE BAND    TUNING (life back for everyone) or, now and then, SECTIONAL (every weapon up a tier : a star on every ATTACK)
     //   REROLL      a new shelf, dearer each time in one visit (BattleRules.ShopRerollBase / ShopRerollStep, like Balatro)
     //The shelves come from the place's own dice (RunState.PlaceSeed) and the number of rolls, so leaving the game and coming
     //back finds the same first shelf (the run was saved when the band walked in, the shards too). The seats on stage and
@@ -65,24 +66,24 @@ namespace Tacetno433.Screens
         private const string RerolledLine = "There. A fresh shelf. Mind the dust.";
 
         //Wares : what one place on the shelf holds
-        private enum WareKind { Motif, Weapon, Tuning, Sectional, Empty }
+        private enum WareKind { Motif, Rehearsal, Tuning, Sectional, Empty }
 
         private class Ware
         {
             public WareKind Kind;
             public Motif Motif;              // MOTIF
-            public Musician Who;             // WEAPON : whose weapon
+            public Musician Who;             // REHEARSAL : whose button
+            public int Button;               //             which one (0 the ATTACK, 1 and 2 the skills)
             public int Price;
             public bool Sold;
             public string Name = "";
-            public string KindLabel = "";    // COMMON / RARE / TREASURED, WEAPON, FOR THE BAND
+            public string KindLabel = "";    // COMMON / RARE / TREASURED, REHEARSAL, FOR THE BAND
             public string Note = "";         // what the keeper says when it is pointed at
             public string PriceLabel = "";
             public string IconLabel = "";    // the word or numeral where a badge would be
         }
 
         private const int WareCount = 4;
-        private static readonly string[] TierWords = { "", "TIER I", "TIER II", "TIER III" };
 
         //Shop Layout
         private Rectangle waresBox = new Rectangle(730, 120, 510, 450);
@@ -160,12 +161,18 @@ namespace Tacetno433.Screens
             for (int i = 0; i < 2; i++)
                 wares[i] = i < motifs.Length ? MotifWare(motifs[i]) : EmptyWare();
 
-            //Weapon : one of the band who can still train, rolled
+            //Rehearsal : one button of the band that can still get a star, rolled
             Musician who = null;
+            int button = 0;
             int candidates = 0;
             for (int i = 0; i < run.Roster.Count; i++)
-                if (run.CanRehearse(run.Roster[i]) && dice.Next(++candidates) == 0) who = run.Roster[i];
-            wares[2] = who != null ? WeaponWare(run, who) : EmptyWare();
+                for (int b = 0; b < RehearsalList.Buttons; b++)
+                    if (RehearsalList.CanRaise(run.Roster[i], b) && dice.Next(++candidates) == 0)
+                    {
+                        who = run.Roster[i];
+                        button = b;
+                    }
+            wares[2] = who != null ? RehearsalWare(run, who, button) : EmptyWare();
 
             //The Band : TUNING, or now and then SECTIONAL while a weapon can still go up
             bool sectional = run.AnyToTrain && dice.Next(100) < BattleRules.ShopSectionalChance;
@@ -193,19 +200,26 @@ namespace Tacetno433.Screens
             return w;
         }
 
-        private static Ware WeaponWare(RunState run, Musician m)
+        //Rehearsal Ware : a star for button b of musician m, what it changes in the keeper's words (the rehearsal page's numbers)
+        private static Ware RehearsalWare(RunState run, Musician m, int button)
         {
-            int next = m.Rehearsed + 1;
+            int next = RehearsalList.StarsOf(m, button) + 1;
+            int power = run.PowerOf(m);
+            Star star = RehearsalList.Next(m, button);
+            string name = RehearsalList.ButtonName(m, button);
             Ware w = new Ware();
-            w.Kind = WareKind.Weapon;
+            w.Kind = WareKind.Rehearsal;
             w.Who = m;
-            w.Price = BattleRules.ShopWeaponPrice[Math.Min(next, BattleRules.ShopWeaponPrice.Length - 1)];
-            w.Name = m.WeaponAt[next];
-            w.KindLabel = "WEAPON  /  " + m.Name;
-            w.Note = m.Name + "'s weapon goes up to " + TierWords[Math.Min(next, TierWords.Length - 1)] + ". Power " + run.PowerOf(m) + " to "
-                   + (run.PowerOf(m) + BattleRules.WeaponTierPower) + ".";
+            w.Button = button;
+            w.Price = BattleRules.ShopStarPrice[Math.Min(next, BattleRules.ShopStarPrice.Length - 1)];
+            w.Name = name;
+            w.KindLabel = "REHEARSAL  /  " + m.Name + "  /  STAR " + next;
+            if (star != null && star.Name.Length > 0)
+                w.Note = "A rehearsal for " + m.Name + ". " + name + " becomes " + star.Name + ". " + star.Line;
+            else
+                w.Note = "A rehearsal for " + m.Name + ". " + (button == 0 ? "Their ATTACK" : name) + " gets a star : "
+                       + RehearsalList.FromText(m, button, power) + " to " + RehearsalList.ToText(m, button, power) + ".";
             w.PriceLabel = w.Price.ToString();
-            w.IconLabel = MusicianList.TierNames[Math.Min(next, MusicianList.TierNames.Length - 1)];
             return w;
         }
 
@@ -229,7 +243,7 @@ namespace Tacetno433.Screens
             w.Price = BattleRules.ShopSectionalPrice;
             w.Name = "SECTIONAL";
             w.KindLabel = "FOR THE BAND";
-            w.Note = "A long night of practice. Every weapon in the band goes up one tier.";
+            w.Note = "A long night of practice. Every ATTACK in the band gets a star : more power for everyone.";
             w.PriceLabel = w.Price.ToString();
             w.IconLabel = "ALL";
             return w;
@@ -357,7 +371,7 @@ namespace Tacetno433.Screens
 
             if (w.Sold) { Deny(SoldLine); return; }
             if (w.Kind == WareKind.Tuning && run.Stamina >= run.MaxStamina) { Deny(RestedLine); return; }
-            if (w.Kind == WareKind.Weapon && !run.CanRehearse(w.Who)) { Deny(SoldLine); return; }
+            if (w.Kind == WareKind.Rehearsal && !RehearsalList.CanRaise(w.Who, w.Button)) { Deny(SoldLine); return; }
             if (!run.SpendShards(w.Price)) { Deny(PoorLine); return; }
 
             w.Sold = true;
@@ -367,9 +381,9 @@ namespace Tacetno433.Screens
                 SoundBank.Play(Sfx.MotifGet);
                 Fly(row, RunHud.BadgeCentre(run.Motifs.Count - 1));
             }
-            else if (w.Kind == WareKind.Weapon)
+            else if (w.Kind == WareKind.Rehearsal)
             {
-                run.Rehearse(w.Who);
+                run.Raise(w.Who, w.Button);
                 SoundBank.Play(Sfx.Rehearse);
                 Fly(row, RunHud.BandAt);
             }
@@ -387,6 +401,11 @@ namespace Tacetno433.Screens
             Say(thanks[thanksIndex++ % thanks.Length]);
             run.RefreshLabels();
             SoundBank.Play(Sfx.Buy);
+
+            //A rehearsal still on the shelf says what its star gives now (SECTIONAL may have given that ATTACK a star already)
+            for (int r = 0; r < WareCount; r++)
+                if (wares[r].Kind == WareKind.Rehearsal && !wares[r].Sold)
+                    wares[r] = RehearsalList.CanRaise(wares[r].Who, wares[r].Button) ? RehearsalWare(run, wares[r].Who, wares[r].Button) : EmptyWare();
         }
 
         private void Deny(string text)
@@ -524,17 +543,13 @@ namespace Tacetno433.Screens
             Ui.Command(sb, rerollButton, rerollLabel, "R", rerollMotion, can ? b : b * 0.5f, false);
         }
 
-        //Ware Icons : the motif's badge, the weapon's next tier as a numeral, or a word for the band's wares
+        //Ware Icons : the motif's badge, a rehearsal's star in the musician's colour, or a word for the band's wares
         //(round 15 : plain words, the drawn chair and tuning fork were hard to read)
         private void DrawWareIcon(SpriteBatch sb, Ware w, float x, float y, float a, Color ink)
         {
             Color c = ink * a;
             if (w.Kind == WareKind.Motif) MotifArt.Badge(sb, w.Motif, x, y, 22, a);
-            else if (w.Kind == WareKind.Weapon)
-            {
-                Gfx.DiamondOutline(sb, x, y, 22f, BandColumn.SpotOf(w.Who) * a, 2f);
-                Gfx.TextCentered(sb, Game.BigFont, w.IconLabel, x, y - 2f, c, TextSize.Small * 0.8f);
-            }
+            else if (w.Kind == WareKind.Rehearsal) Gfx.Star(sb, x, y, 22f, BandColumn.SpotOf(w.Who) * a);
             else if (w.IconLabel.Length > 0) Gfx.TextSpacedCentered(sb, Game.Font, w.IconLabel, x, y - 7, c, TextSize.Tiny, 2f);
         }
 

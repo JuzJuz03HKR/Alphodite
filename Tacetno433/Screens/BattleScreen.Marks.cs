@@ -134,6 +134,8 @@ namespace Tacetno433.Screens
             {
                 Skill s = commandSkill[k];
                 commandArt[k] = s != null ? UiArt.IconOf("skill_" + ArtBank.Key(s.Name)) : null;
+                if (s != null && commandArt[k] == null && selected != null)                  // REHEARSAL : a legend with no icon of its own
+                    commandArt[k] = UiArt.IconOf("skill_" + ArtBank.Key(SkillList.Plain(selected.Musician, k - 1).Name));   // keeps the skill's
                 commandCode[k] = s != null ? Initials(s.Name) : "";
                 commandFor[k] = s != null ? TargetWord(s) : "";
             }
@@ -184,7 +186,7 @@ namespace Tacetno433.Screens
 
             //The pointer on an icon : its line, only while the bar is written (nothing to read while it plays)
             int over = -1;
-            if ((view == View.Plan || view == View.Target) && stepFor == null)
+            if (view == View.Plan || view == View.Target)
                 for (int i = 0; i < markCount; i++)
                     if (marks[i].Alpha > 0.3f && Input.MouseOver(marks[i].Box)) over = i;
             if (over != markHover && over >= 0)
@@ -211,7 +213,7 @@ namespace Tacetno433.Screens
             int command = -1;
             bool playing = false;
 
-            if (view == View.Plan && stepFor == null && who != null && battle.CanPlan(who))
+            if (view == View.Plan && who != null && battle.CanPlan(who))
             {
                 if (hoverCommand >= 0)
                 {
@@ -344,7 +346,7 @@ namespace Tacetno433.Screens
                 int life = 0;
                 if (who != null && battle.PaysInLife(who) && battle.BreathFree < s.Cost)
                     life += (s.Cost - Math.Max(0, battle.BreathFree)) * BattleRules.TurnPaganiniLife;
-                if (who != null && who.Musician.Has(PathRule.PaidInBlood)) life += Math.Max(0, Math.Min(BattleRules.TurnPactLife, who.Hp - 1));
+                if (who != null && who.Musician.Has(StarRule.PaidInBlood)) life += Math.Max(0, Math.Min(BattleRules.TurnPactLife, who.Hp - 1));
                 if (life > 0) line = Join(line, "PAYS " + life + " LIFE");
             }
             cardLine = line;
@@ -530,7 +532,7 @@ namespace Tacetno433.Screens
         //Draw Reticles : on TACET (inside the camera batch). The move's targets full, the ones that could be picked faint.
         private void DrawReticles(SpriteBatch sb)
         {
-            if (!aimOn || stepFor != null) return;
+            if (!aimOn) return;
             float lockIn = Smooth(Math.Min(1f, aimTime / BattleRules.AimLockTime));
             float a = aimPlaying ? 0.7f : 1f;
             if (aimFull)
@@ -632,7 +634,7 @@ namespace Tacetno433.Screens
         private bool FriendAimed(Fighter f, out bool full)
         {
             full = false;
-            if (!aimOn || f.IsEnemy || f.Down || stepFor != null) return false;
+            if (!aimOn || f.IsEnemy || f.Down) return false;
             if (aimFull)
             {
                 full = aim.Targets.Contains(f);
@@ -737,7 +739,7 @@ namespace Tacetno433.Screens
         //the name and the BREATH it costs, the kind and who it is for, what it does in numbers.
         private void DrawSkillCard(SpriteBatch sb)
         {
-            if (!aimOn || aimPlaying || aimCommand < 0 || stepFor != null) return;
+            if (!aimOn || aimPlaying || aimCommand < 0) return;
             Rectangle r = cardShown;                                                     // FRIEND PICK : over the row while it is open
             float rise = Smooth(Math.Min(1f, aimTime / 0.12f));
             r.Y += (int)((1f - rise) * 8f);

@@ -32,7 +32,8 @@ namespace Tacetno433.Core
     //   FIGHTS      one fight at full life with the PACKS of the run (BattleRules ONE BAR), the band of three
     //   RANKS       the RANK of the won fights above (29 Oct, BattleState.RankScore), S / A / B / C percent and the shards' scale
     //   RUNS        three floors in a row with life carried over : N N E N N, a rest (40 percent back), then the boss,
-    //               after every win the result page's life back and one PATH step (30 Oct, a random open one, INSPIRED ones too). THE BAND OF THREE (29 Oct) : 3 of the 5 legends picked at
+    //               after every win the result page's life back and one REHEARSAL star (31 Oct, to a random button that can still get one,
+    //               SimRehearse ; 30 Oct to 31 Oct a PATH step and the INSPIRED ones). THE BAND OF THREE (29 Oct) : 3 of the 5 legends picked at
     //               random for each run, every weapon one tier up after each floor (WEAPON TIERS, as a rehearsal each per
     //               floor before), THE UNHEARING, no motifs, shops, luthier or events (so it is harder than a real run)
     //   CONDUCTORS  the same runs with each of the six conductors of the turn battle
@@ -372,9 +373,7 @@ namespace Tacetno433.Core
                     SimHeal(band, life, BattleRules.RecoverAfterWin);                 // the result page's life back
                     simBars[floor] += b.Round;                                        // how long the fights won take (30 Oct)
                     simWonFights[floor]++;
-                    for (int m = 0; m < b.Party.Count; m++)                           // PATH : INSPIRED steps left for the result page
-                        if (b.Party[m].InspirePending) SimStep(b.Party[m].Musician, floor, rng);
-                    SimWinStep(band, floor, rng);                                     // PATH : the step every won fight gives
+                    if (path[i] != "BOSS" || floor < 3) SimRehearse(band, rng);        // REHEARSAL : the star every won fight gives (not the last)
                 }
                 for (int m = 0; m < band.Count; m++)                                 // WEAPON TIERS : every weapon one tier up per floor
                     band[m].Rehearsed = Math.Min(BattleRules.RehearseMax, band[m].Rehearsed + 1);
@@ -383,45 +382,20 @@ namespace Tacetno433.Core
             return 4;
         }
 
-        //PATH (Beta1 30 Oct) : the simulated player takes the steps like a player who has no favourite, a random one of those
-        //open (the win's card is one of up to three, so it is taken among all of the band's open steps)
-        private static int SimPathOf(Musician m, int floor, Random rng)
+        //REHEARSAL (Beta1 31 Oct) : the simulated player gives the star of every won fight like a player who has no favourite, to
+        //a random button of the band that can still get one (the ATTACK's too). TACET_SIM_NOSTARS=1 plays the runs without the
+        //stars of the wins, to see what they add. (30 to 31 Oct : a random PATH step, TACET_SIM_NOPATH and TACET_SIM_ONLY.)
+        private static bool simNoStars = Environment.GetEnvironmentVariable("TACET_SIM_NOSTARS") == "1";
+
+        private static void SimRehearse(List<Musician> band, Random rng)
         {
-            bool first = PathList.StepOpen(m, 0, floor);
-            bool second = PathList.StepOpen(m, 1, floor);
-            if (simOnly[0] == m.Index) { first &= simOnly[1] == 0; second &= simOnly[1] == 1; }   // TACET_SIM_ONLY : one path of one musician
-            if (!first && !second) return -1;
-            if (first && second) return rng.Next(2);
-            return first ? 0 : 1;
-        }
-
-        private static void SimStep(Musician m, int floor, Random rng)
-        {
-            int p = simNoPath ? -1 : SimPathOf(m, floor, rng);
-            if (p >= 0) PathList.Take(m, p, floor);
-        }
-
-        //Only : TACET_SIM_ONLY="2:0" lets the musician at place 2 of MusicianList.All (PFUNDT) walk only their path 0 (30 Oct),
-        //to see what one path adds
-        private static int[] simOnly = SimOnly();
-
-        private static int[] SimOnly()
-        {
-            string text = Environment.GetEnvironmentVariable("TACET_SIM_ONLY");
-            int who, path;
-            if (text == null || text.IndexOf(':') < 0 || !int.TryParse(text.Split(':')[0], out who) || !int.TryParse(text.Split(':')[1], out path)) return new int[] { -1, -1 };
-            return new int[] { who, path };
-        }
-
-        //No Path : TACET_SIM_NOPATH=1 plays the runs without PATH steps, to see what they add (30 Oct)
-        private static bool simNoPath = Environment.GetEnvironmentVariable("TACET_SIM_NOPATH") == "1";
-
-        private static void SimWinStep(List<Musician> band, int floor, Random rng)
-        {
-            List<Musician> open = new List<Musician>();
+            if (simNoStars) return;
+            int picked = -1;
+            int candidates = 0;
             for (int m = 0; m < band.Count; m++)
-                if (PathList.AnyOpen(band[m], floor) && SimPathOf(band[m], floor, rng) >= 0) open.Add(band[m]);
-            if (open.Count > 0) SimStep(open[rng.Next(open.Count)], floor, rng);
+                for (int button = 0; button < RehearsalList.Buttons; button++)
+                    if (RehearsalList.CanRaise(band[m], button) && rng.Next(++candidates) == 0) picked = m * RehearsalList.Buttons + button;
+            if (picked >= 0) RehearsalList.Raise(band[picked / RehearsalList.Buttons], picked % RehearsalList.Buttons);
         }
 
         //Bars On : the bars a fight won took on this floor, on average (RUNS, 30 Oct : PATH makes the band stronger as it goes,
@@ -486,11 +460,6 @@ namespace Tacetno433.Core
             {
                 if (b.Step == TurnStep.Plan)
                 {
-                    for (Fighter f = b.InspiredWaiting; f != null && !simNoPath; f = b.InspiredWaiting)   // INSPIRED : a step of theirs at once
-                    {
-                        int p = SimPathOf(f.Musician, b.Floor, rng);
-                        if (p < 0 || !b.TakeStep(f, p)) f.InspirePending = false;
-                    }
                     SimPlan(b, player, rng);
                     if (b.Step == TurnStep.Plan) b.PlayBar();                              // the SIGNATURE may have won it
                 }
@@ -626,20 +595,21 @@ namespace Tacetno433.Core
         //Sim Hit Value : how much a skill that hits deals, roughly, for picking between two (30 Oct : the dearest one was played
         //before, so a CAPRICE that PATH made 6 cuts long was never used, and CHAKRAM only against two enemies or more). Every
         //note's damage, a held note at 1.2 (held part way), 0.1 for each DISSONANCE it leaves, x the enemies it reaches. CHAKRAM : a new enemy each throw while there
-        //are some, the others at TurnChakramRepeat (whole with THE CATCH), WHIRLWIND's last throw at every enemy. CAPRICE No. 24's
-        //last cut x3.
+        //are some, the others at TurnChakramRepeat (whole with CHAKRAM's second star), WHIRLWIND's last throw at every enemy.
+        //CAPRICE No. 24's last cut x3. LANCE x its Revenge with THE LAST LANCE (always).
         private static float SimHitValue(Fighter me, Skill s, int standing)
         {
             float value = 0f;
             for (int n = 0; n < s.Notes.Length; n++) value += s.Damage * (s.Notes[n].Kind == NoteKind.Hold ? 1.2f : 1f) + 0.1f * s.Dissonance;   // a stack of DISSONANCE, roughly
-            if (me.Musician.Has(PathRule.LastCut) && s.Name == SkillList.Plain(me.Musician, 0).Name) value += s.Damage * (BattleRules.TurnLastCutScale - 1f);
+            if (me.Musician.Has(StarRule.LastCut) && s == SkillList.First(me.Musician)) value += s.Damage * (BattleRules.TurnLastCutScale - 1f);
+            if (s.Revenge > 0f && me.Musician.Has(StarRule.LanceAlways)) value *= s.Revenge;
             if (s.Target == SkillTarget.AllEnemies) value *= standing;
             if (s.Bounce > 0)
             {
                 int fresh = Math.Min(s.Notes.Length, Math.Min(s.Bounce, Math.Max(1, standing)));
-                float again = me.Musician.Has(PathRule.ChakramFull) ? 1f : BattleRules.TurnChakramRepeat;
+                float again = me.Musician.Has(StarRule.ChakramFull) ? 1f : BattleRules.TurnChakramRepeat;
                 value = s.Damage * (fresh + (s.Notes.Length - fresh) * again);
-                if (me.Musician.Has(PathRule.ChakramLast)) value += s.Damage * (standing - 1);
+                if (me.Musician.Has(StarRule.ChakramLast)) value += s.Damage * (standing - 1);
             }
             return value;
         }

@@ -76,19 +76,6 @@ namespace Tacetno433.Screens
         private Skill[] commandSkill = new Skill[3];       // [0] is ATTACK (null)
         private Skill pending;                             // the skill waiting for a target, null for ATTACK
 
-        //INSPIRED (Beta1 30 Oct) : the step pick that opens over the stage when a bar is to be written and a musician is INSPIRED
-        //(TurnBattle.TakeStep, their new skill counts in this bar). A right click leaves it for the result page (RunState).
-        private Fighter stepFor;                           // whose pick is open, null for none
-        private int[] stepPaths = new int[0];
-        private PathStep[] stepCards = new PathStep[0];
-        private int[] stepLevels = new int[0];
-        private string[] stepPathNames = new string[0];
-        private Rectangle[] stepBoxes = new Rectangle[0];
-        private string stepHeading = "";
-        private int stepHover = -1;
-        private List<Fighter> stepLater = new List<Fighter>();
-        private const int StepCardW = 240;
-        private const int StepCardH = 366;
         private Fighter hover;
         private Skill hoverSkill;
 
@@ -444,71 +431,6 @@ namespace Tacetno433.Screens
             Game.IsMouseVisible = true;
             if (!battle.CanPlan(selected) || battle.Bar.Count == 0) Select(NextUnwritten(null));     // a new bar starts at the front seat
             RefreshPreview();
-            OpenStepPick();                                                                          // INSPIRED
-        }
-
-        //Open Step Pick : INSPIRED, the next musician whose step waits (and was not left for later) gets the cards of their
-        //open steps, one or two. Nobody : the pick stays closed.
-        private void OpenStepPick()
-        {
-            stepFor = null;
-            if (practice) return;
-            for (int i = 0; i < battle.Party.Count && stepFor == null; i++)
-            {
-                Fighter f = battle.Party[i];
-                if (f.InspirePending && !stepLater.Contains(f) && PathList.AnyOpen(f.Musician, battle.Floor)) stepFor = f;
-            }
-            if (stepFor == null) return;
-
-            List<int> open = new List<int>();
-            for (int p = 0; p < 2; p++)
-                if (PathList.StepOpen(stepFor.Musician, p, battle.Floor)) open.Add(p);
-            int n = open.Count;
-            stepPaths = open.ToArray();
-            stepCards = new PathStep[n];
-            stepLevels = new int[n];
-            stepPathNames = new string[n];
-            stepBoxes = new Rectangle[n];
-            int totalW = n * StepCardW + (n - 1) * 40;
-            for (int i = 0; i < n; i++)
-            {
-                stepCards[i] = PathList.Next(stepFor.Musician, stepPaths[i]);
-                stepLevels[i] = stepFor.Musician.PathLevel[stepPaths[i]];
-                stepPathNames[i] = PathList.Of(stepFor.Musician)[stepPaths[i]].Name;
-                stepBoxes[i] = new Rectangle((TacetGame.ScreenW - totalW) / 2 + i * (StepCardW + 40), 150, StepCardW, StepCardH);
-            }
-            stepHeading = "INSPIRED  :  " + stepFor.Name;
-            stepHover = -1;
-        }
-
-        //Update Step Pick : a click on a card (or its number key) takes that step at once, a right click leaves it for later
-        private void UpdateStepPick()
-        {
-            stepHover = -1;
-            for (int i = 0; i < stepBoxes.Length; i++)
-                if (Input.MouseOver(stepBoxes[i])) stepHover = i;
-            int chosen = -1;
-            if (Input.KeyPressed(Keys.D1) || Input.KeyPressed(Keys.NumPad1)) chosen = 0;
-            if ((Input.KeyPressed(Keys.D2) || Input.KeyPressed(Keys.NumPad2)) && stepBoxes.Length > 1) chosen = 1;
-            for (int i = 0; i < stepBoxes.Length; i++)
-                if (Input.ClickedOn(stepBoxes[i])) chosen = i;
-
-            if (chosen >= 0 && battle.TakeStep(stepFor, stepPaths[chosen]))
-            {
-                SoundBank.Play(Sfx.MotifGet);
-                Rectangle at = BoxOf(stepFor);
-                effects.SpawnPop(at.Center.X, at.Y - 60, stepCards[chosen].Name, SpotOf(stepFor).Tint, 1f);
-                if (selected != null) Select(selected);                                    // the commands show the new skills
-                RefreshPreview();
-                OpenStepPick();
-                return;
-            }
-            if (Input.MouseRightClicked())
-            {
-                SoundBank.Play(Sfx.UiBack);
-                stepLater.Add(stepFor);
-                OpenStepPick();
-            }
         }
 
         //Select : the musician whose move the commands write (null for nobody)
@@ -557,11 +479,6 @@ namespace Tacetno433.Screens
             hover = null;
             hoverSkill = null;
             hoverCommand = -1;
-            if (stepFor != null)                                                           // INSPIRED : the pick comes first
-            {
-                UpdateStepPick();
-                return;
-            }
 
             //SIGNATURE : SPACE, or a click on the gauge
             if (battle.CanSignature && (Input.KeyPressed(Keys.Space) || Input.ClickedOn(signatureBox)))
@@ -1227,16 +1144,15 @@ namespace Tacetno433.Screens
                 else if (e.Kind == TurnEventKind.Shield) effects.SpawnPop(x, y, "SHIELD", Palette.KindDefend, 0.8f);         // SHIELD
                 else if (e.Kind == TurnEventKind.Lesson) effects.SpawnPop(x, y, "LESSON", Palette.KindBoost, 0.8f);          // THE LESSON
                 else if (e.Kind == TurnEventKind.Cue) effects.SpawnPop(x, y, "CUE", Palette.KindBoost, 0.8f);                // THE HUNTING CALL
-                else if (e.Kind == TurnEventKind.Revenge) effects.SpawnPop(x, y, "x2", Palette.KindAttack, 0.9f);            // LANCE
+                else if (e.Kind == TurnEventKind.Revenge) effects.SpawnPop(x, y, "x" + NumberText.Get(Math.Max(2, e.Amount)), Palette.KindAttack, 0.9f);   // LANCE (x3 with its first star)
                 //ENEMY MOVES (Beta1 30 Oct) : words for TACET's CHARGE and GUARD and the band's answers (until their VFX)
                 else if (e.Kind == TurnEventKind.Charge) effects.SpawnPop(x, box.Y - 70, "CHARGE", Palette.Paper, 0.9f);      // CHARGE : wound up
                 else if (e.Kind == TurnEventKind.Broken) effects.SpawnPop(x, box.Y - 70, "BROKEN", Palette.Highlight, 1.1f);  // BREAK
                 else if (e.Kind == TurnEventKind.Guard) effects.SpawnPop(x, y, "GUARD " + NumberText.Get(e.Amount), Palette.Paper, 0.8f);   // GUARD
                 else if (e.Kind == TurnEventKind.Blocked) effects.SpawnPop(x, y, "-" + NumberText.Get(e.Amount) + " GUARD", Palette.PaperDim, 0.7f);
                 else if (e.Kind == TurnEventKind.Pierce) effects.SpawnPop(x, box.Y - 70, "PIERCE", Palette.KindAttack, 0.9f); // PIERCE
-                //PATH and INSPIRED (Beta1 30 Oct) : the step's name when its rule works, INSPIRED in the musician's colour
-                else if (e.Kind == TurnEventKind.Path) effects.SpawnPop(x, y, PathList.RuleWords[e.Amount], SpotOf(e.Who).Tint, 0.8f);
-                else if (e.Kind == TurnEventKind.Inspired) effects.SpawnPop(x, box.Y - 90, e.Amount > 0 ? "INSPIRED" : "INSPIRED  +BREATH", SpotOf(e.Who).Tint, 1.1f);
+                //REHEARSAL (Beta1 31 Oct) : the legend's name when the rule of a third star works, in the musician's colour
+                else if (e.Kind == TurnEventKind.Legend && RehearsalList.RuleWords[e.Amount].Length > 0) effects.SpawnPop(x, y, RehearsalList.RuleWords[e.Amount], SpotOf(e.Who).Tint, 0.8f);
                 else if (e.Kind == TurnEventKind.Counter)
                 {
                     effects.SpawnPop(x, y, "COUNTER", Palette.Highlight, 0.9f);
@@ -1354,11 +1270,8 @@ namespace Tacetno433.Screens
             record.Finished = true;
             record.PlayerWon = battle.Step == TurnStep.Won;
 
-            //PATH : INSPIRED steps not picked in the fight wait for the pages after the result, with the one a win gives
-            run.InspiredPending.Clear();
-            for (int i = 0; i < battle.Party.Count && record.PlayerWon; i++)
-                if (battle.Party[i].InspirePending) run.InspiredPending.Add(battle.Party[i].Musician);
-            run.WinStepPending = record.PlayerWon;
+            //REHEARSAL : a won fight leaves a star to pick on the page after the result (RehearsalScreen)
+            run.RehearsalPending = record.PlayerWon;
             record.PerfectCount = perfects;
             record.NotesPlayed = notesPlayed;                                               // RANK
             record.LifeKept = lifeAtStart > 0 ? lifeAtEnd / (float)lifeAtStart : 1f;
@@ -1576,14 +1489,6 @@ namespace Tacetno433.Screens
                 battle.Events.Add(new TurnEvent(TurnEventKind.Revenge, battle.Party[2], 0));
                 ShowEvents();
             }
-            else if (name == "battleinspired")
-            {
-                //PATH (30 Oct) : the front musician is INSPIRED, their step pick is open over the bar being written
-                battle.Party[0].Inspired = true;
-                battle.Party[0].InspirePending = true;
-                battle.Events.Clear();
-                OpenStepPick();
-            }
             else if (name == "battlemoves")
             {
                 //ENEMY MOVES (Beta1 30 Oct) : the first enemy winds up a CHARGE (the blow to come under the word), the second means
@@ -1788,7 +1693,6 @@ namespace Tacetno433.Screens
             DrawFriendRow(sb);                                                    // FRIEND PICK : the friends a skill can go to, over the commands
             DrawSkillCard(sb);
             if (practice) DrawCoach(sb);
-            if (stepFor != null && planning) DrawStepPick(sb);                             // INSPIRED
             if (bondLine.Length > 0 && bondTime < BattleRules.TurnBondLineTime) DrawBondLine(sb);   // BONDS
             DrawTip(sb);                                                                             // MARKS AND AIM : what an icon is
 
@@ -1831,23 +1735,6 @@ namespace Tacetno433.Screens
             float w = Gfx.TextWidth(Game.StoryFont, bondLine, TextSize.Story);
             Gfx.Rect(sb, new Rectangle((int)(TacetGame.ScreenW / 2f - w / 2f - 24), 132, (int)(w + 48), 38), Palette.Void * (0.7f * a));
             Gfx.TextCentered(sb, Game.StoryFont, bondLine, TacetGame.ScreenW / 2f, 150, Palette.Paper * a, TextSize.Story);
-        }
-
-        //Draw Step Pick : INSPIRED, the stage darkened, the musician's name, their step cards (the reward page's cards, flat here)
-        //and how to choose or wait
-        private void DrawStepPick(SpriteBatch sb)
-        {
-            Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.Void * 0.72f);
-            Color spot = SpotOf(stepFor).Tint;
-            Gfx.DrawGlow(sb, TacetGame.ScreenW / 2f, 320f, 520f, spot * 0.18f);
-            Gfx.TextSpacedCentered(sb, Game.Font, stepHeading, TacetGame.ScreenW / 2f, 84, spot, TextSize.Label, 5f);
-            Gfx.TextCentered(sb, Game.BigFont, "Choose a step", TacetGame.ScreenW / 2f, 122, Palette.Paper, TextSize.Title);
-            for (int i = 0; i < stepBoxes.Length; i++)
-            {
-                MotifArt.PathFace(sb, stepBoxes[i], stepFor.Musician, stepPathNames[i], stepCards[i], stepLevels[i], stepHover == i, 1f, time);
-                Gfx.TextCentered(sb, Game.Font, RouteNodeInfo.PanelNumbers[i], stepBoxes[i].Center.X, stepBoxes[i].Bottom + 20, Palette.LineGrey, TextSize.Label);
-            }
-            Gfx.TextSpacedCentered(sb, Game.Font, "IT COUNTS IN THIS BAR   /   RIGHT CLICK = LATER", TacetGame.ScreenW / 2f, 548, Palette.PaperDim, TextSize.Tiny, 3f);
         }
 
         //THE BAND (Beta1) : everyone on the field as a card in a row under the bar strip, until the user's face GUI.
@@ -2288,6 +2175,7 @@ namespace Tacetno433.Screens
                         Ui.Icon(sb, icon, commandArt[k], commandCode[k], lit ? Palette.Ink : kind, false, 0, a);
                         Gfx.TextSpaced(sb, Game.Font, commandFor[k], box.X + Ui.Slant + 2, box.Y - 13, Palette.LineGrey * a, TextSize.Tiny, 2f);
                         if (k > 0) Ui.Pips(sb, icon.Center.X - (s.Cost - 1) * 4.5f, box.Bottom - 6, s.Cost, s.Cost, 3f, 9f, a);
+                        Ui.Stars(sb, box.Right - Ui.Slant - 34, box.Y + 9, RehearsalList.StarsOf(selected.Musician, k), RehearsalList.Most, 4f, 11f, SpotOf(selected).Tint, a);   // REHEARSAL : its stars
                     }
                 }
 

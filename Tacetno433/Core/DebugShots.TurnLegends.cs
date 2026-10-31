@@ -157,7 +157,7 @@ namespace Tacetno433.Core
             report += Same("chakram", "10 10 10 20", thrown + " " + (999 - b.Enemies[0].Hp));
 
             report += TurnCheckMoves();                                                // ENEMY MOVES (Beta1 30 Oct)
-            report += TurnCheckPaths();                                                // PATH and INSPIRED (Beta1 30 Oct)
+            report += TurnCheckRehearsal();                                            // REHEARSAL (Beta1 31 Oct, was PATH and INSPIRED)
             report += TurnCheckPreview();                                              // PREVIEW (Beta1 30 Oct, block 1 item 4)
             return report;
         }

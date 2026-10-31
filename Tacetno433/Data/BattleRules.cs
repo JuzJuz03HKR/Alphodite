@@ -65,7 +65,7 @@
         //Floor Scale (step 8) : enemies are tougher deeper down, life and each note's damage, floor 1 / 2 / 3
         public static float[] TurnFloorLife = { 1.6f, 3.85f, 6f };    // step 15 : was 1 / 1.3 / 1.6, fights about 1.5 times longer (the user asked for longer fights)
         public static float[] TurnFloorDamage = { 1f, 1.39f, 1.72f }; // PATH, SIGNATURE GROWS and BONDS (Beta1 30 Oct) : was 1.6 / 2.1 / 2.7 and 1 / 1.2 / 1.4. The
-                                                                      // band grows a step a floor now (Data/Path.cs) and its SIGNATURE at each boss, so TACET
+                                                                      // band grows a step a floor now (PATH, REHEARSAL since 31 Oct) and its SIGNATURE at each boss, so TACET
                                                                       // grows too, from floor 2 (the user : the monsters get tougher as well, 13.13). turnsim
                                                                       // 24 seeds, the same tool before and after : see BETA1_DIRECTION 13.3 for the numbers
 
@@ -216,21 +216,20 @@
         public static float TurnLessonScale = 1.3f;    //                               and the skill plays this much harder
         public static float TurnShieldKeep = 0.5f;     // SHIELD (DUPORT's skill) : the share of a hit on the friend that DUPORT takes instead
         public static float TurnChakramRepeat = 0.5f;  // CHAKRAM (PUNTO's skill) : an enemy the same throw already hit takes this share
-        //PATH (Beta1 30 Oct, Data/Path.cs) : the numbers of the steps that need one (the others rewrite a skill in Path.cs)
-        public static float TurnBloodScale = 1.3f;     // THE PACT (PAGANINI) : every skill of theirs plays this much harder
+        //REHEARSAL (Beta1 31 Oct, Data/Rehearsal.cs, was PATH) : the numbers of the stars that need one (the others rewrite a skill
+        //in Rehearsal.cs). INSPIRED (30 Oct, a step at once after 4 PERFECTs of one's own) went with the PATH cards on 31 Oct.
+        public static float TurnBloodScale = 1.3f;     // THE PACT (PAGANINI, no star gives it now) : every skill of theirs plays this much harder
         public static int TurnPactLife = 4;            //                      and costs this much life (never the last of it)
         public static float TurnLastCutScale = 3f;     // CAPRICE No. 24 (PAGANINI) : the last cut of CAPRICE
-        public static float TurnLessonStrong = 1.6f;   // THE METHOD (QUANTZ) : a LESSON plays this much harder (TurnLessonScale without it)
-        public static float TurnLessonEcho = 0.5f;     // EVERY EVENING (QUANTZ) : a friend taught plays their next move again at this
-        public static float TurnShieldThird = 0.34f;   // STRADIVARIUS (DUPORT) : the share of a blow DUPORT takes for a friend (TurnShieldKeep without it)
-        public static float TurnCallStrong = 1.5f;     // TALLY-HO (PUNTO) : THE HUNTING CALL (TurnHuntingCallScale without it)
-        public static int TurnHandOneLeast = 1;        // ONE TURN (PFUNDT) : TURN OF THE HAND leaves this many notes at least (TurnHandLeast without it)
-        public static int TurnHandPaukenCut = 2;       // DIE PAUKEN (PFUNDT) : TURN OF THE HAND takes this many notes (TurnHandCut without it)
-        //INSPIRED (Beta1 30 Oct, BETA1_DIRECTION 11.7 point 6, the user chose way A in 11.11) : a musician with this many PERFECTs
-        //in one fight (their skill's notes and the notes they parry) is INSPIRED, once a fight, and walks one step of a path at
-        //the start of the next bar. With no step open on this floor they bring TurnInspiredBreath BREATH instead.
-        public static int TurnInspiredNeed = 4;
-        public static int TurnInspiredBreath = 2;
+        public static float TurnLessonStrong = 1.6f;   // THE LESSON's first star (QUANTZ) : a LESSON plays this much harder (TurnLessonScale without it)
+        public static float TurnLessonEcho = 0.5f;     // KING'S LESSON (QUANTZ) : a friend taught plays their next move again at this
+        public static float TurnShieldThird = 0.34f;   // SHIELD's and THUNDER CALL's second stars : the share of a blow DUPORT takes for a friend
+                                                       //   (TurnShieldKeep without it), and PFUNDT on GUARD (TurnGuardKeep without it)
+        public static float TurnCallStrong = 1.5f;     // FANFARE's second star (PUNTO) : THE HUNTING CALL (TurnHuntingCallScale without it)
+        public static int TurnHandOneLeast = 1;        // ONE TURN (PFUNDT, no star gives it now) : TURN OF THE HAND leaves this many notes at least
+        public static int TurnHandPaukenCut = 2;       // DIE PAUKEN (PFUNDT) : THUNDER CALL takes this many notes off every enemy (TurnHandCut without it)
+        public static int TurnAttackDissonance = 1;    // DIABOLUS IN MUSICA (PAGANINI's ATTACK, third star) : DISSONANCE their ATTACK adds
+        public static int TurnAttackHeal = 4;          // EVENING CONCERT (QUANTZ's ATTACK, third star) : life back for the band's most hurt musician
         //The hidden musicians (old saves only since 29 Oct)
         public static float TurnByEarScale = 1.5f;     // BY EAR (MALI) : against an enemy that is OFF-BEAT
         public static float TurnHeldNoteShare = 0.4f;  // HELD NOTE (CHAI) : his ATTACK hits again for this share
@@ -816,11 +815,11 @@
         public static int VillageBandRecover = 3;    // THE FOLK LEADER's VILLAGE BAND, breath back for every stroke on time under it (round 15)
 
         //Shop (29 Oct, the user : the shop is where the whole band gets stronger, BETA1_DIRECTION 8.5) : four wares rolled
-        //for each visit, two MOTIFS (MotifPrice above), one WEAPON (one musician's weapon up a tier) and one for the whole
+        //for each visit, two MOTIFS (MotifPrice above), one REHEARSAL (a star for one button of the band, 31 Oct, was a WEAPON tier) and one for the whole
         //band (TUNING, or now and then SECTIONAL). REROLL buys a new shelf, dearer each time in one visit (like Balatro).
         public static int TuningPrice = 30;          // TUNING : life back for the whole band
         public static float TuningRecover = 0.4f;
-        public static int[] ShopWeaponPrice = { 0, 50, 70, 95 };   // WEAPON : one musician's weapon up to tier I, II, III
+        public static int[] ShopStarPrice = { 0, 50, 70, 95 };     // REHEARSAL (31 Oct, was WEAPON) : one button's first, second or third star
         public static int ShopSectionalPrice = 150;  // SECTIONAL : every weapon of the band up one tier
         public static int ShopSectionalChance = 25;  //            percent : the band's ware is SECTIONAL instead of TUNING
         public static int ShopRerollBase = 10;       // REROLL : the first new shelf of a visit
@@ -829,7 +828,7 @@
         //Rest
         public static float BreatheRecover = 0.4f;   // free
         public static int DeepRestPrice = 35;        // full stamina
-        public static int RehearseMax = 3;           // WEAPON TIERS (29 Oct) : the top tier of a weapon, I II III (how many times one musician can train)
+        public static int RehearseMax = 3;           // WEAPON TIERS (29 Oct) : the top tier of a weapon, I II III, the stars of the ATTACK (REHEARSAL, RehearsalList.Most)
         public static int WeaponTierPower = 2;       // each tier adds this much power (a rehearsal added 1 until the band of three, 29 Oct :
                                                      // an upgrade has to be felt, and three legends carry the whole run, BETA1_DIRECTION 9.6)
 

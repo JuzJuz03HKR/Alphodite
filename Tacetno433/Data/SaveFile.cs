@@ -186,13 +186,13 @@ namespace Tacetno433.Data
             for (int i = 0; i < MusicianList.All.Length; i++) rehearsed.Add(MusicianList.All[i].Rehearsed.ToString());
             lines.Add("rehearsed=" + string.Join(",", rehearsed));
 
-            List<string> paths = new List<string>();                // PATH (Beta1 30 Oct) : the steps of each musician's two paths
+            List<string> stars = new List<string>();                // REHEARSAL (Beta1 31 Oct) : the stars of each musician's two skills
             for (int i = 0; i < MusicianList.All.Length; i++)
             {
-                paths.Add(MusicianList.All[i].PathLevel[0].ToString());
-                paths.Add(MusicianList.All[i].PathLevel[1].ToString());
+                stars.Add(MusicianList.All[i].SkillStars[0].ToString());
+                stars.Add(MusicianList.All[i].SkillStars[1].ToString());
             }
-            lines.Add("paths=" + string.Join(",", paths));
+            lines.Add("stars=" + string.Join(",", stars));
 
             List<string> life = new List<string>();
             for (int i = 0; i < MusicianList.All.Length; i++) life.Add(MusicianList.All[i].Life.ToString());
@@ -285,14 +285,17 @@ namespace Tacetno433.Data
             for (int i = 0; i < rehearsed.Length && i < MusicianList.All.Length; i++)
                 MusicianList.All[i].Rehearsed = rehearsed[i];
 
-            int[] paths = GetList(v, "paths");                 // PATH : a save from before 30 Oct has none, no step taken
+            //REHEARSAL (31 Oct) : the stars of the two skills. A save of 30 Oct has the steps of the two PATHS (paths=) instead,
+            //each path's steps become the stars of one skill (as many as were earned). Older saves have neither : no star.
+            int[] stars = GetList(v, "stars");
+            if (stars.Length == 0) stars = GetList(v, "paths");
             for (int i = 0; i < MusicianList.All.Length; i++)
             {
                 Musician m = MusicianList.All[i];
-                int steps = PathList.Of(m).Length > 0 ? PathList.Of(m)[0].Steps.Length : 0;
-                m.PathLevel[0] = 2 * i < paths.Length ? Math.Max(0, Math.Min(steps, paths[2 * i])) : 0;
-                m.PathLevel[1] = 2 * i + 1 < paths.Length ? Math.Max(0, Math.Min(steps, paths[2 * i + 1])) : 0;
-                PathList.Rebuild(m);
+                int most = RehearsalList.Of(m).Length > 0 ? RehearsalList.Most : 0;
+                m.SkillStars[0] = 2 * i < stars.Length ? Math.Max(0, Math.Min(most, stars[2 * i])) : 0;
+                m.SkillStars[1] = 2 * i + 1 < stars.Length ? Math.Max(0, Math.Min(most, stars[2 * i + 1])) : 0;
+                RehearsalList.Rebuild(m);
             }
 
             int[] life = GetList(v, "life");                   // a save from before Alpha 7 has none : everybody full

@@ -79,7 +79,7 @@ namespace Tacetno433.Data
             get { return Shield || Lesson; }
         }
 
-        //Copy : a skill of its own to rewrite (PATH, Data/Path.cs). The notes are shared until a step gives new ones.
+        //Copy : a skill of its own to rewrite (REHEARSAL, Data/Rehearsal.cs). The notes are shared until a star gives new ones.
         public Skill Copy()
         {
             return (Skill)MemberwiseClone();
@@ -176,11 +176,11 @@ namespace Tacetno433.Data
                         Notes = new[] { S(D), S(D), T() }, Damage = 0.8f, OffBeat = 15 },
         };
 
-        //Skills Of : the two skills of one musician in this run, as their PATH steps rewrote them (Musician.Kit, Data/Path.cs)
+        //Skills Of : the two skills of one musician in this run, as their stars rewrote them (Musician.Kit, Data/Rehearsal.cs)
         public static Skill First(Musician m) { return m.Kit != null ? m.Kit[0] : Plain(m, 0); }
         public static Skill Second(Musician m) { return m.Kit != null ? m.Kit[1] : Plain(m, 1); }
 
-        //Plain : skill k (0 or 1) of the musician before any PATH step
+        //Plain : skill k (0 or 1) of the musician before any star
         public static Skill Plain(Musician m, int k) { return All[Array.IndexOf(MusicianList.All, m) * 2 + k]; }
     }
 }
