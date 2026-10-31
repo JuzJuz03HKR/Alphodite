@@ -64,6 +64,11 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 
 ## สถานะล่าสุด (31 ต.ค.)
 
+**31 ต.ค. แชท /system : /update ปิดแชท ผู้ใช้จะเปิดแชทใหม่** (คำต่อคำ `USER_BRIEFS.md` 13.44)
+✅ ของ GIFT (16.14 ข้อ 2 `BETA1_DIRECTION.md` 18) ผู้ใช้ Rebuild ลองแล้ว "ยังไม่ต้องแก้อะไร" / งานทั้งหมดอยู่บน GitHub (`4fde789` กับ commit ปิดแชทนี้) / ตาราง "แชทที่กำลังทำงาน" ว่าง
+**วิธีทำงานที่ผู้ใช้สั่ง (13.40)** : ทำ 16.14 ทีละข้อ จบข้อไหนบันทึก commit push แล้วหยุดรอผู้ใช้สั่งข้อต่อไป
+**งานถัดไป (เมื่อผู้ใช้สั่ง) : 16.14 ข้อ 3 ภาษาทั้งเกม** : เหมือนรายการด้านล่าง (ถามผู้ใช้ก่อนว่าเอาคำไหนในตาราง 16.7 แล้วเปลี่ยนพร้อมกันทั้งเกม รวมบรรทัดของ GIFT ใน `Data/Motif.cs`) / ต่อจากนั้น ข้อ 4 บอส ข้อ 5 แผนที่ / PLAYTEST SIGNATURE ยัง 1 PERFECT / VFX ทุกชนิดรอภาพอ้างอิง
+
 **31 ต.ค. ค่ำ แชท /system : ✅ 16.14 ข้อ 2 ของ GIFT แทน MOTIF เสร็จ หยุดรอผู้ใช้** (ผู้ใช้สั่ง "ทำงานต่อได้เลย" คำต่อคำ `USER_BRIEFS.md` 13.43 รายละเอียด `BETA1_DIRECTION.md` ข้อ 18)
 ✅ บนจอเรียก MOTIF ว่า GIFT / ของเหลือ 19 ชิ้น คนละ 3 (ธรรมดา หายาก ล้ำค่า) กับของทั้งวง 4 / ทุกชิ้นติดเครื่องหมายของคน (`GiftKey` : PAGANINI DISSONANCE แดง QUANTZ HEAL เขียว PFUNDT OFF-BEAT ขาว DUPORT SHIELD ฟ้า PUNTO CRESCENDO ทอง ทั้งวง ALL เทา) เห็นที่การ์ด ร้าน แถบบน และข้างชื่อที่ THE AUDITION / รันเจอแค่ของของคนในวง / ชื่อของเด้งตอนทำงาน
 ✅ ชื่อของจริงจากชีวิตนักดนตรี (LA CAMPANELLA THE PACT SNAPPED STRINGS / ON PLAYING THE FLUTE THE KING'S FAVOUR 300 CONCERTOS / WOODEN STICKS THE CRANK THUNDER SHEET / HARD CASE TOURTE BOW THE EMPEROR'S SPUR / HAND STOPPING THE SILVER HORN HALLALI / OPENING NIGHT SPARE STRINGS LUCKY BOW FRONT ROW ROSES) ค้นยืนยันประวัติ Pfundt Punto Duport แล้ว (18.4)
