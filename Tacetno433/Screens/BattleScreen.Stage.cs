@@ -195,7 +195,7 @@ namespace Tacetno433.Screens
             }
 
             //THE DARK : a spring towards where the balance of life puts it
-            dark.Update(worldDt, DarkShare());
+            dark.Update(worldDt, MathHelper.Clamp(DarkShare() + BossDark(), 0f, 1f));   // BOSS SHOW : the dark grows in its moments
 
             //Camera : the nudge of a hit dies away quickly
             kick *= (float)Math.Pow(0.0015, worldDt);

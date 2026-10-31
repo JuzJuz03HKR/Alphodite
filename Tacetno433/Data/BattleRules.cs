@@ -328,6 +328,16 @@
         public static float TurnNumberBigCell = 6f;       //   the same for a big hit (was 8)
         public static float TurnDissolveTime = 1.0f;      // an enemy SILENCED dissolves into TACET's hole in this long
         public static float TurnCutInTime = 1.3f;         // the SIGNATURE's CUT-IN, before its strokes (Beta1 round 4, the old duel's picture)
+
+        //BOSS SHOW (Beta1 31 Oct, docs/BETA1_DIRECTION.md 21.9, Screens/BattleScreen.Boss.cs) : the boss's moments, in seconds
+        public static float BossEntranceTime = 3.6f;      // ENTRANCE : the dark swallows the stage, the boss rises, its name on five lines
+        public static float BossEntranceSkip = 1.0f;      //            a click after this long jumps to its last half second
+        public static float BossTellTime = 1.6f;          // THE TELL : the BIG ATTACK's name, at the start of the turn it is shown
+        public static float BossStrikeTime = 1.4f;        // THE STRIKE : the cut in before the BIG ATTACK's notes
+        public static float BossPreTime = 0.55f;          // PRE ANIMATION : before each plain attack of a boss, it rises and leans in
+        public static float BossTurnTime = 2.4f;          // THE TURN : half life, the frame stops, its second line
+        public static float BossDarkRise = 0.25f;         // the stage's dark (TACET's share) grows this much at the top of a moment
+        public static float BossRise = 140f;              // ENTRANCE : the boss rises this far out of the hole
         public static float TurnKillStop = 0.18f;         //           the freeze when an enemy falls silent
         public static float TurnEndTime = 2.2f;           // the win or lose banner stays this long
         public static float TurnSparkGap = 0.3f;          // a spark comes this soon after the note before it

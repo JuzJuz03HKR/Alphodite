@@ -102,6 +102,11 @@ namespace Tacetno433.Screens
         //and bottom, speed lines rush across, the move's name, then it all slides away (DuelScreen.Hud.cs DrawCutIn).
         private void DrawCutIn(SpriteBatch sb)
         {
+            if (bossCut)                                                                 // BOSS SHOW : THE STRIKE or PRE (BattleScreen.Boss.cs)
+            {
+                DrawBossCut(sb);
+                return;
+            }
             Conductor c = CutInConductor();
             float t = 1f - cutIn / BattleRules.TurnCutInTime;              // 0 at the start, 1 at the end
             float slideIn = Smooth(t / 0.2f);

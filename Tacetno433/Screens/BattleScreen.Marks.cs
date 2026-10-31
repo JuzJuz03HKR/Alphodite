@@ -412,21 +412,22 @@ namespace Tacetno433.Screens
             {
                 Fighter f = battle.Enemies[i];
                 if (f.Down) continue;
-                Rectangle plate = EnemyPlate(BoxOf(f));
-                float a = PlateAlpha(f);
-                if (f.Block > 0) Add(f, Ico.Block, f.Block, BlockBox(plate), false, Palette.Paper, true, a);   // GUARD : the BLOCK left
+                bool stage = f != boss;                                                   // BOSS SHOW : the boss's marks sit under its BOSS BAR,
+                Rectangle plate = stage ? EnemyPlate(BoxOf(f)) : BossPlate;              //   on the screen (not through the camera)
+                float a = stage ? PlateAlpha(f) : 1f;
+                if (f.Block > 0) Add(f, Ico.Block, f.Block, BlockBox(plate), false, Palette.Paper, stage, a);   // GUARD : the BLOCK left
                 float x = plate.X;
                 float y = plate.Bottom + 3;
-                if (TurnBattle.CutsIn(f)) x = AddMark(f, Ico.CutIn, 0, false, Palette.PaperDim, true, x, y, a);
-                if (f.Staggered) x = AddMark(f, Ico.OffBeat, 0, true, Palette.Paper, true, x, y, a);
-                if (f.Dissonance > 0) x = AddMark(f, Ico.Dissonance, f.Dissonance, true, Palette.Paper, true, x, y, a);
+                if (TurnBattle.CutsIn(f)) x = AddMark(f, Ico.CutIn, 0, false, Palette.PaperDim, stage, x, y, a);
+                if (f.Staggered) x = AddMark(f, Ico.OffBeat, 0, true, Palette.Paper, stage, x, y, a);
+                if (f.Dissonance > 0) x = AddMark(f, Ico.Dissonance, f.Dissonance, true, Palette.Paper, stage, x, y, a);
 
                 Ico intent;
                 if (view != View.Over && ia > 0.01f && IntentOf(f, out intent))
                 {
                     float left, cy;
                     IntentRow(f, out left, out cy);
-                    Add(f, intent, 0, new Rectangle((int)left, (int)(cy - IntentIcon / 2f), IntentIcon, IntentIcon), false, Palette.Paper, true, ia);
+                    Add(f, intent, 0, new Rectangle((int)left, (int)(cy - IntentIcon / 2f), IntentIcon, IntentIcon), false, Palette.Paper, stage, ia);
                 }
             }
         }
@@ -501,12 +502,14 @@ namespace Tacetno433.Screens
 
         private void IntentRow(Fighter f, out float left, out float cy)
         {
-            Rectangle r = EnemyPlate(BoxOf(f));
+            bool isBoss = f == boss;                                                     // BOSS SHOW : under its BOSS BAR, from its left
+            Rectangle r = isBoss ? BossPlate : EnemyPlate(BoxOf(f));
             cy = r.Y - 22;
             int notes = PlaysNotes(f) ? f.IntentNotes.Length : 0;
             bool number = notes > 0 || f.IntentCharge || f.IntentGuard > 0;
             float width = IntentIcon + (number ? 6f + IntentRoom(f) : 0f) + notes * IntentNoteStep;
-            left = r.Center.X - width / 2f;
+            left = isBoss ? r.X : r.Center.X - width / 2f;
+            if (isBoss) return;
             if (!Settings.ClearFight || notes == 0) return;
             for (int n = 0; n < f.IntentNotes.Length; n++)
                 if (f.IntentWays[n] == Flick.Down) { cy -= 14f; return; }

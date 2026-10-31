@@ -1052,8 +1052,13 @@ namespace Tacetno433.Core
 
             //Battle
             run.Chosen = new RouteNode();
-            run.Chosen.Type = name == "duelboss" || name == "battleboss" ? NodeType.Boss : NodeType.Battle;
-            if (name == "battleboss") run.Floor = 3;                                  // Alpha 7 step 12 : the boss and two more
+            run.Chosen.Type = name == "duelboss" || name.StartsWith("battleboss") ? NodeType.Boss : NodeType.Battle;
+            if (name.StartsWith("battleboss")) run.Floor = 3;                         // Alpha 7 step 12 : the boss and two more
+            //BOSS SHOW (Beta1 31 Oct) : battlebossbar battlebosstell battlebossstrike battlebossparry battlebossturn, a last digit
+            //picks the boss (1 REQUIEM 2 THE DEAF CROWN 3 THE NAMELESS MASTER 4 THE STAFF 5 THE DEVIL'S STRING 6 THE BLIND CANTOR)
+            string[] showBosses = { "REQUIEM", "THE DEAF CROWN", "THE NAMELESS MASTER", "THE STAFF", "THE DEVIL'S STRING", "THE BLIND CANTOR" };
+            char lastChar = name[name.Length - 1];
+            string pickedBoss = name.StartsWith("battleboss") && lastChar >= '1' && lastChar <= '6' ? showBosses[lastChar - '1'] : null;
             string newBoss = name == "battlecrown" ? "THE DEAF CROWN" : (name == "battlestaff" ? "THE STAFF" : (name == "battlecantor" ? "THE BLIND CANTOR" : null));
             if (newBoss != null)                                                      // step 14 : each new boss on floor 2 with one more
             {
@@ -1070,6 +1075,7 @@ namespace Tacetno433.Core
             run.Chosen.Caption = RouteNodeInfo.CaptionOf(run.Chosen.Type);
             run.BeginBattle();
             if (newBoss != null) run.BeginBattle(EnemyNamed(newBoss));
+            if (pickedBoss != null) run.BeginBattle(EnemyNamed(pickedBoss));
             run.ChangeStamina(-20);
 
             //Combo Picture : a fight already a few PERFECTs in

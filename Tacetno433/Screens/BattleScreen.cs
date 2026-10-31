@@ -289,6 +289,7 @@ namespace Tacetno433.Screens
             //The first bar starts after a moment, so the page can be seen first
             view = View.Pause;
             viewTime = 0f;
+            if (!practice) LoadBoss();                                                   // BOSS SHOW : its ENTRANCE (BattleScreen.Boss.cs)
         }
 
         //Name : a fighter's plate words and look, made once when they come onto the field
@@ -385,6 +386,11 @@ namespace Tacetno433.Screens
                 UpdateCoach();
             }
 
+            if (UpdateBoss(dt))                                                          // BOSS SHOW : a moment holds the fight
+            {
+                UpdateMarks(dt);
+                return;
+            }
             if (view == View.Plan && bondLine.Length > 0) bondTime += dt;                  // BONDS : the line shows while the first bar is written
             if (view == View.Plan) UpdatePlan();
             else if (view == View.Target) UpdateTarget();
@@ -398,6 +404,7 @@ namespace Tacetno433.Screens
         //Next Step : the fight ends, a new bar is written, or the next move of the bar plays
         private void NextStep()
         {
+            if (BossTurnFirst()) return;                                                 // BOSS SHOW : THE TURN, then this step again
             if (battle.Step == TurnStep.Won || battle.Step == TurnStep.Lost)
             {
                 view = View.Over;
@@ -432,6 +439,7 @@ namespace Tacetno433.Screens
             Game.IsMouseVisible = true;
             if (!battle.CanPlan(selected) || battle.Bar.Count == 0) Select(NextUnwritten(null));     // a new bar starts at the front seat
             RefreshPreview();
+            BossTell();                                                                  // BOSS SHOW : its BIG ATTACK comes this turn
         }
 
         //Select : the musician whose move the commands write (null for nobody)
@@ -727,6 +735,7 @@ namespace Tacetno433.Screens
             for (int i = 0; i < TurnBattle.SignatureShape.Length; i++) AddNote(NoteKind.Swipe, TurnBattle.SignatureShape[i], false);
             BeginSwipe(SwipeFor.Signature);
             cutIn = BattleRules.TurnCutInTime;                                         // CUT-IN first (BattleScreen.Show.cs)
+            bossCut = false;
             hitBy = null;
             hitSignature = true;
         }
@@ -740,9 +749,10 @@ namespace Tacetno433.Screens
             PlayArt(enemy, "attack");
             PlayArt(battle.HitTarget(enemy), "parry");                                    // SHIELD : the one standing in front parries
             notes.Clear();
-            for (int i = 0; i < enemy.IntentNotes.Length; i++)
-                AddNote(NoteKind.Swipe, enemy.IntentWays[i], i < enemy.IntentLate.Length && enemy.IntentLate[i]);   // FALSE NOTES
+            for (int i = 0; i < enemy.IntentNotes.Length; i++)                                     // BOSSES : TE DEUM ends in a SHAKE
+                AddNote(i < enemy.IntentKinds.Length ? enemy.IntentKinds[i] : NoteKind.Swipe, enemy.IntentWays[i], i < enemy.IntentLate.Length && enemy.IntentLate[i]);   // FALSE NOTES
             BeginSwipe(SwipeFor.Parry);
+            BossCut(enemy);                                                                          // BOSS SHOW : THE STRIKE or PRE first
         }
 
         private void AddNote(NoteKind kind, Flick way, bool late)
@@ -766,7 +776,7 @@ namespace Tacetno433.Screens
                 if (i > 0)
                 {
                     NoteKind before = notes[i - 1].Kind;
-                    due += notes[i].Kind == NoteKind.Spark ? BattleRules.TurnSparkGap : gap;
+                    due += notes[i].Kind == NoteKind.Spark ? BattleRules.TurnSparkGap : gap * GapAt(what, i);   // THE NINTH : uneven
                     if (before == NoteKind.Hold) due += BattleRules.TurnHoldTime;
                     if (before == NoteKind.Roll) due += BattleRules.TurnRollTime;
                 }
@@ -795,6 +805,14 @@ namespace Tacetno433.Screens
             gesture.Clear();
             baton.Reset(Input.MousePos);
             Game.IsMouseVisible = false;
+        }
+
+        //Gap At : THE NINTH (BOSSES), the gap before note i of a parry x this, 1 for every other phrase
+        private float GapAt(SwipeFor what, int i)
+        {
+            Fighter enemy = battle.Current;
+            if (what != SwipeFor.Parry || enemy == null || !enemy.IsEnemy || i >= enemy.IntentGaps.Length) return 1f;
+            return enemy.IntentGaps[i];
         }
 
         private void UpdateSwipe(float dt)
@@ -1152,6 +1170,10 @@ namespace Tacetno433.Screens
                 else if (e.Kind == TurnEventKind.Echo) effects.SpawnPop(x, box.Y - 60, "ECHO", Palette.Highlight, 0.7f);       // FUGUE
                 else if (e.Kind == TurnEventKind.Quieter) effects.SpawnPop(x, box.Y - 70, "QUIETER", Palette.Paper, 0.7f);    // THE WHOLE FLOOR
                 else if (e.Kind == TurnEventKind.Thorns) effects.SpawnPop(x, box.Y - 70, "DECREE", Palette.Accent, 0.8f);     // DECREE broken
+                //BOSSES (Beta1 31 Oct) : THE TURN plays at the next step, a BIG ATTACK blocked whole, TE DEUM's own foot
+                else if (e.Kind == TurnEventKind.BossTurn) { bossTurnWaiting = true; bossHalfBreak = 1f; }
+                else if (e.Kind == TurnEventKind.BigParried) BossBlocked(x, box);
+                else if (e.Kind == TurnEventKind.OwnFoot) effects.SpawnPop(x, box.Y - 90, WordOwnFoot, Palette.Highlight, 1.1f);
                 //THE FIVE KITS (Beta1 29 Oct) : a word for each new move, in the colour of its SKILL KIND (until their VFX)
                 else if (e.Kind == TurnEventKind.Cut) effects.SpawnPop(x, box.Y - 70, "-" + NumberText.Get(e.Amount) + " NOTE", Palette.Paper, 0.8f);   // TURN OF THE HAND
                 else if (e.Kind == TurnEventKind.Shield) effects.SpawnPop(x, y, Words.Shield, Palette.KindDefend, 0.8f);     // SHIELD
@@ -1227,6 +1249,7 @@ namespace Tacetno433.Screens
                     r.Y -= (int)(jab * jab * 10f);
                 }
             }
+            if (f.IsEnemy && f == boss) r = BossPose(r);                                 // BOSS SHOW : it rises, rears up, shudders
             return r;
         }
 
@@ -1360,11 +1383,61 @@ namespace Tacetno433.Screens
             return null;
         }
 
+        //Picture Step : for --shots, the fight goes on one step (the band ATTACKs, TACET's notes are blocked GOOD)
+        private void PictureStep()
+        {
+            if (battle.Step == TurnStep.Plan) battle.PlayBar();
+            else if (battle.Step == TurnStep.PlayerTurn) battle.Attack();
+            else if (battle.Step == TurnStep.EnemyTurn)
+            {
+                Grade[] goods = new Grade[battle.Current.IntentNotes.Length];
+                for (int i = 0; i < goods.Length; i++) goods[i] = Grade.Good;
+                battle.TakeEnemyAttack(goods);
+            }
+            for (int i = 0; i < battle.Party.Count; i++) battle.Party[i].Hp = battle.Party[i].MaxHp;   // the band stays up for the picture
+        }
+
         //Picture Hook : for --shots, jump straight to the moment the picture is about
         public void ShowForPicture(string name)
         {
             NextStep();                                                                 // the first bar is being written
             string pic = name.EndsWith("clear") ? name.Substring(0, name.Length - 5) : name;   // MARKS AND AIM : the same with CLEAR FIGHT on
+
+            //BOSS SHOW (Beta1 31 Oct) : its moments, see Core/DebugShots.cs for the names
+            if (pic.StartsWith("battleboss") && boss != null)
+            {
+                string show = pic.TrimEnd('1', '2', '3', '4', '5', '6');
+                if (show != "battleboss") { bossMoment = BossMoment.None; bossBarIn = 1f; }   // past its ENTRANCE
+                if (show == "battlebosstell" || show == "battlebossstrike" || show == "battlebossparry")
+                {
+                    for (int i = 0; i < 200 && !boss.IntentBig && battle.Step != TurnStep.Won && battle.Step != TurnStep.Lost; i++) PictureStep();
+                    if (show == "battlebosstell")
+                    {
+                        while (battle.Step != TurnStep.Plan && battle.Step != TurnStep.Won && battle.Step != TurnStep.Lost) PictureStep();
+                        battle.Events.Clear();
+                        EnterPlan();
+                    }
+                    else
+                    {
+                        for (int i = 0; i < 60 && !(battle.Step == TurnStep.EnemyTurn && battle.Current == boss); i++) PictureStep();
+                        battle.Events.Clear();
+                        bossToldAt = boss.Attacks;
+                        StartParry();
+                        if (show == "battlebossparry") { cutIn = 0f; clock = RingTime * 0.8f; }
+                    }
+                }
+                if (show == "battlebossturn")
+                {
+                    boss.Hp = boss.MaxHp / 2 + 1;
+                    battle.PlanAttack(battle.Party[0], boss);
+                    battle.PlayBar();
+                    if (battle.Step == TurnStep.PlayerTurn) battle.Attack();
+                    ShowEvents();
+                    view = View.Pause;
+                    NextStep();
+                }
+                return;
+            }
 
             if (name == "battleplan")
             {
@@ -1747,12 +1820,14 @@ namespace Tacetno433.Screens
             if (view != View.Over) DrawIntent(sb, 1f - FocusEased);               // fades out as a ring comes up (round 4)
             DrawIcons(sb, true);                                                  // MARKS AND AIM : TACET's statuses and intents
             if (view != View.Over) DrawReticles(sb);                              //   and the rings on the ones a move is aimed at
+            DrawBossRing(sb, planning);                                           // BOSS SHOW : its BIG ATTACK comes this turn
             EndCameraBatch(sb);
 
             DrawBand(sb, planning);
             DrawIcons(sb, false);                                                 // MARKS AND AIM : THE BAND's statuses
             DrawForeMarks(sb);
             DrawBarStrip(sb, planning);
+            DrawBossBar(sb);                                                      // BOSS SHOW : its life, long, top right
 
             //QTE FOCUS : the world behind is already dark, grey and soft (PostChain), the ring and the notes come on top
             if (swiping)
@@ -1791,6 +1866,8 @@ namespace Tacetno433.Screens
                 Gfx.Rect(sb, 0, 300, TacetGame.ScreenW, 120, Palette.Void * (0.8f * a));
                 Gfx.TextCentered(sb, Game.LogoFont, bannerText, TacetGame.ScreenW / 2f, 360, Palette.Highlight * a, TextSize.Banner);
             }
+
+            DrawBossShow(sb);                                                     // BOSS SHOW : ENTRANCE, THE TELL, THE TURN
 
             if (swiping)
             {
@@ -1951,6 +2028,7 @@ namespace Tacetno433.Screens
             for (int i = 0; i < battle.Enemies.Count; i++)
             {
                 Fighter f = battle.Enemies[i];
+                if (f == boss) continue;                                                 // BOSS SHOW : the BOSS BAR instead
                 Rectangle plate = EnemyPlate(BoxOf(f));
                 float a = PlateAlpha(f);
                 if (battle.Current == f) Gfx.Rect(sb, plate.X, plate.Bottom + 2, plate.Width, 3, Palette.Accent);
@@ -2043,10 +2121,17 @@ namespace Tacetno433.Screens
         {
             if (ia <= 0.01f) return;
             for (int i = 0; i < battle.Enemies.Count; i++)
+                if (battle.Enemies[i] != boss) DrawIntentOf(sb, battle.Enemies[i], ia);   // BOSS SHOW : the boss's is under its BOSS BAR (DrawBossBar)
+        }
+
+        //Draw Intent Of : one enemy's next move, over its plate (the boss's under its BOSS BAR, on the screen)
+        private void DrawIntentOf(SpriteBatch sb, Fighter f, float ia)
+        {
+            if (ia <= 0.01f) return;
             {
-                Fighter f = battle.Enemies[i];
-                if (f.Down || f.IntentRest || f.ChargeBroken) continue;
-                Rectangle r = EnemyPlate(BoxOf(f));                 // Beta1 : the intent sits above the name plate
+                if (f.Down || f.IntentRest || f.ChargeBroken) return;
+                bool isBoss = f == boss;
+                Rectangle r = isBoss ? BossPlate : EnemyPlate(BoxOf(f));   // Beta1 : the intent sits above the name plate
                 float left, cy;
                 IntentRow(f, out left, out cy);
                 float x = left + IntentIcon + 6f;                   // the number, after the icon
@@ -2057,9 +2142,9 @@ namespace Tacetno433.Screens
                     string number = NumberText.Get(f.IntentCharge ? f.ChargeHit : f.IntentGuard);
                     if (Settings.ClearFight) Gfx.Text(sb, Game.Font, number, x, cy - Game.Font.LineSpacing * TextSize.Heading / 2f, Palette.Highlight * ia, TextSize.Heading);
                     else Gfx.Text(sb, Game.BigFont, number, x, cy - 16, Palette.Highlight * ia, TextSize.Small);
-                    continue;
+                    return;
                 }
-                if (f.IntentNotes.Length == 0) continue;
+                if (f.IntentNotes.Length == 0) return;
 
                 float row = f.IntentNotes.Length * IntentNoteStep;
                 float room = IntentRoom(f);                                            // NO LIMIT : wider for a number of 4 digits or more
@@ -2071,13 +2156,22 @@ namespace Tacetno433.Screens
                     //CLEAR FIGHT : a solid plate behind the attack, the number in plain upright figures, and who it is for
                     Gfx.Rect(sb, new Rectangle((int)(left - 8), (int)(cy - 17), (int)(IntentIcon + 6f + room + row + 14), 34), Palette.Void * (BattleRules.ClearPlate * ia));
                     Gfx.Text(sb, Game.Font, NumberText.Get(f.IntentNotes[0]), x, cy - Game.Font.LineSpacing * TextSize.Heading / 2f, Palette.Highlight * ia, TextSize.Heading);
-                    if (f.IntentTarget != null && !f.IntentAll) DrawAimedAt(sb, battle.HitTarget(f), r.Center.X, cy - lift, ia);
+                    if (f.IntentTarget != null && !f.IntentAll)
+                        DrawAimedAt(sb, battle.HitTarget(f), isBoss ? r.Right - 60f : r.Center.X, isBoss ? cy + 30f : cy - lift, ia);   // BOSS SHOW : beside, not on its bar
                 }
                 else Gfx.Text(sb, Game.BigFont, NumberText.Get(f.IntentNotes[0]), x, cy - 16, Palette.Highlight * ia, TextSize.Small);
                 for (int n = 0; n < f.IntentNotes.Length; n++)
-                    NoteGlyph.Note(sb, Game.BigFont, x + room + IntentNoteStep * (n + 0.5f), cy, f.IntentWays[n], 0.46f, ia, n < f.IntentLate.Length && f.IntentLate[n]);
-                if (f.IntentCadenza || f.IntentAll || f.IntentHeavy)                    // CHARGE : the charged blow says so like a CADENZA (BIG ATTACK)
-                    Gfx.TextSpacedCentered(sb, Game.Font, f.IntentAll ? Words.Everyone : (f.IntentHeavy ? Words.Charged : Words.BigAttack), r.Center.X, cy - (Settings.ClearFight && !f.IntentAll ? lift + 22f : 40f), Palette.Highlight * (ia * (0.7f + 0.3f * (float)Math.Sin(time * 6f))), TextSize.Label, 3f);
+                {
+                    float nx = x + room + IntentNoteStep * (n + 0.5f);
+                    if (n < f.IntentKinds.Length && f.IntentKinds[n] == NoteKind.Roll) NoteGlyph.RollNote(sb, nx, cy, 0.46f, ia);   // TE DEUM : a SHAKE
+                    else NoteGlyph.Note(sb, Game.BigFont, nx, cy, f.IntentWays[n], 0.46f, ia, n < f.IntentLate.Length && f.IntentLate[n]);
+                }
+                string tag = f.IntentBig ? f.Enemy.BigName : (f.IntentAll ? Words.Everyone : (f.IntentHeavy ? Words.Charged : Words.BigAttack));   // BOSSES : its name
+                Color tagColor = Palette.Highlight * (ia * (0.7f + 0.3f * (float)Math.Sin(time * 6f)));
+                if (isBoss && (f.IntentBig || f.IntentAll))                             // BOSS SHOW : after the notes, on their line
+                    Gfx.TextSpaced(sb, Game.Font, tag, x + room + row + 16f, cy - 9f, tagColor, TextSize.Label, 3f);
+                else if (f.IntentBig || f.IntentCadenza || f.IntentAll || f.IntentHeavy)     // CHARGE : the charged blow says so like a CADENZA (BIG ATTACK)
+                    Gfx.TextSpacedCentered(sb, Game.Font, tag, r.Center.X, cy - (Settings.ClearFight && !f.IntentAll ? lift + 22f : 40f), tagColor, TextSize.Label, 3f);
                 if (f.Staggered)
                     Gfx.Line(sb, x - 6, cy, x + room + 6f + row, cy, Palette.Highlight * ia, 2f);   // OFF-BEAT : it loses its next turn, this move waits for the one after
             }
@@ -2139,8 +2233,8 @@ namespace Tacetno433.Screens
                 Gfx.TextSpacedRight(sb, Game.Font, battle.FelixVoice ? "???" : "FANNY", TacetGame.ScreenW - 24, 60, Palette.Highlight, TextSize.Body, 2f);
             }
 
-            //DECREE (THE DEAF CROWN) : what this bar forbids
-            if (battle.Decree != DecreeKind.None)
+            //DECREE (THE DEAF CROWN) : what this bar forbids (BOSS SHOW : with its BOSS BAR when it is the boss, DrawBossBar)
+            if (battle.Decree != DecreeKind.None && boss == null)
             {
                 Gfx.TextSpacedRight(sb, Game.Font, "DECREE", TacetGame.ScreenW - 24, 92, Palette.LineGrey, TextSize.Label, 3f);
                 Gfx.TextSpacedRight(sb, Game.Font, battle.Decree == DecreeKind.NoSkills ? "NO SKILLS" : "NO ATTACKS", TacetGame.ScreenW - 24, 110,
@@ -2250,7 +2344,8 @@ namespace Tacetno433.Screens
                 float y = MathHelper.Lerp(from.Center.Y, HitY, p);
                 float a = i == next ? 1f : 0.55f;
                 bool hidden = notes[i].Late && progress < BattleRules.TurnLateReveal;                // FALSE NOTES
-                NoteGlyph.Note(sb, Game.BigFont, x, y, notes[i].Way, MathHelper.Lerp(1f, NoteGrow, p), a, hidden);
+                if (notes[i].Kind == NoteKind.Roll) NoteGlyph.RollNote(sb, x, y, MathHelper.Lerp(1f, NoteGrow, p), a);   // TE DEUM : shake
+                else NoteGlyph.Note(sb, Game.BigFont, x, y, notes[i].Way, MathHelper.Lerp(1f, NoteGrow, p), a, hidden);
                 if (i == next) NoteGlyph.TimingRing(sb, HitX, HitY, progress, RingMark, RingStart, 0f, Math.Min(1f, progress * 3f));
             }
         }
