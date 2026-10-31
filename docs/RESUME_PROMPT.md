@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| (ว่าง) | | |
+| 31 ต.ค. (แชท /system Finalize5) | 16.14 ข้อ 3 ภาษาทั้งเกม (คำกติกาตาราง 16.7 ที่คิดใหม่ คำอธิบายคำง่าย) | ข้อความบนจอเกือบทุกไฟล์ใน `Tacetno433/Data/` `Screens/` `Core/` (Skill Enemy Musician Conductor Motif Rehearsal Bond RouteNode Guide BattleScreen*) + `Core/DebugShots.Turn*.cs` |
 
 ---
 
