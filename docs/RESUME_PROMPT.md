@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 31 ต.ค. แชท /system | ทิศทางใหม่ทั้งเกม (`BETA1_DIRECTION.md` 16 รวม 15.2 การโต 15.3 บอส) รอผู้ใช้ตอบแล้วทำต่อในแชทนี้ | `Data/Path.cs` `Data/RunState.cs` `Data/Musician.cs` `Data/Enemy.cs` `Battle/TurnBattle.cs` `Screens/BattleScreen*.cs` `Screens/MotifRewardScreen.cs` `Screens/ResultScreen.cs` หน้าแผนที่ |
+| (ว่าง) | | |
 
 ---
 
@@ -63,6 +63,14 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 ---
 
 ## สถานะล่าสุด (31 ต.ค.)
+
+**31 ต.ค. แชท /system : /update ปิดแชท ผู้ใช้จะเปิดแชทใหม่** (คำต่อคำ `USER_BRIEFS.md` 13.36 ถึง 13.39 รายละเอียด `BETA1_DIRECTION.md` ข้อ 15 กับ 16)
+✅ FRIEND PICK การ์ดเพื่อนใบใหญ่เหนือปุ่มคำสั่ง (`Screens/BattleScreen.Friends.cs` 15.1) build 0/0 turncheck 145/145 savecheck 33/33 อยู่บน GitHub แล้ว (`985b77c`)
+⚠️ FRIEND PICK ผู้ใช้ยังไม่ได้ Rebuild ลองบน Windows
+✅ ค้นเกม ref เพิ่ม (Limbus Company, Reverse: 1999, Witch's Apocalyptic Journey, Balatro, Into the Breach, Hades, NBA Jam, Devil May Cry 5, The Metronomicon) และเขียนทิศทาง "สนุกก่อน แล้วระบบตามมา" (16)
+**ผู้ใช้ตัดสินแล้ว (16.14)** : ทิศทาง 16 ลองทำออกมาก่อน / **เกมไม่เน้น rhythm แล้ว** เน้น roguelike ที่มันส์ผ่านธีมดนตรีกับความเป็น Maestro อาวุธผสมเครื่องดนตรี (ตอนตีมีเสียงเครื่องดนตรีผสมเสียงอาวุธ) / **คำอธิบายใช้คำง่าย ศัพท์พิเศษเป็นแค่ชื่อ** / **ทำระบบก่อน การนำเสนอกับ VFX ทำทีเดียวทีหลัง** / เกมที่ผู้ใช้ว่ามันส์ Haste, Limbus Mirror Dungeon, CZN / ไฟต์คือจุดดึงดูด แผนที่ผู้ใช้กดผ่านเร็วๆ
+**งานแชทถัดไป (ลำดับและไฟล์อยู่ `BETA1_DIRECTION.md` 16.14)** : 1) การซ้อม REHEARSAL ชนะแล้วเลือก 1 ใน 9 ปุ่มของวงขึ้นดาว ดาว 3 = ร่างในตำนาน แทนการ์ด PATH INSPIRED ขั้นอาวุธ (`Data/Path.cs` `Data/Musician.cs` `Data/RunState.cs` `Screens/MotifRewardScreen.cs` `Screens/ResultScreen.cs` `Screens/LuthierScreen.cs` `Screens/RestScreen.cs` `Screens/ShopScreen.cs` `Data/SaveFile.cs` เอา INSPIRED ออกจาก `TurnBattle` กับ `BattleScreen`) 2) GIFT แทน MOTIF (`Data/Motif.cs` ห้ามสลับลำดับ) 3) ภาษาทั้งเกม คำอธิบายคำง่าย คำกติกาตามตาราง 16.7 4) บอส 2 เฟส ท่าไม้ตายมีชื่อ เห็นบนแผนที่ 5) แผนที่บอกรางวัลด้วยคำเดียว 6) ความโหดปรับตอน balance
+หมายเหตุ : PLAYTEST SIGNATURE ยัง 1 PERFECT / VFX ทุกชนิดรอภาพอ้างอิงและทำทีเดียวทีหลัง / ตาราง "แชทที่กำลังทำงาน" ว่างแล้ว
 
 **31 ต.ค. แชท /system : ผู้ใช้ตอบ 14.7** (คำต่อคำ `USER_BRIEFS.md` 13.36 รายละเอียด `BETA1_DIRECTION.md` ข้อ 15)
 ✅ เป้าของสกิลที่ใช้กับเพื่อน แบบ ก : FRIEND PICK การ์ดเพื่อนใบใหญ่เหนือปุ่มคำสั่ง คลิกหรือกดเลข (`Screens/BattleScreen.Friends.cs` 15.1) build 0/0 turncheck 145/145 savecheck 33/33 ภาพ `battlefriend` รอผู้ใช้ Rebuild ดู

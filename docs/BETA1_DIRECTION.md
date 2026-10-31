@@ -1186,3 +1186,39 @@
 6. รอบแรกค่อยๆ เปิด (คำอธิบายบรรทัดเดียวตอนเจอครั้งแรก)
 
 แหล่ง (ค้น 31 ต.ค.) : [Limbus Mirror Dungeon keywords (games.gg)](https://games.gg/limbus-company/guides/) [Limbus E.G.O Gifts (wiki)](https://limbuscompany.wiki.gg/wiki/E.G.O_Gifts) [Limbus combat (Prydwen)](https://prydwen.gg/limbus-company/guides/combat-mechanics) [A Better Tutorial for Limbus Company](https://videohighlight.com/v/ujQgRJo9vHA) [Reverse 1999 combat (Pocket Gamer)](https://www.pocketgamer.com/reverse-1999-rpg/essential-guide) [Reverse 1999 tips (TouchArcade)](https://toucharcade.com/2023/10/27/reverse-1999-tips-and-tricks-iphone-ipad-android-pc/) [Witch's Apocalyptic Journey (Steam)](https://store.steampowered.com/app/3709430) [Witch's Apocalyptic Journey review (GamesCreed)](https://www.gamescreed.com/review/witchs-apocalyptic-journey-review) [Witch's Apocalyptic Journey reviews summary (vaporlens)](https://vaporlens.app/app/3709430/witchs_apocalyptic_journey.md) [Balatro and poker (Game Developer)](https://gamedeveloper.com/business/localthunk-knew-balatro-needed-to-draw-players-in-with-poker) [Balatro interview (Rogueliker)](https://rogueliker.com/balatro-interview/) [Into the Breach (Game Developer)](https://gamedeveloper.com/game-platforms/road-to-the-igf-subset-games-i-into-the-breach-i-) [Into the Breach Design Postmortem (GDC Vault)](https://gdcvault.com/play/1025772/-Into-the-Breach-Design) [Hades (Wikipedia)](https://en.wikipedia.org/wiki/Hades_(video_game)) [Hades narrative (Game Developer)](https://gamedeveloper.com/design/how-supergiant-weaves-narrative-rewards-into-i-hades-i-cycle-of-perpetual-death) [NBA Jam on fire (NBA-Live)](https://www.nba-live.com/ww-why-being-on-fire-was-so-cool-in-nba-jam/) [DMC5 style ranks (Shacknews)](https://shacknews.com/article/110322/stylish-points-and-style-ranks-in-devil-may-cry-5) [The Metronomicon (GamesRadar)](https://gamesradar.com/the-metronomicon-brilliantly-combines-dance-battles-and-boss-battles)
+
+### 16.14 ผู้ใช้ตอบ 16.12 แล้วสั่ง /update (31 ต.ค. คำต่อคำ `USER_BRIEFS.md` 13.39)
+คำตอบทีละข้อ
+1. เกมที่มันส์ที่สุด
+   - **Haste** : roguelike วิ่งไปข้างหน้าหลบสิ่งกีดขวาง มันส์เพราะได้ทำเองแล้วออกมาเท่ (วิ่งเร็วจนพังของ ผ่านแมพเหมือนวิ่งจริง) ยิ่งเก็บหรือซื้ออัปเกรด ผลของการพัฒนายิ่งชัด ความเร็วกับกล้องที่ยืดตามความเร็วดันความตื่นเต้นของผู้เล่นขึ้นเรื่อยๆ ลื่นไหลและสนุกตลอด
+   - **Limbus Company (Mirror Dungeon)** : ตัวที่ชอบกลายเป็นตัวเก่งมากจาก E.G.O Gift ที่สะสม ยิ่งเล่น ยิ่งได้ของ ยิ่งซื้อ ทีมยิ่งเก่งแบบเห็นผล เห็นเอฟเฟกต์ชัด ท้าทายว่าไปได้สุดแค่ไหน ศัตรูโหดขึ้นแบบทวีคูณยิ่งลึก ดาเมจสุดมาก ต้องคำนวณทุกการโจมตีว่าจะทนยังไง จะเบิร์สให้บอสตายรวดเดียวยังไง บอสรอดทีมอาจตายหมด อันตรายตรงหน้าแต่จัดการได้ในอึดใจ
+   - **Chaos Zero Nightmare** : ยากมาก ทุกการกระทำมีผลตามมา แต่ทุกอย่างเข้าใจง่าย บทบาทชัด (ตี ฮีล ป้องกัน ซัพพอร์ต) แต่ทุกตัวมีสกิลที่ดีกับตัวเองเด่นชัดและมีจุดเด่นหลายจุด คอมโบได้หลากหลาย วางแผนได้ว่าแต่ละตัวเด่นด้านไหน ต้องบริหารเงิน เลือด อัปเกรด ทุกอย่างสำคัญ การกระทำชี้เป็นชี้ตาย ตัวที่ปั้นมาอย่างลำบากเก่งขึ้นไปพร้อมเรา เห็นผลทุกครั้งที่พัฒนาแม้เล็กน้อย ดวงทำให้ทุกรันต่างกันมาก
+2. ตอนนี้ไฟต์สนุกที่สุด (มีให้ทำมากสุด สวย เป็นแก่น เห็นผลมากสุด) ยังไม่มีช่วงน่าเบื่อเพราะมีระบบหลักแค่การต่อสู้ **แผนที่ผู้ใช้กดผ่านเร็วๆ รีบไปอัปเกรดแล้วไปสู้** จุดดึงดูดอยู่ที่ไฟต์
+3. **ทิศทางข้อ 16 ลองทำออกมาก่อน** แต่ **เกมไม่เน้น rhythm ขนาดนั้นแล้ว** เน้น roguelike ที่มันส์ผ่านธีมดนตรีกับความเป็น Maestro / อาวุธผสมเครื่องดนตรี ตอนโจมตีมีเสียงเครื่องดนตรีนั้นผสมเสียงอาวุธ
+4. **คำอธิบายใช้คำง่ายที่ทุกคนเข้าใจ ศัพท์พิเศษใช้ได้แค่เป็นชื่อหรือหัวข้อของสิ่งที่เท่ๆ**
+5. **ตอนนี้ทำระบบก่อน การนำเสนอกับ VFX หนักๆ ทำทีเดียวทีหลัง**
+
+สิ่งที่ไอริสสรุปจาก ref ทั้ง 3 (หลักของงานระบบต่อจากนี้)
+- **โตแล้วเห็นผลทุกครั้ง** : ทุกอัปเกรดต้องเปลี่ยนสิ่งที่เห็นในไฟต์ถัดไปทันที แม้เล็กน้อย (ทั้ง 3 เกม)
+- **ปั้นตัวที่ชอบให้เก่งสุดได้** (Limbus) และ **เลือกได้ว่าแต่ละตัวเด่นด้านไหน** (CZN)
+- **ศัตรูโหดขึ้นแบบทวีคูณ ต้องคิดว่าจะทนหรือจะเบิร์ส** อันตรายตรงหน้าแต่แก้ได้ในตาเดียว (Limbus CZN)
+- **ทรัพยากรทุกอย่างมีความหมาย** เงิน เลือด อัปเกรด (CZN)
+- **ความมันโตตามพลัง** ยิ่งเก่งยิ่งตีหลายครั้งยิ่งใหญ่ (Haste) ส่วนภาพทำทีหลังตามข้อ 5 แต่ระบบต้องเปิดทางไว้
+- แผนที่ถูกกดผ่าน : ส่วนนอกไฟต์ต้องเร็วและมีความหมาย
+
+ปรับหัวใจ 16.4 ตามข้อ 3 : จาก "เล่นเป๊ะแล้วเพลงดัง" (เอนไปทาง rhythm) เป็น **"Maestro ปั้นวงนักรบดนตรีในตำนานให้เก่งที่สุด ฝ่าความเงียบที่โหดขึ้นเรื่อยๆ"** การตวัดไม้คือคำสั่งของ Maestro ที่ทำให้ทุกท่ามีน้ำหนัก (ยังชูโรง) แต่ความมันหลักมาจากการปั้นทีม การคิดคอมโบ และการเบิร์สก่อนโดนเบิร์ส ช่วงมันส์ 3 ถึง 6 ของ 16.4 (COMBO สีกลืนความมืด SOLO เกรดสด) เป็นงานนำเสนอเป็นส่วนใหญ่ เลื่อนไปทำพร้อม VFX ทีเดียว
+
+**แผนงานระบบของแชทถัดไป** (ผู้ใช้สั่งลองทำออกมาก่อน ไอริสตัดสินรายละเอียดเอง ผู้ใช้เปลี่ยนได้ทุกข้อ / ทุกข้อ build 0/0 turncheck savecheck แล้วบันทึกเอกสาร)
+1. **การซ้อม REHEARSAL แทนการ์ด PATH INSPIRED และขั้นอาวุธ**
+   - ชนะไฟต์ : หน้าเดียว ภาพหน้า 3 คน แต่ละคนมี 3 ปุ่มที่ใช้ในไฟต์อยู่แล้ว (อาวุธ = ATTACK, สกิล 1, สกิล 2) แต่ละปุ่มมีดาว 3 ดวง เลือก 1 ปุ่มขึ้น 1 ดาว ใต้ปุ่มบอกสิ่งที่เปลี่ยนเป็นตัวเลข (เช่น CAPRICE 4 เป็น 5 ครั้ง)
+   - ดาว 3 = ร่างในตำนานของท่านั้น (ใช้กฎของการ์ด PATH ที่มีอยู่ `PathRule`) เช่น CAPRICE เป็น CAPRICE No. 24
+   - ทำไมแบบนี้ : เลือกว่าแต่ละคนเด่นด้านไหน (CZN) ปั้นตัวที่ชอบให้สุดได้ (Limbus) ของที่โตคือปุ่มที่กดอยู่แล้ว เห็นผลไฟต์ถัดไปทันที / ทั้งวงมี 27 ดาว รันหนึ่งได้ซ้อมราว 15 ถึง 20 ครั้ง จึงต้องเลือก ได้ไม่ครบทุกอย่าง
+   - ที่มาในโลก : ซ้อมหลังทุกคอนเสิร์ต / ที่พักให้เลือกฟื้นเลือดหรือซ้อม 1 ดาว / ร้านขายการซ้อม (เงินมีที่ใช้จริง) / ห้อง LUTHIER ให้ดาวปุ่มอาวุธฟรี / รางวัลบอส REFORGE = ปุ่มอาวุธทุกคน +1 ดาว (ขั้นอาวุธเดิม `Musician.Rehearsed` กลายเป็นดาวของปุ่มอาวุธ)
+   - เอาออก : INSPIRED ทั้งระบบ (`TurnBattle` ค้นคำ INSPIRED `CountNote` `Inspire` `TakeStep` `InspiredWaiting` / `BattleScreen` `OpenStepPick` `UpdateStepPick` `DrawStepPick` / `RunState.InspiredPending` / `BattleRules.TurnInspiredNeed` `TurnInspiredBreath` / HOW TO PLAY / turncheck ข้อ inspired)
+   - โค้ด : `Data/Path.cs` (เป็นรางดาว 3 ปุ่มต่อคน) `Data/Musician.cs` (`PathLevel` `Kit` `Rules` `Has` `Rehearsed` `WeaponNow`) `Data/RunState.cs` (`WinStepPending` `StepsWaiting` `MotifAfterSteps`) `Screens/MotifRewardScreen.cs` (แบบ Path เป็นหน้าซ้อม) `Screens/ResultScreen.cs` `Screens/LuthierScreen.cs` `Screens/RestScreen.cs` `Screens/ShopScreen.cs` `Data/SaveFile.cs` (`paths=` เซฟเก่าต้องโหลดได้) `Core/DebugShots.TurnPaths.cs` และตัวจำลอง
+2. **ของ GIFT แทน MOTIF** : น้อยลงแต่แรง ติดไอคอนจุดเด่นของนักดนตรี (แบบคำสำคัญของ Limbus เช่นของที่ทำให้ CRACK แรงขึ้นเข้ากับ PAGANINI) สะสมแล้วตัวที่ชอบเวอร์ได้ ชื่อเป็นของจริงที่เท่ คำอธิบายบรรทัดเดียวคำง่าย ทำงานแล้วมีคำเด้ง (VFX ทีหลัง) / `Data/Motif.cs` ห้ามสลับลำดับ `MotifList` เปลี่ยนผลในช่องเดิม ใบที่ไม่ใช้ถอดออกจากกองสุ่ม
+3. **ภาษาทั้งเกม (ข้อ 4)** : คำอธิบายทุกบรรทัดเป็นคำง่าย (`Skill.Text` `IcoLine` ใน `BattleScreen.Marks.cs` `Enemy.TurnTraitText` `Musician.TraitText` ข้อความของ GIFT `Screens/GuideScreen.cs` คำใบ้ในหน้าต่อสู้) คำที่เป็นกติกาใช้ตาราง 16.7 (CRACK POWER STUN SILENCED ARMOR FOCUS ROUND ฯลฯ) ชื่อสกิล ของ บอส ท่อน ยังเป็นชื่อเท่ได้
+4. **บอส (ส่วนที่เป็นระบบของ 15.3)** : แถบเลือดบอส 2 เฟส ท่าไม้ตายมีชื่อที่ต้องเบิร์สหรือป้องกันให้ทัน เห็นบอสบนแผนที่ตั้งแต่ต้นชั้น บอสสุดท้ายเป็นร่างของวาทยากรที่เลือก (`Data/Enemy.cs` `Battle/TurnBattle.cs` `Data/FloorMap.cs` `Screens/RouteScreen.cs`) ช่วงเปิดตัวกับ VFX ทำทีหลัง
+5. **นอกไฟต์ให้เร็วและมีความหมาย** : จุดบนแผนที่บอกรางวัลด้วยคำเดียว (ซ้อม ของ เงิน ฟื้นเลือด) ลดแถวที่ไม่มีอะไรให้เลือก (`Data/FloorMap.cs` `Screens/RouteScreen.cs`)
+6. **ความโหดแบบทวีคูณกับช่วงเบิร์ส** : ปรับตอน balance จากการเล่นจริง (14.6) ตัวจำลองใช้เทียบก่อนหลังเท่านั้น
+- ทำทีหลังพร้อมกัน (การนำเสนอ) : COMBO สีกลืนความมืด SOLO เกรดสด เปิดตัวบอส VFX ของดาวขั้นสูง เสียงเครื่องดนตรีผสมเสียงอาวุธ (รอไฟล์เสียงจริง กติกาไม่มีเสียงชั่วคราว)
