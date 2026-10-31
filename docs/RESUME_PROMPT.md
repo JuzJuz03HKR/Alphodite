@@ -69,7 +69,12 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 **งานถัดไป (ผู้ใช้สั่งแล้ว ทำก่อนข้อ 4) : ตัวเลขเกิน 999 ได้** ทั้งเลือดศัตรู ดาเมจของตัวละคร ดาเมจรวมของเทิร์น และที่อื่น (`BETA1_DIRECTION.md` 19.9) /
 ต้นเหตุ `Core/NumberText.cs` `Max = 999` กับ `Clamp` (ทุกตัวเลขที่ผ่าน `NumberText.Get` `Signed` หยุดที่ 999 เช่นเลือดบนป้ายศัตรู TURN TOTAL `barDamageText` ใน `Screens/BattleScreen.cs` HUD หน้าผล) / `Core/PixelDigits.cs` ไม่ติด / ห้ามสร้าง string ใน Draw ยังใช้ / ตรวจภาพแคปทุกจุดที่ตัวเลขกว้างขึ้น / เพิ่มบรรทัด turncheck / จบแล้วบันทึก commit push หยุดรอ
 ต่อจากนั้น 16.14 ข้อ 4 บอส (ท่าไม้ตายมีชื่อแทน BIG ATTACK คำใหม่ใส่ `Data/Words.cs`) แล้วข้อ 5 แผนที่ / PLAYTEST FINALE ยัง 1 PERFECT / VFX ทุกชนิดรอภาพอ้างอิง /
-บั๊กเล็กที่เจอ (ยังไม่แก้ `BETA1_DIRECTION.md` 19.7) : การ์ดเพื่อน FRIEND PICK ตัวที่โดนเล็ง INCOMING ทับชื่อท่ายาว (`Screens/BattleScreen.Friends.cs`)
+FRIEND PICK : INCOMING ทับชื่อท่า แก้แล้วในแชทแก้บั๊ก (`0a23147` รายการถัดไป) รอผู้ใช้ Rebuild ดู / ที่แชทนั้นเจอเพิ่มและรอผู้ใช้ตัดสิน (`BETA1_DIRECTION.md` 19.7) : SHIELD บรรทัด `HITS GO TO DUPORT` ล้นขอบการ์ดเพื่อน / แถว THE BAND ซ้ายบน ชื่อท่ายาวทับ `/ 54`
+
+**31 ต.ค. แชทแก้บั๊ก : ✅ การ์ดเพื่อน FRIEND PICK ตัวที่โดนเล็ง INCOMING ไม่ทับชื่อท่าแล้ว (`BETA1_DIRECTION.md` 19.7) รอผู้ใช้ Rebuild ดู**
+✅ การ์ดสูงขึ้น 1 บรรทัด ชื่อท่าอยู่บรรทัดของตัวเอง INCOMING อยู่บรรทัดล่างสุด (`Screens/BattleScreen.Friends.cs`) / build 0/0 turncheck 174/174 ภาพ battlefriend@40 / ชื่อยาวสุดกับ INCOMING 3 หลักไม่ล้นกรอบ
+⚠️ เจอเพิ่ม ยังไม่แก้ รอผู้ใช้ตัดสิน (19.7) : SHIELD บรรทัด `HITS GO TO DUPORT` ล้นขอบขวาการ์ดเพื่อน / แถว THE BAND ซ้ายบน ชื่อท่ายาวทับ `/ 54` (เช่น THUNDER CALL)
+งานถัดไปเหมือนรายการด้านล่าง (16.14 ข้อ 4 บอส เมื่อผู้ใช้สั่ง)
 
 **31 ต.ค. แชท /system (Finalize5) : ✅ 16.14 ข้อ 3 ภาษาทั้งเกม เสร็จ หยุดรอผู้ใช้** (ผู้ใช้ : "เอาตามแนะนำ แต่โปรดลองคิดอีกรอบ..." คำต่อคำ `USER_BRIEFS.md` 13.45 รายละเอียด `BETA1_DIRECTION.md` ข้อ 19)
 ✅ คำกติกาทั้งเกมอยู่ `Data/Words.cs` ที่เดียว (เปลี่ยนคำที่นี่เปลี่ยนทั้งเกม ชื่อในโค้ดกับเซฟยังเป็นคำเดิม) : DISSONANCE เป็น BURN (คิดใหม่จาก CRACK) / CRESCENDO เป็น VOLUME / OFF-BEAT เป็น STUN กับ STUNNED / MUTE เป็น MUTED / GUARD แยกเป็น GUARD ARMOR ARMOR UP / LESSON เป็น FOCUS / SIGNATURE เป็น FINALE (ป้ายบอสบนแผนที่เป็น LAST FIGHT) / BAR เป็น TURN ปุ่ม PLAY / LUTHIER เป็น WORKSHOP (W) / ECHOES เป็น APPLAUSE / เจตนา REST เป็น HEAL / CADENZA เป็น BIG ATTACK / REST บนแผนที่คงไว้ (คิดใหม่แล้ว BACKSTAGE ไม่ชัด)

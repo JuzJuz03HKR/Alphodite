@@ -24,9 +24,10 @@ namespace Tacetno433.Screens
     public partial class BattleScreen
     {
         private const int FriendW = 288;          // a friend's card : the face (112 x 112, drawn at the size it was drawn) and the words
-        private const int FriendH = 128;
+        private const int FriendH = 144;          //   tall enough for the two lines of the foot (The Foot), the face in the middle
         private const int FriendGap = 12;
         private const int FriendFace = 112;
+        private const int FriendLine = 16;        // the foot's two lines of small words, this far apart
         private const int FriendBottom = 584;     // the row's foot, over the words above the commands
         private const float FriendRise = 0.16f;   // seconds for the row to slide up (and down again)
         private const float FriendLift = 18f;     //   from this many pixels lower
@@ -219,8 +220,9 @@ namespace Tacetno433.Screens
                 Gfx.Rect(sb, r.X, r.Y, 5, r.Height, aimColor * a);                                  // the kind's band, like the skill card
                 Gfx.RectOutline(sb, r, (over ? aimColor : Palette.LineGrey * 0.6f) * a, over ? 2 : 1);
 
-                //The Face : the art at the size it was drawn, the empty frame until it comes (docs/UI_ART_PLAN.md 2.1)
-                Rectangle face = new Rectangle(r.X + 12, r.Y + 8, FriendFace, FriendFace);
+                //The Face : the art at the size it was drawn, the empty frame until it comes (docs/UI_ART_PLAN.md 2.1), in the middle
+                //of the card's height
+                Rectangle face = new Rectangle(r.X + 12, r.Y + (r.Height - FriendFace) / 2, FriendFace, FriendFace);
                 Gfx.Rect(sb, face, Palette.CanvasDark * a);
                 ArtBank.DrawOrSlot(sb, UiArt.FaceOf(f.Musician), face, Palette.Paper, a);
 
@@ -251,14 +253,15 @@ namespace Tacetno433.Screens
                 Gfx.Text(sb, Game.Font, friendGets[k], gx, gy, gets * a, TextSize.Label);
                 if (friendMore[k].Length > 0) Gfx.Text(sb, Game.Font, friendMore[k], gx, gy + 17, Palette.PaperDim * a, TextSize.Tiny);
 
-                //The Foot : TACET's mark and the attack aimed at them on the left, the move they have written on the right
+                //The Foot : the move they have written on the right, and on the line under it TACET's mark and the attack aimed at
+                //them on the left. Each has a line of its own, so a long move name (NAPOLEON'S DENT) never runs into INCOMING.
                 float fy = r.Bottom - 15;
+                if (friendMove[k].Length > 0) Gfx.TextRight(sb, Game.Font, friendMove[k], r.Right - 10, fy - 8f - FriendLine, Palette.LineGrey * a, TextSize.Tiny);
                 if (friendIncoming[k].Length > 0)
                 {
                     DrawTargetSign(sb, x + 6f, fy, 6f, Palette.Accent * (pulse * a));
                     Gfx.Text(sb, Game.Font, friendIncoming[k], x + 18f, fy - 8f, Palette.Accent * a, TextSize.Tiny);
                 }
-                if (friendMove[k].Length > 0) Gfx.TextRight(sb, Game.Font, friendMove[k], r.Right - 10, fy - 8f, Palette.LineGrey * a, TextSize.Tiny);
             }
         }
     }
