@@ -40,6 +40,13 @@ become _   ("THE DEVIL'S STRING" -> the_devil_s_string).
 A battle character comes either as an Aseprite sheet (<name>.png + <name>.json, one Tag per
 animation) or as one file per frame (<name>_<animation>_<number>.png, numbers from 0).
 
+SHARED LOOKS (1 Nov) : an enemy with no files of its own wears its look : hush, static, the_damper or
+the_mute_choir (docs/ASSET_LIST.md 1.2, the table in the code is Data/Enemy.cs). The code tells the
+wearers apart with brightness and a small mark of its own, so draw each look once.
+A move with no picture yet is stood in for : skill and parry use attack, hurt shivers, a knock out
+sinks and fades, an enemy's attack rushes at the band, and a set with no idle stands on the first
+frame of its attack. Draw idle and attack first, the rest when there is time.
+
 F3 while playing counts the pictures built through Content.mgcb (ART). The Battle and Ui folders
 are not counted there yet.
 

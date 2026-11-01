@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 1 พ.ย. (แชท /system Finalize10) | ข้อ 2 ทำระบบให้เสร็จ รอบแรก (คำต่อคำ `USER_BRIEFS.md` 13.61) : บั๊ก `PlaceSeed` / ชื่อไฟล์วาทยากร Fanny `the_unsigned` / ศัตรูใช้ภาพของแบบตาม `LOOK_OF` / ท่าแทนเมื่อไม่มีภาพ | `Screens/RouteScreen.cs` `Screens/RunFlow.cs` `Core/ArtBank.cs` `Core/UiArt.cs` `Core/FrameArt.cs` `Data/Conductor.cs` `Data/Enemy.cs` `Data/BattleRules.cs` `Screens/BattleScreen.Stage.cs` (และไฟล์ที่โหลดภาพวาทยากร) `Core/DebugShots*.cs` `docs/asset_list.py` `docs/ASSET_LIST.md` + เอกสารสถานะ |
+| (ว่าง) | | |
 
 ---
 
@@ -63,6 +63,11 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 ---
 
 ## สถานะล่าสุด (1 พ.ย.)
+
+**1 พ.ย. แชท /system (Finalize10) : ✅ งานระบบรอบแรก (ข้อ 1 ถึง 4 ของข้อ 2 ระบบ) เสร็จ หยุดรอผู้ใช้** (คำต่อคำ `USER_BRIEFS.md` 13.61 รายละเอียด `BETA1_DIRECTION.md` 24)
+✅ ลูกเต๋าของห้องสุ่มทุกห้อง `RunState.PickPlace` / ชื่อไฟล์ถาวรของวาทยากร `Conductor.FileKey` (Fanny `the_unsigned`) / ศัตรูไม่มีไฟล์ใส่ภาพของแบบ `Enemy.Looks` แยกด้วย `LookShade` กับเครื่องหมาย `LookMark` (ไม่ใช้ขนาด เหตุผล 24.2) / ท่าแทนเมื่อไม่มีภาพ `PlayArt` `StandInMove` `StandInPose` `FrameArt.StandStill` / ตัวเลข `BattleRules` หัวข้อ Look Feel
+✅ build 0/0 turncheck 188/188 savecheck 40/40 (ใหม่ 3 ข้อ) / ภาพ `battlelooks1` ถึง `3` / `docs/asset_list.py` อ่านตารางภาพร่วมจากโค้ด / งานอยู่บน GitHub / ตาราง "แชทที่กำลังทำงาน" ว่าง
+**ถัดไป** : ผู้ใช้ Rebuild ลอง (24.4) / รอบสอง แผนที่ 16.14 ข้อ 5 เมื่อผู้ใช้สั่ง / ต่อจากนั้นตามลำดับเดิม QoL GUI VFX เสียง / PLAYTEST FINALE ยัง 1 PERFECT (`PlaytestSignatureNeed` ห้ามแก้จนผู้ใช้บอก)
 
 **1 พ.ย. แชท /system (Finalize9) : ✅ รายการงานอาร์ตกับเสียง (ข้อ 1 ของลำดับด้านล่าง) เสร็จ หยุดรอผู้ใช้** (คำต่อคำ `USER_BRIEFS.md` 13.56 รายละเอียด `BETA1_DIRECTION.md` 23)
 ✅ `docs/ASSET_LIST.md` เขียนใหม่ทั้งไฟล์ + `docs/TACET_Asset_List.xlsx` (แท็บ อ่านก่อน Art Animations Sound) ตารางทั้งสองสร้างจาก `docs/asset_list.py` ที่เดียว (แก้รายการที่สคริปต์ ช่องที่ทีมกรอกไม่หาย) / README ใน `Content/Art` กับ `Content/Audio` เขียนใหม่ / ไม่แตะโค้ดเกม

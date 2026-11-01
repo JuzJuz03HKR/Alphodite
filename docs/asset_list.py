@@ -95,8 +95,9 @@ ENEMIES = [
     ("practice", "PRACTICE", "หุ่นซ้อมของไฟต์ฝึก", NORMAL, "ไฟต์ฝึกจาก Tutorial ซึ่งจะทำใหม่ทีหลัง"),
 ]
 # SHARED LOOKS (the user, 1 Nov : 3 or 4 enemy pictures, every enemy kept, the pictures shared). A look is named after
-# its first enemy. An enemy with no file of its own will use its look's file, told apart by shade, size and an effect
-# of its own drawn in code (the world stays grey). The code for that is the systems work, ASSET_LIST.md 9.
+# its first enemy. An enemy with no file of its own wears its look's file, told apart by its brightness and a small mark
+# drawn in code (Data/Enemy.cs Looks LookShade Mark, BETA1_DIRECTION 24). Not by size : pixel art drawn at a size that
+# is not a whole number of pixels gets uneven pixels. The table below (LOOK_OF) is read from that code.
 DESIGNS = [
     ("hush", "แบบที่ 1 เงียบนุ่ม", NORMAL, "HUSH, THE LULL, ROOM TONE, PRACTICE (หุ่นซ้อม)",
      "ตัวเงียบที่ค่อยๆ กลืนเสียง ฮีลตัวเองและคุ้มกันพวก"),
@@ -137,13 +138,12 @@ for key, name, kind, size, line in ENEMIES:
         "THE STRIKE 360×400 / THE TELL 230×220", PIX2, "ไฟต์บอส ตอนเตือนและตอนปล่อยท่าไม้ตาย", 2, stable=False,
         note="หน้าหรือครึ่งตัวของร่างปีศาจ ท่าทางกำลังจะปล่อยท่า")
 
-# 2 the three conductors (ConductorList.Shown 3 8 1, ArtBank : the key is the name on screen)
+# 2 the three conductors (ConductorList.Shown 3 8 1, ArtBank.ConductorKey : a fixed file name, Conductor.FileKey, 1 Nov)
 CONDUCTORS = [("the_unhearing", "THE UNHEARING (Beethoven)", "ฟ้าสายฟ้ากับพายุ"),
               ("the_unsigned", "FANNY MENDELSSOHN AND ??? (Fanny กับเงาของ Felix)", "ผลึกคริสตัลสีรุ้ง Felix เป็นเงาอยู่ขวาของภาพ"),
               ("the_metronome", "THE METRONOME (J. S. Bach)", "แสงศักดิ์สิทธิ์สีทอง ผ้าพันตา รอบตัวมืด")]
 for key, name, theme in CONDUCTORS:
-    fanny = key == "the_unsigned"
-    warn = " / ชื่อนี้ใช้ได้หลังไอริสแก้โค้ดในงานระบบ (ตอนนี้เกมยังหา fanny_mendelssohn_and____)" if fanny else ""
+    warn = ""
     art("conductors", "Content/Art/Conductors/gallery_" + key, name + " ภาพเต็ม", (302, 402), "302×402", PIX1,
         "หน้าเลือกวาทยากร หน้าโปรไฟล์ เสาแรกของหน้าวง CURTAIN CALL", 2, mgcb=True, note=theme + warn)
     art("conductors", "Content/Art/Conductors/face_" + key, name + " หน้า", (224, 224), "224×224", PIX1,
@@ -250,19 +250,19 @@ art("other", "Icon.bmp", "ไอคอนเกม .bmp", (256, 256), "หน้
 
 # Animations : the names FrameArt looks for, and what the battle page plays (BattleScreen.Stage, BattleScreen)
 MUST, TIME, NO, IRIS, FREE = "ต้องมี", "ถ้ามีเวลา", "ไม่วาด", "ไอริสทำ", "ไม่บังคับ"
-MUSICIAN_ANIMS = [("idle", "4–8", "วนซ้ำ", "ทุกช่วงที่ไม่ได้ทำอะไร", MUST),
+MUSICIAN_ANIMS = [("idle", "4–8", "วนซ้ำ", "ทุกช่วงที่ไม่ได้ทำอะไร (ไม่มี ยืนนิ่งที่เฟรมแรกของ attack)", MUST),
                   ("attack", "6–10", "ครั้งเดียว", "ATTACK (บอกเฟรมที่โดน)", MUST),
-                  ("skill", "6–12", "ครั้งเดียว", "สกิล (บอกเฟรมที่โดน) ไม่มีจะให้โค้ดใช้ attack แทน", TIME),
-                  ("parry", "3–6", "ครั้งเดียว", "ปัดตอนศัตรูตี (บอกเฟรมที่โดน) ไม่มีจะให้โค้ดใช้ attack แทน", TIME),
-                  ("hurt", "2–4", "ครั้งเดียว", "เสียเลือด ไม่มีจะให้โค้ดทำตัวสั่นกับแวบแทน", TIME),
-                  ("ko", "4–8", "ค้างเฟรมสุดท้าย", "เลือดหมด ไม่มีจะให้โค้ดทำล้มแล้วจางแทน", TIME),
-                  ("enter", "4–8", "ครั้งเดียว", "สลับคนขึ้นหน้าจอ ไม่มีจะให้โค้ดเลื่อนเข้าแทน", TIME),
+                  ("skill", "6–12", "ครั้งเดียว", "สกิล (บอกเฟรมที่โดน) ไม่มี โค้ดใช้ attack แทน", TIME),
+                  ("parry", "3–6", "ครั้งเดียว", "ปัดตอนศัตรูตี (บอกเฟรมที่โดน) ไม่มี โค้ดใช้ attack แทน", TIME),
+                  ("hurt", "2–4", "ครั้งเดียว", "เสียเลือด ไม่มี โค้ดทำตัวสั่นกับแวบแทน", TIME),
+                  ("ko", "4–8", "ค้างเฟรมสุดท้าย", "เลือดหมด ไม่มี โค้ดให้ค้างนิ่ง จมลงแล้วจางแทน", TIME),
+                  ("enter", "4–8", "ครั้งเดียว", "สลับคนขึ้นหน้าจอ ไม่มี โค้ดเลื่อนเข้าแทน", TIME),
                   ("exit", "3–6", "ครั้งเดียว", "โค้ดยังไม่เรียก", FREE),
                   ("victory", "4–8", "วนซ้ำ", "โค้ดยังไม่เรียก", FREE)]
-ENEMY_ANIMS = [("idle", "4–8", "วนซ้ำ", "ทุกช่วงที่ไม่ได้ทำอะไร", MUST),
-               ("attack", "6–10", "ครั้งเดียว", "ตี (บอกเฟรมที่โดน)", MUST),
-               ("hurt", "2–4", "ครั้งเดียว", "โดนตี ไม่มีจะให้โค้ดทำตัวสั่นกับแวบแทน", TIME),
-               ("death", "4–8", "ครั้งเดียว", "เกมสลายตัวเข้าหลุมให้อยู่แล้ว", FREE)]
+ENEMY_ANIMS = [("idle", "4–8", "วนซ้ำ", "ทุกช่วงที่ไม่ได้ทำอะไร (ไม่มี ยืนนิ่งที่เฟรมแรกของ attack)", MUST),
+               ("attack", "6–10", "ครั้งเดียว", "ตี (บอกเฟรมที่โดน) ไม่มี โค้ดให้พุ่งเข้าหาวงแล้วกลับแทน", MUST),
+               ("hurt", "2–4", "ครั้งเดียว", "โดนตี ไม่มี โค้ดทำตัวสั่นกับแวบแทน", TIME),
+               ("death", "4–8", "ครั้งเดียว", "เกมสลายตัวเข้าหลุมให้อยู่แล้ว (ไม่มี ค้างนิ่งระหว่างสลาย)", FREE)]
 ANIM_COLUMNS = ["idle", "attack", "skill", "parry", "hurt", "ko", "enter", "death", "exit", "victory"]
 
 # PLAN (the user, 1 Nov, USER_BRIEFS 13.57 13.58) : the team draws the 3 conductors, the 5 legends, every boss, 3 or 4
@@ -584,11 +584,57 @@ def sound_md(sec):
     return md_table(["ไฟล์", "เสียงอะไร", "เล่นที่ไหน", "ความยาว", "ลำดับ", "ป้าย", "มีแล้ว", "หมายเหตุ"], rows)
 
 
-# LOOK OF : which shared picture each enemy uses (the systems work puts the same table in the code)
-LOOK_OF = {"hush": "hush", "the_lull": "hush", "room_tone": "hush", "practice": "hush",
-           "static": "static", "stutter": "static", "the_cue": "static",
-           "the_damper": "the_damper", "dead_air": "the_damper",
-           "the_mute_choir": "the_mute_choir", "white_noise": "the_mute_choir", "the_round": "the_mute_choir"}
+# LOOK OF : which shared picture each enemy wears, read from the game's own table (Data/Enemy.cs, SHARED LOOKS 1 Nov) so
+# the list and the game never disagree. LOOKS keeps the whole entry : (the looks in order, brightness, mark).
+MARK_WORDS = {"None": "", "Float": "ลอยเหนือเงา", "Hum": "แสงนวลรอบตัวเต้นช้า", "Jitter": "กระตุกไปข้างเป็นพักๆ",
+              "Flicker": "วูบหายเป็นพักๆ", "Echo": "ภาพซ้อนจางสองชั้นข้างหลัง", "Halo": "แสงขาวข้างหลังเต้นเร็ว"}
+
+
+def read_looks():
+    code = open(os.path.join(GAME, "Data", "Enemy.cs"), encoding="utf-8-sig").read()
+    looks = {}
+    for m in re.finditer(r'new Enemy \{ Name = "([^"]+)",(.*?)(?=new Enemy \{|\};)', code, re.S):
+        block = m.group(2)
+        key = re.sub(r"[^a-z0-9]", "_", m.group(1).lower())
+        names = re.search(r'Looks = new\[\] \{([^}]*)\}', block)
+        shade = re.search(r"LookShade = ([0-9.]+)f", block)
+        mark = re.search(r"Mark = LookMark\.(\w+)", block)
+        looks[key] = (re.findall(r'"([^"]+)"', names.group(1)) if names else [],
+                      float(shade.group(1)) if shade else 1.0, mark.group(1) if mark else "None")
+    return looks
+
+
+LOOKS = read_looks()
+DESIGN_KEYS = [k for k, _, _, _, _ in DESIGNS]
+LOOK_OF = {}
+for _key, _name, _kind, _size, _line in ENEMIES:
+    if _kind.startswith("บอส"):
+        continue
+    if _key not in LOOKS:
+        sys.exit("Data/Enemy.cs has no enemy called " + _name + " (asset_list.py ENEMIES)")
+    _wears = [_key] if _key in DESIGN_KEYS else [k for k in LOOKS[_key][0] if k in DESIGN_KEYS]
+    if not _wears:
+        sys.exit(_name + " wears none of the drawn looks in Data/Enemy.cs (Looks)")
+    LOOK_OF[_key] = _wears[0]
+
+
+def told_apart(key):
+    names, shade, mark = LOOKS[key]
+    words = []
+    if shade < 0.995:
+        words.append("เข้มขึ้น %d%%" % round((1 - shade) * 100))
+    if MARK_WORDS.get(mark):
+        words.append(MARK_WORDS[mark])
+    marks = " + ".join(words) if words else "ไม่แยก (สู้คนเดียวในไฟต์ฝึก)"
+    worn = [k for k in names if k in DESIGN_KEYS]
+    if key in DESIGN_KEYS:
+        text = "ภาพของตัวเอง (แบบนี้ตั้งชื่อตามตัวนี้)"
+        if worn:
+            text += " / ถ้าไม่มีแบบนี้ ใช้ `" + worn[0] + "` " + marks
+        return text
+    if len(worn) > 1:
+        marks += " / ถ้าไม่มีแบบนี้ ใช้ `" + worn[1] + "`"
+    return marks
 
 
 def enemy_map_md():
@@ -597,8 +643,8 @@ def enemy_map_md():
     for key, name, kind, size, line in ENEMIES:
         if kind.startswith("บอส"):
             continue
-        rows.append([name, kind, looks[LOOK_OF[key]] + " `" + LOOK_OF[key] + "`", line])
-    return md_table(["ศัตรู", "ชนิด", "ใช้ภาพ", "คำโปรย (ใช้เป็นแนววาดของแบบนั้น)"], rows)
+        rows.append([name, kind, looks[LOOK_OF[key]] + " `" + LOOK_OF[key] + "`", told_apart(key), line])
+    return md_table(["ศัตรู", "ชนิด", "ใช้ภาพ", "โค้ดแยกตัวด้วย", "คำโปรย (ใช้เป็นแนววาดของแบบนั้น)"], rows)
 
 
 def fill_md():
