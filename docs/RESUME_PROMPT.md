@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| (ว่าง) | | |
+| 1 พ.ย. (แชท /system Finalize10) | ข้อ 2 ทำระบบให้เสร็จ รอบแรก (คำต่อคำ `USER_BRIEFS.md` 13.61) : บั๊ก `PlaceSeed` / ชื่อไฟล์วาทยากร Fanny `the_unsigned` / ศัตรูใช้ภาพของแบบตาม `LOOK_OF` / ท่าแทนเมื่อไม่มีภาพ | `Screens/RouteScreen.cs` `Screens/RunFlow.cs` `Core/ArtBank.cs` `Core/UiArt.cs` `Core/FrameArt.cs` `Data/Conductor.cs` `Data/Enemy.cs` `Data/BattleRules.cs` `Screens/BattleScreen.Stage.cs` (และไฟล์ที่โหลดภาพวาทยากร) `Core/DebugShots*.cs` `docs/asset_list.py` `docs/ASSET_LIST.md` + เอกสารสถานะ |
 
 ---
 
