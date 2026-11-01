@@ -3,24 +3,22 @@ using System.Collections.Generic;
 
 namespace Tacetno433.Data
 {
-    //FloorMap (Beta1, 29 Oct, docs/BETA1_DIRECTION.md 3.1) : the whole floor, made when the floor opens, so the way
-    //through it can be planned (go past the elite or not, find the shop before the boss or not), like Slay the Spire's map.
+    //FloorMap (Beta1, 29 Oct, docs/BETA1_DIRECTION.md 3.1) : the whole floor, made when the floor opens, so the band sees
+    //what lies ahead (a shop three rows on, the boss at the end) and can plan for it.
     //   ROWS   one row for every stage of the floor. Row 1 is the floor's opening (its movement card and the band's new
     //          faces), it holds no places. Rows 2 to the one before the last hold 2 to 4 places, the last row is the boss.
     //   WAYS   every place lists the places of the next row its ways lead to (RouteNode.Next). From the opening every
     //          place of row 2 can be reached.
-    //The route page draws it as rings closing in on TACET's hole (Screens/RouteScreen.cs).
+    //   EVERY WAY OPEN (1 Nov, the user's pick, docs/BETA1_DIRECTION.md 26) : every place leads to every place of the next
+    //          row, so every step of the floor is a real choice. Until then two rows were joined by a STAIRCASE that never
+    //          crossed two ways, and most places had one way on : more than half the steps offered nothing to choose.
+    //The route page draws it as rows across a road closing in on TACET's hole (Screens/RouteScreen.cs).
     //
     //ADVANCED PART : the floor is a DIRECTED ACYCLIC GRAPH (a DAG, docs/report : the chapter on graphs). Directed and
-    //acyclic : a way only leads on to the next row, so the band can never come back to a place.
-    //Two rows are joined by a STAIRCASE : two fingers start on the first place of each row, and every step moves one
-    //finger or both to the next place on their row and draws a way between the places they now touch. The fingers only
-    //ever move to the right, so :
-    //   two ways never cross on the screen (both rows are drawn left to right)
-    //   every place gets at least one way in and one way out (each finger touches every place of its row)
-    //   the two ends of the rows are always joined, so the map never falls apart into pieces
-    //Reachable checks it with a BFS (breadth first search) : it visits row by row from the opening and counts the places
-    //it finds, which has to be every place on the map.
+    //acyclic : a way only leads on to the next row, so the band can never come back to a place. Every pair of rows is
+    //joined completely (each place of one row to each place of the next), a LAYERED graph : a row of 3 and a row of 2
+    //share 3 x 2 = 6 ways. Reachable checks it with a BFS (breadth first search) : it visits row by row from the opening
+    //and counts the places it finds, which has to be every place on the map.
     public class FloorMap
     {
         //Rows : Rows[stage] is one row of places, left to right. Rows[0] and Rows[1] stay empty.
@@ -45,20 +43,14 @@ namespace Tacetno433.Data
             get { return Rows.Length - 1; }
         }
 
-        //Join : the STAIRCASE between two rows (see the top of the file)
-        public static void Join(RouteNode[] from, RouteNode[] to, Random dice)
+        //Join : EVERY WAY OPEN between two rows (see the top of the file), each place of from leads to each place of to.
+        //The ways a place had before are dropped, so a map loaded from an old save opens up the same way.
+        public static void Join(RouteNode[] from, RouteNode[] to)
         {
-            int i = 0;
-            int j = 0;
-            Link(from[0], 0);
-            while (i < from.Length - 1 || j < to.Length - 1)
+            for (int i = 0; i < from.Length; i++)
             {
-                bool canI = i < from.Length - 1;
-                bool canJ = j < to.Length - 1;
-                int step = canI && canJ ? dice.Next(3) : (canI ? 0 : 1);   // 0 the first finger moves, 1 the second, 2 both
-                if (step != 1) i++;
-                if (step != 0) j++;
-                Link(from[i], j);
+                from[i].Next.Clear();
+                for (int j = 0; j < to.Length; j++) Link(from[i], j);
             }
         }
 

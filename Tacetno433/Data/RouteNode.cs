@@ -51,10 +51,10 @@ namespace Tacetno433.Data
 
         public static string[] Captions =
         {
-            BattleRules.TurnBattleOn ? "A fight with TACET. The better you play, the more shards." : "A duel with TACET. Win and take whatever it leaves behind.",
+            BattleRules.TurnBattleOn ? "A fight with TACET. Win it for a star, and shards." : "A duel with TACET. Win and take whatever it leaves behind.",
             "Something is waiting here. A person, a gift, or a fight.",
             BattleRules.TurnBattleOn ? "Spend shards to make the whole band stronger." : "Trade shards for motifs, breath and seats.",
-            "Harder than it looks. More shards, and a gift to choose.",
+            "Harder than it looks. A gift to choose, a star, and more shards.",
             BattleRules.TurnBattleOn ? "Heal up, or rehearse one move for a star. The band chooses one." : "Breathe, or rehearse. The ensemble chooses one.",
             "The last room of this floor. It has been waiting for you.",
             "A door out of this era. The world changes around you.",
@@ -74,6 +74,22 @@ namespace Tacetno433.Data
             "TRAVEL",
             "UPGRADE",
             "FREE"
+        };
+
+        //REWARD WORDS (1 Nov, docs/BETA1_DIRECTION.md 26, the user's pick) : one word under every place on the map, what the
+        //band gets there, so the way is picked at a glance without reading a card. The words of the kinds, not new rules : a
+        //won fight gives its star, an ELITE its gift, a REST its heal. The boss has its name instead.
+        public static string[] Rewards =
+        {
+            Words.Star,    // Battle   (and shards, every fight pays them)
+            "???",         // Event
+            "SHOP",        // Shop
+            Words.Gift,    // Elite    (and a star and shards, it is a fight)
+            Words.Heal,    // Rest     (or a star, the band chooses)
+            "",            // Boss     its name stands beside it (RouteScreen.DrawBossName)
+            "???",         // EraShift never made now
+            Words.Star,    // Luthier  the WORKSHOP's free star for an ATTACK
+            Words.Gift     // Treasure
         };
 
         //Danger : how many of the three diamonds are filled on the panel
@@ -97,6 +113,17 @@ namespace Tacetno433.Data
         public static string CaptionOf(NodeType type)
         {
             return Captions[(int)type];
+        }
+
+        public static string RewardOf(NodeType type)
+        {
+            return Rewards[(int)type];
+        }
+
+        //Is Fight : a place where the band fights for sure (EVERY WAY OPEN : every row of the map has one)
+        public static bool IsFight(NodeType type)
+        {
+            return type == NodeType.Battle || type == NodeType.Elite;
         }
     }
 }

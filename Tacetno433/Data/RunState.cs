@@ -627,7 +627,8 @@ namespace Tacetno433.Data
         }
 
         //Map Build : the whole floor at once (Data/FloorMap.cs). Each row's kinds come from the same weights the paths
-        //were rolled with before the map, the last row is the boss, then the rows are joined by the STAIRCASE.
+        //were rolled with before the map (RowKinds), the last row is the boss, then every place of a row is joined to every
+        //place of the next one (EVERY WAY OPEN, 1 Nov).
         //THE WINGS (BOSSES, Beta1 31 Oct) : the row before the boss is one REST that every way walks into (21.7).
         private void BuildMap()
         {
@@ -638,27 +639,42 @@ namespace Tacetno433.Data
             Map.Rows[1] = new RouteNode[0];                                  // the opening holds no places
             for (int s = 2; s <= stages; s++)
             {
-                bool wings = s == stages - 1;
-                int count = s == stages || wings ? 1 : (s == 2 ? 3 + mapDice.Next(2) : 2 + mapDice.Next(3));   // the first row is wide, 3 or 4
-                RouteNode[] row = new RouteNode[count];
-                for (int c = 0; c < count; c++) row[c] = MakeNode(s == stages ? NodeType.Boss : (wings ? NodeType.Rest : PickType(s)), s, c);
+                List<NodeType> kinds = new List<NodeType>();
+                if (s == stages) kinds.Add(NodeType.Boss);
+                else if (s == stages - 1) kinds.Add(NodeType.Rest);             // THE WINGS
+                else kinds = RowKinds(s, s == 2 ? 3 + mapDice.Next(2) : 2 + mapDice.Next(3));   // the first row rolls 3 or 4
 
-                //Variety Guard : if every place of a row rolled the same, change the first one,
-                //otherwise the player is not really being offered a choice
-                bool allSame = true;
-                for (int c = 1; c < count; c++)
-                    if (row[c].Type != row[0].Type) allSame = false;
-                if (allSame && count > 1) row[0] = MakeNode(row[0].Type == NodeType.Battle ? NodeType.Event : NodeType.Battle, s, 0);
-
+                RouteNode[] row = new RouteNode[kinds.Count];
+                for (int c = 0; c < row.Length; c++) row[c] = MakeNode(kinds[c], s, c);
                 Map.Rows[s] = row;
             }
-            for (int s = 2; s < stages; s++) FloorMap.Join(Map.Rows[s], Map.Rows[s + 1], mapDice);
+            for (int s = 2; s < stages; s++) FloorMap.Join(Map.Rows[s], Map.Rows[s + 1]);
             MapAt = -1;
             MapPath.Clear();
         }
 
+        //Row Kinds (EVERY WAY OPEN, 1 Nov, docs/BETA1_DIRECTION.md 26) : the kinds of one row of places, rolled rolls times.
+        //The band can walk to any place of the row, so the row is one choice, and three rules keep it a real one :
+        //   ONE OF EACH   two places of the same kind would be the same choice twice, so a kind shows once
+        //   TWO AT LEAST  a row of one place is no choice at all
+        //   A FIGHT       every row has a FIGHT or an ELITE : the fights are the heart of the run (the user, 16.14)
+        //A kind that rolls twice is dropped, not rolled again, so the rare kinds (a TREASURE) stay as rare as they were.
+        private List<NodeType> RowKinds(int stage, int rolls)
+        {
+            List<NodeType> kinds = new List<NodeType>();
+            for (int i = 0; i < rolls; i++)
+            {
+                NodeType type = PickType(stage);
+                if (!kinds.Contains(type)) kinds.Add(type);
+            }
+            if (kinds.Count < 2) kinds.Add(kinds[0] == NodeType.Battle ? NodeType.Event : NodeType.Battle);
+            if (!kinds.Contains(NodeType.Battle) && !kinds.Contains(NodeType.Elite)) kinds[kinds.Count - 1] = NodeType.Battle;
+            return kinds;
+        }
+
         //Map Restore : the map a save file wrote down (FloorMap.Write), and the way the band came. A save from before the
-        //map, or a broken line, gets a new map for its floor and the band at its opening.
+        //map, or a broken line, gets a new map for its floor and the band at its opening. EVERY WAY OPEN (1 Nov) : the rows
+        //are joined again whatever ways the save wrote, so a save from the STAIRCASE days opens up too.
         public void RestoreMap(string line, int[] path)
         {
             List<List<KeyValuePair<NodeType, List<int>>>> rows = FloorMap.Read(line);
@@ -680,9 +696,9 @@ namespace Tacetno433.Data
                 {
                     NodeType type = rows[r][c].Key == NodeType.EraShift ? NodeType.Event : rows[r][c].Key;   // NO MORE ERAS : an old save's CROSSING is a ???
                     Map.Rows[s][c] = MakeNode(type, s, c);
-                    Map.Rows[s][c].Next.AddRange(rows[r][c].Value);
                 }
             }
+            for (int s = 2; s < StagesThisFloor; s++) FloorMap.Join(Map.Rows[s], Map.Rows[s + 1]);
             MapPath.Clear();
             for (int i = 0; i < path.Length; i++) MapPath.Add(path[i]);
             MapAt = MapPath.Count > 0 ? MapPath[MapPath.Count - 1] : -1;

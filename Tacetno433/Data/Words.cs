@@ -55,6 +55,8 @@ namespace Tacetno433.Data
         public const string Wings = "THE WINGS";      // BOSSES (Beta1 31 Oct) : the REST just before the boss, rest and rehearse in one
         public const string Applause = "APPLAUSE";    // ECHOES in the code : what a run leaves behind, spent in THE ARCHIVE
         public const string Shards = "SHARDS";
+        public const string Star = "STAR";            // REHEARSAL : one star for one button of the band (a won fight, the WORKSHOP, a REST)
+        public const string Gift = "GIFT";            // MOTIF in the code : what an ELITE, a TREASURE or a boss leaves
 
         //======================================================================================
         //Lines : what each word does, shown after "WORD = ". Plain words, one short line, the numbers from BattleRules.

@@ -496,11 +496,12 @@ namespace Tacetno433.Core
             File.WriteAllText(Path.Combine(outDir, "savecheck.txt"), report);
         }
 
-        //Map Check (Beta1 map) : many floors' maps, each must let every place be reached (BFS), give every place a way on,
-        //and never cross two ways. Then an event's elite takes its place's spot on the map.
+        //Map Check (Beta1 map) : many floors' maps, each must let every place be reached (BFS) and give every place a way on.
+        //EVERY WAY OPEN (1 Nov) : every place leads to every place of the next row (none closed), no row shows a kind twice,
+        //and every row of places has a FIGHT or an ELITE. Then an event's elite takes its place's spot on the map.
         private static string MapCheck(TacetGame game)
         {
-            int unreached = 0, deadEnds = 0, crossings = 0, rowsWrong = 0;
+            int unreached = 0, deadEnds = 0, closed = 0, rowsWrong = 0, twice = 0, noFight = 0;
             for (int m = 0; m < 300; m++)
             {
                 RunState run = new RunState();
@@ -511,18 +512,36 @@ namespace Tacetno433.Core
                 for (int s = 2; s < map.LastRow; s++)
                 {
                     if (s == map.LastRow - 1) { if (map.Count(s) != 1 || map.Rows[s][0].Type != NodeType.Rest) rowsWrong++; }   // THE WINGS
-                    else if (map.Count(s) < 2 || map.Count(s) > 4) rowsWrong++;
+                    else
+                    {
+                        if (map.Count(s) < 2 || map.Count(s) > 4) rowsWrong++;
+                        bool fight = false;
+                        for (int c = 0; c < map.Count(s); c++)
+                        {
+                            if (RouteNodeInfo.IsFight(map.Rows[s][c].Type)) fight = true;
+                            for (int d = c + 1; d < map.Count(s); d++)
+                                if (map.Rows[s][c].Type == map.Rows[s][d].Type) twice++;
+                        }
+                        if (!fight) noFight++;
+                    }
                     for (int c = 0; c < map.Count(s); c++)
                     {
                         if (map.Rows[s][c].Next.Count == 0) deadEnds++;
-                        for (int d = c + 1; d < map.Count(s); d++)
-                            for (int a = 0; a < map.Rows[s][c].Next.Count; a++)
-                                for (int b = 0; b < map.Rows[s][d].Next.Count; b++)
-                                    if (map.Rows[s][c].Next[a] > map.Rows[s][d].Next[b]) crossings++;
+                        if (map.Rows[s][c].Next.Count != map.Count(s + 1)) closed++;
                     }
                 }
             }
-            string report = Same("map reach", "0 0 0 0", unreached + " " + deadEnds + " " + crossings + " " + rowsWrong);
+            string report = Same("map reach", "0 0 0 0 0 0", unreached + " " + deadEnds + " " + closed + " " + rowsWrong + " " + twice + " " + noFight);
+
+            //EVERY WAY OPEN : a save from the STAIRCASE days loads with every way open. Its FIGHT on row 2 led only to the left
+            //place of row 3, and the band stands on it : now both places of row 3 are offered.
+            RunState stairs = new RunState();
+            stairs.Start(ConductorList.Shown[0], game.StoryFont, RouteNodeInfo.CaptionWrapWidth);
+            stairs.StagesThisFloor = 5;
+            stairs.Stage = 3;
+            stairs.RestoreMap("0:0,1:0.1/0:0,3:0/4:0/5:", new int[] { 0 });
+            report += Same("map old ways", "2 Battle Elite 2", stairs.Options.Length + " " + (stairs.Options.Length > 1 ? stairs.Options[0].Type + " " + stairs.Options[1].Type : "-")
+                                                               + " " + stairs.Map.Rows[2][0].Next.Count);
 
             //BOSSES (Beta1 31 Oct) : the last floor's boss is the conductor's own hollow, the other two floors' are two different
             //ones of the other five, 100 runs of each conductor shown

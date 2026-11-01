@@ -15,9 +15,11 @@ namespace Tacetno433.Screens
     //nearest one and the boss waits in front of the hole at the far end. Near rows are big and clear, far ones small and
     //faint, and the hole grows as the band comes closer. Rings on the floor flow slowly into the hole (RIPPLES, drawn in
     //DrawBack, the layer TACET's dark bends), and the screen's edges darken the closer the boss is (GLOOM).
-    //   PLACES   a circle with the kind's letter (RouteNodeInfo.Marks). The ones the band can walk to now are bright and a
-    //            light runs along their ways toward them, the places further on are grey, the ones out of reach fade, the
-    //            places walked through are filled and joined by a solid line.
+    //   PLACES   a circle with the kind's letter (RouteNodeInfo.Marks), and under it one word for what the band gets there
+    //            (REWARD WORDS, RouteNodeInfo.Rewards : STAR GIFT HEAL SHOP ???). EVERY WAY OPEN (1 Nov) : every place of
+    //            the next row can be walked to, those are bright and a light runs along their ways toward them. The rows
+    //            further on are grey (every place on them can be reached later), the places walked through are filled and
+    //            joined by a solid line, the rest of a row the band went through fades.
     //   HERE     where the band stands : a ring of ticks turning round it, or the way in before the first place
     //   BOSS     a big black disc standing in front of the hole, thorns turning round it and a dark beating behind it
     //   WALK     back from a room the camera walks from the last row to the new one, so the way behind slides off the screen
@@ -36,6 +38,9 @@ namespace Tacetno433.Screens
         private const float Funnel = 0.8f;            // the rows narrow toward the boss, the last one before it this much
         private const float Follow = 0.5f;            // the camera leans this much toward the side the band's place is on
         private const float PlaceR = 22f;             // a place of the next row is this big (radius), nearer ones bigger
+        private const float RewardFrom = 15f;         // REWARD WORDS : shown under places at least this big (the next two rows :
+                                                      //   further on the words would slip under the circles of the row in front)
+        private const float RewardGap = 9f;           //   this far under the circle
         private const float BossGap = 0.6f;           // the boss stands this many rows past the last row before it
         private const float HoleGap = 1f;             // TACET's hole lies this many rows past the boss
         private const float HoleSize = 1.05f;         // the hole's size, half across (rows)
@@ -61,8 +66,10 @@ namespace Tacetno433.Screens
         private const int FooterY = 612;
         private Rectangle bandButton = new Rectangle(36, 648, 230, 44);
         private const int CardW = 290;
+        private const int CardH = 340;
         private const int CardArtW = 230;             // the kind's picture, as drawn (docs/UI_ART_PLAN.md 3.3)
         private const int CardArtH = 142;
+        private const int CardTextTop = 16 + CardArtH + 70;   // the card's line starts this far below its top (DrawCard)
 
         //Route State
         private int selected;                         // which of run.Options is chosen
@@ -81,6 +88,7 @@ namespace Tacetno433.Screens
         private string bossName = "";
         private string bossBig = "";
         private string bossCardLine = "";
+        private int bossCardH = CardH;                // its card grows to fit its rule and its BIG ATTACK (they ran into the last line)
         private float cardShown;                      // the card eases in and out
         private RouteNode cardNode;                   // the place the card shows
         private bool[][] ahead = new bool[0][];       // the places the band can still get to from where it stands, made in Load
@@ -170,6 +178,8 @@ namespace Tacetno433.Screens
                 string rule = boss.TraitName.Length > 0 ? Gfx.WrapText(Game.StoryFont, boss.TraitName + " : " + boss.TurnTraitText, CardW - 28, TextSize.StorySmall, 3) : "";
                 string big = boss.BigName.Length > 0 ? Gfx.WrapText(Game.StoryFont, boss.BigName + " : " + boss.BigText, CardW - 28, TextSize.StorySmall, 4) : "";
                 bossCardLine = rule.Length > 0 && big.Length > 0 ? rule + "\n" + big : rule + big;
+                float lines = Game.StoryFont.MeasureString(bossCardLine).Y * TextSize.StorySmall;
+                bossCardH = Math.Max(CardH, CardTextTop + (int)Math.Ceiling(lines) + 36);   // room under it for the last line
             }
 
             //TACET : the hole the whole floor closes in on, and the page's light
@@ -521,8 +531,10 @@ namespace Tacetno433.Screens
             DrawHere(sb, run);
         }
 
-        //Ways : thin lines between the places, like a map of the stars (menu4). The way already walked is solid, the
-        //ways the band can take now are bright with a light running toward the place, the rest are faint.
+        //Ways : thin lines between the places, like a map of the stars (menu4). EVERY WAY OPEN (1 Nov) : every place of a
+        //row leads to every place of the next one, so only two kinds of way are drawn : the way already walked (solid), and
+        //the ways the band can take now (bright, a light running toward each place). The rows further on show their places
+        //alone, every one of them can be reached later, over the faint line across the road under each row (DrawBack).
         //A way fades with its far end and is left out once its near end is behind the camera.
         private void DrawWays(SpriteBatch sb, RunState run)
         {
@@ -535,6 +547,8 @@ namespace Tacetno433.Screens
                 for (int c = 0; c < spots[s].Length; c++)
                 {
                     if (depths[s][c] <= NearestZ) continue;
+                    bool open = s == from && c == run.MapAt;
+                    if (!open && !Walked(run, s, c)) continue;
                     RouteNode node = map.Rows[s][c];
                     Vector2 p = spots[s][c];
                     for (int k = 0; k < node.Next.Count; k++)
@@ -543,12 +557,8 @@ namespace Tacetno433.Screens
                         if (d >= spots[s + 1].Length) continue;
                         Vector2 q = spots[s + 1][d];
                         float far = Far(depths[s + 1][d]) * a;
-                        bool walked = Walked(run, s, c) && Walked(run, s + 1, d);
-                        bool open = s == from && c == run.MapAt;
-                        bool later = Ahead(s, c);
-                        if (walked) Gfx.Line(sb, p, q, Palette.PaperDim * (0.9f * far), 2f);
-                        else if (open) OpenWay(sb, p, q, Array.IndexOf(run.Options, map.Rows[s + 1][d]), far);
-                        else Gfx.Line(sb, p, q, Palette.LineGrey * ((later ? 0.32f : 0.1f) * far), 1f);
+                        if (open) OpenWay(sb, p, q, Array.IndexOf(run.Options, map.Rows[s + 1][d]), far);
+                        else if (Walked(run, s + 1, d)) Gfx.Line(sb, p, q, Palette.PaperDim * (0.9f * far), 2f);
                     }
                 }
             }
@@ -618,6 +628,7 @@ namespace Tacetno433.Screens
                     string mark = RouteNodeInfo.Marks[(int)node.Type];
                     float letter = TextSize.Label * MathHelper.Clamp(size, 0.5f, 1.5f);
                     bool words = r >= 7f;                                                    // too small to read : the circle alone
+                    bool reward = r >= RewardFrom;                                           // REWARD WORDS : the nearer rows only
 
                     if (Walked(run, s, c))
                     {
@@ -639,17 +650,30 @@ namespace Tacetno433.Screens
                         Gfx.CircleOutline(sb, p.X, p.Y, stepped + 4f + 2f * pulse, Palette.Paper * ((0.25f + 0.2f * pulse) * (1f - e) * a), 1f);
                         if (m.Ring < 1f) Gfx.CircleOutline(sb, p.X, p.Y, stepped + 22f * m.Ring, Palette.Paper * ((1f - m.Ring) * 0.8f * a), 1.5f);
                         Gfx.TextCentered(sb, Game.Font, mark, p.X, p.Y - 1f, Color.Lerp(Palette.Paper, Palette.Ink, e) * a, letter);
+                        if (reward) RewardWord(sb, node.Type, p.X, p.Y + stepped, size, Palette.Paper * a);
                         continue;
                     }
 
-                    //Further On, or out of reach. The rest of the band's own row is behind it already : barely there.
+                    //Further On (EVERY WAY OPEN : every place of a later row can still be reached). The rest of the band's own
+                    //row, and of the rows behind it, is passed : barely there.
                     bool passed = s < run.Stage;
                     float k = (Ahead(s, c) ? 1f : (passed ? 0.12f : 0.35f)) * far;
                     Gfx.Circle(sb, p.X, p.Y, r, Palette.Void * (passed ? 0.5f * a : a));
                     Gfx.CircleOutline(sb, p.X, p.Y, r, Palette.LineGrey * k, 1f);
                     if (words && !passed) Gfx.TextCentered(sb, Game.Font, mark, p.X, p.Y - 1f, Palette.PaperDim * k, letter);
+                    if (reward && !passed) RewardWord(sb, node.Type, p.X, p.Y + r, size, Palette.PaperDim * (0.8f * k));
                 }
             }
+        }
+
+        //Reward Word (REWARD WORDS, 1 Nov) : what the band gets at a place, one word centred under its circle (bottom is the
+        //circle's lowest point). The words are made once in RouteNodeInfo.Rewards, nothing is built here.
+        private void RewardWord(SpriteBatch sb, NodeType type, float x, float bottom, float size, Color color)
+        {
+            string word = RouteNodeInfo.RewardOf(type);
+            if (word.Length == 0) return;
+            float near = MathHelper.Clamp(size, 0.8f, 1.15f);
+            Gfx.TextSpacedCentered(sb, Game.Font, word, x, bottom + RewardGap * near, color, TextSize.Tiny * near, 2f * near);
         }
 
         //Boss : the floor's last room, big and frightening (the user's ask). A black disc standing on the floor in front of
@@ -778,7 +802,8 @@ namespace Tacetno433.Screens
             int x = right ? TacetGame.ScreenW - 36 - CardW : 36;
             int y = 150;
             x += (int)Math.Round((1f - a) * (right ? 24f : -24f));
-            Rectangle card = new Rectangle(x, y, CardW, 340);
+            bool isBoss = cardNode.Type == NodeType.Boss && boss != null;                // BOSSES : its name, rule and BIG ATTACK
+            Rectangle card = new Rectangle(x, y, CardW, isBoss ? bossCardH : CardH);
             int type = (int)cardNode.Type;
 
             Gfx.Rect(sb, card, Palette.Panel * (0.94f * a));
@@ -801,12 +826,11 @@ namespace Tacetno433.Screens
                 if (d < RouteNodeInfo.Danger[type]) Gfx.Diamond(sb, px, art.Bottom + 21, 4, Palette.Paper * a);
                 else Gfx.DiamondOutline(sb, px, art.Bottom + 21, 4, Palette.LineGrey * a, 1f);
             }
-            bool isBoss = cardNode.Type == NodeType.Boss && boss != null;                // BOSSES : its name, rule and BIG ATTACK
             Gfx.Text(sb, Game.BigFont, isBoss ? bossName : cardNode.Title, tx, art.Bottom + 38, Palette.Highlight * a, TextSize.Subtitle);
             Gfx.Text(sb, Game.StoryFont, isBoss ? bossCardLine : cardLines[type], tx, art.Bottom + 70, Palette.PaperDim * a, TextSize.StorySmall);
 
-            //Reach : what the band can do about it now
-            string reach = Array.IndexOf(run.Options, cardNode) >= 0 ? "CLICK OR ENTER TO GO" : (cardNode.Row > run.Stage ? "FURTHER ON" : "OUT OF REACH");
+            //Reach : what the band can do about it now (EVERY WAY OPEN : a place further on can always be reached later)
+            string reach = Array.IndexOf(run.Options, cardNode) >= 0 ? "CLICK OR ENTER TO GO" : (cardNode.Row > run.Stage ? "FURTHER ON" : "PASSED");
             Gfx.TextSpaced(sb, Game.Font, reach, tx, card.Bottom - 26, Palette.LineGrey * a, TextSize.Tiny, 2f);
         }
 
