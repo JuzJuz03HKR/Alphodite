@@ -6,6 +6,10 @@ sizes, where each picture shows, which are still missing, and the order to draw 
 The team ticks its work in docs/TACET_Asset_List.xlsx. How to draw them : docs/BATTLE_ART_PLAN.md
 (the battle page) and docs/UI_ART_PLAN.md (every other page).
 
+What the team draws (the user, 1 Nov) : the 3 conductors, the 5 legends, the 6 bosses, 3 or 4 enemy
+looks shared by every enemy, and the logo. Everything else is not drawn : the pages are made to need
+no picture (docs/ASSET_LIST.md, the plan column).
+
 Nothing in this folder is needed for the game to run. A missing picture is drawn as an EMPTY FRAME
 (a faint box with four corner marks) at the exact place and size the picture will have.
 

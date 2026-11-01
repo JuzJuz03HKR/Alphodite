@@ -54,10 +54,11 @@ ART = []
 
 
 def art(sec, path, name, canvas, screen, style, where, prio, stable=True, note="", kind="png",
-        mgcb=False, optional=False, check=True):
+        mgcb=False, optional=False, check=True, size_text=None):
     """path : inside Tacetno433/ without the extension (a set : the character's key, both ways of handing over)."""
     ART.append(dict(sec=sec, path=path, name=name, canvas=canvas, screen=screen, style=style, where=where,
-                    prio=prio, stable=stable, note=note, kind=kind, mgcb=mgcb, optional=optional, check=check))
+                    prio=prio, stable=stable, note=note, kind=kind, mgcb=mgcb, optional=optional, check=check,
+                    size_text=size_text))
 
 
 PIX2 = "pixel ขยาย 2 เท่า"
@@ -93,12 +94,24 @@ ENEMIES = [
     ("the_blind_cantor", "THE BLIND CANTOR", "บอส ร่างปีศาจของ Bach", BOSS, "It plays by touch, one voice after another. ท่าไม้ตาย IN THE DARK"),
     ("practice", "PRACTICE", "หุ่นซ้อมของไฟต์ฝึก", NORMAL, "ไฟต์ฝึกจาก Tutorial ซึ่งจะทำใหม่ทีหลัง"),
 ]
+# SHARED LOOKS (the user, 1 Nov : 3 or 4 enemy pictures, every enemy kept, the pictures shared). A look is named after
+# its first enemy. An enemy with no file of its own will use its look's file, told apart by shade, size and an effect
+# of its own drawn in code (the world stays grey). The code for that is the systems work, ASSET_LIST.md 9.
+DESIGNS = [
+    ("hush", "แบบที่ 1 เงียบนุ่ม", NORMAL, "HUSH, THE LULL, ROOM TONE, PRACTICE (หุ่นซ้อม)",
+     "ตัวเงียบที่ค่อยๆ กลืนเสียง ฮีลตัวเองและคุ้มกันพวก"),
+    ("static", "แบบที่ 2 สัญญาณรบกวน", NORMAL, "STATIC, STUTTER, THE CUE", "ตัวกวน ซ่อนลูกศร แทรกตา เล็งคนที่เพิ่งใช้สกิล"),
+    ("the_damper", "แบบที่ 3 ของหนักกดเสียง", NORMAL, "THE DAMPER, DEAD AIR",
+     "ตัวหนัก ตั้งโล่และชาร์จตีแรง / ถ้าทีมทำได้แค่ 3 แบบ THE DAMPER ใช้แบบที่ 1 DEAD AIR ใช้แบบที่ 2"),
+    ("the_mute_choir", "แบบ elite คณะร้องไร้เสียง", ELITE, "THE MUTE CHOIR, WHITE NOISE, THE ROUND", "elite ทั้ง 3 ตัว ตัวใหญ่กว่า"),
+]
+for key, name, size, users, line in DESIGNS:
+    art("enemies", "Content/Art/Battle/Enemies/" + key, name, size[0], size[1], PIX2, "หน้าต่อสู้ ฝั่งขวา", 3,
+        kind="set", note="ใช้กับ " + users + " / " + line)
 for key, name, kind, size, line in ENEMIES:
-    boss = kind.startswith("บอส")
-    prio = 1 if key == "practice" else (2 if boss else 3)
-    where = "หน้าต่อสู้บอส" if boss else ("ไฟต์ฝึก" if key == "practice" else "หน้าต่อสู้ ฝั่งขวา")
-    art("enemies", "Content/Art/Battle/Enemies/" + key, name + " (" + kind + ")", size[0], size[1], PIX2, where, prio,
-        stable=key != "practice", kind="set", note=line)
+    if kind.startswith("บอส"):
+        art("enemies", "Content/Art/Battle/Enemies/" + key, name + " (" + kind + ")", size[0], size[1], PIX2,
+            "หน้าต่อสู้บอส", 2, kind="set", note=line)
 
 # 1.3 backdrops, one set per movement (MovementList.Names), four layers (BattleScreen.Stage layerFile)
 MOVEMENTS = [("prelude", "PRELUDE ชั้น 1"), ("nocturne", "NOCTURNE ชั้น 2"), ("coda", "CODA ชั้น 3")]
@@ -126,11 +139,11 @@ for key, name, kind, size, line in ENEMIES:
 
 # 2 the three conductors (ConductorList.Shown 3 8 1, ArtBank : the key is the name on screen)
 CONDUCTORS = [("the_unhearing", "THE UNHEARING (Beethoven)", "ฟ้าสายฟ้ากับพายุ"),
-              ("fanny_mendelssohn_and____", "FANNY MENDELSSOHN AND ??? (Fanny กับเงาของ Felix)", "ผลึกคริสตัลสีรุ้ง Felix เป็นเงาอยู่ขวาของภาพ"),
+              ("the_unsigned", "FANNY MENDELSSOHN AND ??? (Fanny กับเงาของ Felix)", "ผลึกคริสตัลสีรุ้ง Felix เป็นเงาอยู่ขวาของภาพ"),
               ("the_metronome", "THE METRONOME (J. S. Bach)", "แสงศักดิ์สิทธิ์สีทอง ผ้าพันตา รอบตัวมืด")]
 for key, name, theme in CONDUCTORS:
-    fanny = key.startswith("fanny")
-    warn = " / ชื่อไฟล์นี้มาจากชื่อบนจอ ไอริสเสนอเปลี่ยนเป็น the_unsigned" if fanny else ""
+    fanny = key == "the_unsigned"
+    warn = " / ชื่อนี้ใช้ได้หลังไอริสแก้โค้ดในงานระบบ (ตอนนี้เกมยังหา fanny_mendelssohn_and____)" if fanny else ""
     art("conductors", "Content/Art/Conductors/gallery_" + key, name + " ภาพเต็ม", (302, 402), "302×402", PIX1,
         "หน้าเลือกวาทยากร หน้าโปรไฟล์ เสาแรกของหน้าวง CURTAIN CALL", 2, mgcb=True, note=theme + warn)
     art("conductors", "Content/Art/Conductors/face_" + key, name + " หน้า", (224, 224), "224×224", PIX1,
@@ -227,26 +240,54 @@ for key, word in ROUTES:
 art("other", "Content/Art/Baton/baton", "ไม้บาตอง", None, "ยาว 118 หมุนตามการตวัด", PIX1,
     "เคอร์เซอร์ตอนตวัดไม้ในวงแหวน QTE", 2, mgcb=True,
     note="วาดตั้งขึ้น ด้ามล่าง ปลายบน แคนวาสสูง 118 กว้างตามรูป (เกมยืดความสูงภาพเป็น 118)")
+art("other", "Content/Art/Ui/logo", "โลโก้เกม", None, "หน้า Title", PIX1,
+    "หน้า Title แทนชื่อเกมที่เป็นตัวอักษรตอนนี้ และใช้ทำไอคอนเกม", 3, stable=False, check=False,
+    size_text="แนะนำไม่เกิน 480×200", note="ทีมส่งพร้อมงานอาร์ต / ยังไม่มีช่องในโค้ด ไอริสทำช่องตอนงาน GUI แล้วบอกขนาดแน่นอน พื้นหลังโปร่งใส")
 art("other", "Icon.ico", "ไอคอนเกม .ico", None, "ไฟล์ .exe และทาสก์บาร์", "ไอคอน",
-    "ไอคอนของไฟล์เกม", 2, kind="gameicon", note="ไฟล์เดียวใส่หลายขนาด 16 32 48 256 / ตอนนี้ยังเป็นโลโก้ MonoGame")
+    "ไอคอนของไฟล์เกม", 2, kind="gameicon", note="ไอริสทำจากโลโก้ (ไฟล์เดียวใส่ 16 32 48 256) / ตอนนี้ยังเป็นโลโก้ MonoGame")
 art("other", "Icon.bmp", "ไอคอนเกม .bmp", (256, 256), "หน้าต่างเกม", "ไอคอน",
-    "ไอคอนของหน้าต่างเกม", 2, kind="gameicon", note="ภาพเดียวกับ .ico ขนาด 256×256 / ตอนนี้ยังเป็นโลโก้ MonoGame")
+    "ไอคอนของหน้าต่างเกม", 2, kind="gameicon", note="ไอริสทำจากโลโก้ 256×256 / ตอนนี้ยังเป็นโลโก้ MonoGame")
 
 # Animations : the names FrameArt looks for, and what the battle page plays (BattleScreen.Stage, BattleScreen)
-MUSICIAN_ANIMS = [("idle", "4–8", "วนซ้ำ", "ทุกช่วงที่ไม่ได้ทำอะไร", False),
-                  ("attack", "6–10", "ครั้งเดียว", "ATTACK (บอกเฟรมที่โดน)", False),
-                  ("skill", "6–12", "ครั้งเดียว", "สกิล ไม่มีใช้ attack แทน (บอกเฟรมที่โดน)", False),
-                  ("parry", "3–6", "ครั้งเดียว", "ปัดตอนศัตรูตี (บอกเฟรมที่โดน)", False),
-                  ("hurt", "2–4", "ครั้งเดียว", "เสียเลือด", False),
-                  ("ko", "4–8", "ค้างเฟรมสุดท้าย", "เลือดหมด", False),
-                  ("enter", "4–8", "ครั้งเดียว", "สลับคนขึ้นหน้าจอ", False),
-                  ("exit", "3–6", "ครั้งเดียว", "ไม่บังคับ โค้ดยังไม่เรียก (ไม่มีโค้ดเลื่อนออกเอง)", True),
-                  ("victory", "4–8", "วนซ้ำ", "ไม่บังคับ โค้ดยังไม่เรียก", True)]
-ENEMY_ANIMS = [("idle", "4–8", "วนซ้ำ", "ทุกช่วงที่ไม่ได้ทำอะไร", False),
-               ("attack", "6–10", "ครั้งเดียว", "ตี (บอกเฟรมที่โดน)", False),
-               ("hurt", "2–4", "ครั้งเดียว", "โดนตี", False),
-               ("death", "4–8", "ครั้งเดียว", "ไม่บังคับ เกมสลายตัวเข้าหลุมให้อยู่แล้ว", True)]
+MUST, TIME, NO, IRIS, FREE = "ต้องมี", "ถ้ามีเวลา", "ไม่วาด", "ไอริสทำ", "ไม่บังคับ"
+MUSICIAN_ANIMS = [("idle", "4–8", "วนซ้ำ", "ทุกช่วงที่ไม่ได้ทำอะไร", MUST),
+                  ("attack", "6–10", "ครั้งเดียว", "ATTACK (บอกเฟรมที่โดน)", MUST),
+                  ("skill", "6–12", "ครั้งเดียว", "สกิล (บอกเฟรมที่โดน) ไม่มีจะให้โค้ดใช้ attack แทน", TIME),
+                  ("parry", "3–6", "ครั้งเดียว", "ปัดตอนศัตรูตี (บอกเฟรมที่โดน) ไม่มีจะให้โค้ดใช้ attack แทน", TIME),
+                  ("hurt", "2–4", "ครั้งเดียว", "เสียเลือด ไม่มีจะให้โค้ดทำตัวสั่นกับแวบแทน", TIME),
+                  ("ko", "4–8", "ค้างเฟรมสุดท้าย", "เลือดหมด ไม่มีจะให้โค้ดทำล้มแล้วจางแทน", TIME),
+                  ("enter", "4–8", "ครั้งเดียว", "สลับคนขึ้นหน้าจอ ไม่มีจะให้โค้ดเลื่อนเข้าแทน", TIME),
+                  ("exit", "3–6", "ครั้งเดียว", "โค้ดยังไม่เรียก", FREE),
+                  ("victory", "4–8", "วนซ้ำ", "โค้ดยังไม่เรียก", FREE)]
+ENEMY_ANIMS = [("idle", "4–8", "วนซ้ำ", "ทุกช่วงที่ไม่ได้ทำอะไร", MUST),
+               ("attack", "6–10", "ครั้งเดียว", "ตี (บอกเฟรมที่โดน)", MUST),
+               ("hurt", "2–4", "ครั้งเดียว", "โดนตี ไม่มีจะให้โค้ดทำตัวสั่นกับแวบแทน", TIME),
+               ("death", "4–8", "ครั้งเดียว", "เกมสลายตัวเข้าหลุมให้อยู่แล้ว", FREE)]
 ANIM_COLUMNS = ["idle", "attack", "skill", "parry", "hurt", "ko", "enter", "death", "exit", "victory"]
+
+# PLAN (the user, 1 Nov, USER_BRIEFS 13.57 13.58) : the team draws the 3 conductors, the 5 legends, every boss, 3 or 4
+# enemy looks and the logo, in two tiers. Everything else is not drawn : the pages are made to need no picture.
+def plan_of(r):
+    name = os.path.basename(r["path"])
+    if r["kind"] == "gameicon":
+        return IRIS                                   # made from the team's logo
+    if r["sec"] == "musicians":
+        return MUST
+    if r["sec"] == "enemies":
+        return TIME if name == "the_damper" else MUST
+    if r["sec"] == "bosscut":
+        return TIME
+    if r["sec"] == "conductors":
+        return MUST if name.startswith("gallery_") else TIME
+    if r["sec"] == "uimusicians":
+        return MUST if name.startswith("bust_") else TIME
+    if name == "logo":
+        return MUST
+    return NO                                         # stages, icons, places, events, route cards, the baton
+
+
+for r in ART:
+    r["plan"] = plan_of(r)
 
 # ---------------------------------------------------------------------------------------------
 # SOUND
@@ -433,6 +474,8 @@ for r in SOUND:
 
 def canvas_text(r):
     c = r["canvas"]
+    if r.get("size_text"):
+        return r["size_text"]
     if r["kind"] == "gameicon" and r["path"].endswith(".ico"):
         return "16 32 48 256"
     return "%d×%d" % tuple(c) if c else "สูง 118"
@@ -478,27 +521,26 @@ def md_table(head, rows):
 SECTIONS = [("musicians", "1.1 นักดนตรีในฉากต่อสู้"), ("enemies", "1.2 ศัตรูและบอสในฉากต่อสู้"),
             ("stages", "1.3 ฉากหลัง"), ("bosscut", "1.4 ภาพ cut in ของบอส"), ("conductors", "2 วาทยากร"),
             ("uimusicians", "3 เสาภาพและหน้านักดนตรี"), ("icons", "4 ไอคอน"), ("legendicons", "4 ไอคอนร่างในตำนาน"),
-            ("places", "5 สถานที่ เหตุการณ์ การ์ดห้อง"), ("other", "6 ไม้บาตองและไอคอนเกม")]
+            ("places", "5 สถานที่ เหตุการณ์ การ์ดห้อง"), ("other", "6 โลโก้ ไม้บาตอง ไอคอนเกม")]
 
 
 def summary_md():
     rows = []
     for sec, title in SECTIONS:
         items = [r for r in ART if r["sec"] == sec]
-        need = [r for r in items if not r["optional"]]
-        top = max(r["prio"] for r in items)
-        rows.append([title, len(need), len(items) - len(need), sum(1 for r in items if r["done"]), STARS[top]])
-    need = [r for r in ART if not r["optional"]]
-    rows.append(["**รวมภาพ**", "**%d**" % len(need), "**%d**" % (len(ART) - len(need)),
-                 "**%d**" % sum(1 for r in ART if r["done"]), ""])
+        rows.append([title] + [sum(1 for r in items if r["plan"] == p) for p in (MUST, TIME, NO, IRIS)]
+                    + [sum(1 for r in items if r["done"])])
+    rows.append(["**รวมภาพ**"] + ["**%d**" % sum(1 for r in ART if r["plan"] == p) for p in (MUST, TIME, NO, IRIS)]
+                + ["**%d**" % sum(1 for r in ART if r["done"])])
+    text = md_table(["หมวดภาพ", MUST, TIME, NO + " (เกมไม่ต้องมีภาพ)", IRIS, "มีแล้ว"], rows)
+    rows = []
     for sec, title in [("music", "S1 เพลง"), ("sfx_now", "S2 เสียงที่โค้ดเล่นแล้ว"), ("sfx_new", "S3 เสียงที่ต้องมีเพิ่ม (ข้อเสนอ)")]:
         items = [r for r in SOUND if r["sec"] == sec]
         need = [r for r in items if not r["optional"]]
-        rows.append([title, len(need), len(items) - len(need), sum(1 for r in items if r["done"]),
-                     STARS[max(r["prio"] for r in items)]])
-    text = md_table(["หมวด", "ต้องทำ", "ไม่บังคับ", "มีแล้ว", "สำคัญสุดในหมวด"], rows)
+        rows.append([title, len(need), len(items) - len(need), sum(1 for r in items if r["done"])])
+    text += "\n\n" + md_table(["หมวดเสียง", "ต้องทำ", "ไม่บังคับ", "มีแล้ว"], rows)
     sets = [r for r in ART if r["kind"] == "set"]
-    text += ("\n\nตัวละครในฉากต่อสู้ %d ตัวนับเป็นชุดละ 1 แถว (นักดนตรี 5 คน คนละ 7 ท่าบังคับ ศัตรู 18 ตัว ตัวละ 3 ท่าบังคับ รายท่าอยู่แท็บ Animations)"
+    text += ("\n\nตัวละครในฉากต่อสู้ %d ชุด (นักดนตรี 5 ศัตรู 4 แบบที่ใช้ร่วมกัน บอส 6) ท่า idle กับ attack ต้องมี ท่าอื่นถ้ามีเวลา รายท่าอยู่แท็บ Animations"
              % len(sets))
     text += "\nตัวเลขในตารางนี้สร้างตอนรันสคริปต์ล่าสุด (" + UPDATED + ")"
     return text
@@ -510,8 +552,8 @@ def art_md(sec):
         if r["sec"] != sec:
             continue
         rows.append(["`" + file_text(r) + "`", r["name"], canvas_text(r), r["screen"], r["where"],
-                     STARS[r["prio"]], label(r), r["have"], r["note"]])
-    head = ["ไฟล์", "คืออะไร", "วาด (px)", "บนจอ", "ใช้ที่", "ลำดับ", "ป้าย", "มีแล้ว", "หมายเหตุ"]
+                     r["plan"], label(r), r["have"], r["note"]])
+    head = ["ไฟล์", "คืออะไร", "วาด (px)", "บนจอ", "ใช้ที่", "แผน", "ป้าย", "มีแล้ว", "หมายเหตุ"]
     folders = sorted(set(folder_text(r) for r in ART if r["sec"] == sec))
     items = [r for r in ART if r["sec"] == sec]
     mg = [r for r in items if r["mgcb"]]
@@ -528,7 +570,7 @@ def art_md(sec):
 
 
 def anims_md(anims):
-    return md_table(["ท่า", "เฟรมที่แนะนำ", "เล่นแบบ", "เกมเล่นตอน"], [[a, f, p, w] for a, f, p, w, _ in anims])
+    return md_table(["ท่า", "เฟรมที่แนะนำ", "เล่นแบบ", "เกมเล่นตอน", "แผน"], [[a, f, p, w, plan] for a, f, p, w, plan in anims])
 
 
 def sound_md(sec):
@@ -542,9 +584,27 @@ def sound_md(sec):
     return md_table(["ไฟล์", "เสียงอะไร", "เล่นที่ไหน", "ความยาว", "ลำดับ", "ป้าย", "มีแล้ว", "หมายเหตุ"], rows)
 
 
+# LOOK OF : which shared picture each enemy uses (the systems work puts the same table in the code)
+LOOK_OF = {"hush": "hush", "the_lull": "hush", "room_tone": "hush", "practice": "hush",
+           "static": "static", "stutter": "static", "the_cue": "static",
+           "the_damper": "the_damper", "dead_air": "the_damper",
+           "the_mute_choir": "the_mute_choir", "white_noise": "the_mute_choir", "the_round": "the_mute_choir"}
+
+
+def enemy_map_md():
+    looks = {k: n for k, n, _, _, _ in DESIGNS}
+    rows = []
+    for key, name, kind, size, line in ENEMIES:
+        if kind.startswith("บอส"):
+            continue
+        rows.append([name, kind, looks[LOOK_OF[key]] + " `" + LOOK_OF[key] + "`", line])
+    return md_table(["ศัตรู", "ชนิด", "ใช้ภาพ", "คำโปรย (ใช้เป็นแนววาดของแบบนั้น)"], rows)
+
+
 def fill_md():
     text = open(MD, encoding="utf-8").read()
     blocks = {"summary": summary_md(), "musician_anims": anims_md(MUSICIAN_ANIMS), "enemy_anims": anims_md(ENEMY_ANIMS),
+              "enemy_map": enemy_map_md(),
               "music": sound_md("music"), "sfx_now": sound_md("sfx_now"), "sfx_new": sound_md("sfx_new")}
     for sec, _ in SECTIONS:
         blocks[sec] = art_md(sec)
@@ -573,7 +633,7 @@ ART_COLS = [  # (Thai header, English header, width, team column?)
     ("#", "#", 5, False), ("ชื่อไฟล์", "Code ID", 30, False), ("หมวด", "Section", 22, False),
     ("ชื่อตัวละคร/ของ", "Name", 34, False), ("ขนาดวาด (px)", "Scale", 12, False), ("ขนาดบนจอ", "In-game size", 18, False),
     ("รูปแบบภาพ", "Type", 16, False), ("โฟลเดอร์ในเกม", "Game folder", 34, False), ("ต้องเพิ่มใน Content.mgcb", "mgcb", 10, False),
-    ("ใช้ที่หน้า", "Where", 36, False), ("ลำดับ", "Priority", 9, False), ("ป้าย", "Stable", 14, False),
+    ("ใช้ที่หน้า", "Where", 36, False), ("แผน", "Plan", 11, False), ("ป้าย", "Stable", 14, False),
     ("มีในเกมแล้ว", "In game", 22, False), ("สถานะการดำเนินงาน", "Status", 14, True),
     ("กำหนดส่ง", "Start - Deadline", 20, True), ("ชนิดไฟล์ที่ส่ง", ".File", 16, False),
     ("ที่อยู่ไฟล์ส่งงาน", "Link", 26, True), ("หมายเหตุจากไอริส", "Note", 46, False), ("หมายเหตุของทีม", "Comment", 30, True)]
@@ -603,7 +663,7 @@ def old_team_values():
             if not key:
                 continue
             for c, head in zip(row, heads):
-                if head in TEAM_HEADS and c.value is not None:
+                if head in TEAM_HEADS and c.value is not None and c.value != "NonStart":   # NonStart is where every row starts
                     kept[(sheet, key, head)] = c.value
     return kept
 
@@ -647,6 +707,13 @@ def have_rule(ws, col_letter, last):
                                                    font=Font(name=FONT, size=9, color="38761D", bold=True)))
 
 
+def start_status(r):
+    """the team's word a row starts with : None when it is not drawn, Done when the file is already in the game"""
+    if r["plan"] in (NO, IRIS):
+        return "None"
+    return "Done" if r["done"] else "NonStart"
+
+
 def write_art(wb, kept):
     ws = wb.create_sheet("Art")
     style_head(ws, ART_COLS)
@@ -656,12 +723,14 @@ def write_art(wb, kept):
         row = n + 2
         key = file_text(r)
         values = [n, key, titles[r["sec"]], r["name"], canvas_text(r), r["screen"], r["style"], folder_text(r),
-                  "ต้อง" if r["mgcb"] else "ไม่ต้อง", r["where"], STARS[r["prio"]], label(r), r["have"],
-                  kept.get(("Art", key, "Status"), "NonStart"), kept.get(("Art", key, "Start - Deadline")),
+                  "ต้อง" if r["mgcb"] else "ไม่ต้อง", r["where"], r["plan"], label(r), r["have"],
+                  kept.get(("Art", key, "Status"), start_status(r)), kept.get(("Art", key, "Start - Deadline")),
                   "PNG + JSON (Aseprite)" if r["kind"] == "set" else ("ICO / BMP" if r["kind"] == "gameicon" else "PNG"),
                   kept.get(("Art", key, "Link")), r["note"], kept.get(("Art", key, "Comment"))]
         for col, (value, (_, en, _, team)) in enumerate(zip(values, ART_COLS), start=1):
-            put(ws, row, col, value, team=team, center=en in ("#", "Scale", "mgcb", "Priority", "Status"))
+            c = put(ws, row, col, value, team=team, center=en in ("#", "Scale", "mgcb", "Plan", "Status"))
+            if r["plan"] == NO and not team:
+                c.font = Font(name=FONT, size=9, color="7F7F7F")      # grey : not drawn
     last = len(ART) + 2
     ws.auto_filter.ref = "A2:%s%d" % (ws.cell(row=2, column=len(ART_COLS)).column_letter, last)
     status_rules(ws, "N3:N%d" % last)
@@ -676,9 +745,8 @@ def write_animations(wb, kept):
     cols += [("เฟรมที่โดน (attack skill parry)", "Hit frames", 24, True), ("หมายเหตุของทีม", "Comment", 30, True)]
     style_head(ws, cols)
     ws.freeze_panes = "B3"
-    musician = {a for a, _, _, _, _ in MUSICIAN_ANIMS}
-    enemy = {a for a, _, _, _, _ in ENEMY_ANIMS}
-    optional = {a for a, _, _, _, o in MUSICIAN_ANIMS + ENEMY_ANIMS if o}
+    musician = {a: plan for a, _, _, _, plan in MUSICIAN_ANIMS}
+    enemy = {a: plan for a, _, _, _, plan in ENEMY_ANIMS}
     sets = [r for r in ART if r["kind"] == "set"]
     for n, r in enumerate(sets, start=1):
         row = n + 2
@@ -689,20 +757,20 @@ def write_animations(wb, kept):
         put(ws, row, 3, canvas_text(r), center=True)
         for i, a in enumerate(ANIM_COLUMNS):
             col = 4 + i
-            fits = a in (musician if is_musician else enemy)
-            if not fits:
+            plan = (musician if is_musician else enemy).get(a)
+            if plan is None:
                 c = put(ws, row, col, "-", center=True)
                 c.fill = NA_FILL
                 continue
-            c = put(ws, row, col, kept.get(("Animations", key, a), "NonStart"), team=True, center=True)
-            if a in optional:
+            c = put(ws, row, col, kept.get(("Animations", key, a), "None" if plan == FREE else "NonStart"), team=True, center=True)
+            if plan != MUST:
                 c.font = Font(name=FONT, size=9, italic=True, color="7F7F7F")
         put(ws, row, 4 + len(ANIM_COLUMNS), kept.get(("Animations", key, "Hit frames")), team=True)
         put(ws, row, 5 + len(ANIM_COLUMNS), kept.get(("Animations", key, "Comment")), team=True)
     last = len(sets) + 2
     status_rules(ws, "D3:%s%d" % (ws.cell(row=3, column=3 + len(ANIM_COLUMNS)).column_letter, last))
     note = last + 2
-    put(ws, note, 1, "ตัวเอียงสีเทา = ท่าไม่บังคับ / ช่อง - = ตัวละครชนิดนี้ไม่มีท่านี้ / เฟรมที่โดนเขียนแบบ attack 5, skill 7, parry 2 (นับจาก 0)")
+    put(ws, note, 1, "ตัวปกติ = ต้องมี (idle attack) / ตัวเอียงสีเทา = ถ้ามีเวลา หรือไม่บังคับ / ช่อง - = ตัวละครชนิดนี้ไม่มีท่านี้ / เฟรมที่โดนเขียนแบบ attack 5, skill 7, parry 2 (นับจาก 0)")
     ws.merge_cells(start_row=note, start_column=1, end_row=note, end_column=8)
     return last
 
@@ -745,7 +813,8 @@ def write_readme(ws, art_last, anim_last, sound_last):
         ("ชื่อไฟล์", "ตัวพิมพ์เล็ก เว้นวรรคและเครื่องหมายเป็น _ ใช้ตามคอลัมน์ชื่อไฟล์ตรงตัว"),
         ("ส่งงาน", "Content/Art/Battle และ Content/Art/Ui วางไฟล์แล้ว Rebuild ได้เลย / ชิ้นที่คอลัมน์ mgcb เขียนว่า ต้อง ให้เพิ่มใน Content.mgcb ด้วย / ส่งให้ผู้ใช้หรือไอริสวางให้ก็ได้"),
         ("ป้าย", "นิ่ง = ชื่อกับขนาดไม่เปลี่ยนแล้ว / อาจเปลี่ยน = รองานจัดหน้าจอรอบสุดท้าย / ไม่บังคับ = ไม่มีเกมก็ทำงานครบ"),
-        ("ลำดับ", "⭐⭐⭐ เห็นตลอด ช่วยให้คนเล่นครั้งแรกอ่านเกมออก ทำก่อน / ⭐⭐ เห็นบ่อย / ⭐ ทำทีหลัง"),
+        ("ขอบเขตที่ทีมวาด (1 พ.ย.)", "วาทยากร 3 คน นักดนตรี 5 คน บอสทั้ง 6 ตัว ศัตรู 3 ถึง 4 แบบที่ศัตรูทุกตัวใช้ร่วมกัน และโลโก้เกม ที่เหลือเกมออกแบบให้ไม่ต้องมีภาพ"),
+        ("แผน", "ต้องมี = ทีมวาดแน่ / ถ้ามีเวลา = ไม่มีไอริสตัดจากภาพหลักของทีมหรือให้โค้ดทำท่าแทน / ไม่วาด = เกมไม่ต้องมีภาพ สถานะเริ่มที่ None / ไอริสทำ = ไอคอนเกมทำจากโลโก้"),
         ("ไฟล์เก่า", "TACET_UI_Asset_List.xlsx (8 ต.ค. UI skin 126 ไฟล์) เป็นของหน้าจอ Alpha6 เกม Beta1 ไม่โหลดภาพพวกนั้น ใช้ไฟล์นี้แทน"),
     ]
     row = 2
@@ -777,6 +846,8 @@ def write_readme(ws, art_last, anim_last, sound_last):
         ("ภาพทั้งหมด (แถว)", "=COUNTA(Art!B3:B%d)" % art_last),
         ("ภาพที่ไม่บังคับ", '=COUNTIF(Art!L3:L%d,"*ไม่บังคับ*")' % art_last),
         ("ภาพที่มีในเกมแล้ว", '=COUNTIF(Art!M3:M%d,"มีแล้ว*")' % art_last),
+        ("ภาพที่ทีมต้องวาด (ต้องมี)", '=COUNTIF(Art!K3:K%d,"ต้องมี")' % art_last),
+        ("ภาพถ้ามีเวลา", '=COUNTIF(Art!K3:K%d,"ถ้ามีเวลา")' % art_last),
         ("ภาพสถานะ Done", '=COUNTIF(Art!N3:N%d,"Done")' % art_last),
         ("ภาพสถานะ In Progress", '=COUNTIF(Art!N3:N%d,"In Progress")' % art_last),
         ("ท่าของตัวละคร (ทุกช่อง รวมท่าไม่บังคับ)", '=COUNTA(Animations!D3:M%d)-COUNTIF(Animations!D3:M%d,"-")' % (anim_last, anim_last)),
@@ -809,7 +880,8 @@ def write_xlsx():
 if __name__ == "__main__":
     fill_md()
     kept = write_xlsx()
-    need = sum(1 for r in ART if not r["optional"])
-    print("art rows %d (%d needed, %d done) / sound rows %d / team cells typed and kept %d"
-          % (len(ART), need, sum(1 for r in ART if r["done"]), len(SOUND), kept))
+    print("art rows %d (must %d, if time %d, not drawn %d, made by Iris %d, in the game %d) / sound rows %d / team cells typed and kept %d"
+          % (len(ART), sum(1 for r in ART if r["plan"] == MUST), sum(1 for r in ART if r["plan"] == TIME),
+             sum(1 for r in ART if r["plan"] == NO), sum(1 for r in ART if r["plan"] == IRIS),
+             sum(1 for r in ART if r["done"]), len(SOUND), kept))
     print("wrote", os.path.relpath(MD, REPO), "and", os.path.relpath(XLSX, REPO))
