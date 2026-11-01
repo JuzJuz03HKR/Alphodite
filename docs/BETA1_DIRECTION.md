@@ -1925,11 +1925,11 @@ MAESTRO
 - ค) **คงไว้** ดูอีกทีตอน G เพราะเงินเฟ้อแก้ใน G แล้วทางจ่ายเงินจะกลับมามีความหมาย
 - ลำดับ : ทำหลัง A3 เสร็จและผู้ใช้ลองแล้ว ตามวิธีทำงานทีละข้อ (13.40)
 
-### 27.5 รอผู้ใช้เลือก
-1. MAESTRO : ก ENCORE แยกตามวาทยากร / ข ENCORE บันไดเดียว / ค คง MAESTRO
-2. THE ARCHIVE : ก คงไว้ / ข เอาออก / ค ปลดของใหม่
-3. MEMORY : ตัด / เก็บไอเดียไว้
-4. A4 เหตุการณ์ : ก เบา / ข คำสาปเต็ม / ค ดูตอน G
+### 27.5 ผู้ใช้เลือกแล้ว (1 พ.ย. คำต่อคำ `USER_BRIEFS.md` 13.69) ตามที่แนะนำทั้ง 4 ข้อ
+1. MAESTRO : **ก ENCORE แยกตามวาทยากร** (27.3 ข้อ 1 ก) ทำเป็น A3 ในแชทนี้
+2. THE ARCHIVE : **ก คงไว้** ปรับตัวเลขตอน G โดยเทียบทั้งตอนยังไม่ซื้อกับซื้อครบ
+3. MEMORY : **ตัด**
+4. A4 เหตุการณ์ : **ก เบา** ใช้ของที่มี ลงมือหลัง A3 เสร็จและผู้ใช้ลองแล้ว
 
 ### 27.6 แหล่ง (ค้น 1 พ.ย.)
 [Limbus Mirror of Immortality (wiki, Grace of Stars)](https://limbuscompany.wiki.gg/wiki/Bizarre_Machine) [Limbus Mirror Dungeon (wiki)](https://limbuscompany.wiki.gg/wiki/Mirror_Dungeon) [Slay the Spire ascension (Twinfinite)](https://twinfinite.net/?p=336281) [Slay the Spire ascension guide (Pocket Gamer)](https://www.pocketgamer.com/slay-the-spire/ascension-guide) [Balatro stakes per deck (Steam)](https://steamcommunity.com/app/2379780/discussions/0/4346606879507039354) [Balatro High Stakes (TrueAchievements)](https://www.trueachievements.com/a424923/high-stakes-achievement) [Hades Mirror of the Night (Fextralife)](https://hades.wiki.fextralife.com/Mirror+of+the+Night) [Hades Pact of Punishment (Prima)](https://primagames.com/?p=313621) [Hades Chaos boons (Prima)](https://primagames.com/gaming/hades-chaos-realm-chaos-blessings) [CZN beginner guide (Prydwen)](https://www.prydwen.gg/chaos-zero-nightmare/guides/beginner-guide) [CZN How to Use Save Data (GameWith)](https://gamewith.net/chaoszeronightmare/70847)
