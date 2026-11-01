@@ -84,7 +84,10 @@ namespace Tacetno433.Screens
             public FramePlayer Player;
             public bool Busy;          // a once-only animation (attack, hurt, enter ...) is on, idle waits for it to end
             public bool Shared;        // SHARED LOOKS : an enemy wearing another's picture (Data/Enemy.cs Looks), its mark is drawn
+            public Figure Figure;      // MATH ART (1 Nov) : no picture, the code draws it from shapes (Core/Figure.cs)
         }
+        private static RenderTarget2D tacetTarget;          // PIXEL LOOK : TACET's figures drawn small, then blown up into the SCENE
+        private Vector2 tacetShift;                         //   the part of the camera's move smaller than one block, added when it is laid
         private Dictionary<Fighter, Art> arts = new Dictionary<Fighter, Art>();
         private Texture2D[] layerArt = new Texture2D[4];   // LAYERS : far, middle, stage floor, front (null = empty frame)
         private static readonly string[] layerFile = { "_far", "_mid", "_stage", "_front" };
@@ -138,8 +141,37 @@ namespace Tacetno433.Screens
             }
             else art.Set = FrameArt.Load(Game.GraphicsDevice, "Musicians", ArtBank.Key(f.Name), musicianAnims);
             if (art.Set != null) art.Player.Play(art.Set.Find("idle"), true);
+            else MakeFigure(f, art);
             arts[f] = art;
             return art;
+        }
+
+        //Make Figure (MATH ART, Beta1 1 Nov, docs/BETA1_DIRECTION.md 31) : a fighter with no picture is drawn by the code.
+        //A legend by its name, a boss by its name, an enemy by the look it shares (SHARED LOOKS : THE LULL wears hush, and its
+        //mark and brightness still tell it apart, Data/Enemy.cs Looks). The team only draws the conductors now (13.79).
+        private void MakeFigure(Fighter f, Art art)
+        {
+            string own = ArtBank.Key(f.Name);
+            if (!f.IsEnemy)
+            {
+                HitColors colors = SpotOf(f);
+                art.Figure = new Figure(Figure.Sort.Musician, own, f.Slot + 1);
+                art.Figure.Tint = colors.Tint;
+                art.Figure.Hot = colors.Hot;
+                return;
+            }
+            bool isBoss = f.Enemy != null && f.Enemy.Kind == EnemyKind.Boss;
+            string key = own;
+            if (!isBoss && !IsLook(own)) key = f.Enemy != null && f.Enemy.Looks.Length > 0 ? f.Enemy.Looks[0] : "hush";
+            if (!isBoss && !IsLook(key)) key = f.Enemy != null && f.Enemy.Looks.Length > 1 ? f.Enemy.Looks[1] : "hush";
+            art.Figure = new Figure(isBoss ? Figure.Sort.Boss : Figure.Sort.Enemy, key, f.Slot + 7);
+            art.Shared = !isBoss && key != own;
+        }
+
+        //Is Look : one of the four looks every enemy shares (docs/ASSET_LIST.md 1.2)
+        private static bool IsLook(string key)
+        {
+            return key == "hush" || key == "static" || key == "the_damper" || key == "the_mute_choir";
         }
 
         //Play Art : start one of a fighter's animations.
@@ -156,6 +188,11 @@ namespace Tacetno433.Screens
         {
             if (f == null) return;
             Art art = ArtOf(f);
+            if (art.Figure != null)                                     // MATH ART : the figure has its own poses (the box still moves)
+            {
+                bool swung = (name == "attack" || name == "skill") && view == View.Swipe;
+                art.Figure.Play(name, swung ? lastWay : Flick.None);
+            }
             FrameAnim anim = art.Set != null ? art.Set.Find(name) : null;
             if (anim == null && art.Set != null && (name == "skill" || name == "parry")) anim = art.Set.Find("attack");
             if (anim == null)
@@ -190,6 +227,49 @@ namespace Tacetno433.Screens
                 if (art.Busy && art.Player.Done && !pair.Key.Down) art.Busy = false;
                 if (!art.Busy) art.Player.Play(art.Set.Find("idle"), false);
             }
+        }
+
+        //Update Figures (MATH ART) : each figure is told where it stands this frame, then its springs, chains and shards move.
+        //WIND : while the baton swings, its speed blows through the hair and the cloth (BattleRules.FigureWind), TACET feels half.
+        private void UpdateFigures(float dt)
+        {
+            Vector2 wind = Vector2.Zero;
+            if (view == View.Swipe && Input.MouseDown())
+            {
+                wind = baton.Velocity * BattleRules.FigureWind;
+                if (wind.LengthSquared() > BattleRules.FigureWindMax * BattleRules.FigureWindMax) wind = Vector2.Normalize(wind) * BattleRules.FigureWindMax;
+            }
+            Vector2 hole = dark.Hole + stageCam * BattleRules.StageParallax[3];
+            if (fore != null) UpdateFigure(fore, dt, wind, hole);
+            for (int i = 0; i < battle.Enemies.Count; i++) UpdateFigure(battle.Enemies[i], dt, wind * 0.5f, hole);
+        }
+
+        private void UpdateFigure(Fighter f, float dt, Vector2 wind, Vector2 hole)
+        {
+            Figure figure = ArtOf(f).Figure;
+            if (figure == null) return;
+            Rectangle r = DrawBox(f);
+            figure.Feet = new Vector2(r.Center.X, r.Bottom);
+            figure.Height = r.Height;
+            figure.Hole = hole;
+            if (!f.Down && figure.IsDown) figure.Up();                    // back up (a heal from zero)
+            figure.Update(dt, wind);
+        }
+
+        //Figure Look Of : how an enemy's figure is drawn this frame, worked out the way DrawEnemy works out a picture :
+        //fainter as it dissolves (SILENCED) or blinks (FLICKER), darker further back and deeper in the dark, the hit's
+        //white, the STAGGERED edge beating
+        private void FigureLookOf(Fighter f, out float alpha, out float light, out float flash, out float mark)
+        {
+            Rectangle r = DrawBox(f);
+            float depth = 1f - BattleRules.StageDepthDim * f.Slot;
+            float deep = dark.InDark(new Vector2(r.Center.X, r.Bottom) - stageCam * BattleRules.StageParallax[3]);
+            light = MathHelper.Clamp(depth * MathHelper.Lerp(1f, 0.55f, deep), 0.2f, 1f);
+            if (ArtOf(f).Shared && f.Enemy != null) light *= f.Enemy.LookShade;
+            alpha = (1f - GoneOf(f)) * FlickerOf(f);
+            Look look;
+            flash = looks.TryGetValue(f, out look) ? look.Flash * Flashing : 0f;
+            mark = f.Staggered ? 0.5f + 0.5f * (float)Math.Sin(time * 8f) : 0f;
         }
 
         //======================================================================================
@@ -232,6 +312,9 @@ namespace Tacetno433.Screens
 
             //THE DARK : a spring towards where the balance of life puts it
             dark.Update(worldDt, MathHelper.Clamp(DarkShare() + BossDark(), 0f, 1f));   // BOSS SHOW : the dark grows in its moments
+
+            //MATH ART : the code's figures move on (where they stand, the baton's wind)
+            UpdateFigures(worldDt);
 
             //Camera : the nudge of a hit dies away quickly
             kick *= (float)Math.Pow(0.0015, worldDt);
@@ -596,6 +679,9 @@ namespace Tacetno433.Screens
             stageCam = cam;
             dark.Place(cam, Horizon);
 
+            //PIXEL LOOK (MATH ART) : TACET's figures into their small picture first, before the page's pictures are begun
+            DrawTacetFigures(device, cam);
+
             //BACK : the movement's backdrop and the floor, alone
             PostChain.BeginBack(device);
             DrawBackdrop(sb, cam);
@@ -612,6 +698,7 @@ namespace Tacetno433.Screens
             //GLOW : the light of the dark, then the effects of the blows
             PostChain.BeginGlowTarget(device);
             dark.DrawGlow(device, sb, PostChain.Back);
+            DrawFrontSilhouette(device, cam);                     // MATH ART : the musician in front hides the seam's light behind it
             sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearClamp, null, null, null, Layer(cam, 3));
             effects.DrawBlows(sb);
             effects.DrawSparks(sb);
@@ -620,6 +707,7 @@ namespace Tacetno433.Screens
             effects.DrawSlashes(sb);
             effects.DrawFlares(sb);
             hits.DrawGlow(sb);
+            DrawFigureGlows(sb);
             DrawMood(sb);
             sb.End();
 
@@ -723,6 +811,18 @@ namespace Tacetno433.Screens
                 }
                 else DrawEnemy(sb, e);
             }
+
+            //PIXEL LOOK : TACET's figures, drawn small in PreDraw (DrawTacetFigures), laid over the scene blown up. Point
+            //sampling keeps the blocks hard. The camera's last part of a block moves the picture (tacetShift).
+            if (tacetDrawn)
+            {
+                sb.End();
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, Sharp.Transform);
+                float block = Math.Max(1f, BattleRules.FigurePixel);
+                sb.Draw(tacetTarget, new Vector2(Sharp.Snap(tacetShift.X), Sharp.Snap(tacetShift.Y)), null, Color.White, 0f, Vector2.Zero, block, SpriteEffects.None, 0f);
+                sb.End();
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, Layer(cam, 3));
+            }
             DrawFront(sb);
             hits.DrawScene(sb);
             sb.End();
@@ -819,6 +919,15 @@ namespace Tacetno433.Screens
             Art art = ArtOf(f);
             float lift = LiftOf(f);                                                    // FLOAT : the shadow stays on the floor
             Gfx.DrawGlowBox(sb, new Rectangle(r.Center.X - r.Width / 2, r.Bottom + (int)lift - 22, r.Width, 44), Color.Black * ((lift > 0f ? 0.4f : 0.6f) * a));
+            if (art.Figure != null)                                                    // MATH ART : the figure is in the PIXEL LOOK picture,
+            {                                                                          //   only its BACKLIGHT, HUM and HALO go behind it here
+                Rectangle haze = r;
+                haze.Inflate(r.Width / 4, r.Height / 8);
+                Gfx.DrawGlowBox(sb, haze, Color.White * (BattleRules.FigureBacklight * shade * a));
+                LookMark glowMark = MarkOf(f);
+                if (gone <= 0f && (glowMark == LookMark.Hum || glowMark == LookMark.Halo)) DrawMark(sb, f, art, r, shade * f.Enemy.LookShade, a * FlickerOf(f));
+                return;
+            }
             if (art.Set != null)
             {
                 if (art.Shared)
@@ -931,6 +1040,17 @@ namespace Tacetno433.Screens
 
             Gfx.DrawGlowBox(sb, new Rectangle(r.X - 20, r.Bottom - 30, r.Width + 40, 60), Color.Black * (0.7f * a));
             Art art = ArtOf(fore);
+            if (art.Figure != null)                                                    // MATH ART : the legend drawn by the code, smooth (BAND LOOK)
+            {
+                Look lit;
+                float flash = looks.TryGetValue(fore, out lit) ? lit.Flash * Flashing : 0f;
+                sb.End();
+                Shapes.Begin(sb.GraphicsDevice, Layer(stageCam, 3), Sharp.Dot);
+                art.Figure.Draw(a, flash, 1f, 0f);
+                Shapes.End();
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, Layer(stageCam, 3));
+                return;
+            }
             if (art.Set != null) art.Player.Draw(sb, art.Set, new Vector2(r.Center.X, r.Bottom), 2, Color.White * a);
             else
             {
@@ -941,6 +1061,119 @@ namespace Tacetno433.Screens
 
             Look look;
             if (looks.TryGetValue(fore, out look) && look.Flash > 0f) Gfx.Rect(sb, r, Palette.Paper * (0.5f * look.Flash * a * Flashing));
+        }
+
+        //======================================================================================
+        //MATH ART (Beta1 1 Nov, docs/BETA1_DIRECTION.md 31) : the fighters the code draws (Core/Figure.cs)
+        //======================================================================================
+
+        private bool tacetDrawn;           // PIXEL LOOK : the small picture holds TACET's figures this frame
+
+        //Draw Tacet Figures (PIXEL LOOK) : every enemy the code draws goes into one small picture, back to front, with hard
+        //edges. DrawFighters then lays it over the scene blown up, so its edges are blocks (BattleRules.FigurePixel).
+        //ADVANCED PART : the camera's move is split in two. The whole blocks of it move the figures inside the small picture,
+        //the rest (less than a block) moves the picture itself when it is laid (tacetShift). So when the camera drifts slowly
+        //a figure keeps the same blocks and glides, its edges do not crawl.
+        private void DrawTacetFigures(GraphicsDevice device, Vector2 cam)
+        {
+            tacetDrawn = false;
+            for (int i = 0; i < battle.Enemies.Count && !tacetDrawn; i++) tacetDrawn = ArtOf(battle.Enemies[i]).Figure != null;
+            if (!tacetDrawn) return;
+
+            float block = Math.Max(1f, BattleRules.FigurePixel);
+            int w = (int)(TacetGame.ScreenW / block);
+            int h = (int)(TacetGame.ScreenH / block);
+            if (tacetTarget == null || tacetTarget.IsDisposed || tacetTarget.GraphicsDevice != device || tacetTarget.Width != w || tacetTarget.Height != h)
+            {
+                if (tacetTarget != null) tacetTarget.Dispose();
+                tacetTarget = new RenderTarget2D(device, w, h);
+            }
+            Vector2 offset = -cam * BattleRules.StageParallax[3];
+            Vector2 whole = new Vector2((float)Math.Floor(offset.X / block) * block, (float)Math.Floor(offset.Y / block) * block);
+            tacetShift = offset - whole;
+
+            device.SetRenderTarget(tacetTarget);
+            device.Clear(Color.Transparent);
+            Shapes.Begin(device, Matrix.CreateTranslation(whole.X, whole.Y, 0f) * Matrix.CreateScale(1f / block), 0f);
+            for (int i = battle.Enemies.Count - 1; i >= 0; i--)
+            {
+                Fighter e = battle.Enemies[i];
+                Figure figure = ArtOf(e).Figure;
+                if (figure == null) continue;
+                float alpha, light, flash, mark;
+                FigureLookOf(e, out alpha, out light, out flash, out mark);
+                if (alpha <= 0f) continue;
+                if (MarkOf(e) == LookMark.Echo)                                          // ECHO : two faint copies behind it
+                {
+                    for (int k = 2; k >= 1; k--)
+                    {
+                        figure.Shift = new Vector2(BattleRules.LookEchoStep * k, -BattleRules.LookEchoStep * 0.4f * k);
+                        figure.Draw(alpha * BattleRules.LookEchoAlpha / k, 0f, light, 0f);
+                    }
+                }
+                figure.Shift = Vector2.Zero;
+                figure.Draw(alpha, flash, light, mark);
+            }
+            Shapes.End();
+
+            //SCANLINES : faint grey lines across every one of TACET's bodies, so a black body still reads in front of the black
+            //hole (TACET is the picture's silence, a dead screen). Only where a figure was drawn : see scanBlend.
+            Shapes.Blending = scanBlend;
+            Shapes.Begin(device, Matrix.CreateScale(1f / block), 0f);
+            Color scan = new Color(BattleRules.FigureScanGrey, BattleRules.FigureScanGrey, BattleRules.FigureScanGrey);
+            for (float y = 0f; y < TacetGame.ScreenH; y += block * BattleRules.FigureScanEvery)
+                Shapes.Box(new Vector2(TacetGame.ScreenW * 0.5f, y + block * 0.5f), TacetGame.ScreenW, block, 0f, scan);
+            Shapes.End();
+            Shapes.Blending = BlendState.AlphaBlend;
+        }
+
+        //Scan Blend : adds a line only where something is already drawn.
+        //ADVANCED PART : the blend mixes "line x what is drawn's own see-through amount + what is drawn". Where nothing was
+        //drawn the amount is 0, so the line vanishes, inside a figure it is 1, so the line is added (on the white edge it changes
+        //nothing, white stays white). The see-through amount itself is kept as it was (source x 0 + destination x 1).
+        private static readonly BlendState scanBlend = new BlendState
+        {
+            ColorSourceBlend = Blend.DestinationAlpha,
+            ColorDestinationBlend = Blend.One,
+            ColorBlendFunction = BlendFunction.Add,
+            AlphaSourceBlend = Blend.Zero,
+            AlphaDestinationBlend = Blend.One,
+            AlphaBlendFunction = BlendFunction.Add,
+        };
+
+        //Front Silhouette : the musician in front drawn in black into the GLOW picture, over the light of TACET's seam, so the
+        //seam's glow passes behind the figure instead of across it (the figure stands in front of it)
+        private void DrawFrontSilhouette(GraphicsDevice device, Vector2 cam)
+        {
+            if (fore == null) return;
+            Figure figure = ArtOf(fore).Figure;
+            if (figure == null) return;
+            Look down;
+            float sink = looks.TryGetValue(fore, out down) && down.Fall > 0f ? Smooth(down.Fall) : 1f;
+            float a = SwapAlpha() * (fore.Down ? MathHelper.Lerp(1f, BattleRules.StageDownFade, sink) : 1f);
+            Shapes.Begin(device, Layer(cam, 3), Sharp.Dot);
+            figure.DrawSilhouette(a);
+            Shapes.End();
+        }
+
+        //Figure Glows : the band's weapon and core, TACET's white light inside, into the GLOW picture (they feed the bloom)
+        private void DrawFigureGlows(SpriteBatch sb)
+        {
+            if (fore != null)
+            {
+                Figure figure = ArtOf(fore).Figure;
+                if (figure != null) figure.DrawGlow(sb, SwapAlpha() * (fore.Down ? BattleRules.StageDownFade : 1f));
+            }
+            for (int i = 0; i < battle.Enemies.Count; i++)
+            {
+                Fighter e = battle.Enemies[i];
+                Figure figure = ArtOf(e).Figure;
+                if (figure == null) continue;
+                float alpha, light, flash, mark;
+                FigureLookOf(e, out alpha, out light, out flash, out mark);
+                figure.Shift = Vector2.Zero;
+                figure.DrawGlow(sb, alpha * light);
+            }
         }
 
         //Swap Offset : the musician in front slides out to the left, the next slides in from the left.

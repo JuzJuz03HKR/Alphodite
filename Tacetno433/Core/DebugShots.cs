@@ -50,6 +50,7 @@ namespace Tacetno433.Core
             {
                 if (args[i] == "--out") outDir = args[i + 1];
                 if (args[i] == "--scale") Scale = float.Parse(args[i + 1], System.Globalization.CultureInfo.InvariantCulture);
+                if (args[i] == "--figure") Figure.Level = int.Parse(args[i + 1]);                  // MATH ART (1 Nov) : "--figure 2" the simple bodies
 
                 if (args[i] == "--shots")
                 {
@@ -1220,7 +1221,17 @@ namespace Tacetno433.Core
 
             //The Band : THE BAND OF THREE (29 Oct), PAGANINI violin, QUANTZ flute and PFUNDT timpani. The audition starts
             //with nobody picked (teampick), or with these three already picked (teampickfull, the page picks the run's band).
-            if (name != "teampick")
+            //MATH ART (1 Nov) : battlelegend1 to battlelegend5 put PAGANINI, QUANTZ, PFUNDT, DUPORT or PUNTO first, the one standing in front
+            int[] legendSlots = { 0, 1, 2, 6, 7 };
+            char legendDigit = name[name.Length - 1];
+            if (name.StartsWith("battlelegend") && legendDigit >= '1' && legendDigit <= '5')
+            {
+                int first = legendSlots[legendDigit - '1'];
+                List<Musician> legends = new List<Musician> { MusicianList.All[first] };
+                foreach (int slot in legendSlots) if (slot != first && legends.Count < 3) legends.Add(MusicianList.All[slot]);
+                run.PickBand(legends);
+            }
+            else if (name != "teampick")
                 run.PickBand(new List<Musician> { MusicianList.All[0], MusicianList.All[1], MusicianList.All[2] });
 
             //Extras : a few gifts (GIFTS 31 Oct : ones the band of the shots can find), some shards and one rehearsed player, so the

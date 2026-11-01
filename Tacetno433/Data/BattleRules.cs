@@ -414,6 +414,34 @@
         public static float StageFallDrop = 60f;          //   this far down
         public static float StageDownFade = 0.35f;        //   a musician down is this faint (with or without the picture)
 
+        //Figure Feel (Beta1 1 Nov, MATH ART, docs/BETA1_DIRECTION.md 31, Core/Figure.cs) : the fighters the code draws from
+        //shapes in place of the team's pictures, and how they move. Pixels are the 1280 x 720 page's, on a figure 512 tall
+        //(a smaller figure scales them down). Only Core/Figure*.cs and Screens/BattleScreen.Stage.cs read these.
+        public static int FigureLevelStart = 1;           // FIGURE LEVEL at the start : 1 shapes only (the Worldless way), 2 a simple body (F4 swaps)
+        public static float FigureSpring = 15f;           // SPRINGS : how hard a part is pulled to where the pose wants it (about 0.4 s to arrive)
+        public static float FigureDamping = 0.9f;         //   a firm part (chest, hips) arrives without passing (1 = never passes)
+        public static float FigureBounce = 0.42f;         //   a loose part (hands, the core, a weapon) passes and swings back (BOUNCE)
+        public static float FigureLooseShare = 0.6f;      //   and is pulled this much less hard
+        public static float FigureKnock = 520f;           // KNOCK : a hit pushes every part this fast (pixels a second), away from the blow
+        public static float FigureGravity = 1400f;        // CHAINS and SHARDS fall this fast (pixels a second squared)
+        public static float FigureDrag = 0.045f;          //   a chain loses this share of its speed every step (it calms down)
+        public static float FigureBreeze = 70f;           //   a slow breeze, so hair and cloth never hang dead still
+        public static float FigureWind = 0.55f;           // WIND : this share of the baton's speed blows through the hair and cloth while it swings
+        public static float FigureWindMax = 2600f;        //   at most this strong
+        public static float FigureWindBody = 0.35f;       //   and this share of it pushes the loose parts (they sway with the swing)
+        public static float FigureCarry = 60f;            // a figure that jumps further than this in one frame takes its chains with it
+        public static float FigureParryTime = 0.45f;      // a PARRY holds the guard this long
+        public static float FigureGlow = 0.5f;            // the band's weapon and core light in the GLOW picture
+        public static float FigureBandShade = 0.62f;      // LIT : the band's colours are laid this dark, the stage light on the one in front brings them to white
+        public static float FigureBacklight = 0.16f;      // BACKLIGHT : a pale haze behind each of TACET's figures so the black reads on the dark stage
+        public static int FigureScanGrey = 44;            // SCANLINES : the grey of the lines across TACET's bodies (0..255)
+        public static float FigureScanEvery = 2f;         //   one line every this many blocks
+        public static float FigureGlowTacet = 0.22f;      // TACET's white light inside
+        public static float FigurePixel = 2f;             // PIXEL LOOK : TACET is drawn in blocks this many page pixels wide (2 = like the other pixel effects)
+        public static float FigureShardHang = 0.35f;      // SILENCED : the shards fly and bounce this long before the hole pulls them in
+        public static float FigureShardPull = 22f;        //   how hard the hole pulls
+        public static float FigureShardBounce = 0.35f;    //   a shard hitting the floor keeps this share of its speed
+
         //Hit Feel (Beta1 round 4) : what a blow looks like where it lands (Core/HitFx.cs). Nothing flies : the musician
         //strikes and the light happens on the enemy. Strings SLASH, winds SHOT, percussion SMASH, the SIGNATURE CROSS.
         public static float HitSize = 105f;               // the size of a blow's light (pixels), more for a stronger blow

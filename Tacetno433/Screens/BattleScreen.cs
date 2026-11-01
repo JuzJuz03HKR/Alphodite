@@ -384,6 +384,10 @@ namespace Tacetno433.Screens
             gesture.Update(dt, view == View.Swipe && Input.MouseDown());
             baton.Update(dt, gesture.Held);
 
+            //FIGURE LEVEL (MATH ART, 1 Nov) : F4 swaps the code's fighters between the shapes (1) and a simple body (2), so the
+            //user can see both (docs/BETA1_DIRECTION.md 31)
+            if (Input.KeyPressed(Keys.F4)) Figure.Level = Figure.Level == 1 ? 2 : 1;
+
             //PRACTICE : ESC leaves for the title, the card follows what is on screen
             if (practice)
             {
