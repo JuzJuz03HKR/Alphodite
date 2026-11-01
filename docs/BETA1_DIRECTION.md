@@ -1597,3 +1597,48 @@
 - ตัวเลข CADENZA (`TurnCadenza*`) กับ `TurnStaffEvery` `TurnStaffPower` ไม่มีบอสใช้แล้ว เก็บไว้ก่อน
 - ถัดไปตามแผนเดิม : 16.14 ข้อ 5 แผนที่ (ป้ายรางวัลคำเดียว ลดแถวที่ไม่มีอะไรให้เลือก) / PLAYTEST FINALE ยัง 1 PERFECT
 - ผู้ใช้สั่ง /update (31 ต.ค. คำต่อคำ `USER_BRIEFS.md` 13.51) : แชทหน้าทำด่านเทสระบบแบบคร่าวๆ กดแล้วไปหน้านั้นเลย (เช่นไฟต์บอสแต่ละตัว ห้องข้างเวที) ก่อนข้อ 5 แนวทางใน `RESUME_PROMPT.md` สถานะล่าสุด
+
+## 22. ด่านเทสระบบ TEST ROOM (31 ต.ค. ถึง 1 พ.ย. แชท /system Finalize8 คำต่อคำ `USER_BRIEFS.md` 13.51 13.52)
+
+### 22.1 ผู้ใช้สั่งและเลือก
+- 13.51 : ด่านเอาไว้เทสระบบต่างๆ แบบคร่าวๆ กดแล้วเจอหน้านั้นเลย ไม่ต้องเล่นทั้งรัน ไม่ต้องทำเป็นระบบเต็มชุด
+- 13.52 ตอบ 4 ข้อ เลือกตามที่แนะนำทุกข้อ : เปิดด้วยปุ่มลับ F2 ที่หน้า Title / อยู่ทุก build มีสวิตช์ปิดจุดเดียว / จบสิ่งที่เทสแล้วเล่นต่อตามปกติ เซฟปิด / ใส่ครบ 4 กลุ่ม (บอส ห้องบนแผนที่ ไฟต์กับศัตรูพิเศษ หน้าอื่นของรัน)
+
+### 22.2 ใช้ยังไง
+- หน้า Title กด F2 ได้หน้า TEST ROOM (เมนูหลักไม่มีแถวนี้ ผู้เล่นทั่วไปไม่เห็น)
+- แถวบน เลือกก่อนกดเทส ค่าค้างไว้จนปิดเกม : CONDUCTOR 3 คน / FLOOR 1 2 3 / BAND เลือก 3 คนตามลำดับ คนแรกยืนหน้า เลขใต้ชื่อคือลำดับ (เลือกไม่ครบ เกมเติมคนแรกที่ยังไม่ถูกเลือกให้) / STARS ON EVERY MOVE : NONE, 1 EACH, 3 EACH (3 EACH = ทุกปุ่มของทั้งวง 3 ดาว ร่างในตำนานครบ) / GIFTS : NONE, ALL (ของทุกชิ้นที่วงนี้เจอได้)
+- BOSSES : 6 ตัว ตัวละ 3 ปุ่ม START (เริ่มไฟต์ เห็น ENTRANCE) / BIG ATTACK (ท่าไม้ตายเป็นการโจมตีแรก THE TELL ขึ้นตาแรก) / HALF LIFE (เลือดบอสเกินครึ่ง 1 แต้ม ตีโดนครั้งแรกเข้า THE TURN) บอสที่กดจะเป็นบอสท้ายชั้นที่เลือก (แผนที่กับห้องข้างเวทีตรงกัน)
+- MAP ROOMS : THE WINGS / REST / SHOP / WORKSHOP / TREASURE / REHEARSAL (หน้าซ้อมหลังชนะ กดไม่ได้ตอน 3 EACH เพราะไม่มีดาวเหลือให้)
+- FIGHTS : ENCOUNTER (สุ่มแบบแผนที่) / ELITE / ศัตรูที่ CHARGE (DEAD AIR, THE ROUND) / ศัตรูที่ ARMOR UP (THE MUTE CHOIR, THE DAMPER) รายชื่อสองกลุ่มนี้อ่านจาก `Enemy.Moves` เอง มีศัตรูใหม่ที่มีท่านี้ก็ขึ้นเอง / EVENTS 10 อันใต้ MAP ROOMS กับ FIGHTS
+- RUN PAGES : THE AUDITION (รันใหม่ยังไม่มีวง) / FLOOR START (การ์ดท่อนเพลงแล้วแผนที่) / MAP BEFORE BOSS (แผนที่ THE WINGS ถัดไป บอสหลังจากนั้น) / BOSS REWARD (REFORGE กับของ 2 ชิ้น) / PRACTICE (ไฟต์ฝึกของ Tutorial) / RESULT WIN LOSE / CURTAIN CALL WIN LOSE
+- กดเทสแล้วเกมสร้างรันใหม่ทันที เงิน 500 SHARDS เดินแผนที่ไปถึงแถวนั้นแบบที่ผู้เล่นเดิน (แถว 4 สำหรับห้องกับไฟต์ แถวก่อนบอสสำหรับ THE WINGS แถวสุดท้ายสำหรับบอส) แล้วเข้าห้องผ่าน `RunFlow.Enter` แบบเดียวกับหน้าแผนที่ จบแล้วเล่นต่อได้ตามปกติ (รางวัล แผนที่ ชั้นถัดไป)
+- ระหว่างเทสกด F2 ได้ทุกหน้า = ทิ้งเทสนั้นกลับ TEST ROOM / ESC ในหน้า TEST ROOM = กลับ Title / ไปถึงหน้า Title ทางไหนก็ได้ (ESC, RETURN TO TITLE, จบรัน, จบไฟต์ฝึก) = จบโหมดเทส
+- เซฟปิดตั้งแต่เปิด TEST ROOM จนถึงหน้า Title : รันเทสไม่ถูกเขียน ไม่ลบเซฟรันจริง (แพ้ในเทสก็ไม่ลบ) APPLAUSE ที่ได้ในเทสคืนค่าเดิมตอนจบโหมดเทส / Settings ยังเซฟตามปกติ
+
+### 22.3 สวิตช์และไฟล์
+- สวิตช์จุดเดียว `TestRoomScreen.On` (ตอนนี้ true) ตั้ง false = F2 ไม่ทำอะไร หน้าเทสหายจากเกม (ตอนจะขาย)
+- `Screens/TestRoomScreen.cs` (ใหม่) : หน้า แถวเลือก ปุ่มเทส / `Launch` สร้างรันเทส (`MakeRun` `WalkTo` `Place` `Enter` `MadeUpResult` `MadeUpJourney`) / `TweakFight` / `StartTests` `StopTests` / ลูกศรเลื่อนไปปุ่มที่ใกล้ที่สุดในทิศนั้น (`Move` ADVANCED PART เล็กๆ)
+- `Data/SaveFile.cs` `TestRun` กัน `SaveRun` `DeleteRun` `SaveArchive`
+- `Battle/TurnBattle.cs` `BigAttackFirst` (กติกาเดียวที่เพิ่ม ใช้แค่ในเทส)
+- `Screens/BattleScreen.cs` เรียก `TestRoomScreen.TweakFight` ใน Load / `Screens/TitleScreen.cs` F2 กับ `StopTests` ใน Load / `TacetGame.cs` F2 กลับระหว่างเทส
+- `Core/DebugShots.cs` ภาพใหม่ : `testroom` / `test` + ชื่อเทส + ตัวเลข เช่น `testbossbig15` (THE STAFF ที่ BIG ATTACK ตัวเลข = ลำดับใน `EnemyList.All`) `testevent6` `testenemy1` `testwings` `testresultwin` (ชื่อเทสตาม `TestRoomScreen.Test`) / `titletest` (F2 ที่ Title) / `testback` (F2 กลับจาก THE WINGS)
+- ไม่มีตัวเลขบาลานซ์ใหม่ 500 SHARDS ของรันเทสอยู่ใน `TestRoomScreen.Shards` เพราะไม่ใช่ตัวเลขของเกมจริง
+
+### 22.4 ที่ไอริสตัดสินเอง (ผู้ใช้เปลี่ยนได้ทุกข้อ)
+- เพิ่มแถวเลือก BAND STARS GIFTS นอกจาก CONDUCTOR กับ FLOOR ที่บอกในข้อความก่อนถาม เพื่อเทสร่างในตำนาน กับ GIFT และ DUPORT PUNTO ได้โดยไม่ต้องชนะหลายไฟต์ ค่าตั้งต้น NONE กับวง PAGANINI QUANTZ PFUNDT ตามที่บอกไว้
+- รันเทสมี 500 SHARDS / ห้องกับไฟต์อยู่แถว 4 / ห้องที่แถวนั้นไม่มี ทางแรกเปลี่ยนเป็นห้องนั้น (`RunState.ReplaceChosen` ทางต่อเหมือนเดิม)
+- HALF LIFE = เลือดเกินครึ่ง 1 แต้ม ไม่ได้เริ่มใน PHASE 2 เลย เพื่อให้เห็นช่วงเปลี่ยนเฟสจริงตอนตีโดน
+- RESULT ใช้ผลสมมุติ 3 PERFECT จาก 5 โน้ต เลือดเหลือ 80% (RANK A) 4 TURNS / CURTAIN CALL ใช้เส้นทางสมมุติ (ชนะ = ครบ 3 ชั้น แพ้ = จบที่ไฟต์ในชั้นที่เลือก)
+- ชื่อวงในรันเทส TEST BAND / ตัวอักษรบนปุ่มเทสขนาดเดียวกันทุกปุ่ม (ชื่อยาวย่อให้พอดี)
+
+### 22.5 ทดสอบในแชท cloud
+- build 0 error 0 warning / turncheck 188/188 (ใหม่ `test room big first`) / savecheck 37/37 (ใหม่ `test room` : รันเทสแพ้บนชั้น 3 จ่าย APPLAUSE เซฟและลบรัน แล้วจบเทส เซฟจริงยังเป็นชั้น 1 APPLAUSE เท่าเดิม)
+- ภาพ (ไม่ commit) : TEST ROOM ที่ 1280×720 และ 1920×1080 / กดเทสครบ 22 แบบ เปิดหน้าได้ไม่พัง / BIG ATTACK ขึ้น THE TELL ตาแรก (TE DEUM ของ THE STAFF ชั้น 1, IN THE DARK ของ THE BLIND CANTOR ชั้น 3) / HALF LIFE เลือด 201/400 (REQUIEM ชั้น 1) กับ 721/1440 (THE DEAF CROWN ชั้น 3) / ชุดค่าสุด (THE METRONOME, DUPORT PUNTO PAGANINI, ชั้น 3, 3 EACH, ALL) หีบ รางวัลบอส WORKSHOP ที่ไม่มีอะไรให้เลือกขึ้นข้อความแทนได้ไม่พัง / F2 เปิดจาก Title และกลับจาก THE WINGS ได้
+- ยังไม่ได้ลองด้วยเมาส์และคีย์บอร์ดจริงบน Windows
+
+### 22.6 ให้ผู้ใช้ลองหลัง Rebuild
+- Title กด F2 / เลือกแถวบน / กดปุ่มเทส / ระหว่างเทสกด F2 กลับ / ESC กลับ Title แล้ว CONTINUE ยังเป็นรันเดิม APPLAUSE เท่าเดิม
+- ลองบอส (21.15 ที่ยังไม่ได้บอกผล) ได้เร็วขึ้นด้วยปุ่ม START BIG ATTACK HALF LIFE
+
+### 22.7 เจอระหว่างทำ ยังไม่แก้ (รอผู้ใช้ตัดสิน)
+- **บั๊กลูกเต๋าของห้อง `PlaceSeed`** (อ่านจากโค้ด ยังไม่ได้เห็นในเกม) : `RunFlow.Enter` สุ่ม `PlaceSeed` ใหม่เฉพาะตอน `run.Chosen != node` แต่หน้าแผนที่ (`RouteScreen.Choose`) ตั้ง `run.Chosen = node` ก่อนเรียก Enter ทุกครั้ง ผลคือในรันจริง `PlaceSeed` เป็น 0 ตลอด ร้านทุกร้านใช้ลูกเต๋าชุดเดียวกัน (ของบนชั้นต่างกันได้แค่เพราะของที่วงมีอยู่ต่างกัน) หีบก็เหมือนกัน ภาพแคปไม่เห็นเพราะตัวแคปตั้ง `PlaceSeed = 4331` เอง / ทางแก้ที่แนะนำ : สุ่มใน `RouteScreen.Choose` (ที่เดียวที่เป็นการเลือกห้องใหม่) RunFlow.Enter คงไว้สำหรับรันที่โหลดจากเซฟ / TEST ROOM สุ่มเองทุกครั้งจึงไม่เจอบั๊กนี้

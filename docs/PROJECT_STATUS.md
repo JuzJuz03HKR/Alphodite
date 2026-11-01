@@ -1569,6 +1569,7 @@ duels0 – duels4 (ดวลขณะ SIGNATURE ของคนนั้นท�
 `dueldouble`/`dueltremolo`/`finale`/`calibrate` กระโดดไปจังหวะนั้นเลยผ่าน hook สำหรับถ่ายภาพ)
 Beta1 รอบ 3 (29 ต.ค.) : `pausesettings@150` (Settings ที่เมนูหยุดยืม) `pauseask@120` (กล่องถามก่อนกลับ Title) `battlepause` (เมนูหยุดทับหน้าต่อสู้) เปิดผ่าน `PauseMenu.OpenSettings` / `AskReturn` ไม่ขึ้นกับเมาส์จำลอง
 CLEAR FIGHT (29 ต.ค.) : ชื่อหน้าใดก็ได้เติม `clear` ท้าย = ภาพเดียวกันแต่เปิด `Settings.ClearFight` เช่น `battleclear` `battleparryclear@8` `battlefullclear`
+TEST ROOM (31 ต.ค. `BETA1_DIRECTION.md` 22) : `testroom` หน้าเทส / `test` + ชื่อเทสใน `TestRoomScreen.Test` + ตัวเลข เช่น `testbossbig15@330` `testbosshalf6@330` `testwings@100` `testevent6@100` `testenemy13@100` `testresultwin@100` (เปลี่ยนหน้าผ่านแผ่นเฉียง แคปช้าลง) / `titletest@150` (F2 ที่ Title) / `testback@260` (F2 กลับจาก THE WINGS)
 
 ```bash
 Tacetno433.exe --shots title,battle,result --out C:\pictures --scale 1.5 --steady
