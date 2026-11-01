@@ -64,6 +64,11 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 
 ## สถานะล่าสุด (1 พ.ย.)
 
+**1 พ.ย. แชท /system (Finalize8) : /update ปิดแชท ผู้ใช้จะเปิดแชทใหม่** (คำต่อคำ `USER_BRIEFS.md` 13.53)
+✅ ผู้ใช้ลอง TEST ROOM แล้ว เล่นได้ปกติ ยังไม่ต้องแก้ (`BETA1_DIRECTION.md` 22 commit `b626e9d` `bf235fa` และ commit ปิดแชทนี้) / งานทั้งหมดอยู่บน GitHub / ตาราง "แชทที่กำลังทำงาน" ว่าง
+⚠️ ยังไม่ได้ตัดสิน : บั๊ก `PlaceSeed` ไม่เคยสุ่มในรันจริง (22.7 ผู้ใช้ไม่ได้ตอบตรงๆ ยังไม่แก้ ถามก่อนแก้ ทางแก้ : สุ่ม `run.PlaceSeed = run.Rng.Next(1, int.MaxValue)` ใน `Screens/RouteScreen.cs` `Choose` แล้วเพิ่มข้อเช็กใน savecheck) / ผลลองบอส 21.15 ผู้ใช้ไม่ได้บอกแยก
+**งานถัดไป (ให้ /system เสนอแล้วรอผู้ใช้สั่ง วิธีทำงาน 13.40 : ทำทีละข้อ จบข้อไหนบันทึก commit push แล้วหยุดรอ)** : ถามเรื่อง PlaceSeed / 16.14 ข้อ 5 นอกไฟต์ให้เร็วและมีความหมาย (จุดบนแผนที่บอกรางวัลคำเดียว ซ้อม ของ เงิน ฟื้นเลือด ลดแถวที่ไม่มีอะไรให้เลือก `Data/FloorMap.cs` `RunState.BuildMap` `RunState.PickType` `Screens/RouteScreen.cs` ป้ายตอนนี้อยู่ `RouteNodeInfo.Tags`) / ทดสอบเร็วด้วย TEST ROOM (F2 ที่ Title) / PLAYTEST FINALE ยัง 1 PERFECT (`PlaytestSignatureNeed` ห้ามแก้จนผู้ใช้บอก) / VFX หนักทำทีเดียวทีหลัง
+
 **1 พ.ย. แชท /system (Finalize8) : ✅ ด่านเทสระบบ TEST ROOM เสร็จ หยุดรอผู้ใช้** (คำต่อคำ `USER_BRIEFS.md` 13.52 รายละเอียด `BETA1_DIRECTION.md` 22)
 ✅ หน้า Title กด F2 = หน้า TEST ROOM (`Screens/TestRoomScreen.cs`) แถวบนเลือกวาทยากร ชั้น วง ดาว ของ / บอส 6 ตัว (START, BIG ATTACK ตาแรก, HALF LIFE) / ห้องบนแผนที่ / ไฟต์ ELITE ศัตรู CHARGE กับ ARMOR UP / เหตุการณ์ 10 / หน้าอื่นของรัน (AUDITION FLOOR START แผนที่ก่อนบอส รางวัลบอส ไฟต์ฝึก RESULT CURTAIN CALL)
 ✅ กดแล้วสร้างรันเทส เดินแผนที่ไปถึงแล้วเข้าห้องแบบหน้าแผนที่ จบแล้วเล่นต่อได้ / ระหว่างเทสกด F2 กลับ / เซฟปิดจนถึงหน้า Title (`SaveFile.TestRun` APPLAUSE คืนค่าเดิม Settings ยังเซฟ) / สวิตช์ปิดจุดเดียว `TestRoomScreen.On`
