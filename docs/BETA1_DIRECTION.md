@@ -1752,3 +1752,7 @@
 ### 24.6 ถัดไป
 - รอบสองเมื่อผู้ใช้สั่ง : แผนที่ 16.14 ข้อ 5 (จุดบนแผนที่บอกรางวัลคำเดียว ลดแถวที่ไม่มีอะไรให้เลือก `Data/FloorMap.cs` `RunState.BuildMap` `RunState.PickType` `Screens/RouteScreen.cs` `RouteNodeInfo.Tags`)
 - ต่อจากนั้นตามลำดับเดิม QoL GUI VFX เสียง / PLAYTEST FINALE ยัง 1 PERFECT (`PlaytestSignatureNeed` ห้ามแก้จนผู้ใช้บอก)
+
+### 24.7 ผลที่ผู้ใช้ลอง (1 พ.ย. คำต่อคำ `USER_BRIEFS.md` 13.62)
+- "ลองเล่นทุกอย่างแล้ว ยังไม่ต้องแก้อะไร" แล้วสั่ง /update ไปเปิดแชทใหม่
+- ถัดไปตาม 24.6 : รอบสอง แผนที่ 16.14 ข้อ 5

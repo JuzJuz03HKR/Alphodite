@@ -64,6 +64,13 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 
 ## สถานะล่าสุด (1 พ.ย.)
 
+**1 พ.ย. แชท /system (Finalize10) : /update ปิดแชท ผู้ใช้จะเปิดแชทใหม่** (คำต่อคำ `USER_BRIEFS.md` 13.62)
+✅ ผู้ใช้ลองงานระบบรอบแรกแล้ว "ลองเล่นทุกอย่างแล้ว ยังไม่ต้องแก้อะไร" (`BETA1_DIRECTION.md` 24 commit `a113172` `7644f9c` และ commit ปิดแชทนี้) / งานทั้งหมดอยู่บน GitHub / ตาราง "แชทที่กำลังทำงาน" ว่าง
+✅ ตัวเลขใหม่ใน `BattleRules` หัวข้อ Look Feel เป็นตัวเลขหน้าตา ไม่ใช่บาลานซ์ `TACET_Balance.xlsx` ไม่ต้องอัปเดต (ชีตไม่มีหัวข้อ Feel อยู่แล้ว)
+**งานถัดไป (เมื่อผู้ใช้สั่ง) : รอบสอง แผนที่ 16.14 ข้อ 5 นอกไฟต์ให้เร็วและมีความหมาย** จุดบนแผนที่บอกรางวัลด้วยคำเดียว (ซ้อม ของ เงิน ฟื้นเลือด) ลดแถวที่ไม่มีอะไรให้เลือก /
+ไฟล์ : `Data/FloorMap.cs` / `Data/RunState.cs` (`BuildMap` `PickType` น้ำหนักห้องต่อขั้น `ReplaceChosen`) / `Data/RouteNode.cs` (`RouteNodeInfo.Tags` ป้ายตอนนี้ `TitleOf` `CaptionOf`) / `Screens/RouteScreen.cs` (วาดจุดและป้าย `Choose`) / เซฟแผนที่ `map=` ใน `Data/SaveFile.cs` ต้องโหลดเซฟเก่าได้ / ข้อเช็ก savecheck `map reach` `map elite` `map walk` /
+ทดสอบเร็วด้วย TEST ROOM (F2 ที่ Title) / วิธีทำงาน 13.40 ทำทีละข้อ จบแล้วบันทึก commit push หยุดรอ / ต่อจากนั้นตามลำดับเดิม QoL GUI VFX เสียง / PLAYTEST FINALE ยัง 1 PERFECT (`PlaytestSignatureNeed` ห้ามแก้จนผู้ใช้บอก)
+
 **1 พ.ย. แชท /system (Finalize10) : ✅ งานระบบรอบแรก (ข้อ 1 ถึง 4 ของข้อ 2 ระบบ) เสร็จ หยุดรอผู้ใช้** (คำต่อคำ `USER_BRIEFS.md` 13.61 รายละเอียด `BETA1_DIRECTION.md` 24)
 ✅ ลูกเต๋าของห้องสุ่มทุกห้อง `RunState.PickPlace` / ชื่อไฟล์ถาวรของวาทยากร `Conductor.FileKey` (Fanny `the_unsigned`) / ศัตรูไม่มีไฟล์ใส่ภาพของแบบ `Enemy.Looks` แยกด้วย `LookShade` กับเครื่องหมาย `LookMark` (ไม่ใช้ขนาด เหตุผล 24.2) / ท่าแทนเมื่อไม่มีภาพ `PlayArt` `StandInMove` `StandInPose` `FrameArt.StandStill` / ตัวเลข `BattleRules` หัวข้อ Look Feel
 ✅ build 0/0 turncheck 188/188 savecheck 40/40 (ใหม่ 3 ข้อ) / ภาพ `battlelooks1` ถึง `3` / `docs/asset_list.py` อ่านตารางภาพร่วมจากโค้ด / งานอยู่บน GitHub / ตาราง "แชทที่กำลังทำงาน" ว่าง
