@@ -458,6 +458,15 @@ namespace Tacetno433.Core
                            Settings.Master + "/" + Settings.Sfx + "/" + Settings.Music + "/" + Settings.Language + "/" + Settings.TimingLabel(Settings.TimingOffset) + "/" + Settings.ClearFight);
             Settings.Master = 0.8f; Settings.Sfx = 0.8f; Settings.Music = 0.55f; Settings.Language = 0; Settings.SetTiming(0f); Settings.ClearFight = false;
 
+            //LAST NAME KEPT (1 Nov) : the last band's name comes back with the settings, and a file from before it reads ""
+            Settings.LastBandName = "THE LOUD ONES";
+            SaveFile.SaveSettings();
+            Settings.LastBandName = "";
+            SaveFile.LoadSettings();
+            string kept = Settings.LastBandName;
+            Settings.LastBandName = "";
+            report += Same("last band name", "THE LOUD ONES", kept);
+
             //KEEPSAKE (Alpha 7) : CONTINUE keeps exactly the saved motifs, it does not roll the keepsake again
             int keptKeepsake = Archive.All[Archive.Keepsake].Level;
             Archive.All[Archive.Keepsake].Level = 1;

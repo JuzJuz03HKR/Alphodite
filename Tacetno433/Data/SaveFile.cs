@@ -111,6 +111,7 @@ namespace Tacetno433.Data
             lines.Add("timing=" + Number(Settings.TimingOffset));
             lines.Add("lessflash=" + (Settings.ReduceFlashing ? 1 : 0));
             lines.Add("clearfight=" + (Settings.ClearFight ? 1 : 0));
+            lines.Add("lastband=" + Settings.LastBandName);                  // LAST NAME KEPT (1 Nov), an older file without it reads ""
             Write(SettingsPath, lines);
         }
 
@@ -159,6 +160,7 @@ namespace Tacetno433.Data
             Settings.SetTiming(GetFloat(v, "timing", 0f));
             Settings.ReduceFlashing = GetInt(v, "lessflash", 0) == 1;
             Settings.ClearFight = GetInt(v, "clearfight", 0) == 1;
+            Settings.LastBandName = GetText(v, "lastband");
         }
 
         //Run Save : everything RunState needs to carry on. A fight in progress is not written,

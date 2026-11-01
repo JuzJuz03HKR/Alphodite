@@ -45,6 +45,7 @@ namespace Tacetno433.Screens
         {
             Game.Window.TextInput += HandleTyping;
             Game.CurrentRun.SyncOrder();
+            name = Settings.LastBandName.Length <= MaxLength ? Settings.LastBandName : "";   // LAST NAME KEPT : last run's name, ENTER keeps it
             Lens.Ambient = 0.42f;
             Lens.SpotPower = 0f;
             Lens.Vignette = 0.55f;
@@ -100,6 +101,11 @@ namespace Tacetno433.Screens
             {
                 confirmMotion.Press();
                 Game.CurrentRun.BandName = name.Length == 0 ? DefaultName : name;
+                if (Settings.LastBandName != name)                                              // LAST NAME KEPT : for the next run's page
+                {
+                    Settings.LastBandName = name;
+                    SaveFile.SaveSettings();
+                }
                 SoundBank.Play(Sfx.UiConfirm);
 
                 //Named : the first movement's card opens the run (ChapterScreen saves it there)

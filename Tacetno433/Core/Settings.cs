@@ -34,6 +34,10 @@ namespace Tacetno433.Core
         //default, so it can be turned on and off to compare (CLEAR FIGHT on the settings page).
         public static bool ClearFight;
 
+        //Last Band Name : LAST NAME KEPT (Beta1 1 Nov, docs/BETA1_DIRECTION.md 29 item 10), the name the last run's band was
+        //given, so the next run's name page starts with it (ENTER keeps it). "" when the band went unnamed.
+        public static string LastBandName = "";
+
         //Stroke Timing : seconds taken off every stroke before it is judged in a duel.
         //Every hand, mouse and screen is a little late in its own way. A player whose strokes
         //are always judged late moves this up, and the duel meets them where they are.
