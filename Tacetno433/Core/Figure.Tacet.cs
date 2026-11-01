@@ -669,11 +669,47 @@ namespace Tacetno433.Core
             return at;
         }
 
+        //Core Point : TACET's heart, a small white diamond of light (the Worldless way : every creature has one small glowing
+        //core, 13.86). Where it sits says something about the enemy : on HUSH's lips, in THE DAMPER's block, on THE DEVIL'S
+        //STRING's string, in the frame where THE NAMELESS MASTER's name was, at the head of THE STAFF.
+        private Vector2 CorePoint()
+        {
+            Vector2 head = body[Head].At, chest = body[Chest].At;
+            switch (design)
+            {
+                case Static: return Level == 2 ? Glitch(head, 0) : Glitch(chest, 9);
+                case Damper: return P(chest, 0.05f, 0.16f);
+                case Choir: return P(chest, 0f, 0.1f);
+                case Requiem: return P(chest, 0f, 0.05f);
+                case Nameless: return P(chest, 0f, 0.11f);
+                case Devil: return chest;
+                case Crown: return P(chest, 0f, 0.12f);
+                case Staff: return Local(0.13f, 0f) + new Vector2(0f, (-0.98f - StaffBeat() * 0.12f) * Height);
+                case Cantor: return P(chest, 0f, 0.08f);
+                default: return P(head, 0.025f, 0.035f);
+            }
+        }
+
+        //Core Size : the bosses' hearts are bigger
+        private float CoreSize
+        {
+            get { return (Of == Sort.Boss ? 0.024f : 0.034f) * Height; }
+        }
+
         //======================================================================================
         //The designs : the white cut through them (eyes and the signs of silence), never the band's colours
         //======================================================================================
 
         private void DrawTacetLights(float alpha)
+        {
+            DrawTacetSigns(alpha);
+            Vector2 core = CorePoint() + Shift;                                      // the heart, over everything
+            Shapes.Polygon(core, CoreSize, 4, 0f, Color.White * alpha);
+            Shapes.Polygon(core, CoreSize * 0.45f, 4, 0f, new Color(40, 40, 46) * alpha);
+            Shapes.Polygon(core, CoreSize * 0.22f, 4, 0f, Color.White * alpha);
+        }
+
+        private void DrawTacetSigns(float alpha)
         {
             float h = Height;
             Color white = Color.White * alpha;
@@ -845,7 +881,10 @@ namespace Tacetno433.Core
                 for (int i = 0; i < shardCount; i += 4) Gfx.DrawGlow(sb, shards[i].At.X, shards[i].At.Y, shards[i].Size * 2f, Color.White * (power * 0.5f));
                 return;
             }
-            Gfx.DrawGlow(sb, at.X, at.Y, 0.18f * h, Color.White * power);
+            Gfx.DrawGlow(sb, at.X, at.Y, 0.18f * h, Color.White * (power * 0.6f));
+            Vector2 core = CorePoint() + Shift;                                      // the heart glows (it feeds the bloom)
+            Gfx.DrawGlow(sb, core.X, core.Y, CoreSize * 5f, Color.White * (power * 1.6f));
+            Gfx.DrawGlow(sb, core.X, core.Y, CoreSize * 2f, Color.White * (power * 1.4f));
             if (design == Crown)
             {
                 Gfx.DrawGlow(sb, body[HandA].At.X, body[HandA].At.Y, 0.12f * h, Color.White * (power * 0.6f));
