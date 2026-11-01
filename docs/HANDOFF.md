@@ -126,6 +126,40 @@
 - เอกสารหลัก : `CLAUDE.md` ข้อ 00 / `docs/RESUME_PROMPT.md` สถานะล่าสุด / `docs/BETA1_DIRECTION.md` (11 รีวิวเกมเพลย์ 12 ก้อน 1) / `docs/SCREENS_LEVEL_UP.md` / `docs/CHARACTER_DESIGN.md` / `docs/BATTLE_SCENE_2_3D_CHANGE.md` / แผนอาร์ต `docs/BATTLE_ART_PLAN.md` `docs/UI_ART_PLAN.md` / คำต่อคำ `docs/USER_BRIEFS.md` หัวข้อ 13
 
 
+### 00.6 ชื่อหน้าที่ใช้คุยกับผู้ใช้ (1 พ.ย. ผู้ใช้ขอให้บอกเป็นหน้าไหน ตรงไหนของจอ `USER_BRIEFS.md` 13.76)
+
+ตามลำดับที่เจอในรันหนึ่งรอบ / ชื่อซ้ายสุดคือชื่อที่ใช้คุย
+
+| ชื่อที่ใช้คุย | บนจอเขียนว่า | ไปยังไง | ไฟล์ |
+|---|---|---|---|
+| หน้าแรก | TACET / NEW RUN ARCHIVE ... | เปิดเกม | `Screens/TitleScreen.cs` |
+| หน้าเลือกวาทยากร | CHOOSE YOUR CONDUCTOR (ภาพ 3 แผ่นเอียง) | NEW RUN | `Screens/ConductorSelectScreen.cs` |
+| หน้าโปรไฟล์วาทยากร | CONDUCTOR PROFILE / ปุ่ม TAKE THE BATON | คลิกภาพวาทยากร | `Screens/ConductorDetailScreen.cs` |
+| หน้าเลือกทีม | Choose your band of three (THE AUDITION) | TAKE THE BATON | `Screens/TeamPickScreen.cs` |
+| หน้าตั้งชื่อวง | Name your ensemble | BEGIN | `Screens/BandNameScreen.cs` |
+| การ์ดชั้น | THE ROAD ... / FLOOR 1 / 3 | ทุกครั้งที่ขึ้นชั้นใหม่ | `Screens/ChapterScreen.cs` |
+| หน้าแผนที่ | CHOOSE A PATH | หลังการ์ดชั้น และหลังจบทุกห้อง | `Screens/RouteScreen.cs` |
+| หน้าวง | THE BAND (เสาภาพ ลากสลับลำดับ) | TAB ที่หน้าแผนที่ | `Screens/BandScreen.cs` |
+| หน้าต่อสู้ | ไม่มีหัวหน้า (ซ้ายบนลำดับเทิร์นกับเลือดเพื่อน / ขวาศัตรู / ล่างปุ่มท่า BREATH ปุ่ม PLAY) | จุด E ! B บนแผนที่ | `Screens/BattleScreen*.cs` |
+| หน้าผลไฟต์ | VICTORY / BATTLE RESULT | ชนะไฟต์ | `Screens/ResultScreen.cs` |
+| หน้าซ้อม | REHEARSAL / Rehearse one move (การ์ด 9 ใบ) | หลังผลไฟต์ / หน้าพัก / THE WINGS | `Screens/RehearsalScreen.cs` |
+| หน้ารางวัล | REWARD / Choose a gift (การ์ด 3 ใบ) | ชนะ ELITE | `Screens/MotifRewardScreen.cs` |
+| หน้าหีบ | TREASURE / Take what is inside | จุด T | `Screens/MotifRewardScreen.cs` |
+| หน้ารางวัลบอส | REWARD / Choose a great upgrade | ชนะบอส | `Screens/MotifRewardScreen.cs` |
+| หน้าร้าน | SHOP (ขวา Wares / ซ้ายล่าง THE ARCHIVIST) | จุด $ | `Screens/ShopScreen.cs` |
+| หน้าโรงช่าง | WORKSHOP / One weapon, made sharper | จุด W | `Screens/LuthierScreen.cs` |
+| หน้าเหตุการณ์ | UNKNOWN PATH (ทางเลือก 3 ทางทางขวา) | จุด ? | `Screens/EventScreen.cs` |
+| หน้าพัก | REST / A quiet room (การ์ด 3 ใบ) | จุด R | `Screens/RestScreen.cs` |
+| หน้าก่อนบอส | THE WINGS | แถวก่อนบอส | `Screens/RestScreen.cs` |
+| หน้าจบรัน | CURTAIN CALL (แพ้ = SILENCE) | แพ้ หรือชนะบอสชั้นสุดท้าย | `Screens/CurtainCallScreen.cs` |
+| เมนูพัก | FERMATA | ESC ระหว่างรัน | `Screens/PauseMenu.cs` |
+| หน้าตั้งค่า | SETTINGS | หน้าแรก หรือเมนูพัก | `Screens/SettingsScreen.cs` |
+| หน้าวิธีเล่น | HOW TO PLAY | หน้าแรก หรือเมนูพัก | `Screens/GuideScreen.cs` |
+| หน้าคลังถาวร | THE ARCHIVE | หน้าแรก | `Screens/ArchiveScreen.cs` |
+| หน้าฝึก | TUTORIAL | หน้าแรก | `Screens/TutorialScreen*.cs` |
+| หน้าเทส | TEST ROOM | F2 ที่หน้าแรก | `Screens/TestRoomScreen.cs` |
+| แถบบนของรัน | ซ้ายชื่อวง / ขวา LIFE SHARDS GIFTS / ใต้แถบขวาป้าย GIFT | ทุกหน้าในรัน | `Core/RunHud.cs` |
+
 ## 0.0 แผนที่โค้ด Beta1 (ฉากต่อสู้ใหม่ + VFX, 28 ต.ค. รอบ 1–6)
 
 ภาพของหน้าต่อสู้แยกจากกติกาทั้งหมด (`Battle/TurnBattle.cs` ไม่มีโค้ดวาด) · เอกสาร `BATTLE_SCENE_2_3D_CHANGE.md` ข้อ 9–14 · ตัวเลขใน `BattleRules` หัวข้อ Stage Feel, Stage Void, Hit Feel, Turn Feel
