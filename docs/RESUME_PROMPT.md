@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| (ว่าง) | | |
+| 1 พ.ย. แชท /system Finalize16 | ตัวละครฉากต่อสู้แบบ math art ระดับ 1 และ 2 มีฟิสิกส์ (`BETA1_DIRECTION.md` 31) | `Core/Figure*.cs` (ใหม่) `Screens/BattleScreen.Stage.cs` `Screens/BattleScreen.cs` `Screens/BattleScreen.Boss.cs` `Data/BattleRules.cs` `Screens/TestRoomScreen.cs` `Core/DebugShots*.cs` เอกสาร |
 
 ---
 
@@ -63,6 +63,10 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 ---
 
 ## สถานะล่าสุด (1 พ.ย.)
+
+**1 พ.ย. แชท /system (Finalize16) : ผู้ใช้ตัดสินทิศทางอาร์ต กำลังทำตัวละครฉากต่อสู้แบบ math art** (คำต่อคำ `USER_BRIEFS.md` 13.78 13.79 แผน `BETA1_DIRECTION.md` 31)
+✅ ตัดสินแล้ว (31.1) : ยกเลิกกฎห้ามวาดแทนอาร์ต (แก้ `CLAUDE.md` ข้อ 00 ข้อ 3 ข้อ 4 แล้ว) / ระดับ 1 และ 2 / มีฟิสิกส์ / มองหลังอิง CZN ไม่เวิร์คให้ยืนหันข้าง / ทำแค่ตัวละครฉากต่อสู้ก่อน / ขอบเนียนกับพิกเซลผสม ไอริสเลือกหรือถาม / ทีมวาดแค่วาทยากร
+⏳ กำลังทำ : ระบบ FIGURES ตาม 31 / แถวในตาราง "แชทที่กำลังทำงาน" จองอยู่ / PLAYTEST FINALE ยัง 1 PERFECT (`PlaytestSignatureNeed` ห้ามแก้จนผู้ใช้บอก)
 
 **1 พ.ย. แชท /system (Finalize15) : ผู้ใช้ลองก้อน B แล้ว ยังไม่ต้องแก้ / /update ปิดแชท แชทหน้าคุยเรื่องอาร์ต** (คำต่อคำ `USER_BRIEFS.md` 13.77)
 ✅ ก้อน B QoL ปิดแล้ว (`BETA1_DIRECTION.md` 29.10) / งานทั้งหมดอยู่บน GitHub / ตาราง "แชทที่กำลังทำงาน" ว่าง
