@@ -63,6 +63,8 @@ namespace Tacetno433.Screens
         }
 
         private int hoverOption = -1;
+        private int previewFor = -2;                // BAND LIFE : the card previewLives was worked out for
+        private int[] previewLives;                 //   the lives it would leave, or null when it does not touch life
         private string[] optionTexts = new string[3];
         private string[] optionPrices = new string[3];
         private string resultTitle = "";
@@ -191,6 +193,11 @@ namespace Tacetno433.Screens
                 hoverOption = -1;
                 for (int i = 0; i < 3; i++)
                     if (Input.MouseOver(OptionRect(i))) hoverOption = i;
+                if (hoverOption != previewFor)                                           // BAND LIFE : the pointed card's lives, once
+                {
+                    previewFor = hoverOption;
+                    previewLives = LifePreview(run, hoverOption);
+                }
 
                 if (Input.MouseClicked() && hoverOption >= 0) Choose(hoverOption);
 
@@ -214,6 +221,7 @@ namespace Tacetno433.Screens
         //Choose : one option per rest stop
         private void Choose(int option)
         {
+            previewFor = -2;                                                             // BAND LIFE : work the preview out again after
             RunState run = Game.CurrentRun;
 
             if (!OptionAllowed(option))
@@ -247,6 +255,20 @@ namespace Tacetno433.Screens
                 SoundBank.Play(Sfx.UiConfirm);                                           // REHEARSE : the rehearsal page, then the map
                 Game.Screens.Change(new RehearsalScreen(RehearsalScreen.From.Rest));
             }
+        }
+
+        //Life Preview : BAND LIFE (1 Nov, docs/BETA1_DIRECTION.md 29 item 2), the lives the pointed card would leave, by the same
+        //sums Choose runs (RunState.ChangeLives and FullLives), or null for a card that does not touch life
+        private int[] LifePreview(RunState run, int option)
+        {
+            if (option < 0 || !OptionAllowed(option)) return null;
+            bool full = wings ? option == WingsDeep : option == DeepRest;
+            bool recover = !wings && option == Breathe;
+            if (!full && !recover) return null;
+            int[] lives = run.LivesNow();
+            if (full) run.FullLives(lives);
+            else run.ChangeLives(lives, (int)(run.MaxStamina * BattleRules.BreatheRecover * run.RestShare));
+            return lives;
         }
 
         //Choose In Wings : THE WINGS, a star opens the rehearsal page (which comes back here), the bed stays in the room
@@ -359,7 +381,7 @@ namespace Tacetno433.Screens
             if (phase == Phase.Choose) DrawOptions(sb);
             if (phase == Phase.Done) DrawDone(sb);
 
-            RunHud.DrawTop(sb, run, hudWord);
+            RunHud.DrawTop(sb, run, hudWord, phase == Phase.Choose ? previewLives : null, time);   // BAND LIFE
             RunHud.DrawTips(sb, run);
         }
 

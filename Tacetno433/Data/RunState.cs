@@ -451,12 +451,9 @@ namespace Tacetno433.Data
             if (BattleRules.TurnBattleOn)
             {
                 SyncBandLife();
-                float share = MaxStamina > 0 ? amount / (float)MaxStamina : 0f;
-                for (int i = 0; i < Roster.Count; i++)
-                {
-                    Musician m = Roster[i];
-                    SetLife(m, LifeOf(m) + (int)Math.Round(share * MaxLifeOf(m)));
-                }
+                int[] lives = LivesNow();
+                ChangeLives(lives, amount);                    // BAND LIFE : the same sum the top bar's preview uses
+                for (int i = 0; i < Roster.Count; i++) SetLife(Roster[i], lives[i]);
                 RefreshLabels();
                 return;
             }
@@ -532,30 +529,71 @@ namespace Tacetno433.Data
         //someone could not pay is paid by the one with the most life left, then the next. Returns the life paid.
         public int PayLife(float share)
         {
+            int[] lives = LivesNow();
+            int paid = PayLives(lives, share);                 // BAND LIFE : the same sum the top bar's preview uses
+            for (int i = 0; i < Roster.Count; i++) SetLife(Roster[i], lives[i]);
+            RefreshLabels();
+            return paid;
+        }
+
+        //BAND LIFE (Beta1 1 Nov, docs/BETA1_DIRECTION.md 29 item 2) : the sums of ChangeStamina and PayLife on a list of lives
+        //(one per musician, in Roster order) instead of on the band. The real change runs them on the band's lives and the
+        //top bar's preview (RunHud.PreviewLives) runs them on a copy, so what a page shows before a click is what the click does.
+
+        //Lives Now : each musician's life now, in Roster order
+        public int[] LivesNow()
+        {
+            int[] lives = new int[Roster.Count];
+            for (int i = 0; i < Roster.Count; i++) lives[i] = LifeOf(Roster[i]);
+            return lives;
+        }
+
+        //Change Lives : ChangeStamina's sum, the change shared as the same part of each one's full life, never under 1
+        public void ChangeLives(int[] lives, int amount)
+        {
+            int most = 0;
+            for (int i = 0; i < Roster.Count; i++) most += MaxLifeOf(Roster[i]);
+            if (most == 0) most = 1;                           // before anybody has joined (SyncBandLife)
+            float share = amount / (float)most;
+            for (int i = 0; i < Roster.Count && i < lives.Length; i++)
+            {
+                int max = MaxLifeOf(Roster[i]);
+                lives[i] = Math.Max(1, Math.Min(max, lives[i] + (int)Math.Round(share * max)));
+            }
+        }
+
+        //Pay Lives : PayLife's sum. Each pays their share as far as they can (never under 1), then what is still owed is paid
+        //by the one with the most life left, then the next. Returns the life paid.
+        public int PayLives(int[] lives, float share)
+        {
             int price = LifeCostOf(share);
             int paid = 0;
-            for (int i = 0; i < Roster.Count; i++)
+            for (int i = 0; i < Roster.Count && i < lives.Length; i++)
             {
-                Musician m = Roster[i];
-                int part = Math.Min((int)Math.Round(share * MaxLifeOf(m)), LifeOf(m) - 1);
+                int part = Math.Min((int)Math.Round(share * MaxLifeOf(Roster[i])), lives[i] - 1);
                 if (part <= 0) continue;
-                SetLife(m, LifeOf(m) - part);
+                lives[i] -= part;
                 paid += part;
             }
 
             //The Rest : what someone could not pay
             while (paid < price)
             {
-                Musician most = null;
-                for (int i = 0; i < Roster.Count; i++)
-                    if (LifeOf(Roster[i]) > 1 && (most == null || LifeOf(Roster[i]) > LifeOf(most))) most = Roster[i];
-                if (most == null) break;
-                int part = Math.Min(price - paid, LifeOf(most) - 1);
-                SetLife(most, LifeOf(most) - part);
+                int most = -1;
+                for (int i = 0; i < Roster.Count && i < lives.Length; i++)
+                    if (lives[i] > 1 && (most < 0 || lives[i] > lives[most])) most = i;
+                if (most < 0) break;
+                int part = Math.Min(price - paid, lives[most] - 1);
+                lives[most] -= part;
                 paid += part;
             }
-            RefreshLabels();
             return paid;
+        }
+
+        //Full Lives : RestoreAllStamina, everyone back to full
+        public void FullLives(int[] lives)
+        {
+            for (int i = 0; i < Roster.Count && i < lives.Length; i++) lives[i] = MaxLifeOf(Roster[i]);
         }
 
         //Rehearse All : SECTIONAL, every ATTACK of the band gets a star (the shop's ware, and A TUNING FORK's RISKY WAY).

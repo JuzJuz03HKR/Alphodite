@@ -91,6 +91,11 @@ namespace Tacetno433.Core
                 Input.MousePos = shot == "duelfermata" ? new Vector2(760f, 470f) : (shot == "rewardtilt" ? new Vector2(730f, 460f) : new Vector2(980f, 200f));
                 return;
             }
+            if (shot == "lifetip")                                                              // BAND LIFE (1 Nov) : resting on LIFE
+            {
+                Input.MousePos = new Vector2(920f, 30f);
+                return;
+            }
             if (shot == "luthier" || shot == "luthierdone" || shot == "teampickfull")
             {
                 Input.MousePos = shot == "teampickfull" ? new Vector2(640f + (mouseClock > 0.2f ? 1f : 0f), 300f) : new Vector2(900f, 300f);
@@ -1054,6 +1059,7 @@ namespace Tacetno433.Core
         //       wipe sweep sweepdark sweepclose (Beta1 screens : a page change on its way, from the route to the title, e.g. wipe@30)
         //       wipeshop wiperest wipeevent wipereward wipechapter wipeband wipesettings (Beta1 screens : the wipe to that page,
         //       with its name, e.g. wipeshop@41) wipegallery (the stage curtain on its way to the conductor select page, e.g. wipegallery@30)
+        //       lifetip (BAND LIFE 1 Nov : the map with the pointer on LIFE, each musician's numbers)
         //       routestart routeboss routedive (Beta1 map : at the way in, the boss next, diving into a place, e.g. routedive@52)
         //       routewalk (the far view, 29 Oct : the camera walking to the new row, e.g. routewalk@20)
         //       gallery1 gallery2 gallerywalk galleryback detailcarry detailswap (Beta1 round 2 : another conductor pointed, stepping
@@ -1121,7 +1127,7 @@ namespace Tacetno433.Core
             if (name == "rehearsalrest") screen = new RehearsalScreen(RehearsalScreen.From.Rest);
             if (name == "rehearsalevent") screen = new RehearsalScreen(RehearsalScreen.From.Event, BattleRules.EventStars);   // RISKY WAYS (1 Nov) : two stars
             if (name == "bandname") screen = new BandNameScreen();
-            if (name.StartsWith("route") || name.StartsWith("pause") || name.StartsWith("wipe") || name.StartsWith("sweep")) screen = new RouteScreen();
+            if (name.StartsWith("route") || name.StartsWith("pause") || name.StartsWith("wipe") || name.StartsWith("sweep") || name == "lifetip") screen = new RouteScreen();   // lifetip : BAND LIFE's numbers (1 Nov)
             if (name == "view" || name == "band") screen = new BandScreen();
             if (name.StartsWith("duel") || name == "finale") screen = new DuelScreen();
             if (name == "archive") screen = new ArchiveScreen();                          // Alpha 7 step 7

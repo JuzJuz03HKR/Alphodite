@@ -54,6 +54,8 @@ namespace Tacetno433.Screens
         }
 
         private int hoverChoice = -1;
+        private int previewFor = -2;                // BAND LIFE : the way previewLives was worked out for
+        private int[] previewLives;                 //   the lives it would leave, or null when it does not touch life for sure
         private int chosen = -1;
         private int hoverCard = -1;
         private Musician checker;
@@ -119,6 +121,22 @@ namespace Tacetno433.Screens
             return new Rectangle(x, pickPanel.Y + 74, w, 170);
         }
 
+        //Life Preview : BAND LIFE (1 Nov, docs/BETA1_DIRECTION.md 29 item 2), the lives a way would leave for sure, by the same
+        //sums Choose and Apply run in the same order (its life price, then its reward). A way left to chance (Check) shows
+        //nothing, nor does one the band cannot take.
+        private int[] LifePreview(RunState run, int i)
+        {
+            if (i < 0 || i >= ev.Choices.Length) return null;
+            EventChoice c = ev.Choices[i];
+            if (c.Check || !CanTake(c)) return null;
+            if (c.LifeCost <= 0f && c.Win != Reward.Stamina && c.Win != Reward.FullLife) return null;
+            int[] lives = run.LivesNow();
+            if (c.LifeCost > 0f) run.PayLives(lives, c.LifeCost);
+            if (c.Win == Reward.Stamina) run.ChangeLives(lives, c.WinAmount);
+            else if (c.Win == Reward.FullLife) run.FullLives(lives);
+            return lives;
+        }
+
         //Can Take : enough shards, and for a way paid in life more life than its price (RISKY WAYS)
         private bool CanTake(EventChoice c)
         {
@@ -142,6 +160,11 @@ namespace Tacetno433.Screens
                 hoverChoice = -1;
                 for (int i = 0; i < ev.Choices.Length; i++)
                     if (Input.MouseOver(ChoiceRect(i))) hoverChoice = i;
+                if (hoverChoice != previewFor)                                           // BAND LIFE : the pointed way's lives, once
+                {
+                    previewFor = hoverChoice;
+                    previewLives = LifePreview(run, hoverChoice);
+                }
 
                 int pick = -1;
                 if (Input.MouseClicked() && hoverChoice >= 0) pick = hoverChoice;
@@ -428,7 +451,7 @@ namespace Tacetno433.Screens
             if (phase == Phase.Rolling) DrawRolling(sb);
             if (phase == Phase.Result) DrawResult(sb);
 
-            RunHud.DrawTop(sb, run, "UNKNOWN PATH");
+            RunHud.DrawTop(sb, run, "UNKNOWN PATH", phase == Phase.Read ? previewLives : null, time);   // BAND LIFE
             RunHud.DrawTips(sb, run);
         }
 

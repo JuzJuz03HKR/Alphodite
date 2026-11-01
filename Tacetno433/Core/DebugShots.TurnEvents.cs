@@ -47,6 +47,20 @@ namespace Tacetno433.Core
             poor += run.CanPayLife(BattleRules.EventLifeCost).ToString();
             report += Same("life not enough", "False False True", poor);
 
+            //BAND LIFE (1 Nov, BETA1_DIRECTION 29 item 2) : the top bar's preview runs the same sums on a copy of the lives, so
+            //it changes nothing and comes out the same as the real price then the real heal
+            run.SetLife(run.Roster[0], 20);
+            run.SetLife(run.Roster[1], 7);
+            run.SetLife(run.Roster[2], 40);
+            string before = EventLives(run);
+            int[] preview = run.LivesNow();
+            run.PayLives(preview, BattleRules.EventLifeCost);
+            run.ChangeLives(preview, 12);
+            string untouched = EventLives(run);
+            run.PayLife(BattleRules.EventLifeCost);
+            run.ChangeStamina(12);
+            report += Same("life preview", before + " " + EventLives(run), untouched + " " + preview[0] + " " + preview[1] + " " + preview[2]);
+
             //Sectional : every ATTACK of the band gets a star, a weapon at its top tier is skipped (QUANTZ at 3)
             run.Roster[1].Rehearsed = BattleRules.RehearseMax;
             run.Roster[2].Rehearsed = 1;
