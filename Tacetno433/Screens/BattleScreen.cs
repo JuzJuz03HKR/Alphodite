@@ -565,12 +565,30 @@ namespace Tacetno433.Screens
             else if (Input.ClickedOn(commandBox[2]) || Input.KeyPressed(Keys.D3) || Input.KeyPressed(Keys.NumPad3)) Pick(commandSkill[2]);
         }
 
+        //Say Why Not : WHY NOT (Beta1 1 Nov, docs/BETA1_DIRECTION.md 29 item 8). A dim command that is clicked (or pressed by its
+        //number) pops its reason over the button : NEED 2 BREATH, MUTED, NO FRIEND STANDING, NOT ENOUGH LIFE. Made here, on the
+        //click, never in Draw.
+        private void SayWhyNot(Skill s)
+        {
+            int need;
+            TurnBattle.NoSkill why = battle.WhyNotSkill(selected, s, out need);
+            if (why == TurnBattle.NoSkill.None) return;
+            string text = why == TurnBattle.NoSkill.Muted ? Words.Muted
+                        : why == TurnBattle.NoSkill.NoFriend ? "NO FRIEND STANDING"
+                        : why == TurnBattle.NoSkill.Life ? "NOT ENOUGH " + BattleRules.LifeWord
+                        : "NEED " + need + " BREATH";
+            for (int k = 1; k < 3; k++)
+                if (commandSkill[k] == s)
+                    hudPops.SpawnPop(commandBox[k].Center.X, commandBox[k].Y - 18, text, Palette.Paper, 0.7f);   // the panel's words never move with the camera
+        }
+
         //Pick : a skill is chosen for the selected musician. Skills that need no choice are written at once.
         private void Pick(Skill s)
         {
             if (!battle.CanPlanSkill(selected, s))
             {
                 SoundBank.Play(Sfx.UiDenied);
+                SayWhyNot(s);                                                            // WHY NOT : the reason pops at the button
                 return;
             }
 

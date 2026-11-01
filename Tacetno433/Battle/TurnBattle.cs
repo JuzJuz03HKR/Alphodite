@@ -426,6 +426,22 @@ namespace Tacetno433.Battle
             return PaysInLife(who) && (s.Cost - Math.Max(0, free)) * BattleRules.TurnPaganiniLife < who.Hp;
         }
 
+        //Why Not Skill : WHY NOT (Beta1 1 Nov, docs/BETA1_DIRECTION.md 29 item 8), the reason CanPlanSkill says no, so the page
+        //can say it (the denied sound alone was all a player got, and the game has no sounds yet). need is the BREATH missing.
+        public enum NoSkill { None, Muted, NoFriend, Breath, Life }
+
+        public NoSkill WhyNotSkill(Fighter who, Skill s, out int need)
+        {
+            need = 0;
+            if (s == null || !CanPlan(who) || CanPlanSkill(who, s)) return NoSkill.None;
+            if (who.Mute > 0) return NoSkill.Muted;
+            if (s.OthersOnly && !OtherStanding(who)) return NoSkill.NoFriend;
+            BarMove old = MoveOf(who);
+            int free = BreathFree + (old != null && old.Skill != null ? old.Skill.Cost : 0);
+            need = s.Cost - Math.Max(0, free);
+            return PaysInLife(who) ? NoSkill.Life : NoSkill.Breath;
+        }
+
         //Can Aim : the skill may be played at this target. A skill at an enemy wants one standing, a skill for one
         //musician wants one standing, and SHIELD and THE LESSON never the one who plays it (the screen uses this too).
         public bool CanAim(Fighter who, Skill s, Fighter target)

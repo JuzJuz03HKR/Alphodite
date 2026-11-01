@@ -109,6 +109,8 @@ namespace Tacetno433.Core
             return text;
         }
 
+        private const string LifeSlash = "/";
+
         //Detail : one musician explained in the box under the row. The name, the name the legends give them (or the family
         //for a hidden one from an old save), life and power, the weapon their instrument becomes at its tier (WEAPON TIERS),
         //then their trait and both skills (skills from SkillText).
@@ -123,8 +125,9 @@ namespace Tacetno433.Core
             Gfx.TextSpaced(sb, Ui.Font, "LIFE", x, y + 56, Palette.LineGrey * a, TextSize.Tiny, 2f);
             string life = NumberText.Get(run.LifeOf(m));
             Gfx.Text(sb, Ui.Font, life, x + 44, y + 52, Palette.Paper * a, TextSize.Body);
-            float mostX = Math.Max(x + 84, x + 48 + Gfx.TextWidth(Ui.Font, life, TextSize.Body));      // NO LIMIT : a life of 5 digits pushes it right
-            Gfx.Text(sb, Ui.Font, NumberText.Get(run.MaxLifeOf(m)), mostX, y + 56, Palette.LineGrey * a, TextSize.Tiny);
+            float slashX = x + 50 + Gfx.TextWidth(Ui.Font, life, TextSize.Body);                         // NO LIMIT : a life of 5 digits pushes it right
+            Gfx.Text(sb, Ui.Font, LifeSlash, slashX, y + 56, Palette.LineGrey * a, TextSize.Tiny);         // LIFE X / Y (1 Nov) : read the way the fight writes it
+            Gfx.Text(sb, Ui.Font, NumberText.Get(run.MaxLifeOf(m)), slashX + 10, y + 56, Palette.LineGrey * a, TextSize.Tiny);
             Gfx.TextSpaced(sb, Ui.Font, "POWER", x + 130, y + 56, Palette.LineGrey * a, TextSize.Tiny, 2f);
             Gfx.Text(sb, Ui.Font, NumberText.Get(run.PowerOf(m)), x + 186, y + 52, Palette.Paper * a, TextSize.Body);
             Gfx.TextSpaced(sb, Ui.Font, "WEAPON", x, y + 80, Palette.LineGrey * a, TextSize.Tiny, 2f);

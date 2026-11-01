@@ -163,6 +163,9 @@ namespace Tacetno433.Core
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             bool wrote = b.PlanSkill(b.Party[0], caprice, b.Enemies[0]);
             report += Same("reserved", "True 2 1 False", wrote + " " + b.Reserved + " " + b.BreathFree + " " + b.CanPlanSkill(b.Party[1], softAir));
+            int need;                                                                  // WHY NOT (1 Nov) : the reason it says no, BREATH short by 1
+            TurnBattle.NoSkill why = b.WhyNotSkill(b.Party[1], softAir, out need);
+            report += Same("why not breath", "Breath 1", why + " " + need);
 
             //Rewrite : a musician written again keeps one move, rubbing it out leaves none
             b.PlanAttack(b.Party[0], b.Enemies[0]);
@@ -228,6 +231,7 @@ namespace Tacetno433.Core
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             b.Party[1].Mute = 1;
             bool canSkill = b.CanPlanSkill(b.Party[1], softAir);
+            report += Same("why not muted", "Muted", b.WhyNotSkill(b.Party[1], softAir, out need).ToString());   // WHY NOT (1 Nov)
             b.PlayBar();
             b.Attack();
             b.Attack();
