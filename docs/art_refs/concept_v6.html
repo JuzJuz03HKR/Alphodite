@@ -1,0 +1,916 @@
+<title>TACET Stage Figures</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600&family=Cormorant+Garamond:wght@500;600;700&family=Saira+Semi+Condensed:wght@400;500;600&family=Trirong:wght@500;600&display=swap">
+<style>
+/* Layout : a concert programme for the battle stage. One dark world on purpose, the figures are drawn for the game's dark stage. */
+:root{
+  color-scheme: dark;
+  --bg:#0c0c0f; --panel:#131317; --line:#26262d; --fg:#e4e3df; --dim:#a3a1aa; --faint:#75747d; --ink:#f4f3ef;
+  --crimson:#ff2d55; --aqua:#45f0d0; --copper:#ff8a3d; --sapphire:#4a8cff; --brass:#ffc53a;
+  --display:"Cormorant Garamond","Trirong",Georgia,serif;
+  --body:"Saira Semi Condensed","Chakra Petch","Segoe UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.65;margin:0}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:40px 72px}
+header{display:grid;gap:12px;padding-bottom:30px;border-bottom:1px solid var(--line)}
+.eyebrow,.sec-label{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+h1{font-family:var(--display);font-weight:600;font-size:clamp(42px,7vw,76px);line-height:.95;margin:0;letter-spacing:.01em;text-wrap:balance}
+.lead{max-width:68ch;margin:0}
+section{padding-block:44px 6px;display:grid;gap:18px}
+h2{font-family:var(--display);font-weight:600;font-size:clamp(27px,3.4vw,36px);line-height:1.12;margin:0;text-wrap:balance}
+.cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:30px}
+.cols h3{font-family:var(--display);font-size:22px;font-weight:600;margin:0 0 6px}
+ul.plain{margin:0;padding-left:1.1em;display:grid;gap:6px}
+ul.plain li::marker{color:var(--faint)}
+.note{color:var(--dim);font-size:14px;max-width:76ch;margin:0}
+.principles{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px}
+.pr{grid-column:span 2;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px 18px;display:grid;gap:6px;align-content:start;min-width:0}
+.pr:nth-child(n+4){grid-column:span 3}
+@media (max-width:980px){.principles{grid-template-columns:repeat(2,minmax(0,1fr))}.pr,.pr:nth-child(n+4){grid-column:auto}.pr:last-child{grid-column:1 / -1}}
+@media (max-width:640px){.principles{grid-template-columns:minmax(0,1fr)}.pr:last-child{grid-column:auto}}
+.pr b{font-family:var(--display);font-size:21px;font-weight:600;line-height:1.2}
+.pr span{font-size:14px;color:var(--dim)}
+.legend{display:grid;grid-template-columns:240px minmax(0,1fr);gap:30px;padding-block:24px;border-top:1px solid var(--line);align-items:start}
+.fig{display:block;width:100%;max-width:240px;height:auto;border-radius:8px}
+.lg-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px}
+.lg-name{font-family:var(--display);font-weight:700;font-size:36px;line-height:1;letter-spacing:.02em}
+.lg-title{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:2px 12px;font-size:13px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--c);box-shadow:0 0 10px var(--c)}
+dl.meta{display:grid;grid-template-columns:108px minmax(0,1fr);gap:7px 16px;margin:14px 0 0}
+dl.meta dt{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);padding-top:3px}
+dl.meta dd{margin:0}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.card{display:grid;gap:9px;align-content:start;min-width:0}
+.card .fig{max-width:none}
+.card h3{font-family:var(--display);font-weight:700;font-size:23px;line-height:1.1;margin:4px 0 0}
+.card .who{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+.card p{margin:0;font-size:14px}
+.card p.sub{color:var(--dim)}
+.rule{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px 20px}
+.rule ul{margin:0;padding-left:1.1em;display:grid;gap:5px}
+.vfx svg{width:100%;height:auto;display:block;border-radius:8px}
+ol.ask{margin:0;padding-left:1.5em;display:grid;gap:10px;max-width:84ch}
+ol.ask li::marker{font-family:var(--display);font-weight:700;color:var(--dim)}
+ol.order{margin:0;padding-left:1.5em;display:grid;gap:6px;max-width:84ch}
+footer{margin-top:52px;padding-top:18px;border-top:1px solid var(--line);color:var(--faint);font-size:13px}
+code{font-family:ui-monospace,Consolas,monospace;font-size:.88em;color:var(--dim)}
+@media (max-width:980px){.grid4,.grid3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.legend{grid-template-columns:minmax(0,1fr)}.cols,.grid2{grid-template-columns:minmax(0,1fr)}dl.meta{grid-template-columns:minmax(0,1fr);gap:2px}dl.meta dt{padding-top:8px}}
+@media (max-width:520px){.grid4,.grid3{grid-template-columns:minmax(0,1fr)}}
+</style>
+
+<!-- shared drawing parts : glows, the stage, the floor's reflection -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <filter id="g1" filterUnits="userSpaceOnUse" x="-60" y="-60" width="460" height="460"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="g2" filterUnits="userSpaceOnUse" x="-60" y="-60" width="460" height="460"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="haze" filterUnits="userSpaceOnUse" x="-60" y="-60" width="460" height="460"><feGaussianBlur stdDeviation="9"/></filter>
+    <linearGradient id="stagebg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#17171d"/><stop offset=".87" stop-color="#0d0d11"/><stop offset=".875" stop-color="#0a0a0d"/><stop offset="1" stop-color="#08080a"/></linearGradient>
+    <radialGradient id="back" cx=".5" cy=".46" r=".5"><stop offset="0" stop-color="#e8e8ee" stop-opacity=".5"/><stop offset=".5" stop-color="#9b9ba4" stop-opacity=".15"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+    <linearGradient id="reflgrad" gradientUnits="userSpaceOnUse" x1="0" y1="262" x2="0" y2="300"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <mask id="refl" maskUnits="userSpaceOnUse" x="0" y="262" width="240" height="40"><rect x="0" y="262" width="240" height="40" fill="url(#reflgrad)"/></mask>
+    <clipPath id="clip-dup"><path d="M88 72 L136 72 L141 110 C132 117 132 133 141 140 L136 206 L88 206 L83 140 C92 133 92 117 83 110 Z"/></clipPath>
+    <linearGradient id="rb" gradientUnits="userSpaceOnUse" x1="14" y1="0" x2="306" y2="0"><stop offset="0" stop-color="#ff3b3b"/><stop offset=".17" stop-color="#ff9a2e"/><stop offset=".33" stop-color="#ffe14d"/><stop offset=".5" stop-color="#4dff88"/><stop offset=".67" stop-color="#3fc8ff"/><stop offset=".83" stop-color="#6a5cff"/><stop offset="1" stop-color="#d04dff"/></linearGradient>
+    <radialGradient id="holy" cx=".5" cy="0" r=".9"><stop offset="0" stop-color="#ffd27a" stop-opacity=".32"/><stop offset=".6" stop-color="#ffb84d" stop-opacity=".06"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+  </defs>
+</svg>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">Beta1 / MATH ART รอบ 6 / ข้อเสนอก่อนเขียนโค้ด</div>
+  <h1>TACET Stage Figures</h1>
+  <p class="lead">สเก็ตช์ตัวละครฉากต่อสู้จากรูปทรงล้วน ใช้คุยกันว่าทางนี้ใช่ไหมก่อนไอริสแก้เกม ในเกมทุกตัวจะขยับ มีฟิสิกส์ และเรืองแสงจริง ส่วนภาพในหน้านี้เป็นภาพนิ่ง ทุกอย่างเปลี่ยนได้หมด</p>
+</header>
+
+<section>
+  <div class="sec-label">รีวิวตัวเองตามจริง</div>
+  <h2>รอบ 5 ตอนนี้เป็นยังไง</h2>
+  <div class="cols">
+    <div>
+      <h3>นักดนตรี</h3>
+      <ul class="plain">
+        <li>ตัวคือเครื่องดนตรีทั้งชิ้น เลยดูเป็นเครื่องดนตรีที่มีหลอดไฟเป็นหัว ไม่ใช่คน</li>
+        <li>ยืนตรง สมมาตร ไม่มีเส้นโค้งของท่าทาง ไม่ลงน้ำหนัก</li>
+        <li>หัว มือ เท้า เหมือนกันทั้ง 5 คน เลยบอกนิสัยหรือเพศไม่ได้</li>
+        <li>สีมีแค่ทองกับแดง ตัวเป็นเทากลางที่จมไปกับเวที</li>
+      </ul>
+    </div>
+    <div>
+      <h3>ศัตรูกับบอส</h3>
+      <ul class="plain">
+        <li>เส้นขอบบางกับลายสแกนบนพื้นดำ ไม่มีเงาทึบให้ตาจับ</li>
+        <li>ประกายรอบหลุมสว่างที่สุดในจอ ตาไปที่ฉากก่อนศัตรู</li>
+        <li>แกนขาวเล็กจนจมไปในประกาย</li>
+        <li>สัญลักษณ์โน้ต (ตัวหยุด หัวโน้ต) ตรงตัวเกินไป</li>
+        <li>บอสเป็นบล็อกเทาใหญ่ อ่านไม่ออกว่าเป็นใคร ไม่มีท่า ไม่มีแสง</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-label">จากภาพ Worldless 9 ภาพใน docs/art_refs</div>
+  <h2>Worldless ทำให้ตัวละครเด่นและมีเสน่ห์ยังไง</h2>
+  <ul class="plain">
+    <li>ตัวละครเป็นค่าสุดขั้ว ขาวล้วนหรือดำล้วน วางบนฉากสีกลางที่นุ่มและเบลอ ตาเลยแยกตัวออกจากฉากทันที</li>
+    <li>ทุกตัวมีจุดสว่างจุดเดียว (เพชรส้ม ลูกแสงฟ้า วงรัศมี) ตาไปที่นั่นก่อน และสีของจุดบอกฝ่าย</li>
+    <li>ชิ้นน้อย ที่ว่างเยอะ แต่ละชิ้นเป็นคำหนึ่งคำที่บอกชื่อ เสี้ยวเดียวคือ MOON ปีกชิ้นเดียวคือ BUTTERFLY ใบมีดแผ่ออกคือ ROOTS</li>
+    <li>ทุกรูปทรงเรียวแหลมที่ปลาย บอสยืนลงน้ำหนักขาเดียว เส้นท่าทางยาวเป็นโค้ง</li>
+    <li>ตัวเอกหญิงมีแค่หัว มือ เท้า เอว กับเส้นที่ออกจากหัวเป็นผม ส่วนที่บอกว่าเป็นผู้หญิงคือเส้นโค้งกับความมน ตัวที่ดุดันใช้เหลี่ยม</li>
+    <li>ของลอยและปลิว (ขนนก เศษ ประกาย) บอกว่ากำลังเคลื่อน พื้นเส้นเดียวกับเงาสะท้อนยึดตัวไว้และเพิ่มแสงอีกเท่า</li>
+  </ul>
+  <p class="note">ZZZ กับ CZN ไอริสเทียบจากความรู้เดิม ไม่ได้ดูภาพของสองเกมนี้ในแชทนี้ : ZZZ ให้แต่ละตัวมีไอเดียเดียวที่เห็นได้จากเงา (เช่นหางฉลามของ Ellen) กับสีประจำตัวที่คุมทั้งตัว / CZN ที่เคยยกมา บทบาทของแต่ละตัวชัด ถ้าอยากให้เทียบละเอียดกว่านี้ส่งภาพมาได้</p>
+</section>
+
+<section>
+  <div class="sec-label">ทำให้เป็นของ TACET</div>
+  <h2>หลัก 5 ข้อของรอบนี้</h2>
+  <div class="principles">
+    <div class="pr"><b>แสงออกจากที่ที่เสียงออก</b><span>จุดสว่างของนักดนตรีคือที่ที่เสียงของเครื่องเขาออกมา รู f รูเป่า หน้ากลอง ปากแตร ส่วน DUPORT คือรอยแผล</span></div>
+    <div class="pr"><b>ธาตุ 5 อย่างของวง</b><span>ไฟ ลม ดิน น้ำ แสง มาจากเรื่องของแต่ละคน ส่วนวาทยากรถือพลังของฟ้า พายุ ปริซึม ไฟมิติ ดาว</span></div>
+    <div class="pr"><b>รูปทรงบอกนิสัยและเพศ</b><span>หญิงมีเส้นยาวออกจากหัว เอวโค้ง หยดมน / ชายเป็นบล็อก มุม เหลี่ยม / สายหนักตัวใหญ่และสูงกว่า</span></div>
+    <div class="pr"><b>TACET คือเปลือกดำที่ขังแสง</b><span>ตัวทึบขอบเนียน ตีจนร้าวแล้วแสงข้างในรั่วออก ตายแล้วแตก แสงที่ถูกขังได้คืน</span></div>
+    <div class="pr"><b>บอสคืออนุสาวรีย์ขาว</b><span>ภาพที่โลกจำตำนานคนนั้น ครึ่งเลือดเปลือกแตก เห็นร่างดำที่ความเงียบกลืนไว้ข้างใน</span></div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-label">ระดับ 1 ทั้งหมด หันขวาหาศัตรู</div>
+  <h2>นักดนตรี 5 คน</h2>
+  <p class="note">เพศในภาพเป็นข้อเสนอของไอริสตามชื่อช่องเดิม (ANNA KLARA IRIS เป็นชื่อผู้หญิง) ยังไม่ได้ตัดสิน ถ้าเปลี่ยนเพศ เปลี่ยนแค่ส่วนโค้งกับส่วนเหลี่ยม / สีของ PAGANINI ใกล้แดงของปุ่มโจมตี ส่วนทองเหลืองของ PUNTO ใกล้ทองของปุ่มเสริมกับแสงของ Bach ในเกมแยกกันด้วยรูปแบบ VFX ถ้าอยากให้ห่างกว่านี้บอกได้</p>
+
+  <!-- PAGANINI : FIRE -->
+  <div class="legend">
+    <svg class="fig" viewBox="0 0 240 300" role="img" aria-label="PAGANINI : หัวเปลวไฟมีเขาเป็นหัวม้วนไวโอลิน ผมเป็นสายสี่เส้น เอวคอดแบบไวโอลิน ถือดาบไวโอลิน">
+      <rect width="240" height="300" fill="url(#stagebg)"/>
+      <g id="f-pag">
+        <path d="M150 62 C196 84 212 132 198 178" fill="none" stroke="#ff2d55" stroke-width="2.2" stroke-linecap="round" opacity=".35" filter="url(#g1)"/>
+        <path d="M106 64 C84 66 66 84 58 112 C50 140 44 170 30 206" fill="none" stroke="#ffb3c2" stroke-width="1.7" stroke-linecap="round" filter="url(#g1)"/>
+        <path d="M106 67 C92 72 82 82 76 96 C74 101 77 104 80 101" fill="none" stroke="#f4f3ef" stroke-width="1.1" stroke-linecap="round" opacity=".75"/>
+        <path d="M107 70 C95 78 88 88 85 100 C84 104 87 106 89 103" fill="none" stroke="#f4f3ef" stroke-width="1.1" stroke-linecap="round" opacity=".6"/>
+        <path d="M108 73 C99 82 95 92 94 104" fill="none" stroke="#f4f3ef" stroke-width="1.1" stroke-linecap="round" opacity=".45"/>
+        <circle cx="112" cy="62" r="16" fill="#ff2d55" opacity=".4" filter="url(#haze)"/>
+        <path d="M107 52 C101 47 99 40 104 37 C107 35.5 109 38.5 107 40.5" fill="none" stroke="#ff2d55" stroke-width="2.2" stroke-linecap="round" filter="url(#g1)"/>
+        <path d="M117 52 C123 47 125 40 120 37 C117 35.5 115 38.5 117 40.5" fill="none" stroke="#ff2d55" stroke-width="2.2" stroke-linecap="round" filter="url(#g1)"/>
+        <path d="M112 46 C117 54 121 61 118 68 C116 73 108 73 106 68 C103 61 107 54 112 46 Z" fill="#ffe1e7" filter="url(#g1)"/>
+        <path d="M92 104 C104 118 104 142 92 156 C99 142 99 118 92 104 Z" fill="#f4f3ef"/>
+        <path d="M132 104 C120 118 120 142 132 156 C125 142 125 118 132 104 Z" fill="#bdbcc4"/>
+        <circle cx="112" cy="131" r="12" fill="#ff2d55" opacity=".6" filter="url(#haze)"/>
+        <path d="M115 115 C108 124 118 137 109 147" fill="none" stroke="#ffe1e7" stroke-width="2.2" stroke-linecap="round" filter="url(#g1)"/>
+        <circle cx="115" cy="115" r="2" fill="#ffe1e7"/><circle cx="109" cy="147" r="2" fill="#ffe1e7"/>
+        <path d="M78 122 L70 115 L58 103 L73 112 Z" fill="#bdbcc4"/>
+        <path d="M140 140 L150 136 L166 140 L150 144 Z" fill="#f4f3ef"/>
+        <ellipse cx="170" cy="135" rx="5" ry="4" fill="#f4f3ef"/>
+        <ellipse cx="171" cy="145" rx="6" ry="5" fill="#f4f3ef"/>
+        <path d="M172 139 L231 214 L227 217 L169 143 Z" fill="#f4f3ef"/>
+        <path d="M175 143 L227 210" stroke="#ff2d55" stroke-width="1.3" filter="url(#g1)"/>
+        <path d="M124 262 C120 256 116 248 119 243 C121 239 127 239 129 243 C132 248 128 256 124 262 Z" fill="#f4f3ef"/>
+        <path d="M102 258 C98 252 94 244 97 239 C99 235 105 235 107 239 C110 244 106 252 102 258 Z" fill="#bdbcc4" transform="rotate(-16 102 258)"/>
+        <g fill="#ff2d55" filter="url(#g1)">
+          <rect x="150" y="96" width="3" height="3" transform="rotate(45 151.5 97.5)"/>
+          <rect x="162" y="80" width="2.4" height="2.4" transform="rotate(45 163.2 81.2)"/>
+          <rect x="140" y="70" width="2" height="2" transform="rotate(45 141 71)"/>
+          <rect x="184" y="112" width="2.6" height="2.6" transform="rotate(45 185.3 113.3)"/>
+          <rect x="86" y="164" width="2.2" height="2.2" transform="rotate(45 87.1 165.1)"/>
+          <rect x="200" y="150" width="2" height="2" transform="rotate(45 201 151)"/>
+        </g>
+      </g>
+      <g mask="url(#refl)" opacity=".2"><use href="#f-pag" transform="matrix(1 0 0 -1 0 524)"/></g>
+      <line x1="0" y1="262" x2="240" y2="262" stroke="#34343c"/>
+    </svg>
+    <div>
+      <div class="lg-head"><span class="lg-name">PAGANINI</span><span class="lg-title">The Devil's Violinist</span></div>
+      <div class="chips"><span class="chip" style="--c:var(--crimson)"><span class="dot"></span>ไฟ FIRE / แดงเลือด</span><span class="chip">เสนอ : หญิง</span></div>
+      <dl class="meta">
+        <dt>ที่มา</dt><dd>ข่าวลือว่าขายวิญญาณให้ปีศาจ ตำนานว่าสายขาดเหลือเส้นเดียวก็ยังเล่นจบ นิ้วยาวผิดคน</dd>
+        <dt>รูปทรง</dt><dd>หัวเป็นเปลวไฟ เขาเล็กสองข้างคือหัวม้วนของไวโอลิน ผม 4 เส้นคือสาย 4 สาย ขาดสั้น 3 เหลือยาวเรืองแสงเส้นเดียว เอวคอดเป็นโค้งเอวไวโอลิน มือเป็นเข็มยาว ยืนปลายเท้า เอนหลังเชิดหน้า</dd>
+        <dt>จุดเปล่งแสง</dt><dd>รู f กลางตัว ที่ที่เสียงไวโอลินออก</dd>
+        <dt>VFX</dt><dd>CAPRICE ฟันเสี้ยวไฟแดง 4 ครั้ง ถ่านปลิว / BURN เปลวไฟเล็กติดบนศัตรู / IL CANNONE สายเส้นเดียวขึงตึงไปถึงศัตรูแล้วดีดขาด ระเบิดเป็นวงเหมือนปืนใหญ่ / THE DEVIL'S BARGAIN จ่ายเลือดแล้วไฟคล้ำลง มีควันดำออกจากรู f</dd>
+      </dl>
+    </div>
+  </div>
+
+  <!-- QUANTZ : WIND -->
+  <div class="legend">
+    <svg class="fig" viewBox="0 0 240 300" role="img" aria-label="QUANTZ : ตัวตรงสงบ แกนกลางเป็นฟลุตมีคีย์ ริบบิ้นลมแทนผม ถือเรเปียร์">
+      <rect width="240" height="300" fill="url(#stagebg)"/>
+      <g id="f-qua">
+        <path d="M150 70 C170 60 192 64 206 76" stroke="#45f0d0" stroke-width="1.2" fill="none" opacity=".4" stroke-linecap="round"/>
+        <path d="M160 152 C178 142 198 146 210 158" stroke="#45f0d0" stroke-width="1.2" fill="none" opacity=".3" stroke-linecap="round"/>
+        <path d="M34 118 C46 110 60 112 68 120" stroke="#45f0d0" stroke-width="1" fill="none" opacity=".3" stroke-linecap="round"/>
+        <path d="M106 63 C86 82 104 110 84 140 C72 158 78 184 60 212" fill="none" stroke="#45f0d0" stroke-width="2.6" stroke-linecap="round" opacity=".85" filter="url(#g1)"/>
+        <path d="M108 66 C92 86 108 112 92 140 C84 154 88 170 80 186" fill="none" stroke="#e0fff8" stroke-width="1" stroke-linecap="round" opacity=".5"/>
+        <circle cx="112" cy="60" r="15" fill="#45f0d0" opacity=".35" filter="url(#haze)"/>
+        <circle cx="112" cy="60" r="9" fill="#e0fff8" filter="url(#g1)"/>
+        <ellipse cx="112" cy="57" rx="16" ry="4.5" transform="rotate(-14 112 57)" fill="none" stroke="#45f0d0" stroke-width="1.5" filter="url(#g1)"/>
+        <path d="M106 77 L118 77 L112 87 Z" fill="#f4f3ef"/>
+        <path d="M104 96 C99 126 100 150 106 186" stroke="#bdbcc4" stroke-width="1.3" fill="none" opacity=".8"/>
+        <path d="M120 96 C125 126 124 150 118 186" stroke="#85848c" stroke-width="1.3" fill="none" opacity=".8"/>
+        <line x1="112" y1="90" x2="112" y2="198" stroke="#f4f3ef" stroke-width="3" stroke-linecap="round"/>
+        <path d="M106 94 Q112 88 118 94" stroke="#f4f3ef" stroke-width="1.5" fill="none"/>
+        <circle cx="112" cy="99" r="9" fill="#45f0d0" opacity=".55" filter="url(#haze)"/>
+        <ellipse cx="112" cy="99" rx="2.6" ry="1.7" fill="#0f0f13" stroke="#e0fff8" stroke-width="1.2" filter="url(#g1)"/>
+        <circle cx="112" cy="113" r="2.8" fill="#e0fff8" filter="url(#g1)"/>
+        <circle cx="112" cy="127" r="2.8" fill="#45f0d0" filter="url(#g1)"/>
+        <circle cx="112" cy="141" r="2.8" fill="#45f0d0" opacity=".7"/>
+        <circle cx="112" cy="155" r="2.6" fill="#0f0f13" stroke="#f4f3ef" stroke-width="1.2"/>
+        <circle cx="112" cy="169" r="2.6" fill="#0f0f13" stroke="#f4f3ef" stroke-width="1.2"/>
+        <circle cx="112" cy="183" r="2.6" fill="#0f0f13" stroke="#f4f3ef" stroke-width="1.2"/>
+        <circle cx="142" cy="118" r="3.8" fill="none" stroke="#f4f3ef" stroke-width="1.6"/>
+        <circle cx="98" cy="152" r="2.6" fill="#bdbcc4"/>
+        <path d="M146 116 L232 92 L146 121 Z" fill="#f4f3ef"/>
+        <path d="M139 111 Q147 118 139 125" stroke="#f4f3ef" stroke-width="1.6" fill="none"/>
+        <circle cx="170" cy="111" r="1.2" fill="#45f0d0"/><circle cx="188" cy="106" r="1.2" fill="#45f0d0"/><circle cx="206" cy="101" r="1.2" fill="#45f0d0"/>
+        <path d="M107 242 C111 249 113 256 110 260 C108 263 104 263 103 260 C100 256 103 249 107 242 Z" fill="#f4f3ef"/>
+        <path d="M118 242 C122 249 124 256 121 260 C119 263 115 263 114 260 C111 256 114 249 118 242 Z" fill="#bdbcc4"/>
+        <g fill="#45f0d0" opacity=".8">
+          <path d="M176 186 q6 -6 12 0 q-6 6 -12 0 Z"/>
+          <path d="M150 210 q5 -5 10 0 q-5 5 -10 0 Z" transform="rotate(-30 155 210)"/>
+          <path d="M60 150 q5 -5 10 0 q-5 5 -10 0 Z" transform="rotate(20 65 150)"/>
+          <path d="M190 228 q4 -4 8 0 q-4 4 -8 0 Z"/>
+        </g>
+      </g>
+      <g mask="url(#refl)" opacity=".2"><use href="#f-qua" transform="matrix(1 0 0 -1 0 524)"/></g>
+      <line x1="0" y1="262" x2="240" y2="262" stroke="#34343c"/>
+    </svg>
+    <div>
+      <div class="lg-head"><span class="lg-name">QUANTZ</span><span class="lg-title">The King's Flute Master</span></div>
+      <div class="chips"><span class="chip" style="--c:var(--aqua)"><span class="dot"></span>ลม WIND / ฟ้าอมเขียว</span><span class="chip">เสนอ : หญิง</span></div>
+      <dl class="meta">
+        <dt>ที่มา</dt><dd>ครูฟลุตของกษัตริย์ Frederick the Great เขียนตำราเป่าฟลุต ลมหายใจคือเครื่องดนตรีของเธอ</dd>
+        <dt>รูปทรง</dt><dd>ตัวตรงสงบ แกนกลางคือฟลุตเส้นเดียว คีย์เรียงลงเหมือนกระดุมเสื้อราชสำนัก ผ้าระบายคอสามเหลี่ยมเล็ก ริบบิ้นลมยาวจากหลังหัวแทนผม มือหนึ่งไขว้หลังแบบครู ยืนส้นชิด ถือเรเปียร์ท่าฟันดาบ</dd>
+        <dt>จุดเปล่งแสง</dt><dd>รูเป่าบนแกน ตอนเล่นคีย์สว่างไล่ลงทีละอันเหมือนไล่บันไดเสียง</dd>
+        <dt>VFX</dt><dd>ATTACK แทงตรงทิ้งเส้นลม / SOFT AIR ริบบิ้นลมพาดผ่านทั้งวง ใบไม้แสงร่วงลงบนเพื่อน / THE LESSON เส้นแสงจากครูไปหาเพื่อน วงแหวนเล็กลอยบนหัวเพื่อน (FOCUS) / BREATH CONTROL ลมพัดเข้าเพชร BREATH</dd>
+      </dl>
+    </div>
+  </div>
+
+  <!-- PFUNDT : EARTH -->
+  <div class="legend">
+    <svg class="fig" viewBox="0 0 240 300" role="img" aria-label="PFUNDT : ตัวใหญ่ ลำตัวเป็นหม้อกลอง อกเป็นหน้ากลอง กุญแจไขลานบนหลัง กำปั้นเป็นหัวไม้ตี">
+      <rect width="240" height="300" fill="url(#stagebg)"/>
+      <g id="f-pfu">
+        <ellipse cx="112" cy="262" rx="44" ry="4" fill="none" stroke="#ff8a3d" stroke-width="1.2" opacity=".55"/>
+        <ellipse cx="112" cy="262" rx="72" ry="6.5" fill="none" stroke="#ff8a3d" stroke-width="1" opacity=".28"/>
+        <path d="M62 262 L50 257 L42 261 L30 255" stroke="#ff8a3d" stroke-width="1" fill="none" opacity=".6"/>
+        <path d="M162 262 L176 256 L186 261 L200 254" stroke="#ff8a3d" stroke-width="1" fill="none" opacity=".6"/>
+        <g transform="translate(0 14)">
+          <g transform="rotate(-24 70 108)">
+            <rect x="62" y="106.5" width="20" height="3" fill="#ff8a3d"/>
+            <ellipse cx="56" cy="108" rx="6" ry="8.5" fill="none" stroke="#ff8a3d" stroke-width="2.4"/>
+            <ellipse cx="44" cy="108" rx="6" ry="8.5" fill="none" stroke="#ff8a3d" stroke-width="2.4"/>
+          </g>
+          <path d="M40 78 A26 26 0 0 0 30 122" fill="none" stroke="#ff8a3d" stroke-width="1" opacity=".5"/>
+          <path d="M27 116 L30 123 L35 117" fill="none" stroke="#ff8a3d" stroke-width="1" opacity=".5"/>
+          <rect x="68" y="78" width="28" height="19" rx="9" fill="#f4f3ef"/>
+          <rect x="128" y="78" width="28" height="19" rx="9" fill="#bdbcc4"/>
+          <path d="M78 98 L146 98 C146 146 130 176 112 176 C94 176 78 146 78 98 Z" fill="#dcdbe0"/>
+          <path d="M112 98 L146 98 C146 146 130 176 112 176 Z" fill="#a3a2aa"/>
+          <path d="M78 98 C78 146 94 176 112 176 C130 176 146 146 146 98" fill="none" stroke="#ff8a3d" stroke-width="1.6" opacity=".9"/>
+          <ellipse cx="112" cy="98" rx="34" ry="7" fill="#101014" stroke="#f4f3ef" stroke-width="1.6"/>
+          <ellipse cx="112" cy="98" rx="24" ry="5" fill="none" stroke="#ff8a3d" stroke-width=".9" opacity=".6"/>
+          <ellipse cx="112" cy="98" rx="15" ry="3.4" fill="none" stroke="#ff8a3d" stroke-width=".9" opacity=".8"/>
+          <ellipse cx="112" cy="98" rx="22" ry="7" fill="#ff8a3d" opacity=".6" filter="url(#haze)"/>
+          <ellipse cx="112" cy="98" rx="7" ry="2.4" fill="#ffe3c7" filter="url(#g1)"/>
+          <ellipse cx="112" cy="54" rx="22" ry="15" fill="#ff8a3d" opacity=".35" filter="url(#haze)"/>
+          <ellipse cx="112" cy="54" rx="14" ry="9" fill="#ffe3c7" filter="url(#g1)"/>
+          <ellipse cx="112" cy="54" rx="18" ry="11.5" fill="none" stroke="#ff8a3d" stroke-width="1.6"/>
+          <line x1="160" y1="124" x2="190" y2="88" stroke="#f4f3ef" stroke-width="2.6" stroke-linecap="round"/>
+          <circle cx="193" cy="85" r="7.5" fill="#f4f3ef"/>
+          <circle cx="195" cy="83" r="2" fill="#ffe3c7"/>
+          <line x1="66" y1="134" x2="46" y2="164" stroke="#bdbcc4" stroke-width="2.6" stroke-linecap="round"/>
+          <circle cx="43" cy="168" r="7" fill="#bdbcc4"/>
+          <circle cx="158" cy="128" r="9.5" fill="#f4f3ef"/>
+          <circle cx="68" cy="132" r="9" fill="#bdbcc4"/>
+        </g>
+        <rect x="84" y="250" width="22" height="12" rx="5" fill="#f4f3ef"/>
+        <rect x="120" y="250" width="22" height="12" rx="5" fill="#bdbcc4"/>
+        <g fill="#ff8a3d" opacity=".8">
+          <rect x="74" y="240" width="2.4" height="2.4"/><rect x="66" y="230" width="2" height="2"/><rect x="150" y="238" width="2.4" height="2.4"/><rect x="160" y="226" width="2" height="2"/><rect x="58" y="246" width="1.8" height="1.8"/>
+        </g>
+      </g>
+      <g mask="url(#refl)" opacity=".2"><use href="#f-pfu" transform="matrix(1 0 0 -1 0 524)"/></g>
+      <line x1="0" y1="262" x2="240" y2="262" stroke="#34343c"/>
+    </svg>
+    <div>
+      <div class="lg-head"><span class="lg-name">PFUNDT</span><span class="lg-title">Who Tunes the Thunder</span></div>
+      <div class="chips"><span class="chip" style="--c:var(--copper)"><span class="dot"></span>ดิน EARTH / ทองแดง</span><span class="chip">เสนอ : ชาย</span></div>
+      <dl class="meta">
+        <dt>ที่มา</dt><dd>นักทิมปานีของวง Gewandhaus ทำกลองที่หมุนข้อเหวี่ยงตั้งเสียงได้ หม้อกลองทิมปานีทำจากทองแดง</dd>
+        <dt>รูปทรง</dt><dd>ตัวใหญ่กว้าง ไหล่เป็นบล็อกมน ลำตัวคือหม้อกลองครึ่งวงกลม อกคือหน้ากลอง กุญแจไขลานบนหลังคือข้อเหวี่ยงของเขา หมุนตอน TURN OF THE HAND ทำงาน กำปั้นคือหัวไม้ตี เท้าเหลี่ยมหนัก</dd>
+        <dt>จุดเปล่งแสง</dt><dd>กลางหน้ากลองบนอก เต้นเป็นจังหวะเหมือนหัวใจ ยิ่งรัวยิ่งเร็ว</dd>
+        <dt>VFX</dt><dd>ATTACK กระแทกพื้น วงคลื่นทองแดง พื้นร้าว ฝุ่นลอย / TIMPANI ROLL วงคลื่นรัว พื้นสั่น ศัตรูที่ STUN มีวงทองแดงหมุนรอบ / THUNDER CALL โดมวงคลื่นขึ้นรอบวง / TURN OF THE HAND กุญแจบนหลังหมุน โน้ตของศัตรูถูกไขหลุดออกเป็นวง</dd>
+      </dl>
+    </div>
+  </div>
+
+  <!-- DUPORT : WATER -->
+  <div class="legend">
+    <svg class="fig" viewBox="0 0 240 300" role="img" aria-label="DUPORT : ตัวเป็นแผ่นสูงขอบเว้าแบบเชลโล มีรอยแผลเรืองแสง หัวเป็นหน้ากากข้าวหลามตัด ขาเดียวเป็นเหล็กปักพื้น">
+      <rect width="240" height="300" fill="url(#stagebg)"/>
+      <g id="f-dup">
+        <ellipse cx="112" cy="262" rx="14" ry="2.6" fill="none" stroke="#4a8cff" stroke-width="1.3" opacity=".85"/>
+        <ellipse cx="112" cy="262" rx="28" ry="4.2" fill="none" stroke="#4a8cff" stroke-width="1.1" opacity=".45"/>
+        <ellipse cx="112" cy="262" rx="44" ry="6" fill="none" stroke="#4a8cff" stroke-width="1" opacity=".22"/>
+        <path d="M108.5 204 L115.5 204 L112 262 Z" fill="#f4f3ef"/>
+        <path d="M88 72 L136 72 L141 110 C132 117 132 133 141 140 L136 206 L88 206 L83 140 C92 133 92 117 83 110 Z" fill="#e3e2e7"/>
+        <rect x="112" y="60" width="40" height="160" fill="#9c9ba4" clip-path="url(#clip-dup)"/>
+        <path d="M94 94 L103 110 L100 117 L112 138 L109 146 L123 166 L120 173 L131 188" fill="none" stroke="#4a8cff" stroke-width="8" opacity=".45" filter="url(#haze)"/>
+        <path d="M94 94 L103 110 L100 117 L112 138 L109 146 L123 166 L120 173 L131 188" fill="none" stroke="#dbe8ff" stroke-width="2.2" stroke-linejoin="round" filter="url(#g1)"/>
+        <circle cx="112" cy="44" r="18" fill="#4a8cff" opacity=".3" filter="url(#haze)"/>
+        <path d="M112 24 L124 44 L112 64 L100 44 Z" fill="#e3e2e7"/>
+        <path d="M112 24 L124 44 L112 64 Z" fill="#9c9ba4"/>
+        <rect x="110.8" y="34" width="2.4" height="20" fill="#dbe8ff" filter="url(#g1)"/>
+        <rect x="146" y="132" width="10" height="10" fill="#f4f3ef" transform="rotate(8 151 137)"/>
+        <rect x="68" y="144" width="9" height="9" fill="#9c9ba4"/>
+        <path d="M154 134 L232 122 L233 125 L155 139 Z" fill="#f4f3ef"/>
+        <line x1="156" y1="141" x2="226" y2="129" stroke="#4a8cff" stroke-width="1.1" filter="url(#g1)"/>
+        <g fill="#4a8cff" filter="url(#g1)">
+          <path d="M150 92 c2 3 3 5 0 7 c-3 -2 -2 -4 0 -7 z"/>
+          <path d="M160 176 c2 3 3 5 0 7 c-3 -2 -2 -4 0 -7 z"/>
+          <path d="M70 186 c2 3 3 5 0 7 c-3 -2 -2 -4 0 -7 z"/>
+          <path d="M140 210 c1.6 2.4 2.4 4 0 5.6 c-2.4 -1.6 -1.6 -3.2 0 -5.6 z"/>
+        </g>
+        <path d="M40 232 C58 222 74 224 86 232" stroke="#4a8cff" stroke-width="1.2" fill="none" opacity=".35"/>
+        <path d="M150 238 C166 228 184 230 198 238" stroke="#4a8cff" stroke-width="1.2" fill="none" opacity=".3"/>
+      </g>
+      <g mask="url(#refl)" opacity=".2"><use href="#f-dup" transform="matrix(1 0 0 -1 0 524)"/></g>
+      <line x1="0" y1="262" x2="240" y2="262" stroke="#34343c"/>
+    </svg>
+    <div>
+      <div class="lg-head"><span class="lg-name">DUPORT</span><span class="lg-title">Scarred by an Emperor</span></div>
+      <div class="chips"><span class="chip" style="--c:var(--sapphire)"><span class="dot"></span>น้ำ WATER / น้ำเงินไพลิน</span><span class="chip">เสนอ : ชาย</span></div>
+      <dl class="meta">
+        <dt>ที่มา</dt><dd>เชลโล Stradivarius ที่ตำนานเล่าว่าจักรพรรดินโปเลียนทิ้งรอยบุบไว้ เสียงต่ำลึกที่ใกล้เสียงคนที่สุด</dd>
+        <dt>รูปทรง</dt><dd>สูงที่สุดในวง ตัวเป็นแผ่นสูงขอบเว้าแบบเชลโล เป็นทั้งตัวและโล่ หัวเป็นข้าวหลามตัดสูงแบบหน้ากากอัศวิน มีช่องแสงแนวตั้ง ขาเดียวคือเหล็ก endpin ปักพื้น มือเหลี่ยม นิ่งเหมือนอนุสาวรีย์</dd>
+        <dt>จุดเปล่งแสง</dt><dd>รอยแผลพาดตัว ยิ่งโดนตียิ่งสว่าง (THE SCAR เก็บ VOLUME)</dd>
+        <dt>VFX</dt><dd>SHIELD แผ่นน้ำใสสีไพลินตั้งขึ้นหน้าเพื่อน โดนตีแล้วเป็นระลอก / LANCE แทงยาวเส้นตรง ทิ้งรอยแผลแสงไว้บนศัตรู / โดนตีมีหยดน้ำกระเด็นแทนประกาย / ระลอกน้ำที่ปลายเหล็กบนพื้นตอนยืน</dd>
+      </dl>
+    </div>
+  </div>
+
+  <!-- PUNTO : LIGHT -->
+  <div class="legend">
+    <svg class="fig" viewBox="0 0 240 300" role="img" aria-label="PUNTO : กำลังก้าวเดิน ปากแตรเป็นวงรัศมีหลังหัว ผมเป็นขดแตร ท่อขดพันเอว ถือจักร">
+      <rect width="240" height="300" fill="url(#stagebg)"/>
+      <g id="f-pun">
+        <path d="M100 64 L0 26 L0 122 Z" fill="#ffc53a" opacity=".12" filter="url(#haze)"/>
+        <circle cx="100" cy="64" r="34" fill="#ffc53a" opacity=".22" filter="url(#haze)"/>
+        <circle cx="100" cy="64" r="26" fill="none" stroke="#ffc53a" stroke-width="2.2" filter="url(#g1)"/>
+        <circle cx="100" cy="64" r="18" fill="none" stroke="#ffc53a" stroke-width=".8" opacity=".55"/>
+        <g id="rays-pun" stroke="#ffc53a" stroke-width="1.4" stroke-linecap="round" opacity=".8"></g>
+        <circle cx="100" cy="64" r="5" fill="#fff4cf" filter="url(#g1)"/>
+        <path d="M119 57 C110 50 113 40 121 43 C127 46 124 54 118 52" fill="none" stroke="#ffc53a" stroke-width="2" stroke-linecap="round" filter="url(#g1)"/>
+        <circle cx="124" cy="64" r="8.5" fill="#fff4cf" filter="url(#g1)"/>
+        <path d="M98 126 C110 114 140 118 136 132 C132 146 102 146 104 134 C106 124 124 125 124 133" fill="none" stroke="#ffc53a" stroke-width="2.2" stroke-linecap="round" filter="url(#g1)"/>
+        <circle cx="156" cy="104" r="3.6" fill="#f4f3ef"/>
+        <circle cx="76" cy="126" r="3" fill="#bdbcc4"/>
+        <g transform="rotate(20 178 96)">
+          <circle cx="178" cy="96" r="15" fill="none" stroke="#f4f3ef" stroke-width="3"/>
+          <path d="M178 77 L182 84 L174 84 Z" fill="#f4f3ef"/>
+          <path d="M197 96 L190 100 L190 92 Z" fill="#f4f3ef"/>
+          <path d="M178 115 L174 108 L182 108 Z" fill="#f4f3ef"/>
+          <path d="M159 96 L166 92 L166 100 Z" fill="#f4f3ef"/>
+          <circle cx="178" cy="96" r="15" fill="none" stroke="#ffc53a" stroke-width="1" filter="url(#g1)"/>
+        </g>
+        <path d="M150 132 C170 142 198 130 206 110" stroke="#ffc53a" stroke-width="1.2" fill="none" opacity=".45"/>
+        <path d="M138 242 C142 249 144 256 141 260 C139 263 135 263 134 260 C131 256 134 249 138 242 Z" fill="#f4f3ef"/>
+        <path d="M90 232 C94 239 96 246 93 250 C91 253 87 253 86 250 C83 246 86 239 90 232 Z" fill="#bdbcc4" transform="rotate(-48 90 246)"/>
+        <g fill="#fff4cf" filter="url(#g1)">
+          <path d="M152 44 L153.4 48.6 L158 50 L153.4 51.4 L152 56 L150.6 51.4 L146 50 L150.6 48.6 Z"/>
+          <path d="M204 66 L205 69 L208 70 L205 71 L204 74 L203 71 L200 70 L203 69 Z"/>
+          <path d="M58 150 L59 153 L62 154 L59 155 L58 158 L57 155 L54 154 L57 153 Z"/>
+          <path d="M196 150 L197.2 153.8 L201 155 L197.2 156.2 L196 160 L194.8 156.2 L191 155 L194.8 153.8 Z"/>
+        </g>
+      </g>
+      <g mask="url(#refl)" opacity=".2"><use href="#f-pun" transform="matrix(1 0 0 -1 0 524)"/></g>
+      <line x1="0" y1="262" x2="240" y2="262" stroke="#34343c"/>
+    </svg>
+    <div>
+      <div class="lg-head"><span class="lg-name">PUNTO</span><span class="lg-title">Louder than Beethoven</span></div>
+      <div class="chips"><span class="chip" style="--c:var(--brass)"><span class="dot"></span>แสง LIGHT / ทองเหลือง</span><span class="chip">เสนอ : หญิง</span></div>
+      <dl class="meta">
+        <dt>ที่มา</dt><dd>นักฮอร์นที่หนีจากเจ้านายแล้วเปลี่ยนชื่อ ดังจน Beethoven แต่งเพลงให้ ฮอร์นมาจากแตรล่าสัตว์ และปากแตรหันไปข้างหลังเสมอ</dd>
+        <dt>รูปทรง</dt><dd>กำลังก้าว เอนไปข้างหน้าแบบคนเดินทาง ผมเป็นขดแตรม้วน ท่อขดพันเอวเป็นสายคาด ปากแตรเป็นวงรัศมีหลังหัว</dd>
+        <dt>จุดเปล่งแสง</dt><dd>ปากแตรหลังหัว แสงส่องไปข้างหลังหาคนที่เล่นต่อจากเธอ (THE HUNTING CALL)</dd>
+        <dt>VFX</dt><dd>CHAKRAM จักรทองเหลืองหมุนทิ้งเส้นโค้ง เด้งไปมามีแฟลร์ / FANFARE รังสีจากปากแตรพาดทั้งวง ทุกคนได้ขอบแสงทอง / THE HUNTING CALL ลำแสงจากปากแตรตกบนคนถัดไป / ประกายสี่แฉกรอบตัว</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-label">ของที่ทำให้ดนตรีเงียบ แทนสัญลักษณ์โน้ต</div>
+  <h2>TACET 4 แบบ</h2>
+  <div class="grid4">
+    <div class="card">
+      <svg class="fig" viewBox="0 0 240 300" role="img" aria-label="THE MUTE : กรวยดำสูงเหมือนคนคลุมผ้า ช่องแสงด้านหน้า มีแท่งพาดเหมือนนิ้วแตะปาก แสงรั่วที่ขอบล่าง">
+        <rect width="240" height="300" fill="url(#stagebg)"/>
+        <ellipse cx="120" cy="140" rx="104" ry="118" fill="url(#back)"/>
+        <g id="t-mute">
+          <ellipse cx="121" cy="262" rx="70" ry="5" fill="#fff" opacity=".22" filter="url(#haze)"/>
+          <path d="M78 232 L164 232 L186 262 L56 262 Z" fill="#fff" opacity=".08"/>
+          <path d="M128 40 C134 70 152 150 166 230 C142 238 100 238 76 230 C92 160 110 90 128 40 Z" fill="#060608"/>
+          <path d="M128 40 C134 70 152 150 166 230 C142 238 100 238 76 230 C92 160 110 90 128 40 Z" fill="none" stroke="#e6e6ea" stroke-width="1" opacity=".5"/>
+          <circle cx="108" cy="150" r="13" fill="#fff" opacity=".35" filter="url(#haze)"/>
+          <path d="M108 118 C105 140 105 160 109 182" fill="none" stroke="#fff" stroke-width="2.4" filter="url(#g1)"/>
+          <path d="M108 143 L113 150 L108 157 L103 150 Z" fill="#fff" filter="url(#g2)"/>
+          <rect x="96" y="136" width="24" height="3.6" rx="1.8" fill="#060608"/>
+          <ellipse cx="121" cy="232" rx="46" ry="3.6" fill="#fff" opacity=".85" filter="url(#g1)"/>
+          <path d="M124 60 L131 74 L127 80" stroke="#fff" stroke-width="1" fill="none" filter="url(#g1)"/>
+          <path d="M146 136 L139 150 L144 158" stroke="#fff" stroke-width="1" fill="none" filter="url(#g1)"/>
+          <path d="M152 66 L163 60 L158 73 Z" fill="#060608" stroke="#e6e6ea" stroke-width=".8"/>
+          <path d="M62 96 L72 90 L70 102 Z" fill="#060608" stroke="#e6e6ea" stroke-width=".7"/>
+          <path d="M176 110 L184 116 L174 118 Z" fill="#060608" stroke="#e6e6ea" stroke-width=".7"/>
+        </g>
+        <g mask="url(#refl)" opacity=".22"><use href="#t-mute" transform="matrix(1 0 0 -1 0 524)"/></g>
+        <line x1="0" y1="262" x2="240" y2="262" stroke="#34343c"/>
+      </svg>
+      <div class="who">ภาพของ HUSH และเพื่อน</div>
+      <h3>THE MUTE</h3>
+      <p>ที่มา : มิวท์ทรงกรวยที่ยัดเข้าปากแตรให้เสียงเงียบ กับท่าชู่ว รูปทรงเป็นกรวยดำสูงเอนตัวเหมือนคนคลุมผ้า ช่องแสงด้านหน้ามีแท่งดำพาดเหมือนนิ้วแตะปาก</p>
+      <p class="sub">แกน : หลังช่องแสง / แสงรั่วที่ขอบล่างลงพื้น</p>
+    </div>
+    <div class="card">
+      <svg class="fig" viewBox="0 0 240 300" role="img" aria-label="THE NOISE : เศษดำลอยรวมกลุ่ม มีเส้นขาวบางแนวนอนระหว่างเศษ แกนกะพริบมีเงาซ้อน">
+        <rect width="240" height="300" fill="url(#stagebg)"/>
+        <ellipse cx="120" cy="140" rx="104" ry="118" fill="url(#back)"/>
+        <g id="t-noise">
+          <ellipse cx="120" cy="262" rx="50" ry="4" fill="#fff" opacity=".14" filter="url(#haze)"/>
+          <g fill="#060608" stroke="#d8d8de" stroke-width=".8" stroke-opacity=".5">
+            <path d="M96 96 L118 90 L112 112 L94 110 Z"/>
+            <path d="M124 86 L148 94 L140 112 L122 104 Z"/>
+            <path d="M84 118 L104 116 L100 138 L80 134 Z"/>
+            <path d="M130 116 L154 120 L150 140 L126 136 Z"/>
+            <path d="M104 140 L124 142 L120 164 L100 160 Z"/>
+            <path d="M134 146 L152 150 L146 168 L130 162 Z"/>
+            <path d="M62 94 L78 96 L76 106 L60 104 Z"/>
+            <path d="M160 100 L174 104 L170 116 L158 112 Z"/>
+          </g>
+          <g stroke="#fff" stroke-width=".8" opacity=".6">
+            <line x1="70" y1="101" x2="98" y2="101"/><line x1="116" y1="99" x2="168" y2="99"/>
+            <line x1="88" y1="114" x2="126" y2="114"/><line x1="78" y1="128" x2="160" y2="128"/>
+            <line x1="96" y1="139" x2="132" y2="139"/><line x1="110" y1="152" x2="156" y2="152"/>
+            <line x1="92" y1="166" x2="122" y2="166"/>
+          </g>
+          <circle cx="120" cy="127" r="14" fill="#fff" opacity=".35" filter="url(#haze)"/>
+          <path d="M120 120 L126 127 L120 134 L114 127 Z" fill="#fff" filter="url(#g2)"/>
+          <path d="M131 120 L137 127 L131 134 L125 127 Z" fill="#fff" opacity=".3"/>
+          <path d="M110 192 L116 188 L114 196 Z" fill="#060608" stroke="#d8d8de" stroke-width=".6" stroke-opacity=".5"/>
+          <path d="M136 214 L141 212 L139 218 Z" fill="#060608" stroke="#d8d8de" stroke-width=".6" stroke-opacity=".5"/>
+          <path d="M100 232 L104 230 L103 235 Z" fill="#060608"/>
+        </g>
+        <g mask="url(#refl)" opacity=".22"><use href="#t-noise" transform="matrix(1 0 0 -1 0 524)"/></g>
+        <line x1="0" y1="262" x2="240" y2="262" stroke="#34343c"/>
+      </svg>
+      <div class="who">ภาพของ STATIC และเพื่อน</div>
+      <h3>THE NOISE</h3>
+      <p>ที่มา : เสียงซ่าของวิทยุที่ไม่มีสถานี เศษดำลอยรวมกลุ่มสั่นกระตุก มีเส้นขาวบางแนวนอนระหว่างเศษ แกนกะพริบมีเงาซ้อน</p>
+      <p class="sub">แกน : กลางกลุ่ม / เศษหลุดง่ายที่สุดในสี่แบบ</p>
+    </div>
+    <div class="card">
+      <svg class="fig" viewBox="0 0 240 300" role="img" aria-label="THE WEIGHT : ก้อนดำหนักห้อยจากคาน กดสายสี่เส้นจนหย่อน แสงถูกบีบออกด้านข้าง">
+        <rect width="240" height="300" fill="url(#stagebg)"/>
+        <ellipse cx="120" cy="140" rx="104" ry="118" fill="url(#back)"/>
+        <g id="t-weight">
+          <ellipse cx="120" cy="262" rx="60" ry="4" fill="#fff" opacity=".14" filter="url(#haze)"/>
+          <line x1="56" y1="40" x2="184" y2="40" stroke="#2c2c33" stroke-width="3"/>
+          <line x1="100" y1="40" x2="100" y2="88" stroke="#4a4a53" stroke-width="1.4"/>
+          <line x1="140" y1="40" x2="140" y2="88" stroke="#4a4a53" stroke-width="1.4"/>
+          <path d="M84 150 L30 142 L30 156 Z" fill="#fff" opacity=".14"/>
+          <path d="M156 150 L210 142 L210 156 Z" fill="#fff" opacity=".14"/>
+          <rect x="82" y="86" width="76" height="60" rx="10" fill="#060608" stroke="#d6d6dc" stroke-width=".8" stroke-opacity=".5"/>
+          <path d="M96 98 L104 108 L100 114" stroke="#fff" stroke-width=".9" fill="none" filter="url(#g1)"/>
+          <ellipse cx="120" cy="150" rx="34" ry="3" fill="#fff" opacity=".9" filter="url(#g2)"/>
+          <path d="M116 150 L120 146 L124 150 L120 154 Z" fill="#fff" filter="url(#g2)"/>
+          <g fill="none" stroke="#fff" stroke-width="1" opacity=".8">
+            <path d="M34 156 L84 156 Q120 178 156 156 L206 156"/>
+            <path d="M34 162 L84 162 Q120 180 156 162 L206 162"/>
+            <path d="M34 168 L84 168 Q120 182 156 168 L206 168"/>
+            <path d="M34 174 L84 174 Q120 184 156 174 L206 174"/>
+          </g>
+        </g>
+        <g mask="url(#refl)" opacity=".22"><use href="#t-weight" transform="matrix(1 0 0 -1 0 524)"/></g>
+        <line x1="0" y1="262" x2="240" y2="262" stroke="#34343c"/>
+      </svg>
+      <div class="who">ภาพของ THE DAMPER และเพื่อน</div>
+      <h3>THE WEIGHT</h3>
+      <p>ที่มา : แผ่นสักหลาดที่กดสายเปียโนให้หยุดเสียง ก้อนดำหนักห้อยจากคาน กดสาย 4 เส้นจนหย่อน ช้าและหนัก</p>
+      <p class="sub">แกน : ใต้ก้อน แสงถูกบีบออกมาด้านข้าง</p>
+    </div>
+    <div class="card">
+      <svg class="fig" viewBox="0 0 240 300" role="img" aria-label="THE EMPTY CHOIR : หัวดำหกหัวเรียงพีระมิด ปากเป็นวงกลวง ชุดคลุมเป็นใบมีดยาวแผ่ลงพื้น">
+        <rect width="240" height="300" fill="url(#stagebg)"/>
+        <ellipse cx="120" cy="140" rx="104" ry="118" fill="url(#back)"/>
+        <g id="t-choir">
+          <ellipse cx="120" cy="262" rx="70" ry="4" fill="#fff" opacity=".14" filter="url(#haze)"/>
+          <ellipse cx="120" cy="44" rx="14" ry="4" fill="none" stroke="#fff" stroke-width=".9" opacity=".6"/>
+          <g fill="#060608" stroke="#d6d6dc" stroke-width=".8" stroke-opacity=".45">
+            <path d="M86 142 L96 142 L70 252 L54 252 Z"/>
+            <path d="M100 142 L110 142 L98 252 L84 252 Z"/>
+            <path d="M115 142 L125 142 L127 252 L113 252 Z"/>
+            <path d="M130 142 L140 142 L156 252 L142 252 Z"/>
+            <path d="M144 142 L154 142 L186 252 L170 252 Z"/>
+            <ellipse cx="120" cy="66" rx="13" ry="16"/>
+            <ellipse cx="102" cy="96" rx="13" ry="16"/><ellipse cx="138" cy="96" rx="13" ry="16"/>
+            <ellipse cx="84" cy="126" rx="13" ry="16"/><ellipse cx="120" cy="126" rx="13" ry="16"/><ellipse cx="156" cy="126" rx="13" ry="16"/>
+          </g>
+          <g fill="none" stroke="#fff" stroke-width="1.4" opacity=".45">
+            <ellipse cx="102" cy="100" rx="4" ry="5"/><ellipse cx="138" cy="100" rx="4" ry="5"/>
+            <ellipse cx="84" cy="130" rx="4" ry="5"/><ellipse cx="120" cy="130" rx="4" ry="5"/><ellipse cx="156" cy="130" rx="4" ry="5"/>
+          </g>
+          <circle cx="120" cy="70" r="11" fill="#fff" opacity=".35" filter="url(#haze)"/>
+          <ellipse cx="120" cy="70" rx="4" ry="5" fill="none" stroke="#fff" stroke-width="1.6" filter="url(#g1)"/>
+          <circle cx="120" cy="70" r="1.8" fill="#fff" filter="url(#g2)"/>
+          <path d="M76 116 L82 124 L78 130" stroke="#fff" stroke-width=".9" fill="none" filter="url(#g1)"/>
+          <path d="M62 108 L70 104 L68 114 Z" fill="#060608" stroke="#d6d6dc" stroke-width=".6" stroke-opacity=".5"/>
+        </g>
+        <g mask="url(#refl)" opacity=".22"><use href="#t-choir" transform="matrix(1 0 0 -1 0 524)"/></g>
+        <line x1="0" y1="262" x2="240" y2="262" stroke="#34343c"/>
+      </svg>
+      <div class="who">ภาพของ THE MUTE CHOIR และเพื่อน</div>
+      <h3>THE EMPTY CHOIR</h3>
+      <p>ที่มา : คณะร้องที่อ้าปากแต่ไม่มีเสียง หัวดำ 6 หัวเรียงพีระมิดแบบอัฒจันทร์คณะร้อง ปากเป็นวงกลวง ชุดคลุมเป็นใบมีดยาวแผ่ลงพื้น</p>
+      <p class="sub">แกน : ในปากหัวบนสุด / ตอนตีปากทุกหัวสว่างพร้อมกัน</p>
+    </div>
+  </div>
+  <div class="rule">
+    <ul>
+      <li>ทุกตัวของ TACET ดำทึบ ขอบเนียน เลิกพิกเซลกับเส้นสแกน และมีแสงขาวนวลข้างหลังตัวเอง เลยอ่านเป็นเงาได้ทุกที่บนจอ</li>
+      <li>แกนขาวจ้าอยู่ข้างใน แสงรั่วออกตามช่องและรอยร้าว ไม่มีอะไรในฉากขาวเท่าแกน</li>
+      <li>เลือดลดถึง 75 50 25 รอยร้าวลามเพิ่มทีละขั้น โดนตีทุกครั้งมีเศษเล็กหลุด</li>
+      <li>ตายแล้วเปลือกแตกกระจาย แสงข้างในพุ่งขึ้นเป็นวง เศษถูกดูดเข้าหลุม (ระบบเศษแตกมีในโค้ดแล้ว)</li>
+      <li>ศัตรูที่ใช้ภาพเดียวกันยังแยกด้วยความสว่างกับเครื่องหมาย LookMark เหมือนเดิม</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="sec-label">เฟส 1 อนุสาวรีย์ขาว / ครึ่งเลือด THE TURN เปลือกแตก</div>
+  <h2>บอส 6 ตัว</h2>
+  <div class="grid3">
+    <div class="card">
+      <svg class="fig" viewBox="0 0 240 300" role="img" aria-label="THE DEAF CROWN : รูปปั้นครึ่งตัว มงกุฎหนามดำปิดหู คิ้วขมวด คาบไม้ มือใหญ่ชูขึ้น">
+        <rect width="240" height="300" fill="url(#stagebg)"/>
+        <g id="b-crown">
+          <ellipse cx="120" cy="262" rx="96" ry="5" fill="#fff" opacity=".12" filter="url(#haze)"/>
+          <path d="M64 140 L176 140 L206 262 L34 262 Z" fill="#e6e5ea"/>
+          <path d="M120 140 L176 140 L206 262 L120 262 Z" fill="#a4a3ac"/>
+          <path d="M90 130 C104 146 136 146 150 130 L152 146 C136 162 104 162 88 146 Z" fill="#cfced5"/>
+          <ellipse cx="120" cy="98" rx="23" ry="29" fill="#eeedf2"/>
+          <path d="M120 69 A23 29 0 0 1 120 127 Z" fill="#a4a3ac"/>
+          <path d="M104 92 L119 99 L136 90" stroke="#0a0a0c" stroke-width="3.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M100 86 L70 64 L96 95 Z M97 99 L58 95 L97 107 Z M100 112 L70 128 L101 116 Z" fill="#0a0a0c"/>
+          <path d="M140 86 L170 64 L144 95 Z M143 99 L182 95 L143 107 Z M140 112 L170 128 L139 116 Z" fill="#0a0a0c"/>
+          <rect x="104" y="112" width="70" height="4" rx="2" fill="#0a0a0c" transform="rotate(-4 104 114)"/>
+          <path d="M182 120 L214 112 L218 140 L190 148 Z" fill="#eeedf2"/>
+          <g fill="#eeedf2"><path d="M184 120 L180 64 L190 118 Z"/><path d="M192 118 L195 54 L200 116 Z"/><path d="M201 116 L211 60 L208 116 Z"/><path d="M209 114 L225 72 L215 119 Z"/><path d="M186 133 L162 110 L190 127 Z"/></g>
+          <circle cx="176" cy="109" r="12" fill="#fff" opacity=".45" filter="url(#haze)"/>
+          <path d="M176 102 L182 109 L176 116 L170 109 Z" fill="#fff" filter="url(#g2)"/>
+          <g stroke="#0a0a0c" stroke-width="1.6" fill="none"><path d="M84 168 L96 186 L90 196 L102 222 L96 240"/><path d="M156 162 L146 182 L154 194 L142 224"/><path d="M108 72 L114 84 L110 92"/></g>
+          <path d="M97 222 L91 197" stroke="#fff" stroke-width="1.1" filter="url(#g1)"/>
+          <path d="M147 183 L153 193" stroke="#fff" stroke-width="1.1" filter="url(#g1)"/>
+        </g>
+        <g mask="url(#refl)" opacity=".2"><use href="#b-crown" transform="matrix(1 0 0 -1 0 524)"/></g>
+        <line x1="0" y1="262" x2="240" y2="262" stroke="#34343c"/>
+      </svg>
+      <div class="who">ร่างของ Beethoven</div>
+      <h3>THE DEAF CROWN</h3>
+      <p>รูปปั้นครึ่งตัวแบบที่ทุกคนจำ คิ้วขมวดเป็นตัว V มงกุฎหนามดำปิดหูสองข้าง ไม่มีด้านหน้า มือใหญ่ชูสั่งวง</p>
+      <p class="sub">แกน : ปลายไม้ที่คาบไว้ (เขาฟังเสียงผ่านกรามด้วยไม้) / ครึ่งเลือด รอยร้าวแบบสายฟ้าแตกออก</p>
+    </div>
+    <div class="card">
+      <svg class="fig" viewBox="0 0 240 300" role="img" aria-label="REQUIEM : ร่างสูงเพรียว รัศมีขาด ขนนกเป็นดาบ น้ำตา เส้นบรรทัดที่หยุดกลางทาง">
+        <rect width="240" height="300" fill="url(#stagebg)"/>
+        <g id="b-req">
+          <ellipse cx="120" cy="262" rx="70" ry="5" fill="#fff" opacity=".12" filter="url(#haze)"/>
+          <g stroke="#eeedf2" stroke-width=".9" opacity=".7"><line x1="34" y1="150" x2="88" y2="150"/><line x1="30" y1="155" x2="88" y2="155"/><line x1="38" y1="160" x2="88" y2="160"/><line x1="33" y1="165" x2="88" y2="165"/><line x1="40" y1="170" x2="88" y2="170"/></g>
+          <circle cx="32" cy="160" r="12" fill="#fff" opacity=".4" filter="url(#haze)"/>
+          <path d="M32 153 L38 160 L32 167 L26 160 Z" fill="#fff" filter="url(#g2)"/>
+          <path d="M120 98 C138 140 152 208 166 262 L74 262 C88 208 102 140 120 98 Z" fill="#e6e5ea"/>
+          <path d="M120 98 C138 140 152 208 166 262 L120 262 Z" fill="#a4a3ac"/>
+          <ellipse cx="120" cy="80" rx="13" ry="16" fill="#eeedf2"/>
+          <path d="M120 64 A13 16 0 0 1 120 96 Z" fill="#a4a3ac"/>
+          <path d="M101 57 A24 7 0 1 1 134 62" fill="none" stroke="#eeedf2" stroke-width="2.4" filter="url(#g1)"/>
+          <path d="M140 72 L146 75 L141 78 Z" fill="#eeedf2"/>
+          <g fill="#fff" filter="url(#g1)"><path d="M114 98 c2 4 3 7 0 9 c-3 -2 -2 -5 0 -9 z"/><path d="M112 116 c1.6 3 2.4 5 0 7 c-2.4 -2 -1.6 -4 0 -7 z"/><path d="M115 134 c1.4 2.6 2 4.4 0 6 c-2 -1.6 -1.4 -3.4 0 -6 z"/></g>
+          <path d="M146 162 C172 128 196 96 218 60 C206 100 186 134 152 168 Z" fill="#eeedf2"/>
+          <path d="M150 166 L216 62" stroke="#a4a3ac" stroke-width="1"/>
+          <rect x="143" y="160" width="9" height="9" fill="#eeedf2" transform="rotate(45 147.5 164.5)"/>
+          <rect x="86" y="155" width="8" height="8" fill="#eeedf2" transform="rotate(45 90 159)"/>
+          <g stroke="#0a0a0c" stroke-width="1.4" fill="none"><path d="M104 190 L110 206 L106 214 L114 236"/><path d="M140 200 L134 214 L139 224"/></g>
+        </g>
+        <g mask="url(#refl)" opacity=".2"><use href="#b-req" transform="matrix(1 0 0 -1 0 524)"/></g>
+        <line x1="0" y1="262" x2="240" y2="262" stroke="#34343c"/>
+      </svg>
+      <div class="who">ร่างของ Mozart</div>
+      <h3>REQUIEM</h3>
+      <p>ร่างสูงเพรียว รัศมีขาด ขนนกเป็นดาบ น้ำตาไหล (LACRIMOSA) เส้นบรรทัดที่ไหลออกจากมือแล้วหยุดกลางทาง (เพลงที่แต่งไม่จบ)</p>
+      <p class="sub">แกน : ปลายเส้นที่หยุด</p>
+    </div>
+    <div class="card">
+      <svg class="fig" viewBox="0 0 240 300" role="img" aria-label="THE NAMELESS MASTER : หน้ากากเรียบ กรอบชื่อว่างกลางอก เงาดำของน้องซ้อนข้างหลัง">
+        <rect width="240" height="300" fill="url(#stagebg)"/>
+        <g id="b-name">
+          <ellipse cx="124" cy="262" rx="76" ry="5" fill="#fff" opacity=".12" filter="url(#haze)"/>
+          <path d="M126 102 L154 102 L182 262 L98 262 Z" fill="#060608" stroke="#d6d6dc" stroke-width=".8" stroke-opacity=".4"/>
+          <ellipse cx="140" cy="82" rx="14" ry="18" fill="#060608" stroke="#d6d6dc" stroke-width=".8" stroke-opacity=".4"/>
+          <g fill="#fff" filter="url(#g1)"><circle cx="134" cy="80" r="1.6"/><circle cx="147" cy="80" r="1.6"/><path d="M134 85 c1.4 2.6 2 4.4 0 6 c-2 -1.6 -1.4 -3.4 0 -6 z"/></g>
+          <path d="M104 110 L136 110 L160 262 L80 262 Z" fill="#e6e5ea"/>
+          <path d="M120 110 L136 110 L160 262 L120 262 Z" fill="#a4a3ac"/>
+          <ellipse cx="120" cy="90" rx="15" ry="19" fill="#f3f2f6"/>
+          <ellipse cx="120" cy="90" rx="15" ry="19" fill="none" stroke="#a4a3ac" stroke-width="1"/>
+          <circle cx="120" cy="161" r="16" fill="#fff" opacity=".35" filter="url(#haze)"/>
+          <rect x="98" y="146" width="44" height="30" fill="none" stroke="#fff" stroke-width="1.6" filter="url(#g1)"/>
+          <path d="M120 154 L126 161 L120 168 L114 161 Z" fill="#fff" filter="url(#g2)"/>
+          <g stroke="#0a0a0c" stroke-width="1.3" fill="none"><path d="M92 196 L100 212 L95 220 L102 240"/><path d="M146 206 L140 218 L145 228"/></g>
+        </g>
+        <g mask="url(#refl)" opacity=".2"><use href="#b-name" transform="matrix(1 0 0 -1 0 524)"/></g>
+        <line x1="0" y1="262" x2="240" y2="262" stroke="#34343c"/>
+      </svg>
+      <div class="who">ร่างของ Fanny</div>
+      <h3>THE NAMELESS MASTER</h3>
+      <p>หน้ากากเรียบไม่มีหน้า กรอบชื่อว่างลอยกลางอก เงาดำของน้องยืนซ้อนข้างหลัง ช้ากว่าหนึ่งจังหวะ เห็นแค่ตากับน้ำตาขาว</p>
+      <p class="sub">แกน : ในกรอบชื่อที่ว่าง</p>
+    </div>
+    <div class="card">
+      <svg class="fig" viewBox="0 0 240 300" role="img" aria-label="THE STAFF : ปกคอเป็นรัศมีดวงอาทิตย์ ไม้เท้าใหญ่กระแทกเท้า เท้าข้างนั้นผุพัง">
+        <rect width="240" height="300" fill="url(#stagebg)"/>
+        <g id="b-staff">
+          <ellipse cx="120" cy="262" rx="80" ry="5" fill="#fff" opacity=".12" filter="url(#haze)"/>
+          <g id="sun-staff" fill="#9a99a2"></g>
+          <path d="M90 118 L150 118 L178 250 L62 250 Z" fill="#e6e5ea"/>
+          <path d="M120 118 L150 118 L178 250 L120 250 Z" fill="#a4a3ac"/>
+          <ellipse cx="120" cy="94" rx="15" ry="19" fill="#eeedf2"/>
+          <path d="M120 75 A15 19 0 0 1 120 113 Z" fill="#a4a3ac"/>
+          <path d="M96 262 C92 256 88 248 91 243 C93 239 99 239 101 243 C104 248 100 256 96 262 Z" fill="#eeedf2"/>
+          <path d="M146 262 C142 257 139 250 141 246 L148 249 L151 244 C153 249 151 256 146 262 Z" fill="#a4a3ac"/>
+          <g fill="#a4a3ac"><path d="M156 244 L161 241 L159 248 Z"/><path d="M164 252 L168 250 L167 255 Z"/><path d="M158 258 L161 257 L160 261 Z"/></g>
+          <g stroke="#0a0a0c" stroke-width="1.3" fill="none"><path d="M160 214 L156 228 L162 236 L158 250"/><path d="M170 226 L166 240"/><path d="M144 250 L148 256"/></g>
+          <line x1="162" y1="48" x2="150" y2="252" stroke="#eeedf2" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="162.5" cy="44" r="8" fill="#eeedf2"/>
+          <rect x="154" y="120" width="10" height="10" fill="#eeedf2" transform="rotate(45 159 125)"/>
+          <circle cx="150" cy="252" r="12" fill="#fff" opacity=".45" filter="url(#haze)"/>
+          <path d="M150 246 L155 252 L150 258 L145 252 Z" fill="#fff" filter="url(#g2)"/>
+        </g>
+        <g mask="url(#refl)" opacity=".2"><use href="#b-staff" transform="matrix(1 0 0 -1 0 524)"/></g>
+        <line x1="0" y1="262" x2="240" y2="262" stroke="#34343c"/>
+      </svg>
+      <div class="who">ร่างของ Lully</div>
+      <h3>THE STAFF</h3>
+      <p>คนในราชสำนักของราชาพระอาทิตย์ ปกคอเป็นรัศมี ไม้เท้าใหญ่กระแทกเท้าตัวเอง เท้าข้างนั้นผุพังร่วงเป็นเศษ (เขาตายจากแผลนี้)</p>
+      <p class="sub">แกน : จุดที่ไม้เท้ากระแทก</p>
+    </div>
+    <div class="card">
+      <svg class="fig" viewBox="0 0 240 300" role="img" aria-label="THE DEVIL'S STRING : สูงผอม หัวม้วนไวโอลินเป็นเขา สายเส้นเดียวผ่านกลางตัว นิ้วเข็ม คันชักเป็นเคียว">
+        <rect width="240" height="300" fill="url(#stagebg)"/>
+        <g id="b-devil">
+          <ellipse cx="120" cy="262" rx="64" ry="5" fill="#fff" opacity=".12" filter="url(#haze)"/>
+          <path d="M110 248 C90 256 76 250 70 238 C80 246 94 248 108 242 Z" fill="#a4a3ac"/>
+          <path d="M114 96 L126 96 L134 250 L106 250 Z" fill="#e6e5ea"/>
+          <path d="M120 96 L126 96 L134 250 L120 250 Z" fill="#a4a3ac"/>
+          <path d="M92 104 L148 104 L144 110 L96 110 Z" fill="#eeedf2"/>
+          <ellipse cx="120" cy="80" rx="10" ry="14" fill="#eeedf2"/>
+          <path d="M112 70 C96 60 84 40 96 30 C104 24 112 32 106 38 C102 42 98 38 100 35" stroke="#eeedf2" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <path d="M128 70 C144 60 156 40 144 30 C136 24 128 32 134 38 C138 42 142 38 140 35" stroke="#a4a3ac" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <g fill="#eeedf2"><path d="M150 138 L196 124 L152 142 Z"/><path d="M151 141 L198 140 L152 145 Z"/><path d="M151 144 L194 156 L151 147 Z"/></g>
+          <g fill="#a4a3ac"><path d="M90 146 L52 136 L89 150 Z"/><path d="M90 150 L50 152 L90 153 Z"/></g>
+          <path d="M188 126 C230 140 236 196 206 228 C220 192 214 152 188 132 Z" fill="#eeedf2"/>
+          <path d="M120 30 C121.5 100 118.5 180 120 262" stroke="#fff" stroke-width="1.4" fill="none" filter="url(#g1)"/>
+          <circle cx="120" cy="150" r="12" fill="#fff" opacity=".45" filter="url(#haze)"/>
+          <path d="M120 143 L126 150 L120 157 L114 150 Z" fill="#fff" filter="url(#g2)"/>
+          <g stroke="#0a0a0c" stroke-width="1.2" fill="none"><path d="M112 176 L117 190 L113 198"/><path d="M128 206 L124 220"/></g>
+        </g>
+        <g mask="url(#refl)" opacity=".2"><use href="#b-devil" transform="matrix(1 0 0 -1 0 524)"/></g>
+        <line x1="0" y1="262" x2="240" y2="262" stroke="#34343c"/>
+      </svg>
+      <div class="who">ร่างของ Paganini</div>
+      <h3>THE DEVIL'S STRING</h3>
+      <p>สูงผอมงอ หัวม้วนไวโอลินกลายเป็นเขาใหญ่ สายเส้นเดียวขึงจากหัวถึงพื้นผ่านกลางตัว นิ้วเข็มยาว คันชักเป็นเคียว เป็นร่างใหญ่ของเขาเล็กบนหัว PAGANINI ในวง</p>
+      <p class="sub">แกน : บนสายตรงอก สายสั่นตอนมันเล่น</p>
+    </div>
+    <div class="card">
+      <svg class="fig" viewBox="0 0 240 300" role="img" aria-label="THE BLIND CANTOR : ผ้าปิดตาที่แสงรั่ว ปีกเป็นท่อออร์แกน วงเสียงออกจากอก">
+        <rect width="240" height="300" fill="url(#stagebg)"/>
+        <g id="b-cantor">
+          <ellipse cx="120" cy="262" rx="90" ry="5" fill="#fff" opacity=".12" filter="url(#haze)"/>
+          <g id="pipes-cantor"></g>
+          <path d="M104 112 L136 112 L166 262 L74 262 Z" fill="#e6e5ea"/>
+          <path d="M120 112 L136 112 L166 262 L120 262 Z" fill="#a4a3ac"/>
+          <ellipse cx="120" cy="88" rx="16" ry="20" fill="#eeedf2"/>
+          <path d="M120 68 A16 20 0 0 1 120 108 Z" fill="#a4a3ac"/>
+          <path d="M102 82 C86 86 76 96 66 112 L71 114 C80 100 90 92 102 89 Z" fill="#0a0a0c"/>
+          <path d="M102 86 C90 94 84 104 80 118 L85 119 C88 106 94 98 103 91 Z" fill="#0a0a0c"/>
+          <rect x="102" y="80" width="36" height="9" rx="2" fill="#0a0a0c"/>
+          <line x1="104" y1="79" x2="136" y2="79" stroke="#fff" stroke-width="1.2" filter="url(#g1)"/>
+          <line x1="104" y1="90.5" x2="136" y2="90.5" stroke="#fff" stroke-width="1" filter="url(#g1)"/>
+          <g fill="none" stroke="#fff"><circle cx="120" cy="146" r="13" stroke-width="1.1" opacity=".55"/><circle cx="120" cy="146" r="24" stroke-width="1" opacity=".32"/><circle cx="120" cy="146" r="36" stroke-width="1" opacity=".16"/></g>
+          <circle cx="120" cy="146" r="11" fill="#fff" opacity=".45" filter="url(#haze)"/>
+          <path d="M120 139 L126 146 L120 153 L114 146 Z" fill="#fff" filter="url(#g2)"/>
+        </g>
+        <g mask="url(#refl)" opacity=".2"><use href="#b-cantor" transform="matrix(1 0 0 -1 0 524)"/></g>
+        <line x1="0" y1="262" x2="240" y2="262" stroke="#34343c"/>
+      </svg>
+      <div class="who">ร่างของ Bach</div>
+      <h3>THE BLIND CANTOR</h3>
+      <p>ผ้าปิดตาที่แสงรั่วตามขอบ ปีกเป็นท่อออร์แกนสูงขึ้นทีละท่อ วงเสียงออกจากอกทีละวง</p>
+      <p class="sub">แกน : กลางอก หัวใจของออร์แกน</p>
+    </div>
+  </div>
+  <div class="rule">
+    <ul>
+      <li>เฟส 1 คืออนุสาวรีย์ขาวของตำนาน ตัวใหญ่ ท่าทางชัด เป็นสิ่งที่เด่นที่สุดในจอ</li>
+      <li>ครึ่งเลือด (THE TURN) เปลือกขาวแตกร่วงพร้อมแสงจ้า เหลือร่างดำข้างใน รูปทรงเดิมแต่มืด แกนสว่างกว่าเดิม</li>
+      <li>เรื่องของแต่ละตัวอยู่ในรูปทรงและในที่อยู่ของแกน ไม่ใช่ในตัวหนังสือ</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="sec-label">ตามที่ผู้ใช้บอกใน 13.87 / ผู้ใช้จะส่งภาพ VFX ที่อยากได้ตามมา</div>
+  <h2>VFX วาทยากร</h2>
+  <div class="grid2">
+    <div class="card vfx">
+      <svg viewBox="0 0 320 160" role="img" aria-label="สายฟ้าสามขั้น ฟ้าขาว ฟ้าแกนแดง และแดงทั้งเส้นใต้เมฆดำ">
+        <rect width="320" height="160" fill="#0d0d12"/>
+        <g>
+          <path d="M60 6 L50 34 L60 38 L46 70 L58 74 L46 108 L54 134" fill="none" stroke="#28aaff" stroke-width="7" opacity=".45" filter="url(#haze)"/>
+          <path d="M60 6 L50 34 L60 38 L46 70 L58 74 L46 108 L54 134" fill="none" stroke="#e8f6ff" stroke-width="2" stroke-linejoin="round" filter="url(#g1)"/>
+          <path d="M52 56 L38 68 L43 76 L32 92" fill="none" stroke="#bfe6ff" stroke-width="1.1" filter="url(#g1)"/>
+          <text x="55" y="153" text-anchor="middle" font-family="Cormorant Garamond, serif" font-size="14" fill="#a3a1aa">I</text>
+        </g>
+        <g transform="translate(105 0)">
+          <path d="M60 6 L50 34 L60 38 L46 70 L58 74 L46 108 L54 134" fill="none" stroke="#28aaff" stroke-width="8" opacity=".4" filter="url(#haze)"/>
+          <path d="M60 6 L50 34 L60 38 L46 70 L58 74 L46 108 L54 134" fill="none" stroke="#ff3b3b" stroke-width="3.6" stroke-linejoin="round" filter="url(#g1)"/>
+          <path d="M60 6 L50 34 L60 38 L46 70 L58 74 L46 108 L54 134" fill="none" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/>
+          <path d="M52 56 L38 68 L43 76 L32 92" fill="none" stroke="#ff7a7a" stroke-width="1.1" filter="url(#g1)"/>
+          <text x="55" y="153" text-anchor="middle" font-family="Cormorant Garamond, serif" font-size="14" fill="#a3a1aa">II</text>
+        </g>
+        <g transform="translate(210 0)">
+          <g stroke="#ff2a2a" stroke-width=".8" opacity=".25"><line x1="10" y1="40" x2="2" y2="60"/><line x1="90" y1="50" x2="82" y2="70"/><line x1="100" y1="90" x2="92" y2="110"/><line x1="18" y1="100" x2="10" y2="120"/></g>
+          <g fill="#2c2c33" filter="url(#haze)"><ellipse cx="30" cy="10" rx="34" ry="14"/><ellipse cx="72" cy="6" rx="40" ry="16"/><ellipse cx="52" cy="16" rx="30" ry="10"/></g>
+          <g fill="#17171c"><ellipse cx="34" cy="4" rx="30" ry="10"/><ellipse cx="74" cy="2" rx="34" ry="11"/></g>
+          <path d="M60 18 L50 40 L60 44 L46 74 L58 78 L46 110 L54 134" fill="none" stroke="#ff2a2a" stroke-width="9" opacity=".55" filter="url(#haze)"/>
+          <path d="M60 18 L50 40 L60 44 L46 74 L58 78 L46 110 L54 134" fill="none" stroke="#ffd2d2" stroke-width="2" stroke-linejoin="round" filter="url(#g1)"/>
+          <path d="M52 60 L36 72 L42 80 L30 96" fill="none" stroke="#ff4a4a" stroke-width="1.2" filter="url(#g1)"/>
+          <text x="55" y="153" text-anchor="middle" font-family="Cormorant Garamond, serif" font-size="14" fill="#a3a1aa">III</text>
+        </g>
+      </svg>
+      <h3>THE UNHEARING (Beethoven)</h3>
+      <p>สายฟ้ากับพายุ ขั้น I ฟ้าขาว / ขั้น II แกนแดงในสายฟ้าฟ้า / ขั้น III แดงทั้งเส้น เมฆดำ ฝนเฉียง ตามขั้นของ FINALE ที่โตทุกบอส</p>
+      <p class="sub">ถ้าอยากให้แดงตั้งแต่แรกก็ได้ ข้อนี้ถามไว้ข้างล่าง</p>
+    </div>
+    <div class="card vfx">
+      <svg viewBox="0 0 320 160" role="img" aria-label="รอยฟันทำให้มิติแตกเป็นรอยร้าว แสงในรอยแยกเป็นสีรุ้ง เศษปริซึมปลิว">
+        <rect width="320" height="160" fill="#0d0d12"/>
+        <path d="M14 128 L160 82 L306 34 L306 40 L162 90 L14 134 Z" fill="#fff" opacity=".25" filter="url(#haze)"/>
+        <g stroke-width="1.4" opacity=".55"><line x1="160" y1="88" x2="196" y2="160" stroke="#ff3b3b"/><line x1="160" y1="88" x2="210" y2="160" stroke="#ff9a2e"/><line x1="160" y1="88" x2="224" y2="160" stroke="#ffe14d"/><line x1="160" y1="88" x2="238" y2="160" stroke="#4dff88"/><line x1="160" y1="88" x2="252" y2="160" stroke="#3fc8ff"/><line x1="160" y1="88" x2="266" y2="160" stroke="#6a5cff"/></g>
+        <path d="M14 128 L160 82 L306 34 L306 40 L162 90 L14 134 Z" fill="url(#rb)" filter="url(#g1)"/>
+        <path d="M14 128 L160 82 L306 34" stroke="#fff" stroke-width="1" fill="none" opacity=".9"/>
+        <g fill="#16161d" stroke="url(#rb)" stroke-width="1.4">
+          <path d="M70 58 L92 50 L84 76 Z"/><path d="M216 92 L238 98 L222 116 Z"/><path d="M120 30 L136 26 L130 44 Z"/><path d="M262 82 L276 74 L274 92 Z"/><path d="M36 92 L48 90 L42 104 Z"/>
+        </g>
+        <g fill="#fff" filter="url(#g1)"><circle cx="160" cy="84" r="2"/><circle cx="96" cy="104" r="1.2"/><circle cx="240" cy="60" r="1.4"/></g>
+      </svg>
+      <h3>FANNY</h3>
+      <p>ฟันแล้วมิติแตกเป็นรอยร้าวแบบกระจก ในรอยแสงแยกเป็นสีรุ้ง เศษปริซึมปลิวออกมาขอบเป็นรุ้ง</p>
+    </div>
+    <div class="card vfx">
+      <svg viewBox="0 0 320 160" role="img" aria-label="รอยฟันเดียวกันแต่ขอบไหม้เป็นไฟม่วงน้ำเงิน ข้างในดำสนิท">
+        <rect width="320" height="160" fill="#0b0a12"/>
+        <path d="M14 128 L160 82 L306 34 L306 42 L162 92 L14 136 Z" fill="#6b3cff" opacity=".35" filter="url(#haze)"/>
+        <g id="flames-felix"></g>
+        <path d="M14 128 L160 82 L306 34 L306 42 L162 92 L14 136 Z" fill="#000"/>
+      </svg>
+      <h3>??? (Felix)</h3>
+      <p>รอยฟันเดียวกันแต่ขอบไหม้เป็นไฟม่วงน้ำเงิน ข้างในดำสนิท ไฟลามไปตามรอยเหมือนกระดาษไหม้ เล่นตอนเสียงของ ??? นำ (TWO VOICES)</p>
+    </div>
+    <div class="card vfx">
+      <svg viewBox="0 0 320 160" role="img" aria-label="ดาวอุ่นนับล้าน บางดวงต่อกันเป็นกลุ่มดาวชี้ไปที่เป้า">
+        <rect width="320" height="160" fill="#0e0d0b"/>
+        <ellipse cx="160" cy="-10" rx="190" ry="130" fill="url(#holy)"/>
+        <g id="stars-bach"></g>
+        <polyline points="30,132 72,108 112,116 154,88 198,94 240,68 280,56" fill="none" stroke="#ffd98a" stroke-width=".9" opacity=".7"/>
+        <circle cx="280" cy="56" r="10" fill="none" stroke="#ffd98a" stroke-width="1.2" filter="url(#g1)"/>
+        <g id="consts-bach" fill="#fff6dc" filter="url(#g1)"></g>
+      </svg>
+      <h3>THE METRONOME (Bach)</h3>
+      <p>ดาวอุ่นนับล้านลอยทั้งจอ บางดวงต่อกันเป็นเส้นกลุ่มดาวชี้ไปที่เป้า เหมือนแสงที่ชี้ทาง ถ้าตกลงกัน ดาวช่วยบอกทางตวัดไม้ได้ด้วย (เรื่องกติกาต้องคุยก่อน)</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-label">ไม่แตะความมืดที่ชอบแล้ว ปรับแค่ตรงที่ชนกับตัวละคร</div>
+  <h2>ฉาก : ให้ตัวละครเด่นกว่า</h2>
+  <ul class="plain">
+    <li>ประกายรอบหลุมจางลงตรงที่ศัตรูยืน และไม่มีจุดไหนในฉากขาวเท่าแกนของตัวละคร</li>
+    <li>ขอบพื้นหยักสีขาวเปลี่ยนเป็นเส้นพื้นบางเส้นเดียว มีเงาสะท้อนจางๆ เหมือนฝาเปียโนดำเงา (แบบในภาพนี้)</li>
+    <li>ค่าความสว่าง : ฉากอยู่ช่วงเทาถึงดำ ตัวละครอยู่ขาวสุดหรือดำสุด และสีสดมีแค่ที่ตัวละคร</li>
+  </ul>
+</section>
+
+<section>
+  <div class="sec-label">ทำทีละข้อ จบแล้วส่งภาพให้ดู</div>
+  <h2>ลำดับงานที่เสนอ</h2>
+  <ol class="order">
+    <li>นักดนตรี 5 คน รูปทรงใหม่ สี และจุดแสง (ระดับ 1)</li>
+    <li>TACET 4 แบบ ขอบเนียน แสงหลัง แตกร้าวตามเลือด ตายแล้วปล่อยแสง พร้อมปรับฉาก</li>
+    <li>บอส 6 ตัว กับการแตกตอนครึ่งเลือด</li>
+    <li>VFX ธาตุของนักดนตรี และ VFX วาทยากร (รอภาพจากผู้ใช้)</li>
+    <li>ท่าโจมตีของแต่ละตัวที่ยังเงอะงะ ทำต่อหลังตัวละครสมบูรณ์ (ผู้ใช้บอกแล้ว)</li>
+  </ol>
+</section>
+
+<section>
+  <div class="sec-label">ตอบเป็นข้อได้เลย</div>
+  <h2>ให้ตัดสิน</h2>
+  <ol class="ask">
+    <li>ใช้ระดับ 1 อย่างเดียว เอาระดับ 2 กับปุ่ม F4 ออกเลยไหม</li>
+    <li>ใครเป็นผู้หญิง ไอริสเสนอตามชื่อช่องเดิม : PAGANINI QUANTZ PUNTO หญิง / PFUNDT DUPORT ชาย</li>
+    <li>ธาตุกับสีของ 5 คนโอเคไหม : ไฟแดงเลือด / ลมฟ้าอมเขียว / ดินทองแดง / น้ำไพลิน / แสงทองเหลือง</li>
+    <li>ศัตรูเปลี่ยนจากสัญลักษณ์โน้ตเป็นของที่ทำให้ดนตรีเงียบ (มิวท์ แผ่นกดสาย เสียงซ่า คณะร้องไร้เสียง) ดีไหม</li>
+    <li>บอสเป็นอนุสาวรีย์ขาว แล้วแตกเป็นร่างดำตอนครึ่งเลือด ดีไหม</li>
+    <li>สายฟ้าแดงของ Beethoven : แดงตั้งแต่แรก หรือฟ้าค่อยๆ เป็นแดงตามขั้น FINALE</li>
+    <li>ฉาก : ลดประกายหลังศัตรู กับพื้นเส้นเดียวมีเงาสะท้อน ทำพร้อมข้อ 2 ของลำดับงานได้ไหม</li>
+  </ol>
+</section>
+
+<footer>สเก็ตช์ทั้งหน้าวาดจากรูปทรงล้วน ไม่ได้ใช้ภาพของเกมอื่น ภาพอ้างอิงอยู่ docs/art_refs ใช้ดูเท่านั้น / สำเนาหน้านี้อยู่ที่ docs/art_refs/concept_v6.html</footer>
+</div>
+
+<script>
+(function(){
+  var NS = 'http://www.w3.org/2000/svg';
+  function el(tag, attrs, parent){ var e = document.createElementNS(NS, tag); for (var k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; }
+  var seed = 11;
+  function rnd(){ seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
+  function f(n){ return n.toFixed(1); }
+
+  // PUNTO : rays round the bell
+  var rays = document.getElementById('rays-pun');
+  if (rays) for (var i = 0; i < 14; i++) {
+    var a = i / 14 * Math.PI * 2, r2 = i % 2 ? 36 : 42;
+    el('line', { x1: f(100 + Math.cos(a) * 30), y1: f(64 + Math.sin(a) * 30), x2: f(100 + Math.cos(a) * r2), y2: f(64 + Math.sin(a) * r2) }, rays);
+  }
+
+  // THE STAFF : the sun king's rays behind the head
+  var sun = document.getElementById('sun-staff');
+  if (sun) for (var j = 0; j < 16; j++) {
+    var b = j / 16 * Math.PI * 2, w = 0.08, r1 = 22, rr = j % 2 ? 38 : 48;
+    var p = [[120 + Math.cos(b - w) * r1, 94 + Math.sin(b - w) * r1], [120 + Math.cos(b) * rr, 94 + Math.sin(b) * rr], [120 + Math.cos(b + w) * r1, 94 + Math.sin(b + w) * r1]];
+    el('path', { d: 'M' + p.map(function(q){ return f(q[0]) + ' ' + f(q[1]); }).join(' L') + ' Z' }, sun);
+  }
+
+  // THE BLIND CANTOR : organ pipes rising as wings
+  var pipes = document.getElementById('pipes-cantor');
+  if (pipes) for (var k = 0; k < 5; k++) {
+    var top = 120 - k * 15, h = 206 - top;
+    [[90 - k * 10, '#e6e5ea'], [143 + k * 10, '#a4a3ac']].forEach(function(side){
+      el('rect', { x: side[0], y: top, width: 7, height: h, fill: side[1] }, pipes);
+      el('rect', { x: side[0] + 1.5, y: 190, width: 4, height: 5, fill: '#0a0a0c' }, pipes);
+    });
+  }
+
+  // ??? : flames burning along both edges of the cut
+  var ff = document.getElementById('flames-felix');
+  if (ff) {
+    var x0 = 14, y0 = 132, x1 = 306, y1 = 38, dx = x1 - x0, dy = y1 - y0, len = Math.sqrt(dx * dx + dy * dy);
+    var ux = dx / len, uy = dy / len, nx = uy, ny = -ux;
+    for (var m = 0; m < 30; m++) {
+      [1, -1].forEach(function(s){
+        var t = (m + rnd()) / 30;
+        var bx = x0 + dx * t + nx * s * 3, by = y0 + dy * t + ny * s * 3;
+        var hgt = (6 + rnd() * 22) * (0.55 + 0.45 * Math.sin(t * Math.PI)) * (s > 0 ? 1 : 0.7), wid = 3 + rnd() * 4;
+        // the tip leans up on the top edge (fire rises), and licks out and down on the lower edge
+        var vx = nx * s * (s > 0 ? 0.45 : 1), vy = ny * s * (s > 0 ? 0.45 : 1) - (s > 0 ? 0.9 : 0.15);
+        var vl = Math.sqrt(vx * vx + vy * vy); vx /= vl; vy /= vl;
+        var sway = (rnd() - 0.5) * 0.6;
+        var tx = bx + (vx + sway * ux) * hgt, ty = by + (vy + sway * uy) * hgt;
+        var mx = bx + vx * hgt * 0.45, my = by + vy * hgt * 0.45;
+        var d = 'M' + f(bx - ux * wid) + ' ' + f(by - uy * wid) + ' Q' + f(mx - ux * wid * 0.7) + ' ' + f(my - uy * wid * 0.7) + ' ' + f(tx) + ' ' + f(ty) + ' Q' + f(mx + ux * wid * 0.7) + ' ' + f(my + uy * wid * 0.7) + ' ' + f(bx + ux * wid) + ' ' + f(by + uy * wid) + ' Z';
+        el('path', { d: d, fill: '#7b45ff', opacity: f(0.45 + rnd() * 0.4), filter: 'url(#g1)' }, ff);
+        var d2 = 'M' + f(bx - ux * wid * 0.45) + ' ' + f(by - uy * wid * 0.45) + ' Q' + f(mx) + ' ' + f(my) + ' ' + f(bx + vx * hgt * 0.6) + ' ' + f(by + vy * hgt * 0.6) + ' Q' + f(mx) + ' ' + f(my) + ' ' + f(bx + ux * wid * 0.45) + ' ' + f(by + uy * wid * 0.45) + ' Z';
+        el('path', { d: d2, fill: '#3557ff', opacity: '.85' }, ff);
+      });
+    }
+    for (var e = 0; e < 26; e++) el('circle', { cx: f(20 + rnd() * 285), cy: f(20 + rnd() * 120), r: f(0.6 + rnd() * 1.2), fill: rnd() > 0.5 ? '#9d7bff' : '#5f7dff', opacity: f(0.4 + rnd() * 0.5) }, ff);
+  }
+
+  // THE METRONOME : warm stars, and the bright ones of the guiding line
+  var st = document.getElementById('stars-bach');
+  if (st) for (var n = 0; n < 190; n++) el('circle', { cx: f(4 + rnd() * 312), cy: f(4 + rnd() * 152), r: f(0.3 + rnd() * 1.05), fill: '#fff1cf', opacity: f(0.25 + rnd() * 0.75) }, st);
+  var cs = document.getElementById('consts-bach');
+  if (cs) [[30,132,4],[72,108,5],[112,116,4],[154,88,6],[198,94,4.5],[240,68,5]].forEach(function(q){
+    var x = q[0], y = q[1], s = q[2], g = s * 0.22;
+    el('path', { d: 'M' + x + ' ' + (y - s) + ' L' + f(x + g) + ' ' + f(y - g) + ' L' + (x + s) + ' ' + y + ' L' + f(x + g) + ' ' + f(y + g) + ' L' + x + ' ' + (y + s) + ' L' + f(x - g) + ' ' + f(y + g) + ' L' + (x - s) + ' ' + y + ' L' + f(x - g) + ' ' + f(y - g) + ' Z' }, cs);
+  });
+})();
+</script>
