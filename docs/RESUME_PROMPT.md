@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| (ว่าง) | | |
+| 1 พ.ย. (แชท /system Finalize13) | A3 ระบบนอกรัน ก้อน 5 เดิม ENCORE ARCHIVE MEMORY (คำต่อคำ `USER_BRIEFS.md` 13.68) : ดูระบบที่มีตอนนี้ (THE ARCHIVE APPLAUSE MAESTRO) แล้วคุยว่าเก็บ ตัด เพิ่มอะไร คุย A4 เหตุการณ์ทางเลือกเสี่ยงพร้อมกัน / คุยก่อนเขียนโค้ด | ตอนคุย : เอกสาร / ถ้าผู้ใช้เลือกแล้ว : `Data/Archive.cs` `Screens/ArchiveScreen.cs` `Data/SaveFile.cs` `Core/Settings.cs` `Data/RunState.cs` `Data/BattleRules.cs` `Data/GameEvent.cs` `Screens/EventScreen.cs` `Core/DebugShots*.cs` |
 
 ---
 
