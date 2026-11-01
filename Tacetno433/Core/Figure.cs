@@ -256,6 +256,11 @@ namespace Tacetno433.Core
                 body[i].Speed += new Vector2(-Facing * power * jitter, -power * 0.25f * jitter) * scale;
             }
             weapon.Speed += -Facing * 9f;
+            for (int b = 0; b < bits.Length; b++)                            // the floating bits fly furthest
+            {
+                float a = Hash(b + 11, (int)(clock * 10f)) * MathHelper.TwoPi;
+                bits[b].Speed += new Vector2(-Facing * power * 1.4f + (float)Math.Cos(a) * power * 0.8f, (float)Math.Sin(a) * power * 0.8f) * scale;
+            }
             for (int c = 0; c < chainCount; c++) chains[c].Push(new Vector2(-Facing * power * 0.6f, -power * 0.2f) * scale, 1f / 60f);
         }
 
@@ -301,12 +306,14 @@ namespace Tacetno433.Core
             }
             weapon.Follow(weaponWant, stiff * 1.25f, BattleRules.FigureBounce, dt);
             weapon2.Follow(weapon2Want, stiff * 1.1f, BattleRules.FigureBounce, dt);
+            for (int b = 0; b < bits.Length; b++) bits[b].Follow(bitWant[b], stiff * 0.45f, BattleRules.FigureBounce * 0.8f, dt);
 
             //AIR : gravity, the baton's wind, and a slow breeze so nothing ever hangs dead still. The wind also pushes the loose
             //parts a little (they float on springs, so they lean with the swing and come back)
             Vector2 breeze = new Vector2((float)Math.Sin(clock * 0.9f + seed) * 0.6f + (float)Math.Sin(clock * 2.3f + seed * 2f) * 0.25f, 0f)
                              * BattleRules.FigureBreeze;
             for (int i = 0; i < body.Length; i++) body[i].Speed += wind * (bodyLoose[i] * BattleRules.FigureWindBody * scale * dt);
+            for (int b = 0; b < bits.Length; b++) bits[b].Speed += wind * (BattleRules.FigureWindBody * 1.6f * scale * dt);
             Vector2 pull = new Vector2(0f, BattleRules.FigureGravity) * scale + (wind + breeze) * scale;
             for (int c = 0; c < chainCount; c++)
             {
@@ -327,6 +334,11 @@ namespace Tacetno433.Core
             }
             weapon.At = weaponWant;
             weapon2.At = weapon2Want;
+            for (int b = 0; b < bits.Length; b++)
+            {
+                bits[b].At = bitWant[b];
+                bits[b].Speed = Vector2.Zero;
+            }
             for (int c = 0; c < chainCount; c++)
             {
                 chains[c].Link = chainLink[c] * Height;
@@ -337,6 +349,7 @@ namespace Tacetno433.Core
         private void CarryAll(Vector2 by)
         {
             for (int i = 0; i < body.Length; i++) body[i].At += by;
+            for (int b = 0; b < bits.Length; b++) bits[b].At += by;
             for (int c = 0; c < chainCount; c++) chains[c].Carry(by);
             for (int s = 0; s < shardCount; s++) shards[s].At += by;
         }
