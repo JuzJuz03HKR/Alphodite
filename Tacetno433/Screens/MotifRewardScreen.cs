@@ -174,7 +174,7 @@ namespace Tacetno433.Screens
             bool ready = time > FlipStart(offer.Length - 1) + BattleRules.UiCardFlipTime * 0.6f;
             bool confirm = ready && offer.Length > 0 && (Input.KeyPressed(Keys.Enter) || Input.KeyPressed(Keys.Space));
             for (int i = 0; i < cards.Length; i++)
-                if (ready && Input.ClickedOn(cards[i])) { selected = i; confirm = true; }
+                if (ready && (Input.ClickedOn(cards[i]) || Input.NumberPressed(i))) { selected = i; confirm = true; }   // NUMBER KEYS : 1 2 3, the cards' 01 02 03
 
             if (confirm)
             {

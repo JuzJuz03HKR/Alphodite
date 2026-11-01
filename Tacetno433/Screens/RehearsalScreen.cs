@@ -209,7 +209,7 @@ namespace Tacetno433.Screens
             int choice = -1;
             if (selected >= 0 && (Input.KeyPressed(Keys.Enter) || Input.KeyPressed(Keys.Space))) choice = selected;
             for (int i = 0; i < cards.Length; i++)
-                if (Input.ClickedOn(cards[i])) choice = i;
+                if (Input.ClickedOn(cards[i]) || Input.NumberPressed(i)) choice = i;           // NUMBER KEYS : 1 to 9, column after column
             if (choice >= 0) Pick(choice);
         }
 
@@ -444,6 +444,7 @@ namespace Tacetno433.Screens
             Arrow(sb, ax, ay, spot * a);
             Gfx.Text(sb, Game.Font, toText[i], ax + 24f, y, Color.Lerp(Palette.Highlight, spot, 0.5f) * a, TextSize.Label);
             if (legendText[i].Length > 0) Gfx.Text(sb, Game.StoryFont, legendText[i], r.X + 18, r.Y + 66, Palette.Paper * a, TextSize.StorySmall);
+            if (picked < 0 && i < 9 && can[i]) Ui.NumberKey(sb, i, r.Right - 26, r.Bottom - 16, a);  // NUMBER KEYS
         }
 
         //Arrow : a small arrow pointing right, from x

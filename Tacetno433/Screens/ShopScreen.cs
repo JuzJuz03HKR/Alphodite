@@ -312,6 +312,9 @@ namespace Tacetno433.Screens
             }
 
             if (Input.MouseClicked() && hoverRow >= 0 && hoverRow < WareCount) Buy(hoverRow);
+            else
+                for (int r = 0; r < WareCount; r++)
+                    if (Input.NumberPressed(r)) { Buy(r); break; }                        // NUMBER KEYS
             if (Input.ClickedOn(rerollButton) || Input.KeyPressed(Keys.R)) Reroll();
 
             if (Input.KeyPressed(Keys.Enter) || Input.ClickedOn(leaveButton))
@@ -525,6 +528,7 @@ namespace Tacetno433.Screens
                 Gfx.Text(sb, Game.BigFont, w.Name, row.X + 70, row.Y + 10, ink * dim, TextSize.Small);
                 if (w.KindLabel.Length > 0) Gfx.TextSpaced(sb, Game.Font, w.KindLabel, row.X + 72, row.Y + 44, soft * dim, TextSize.Tiny, 2f);
 
+                if (!w.Sold) Ui.NumberKey(sb, r, row.Right - 102, row.Center.Y, a);             // NUMBER KEYS : before the price, over the ink bar
                 //Price : a diamond and the number, dimmed when you cannot afford it
                 if (!w.Sold)
                 {

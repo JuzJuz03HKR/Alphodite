@@ -112,9 +112,13 @@ namespace Tacetno433.Screens
             }
             moveMotion.Update(dt, Done && Input.MouseOver(moveButton));
 
-            //Sharpen : a click on a musician whose weapon can still go up
-            if (!Done && pointed >= 0 && Input.MouseClicked())
+            //Sharpen : a click on a musician whose weapon can still go up, or their number (NUMBER KEYS)
+            int pick = pointed >= 0 && Input.MouseClicked() ? pointed : -1;
+            for (int i = 0; i < columns.Length && pick < 0; i++)
+                if (Input.NumberPressed(i)) pick = i;
+            if (!Done && pick >= 0)
             {
+                pointed = pick;
                 Musician m = run.Roster[pointed];
                 if (!run.CanRehearse(m))
                 {
@@ -198,6 +202,7 @@ namespace Tacetno433.Screens
                 float a = ColumnIn(i) * (Done && i != sharpenedAt ? 0.55f : 1f);
                 if (i == sharpenedAt) Gfx.DrawGlowBox(sb, new Rectangle(r.X - 60, r.Bottom - 40, r.Width + 120, 90), BandColumn.SpotOf(m) * 0.2f);
                 BandColumn.Picture(sb, r, UiArt.BustOf(m), BandColumn.SpotOf(m), Flood(i), a);
+                if (!Done) Ui.NumberKey(sb, i, r.X + 14, r.Y + 20, a);                          // NUMBER KEYS
             }
         }
 

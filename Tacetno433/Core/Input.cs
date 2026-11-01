@@ -58,6 +58,14 @@ namespace Tacetno433.Core
             return keyNow.IsKeyDown(key) && keyOld.IsKeyUp(key);
         }
 
+        //Number Pressed : NUMBER KEYS (Beta1 1 Nov, docs/BETA1_DIRECTION.md 29 item 9), the key for the choice at place i (0 is
+        //the 1 key) on the top row or the number pad. Every page that offers choices reads its choices this way.
+        public static bool NumberPressed(int i)
+        {
+            if (i < 0 || i > 8) return false;
+            return KeyPressed((Keys)((int)Keys.D1 + i)) || KeyPressed((Keys)((int)Keys.NumPad1 + i));
+        }
+
         //Pretend Press : DEVELOPER TOOL ONLY. DebugShots sets a key here for a single frame,
         //so a picture can show what that key does (the pause, the signature). Never set in play.
         public static Keys PretendPress = Keys.None;

@@ -200,6 +200,9 @@ namespace Tacetno433.Screens
                 }
 
                 if (Input.MouseClicked() && hoverOption >= 0) Choose(hoverOption);
+                else
+                    for (int i = 0; i < 3; i++)
+                        if (Input.NumberPressed(i) && OptionAllowed(i)) { Choose(i); break; }   // NUMBER KEYS
 
                 //Skip : leaving without resting is allowed
                 if (Input.ClickedOn(moveButton))
@@ -402,6 +405,7 @@ namespace Tacetno433.Screens
                 Gfx.DrawGlowBox(sb, new Rectangle(r.X - 10, r.Bottom - 6, r.Width + 20, 30), Color.Black * (0.5f * a));
                 Gfx.Rect(sb, r, Color.Lerp(Palette.Panel, Palette.Stage, e) * a);
                 Ornament.DoubleFrame(sb, r, Color.Lerp(Palette.LineGrey, Palette.Highlight, e) * a);
+                if (phase == Phase.Choose) Ui.NumberKey(sb, i, r.Right - 30, r.Y + 26, a);       // NUMBER KEYS
 
                 //Name : on an ink bar when pointed at
                 float nameW = Gfx.SpacedWidth(Game.BigFont, optionNames[i], TextSize.Small, 2f);

@@ -705,6 +705,12 @@ namespace Tacetno433.Core
             WordRows(sb, words, words.Count, x, y, alpha);
         }
 
+        //Number Key : NUMBER KEYS (1 Nov), the small key on a choice that its number key picks, quieter than ENTER's
+        public static void NumberKey(SpriteBatch sb, int i, float x, float cy, float alpha)
+        {
+            KeyBox(sb, NumberText.Get(i + 1), x, cy, Palette.PaperDim, Palette.Ink, 0.85f * alpha);
+        }
+
         //Tooltip : a small box next to the mouse. body should already be wrapped.
         public static void Tooltip(SpriteBatch sb, string title, string body, float x, float y)
         {
