@@ -74,7 +74,8 @@ if ws.cell(row=1, column=11).value is None:      # BOSSES (Beta1 31 Oct) : the n
 if ws.cell(row=1, column=10).value is None:      # ENEMY MOVES (Beta1 30 Oct) : its Moves list, GUARD with its GuardBlock
     ws.cell(row=1, column=10).value = 'MOVES in turn (GUARD block on floor 1 before x1.6)'
     ws.cell(row=1, column=10)._style = copy.copy(ws.cell(row=1, column=8)._style)
-for block in re.findall(r'new Enemy \{ Name = "([^"]+)",(.*?)\},\s*(?=//|new Enemy|\};)', es, re.S):
+# an entry ends at "}," closing its line (1 Nov : PRACTICE's "Looks = new[] { "hush" },  // SHARED LOOKS" ended it too early)
+for block in re.findall(r'new Enemy \{ Name = "([^"]+)",(.*?)\},[ \t]*\n\s*(?=//|new Enemy|\};)', es, re.S):
     name, body = block
     def get(key, default=''):
         m = re.search(key + r'\s*=\s*([^,\n]+?)(?:,|\n)', body)

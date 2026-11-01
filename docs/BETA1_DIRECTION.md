@@ -1933,3 +1933,38 @@ MAESTRO
 
 ### 27.6 แหล่ง (ค้น 1 พ.ย.)
 [Limbus Mirror of Immortality (wiki, Grace of Stars)](https://limbuscompany.wiki.gg/wiki/Bizarre_Machine) [Limbus Mirror Dungeon (wiki)](https://limbuscompany.wiki.gg/wiki/Mirror_Dungeon) [Slay the Spire ascension (Twinfinite)](https://twinfinite.net/?p=336281) [Slay the Spire ascension guide (Pocket Gamer)](https://www.pocketgamer.com/slay-the-spire/ascension-guide) [Balatro stakes per deck (Steam)](https://steamcommunity.com/app/2379780/discussions/0/4346606879507039354) [Balatro High Stakes (TrueAchievements)](https://www.trueachievements.com/a424923/high-stakes-achievement) [Hades Mirror of the Night (Fextralife)](https://hades.wiki.fextralife.com/Mirror+of+the+Night) [Hades Pact of Punishment (Prima)](https://primagames.com/?p=313621) [Hades Chaos boons (Prima)](https://primagames.com/gaming/hades-chaos-realm-chaos-blessings) [CZN beginner guide (Prydwen)](https://www.prydwen.gg/chaos-zero-nightmare/guides/beginner-guide) [CZN How to Use Save Data (GameWith)](https://gamewith.net/chaoszeronightmare/70847)
+
+### 27.7 ทำแล้ว : ENCORE แทน MAESTRO (A3 ข้อ 1 ก) รอผู้ใช้ Rebuild ลอง
+- ข้อมูล `Data/Encore.cs` (ไฟล์ใหม่) : `Encore.Won` ขั้นสูงสุดที่ชนะของวาทยากรแต่ละคน (-1 = ยังไม่เคยชนะ เรียงตาม `ConductorList.All` ห้ามสลับ) / `Open` ขั้นที่เล่นได้ (ขั้นที่ชนะ + 1 สูงสุด 5) / `Pick` ขั้นที่เลือกไว้สำหรับรันหน้า (ไม่เซฟ เริ่มที่ขั้นสูงสุดที่เปิด) / `Win` เรียกจาก `Archive.Pay` ตอนชนะรัน / ข้อความ `Lines` `Labels` `Digits` เตรียมไว้ก่อน ไม่สร้างใน Draw / คำ `Words.Encore`
+- กติกา (ตัวเลข `BattleRules` หัวข้อ ENCORE ต่อจาก ARCHIVE ไม่มีกติกาใหม่ให้สอน ใช้ของที่มีในเกม)
+  1. ศัตรูตีแรง x1.3 (`MaestroTurnDamage` เดิม)
+  2. วงหด 0.8 วินาที ช่วงจังหวะแคบ ROLL ต้อง 6 ครั้งถึง PERFECT (`TurnBattle.TightTiming` ใช้ตัวเลข Maestro เดิม)
+  3. ไฟต์ธรรมดามีศัตรูเพิ่ม 1 ตัว สูงสุด 4 (`RunState.PackEscorts` `EncorePackMost`) ELITE กับบอสเท่าเดิม
+  4. RECOVER ที่ REST กับการพักตอนเดินเข้า THE WINGS ได้ 0.6 เท่า (`RunState.RestShare` `EncoreRestShare` ข้อความการ์ด REST บอกเปอร์เซ็นต์ใหม่) DEEP REST ที่จ่ายเงินยังเต็ม
+  5. บอสเข้า PHASE 2 ที่เลือด 3/4 แทนครึ่ง (`TurnBattle.BigPhase` `EncoreBigPhase` เพชรบนแถบเลือดบอสย้ายตาม)
+  - APPLAUSE ขั้นละ +25% (`EchoesEncore` แทน `EchoesMaestro` ขั้น 2 = x1.5 เท่า MAESTRO เดิม)
+- หน้าจอ
+  - หน้าเลือกวาทยากร (Gallery กับ Detail) : สวิตช์ NORMAL MAESTRO เปลี่ยนเป็นช่อง ENCORE 0 ถึง 5 ที่เดิมมุมขวาล่าง (`Ui.EncorePicker`) ขึ้นเฉพาะวาทยากรที่เคยชนะ / คลิกเลขหรือกด E ไล่ขั้น (ปุ่ม M เลิกใช้) / บรรทัดใต้ช่องบอกว่าขั้นที่เลือกเพิ่มอะไร / ขั้นที่ยังไม่เปิดเป็นขีดจาง ให้เห็นว่าบันไดยาวแค่ไหน
+  - Gallery : เหนือแผ่นภาพของวาทยากรที่เคยชนะมีคำ ENCORE กับเพชร 5 เม็ด เม็ดทึบ = ขั้นที่ชนะแล้ว
+  - CURTAIN CALL ตอนชนะ : คำ ENCORE! สีของวาทยากรใต้บรรทัด BRAVO กับ ENCORE 2 IS OPEN (ชนะขั้นสุดท้ายขึ้น ENCORE 5 WON) / เล่นขั้นที่เปิดแล้วซ้ำไม่ขึ้น
+  - แถบบนระหว่างรัน : ENCORE 2 ต่อท้ายชื่อวาทยากร รันแรกไม่มีคำ (เดิมขึ้น NORMAL หรือ MAESTRO ตลอด)
+  - TEST ROOM : แถวบนมี ENCORE 0 ถึง 5 เลือกได้ทุกขั้นไม่ต้องเปิดก่อน / ชนะในเทสไม่เปิดขั้นจริง (`StopTests` คืนค่าตอนกลับ Title)
+  - Title : คำใบ้ใหม่ "Win a run to open ENCORE : the same conductor again, with one more rule."
+- คำบนจอ : "No extra rules." / "+ Enemies hit harder." / "+ A faster ring and tighter timing." / "+ One more enemy in normal fights." / "+ Resting heals less." / "+ Bosses reach PHASE 2 sooner."
+- เซฟ : archive.txt เพิ่มบรรทัด `encore=` / เซฟรันใช้ `encore=` แทน `maestro=` / เซฟรันเก่าที่เป็น MAESTRO โหลดเป็น ENCORE 2 / settings.txt เลิกเขียน maestro (`Settings.Maestro` ลบแล้ว ไฟล์เก่าอ่านข้ามได้) / คนที่เคยเลือก MAESTRO ไว้ต้องชนะรันปกติก่อน 1 ครั้งจึงเลือก ENCORE ได้ (ข้อเสียที่บอกไว้ใน 27.3)
+- โค้ดดวลเก่าของ Alpha6 ยังอ่าน `RunState.Maestro` ได้ ตอนนี้เป็น true ตั้งแต่ ENCORE 2
+
+### 27.8 ทดสอบในแชท cloud
+- build 0 error 0 warning / turncheck 194/194 (ข้อใหม่ 6 ข้อใน `Core/DebugShots.TurnEncore.cs` : encore ladder, 2 timing, 3 packs, 4 rest, 5 phase, applause / `maestro notes` เปลี่ยนชื่อเป็น `encore 1 notes`) / savecheck 43/43 (ข้อใหม่ `encore archive` `old maestro` / `maestro` เปลี่ยนเป็น `encore`)
+- turnsim ก่อนแก้กับหลังแก้ได้ผลเหมือนกันทุกบรรทัด : ENCORE 0 = NORMAL เดิม และโหมด MAESTRO ของตัวจำลอง (= ENCORE 2) = MAESTRO เดิม / ไม่ได้ใช้ตัดสินความยาก (14.6)
+- ภาพ (ชื่อหน้าเติม `encore` = หน้าเดิมที่มีขั้นชนะแล้ว `PROJECT_STATUS.md` หัวข้อ 11) : `galleryencore` `detailencore` `curtainwinencore` `routeencore` กับ `testroom` `detail` ดูแล้วไม่ทับกัน
+- `docs/TACET_Balance.xlsx` แท็บ Turn Battle มีแถว ENCORE แล้ว (`python3 docs/turn_balance_tabs.py`) / แก้สคริปต์ที่พังตั้งแต่ Finalize10 (บล็อก PRACTICE มี `Looks` ทำให้ตัดบล็อกศัตรูผิดที่) แท็บอื่นไม่เปลี่ยน
+
+### 27.9 ให้ผู้ใช้ลองหลัง Rebuild
+1. รันแรก หรือวาทยากรที่ยังไม่เคยชนะ : หน้าเลือกวาทยากรไม่มีช่อง ENCORE / แถบบนไม่มีคำ NORMAL MAESTRO
+2. เร็วสุดด้วย TEST ROOM (F2 ที่ Title) : CURTAIN CALL WIN ดูคำ ENCORE! / เลือก ENCORE 3 ถึง 5 แล้วลองไฟต์ ที่พัก บอส HALF LIFE (ENCORE 5 เพชรบนแถบเลือดบอสอยู่ที่ 3/4)
+3. เล่นจริงชนะ 1 รัน : CURTAIN CALL ขึ้น ENCORE! ENCORE 1 IS OPEN / กลับหน้าเลือกวาทยากร เห็นเพชรเหนือภาพ และช่อง ENCORE มุมขวาล่าง (คลิกเลขหรือกด E)
+4. ค่า MAESTRO ที่เคยเลือกไว้หายแล้ว ต้องชนะ 1 รันก่อน
+
+### 27.10 ถัดไป
+- ผู้ใช้ Rebuild ลอง (27.9) / แล้ว A4 เหตุการณ์แบบเบา (27.4 ก) / วิธีทำงาน 13.40 ทำทีละข้อ / PLAYTEST FINALE ยัง 1 PERFECT (`PlaytestSignatureNeed` ห้ามแก้จนผู้ใช้บอก)

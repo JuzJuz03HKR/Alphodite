@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 1 พ.ย. (แชท /system Finalize13) | A3 ระบบนอกรัน ก้อน 5 เดิม ENCORE ARCHIVE MEMORY (คำต่อคำ `USER_BRIEFS.md` 13.68) : ดูระบบที่มีตอนนี้ (THE ARCHIVE APPLAUSE MAESTRO) แล้วคุยว่าเก็บ ตัด เพิ่มอะไร คุย A4 เหตุการณ์ทางเลือกเสี่ยงพร้อมกัน / คุยก่อนเขียนโค้ด | ตอนคุย : เอกสาร / ถ้าผู้ใช้เลือกแล้ว : `Data/Archive.cs` `Screens/ArchiveScreen.cs` `Data/SaveFile.cs` `Core/Settings.cs` `Data/RunState.cs` `Data/BattleRules.cs` `Data/GameEvent.cs` `Screens/EventScreen.cs` `Core/DebugShots*.cs` |
+| (ว่าง) | | |
 
 ---
 
@@ -63,6 +63,13 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 ---
 
 ## สถานะล่าสุด (1 พ.ย.)
+
+**1 พ.ย. แชท /system (Finalize13) : ✅ A3 ระบบนอกรัน เสร็จ หยุดรอผู้ใช้** (คำต่อคำ `USER_BRIEFS.md` 13.68 13.69 รายละเอียด `BETA1_DIRECTION.md` 27)
+✅ คุยก่อน : ไอริสอ่านระบบนอกรันในโค้ด (APPLAUSE ราว 95 ต่อรันที่ชนะ / THE ARCHIVE 6 ช่องรวม 790 ราว 8 รันที่ชนะ ทุกช่องทำให้ง่ายขึ้น / MAESTRO ขั้นเดียว ถามตั้งแต่รันแรก) ค้นยืนยันเกมอ้างอิง (Slay the Spire Balatro Hades Limbus CZN) พบว่าร่าง MEMORY เดิมอ้าง CZN ไม่ตรง / ผู้ใช้เลือกตามที่แนะนำทั้ง 4 ข้อ
+✅ **ENCORE แทน MAESTRO** `Data/Encore.cs` : ชนะรันกับวาทยากรคนไหนเปิดขั้นถัดไปของคนนั้น สูงสุด 5 ขั้น ซ้อนกัน 1 ตีแรง 2 ตวัดยาก (= MAESTRO เดิม) 3 ศัตรูเพิ่ม 4 พักได้น้อยลง 5 บอสเข้า PHASE 2 ที่ 3/4 / หน้าเลือกวาทยากรมีช่อง ENCORE แทนสวิตช์ (เฉพาะคนที่เคยชนะ คลิกหรือ E) เพชรเหนือภาพ / CURTAIN CALL ขึ้น ENCORE! / TEST ROOM เลือกขั้นได้ / เซฟเก่า MAESTRO โหลดเป็น ENCORE 2 / **THE ARCHIVE คงไว้** / **MEMORY ตัด** / A4 เลือกแบบเบา
+✅ build 0/0 turncheck 194/194 savecheck 43/43 / turnsim ก่อนกับหลังเหมือนกันทุกบรรทัด / ภาพ `galleryencore` `detailencore` `curtainwinencore` `routeencore` `testroom` ดูแล้ว / `TACET_Balance.xlsx` อัปเดต (แก้ `docs/turn_balance_tabs.py` ที่พังตั้งแต่ Finalize10) / งานอยู่บน GitHub / ตาราง "แชทที่กำลังทำงาน" ว่าง
+⚠️ คนที่เคยเลือก MAESTRO ต้องชนะรันปกติ 1 ครั้งก่อนจึงเลือก ENCORE ได้ / ENCORE 4 เบาลงถ้าเงินเฟ้อ เพราะ DEEP REST ที่จ่ายเงินยังเต็ม (ดูตอน G)
+**ถัดไป** : ผู้ใช้ Rebuild ลอง (`BETA1_DIRECTION.md` 27.9) / แล้ว A4 เหตุการณ์แบบเบา (27.4 ก : ทุกเหตุการณ์มี 1 ทางเสี่ยงแต่ได้ดีกว่า ใช้ของที่มี `Data/GameEvent.cs` ห้ามสลับลำดับ `EventList` `Screens/EventScreen.cs`) / วิธีทำงาน 13.40 ทำทีละข้อ / PLAYTEST FINALE ยัง 1 PERFECT (`PlaytestSignatureNeed` ห้ามแก้จนผู้ใช้บอก)
 
 **1 พ.ย. แชท /system (Finalize12) : /update ปิดแชท ผู้ใช้จะเปิดแชทใหม่** (คำต่อคำ `USER_BRIEFS.md` 13.67)
 ✅ ผู้ใช้ลอง A2 แผนที่แล้ว "เทสทุกอย่างแล้ว ยังไม่ต้องแก้อะไร" (`BETA1_DIRECTION.md` 26 commit `035b8d1` `1061450` และ commit ปิดแชทนี้) / งานทั้งหมดอยู่บน GitHub / ตาราง "แชทที่กำลังทำงาน" ว่าง
