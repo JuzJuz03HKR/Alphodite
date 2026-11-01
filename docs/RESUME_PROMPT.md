@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| (ว่าง) | | |
+| 1 พ.ย. แชท /system (Finalize14) | A4 เหตุการณ์แบบเบา : เสนอทางเสี่ยงของทั้ง 10 เหตุการณ์ก่อน ผู้ใช้เลือกแล้วค่อยทำ | ตอนเสนอ : `docs/BETA1_DIRECTION.md` `docs/USER_BRIEFS.md` `docs/RESUME_PROMPT.md` / ตอนทำ : `Data/GameEvent.cs` `Screens/EventScreen.cs` `Screens/RehearsalScreen.cs` `Data/BattleRules.cs` `Data/Words.cs` `Core/DebugShots*.cs` |
 
 ---
 
