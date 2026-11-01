@@ -174,6 +174,9 @@
 | VFX ตอนตี : SLASH SHOT SMASH CROSS INK LIGHTNING, สีของตัวละคร (ทอง ประกาย / แดง ไฟ), ปัด CLASH, ศัตรูตาย PULL, focus lines | `Core/HitFx.cs` (สไตล์ต่อกลุ่มเครื่องดนตรี `BattleScreen.StyleOf`, สีต่อคน `Musician.Spot` + `Palette.Spot*`, SIGNATURE `SignatureStyle` / `SignatureColors`) |
 | ตัวเลขดาเมจแบบ pixel | `Core/PixelDigits.cs` · ป๊อปอัป `Screens/BattleScreen.Show.cs` (`SpawnNumber`) |
 | ฉาก กล้อง parallax ไฟ นักดนตรีตัวหน้า สลับคน ศัตรูยืน ลำแสง | `Screens/BattleScreen.Stage.cs` |
+| MATH ART (1 พ.ย.) ตัวละครที่โค้ดวาดแทนภาพทีม : ตัววาดรูปทรง (FEATHER ขอบเนียน) | `Core/Shapes.cs` |
+| MATH ART : ฟิสิกส์ของตัวละคร (SPRINGS CHAINS SHARDS IK) ท่า ATTACK PARRY HURT KO DEATH, F4 สลับระดับ `Figure.Level` | `Core/Figure.cs` · นักดนตรี `Core/Figure.Band.cs` · TACET กับบอส `Core/Figure.Tacet.cs` · ตัวเลข `BattleRules` หัวข้อ Figure Feel |
+| MATH ART : ต่อเข้าหน้าต่อสู้ (MakeFigure, PIXEL LOOK ภาพเล็กของ TACET + SCANLINES, BACKLIGHT, SILHOUETTE บังแสงรอยต่อ, ลมจากไม้บาตอง) | `Screens/BattleScreen.Stage.cs` หัวข้อ MATH ART · หน้าแคป `battlelegend1` ถึง `5` และ `--figure 2` ใน `Core/DebugShots.cs` |
 | cut-in SIGNATURE, แสงของวง QTE (วาดทับหลังโลกถูกหรี่) | `Screens/BattleScreen.Show.cs` |
 | อ่านภาพ animation ของทีมอาร์ต (PNG / Aseprite) | `Core/FrameArt.cs` · โฟลเดอร์ `Content/Art/Battle/` · แผนอาร์ต `BATTLE_ART_PLAN.md` |
 | LESS FLASHING | `Core/Settings.cs` `ReduceFlashing` · หน้า `Screens/SettingsScreen.cs` แถว 07 · `BattleRules.LessFlash` |
