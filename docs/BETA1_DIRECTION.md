@@ -2033,3 +2033,9 @@ MAESTRO
 - ข้อ ค : `RehearsalScreen.From` เพิ่มทางมาจากเหตุการณ์ กับจำนวนดาวที่เหลือ แล้วไปห้องถัดไป
 - คำใหม่ใน `Words` / ตัวเลขใน `BattleRules` หัวข้อ Event Checks
 - ทดสอบ : turncheck ข้อใหม่ (ส่วนเลือดต่อคน เลือดไม่พอกดไม่ได้ ดาวหลายดวง ATTACK ทุกคน เลือดเต็ม) / savecheck `event` (เซฟเก็บแค่ลำดับเหตุการณ์ ทางเลือกที่เปลี่ยนไม่กระทบ) / ภาพทุกเหตุการณ์จาก TEST ROOM คอลัมน์ EVENTS
+
+### 28.7 ผู้ใช้เลือกแล้ว (1 พ.ย. คำต่อคำ `USER_BRIEFS.md` 13.72)
+- ทำ : 1 THE BROKEN METRONOME / 2 A STREET MUSICIAN / 3 THE SILENT AUDIENCE / 6 THE TEA HOUSE / 7 THE EMPTY CHAIR / 9 A TUNING FORK ตามตาราง 28.3
+- คงเดิม : 4 A LOST SCORE / 10 A CRACKED BOW (ทาง "ปิดกล่อง" ยังอยู่) / 5 กับ 8 ไม่แก้อยู่แล้ว
+- ข้อเสริม : ก ป้ายของที่ได้ ทำ / ค เลือกปุ่มของดาวเอง ทำ / ข ลุ้นพลาดเจ็บขึ้น ไม่ทำ
+- ราคาเลือด : 35% (GIFT หายาก 2 ดาว) / 50% (ATTACK ทุกคน +1 ดาว)
