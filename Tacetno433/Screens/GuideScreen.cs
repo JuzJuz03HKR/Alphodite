@@ -107,6 +107,21 @@ namespace Tacetno433.Screens
         private UiMotion nextMotion = new UiMotion();
         private UiMotion backMotion = new UiMotion();
 
+        //From Pause : HOW TO PLAY IN THE PAUSE MENU (Beta1 1 Nov, docs/BETA1_DIRECTION.md 29 item 3). The pause menu borrows this
+        //page the way it borrows SETTINGS : it calls Update and Draw only, BACK sets Closed instead of going to the title,
+        //and the room is drawn flat under the words because the page's own layers (DrawBack, DrawWorld) do not run.
+        private bool fromPause;
+        public bool Closed;
+
+        public GuideScreen()
+        {
+        }
+
+        public GuideScreen(bool fromPause)
+        {
+            this.fromPause = fromPause;
+        }
+
         public override void Load()
         {
             //Text Wrap : done once for the whole game, the first time the guide opens
@@ -117,11 +132,15 @@ namespace Tacetno433.Screens
                     wrapped[i] = Gfx.WrapText(Game.StoryFont, bodies[i], TextWrap, TextSize.Story);
             }
 
-            //TACET and the page's light : the dark, still room of THE ARCHIVE
-            Dark = new TacetVoid();
-            Lens.Ambient = 0.42f;
-            Lens.SpotPower = 0f;
-            Lens.Vignette = 0.6f;
+            //TACET and the page's light : the dark, still room of THE ARCHIVE (borrowed by the pause menu, the paused page keeps its own)
+            if (!fromPause)
+            {
+                Dark = new TacetVoid();
+                Lens.Ambient = 0.42f;
+                Lens.SpotPower = 0f;
+                Lens.Vignette = 0.6f;
+            }
+            if (fromPause) backButton = new Rectangle(40, 646, 250, 46);
             nextMotion.Snap(true);
 
             SoundBank.PlayMusic(Music.Title);
@@ -132,9 +151,12 @@ namespace Tacetno433.Screens
             time += dt;
             turn = Math.Min(1f, turn + dt * 3f);
 
-            //TACET : far up in the corner, still
-            Dark.Update(dt, 0.3f);
-            Dark.PlaceOnPage(Hole, 26f * UiMotion.EaseBack(MathHelper.Clamp(time / 0.6f, 0f, 1f)) * (1f + 0.03f * (float)Math.Sin(time * 0.6f)), 0f, 0f, 0f);
+            //TACET : far up in the corner, still (not while borrowed by the pause menu, it has no dark of its own then)
+            if (Dark != null)
+            {
+                Dark.Update(dt, 0.3f);
+                Dark.PlaceOnPage(Hole, 26f * UiMotion.EaseBack(MathHelper.Clamp(time / 0.6f, 0f, 1f)) * (1f + 0.03f * (float)Math.Sin(time * 0.6f)), 0f, 0f, 0f);
+            }
 
             //POINT : NEXT stays lit unless the mouse points at PREV or BACK
             bool last = page >= steps.Length - 1;
@@ -162,7 +184,8 @@ namespace Tacetno433.Screens
             {
                 backMotion.Press();
                 SoundBank.Play(Sfx.UiBack);
-                Game.Screens.Change(new TitleScreen());
+                if (fromPause) Closed = true;                                         // back to the pause menu
+                else Game.Screens.Change(new TitleScreen());
             }
         }
 
@@ -214,6 +237,18 @@ namespace Tacetno433.Screens
             Corner(sb, artBox.Right, artBox.Bottom, a);
         }
 
+        //World Flat : DrawWorld without the hole's pull (no TacetVoid while borrowed by the pause menu)
+        private void DrawWorldFlat(SpriteBatch sb)
+        {
+            float a = UiMotion.Between(time, 0.15f, 0.5f);
+            Gfx.Rect(sb, artBox, Palette.Void * (0.45f * a));
+            Gfx.RectOutline(sb, artBox, Palette.LineGrey * (0.4f * a), 1);
+            Corner(sb, artBox.X, artBox.Y, a);
+            Corner(sb, artBox.Right, artBox.Y, a);
+            Corner(sb, artBox.X, artBox.Bottom, a);
+            Corner(sb, artBox.Right, artBox.Bottom, a);
+        }
+
         private static void Corner(SpriteBatch sb, float x, float y, float a)
         {
             Gfx.Circle(sb, x, y, 4f, Palette.StageDeep * a);
@@ -234,6 +269,13 @@ namespace Tacetno433.Screens
 
         public override void Draw(SpriteBatch sb)
         {
+            //Borrowed : the pause menu draws only this, so the room and the drawing's frame come along flat
+            if (fromPause)
+            {
+                DrawBack(sb);
+                DrawWorldFlat(sb);
+            }
+
             //Title Bar : the page's name turned on the tall white bar at the left (menu1)
             float t = UiMotion.Between(time, 0f, 0.45f);
             int barX = 40 + (int)Math.Round((1f - t) * -40f);
@@ -261,7 +303,7 @@ namespace Tacetno433.Screens
             float low = UiMotion.Between(time, 0.4f, BattleRules.UiEnterTime);
             Ui.Command(sb, prevButton, "PREV", "A", prevMotion, low * (page > 0 ? 1f : 0.35f), false);
             Ui.Command(sb, nextButton, "NEXT", "D", nextMotion, low * (page < steps.Length - 1 ? 1f : 0.35f), false);
-            Ui.Command(sb, backButton, "BACK", "ESC", backMotion, low, false);
+            Ui.Command(sb, backButton, fromPause ? "BACK TO PAUSE" : "BACK", "ESC", backMotion, low, false);
 
             Ui.Steps(sb, steps, page, NavX, NavY, NavSpacing, low);
             Gfx.TextSpacedRight(sb, Game.Font, "LEFT RIGHT  TURN THE PAGE   /   ESC  BACK", 1240, 692, Palette.LineGrey * low, TextSize.Tiny, 2f);

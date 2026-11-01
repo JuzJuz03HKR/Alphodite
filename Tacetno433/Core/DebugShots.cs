@@ -979,6 +979,7 @@ namespace Tacetno433.Core
             if ((names[index] == "duelpause" || names[index] == "pause") && frames == waits[index] - 30) Input.PretendPress = Keys.Escape;
             if (names[index] == "pausesettings" && frames == waits[index] - 80) { game.Pause.Show(); game.Pause.OpenSettings(); }   // round 3 : the settings page borrowed
             if (names[index] == "pauseask" && frames == waits[index] - 30) { game.Pause.Show(); game.Pause.AskReturn(); }          //   and the box asking first
+            if (names[index] == "pauseguide" && frames == waits[index] - 80) { game.Pause.Show(); game.Pause.OpenGuide(); }   // HOW TO PLAY in the pause menu (1 Nov)
             if (names[index] == "battlepause" && frames == waits[index] - 30) game.Pause.Show();                                    //   and over a fight
             if (names[index] == "titlequit" && frames == waits[index] - 10) Input.PretendPress = Keys.Escape;
             if (names[index] == "titletest" && frames == 30) Input.PretendPress = Keys.F2;               // TEST ROOM (31 Oct) : F2 on the title page
@@ -1059,7 +1060,7 @@ namespace Tacetno433.Core
         //       wipe sweep sweepdark sweepclose (Beta1 screens : a page change on its way, from the route to the title, e.g. wipe@30)
         //       wipeshop wiperest wipeevent wipereward wipechapter wipeband wipesettings (Beta1 screens : the wipe to that page,
         //       with its name, e.g. wipeshop@41) wipegallery (the stage curtain on its way to the conductor select page, e.g. wipegallery@30)
-        //       lifetip (BAND LIFE 1 Nov : the map with the pointer on LIFE, each musician's numbers)
+        //       lifetip (BAND LIFE 1 Nov : the map with the pointer on LIFE, each musician's numbers) pauseguide (HOW TO PLAY borrowed by the pause menu)
         //       routestart routeboss routedive (Beta1 map : at the way in, the boss next, diving into a place, e.g. routedive@52)
         //       routewalk (the far view, 29 Oct : the camera walking to the new row, e.g. routewalk@20)
         //       gallery1 gallery2 gallerywalk galleryback detailcarry detailswap (Beta1 round 2 : another conductor pointed, stepping

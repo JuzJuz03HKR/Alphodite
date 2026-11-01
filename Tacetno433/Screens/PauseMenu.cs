@@ -14,6 +14,8 @@ namespace Tacetno433.Screens
     //updating that page while the menu is open, but still draws it underneath, so the player
     //comes back to exactly where they were. Alt tab opens it too.
     //   RESUME           close the menu (ESC does the same). The duel counts the band back in.
+    //   HOW TO PLAY      HOW TO PLAY IN THE PAUSE MENU (Beta1 1 Nov, docs/BETA1_DIRECTION.md 29 item 3) : the guide page,
+    //                    borrowed like SETTINGS, so the rules can be read again in the middle of a run
     //   SETTINGS         the settings page, borrowed and drawn over everything until it closes
     //   RETURN TO TITLE  asks first. The run was saved when the last path was picked, so
     //                    CONTINUE on the title page carries on from there.
@@ -31,6 +33,7 @@ namespace Tacetno433.Screens
         private TacetGame game;
         private ConfirmBox confirm = new ConfirmBox();
         private SettingsScreen settings;      // not null while the settings page is borrowed
+        private GuideScreen guide;            // not null while the HOW TO PLAY page is borrowed
         private int selected;
         private float appear;
         private float clock;                  // since the menu opened, the pieces come in one after another
@@ -38,14 +41,17 @@ namespace Tacetno433.Screens
         private Vector2 lastMouse;
 
         //Menu Lines
-        private static string[] items = { "RESUME", "SETTINGS", "RETURN TO TITLE" };
-        private static string[] itemIndex = { "01", "02", "03" };
+        private static string[] items = { "RESUME", "HOW TO PLAY", "SETTINGS", "RETURN TO TITLE" };
+        private static string[] itemIndex = { "01", "02", "03", "04" };
+        private const int ItemResume = 0;
+        private const int ItemGuide = 1;
+        private const int ItemSettings = 2;
         private const string EnterKey = "ENTER";
-        private Rectangle[] boxes = new Rectangle[3];
-        private Vector2[] itemAt = new Vector2[3];
-        private UiMotion[] motion = new UiMotion[3];
-        private const int MenuY = 318;
-        private const int MenuStep = 62;
+        private Rectangle[] boxes = new Rectangle[4];
+        private Vector2[] itemAt = new Vector2[4];
+        private UiMotion[] motion = new UiMotion[4];
+        private const int MenuY = 286;                 // four lines since HOW TO PLAY came in (1 Nov), the last one still above the notes
+        private const int MenuStep = 56;
 
         //The Ring : TACET's hole at the right, and the big thin ring round it that the lines sit on, like the title page
         private static readonly Vector2 Hole = new Vector2(800f, 250f);
@@ -94,6 +100,7 @@ namespace Tacetno433.Screens
             appear = 0f;
             clock = 0f;
             settings = null;
+            guide = null;
             lastMouse = Input.MousePos;
             for (int i = 0; i < motion.Length; i++) motion[i] = new UiMotion();     // fresh, so the last press does not play again
 
@@ -125,6 +132,18 @@ namespace Tacetno433.Screens
                 if (settings.Closed)
                 {
                     settings = null;
+                    clock = 0f;
+                }
+                return;
+            }
+
+            //How To Play : the same, for the guide page
+            if (guide != null)
+            {
+                guide.Update(dt);
+                if (guide.Closed)
+                {
+                    guide = null;
                     clock = 0f;
                 }
                 return;
@@ -170,11 +189,15 @@ namespace Tacetno433.Screens
             if (!press) return;
             motion[selected].Press();
 
-            if (selected == 0)
+            if (selected == ItemResume)
             {
                 Resume();
             }
-            else if (selected == 1)
+            else if (selected == ItemGuide)
+            {
+                OpenGuide();
+            }
+            else if (selected == ItemSettings)
             {
                 OpenSettings();
             }
@@ -193,6 +216,15 @@ namespace Tacetno433.Screens
             settings.Load();
         }
 
+        //Open Guide : borrow the HOW TO PLAY page (HOW TO PLAY, and the DEVELOPER TOOL's picture of it)
+        public void OpenGuide()
+        {
+            SoundBank.Play(Sfx.UiConfirm);
+            guide = new GuideScreen(true);
+            guide.Game = game;
+            guide.Load();
+        }
+
         //Ask Return : the box that asks before going back to the title page (RETURN TO TITLE, and the DEVELOPER TOOL)
         public void AskReturn()
         {
@@ -206,6 +238,11 @@ namespace Tacetno433.Screens
             if (settings != null)
             {
                 settings.Draw(sb);
+                return;
+            }
+            if (guide != null)
+            {
+                guide.Draw(sb);
                 return;
             }
 
