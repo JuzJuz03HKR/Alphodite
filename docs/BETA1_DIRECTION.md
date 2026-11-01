@@ -2039,3 +2039,34 @@ MAESTRO
 - คงเดิม : 4 A LOST SCORE / 10 A CRACKED BOW (ทาง "ปิดกล่อง" ยังอยู่) / 5 กับ 8 ไม่แก้อยู่แล้ว
 - ข้อเสริม : ก ป้ายของที่ได้ ทำ / ค เลือกปุ่มของดาวเอง ทำ / ข ลุ้นพลาดเจ็บขึ้น ไม่ทำ
 - ราคาเลือด : 35% (GIFT หายาก 2 ดาว) / 50% (ATTACK ทุกคน +1 ดาว)
+
+### 28.8 ทำแล้ว (1 พ.ย. แชท Finalize14) รอผู้ใช้ Rebuild ลอง
+- ทางใหม่ 6 เหตุการณ์ตามที่เลือก (ข้อความผลตามร่าง 28.3)
+  1. THE BROKEN METRONOME "Wind it by hand until it holds" จ่ายเลือด 35% ได้ RARE GIFT (แทน Leave it ticking)
+  2. A STREET MUSICIAN "Play with them until dawn" จ่ายเลือด 35% ได้ 2 STARS เลือกปุ่มเอง (แทน Drop a coin and move on)
+  3. THE SILENT AUDIENCE "Play loud enough to wake them" ELITE FIGHT (ทางที่ 3 ใหม่)
+  6. THE TEA HOUSE "Play the owner's favourite" ลุ้นใครก็ได้ ตั้งต้น 10 ผ่าน = FULL LIFE พลาด = -10 เงิน ไม่ได้พัก (แทน Play for the room)
+  7. THE EMPTY CHAIR "Wait in the dark for its player" ELITE FIGHT (แทน Leave the chair empty)
+  9. A TUNING FORK "Tune the whole band to it" จ่ายเลือด 50% ATTACK ทุกคน +1 ดาว (ทางที่ 3 ใหม่)
+- จ่ายเลือด (`EventChoice.LifeCost` / `RunState.LifeCostOf` `CanPayLife` `PayLife`) : ราคา = ส่วนเดียวกันของเลือดเต็มแต่ละคน รวมทั้งวงบนป้าย (วง 138 : 35% = 49 / 50% = 69) / กดได้เมื่อเลือดทั้งวงมากกว่าราคา ไม่พอปุ่มจางเหมือนเงินไม่พอ / แต่ละคนจ่ายส่วนของตัวเองก่อน ไม่ต่ำกว่า 1 ส่วนที่จ่ายไม่ไหว คนที่เลือดเหลือมากสุดจ่ายแทน / หน้าผลขึ้นป้าย PAID 49 LIFE
+- ผลใหม่ต่อท้าย `Reward` : `Stars` (เปิดหน้าซ้อม `RehearsalScreen.From.Event` ปุ่มต่อไปเป็น REHEARSE) / `Sectional` (`RunState.RehearseAll` ร้านใช้ตัวเดียวกันแล้ว) / `FullLife` / ไม่มีดาวเหลือให้ = +15 เงินแบบทางเดิม
+- ป้ายของที่ได้ (ข้อ ก `EventChoice.RewardTag` `EventList.TagOf`) : ป้ายทึบขวาสุดบอกของที่ได้ (STAR / 2 STARS / GIFT / RARE GIFT / +25 SHARDS / +25 LIFE / FULL LIFE / +1 STAR EACH / ELITE FIGHT) ป้ายเส้นทางซ้ายบอกราคา (CHECK / COSTS ... SHARDS / COSTS ... LIFE) / ชี้ที่ทางแล้วป้ายเปลี่ยนเป็นสีเข้มตามแผ่นหมึก (`Ui.Tag` แบบมีค่า ink) / ทางที่ไม่ได้อะไรไม่มีป้าย / ทางลุ้นบอกของตอนผ่าน
+- หน้าซ้อมหลายดาว (ข้อ ค MORE STARS) : หัว "A LESSON ON THE ROAD" / "Rehearse two moves" ให้ดาวแรกแล้วหน้าอยู่ต่อเป็น "Rehearse one more move" แล้วไปห้องถัดไป
+- คำใหม่ `Words.Stars` `Words.RareGift` `Words.EliteFight` / ตัวเลข `BattleRules` หัวข้อ Event Checks : `EventLifeCost` 0.35 `EventLifeCostBig` 0.5 `EventStars` 2 / `docs/TACET_Balance.xlsx` แท็บ Economy เพิ่ม 3 แถว
+- ไม่แก้ : A LOST SCORE / A CRACKED BOW / ทางลุ้นพลาดเดิม / ทางจ่ายเงินเดิม (รอ G)
+- เจอระหว่างทำ : ชื่อหน้าแคป `eventchair` เปิด A CRACKED BOW มาตั้งแต่ขั้น 13 (มีเหตุการณ์ต่อท้ายเพิ่ม) แก้ให้เปิด THE EMPTY CHAIR แล้ว / เกมเซฟตอนเดินเข้าห้อง (`RunFlow` `SaveFile.SaveRun`) ออกจากเกมกลางเหตุการณ์หรือบนหน้าซ้อมของเหตุการณ์ แล้ว CONTINUE จะเริ่มเหตุการณ์ใหม่พร้อมเลือดเดิม เป็นแบบนี้มาก่อนแล้วกับทุกทาง ไม่ได้แก้
+
+### 28.9 ทดสอบในแชท cloud
+- build 0 error 0 warning / turncheck 201/201 (ข้อใหม่ 7 ข้อใน `Core/DebugShots.TurnEvents.cs` : life price, life pay, life pay rest, life not enough, sectional, risky ways, reward tags) / savecheck 43/43 (ข้อ `event` ยังโหลดเหตุการณ์ได้ เซฟเก็บแค่ลำดับเหตุการณ์)
+- ภาพ (ชื่อหน้าใหม่ `event0` ถึง `event9` = เหตุการณ์ตามลำดับ `EventList.All` / `eventpaid0` ถึง `eventpaid9` = กดทางที่ 3 / `rehearsalevent` = หน้าซ้อม 2 ดาว เฟรม 40 ให้ดาวแรก) : `event0 1 2 5 6 8` `eventpaid0 1 8` `rehearsalevent@90` `@140` ที่ 1280×720 และ `event1` ที่ 1920×1080 ดูแล้ว ป้ายไม่ทับข้อความ
+- ตัวจำลองไม่ได้จำลองเหตุการณ์ จึงไม่ได้รัน (14.6)
+
+### 28.10 ให้ผู้ใช้ลองหลัง Rebuild
+1. เร็วสุดด้วย TEST ROOM (F2 ที่ Title คอลัมน์ EVENTS) เปิดทีละเหตุการณ์ : ป้ายราคากับป้ายของที่ได้ อ่านครั้งเดียวรู้ไหมว่าแต่ละทางจ่ายอะไร ได้อะไร
+2. ทางจ่ายเลือด : เลขบนป้ายเทียบกับ LIFE ด้านบน / หน้าผลขึ้น PAID ... LIFE / ตอนเลือดน้อยกว่าราคา ปุ่มต้องจางและกดไม่ได้
+3. A STREET MUSICIAN ทางที่ 3 : ปุ่ม REHEARSE แล้วให้ดาว 2 ดวงบนหน้าซ้อม
+4. THE SILENT AUDIENCE กับ THE EMPTY CHAIR ทางที่ 3 : ไฟต์ ELITE ชนะแล้วได้ของแบบ ELITE (ดาว GIFT เงิน)
+5. THE TEA HOUSE ทางที่ 2 : ผ่านเลือดเต็มทุกคน พลาดเสีย 10 เงิน
+
+### 28.11 ถัดไป
+- ผู้ใช้ Rebuild ลอง (28.10) / แล้วก้อน B QoL (`HANDOFF.md` 00.3 ไอริสไล่เล่นทั้งรันแล้วเสนอรายการก่อนทำ) / วิธีทำงาน 13.40 / PLAYTEST FINALE ยัง 1 PERFECT (`PlaytestSignatureNeed` ห้ามแก้จนผู้ใช้บอก)

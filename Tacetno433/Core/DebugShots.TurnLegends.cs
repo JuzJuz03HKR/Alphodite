@@ -164,6 +164,7 @@ namespace Tacetno433.Core
             report += TurnCheckNumbers();                                              // NO LIMIT (Beta1 31 Oct, numbers past 999)
             report += TurnCheckBigs();                                                 // BOSSES (Beta1 31 Oct, the named BIG ATTACKs)
             report += TurnCheckEncore();                                               // ENCORE (Beta1 1 Nov, in place of MAESTRO MODE)
+            report += TurnCheckEvents();                                               // RISKY WAYS (Beta1 1 Nov, the events)
             return report;
         }
 

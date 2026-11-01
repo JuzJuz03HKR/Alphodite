@@ -577,18 +577,25 @@ namespace Tacetno433.Core
         //Tag : a word in a small box. filled tags are for things that matter right now.
         public static void Tag(SpriteBatch sb, string text, float x, float y, bool filled, float alpha)
         {
+            Tag(sb, text, x, y, filled, alpha, 0f);
+        }
+
+        //Tag Inked : REWARD TAGS (Beta1 1 Nov), the same tag turning dark while the plate under it fills with white ink (a
+        //pointed choice on the event page). ink 0 is the plain tag, 1 the dark one.
+        public static void Tag(SpriteBatch sb, string text, float x, float y, bool filled, float alpha, float ink)
+        {
             float w = Gfx.SpacedWidth(Font, text, TextSize.Tiny, 1.5f) + 14f;
             Rectangle box = new Rectangle((int)x, (int)y, (int)w, 18);
 
             if (filled)
             {
-                Gfx.Rect(sb, box, Palette.Paper * alpha);
-                Gfx.TextSpaced(sb, Font, text, box.X + 7, box.Y + 3, Palette.Ink * alpha, TextSize.Tiny, 1.5f);
+                Gfx.Rect(sb, box, Color.Lerp(Palette.Paper, Palette.Ink, ink) * alpha);
+                Gfx.TextSpaced(sb, Font, text, box.X + 7, box.Y + 3, Color.Lerp(Palette.Ink, Palette.Paper, ink) * alpha, TextSize.Tiny, 1.5f);
             }
             else
             {
-                Gfx.RectOutline(sb, box, Palette.LineGrey * alpha, 1);
-                Gfx.TextSpaced(sb, Font, text, box.X + 7, box.Y + 3, Palette.PaperDim * alpha, TextSize.Tiny, 1.5f);
+                Gfx.RectOutline(sb, box, Color.Lerp(Palette.LineGrey, Palette.InkSoft, ink) * alpha, 1);
+                Gfx.TextSpaced(sb, Font, text, box.X + 7, box.Y + 3, Color.Lerp(Palette.PaperDim, Palette.InkSoft, ink) * alpha, TextSize.Tiny, 1.5f);
             }
         }
 

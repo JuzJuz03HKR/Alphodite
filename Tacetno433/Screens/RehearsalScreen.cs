@@ -17,10 +17,13 @@ namespace Tacetno433.Screens
     //   it does in one line.
     //   A click (or the arrows and ENTER) gives the star, it fills in the musician's colour and the page moves on by itself.
     //Opened by the result page after a win (an ELITE's or a BOSS's motif comes after it) and by the rest stop (REHEARSE).
+    //RISKY WAYS (Beta1 1 Nov, docs/BETA1_DIRECTION.md 28) : and by an event's way that gives more than one star. The page stays
+    //for each of them (MORE STARS), the player picks the moves.
     //Its look is a first one : the VFX of a new star and of a legend wait for the user's references (16.14 point 5).
     public class RehearsalScreen : GameScreen
     {
-        public enum From { Fight, Rest, Wings }                  // Wings : THE WINGS (BOSSES), back to its room after the star
+        public enum From { Fight, Rest, Wings, Event }           // Wings : THE WINGS (BOSSES), back to its room after the star
+                                                                 // Event : RISKY WAYS, an event's stars, then the next stage
 
         //Rehearsal Layout
         public const float LineWidth = 340f;            // the legends' lines are wrapped to this (RehearsalList.PrepareText)
@@ -57,10 +60,18 @@ namespace Tacetno433.Screens
         private Vector2 lastMouse;
         private string over = "";
         private string doneLine = "";
+        private string title = "";
+        private int starsLeft = 1;                      // MORE STARS : the stars still to give on this page
+        private int starsGiven;
 
-        public RehearsalScreen(From from)
+        public RehearsalScreen(From from) : this(from, 1)
+        {
+        }
+
+        public RehearsalScreen(From from, int stars)
         {
             this.from = from;
+            starsLeft = Math.Max(1, stars);
         }
 
         //Wipe Word : the page's name in the wipe on the way here (WIPE WORD)
@@ -74,7 +85,7 @@ namespace Tacetno433.Screens
             RunState run = Game.CurrentRun;
             if (from == From.Fight) run.RehearsalPending = false;                         // the win's star is picked here
             band = run.Lineup();
-            over = from == From.Fight ? "AFTER THE CONCERT" : "A QUIET ROOM";
+            over = from == From.Fight ? "AFTER THE CONCERT" : (from == From.Event ? "A LESSON ON THE ROAD" : "A QUIET ROOM");
 
             int count = band.Count;
             faces = new Rectangle[count];
@@ -102,6 +113,7 @@ namespace Tacetno433.Screens
             }
 
             anyLeft = run.AnyStarLeft;
+            title = Title();
             for (int i = 0; i < n && selected < 0; i++)
                 if (can[i]) selected = i;
             lastMouse = Input.MousePos;
@@ -145,14 +157,18 @@ namespace Tacetno433.Screens
                 lift[i] = MathHelper.Clamp(lift[i] + (up ? dt : -dt) / BattleRules.UiHoverTime, 0f, 1f);
             }
 
-            //Leaving : the new star has a moment on its own first
+            //Leaving : the new star has a moment on its own first, then the next star (MORE STARS) or the way on
             if (picked >= 0)
             {
                 pickTime += dt;
                 if (pickTime > LeaveAfter && !gone)
                 {
-                    gone = true;
-                    GoOn();
+                    if (starsLeft > 1 && Game.CurrentRun.AnyStarLeft) NextStar();
+                    else
+                    {
+                        gone = true;
+                        GoOn();
+                    }
                 }
                 return;
             }
@@ -216,6 +232,36 @@ namespace Tacetno433.Screens
         }
 
         private static readonly string[] StarWords = { "", "1 STAR", "2 STARS", "3 STARS" };
+
+        //Next Star : MORE STARS (RISKY WAYS, an event's), the page stays. The picked column's words are made again from its new
+        //stars, and the pointer goes to a move that can still take one.
+        private void NextStar()
+        {
+            RunState run = Game.CurrentRun;
+            starsLeft--;
+            starsGiven++;
+            Words(run, picked / RehearsalList.Buttons);
+            picked = -1;
+            pickTime = 0f;
+            doneLine = "";
+            anyLeft = run.AnyStarLeft;
+            title = Title();
+            if (selected < 0 || !can[selected])
+            {
+                selected = -1;
+                for (int i = 0; i < can.Length && selected < 0; i++)
+                    if (can[i]) selected = i;
+            }
+        }
+
+        //Title : the heading, made when the stars change (never in Draw)
+        private string Title()
+        {
+            if (!anyLeft) return "Every move has its three stars";
+            if (starsLeft == 2) return "Rehearse two moves";
+            if (starsLeft > 2) return "Rehearse " + starsLeft + " moves";
+            return starsGiven > 0 ? "Rehearse one more move" : "Rehearse one move";
+        }
 
         //Go On : an ELITE's or a BOSS's motif after the fight's star, else the next stage
         private void GoOn()
@@ -311,7 +357,7 @@ namespace Tacetno433.Screens
             float head = UiMotion.Between(time, 0.05f, BattleRules.UiEnterTime);
             float rise = (1f - head) * BattleRules.UiEnterSlide;
             Gfx.TextSpacedCentered(sb, Game.Font, over, cx, 74 - rise, Palette.LineGrey * head, TextSize.Tiny, 5f);
-            Gfx.TextCentered(sb, Game.BigFont, anyLeft ? "Rehearse one move" : "Every move has its three stars", cx, 112 - rise, Palette.Paper * head, TextSize.Title);
+            Gfx.TextCentered(sb, Game.BigFont, title, cx, 112 - rise, Palette.Paper * head, TextSize.Title);
             Gfx.TextCentered(sb, Game.StoryFont, "It gets a star. Three stars make it a legend.", cx, 146 - rise, Palette.PaperDim * head, TextSize.Story);
 
             for (int c = 0; c < faces.Length; c++) DrawLegend(sb, c);

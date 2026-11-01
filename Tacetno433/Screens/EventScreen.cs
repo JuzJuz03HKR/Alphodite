@@ -67,6 +67,9 @@ namespace Tacetno433.Screens
         private string rewardLabel = "";
         private string outcomeWrapped = "";
         private string stageLine = "";
+        private string[] costTags = { "", "", "", "" };   // what each way costs : a check, shards, or the band's life (RISKY WAYS)
+        private string paidLabel = "";                    // RISKY WAYS : "PAID 48 LIFE" on the result
+        private int starsToGive;                          // RISKY WAYS : stars given on the rehearsal page after this one
         private int[] cardChances = new int[16];
         private float phaseTimer;
         private float time;
@@ -84,6 +87,13 @@ namespace Tacetno433.Screens
 
             stageLine = "UNKNOWN PATH   /   " + run.StageLabel;
             phase = Phase.Read;
+
+            //Price Tags : made once here, because a price in life is the band's own number (RISKY WAYS)
+            for (int i = 0; i < ev.Choices.Length && i < costTags.Length; i++)
+            {
+                EventChoice c = ev.Choices[i];
+                costTags[i] = c.LifeCost > 0f ? "COSTS " + run.LifeCostOf(c.LifeCost) + " " + BattleRules.LifeWord : c.HintLabel;
+            }
             SoundBank.Play(Sfx.PageTurn);
             SoundBank.PlayMusic(Music.Event);
 
@@ -109,9 +119,12 @@ namespace Tacetno433.Screens
             return new Rectangle(x, pickPanel.Y + 74, w, 170);
         }
 
+        //Can Take : enough shards, and for a way paid in life more life than its price (RISKY WAYS)
         private bool CanTake(EventChoice c)
         {
-            return Game.CurrentRun.Shards >= c.ShardCost;
+            RunState run = Game.CurrentRun;
+            if (run.Shards < c.ShardCost) return false;
+            return c.LifeCost <= 0f || run.CanPayLife(c.LifeCost);
         }
 
         public override void Update(float dt)
@@ -215,6 +228,7 @@ namespace Tacetno433.Screens
             }
 
             run.SpendShards(c.ShardCost);
+            if (c.LifeCost > 0f) paidLabel = "PAID " + run.PayLife(c.LifeCost) + " " + BattleRules.LifeWord;    // RISKY WAYS
             resultWord = "";
             rollLabel = "";
             Finish(c.Win, c.WinAmount, c.WinWrapped);
@@ -280,6 +294,40 @@ namespace Tacetno433.Screens
                 return "A FIGHT BEGINS";
             }
 
+            //Stars : RISKY WAYS, the player gives them to moves on the rehearsal page that comes next (RehearsalScreen.From.Event)
+            if (reward == Reward.Stars)
+            {
+                if (!run.AnyStarLeft)
+                {
+                    run.AddShards(BattleRules.SkipMotifShards);
+                    return "ALREADY AT THEIR BEST  /  +" + BattleRules.SkipMotifShards + " SHARDS";
+                }
+                starsToGive = amount;
+                return amount + " " + Words.Stars + "  /  CHOOSE THE MOVES NEXT";
+            }
+
+            //Sectional : RISKY WAYS, a star on every ATTACK of the band, like the shop's SECTIONAL
+            if (reward == Reward.Sectional)
+            {
+                int raised = run.RehearseAll();
+                if (raised == 0)
+                {
+                    run.AddShards(BattleRules.SkipMotifShards);
+                    return "ALREADY AT THEIR BEST  /  +" + BattleRules.SkipMotifShards + " SHARDS";
+                }
+                run.RefreshLabels();
+                SoundBank.Play(Sfx.Rehearse);
+                return (raised == run.Roster.Count ? "EVERY " + Words.Attack : raised + " " + Words.Attack + "S") + "  +1 " + Words.Star;
+            }
+
+            //Full Life : RISKY WAYS, every musician's life back to full
+            if (reward == Reward.FullLife)
+            {
+                int before = run.BandLife();
+                run.RestoreAllStamina();
+                return "FULL " + BattleRules.LifeWord + "  /  " + NumberText.Signed(run.BandLife() - before);
+            }
+
             return "NOTHING CHANGES";
         }
 
@@ -294,6 +342,13 @@ namespace Tacetno433.Screens
                 run.BeginBattle();
                 SaveFile.SaveRun(run);
                 Game.Screens.Change(RunFlow.FightScreen());
+                return;
+            }
+
+            //RISKY WAYS : the stars first, the rehearsal page goes on to the next stage after them
+            if (starsToGive > 0)
+            {
+                Game.Screens.Change(new RehearsalScreen(RehearsalScreen.From.Event, starsToGive));
                 return;
             }
 
@@ -423,10 +478,19 @@ namespace Tacetno433.Screens
                 Gfx.Text(sb, Game.BigFont, numerals[i], r.X + 24, r.Y + 10, Color.Lerp(Palette.PaperDim, Palette.InkSoft, e) * a, TextSize.Small);
                 Gfx.Text(sb, Game.StoryFont, c.Text, r.X + 70, r.Y + 15, text * a, TextSize.Story);
 
-                if (c.HintLabel.Length > 0)
+                //Tags : from the right edge, what the way gives (REWARD TAGS, filled), then what it costs (a check, shards, life).
+                //They turn dark with the words while the plate fills with ink.
+                float tx = r.Right - Ui.Slant - 14;
+                if (c.RewardTag.Length > 0)
                 {
-                    float tw = Ui.TagWidth(c.HintLabel);
-                    Ui.Tag(sb, c.HintLabel, r.Right - Ui.Slant - tw - 14, r.Y + 18, c.Check, a);
+                    tx -= Ui.TagWidth(c.RewardTag);
+                    Ui.Tag(sb, c.RewardTag, tx, r.Y + 18, true, a, e);
+                    tx -= 8;
+                }
+                if (costTags[i].Length > 0)
+                {
+                    tx -= Ui.TagWidth(costTags[i]);
+                    Ui.Tag(sb, costTags[i], tx, r.Y + 18, false, a, e);
                 }
 
                 Ui.KeyChipRight(sb, NumberText.Get(i + 1), ChoiceRect(i).X - 8, r.Center.Y, Palette.LineGrey * a);
@@ -498,6 +562,11 @@ namespace Tacetno433.Screens
                 Gfx.TextSpaced(sb, Game.Font, rollLabel, TextX + Ui.TagWidth(resultWord) + 14, y + 3, Palette.PaperDim * a, TextSize.Tiny, 2f);
                 y += 34;
             }
+            else if (paidLabel.Length > 0)
+            {
+                Ui.Tag(sb, paidLabel, TextX, y, false, a);                                // RISKY WAYS : what the way cost
+                y += 34;
+            }
 
             Gfx.Text(sb, Game.StoryFont, outcomeWrapped, TextX, y, Palette.Paper * a, TextSize.Story);
             y += 70;
@@ -511,7 +580,7 @@ namespace Tacetno433.Screens
             if (gotMotif != null)
                 Gfx.Text(sb, Game.StoryFont, gotMotif.TipWrapped, TextX + 56, y + 62, Palette.PaperDim * line, TextSize.StorySmall);
 
-            string label = startFight ? "FACE IT" : "CONTINUE";
+            string label = startFight ? "FACE IT" : (starsToGive > 0 ? "REHEARSE" : "CONTINUE");
             float button = UiMotion.Between(phaseTimer, 0.3f, BattleRules.UiEnterTime);
             Ui.Command(sb, continueButton, label, "ENTER", continueMotion, button, false);
         }

@@ -932,6 +932,14 @@
         public static int CheckPerPower = 5;         // each point of power adds this many percent
         public static int CheckFamilyBonus = 25;     // the family the check asks for adds this
 
+        //RISKY WAYS (Beta1 1 Nov, docs/BETA1_DIRECTION.md 28, the user picked 35 and 50 percent) : the one way of an event that
+        //costs more and gives more, paid in life. The price is the same share of every musician's full life, added up for the
+        //band on the button, and only a band with more life than that can pay it (RunState.PayLife). A REST trades 0.4 of the
+        //life for one star, these give more for their price : the better way, and the riskier one.
+        public static float EventLifeCost = 0.35f;     // a RARE GIFT, or 2 STARS
+        public static float EventLifeCostBig = 0.5f;   // a star on every ATTACK (the shop's SECTIONAL, ShopSectionalPrice)
+        public static int EventStars = 2;              // A STREET MUSICIAN's long night
+
         //======================================================================================
         //Aim Feel (Beta1 30 Oct, block 1 item 4) : the marks that say who a move is for (Screens/BattleScreen.Marks.cs)
         //======================================================================================

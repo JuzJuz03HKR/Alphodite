@@ -1572,6 +1572,7 @@ CLEAR FIGHT (29 ต.ค.) : ชื่อหน้าใดก็ได้เต�
 TEST ROOM (31 ต.ค. `BETA1_DIRECTION.md` 22) : `testroom` หน้าเทส / `test` + ชื่อเทสใน `TestRoomScreen.Test` + ตัวเลข เช่น `testbossbig15@330` `testbosshalf6@330` `testwings@100` `testevent6@100` `testenemy13@100` `testresultwin@100` (เปลี่ยนหน้าผ่านแผ่นเฉียง แคปช้าลง) / `titletest@150` (F2 ที่ Title) / `testback@260` (F2 กลับจาก THE WINGS)
 SHARED LOOKS (1 พ.ย. `BETA1_DIRECTION.md` 24) : `battlelooks1` (ตัวที่ใช้ภาพ hush) `battlelooks2` (static) `battlelooks3` (elite) ยืนเรียงกัน เครื่องหมายขึ้นเมื่อมีไฟล์ของแบบใน `Content/Art/Battle/Enemies/`
 ENCORE (1 พ.ย. `BETA1_DIRECTION.md` 27) : ชื่อหน้าใดก็ได้เติม `encore` ท้าย = หน้าเดิมแต่ THE UNHEARING ชนะ ENCORE 1 แล้ว THE METRONOME ชนะรันแรก FANNY ยังไม่เคย และรันอยู่ ENCORE 2 เช่น `galleryencore` `detailencore` `curtainwinencore` `routeencore` / หน้าอื่นทุกหน้าถือว่ายังไม่มีใครชนะ
+RISKY WAYS (1 พ.ย. `BETA1_DIRECTION.md` 28) : `event0` ถึง `event9` = เหตุการณ์ตามลำดับ `EventList.All` (`event` = A STREET MUSICIAN `eventchair` = THE EMPTY CHAIR) / `eventpaid0` ถึง `eventpaid9` = กดทางที่ 3 ที่เฟรม 40 เช่น `eventpaid0@100` / `rehearsalevent` = หน้าซ้อม 2 ดาวของเหตุการณ์ เฟรม 40 ให้ดาวแรก (`rehearsalevent@140` = ดาวที่สอง)
 
 ```bash
 Tacetno433.exe --shots title,battle,result --out C:\pictures --scale 1.5 --steady

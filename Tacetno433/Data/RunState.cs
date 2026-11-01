@@ -505,6 +505,73 @@ namespace Tacetno433.Data
             if (MaxStamina == 0) MaxStamina = 1;          // before anybody has joined
         }
 
+        //Band Life : the life of the whole band added up, what the top bar shows
+        public int BandLife()
+        {
+            int life = 0;
+            for (int i = 0; i < Roster.Count; i++) life += LifeOf(Roster[i]);
+            return life;
+        }
+
+        //Life Cost : RISKY WAYS (Beta1 1 Nov, docs/BETA1_DIRECTION.md 28), an event's way paid in life. The price is the same
+        //share of every musician's full life, added up for the band, so the button's number reads against the top bar.
+        public int LifeCostOf(float share)
+        {
+            int cost = 0;
+            for (int i = 0; i < Roster.Count; i++) cost += (int)Math.Round(share * MaxLifeOf(Roster[i]));
+            return cost;
+        }
+
+        //Can Pay Life : only a band with more life than the price, so a band down to 1 life each never takes it for free
+        public bool CanPayLife(float share)
+        {
+            return Roster.Count > 0 && BandLife() > LifeCostOf(share);
+        }
+
+        //Pay Life : every musician pays their share first, as far as they can (nobody goes under 1 outside a fight), and what
+        //someone could not pay is paid by the one with the most life left, then the next. Returns the life paid.
+        public int PayLife(float share)
+        {
+            int price = LifeCostOf(share);
+            int paid = 0;
+            for (int i = 0; i < Roster.Count; i++)
+            {
+                Musician m = Roster[i];
+                int part = Math.Min((int)Math.Round(share * MaxLifeOf(m)), LifeOf(m) - 1);
+                if (part <= 0) continue;
+                SetLife(m, LifeOf(m) - part);
+                paid += part;
+            }
+
+            //The Rest : what someone could not pay
+            while (paid < price)
+            {
+                Musician most = null;
+                for (int i = 0; i < Roster.Count; i++)
+                    if (LifeOf(Roster[i]) > 1 && (most == null || LifeOf(Roster[i]) > LifeOf(most))) most = Roster[i];
+                if (most == null) break;
+                int part = Math.Min(price - paid, LifeOf(most) - 1);
+                SetLife(most, LifeOf(most) - part);
+                paid += part;
+            }
+            RefreshLabels();
+            return paid;
+        }
+
+        //Rehearse All : SECTIONAL, every ATTACK of the band gets a star (the shop's ware, and A TUNING FORK's RISKY WAY).
+        //A weapon at its top tier is skipped. Returns how many got one.
+        public int RehearseAll()
+        {
+            int raised = 0;
+            for (int i = 0; i < Roster.Count; i++)
+            {
+                if (!CanRehearse(Roster[i])) continue;
+                Rehearse(Roster[i]);
+                raised++;
+            }
+            return raised;
+        }
+
         //Shards : SpendShards returns false and changes nothing when there is not enough
         public void AddShards(int amount)
         {

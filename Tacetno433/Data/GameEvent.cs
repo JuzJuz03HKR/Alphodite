@@ -12,8 +12,12 @@ namespace Tacetno433.Data
         Stamina,      // Amount can be negative
         Motif,        // a random motif, Amount is the lowest rarity
         Rehearse,     // a weapon goes up one tier : the musician who took the check, or without a check the band's least trained
-        Fight         // an elite fight starts
+        Fight,        // an elite fight starts
         //THE BAND OF THREE (29 Oct) : RECRUIT and RECRUIT PART (someone joins the band) are gone, the band is picked at the start
+        //RISKY WAYS (Beta1 1 Nov, docs/BETA1_DIRECTION.md 28) : three more, made of things the band already knows
+        Stars,        // Amount stars, the player gives each one to a move on the rehearsal page (RehearsalScreen.From.Event)
+        Sectional,    // every ATTACK of the band gets a star, like the shop's SECTIONAL
+        FullLife      // every musician's life back to full
     }
 
     //EventChoice : one button on an event page.
@@ -23,10 +27,15 @@ namespace Tacetno433.Data
     //and either Win or Lose happens. The chance is
     //    CheckBase + that musician's power x CheckPerPower
     //    + CheckFamilyBonus if they belong to CheckFamily
+    //
+    //RISKY WAYS (Beta1 1 Nov, docs/BETA1_DIRECTION.md 28, the user picked them) : most events have one way that costs more and
+    //gives more, paid in life (LifeCost) or in an ELITE's fight (Reward.Fight). ShardCost and LifeCost are for the ways
+    //without a check.
     public class EventChoice
     {
         public string Text = "";             // the button
         public int ShardCost = 0;            // paid when the choice is taken, 0 for free
+        public float LifeCost = 0f;          // RISKY WAYS : paid when the choice is taken, a share of every musician's full life
 
         public bool Check = false;
         public int CheckFamily = -1;         // -1 any family helps equally, else (int)Family
@@ -41,7 +50,8 @@ namespace Tacetno433.Data
         public string LoseText = "";
 
         //Prepared Text
-        public string HintLabel = "";        // "CHECK  /  PERCUSSION"  or  "COSTS 30 SHARDS"
+        public string HintLabel = "";        // "CHECK  /  PERCUSSION"  or  "COSTS 30 SHARDS" (a price in life : EventScreen.Load)
+        public string RewardTag = "";        // REWARD TAGS : what the way gives, "RARE GIFT"  or  "+25 SHARDS" (a check : its success)
         public string WinWrapped = "";
         public string LoseWrapped = "";
     }
@@ -75,8 +85,9 @@ namespace Tacetno433.Data
                                       Lose = Reward.Stamina, LoseAmount = -12, LoseText = BattleRules.TurnBattleOn ? "It snaps at the fingers. The band gets hurt trying to hold the tempo." : "It snaps at the fingers. The band loses its breath trying to hold the tempo." },
                     new EventChoice { Text = "Smash it and sell the brass",
                                       Win = Reward.Shards, WinAmount = 25, WinText = "The brass is worth something. The silence it leaves behind is not." },
-                    new EventChoice { Text = "Leave it ticking",
-                                      Win = Reward.Nothing, WinText = "You close the door softly. It keeps skipping behind you." },
+                    //RISKY WAYS (1 Nov) : forced by hand instead of mended, a sure price for the better gift (was : Leave it ticking)
+                    new EventChoice { Text = "Wind it by hand until it holds", LifeCost = BattleRules.EventLifeCost,
+                                      Win = Reward.Motif, WinAmount = 3, WinText = "It bites every hand that holds it. Then it ticks true, and something bright drops out of its case." },
                 }
             },
 
@@ -93,8 +104,9 @@ namespace Tacetno433.Data
                     new EventChoice { Text = "Play along with them", Check = true, CheckFamily = (int)Family.String, CheckBase = 30,
                                       Win = Reward.Rehearse, WinText = "The duet teaches your player something new.",
                                       Lose = Reward.Stamina, LoseAmount = -10, LoseText = "You fall out of step. It is tiring to be out of step." },
-                    new EventChoice { Text = "Drop a coin and move on", ShardCost = 10,
-                                      Win = Reward.Stamina, WinAmount = 18, WinText = "Their song follows you down the street and lifts the whole band." },
+                    //RISKY WAYS (1 Nov) : stars all three ways, paid in shards, in luck, or in a whole night (was : Drop a coin and move on)
+                    new EventChoice { Text = "Play with them until dawn", LifeCost = BattleRules.EventLifeCost,
+                                      Win = Reward.Stars, WinAmount = BattleRules.EventStars, WinText = "By morning nobody can stand, and nobody has ever played better." },
                 }
             },
 
@@ -111,6 +123,9 @@ namespace Tacetno433.Data
                                       Lose = Reward.Stamina, LoseAmount = -15, LoseText = "The silence swallows every note. The band walks off drained." },
                     new EventChoice { Text = "Bow, and leave quietly",
                                       Win = Reward.Stamina, WinAmount = 10, WinText = "A small rest in the dark does the band good." },
+                    //RISKY WAYS (1 Nov) : a faceless hall that waits in silence is TACET's, and a sound loud enough wakes it
+                    new EventChoice { Text = "Play loud enough to wake them",
+                                      Win = Reward.Fight, WinText = "Every faceless head turns at once. This was never an audience." },
                 }
             },
 
@@ -155,8 +170,9 @@ namespace Tacetno433.Data
                 {
                     new EventChoice { Text = "Rest and drink",
                                       Win = Reward.Stamina, WinAmount = 25, WinText = "Warm tea, a quiet room. The band feels like itself again." },
-                    new EventChoice { Text = "Play for the room", Check = true, CheckBase = 20,
-                                      Win = Reward.Shards, WinAmount = 40, WinText = "The room goes quiet, then the tips come in.",
+                    //RISKY WAYS (1 Nov) : the sure small rest, or a long chance at a whole night's sleep (was : Play for the room, 40 shards)
+                    new EventChoice { Text = "Play the owner's favourite", Check = true, CheckBase = 10,
+                                      Win = Reward.FullLife, WinText = "The owner hums along, then locks the door and lets you sleep. You wake up whole.",
                                       Lose = Reward.Shards, LoseAmount = -10, LoseText = "Nobody listens. You pay for the tea after all." },
                 }
             },
@@ -177,8 +193,9 @@ namespace Tacetno433.Data
                     new EventChoice { Text = "Play it yourselves", Check = true, CheckBase = 35,
                                       Win = Reward.Rehearse, WinText = "The line is strange and beautiful. Your player keeps it.",
                                       Lose = Reward.Stamina, LoseAmount = -8, LoseText = "The part is written for someone else. It fights every note." },
-                    new EventChoice { Text = "Leave the chair empty",
-                                      Win = Reward.Stamina, WinAmount = 8, WinText = "You leave the part where it lies. The quiet of the pit is almost restful." },
+                    //RISKY WAYS (1 Nov) : the gift is bought, or fought for. Whoever was meant to play it is gone (was : Leave the chair empty)
+                    new EventChoice { Text = "Wait in the dark for its player",
+                                      Win = Reward.Fight, WinText = "Something sits down in the chair. It is not who you were waiting for." },
                 }
             },
 
@@ -213,6 +230,9 @@ namespace Tacetno433.Data
                                       Lose = Reward.Stamina, LoseAmount = -8, LoseText = "It rings far too loud. Everyone flinches." },
                     new EventChoice { Text = "Pocket it to sell",
                                       Win = Reward.Shards, WinAmount = 20, WinText = "Good steel. Somebody will pay for it." },
+                    //RISKY WAYS (1 Nov) : the note that is almost right goes through every instrument and every player
+                    new EventChoice { Text = "Tune the whole band to it", LifeCost = BattleRules.EventLifeCostBig,
+                                      Win = Reward.Sectional, WinText = "The note runs through every string and every player. It hurts, and then the whole band rings true." },
                 }
             },
 
@@ -256,9 +276,26 @@ namespace Tacetno433.Data
                     else if (ch.ShardCost > 0)
                         ch.HintLabel = "COSTS " + ch.ShardCost + " SHARDS";
                     else
-                        ch.HintLabel = "";
+                        ch.HintLabel = "";                // RISKY WAYS : a price in life is the band's own number, EventScreen.Load makes it
+                    ch.RewardTag = TagOf(ch.Win, ch.WinAmount);
                 }
             }
+        }
+
+        //Reward Tag : REWARD TAGS (Beta1 1 Nov, docs/BETA1_DIRECTION.md 28, the user picked it), what a way gives in the words of
+        //the map (A2), so a player sees it before taking it. A check shows what its success gives, a way that gives nothing no tag.
+        private static string TagOf(Reward reward, int amount)
+        {
+            string signed = amount > 0 ? "+" + amount : (amount < 0 ? "-" + (-amount) : "0");
+            if (reward == Reward.Shards) return signed + " " + Words.Shards;
+            if (reward == Reward.Stamina) return signed + " " + BattleRules.LifeWord;
+            if (reward == Reward.Motif) return amount >= 3 ? Words.RareGift : Words.Gift;
+            if (reward == Reward.Rehearse) return Words.Star;
+            if (reward == Reward.Stars) return amount + " " + Words.Stars;
+            if (reward == Reward.Sectional) return "+1 " + Words.Star + " EACH";
+            if (reward == Reward.FullLife) return "FULL " + BattleRules.LifeWord;
+            if (reward == Reward.Fight) return Words.EliteFight;
+            return "";
         }
 
         //Event Pick : any event, but never the same one twice in a row

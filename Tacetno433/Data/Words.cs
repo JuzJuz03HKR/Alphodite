@@ -58,6 +58,9 @@ namespace Tacetno433.Data
         public const string Shards = "SHARDS";
         public const string Star = "STAR";            // REHEARSAL : one star for one button of the band (a won fight, the WORKSHOP, a REST)
         public const string Gift = "GIFT";            // MOTIF in the code : what an ELITE, a TREASURE or a boss leaves
+        public const string Stars = "STARS";          //   more than one STAR (RISKY WAYS, 1 Nov : A STREET MUSICIAN's 2 STARS)
+        public const string RareGift = "RARE GIFT";   // RISKY WAYS (Beta1 1 Nov) : a gift of the top rarity (3), an event's way paid in life
+        public const string EliteFight = "ELITE FIGHT"; // RISKY WAYS : an event's way that turns the place into an ELITE's fight
 
         //======================================================================================
         //Lines : what each word does, shown after "WORD = ". Plain words, one short line, the numbers from BattleRules.

@@ -717,6 +717,18 @@ namespace Tacetno433.Core
             return alike;
         }
 
+        //Event Shot : which event a page name opens. event is A STREET MUSICIAN, eventchair THE EMPTY CHAIR (until 1 Nov it took
+        //the last event, A CRACKED BOW since step 13), event0 to event9 the one at that place in EventList.All, eventpaid0 to
+        //eventpaid9 the same with its third way taken (RISKY WAYS, 1 Nov)
+        private static int EventShot(string name)
+        {
+            if (name == "eventchair") return 6;
+            int index;
+            if (name.StartsWith("eventpaid") && int.TryParse(name.Substring(9), out index) && index >= 0 && index < EventList.All.Length) return index;
+            if (name.Length > 5 && int.TryParse(name.Substring(5), out index) && index >= 0 && index < EventList.All.Length) return index;
+            return 1;
+        }
+
         private static string Same(string what, string saved, string loaded)
         {
             return (saved == loaded ? "PASS  " : "FAIL  ") + what.PadRight(16) + saved + "   ->   " + loaded + "\r\n";
@@ -953,6 +965,8 @@ namespace Tacetno433.Core
             if (names[index] == "rewardpick" && frames == 72) Input.PretendPress = Keys.Enter;            // Beta1 round 1 : the picked card
             if (names[index] == "shopbuy" && frames == 30) Input.PretendClick = true;                     //   a motif bought, on its way up
             if (names[index] == "luthierdone" && frames == 30) Input.PretendClick = true;                 // 29 Oct : the middle weapon sharpened
+            if (names[index].StartsWith("eventpaid") && frames == 40) Input.PretendPress = Keys.D3;      // RISKY WAYS (1 Nov) : the third way taken
+            if (names[index] == "rehearsalevent" && frames == 40) Input.PretendPress = Keys.Enter;       //   the first of the two stars given (MORE STARS)
             if (names[index] == "gallerywalk" && frames == 40) Input.PretendPress = Keys.Enter;          // Beta1 round 2 : stepping inside a painting
             if (names[index] == "routedive" && frames == 40) Input.PretendPress = Keys.Enter;            //   the camera diving into the chosen place
             if (names[index] == "detailswap" && frames == 34) Input.PretendPress = Keys.Right;           //   the next profile
@@ -1032,7 +1046,7 @@ namespace Tacetno433.Core
         //       duel duelcombo duelboss duelcutin duelpause dueldouble dueltremolo duelfermata duelfire duelrepeat finale
         //       result defeat reward shop shopleave event eventchair rest curtain curtainwin
         //       rewardpick rewardtilt shopbuy (Beta1 round 1 : a card picked, the pointed card leaning, a motif bought, e.g. rewardpick@80)
-        //       battle battleswing battleskill battleparry battlestatus (Alpha 7, use a few frames, e.g. battleswing@2) battlewin battlelose (Beta1, TACET's dark) battleslash battleshot battlesmash battlecross battleink (Beta1, one blow, e.g. battleslash@4) battlecutin battlekill battlebolt battleboltsoft battleimpact (Beta1 round 6) battlekit (THE FIVE KITS, 29 Oct : the SHIELD and LESSON tags, the new moves' words) battlemoves (ENEMY MOVES, 30 Oct : CHARGE, GUARD and the charged blow over the enemies) battlestars (REHEARSAL, 31 Oct : stars on the commands, a legend's name) battleaim battlepick battleheal battletip battlechakram (MARKS AND AIM, 30 Oct : the skill card, the rings, the marks on friends, an icon's line) battlefriend (FRIEND PICK, 31 Oct : the friends a skill for one friend can go to, over the commands) battlegift (GIFTS, 31 Oct : three gifts' names popping) rehearsal rehearsalrest (REHEARSAL, 31 Oct : the star after a win, from the rest stop) battleshield battlelong (31 Oct : SHIELD's friend cards, the band's longest move names) battlebig battlebigturn (NO LIMIT, 31 Oct : numbers past 999 in the plan and in a turn's TURN TOTAL) battlelooks1 battlelooks2 battlelooks3 (SHARED LOOKS, 1 Nov : the enemies that wear one picture side by side)
+        //       battle battleswing battleskill battleparry battlestatus (Alpha 7, use a few frames, e.g. battleswing@2) battlewin battlelose (Beta1, TACET's dark) battleslash battleshot battlesmash battlecross battleink (Beta1, one blow, e.g. battleslash@4) battlecutin battlekill battlebolt battleboltsoft battleimpact (Beta1 round 6) battlekit (THE FIVE KITS, 29 Oct : the SHIELD and LESSON tags, the new moves' words) battlemoves (ENEMY MOVES, 30 Oct : CHARGE, GUARD and the charged blow over the enemies) battlestars (REHEARSAL, 31 Oct : stars on the commands, a legend's name) battleaim battlepick battleheal battletip battlechakram (MARKS AND AIM, 30 Oct : the skill card, the rings, the marks on friends, an icon's line) battlefriend (FRIEND PICK, 31 Oct : the friends a skill for one friend can go to, over the commands) battlegift (GIFTS, 31 Oct : three gifts' names popping) rehearsal rehearsalrest (REHEARSAL, 31 Oct : the star after a win, from the rest stop) rehearsalevent event0 to event9 eventpaid0 to eventpaid9 (RISKY WAYS, 1 Nov : an event's two stars, each event by its place in EventList.All, its third way taken) battleshield battlelong (31 Oct : SHIELD's friend cards, the band's longest move names) battlebig battlebigturn (NO LIMIT, 31 Oct : numbers past 999 in the plan and in a turn's TURN TOTAL) battlelooks1 battlelooks2 battlelooks3 (SHARED LOOKS, 1 Nov : the enemies that wear one picture side by side)
         //       teampick teampickfull luthier treasure rewardboss battletier (29 Oct : THE AUDITION empty and with three picked, the
         //       luthier, a chest, the boss's great upgrade with REFORGE, a tier III blow e.g. battletier@4)
         //       practice practiceskill practicesig (Alpha 7, the tutorial's practice fight, e.g. practice@60)
@@ -1102,9 +1116,10 @@ namespace Tacetno433.Core
             if (name == "luthier" || name == "luthierdone") screen = new LuthierScreen();   // 29 Oct : the luthier, the chest, the boss's great upgrade
             if (name == "treasure") screen = new MotifRewardScreen(MotifRewardScreen.Kind.Treasure);
             if (name == "rewardboss") screen = new MotifRewardScreen();
-            if (name == "rehearsal" || name == "rehearsalrest" || name == "battlestars") SampleStars(game.CurrentRun);   // REHEARSAL (31 Oct)
+            if (name == "rehearsal" || name == "rehearsalrest" || name == "rehearsalevent" || name == "battlestars") SampleStars(game.CurrentRun);   // REHEARSAL (31 Oct)
             if (name == "rehearsal") screen = new RehearsalScreen(RehearsalScreen.From.Fight);
             if (name == "rehearsalrest") screen = new RehearsalScreen(RehearsalScreen.From.Rest);
+            if (name == "rehearsalevent") screen = new RehearsalScreen(RehearsalScreen.From.Event, BattleRules.EventStars);   // RISKY WAYS (1 Nov) : two stars
             if (name == "bandname") screen = new BandNameScreen();
             if (name.StartsWith("route") || name.StartsWith("pause") || name.StartsWith("wipe") || name.StartsWith("sweep")) screen = new RouteScreen();
             if (name == "view" || name == "band") screen = new BandScreen();
@@ -1201,7 +1216,7 @@ namespace Tacetno433.Core
                 run.AddMotif(MotifList.Get(MotifId.SpareStrings));
                 run.AddShards(120);
                 if (run.Roster.Count > 0) run.Rehearse(run.Roster[0]);                // the audition (teampick) has nobody yet
-                run.CurrentEvent = EventList.All[name == "eventchair" ? EventList.All.Length - 1 : 1];   // eventchair : THE EMPTY CHAIR
+                run.CurrentEvent = EventList.All[EventShot(name)];
                 run.BattlesWon = 6;
                 run.PerfectsTotal = 23;
                 run.BestCombo = 5;

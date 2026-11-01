@@ -394,7 +394,7 @@ namespace Tacetno433.Screens
             }
             else if (w.Kind == WareKind.Sectional)
             {
-                for (int i = 0; i < run.Roster.Count; i++) run.Rehearse(run.Roster[i]);
+                run.RehearseAll();
                 SoundBank.Play(Sfx.Rehearse);
                 Fly(row, RunHud.BandAt);
             }
