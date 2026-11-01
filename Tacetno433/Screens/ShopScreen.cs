@@ -260,6 +260,8 @@ namespace Tacetno433.Screens
         }
 
         //Say : the shopkeeper's line, wrapped once when it changes
+        private readonly WordSet lineWords = new WordSet();     // WORDS EVERYWHERE : the rule words of the line, under it once it is out
+
         private void Say(string text)
         {
             if (text == line) return;
@@ -267,6 +269,7 @@ namespace Tacetno433.Screens
             lineWrapped = Gfx.WrapText(Game.StoryFont, text, dialogueBox.Width - 60, TextSize.Story);
             lineRows = lineWrapped.Split('\n');
             lineAge = 0f;
+            lineWords.Find(text);
         }
 
         private Rectangle RowRect(int row)
@@ -627,6 +630,14 @@ namespace Tacetno433.Screens
             {
                 float bob = (float)Math.Sin(time * 5f) * 3f;
                 Gfx.Triangle(sb, box.Right - 26, box.Bottom - 20 + bob, 6, false, Palette.Paper * a);
+
+                //WORDS EVERYWHERE : what the line's rule words do, under it, as many rows as the box still holds
+                if (lineWords.Count > 0)
+                {
+                    float wy = y + lineRows.Length * rowH + 8f;
+                    int rows = (int)((box.Bottom - 8 - wy) / Ui.WordStep);
+                    if (rows > 0) Ui.WordRows(sb, lineWords, rows, x, wy, a);
+                }
             }
         }
     }

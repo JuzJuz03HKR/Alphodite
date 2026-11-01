@@ -90,6 +90,7 @@ namespace Tacetno433.Data
         //Prepared Text
         public string TextWrapped = "";   // for cards
         public string TipWrapped = "";    // for tooltips, a little wider
+        public readonly WordSet RuleWords = new WordSet();   // WORDS EVERYWHERE (1 Nov) : its rule words, for the cards and the tooltip
         public string RarityLabel = "";
         public string ForLabel = "";      // GIFTS : "PAGANINI" or "THE BAND", under its icon
         public string WareLabel = "";     // GIFTS : "PAGANINI  /  RARE" on the shop's shelf
@@ -293,6 +294,7 @@ namespace Tacetno433.Data
                 m.WareLabel = m.ForLabel + "  /  " + m.RarityLabel;
                 m.TextWrapped = Gfx.WrapText(storyFont, text, cardWidth, TextSize.StorySmall, 4);
                 m.TipWrapped = Gfx.WrapText(storyFont, "FOR " + m.ForLabel + ".  " + text, tipWidth, TextSize.StorySmall);
+                m.RuleWords.Find(text);                                                        // WORDS EVERYWHERE
 
                 //Initials : the first letters of the first two words, or the first two letters of one word ("THE" left out).
                 //A motif can set its own when two would come out the same (COUNTERPOINT "CP", not CODA's "CO").

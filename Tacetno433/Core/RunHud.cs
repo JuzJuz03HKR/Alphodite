@@ -98,7 +98,7 @@ namespace Tacetno433.Core
         {
             if (hoverMotif < 0 || hoverMotif >= run.Motifs.Count) return;
             Motif m = run.Motifs[hoverMotif];
-            Ui.Tooltip(sb, m.Name, m.TipWrapped, Input.MousePos.X, Input.MousePos.Y);
+            Ui.Tooltip(sb, m.Name, m.TipWrapped, Input.MousePos.X, Input.MousePos.Y, m.RuleWords);   // WORDS EVERYWHERE : its rule words under it
         }
 
         //Track : the stages of this floor as diamonds on a line. Behind you, you, ahead,

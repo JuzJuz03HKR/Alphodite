@@ -668,13 +668,62 @@ namespace Tacetno433.Core
             }
         }
 
+        //WORDS EVERYWHERE (Beta1 1 Nov, docs/BETA1_DIRECTION.md 29 item 1) : rule words with what they do, wherever a rule
+        //word shows outside the fight (the audition, the profile, the gifts, the rehearsal, the shop, the gift badges). The
+        //look of the fight's skill card (BattleScreen.Marks) : the word bright, "=  what it does" dim, one row each.
+        //The page finds the words once (WordSet.Find), these only draw them.
+        public const int WordStep = 18;
+
+        //Word Width : the widest row, for a box or for centring the rows
+        public static float WordWidth(WordSet words)
+        {
+            float w = 0f;
+            for (int k = 0; k < words.Count; k++) w = Math.Max(w, Gfx.TextWidth(Font, Words.KeywordLines[words.Keys[k]], TextSize.Tiny));
+            return w;
+        }
+
+        //Word Rows : at most "rows" of them from x, y (fewer when the room ends)
+        public static void WordRows(SpriteBatch sb, WordSet words, int rows, float x, float y, float alpha)
+        {
+            int count = Math.Min(rows, words.Count);
+            for (int k = 0; k < count; k++)
+            {
+                string word = Words.KeywordNames[words.Keys[k]];
+                float ky = y + k * WordStep;
+                Gfx.Text(sb, Font, word, x, ky, Palette.Paper * alpha, TextSize.Tiny);
+                Gfx.Text(sb, Font, Words.KeywordRests[words.Keys[k]], x + Gfx.TextWidth(Font, word, TextSize.Tiny) + 8, ky, Palette.PaperDim * alpha, TextSize.Tiny);
+            }
+        }
+
+        //Word Rows Centred : the rows as one block centred on cx, a thin rule over them like the skill card
+        public static void WordRowsCentred(SpriteBatch sb, WordSet words, float cx, float y, float alpha)
+        {
+            if (words.Count == 0) return;
+            float w = WordWidth(words);
+            float x = cx - w / 2f;
+            Gfx.Rect(sb, x, y - 7, w, 1, Palette.LineGrey * (0.6f * alpha));
+            WordRows(sb, words, words.Count, x, y, alpha);
+        }
+
         //Tooltip : a small box next to the mouse. body should already be wrapped.
         public static void Tooltip(SpriteBatch sb, string title, string body, float x, float y)
+        {
+            Tooltip(sb, title, body, x, y, null);
+        }
+
+        //Tooltip With Words : WORDS EVERYWHERE, the rule words of the body under it (the gift badges on the run's top bar)
+        public static void Tooltip(SpriteBatch sb, string title, string body, float x, float y, WordSet words)
         {
             float w = Gfx.TextWidth(BigFont, title, TextSize.Small);
             float bodyW = Gfx.TextWidth(StoryFont, body, TextSize.StorySmall);
             if (bodyW > w) w = bodyW;
             float h = StoryFont.MeasureString(body).Y * TextSize.StorySmall;
+            int wordCount = words == null ? 0 : words.Count;
+            if (wordCount > 0)
+            {
+                w = Math.Max(w, WordWidth(words));
+                h += 14 + wordCount * WordStep;
+            }
 
             Rectangle box = new Rectangle((int)x + 16, (int)y + 16, (int)w + 28, (int)h + 54);
 
@@ -687,6 +736,12 @@ namespace Tacetno433.Core
             Ornament.DoubleFrame(sb, box, Palette.PaperDim);
             Gfx.Text(sb, BigFont, title, box.X + 14, box.Y + 10, Palette.Highlight, TextSize.Small);
             Gfx.Text(sb, StoryFont, body, box.X + 14, box.Y + 40, Palette.PaperDim, TextSize.StorySmall);
+            if (wordCount > 0)
+            {
+                float wy = box.Bottom - 12 - wordCount * WordStep;
+                Gfx.Rect(sb, box.X + 14, wy - 6, box.Width - 28, 1, Palette.LineGrey * 0.6f);
+                WordRows(sb, words, wordCount, box.X + 14, wy, 1f);
+            }
         }
 
         //Capsule Bar : a rounded bar, used for stamina everywhere

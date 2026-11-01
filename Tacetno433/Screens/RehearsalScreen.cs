@@ -47,6 +47,7 @@ namespace Tacetno433.Screens
         private string[] fromText = new string[0];
         private string[] toText = new string[0];
         private string[] legendText = new string[0];    // the third star's line (wrapped), "" for the first two
+        private WordSet[] cardWords = new WordSet[0];   // WORDS EVERYWHERE : the rule words of each card's next star
         private int[] stars = new int[0];
         private bool[] can = new bool[0];
         private Color[] kind = new Color[0];
@@ -96,6 +97,8 @@ namespace Tacetno433.Screens
             fromText = new string[n];
             toText = new string[n];
             legendText = new string[n];
+            cardWords = new WordSet[n];
+            for (int i = 0; i < n; i++) cardWords[i] = new WordSet();
             stars = new int[n];
             can = new bool[n];
             kind = new Color[n];
@@ -145,6 +148,7 @@ namespace Tacetno433.Screens
                 fromText[i] = RehearsalList.FromText(m, b, power);
                 toText[i] = RehearsalList.ToText(m, b, power);
                 legendText[i] = next != null ? next.LineWrapped : "";
+                cardWords[i].Find(toText[i], legendText[i]);                                   // WORDS EVERYWHERE
             }
         }
 
@@ -366,7 +370,12 @@ namespace Tacetno433.Screens
             //Foot : what was earned, or how to choose
             float foot = UiMotion.Between(time, 0.5f, BattleRules.UiEnterTime);
             if (picked >= 0) Gfx.TextSpacedCentered(sb, Game.Font, doneLine, cx, 652, BandColumn.SpotOf(band[picked / RehearsalList.Buttons]), TextSize.Label, 3f);
-            else if (anyLeft) Gfx.TextSpacedCentered(sb, Game.Font, "CLICK A MOVE   /   IT COUNTS FROM THE NEXT FIGHT", cx, 652, Palette.LineGrey * foot, TextSize.Tiny, 2f);
+            else if (anyLeft)
+            {
+                //WORDS EVERYWHERE : the pointed card's rule words under the cards, the how-to line under them
+                if (selected >= 0 && selected < cardWords.Length && can[selected]) Ui.WordRowsCentred(sb, cardWords[selected], cx, 642, foot);
+                Gfx.TextSpacedCentered(sb, Game.Font, "CLICK A MOVE   /   IT COUNTS FROM THE NEXT FIGHT", cx, 696, Palette.LineGrey * foot, TextSize.Tiny, 2f);
+            }
             else Gfx.TextSpacedCentered(sb, Game.Font, "CLICK TO GO ON", cx, 652, Palette.LineGrey * foot, TextSize.Tiny, 2f);
 
             RunHud.DrawTop(sb, run, "REHEARSAL");

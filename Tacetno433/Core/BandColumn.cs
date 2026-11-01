@@ -84,10 +84,17 @@ namespace Tacetno433.Core
             }
         }
 
-        //Skill Text : each musician's two skills explained, by MusicianList index, wrapped once for Detail (a page's Load)
+        //Skill Text : each musician's two skills explained, by MusicianList index, wrapped once for Detail (a page's Load).
+        //WORDS EVERYWHERE (1 Nov) : the rule words of their trait and skills are found here too, with how tall the skills are,
+        //so Detail can explain each word under them.
+        private static WordSet[] skillWords = new WordSet[0];
+        private static float[] skillHeight = new float[0];
+
         public static string[] SkillText(SpriteFont font)
         {
             string[] text = new string[MusicianList.All.Length];
+            skillWords = new WordSet[text.Length];
+            skillHeight = new float[text.Length];
             for (int i = 0; i < MusicianList.All.Length; i++)
             {
                 Musician m = MusicianList.All[i];
@@ -95,6 +102,9 @@ namespace Tacetno433.Core
                 Skill second = SkillList.Second(m);
                 text[i] = Gfx.WrapText(font, first.Name + " : " + first.Text, 470, TextSize.StorySmall, 2) + "\n"
                         + Gfx.WrapText(font, second.Name + " : " + second.Text, 470, TextSize.StorySmall, 2);
+                skillWords[i] = new WordSet();
+                skillWords[i].Find(m.TraitWrapped, text[i]);
+                skillHeight[i] = font.MeasureString(text[i]).Y * TextSize.StorySmall;
             }
             return text;
         }
@@ -125,6 +135,14 @@ namespace Tacetno433.Core
             Ui.Tag(sb, m.TraitName, x + 266, y, true, a);
             Gfx.Text(sb, Ui.StoryFont, m.TraitWrapped, x + 266, y + 26, Palette.Paper * a, TextSize.StorySmall);
             Gfx.Text(sb, Ui.StoryFont, skills, x + 600, y, Palette.Paper * a, TextSize.StorySmall);
+
+            //WORDS EVERYWHERE : what the rule words of the trait and the skills do, under the skills, as many as the box holds
+            if (m.Index >= 0 && m.Index < skillWords.Length && skillWords[m.Index].Count > 0)
+            {
+                float wy = y + skillHeight[m.Index] + 4;                                       // three rows fit under two skill lines
+                int rows = (int)((box.Bottom - 2 - wy) / Ui.WordStep);
+                Ui.WordRows(sb, skillWords[m.Index], rows, x + 600, wy, a);
+            }
         }
 
         //Tier Pips : WEAPON TIERS, three small diamonds, the tiers the weapon has filled

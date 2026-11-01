@@ -135,4 +135,40 @@ namespace Tacetno433.Data
             return ((int)Math.Round(part * 100f)).ToString(CultureInfo.InvariantCulture);
         }
     }
+
+    //Word Set : WORDS EVERYWHERE (Beta1 1 Nov, docs/BETA1_DIRECTION.md 29 item 1). The rule words one text uses, so a page
+    //outside the fight can show each with what it does, the way the fight's skill card does (Ui.WordRows draws them).
+    //Find runs when the text is made or changes (a page's Load, a new pointed card), never in Draw. Keys are places in
+    //Words.KeywordLines, in the order Words keeps them.
+    public sealed class WordSet
+    {
+        public const int Most = 3;                 // more than three rows would bury the thing they explain
+        public readonly int[] Keys = new int[Most];
+        public int Count;
+
+        public void Find(string text)
+        {
+            Count = Words.KeywordsIn(text, Keys, Most);
+        }
+
+        //Find Both : the words of two texts together (a musician's trait and their skills), no word twice
+        public void Find(string first, string second)
+        {
+            Count = Words.KeywordsIn(first, Keys, Most);
+            int[] more = new int[Most];
+            int found = Words.KeywordsIn(second, more, Most);
+            for (int i = 0; i < found && Count < Most; i++)
+            {
+                bool twice = false;
+                for (int k = 0; k < Count; k++) if (Keys[k] == more[i]) twice = true;
+                if (!twice) Keys[Count++] = more[i];
+            }
+            Array.Sort(Keys, 0, Count);            // the order Words keeps (BURN before STUN), whichever text had it first
+        }
+
+        public void Clear()
+        {
+            Count = 0;
+        }
+    }
 }

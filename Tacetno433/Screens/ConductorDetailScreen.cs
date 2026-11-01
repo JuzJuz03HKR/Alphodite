@@ -58,6 +58,7 @@ namespace Tacetno433.Screens
         private string nameLow = "";       //   and the rest on a second line ("" for a name that fits)
         private float nameDrop;            //   how far the column under the name steps down for that second line
         private ConductorAura[] auras = new ConductorAura[0];   // AURA : one for each conductor the arrows can show
+        private readonly WordSet ruleWords = new WordSet();     // WORDS EVERYWHERE : the rule words of the PASSIVE and the FINALE
 
         //Detail State
         private enum Phase { Arrive, Look, Leave }
@@ -98,6 +99,7 @@ namespace Tacetno433.Screens
             epithetWrapped = Gfx.WrapText(Game.StoryFont, c.Epithet, LeftW, TextSize.Story);
             storyWrapped = Gfx.WrapText(Game.StoryFont, c.Story, LeftW, TextSize.Story);
             basedOnWrapped = Gfx.WrapText(Game.StoryFont, c.BasedOn, LeftW - FaceSize - 22, TextSize.Story);
+            ruleWords.Find(c.MechanicWrapped, c.SignatureWrapped);                             // WORDS EVERYWHERE
 
             //Name Fit : long names shrink so they never run into the painting. NAME FIT : a name that would shrink to less
             //than 80% takes two lines instead, broken at the space that keeps both lines shortest (FANNY MENDELSSOHN / AND ???)
@@ -510,6 +512,13 @@ namespace Tacetno433.Screens
                 Gfx.Text(sb, Game.Font, NumberText.Get(need), sx + 70, ny, Palette.Paper * d, TextSize.Body);
                 Gfx.TextSpaced(sb, Game.Font, "PERFECT", sx + 92, ny + 5, Palette.Paper * d, TextSize.Tiny, 2f);
                 Gfx.TextSpaced(sb, Game.Font, "PERFECT HITS AND BLOCKS FILL IT", sx, ny + 32, Palette.LineGrey * d, TextSize.Tiny, 2f);
+
+                //WORDS EVERYWHERE : what the rule words of the PASSIVE and the FINALE do (STUN in LIGHTNING), under a thin rule
+                if (ruleWords.Count > 0)
+                {
+                    Gfx.Rect(sb, sx, ny + 62, RightW, 1, Palette.LineGrey * (0.35f * d));
+                    Ui.WordRows(sb, ruleWords, WordSet.Most, sx, ny + 72, d);
+                }
                 return;
             }
 

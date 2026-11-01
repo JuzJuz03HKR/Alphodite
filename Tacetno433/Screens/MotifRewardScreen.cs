@@ -42,6 +42,7 @@ namespace Tacetno433.Screens
         private Motif[] offer = new Motif[0];
 
         private Rectangle[] cards = new Rectangle[0];
+        private WordSet[] cardWords = new WordSet[0];   // WORDS EVERYWHERE : each card's rule words, found once in Load
         private int selected;
         private bool mouseOnCard;          // the mouse is over the selected card, so it leans toward it
         private int picked = -1;           // -1 until a choice is made, -2 for skipping
@@ -103,6 +104,10 @@ namespace Tacetno433.Screens
                 }
                 else offer = motifs;
             }
+
+            cardWords = new WordSet[offer.Length];
+            for (int i = 0; i < offer.Length; i++)
+                cardWords[i] = offer[i] != null ? offer[i].RuleWords : new WordSet();              // REFORGE has none
 
             cards = new Rectangle[offer.Length];
             int totalW = offer.Length * CardW + (offer.Length - 1) * CardGap;
@@ -443,7 +448,11 @@ namespace Tacetno433.Screens
             }
 
             float foot = UiMotion.Between(time, FlipStart(offer.Length) + 0.2f, BattleRules.UiEnterTime);
-            Gfx.TextCentered(sb, Game.StoryFont, "It stays with the band until the run ends. The icon shows who it is for.", cx, 594, Palette.PaperDim * foot, TextSize.StorySmall);
+
+            //WORDS EVERYWHERE : the pointed card's rule words with what they do, under the cards (the note went under the button)
+            if (picked == -1 && selected >= 0 && selected < cardWords.Length)
+                Ui.WordRowsCentred(sb, cardWords[selected], cx, 574, foot);
+            Gfx.TextCentered(sb, Game.StoryFont, "It stays with the band until the run ends. The icon shows who it is for.", cx, 692, Palette.PaperDim * foot, TextSize.StorySmall);
             float leaving = picked == -1 ? 1f : 1f - MathHelper.Clamp(leaveTimer / 0.3f, 0f, 1f);
             Ui.Command(sb, skipButton, skipLabel, "", skipMotion, foot * leaving, false);
 
