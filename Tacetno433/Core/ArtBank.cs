@@ -21,6 +21,7 @@ namespace Tacetno433.Core
     //   ConductorFace      small square face                     Art/Conductors/face_the_inferno
     //   ConductorGallery   the gallery painting only (29 Sep)    Art/Conductors/gallery_the_inferno, else the portrait
     //   CutIn              the signature picture                 Art/Conductors/cutin_the_inferno
+    //   (a conductor's file name is ConductorKey : the shown three keep a fixed one, FANNY MENDELSSOHN AND ??? is the_unsigned)
     //   Enemy              TACET's shape in a duel               Art/Enemies/enemy_hush
     //   RoutePanel         a kind of place, small and wide       Art/Route/route_shop    (230 x 142 on the route page)
     //   EventPicture       one per event                         Art/Events/event_a_street_musician
@@ -81,7 +82,7 @@ namespace Tacetno433.Core
             ConductorGallery = new Texture2D[conductors];
             for (int i = 0; i < conductors; i++)
             {
-                string key = Key(ConductorList.All[i].Name);
+                string key = ConductorKey(ConductorList.All[i]);
                 CutIn[i] = Picture(content, "Art/Conductors/cutin_" + key);
                 ConductorPortrait[i] = Picture(content, "Art/Conductors/portrait_" + key);
                 ConductorFace[i] = Picture(content, "Art/Conductors/face_" + key);
@@ -131,6 +132,13 @@ namespace Tacetno433.Core
             for (int i = 0; i < letters.Length; i++)
                 if (!char.IsLetterOrDigit(letters[i])) letters[i] = '_';
             return new string(letters);
+        }
+
+        //Conductor Key (1 Nov) : a conductor's file name. The three in the gallery have a fixed one (Conductor.FileKey), so a
+        //new name on screen never loses their pictures. The others are made from the name, "THE INFERNO" is "the_inferno".
+        public static string ConductorKey(Conductor conductor)
+        {
+            return conductor.FileKey.Length > 0 ? conductor.FileKey : Key(conductor.Name);
         }
 
         //Draw Or Slot : the picture stretched into box, or the empty slot when there is none

@@ -557,6 +557,34 @@ namespace Tacetno433.Core
             report += Same("map elite", "Elite 2 0 " + ways, walk.Map.Rows[2][0].Type + " " + walk.Chosen.Row + " " + walk.Chosen.Column + " " + walk.Chosen.Next.Count);
             walk.Advance();
             report += Same("map walk", "3 0 " + ways, walk.Stage + " " + walk.MapAt + " " + walk.Options.Length);
+
+            //PLACE DICE (1 Nov, docs/BETA1_DIRECTION.md 22.7) : every place picked on the map (RunState.PickPlace, the same call
+            //the map page makes) rolls its own dice, so two shops never sell the same shelves. Before the fix they stayed 0.
+            RunState dice = new RunState();
+            dice.Start(ConductorList.Shown[0], game.StoryFont, RouteNodeInfo.CaptionWrapWidth);
+            dice.LeaveOpening();
+            int rolledSeeds = 0;
+            int sameSeeds = 0;
+            int lastSeed = -1;
+            for (int step = 0; step < 6 && dice.Options.Length > 0; step++)
+            {
+                dice.PickPlace(dice.Options[0]);
+                if (dice.PlaceSeed > 0) rolledSeeds++;
+                if (dice.PlaceSeed == lastSeed) sameSeeds++;
+                lastSeed = dice.PlaceSeed;
+                dice.Advance();
+            }
+            report += Same("place dice", "6 0", rolledSeeds + " " + sameSeeds);
+
+            //ART FILES (1 Nov, docs/BETA1_DIRECTION.md 24) : the three conductors keep the file names the team draws to, whatever
+            //the name on screen says (FANNY MENDELSSOHN AND ??? is the_unsigned)
+            string files = "";
+            for (int c = 0; c < ConductorList.Shown.Length; c++) files += (c > 0 ? " " : "") + ArtBank.ConductorKey(ConductorList.Shown[c]);
+            report += Same("conductor files", "the_unhearing the_unsigned the_metronome", files);
+
+            //SHARED LOOKS : every enemy but the bosses ends on a look the team will draw, with only the 3 sure ones (hush static
+            //the_mute_choir) and with the 4th too (the_damper), and no two enemies on one picture look the same there
+            report += Same("enemy looks", "0 0 0", LooksMissing() + " " + LooksAlike(false) + " " + LooksAlike(true));
             return report;
         }
 
@@ -589,6 +617,60 @@ namespace Tacetno433.Core
                 if (next > most) { most = next; best = ways[w]; }
             }
             return best;
+        }
+
+        //SHARED LOOKS (savecheck) : the picture an enemy is drawn in when only these looks exist, "" when none of them
+        private static string WornLook(Enemy e, bool damperDrawn)
+        {
+            string[] drawn = damperDrawn ? new[] { "hush", "static", "the_damper", "the_mute_choir" } : new[] { "hush", "static", "the_mute_choir" };
+            string own = ArtBank.Key(e.Name);
+            if (Array.IndexOf(drawn, own) >= 0) return own;
+            for (int i = 0; i < e.Looks.Length; i++)
+                if (Array.IndexOf(drawn, e.Looks[i]) >= 0) return e.Looks[i];
+            return "";
+        }
+
+        private static List<Enemy> LookEnemies()
+        {
+            List<Enemy> list = new List<Enemy>();
+            for (int i = 0; i < EnemyList.All.Length; i++)
+                if (EnemyList.All[i].Kind != EnemyKind.Boss) list.Add(EnemyList.All[i]);
+            list.Add(EnemyList.Practice);
+            return list;
+        }
+
+        private static int LooksMissing()
+        {
+            int missing = 0;
+            List<Enemy> list = LookEnemies();
+            for (int i = 0; i < list.Count; i++)
+                if (WornLook(list[i], false) == "" || WornLook(list[i], true) == "") missing++;
+            return missing;
+        }
+
+        //Looks Alike : pairs on the same picture with the same brightness and mark (one in its own picture shows neither).
+        //PRACTICE only fights alone (the practice fight), so it is left out.
+        private static int LooksAlike(bool damperDrawn)
+        {
+            int alike = 0;
+            List<Enemy> list = LookEnemies();
+            for (int i = 0; i < list.Count; i++)
+                for (int j = i + 1; j < list.Count; j++)
+                {
+                    Enemy a = list[i];
+                    Enemy b = list[j];
+                    if (a == EnemyList.Practice || b == EnemyList.Practice) continue;
+                    string look = WornLook(a, damperDrawn);
+                    if (look != WornLook(b, damperDrawn)) continue;
+                    bool aOwn = look == ArtBank.Key(a.Name);
+                    bool bOwn = look == ArtBank.Key(b.Name);
+                    float aShade = aOwn ? 1f : a.LookShade;
+                    float bShade = bOwn ? 1f : b.LookShade;
+                    LookMark aMark = aOwn ? LookMark.None : a.Mark;
+                    LookMark bMark = bOwn ? LookMark.None : b.Mark;
+                    if (Math.Abs(aShade - bShade) < 0.05f && aMark == bMark) alike++;
+                }
+            return alike;
         }
 
         private static string Same(string what, string saved, string loaded)
@@ -906,7 +988,7 @@ namespace Tacetno433.Core
         //       duel duelcombo duelboss duelcutin duelpause dueldouble dueltremolo duelfermata duelfire duelrepeat finale
         //       result defeat reward shop shopleave event eventchair rest curtain curtainwin
         //       rewardpick rewardtilt shopbuy (Beta1 round 1 : a card picked, the pointed card leaning, a motif bought, e.g. rewardpick@80)
-        //       battle battleswing battleskill battleparry battlestatus (Alpha 7, use a few frames, e.g. battleswing@2) battlewin battlelose (Beta1, TACET's dark) battleslash battleshot battlesmash battlecross battleink (Beta1, one blow, e.g. battleslash@4) battlecutin battlekill battlebolt battleboltsoft battleimpact (Beta1 round 6) battlekit (THE FIVE KITS, 29 Oct : the SHIELD and LESSON tags, the new moves' words) battlemoves (ENEMY MOVES, 30 Oct : CHARGE, GUARD and the charged blow over the enemies) battlestars (REHEARSAL, 31 Oct : stars on the commands, a legend's name) battleaim battlepick battleheal battletip battlechakram (MARKS AND AIM, 30 Oct : the skill card, the rings, the marks on friends, an icon's line) battlefriend (FRIEND PICK, 31 Oct : the friends a skill for one friend can go to, over the commands) battlegift (GIFTS, 31 Oct : three gifts' names popping) rehearsal rehearsalrest (REHEARSAL, 31 Oct : the star after a win, from the rest stop) battleshield battlelong (31 Oct : SHIELD's friend cards, the band's longest move names) battlebig battlebigturn (NO LIMIT, 31 Oct : numbers past 999 in the plan and in a turn's TURN TOTAL)
+        //       battle battleswing battleskill battleparry battlestatus (Alpha 7, use a few frames, e.g. battleswing@2) battlewin battlelose (Beta1, TACET's dark) battleslash battleshot battlesmash battlecross battleink (Beta1, one blow, e.g. battleslash@4) battlecutin battlekill battlebolt battleboltsoft battleimpact (Beta1 round 6) battlekit (THE FIVE KITS, 29 Oct : the SHIELD and LESSON tags, the new moves' words) battlemoves (ENEMY MOVES, 30 Oct : CHARGE, GUARD and the charged blow over the enemies) battlestars (REHEARSAL, 31 Oct : stars on the commands, a legend's name) battleaim battlepick battleheal battletip battlechakram (MARKS AND AIM, 30 Oct : the skill card, the rings, the marks on friends, an icon's line) battlefriend (FRIEND PICK, 31 Oct : the friends a skill for one friend can go to, over the commands) battlegift (GIFTS, 31 Oct : three gifts' names popping) rehearsal rehearsalrest (REHEARSAL, 31 Oct : the star after a win, from the rest stop) battleshield battlelong (31 Oct : SHIELD's friend cards, the band's longest move names) battlebig battlebigturn (NO LIMIT, 31 Oct : numbers past 999 in the plan and in a turn's TURN TOTAL) battlelooks1 battlelooks2 battlelooks3 (SHARED LOOKS, 1 Nov : the enemies that wear one picture side by side)
         //       teampick teampickfull luthier treasure rewardboss battletier (29 Oct : THE AUDITION empty and with three picked, the
         //       luthier, a chest, the boss's great upgrade with REFORGE, a tier III blow e.g. battletier@4)
         //       practice practiceskill practicesig (Alpha 7, the tutorial's practice fight, e.g. practice@60)
@@ -1116,6 +1198,22 @@ namespace Tacetno433.Core
             run.BeginBattle();
             if (newBoss != null) run.BeginBattle(EnemyNamed(newBoss));
             if (pickedBoss != null) run.BeginBattle(EnemyNamed(pickedBoss));
+
+            //SHARED LOOKS (1 Nov) : battlelooks1 the enemies that wear hush, battlelooks2 the ones in static, battlelooks3 the
+            //elites in the_mute_choir, side by side. Their marks show once the look's picture exists (Content/Art/Battle/Enemies).
+            if (name.StartsWith("battlelooks") && lastChar >= '1' && lastChar <= '3')
+            {
+                string[][] wearers =
+                {
+                    new[] { "HUSH", "THE LULL", "ROOM TONE", "THE DAMPER" },
+                    new[] { "STATIC", "STUTTER", "THE CUE", "DEAD AIR" },
+                    new[] { "THE MUTE CHOIR", "WHITE NOISE", "THE ROUND" },
+                };
+                List<Enemy> pack = new List<Enemy>();
+                foreach (string who in wearers[lastChar - '1']) pack.Add(EnemyNamed(who));
+                run.Chosen.Type = lastChar == '3' ? NodeType.Elite : NodeType.Battle;
+                run.BeginBattle(pack[0], pack);
+            }
             run.ChangeStamina(-20);
 
             //Combo Picture : a fight already a few PERFECTs in

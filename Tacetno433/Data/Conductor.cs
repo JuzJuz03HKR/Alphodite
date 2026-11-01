@@ -43,6 +43,8 @@ namespace Tacetno433.Data
         //Conductor Identity
         public string Name = "";
         public string ShortName = "";      // (29 Oct) the name where only a few letters fit, empty when the full name fits there
+        public string FileKey = "";        // (1 Nov) the art's file name (gallery_<FileKey>.png), it stays when the name on screen
+                                           // changes. Empty = made from Name (ArtBank.ConductorKey)
         public string BasedOn = "";        // the real musician the class is bent from
         public string Role = "";           // the rough build, shown under the face icon
         public string Epithet = "";        // one short line under the painting
@@ -167,6 +169,7 @@ namespace Tacetno433.Data
             new Conductor
             {
                 Name = "THE METRONOME",
+                FileKey = "the_metronome",
                 BasedOn = "J. S. BACH",
                 Role = "ENDURANCE",
                 Epithet = "The beat is not yours to move.",
@@ -229,6 +232,7 @@ namespace Tacetno433.Data
             new Conductor
             {
                 Name = "THE UNHEARING",
+                FileKey = "the_unhearing",
                 BasedOn = "L. V. BEETHOVEN",
                 Role = "SCALING",
                 Epithet = "He wrote it deaf, and it was the loudest thing ever written.",
@@ -376,6 +380,7 @@ namespace Tacetno433.Data
             {
                 Name = "FANNY MENDELSSOHN AND ???",
                 ShortName = "FANNY AND ???",
+                FileKey = "the_unsigned",               // (1 Nov) her old name, so "???" never turns up in a file name
                 BasedOn = "F. MENDELSSOHN",
                 Role = "TWO VOICES",
                 Epithet = "Some of her songs were printed under her brother's name.",

@@ -83,6 +83,7 @@ namespace Tacetno433.Screens
             public FrameSet Set;
             public FramePlayer Player;
             public bool Busy;          // a once-only animation (attack, hurt, enter ...) is on, idle waits for it to end
+            public bool Shared;        // SHARED LOOKS : an enemy wearing another's picture (Data/Enemy.cs Looks), its mark is drawn
         }
         private Dictionary<Fighter, Art> arts = new Dictionary<Fighter, Art>();
         private Texture2D[] layerArt = new Texture2D[4];   // LAYERS : far, middle, stage floor, front (null = empty frame)
@@ -118,38 +119,73 @@ namespace Tacetno433.Screens
             for (int i = 0; i < battle.Enemies.Count; i++) ArtOf(battle.Enemies[i]);
         }
 
-        //Art Of : a fighter's pictures, found the first time they are needed (a musician CALLED in later too)
+        //Art Of : a fighter's pictures, found the first time they are needed (a musician CALLED in later too).
+        //SHARED LOOKS (1 Nov) : an enemy with no picture of its own wears the first look of its list that the team has drawn
+        //(Data/Enemy.cs Looks : THE LULL wears hush). Each wearer keeps its own clock, the pictures are read once (FrameArt).
         private Art ArtOf(Fighter f)
         {
             Art art;
             if (arts.TryGetValue(f, out art)) return art;
             art = new Art();
-            art.Set = f.IsEnemy ? FrameArt.Load(Game.GraphicsDevice, "Enemies", ArtBank.Key(f.Name), enemyAnims)
-                                : FrameArt.Load(Game.GraphicsDevice, "Musicians", ArtBank.Key(f.Name), musicianAnims);
+            if (f.IsEnemy)
+            {
+                art.Set = FrameArt.Load(Game.GraphicsDevice, "Enemies", ArtBank.Key(f.Name), enemyAnims);
+                for (int i = 0; art.Set == null && f.Enemy != null && i < f.Enemy.Looks.Length; i++)
+                {
+                    art.Set = FrameArt.Load(Game.GraphicsDevice, "Enemies", f.Enemy.Looks[i], enemyAnims);
+                    art.Shared = art.Set != null;
+                }
+            }
+            else art.Set = FrameArt.Load(Game.GraphicsDevice, "Musicians", ArtBank.Key(f.Name), musicianAnims);
             if (art.Set != null) art.Player.Play(art.Set.Find("idle"), true);
             arts[f] = art;
             return art;
         }
 
-        //Play Art : start one of a fighter's animations (nothing happens when it has no such animation yet)
+        //Play Art : start one of a fighter's animations.
+        //STAND IN MOVES (1 Nov, docs/BETA1_DIRECTION.md 24) : the team draws idle and attack first (docs/ASSET_LIST.md), so a
+        //move with no picture of its own borrows a near one, and with nothing near the code moves the picture (StandInMove) :
+        //   skill, parry   the attack's picture, both land a blow
+        //   hurt           the picture shivers as it flashes and is knocked back
+        //   ko             the picture holds still, sinks and fades
+        //   death          it holds still while it dissolves into the hole (the code did that already)
+        //   attack         a musician lunges at the enemy (the code did that already), an enemy rushes at the band and back
+        //   enter          the musician slides in (SWAP did that already)
+        //   idle           a set with no idle stands on the first frame of its attack (FrameArt StandStill)
         private void PlayArt(Fighter f, string name)
         {
             if (f == null) return;
             Art art = ArtOf(f);
-            if (art.Set == null) return;
-            FrameAnim anim = art.Set.Find(name);
-            if (anim == null) return;
+            FrameAnim anim = art.Set != null ? art.Set.Find(name) : null;
+            if (anim == null && art.Set != null && (name == "skill" || name == "parry")) anim = art.Set.Find("attack");
+            if (anim == null)
+            {
+                StandInMove(f, name);
+                return;
+            }
             art.Player.Play(anim, true);
             art.Busy = !anim.Loop;
         }
 
-        //Update Arts : every clock moves on. When a once-only animation ends, idle comes back (KO and death hold)
+        //Stand In Move : the code's own move for a picture not drawn yet. Look keeps its clock, StandInPose moves the picture.
+        private void StandInMove(Fighter f, string name)
+        {
+            Look look;
+            if (!looks.TryGetValue(f, out look)) return;
+            if (name == "hurt") look.Shiver = 1f;
+            else if (name == "ko") look.Fall = 0.0001f;
+            else if (name == "attack" && f.IsEnemy && f != boss) look.Rush = 0.0001f;          // a boss rears up instead (BossPose)
+        }
+
+        //Update Arts : every clock moves on. When a once-only animation ends, idle comes back (KO and death hold).
+        //STAND IN MOVES : one down with no KO or death picture holds the frame it fell on.
         private void UpdateArts(float dt)
         {
             foreach (KeyValuePair<Fighter, Art> pair in arts)
             {
                 Art art = pair.Value;
                 if (art.Set == null) continue;
+                if (pair.Key.Down && art.Player.Anim != null && art.Player.Anim.Loop) continue;
                 art.Player.Update(dt);
                 if (art.Busy && art.Player.Done && !pair.Key.Down) art.Busy = false;
                 if (!art.Busy) art.Player.Play(art.Set.Find("idle"), false);
@@ -780,9 +816,19 @@ namespace Tacetno433.Screens
                 a = 1f - gone;
             }
 
-            Gfx.DrawGlowBox(sb, new Rectangle(r.Center.X - r.Width / 2, r.Bottom - 22, r.Width, 44), Color.Black * (0.6f * a));
             Art art = ArtOf(f);
-            if (art.Set != null) art.Player.Draw(sb, art.Set, new Vector2(r.Center.X, r.Bottom), 2, new Color(shade, shade, shade) * a);
+            float lift = LiftOf(f);                                                    // FLOAT : the shadow stays on the floor
+            Gfx.DrawGlowBox(sb, new Rectangle(r.Center.X - r.Width / 2, r.Bottom + (int)lift - 22, r.Width, 44), Color.Black * ((lift > 0f ? 0.4f : 0.6f) * a));
+            if (art.Set != null)
+            {
+                if (art.Shared)
+                {
+                    shade *= f.Enemy.LookShade;                                          // SHARED LOOKS : its own brightness and mark
+                    a *= FlickerOf(f);
+                    DrawMark(sb, f, art, r, shade, a);
+                }
+                art.Player.Draw(sb, art.Set, new Vector2(r.Center.X, r.Bottom), 2, new Color(shade, shade, shade) * a);
+            }
             else ArtSlot.Draw(sb, r, Palette.Paper * shade, a);
             if (f.Staggered) Gfx.RectOutline(sb, r, Palette.Highlight * (0.5f + 0.5f * (float)Math.Sin(time * 8f)), 3);
 
@@ -790,12 +836,98 @@ namespace Tacetno433.Screens
             if (looks.TryGetValue(f, out look) && look.Flash > 0f) Gfx.Rect(sb, r, Palette.Paper * (0.55f * look.Flash * Flashing));
         }
 
+        //======================================================================================
+        //STAND IN MOVES and SHARED LOOKS (Beta1 1 Nov, docs/BETA1_DIRECTION.md 24, numbers in BattleRules Look Feel)
+        //======================================================================================
+
+        //Stand In Pose : where the code's own moves put a fighter's picture this frame (called from DrawBox, so the aim
+        //marks and the blows' light follow it). Only the enemies and the musician in front move, the band's cards stay still.
+        private Rectangle StandInPose(Fighter f, Look look, Rectangle r)
+        {
+            if (!f.IsEnemy && f != fore) return r;
+            if (look.Shiver > 0f) r.X += (int)(Math.Sin(time * BattleRules.StageShiverSpeed) * BattleRules.StageShiverPixels * look.Shiver * Flashing);
+            if (look.Rush > 0f)
+            {
+                float lunge = Lunge(look.Rush);                                          // the same weighty move as a musician's ATTACK
+                r.X -= (int)(lunge * BattleRules.StageRushX);
+                r.Y += (int)(Math.Max(0f, lunge) * BattleRules.StageRushY);
+            }
+            if (look.Fall > 0f) r.Y += (int)(BattleRules.StageFallDrop * Smooth(look.Fall));
+            if (f.IsEnemy)
+            {
+                r.Y -= (int)LiftOf(f);
+                r.X += (int)JitterOf(f);
+            }
+            return r;
+        }
+
+        //Mark Of : the mark an enemy wears on a borrowed picture, None on its own picture or an empty frame
+        private LookMark MarkOf(Fighter f)
+        {
+            if (!f.IsEnemy || f.Enemy == null || !ArtOf(f).Shared) return LookMark.None;
+            return f.Enemy.Mark;
+        }
+
+        //Lift Of : FLOAT, how high it hangs above its shadow (slots bob out of step)
+        private float LiftOf(Fighter f)
+        {
+            if (MarkOf(f) != LookMark.Float) return 0f;
+            return BattleRules.LookFloatLift + (float)Math.Sin(worldTime * BattleRules.LookFloatSpeed + f.Slot * 1.7f) * BattleRules.LookFloatBob;
+        }
+
+        //Jitter Of : JITTER, the step sideways it snaps to now and then, left and right in turn
+        private float JitterOf(Fighter f)
+        {
+            if (MarkOf(f) != LookMark.Jitter) return 0f;
+            float t = worldTime + f.Slot * 0.37f;
+            if (t % BattleRules.LookJitterEvery >= BattleRules.LookJitterTime) return 0f;
+            return ((int)(t / BattleRules.LookJitterEvery) % 2 == 0 ? 1f : -1f) * BattleRules.LookJitterStep;
+        }
+
+        //Flicker Of : FLICKER, how strong it is this moment, now and then it blinks out.
+        //ADVANCED PART : the blinks come from a hash of the step number (multiplying by a big odd number mixes its bits),
+        //so they look random but need no dice and come back the same, frame after frame, with nothing stored.
+        private float FlickerOf(Fighter f)
+        {
+            if (MarkOf(f) != LookMark.Flicker) return 1f;
+            uint step = (uint)((worldTime + f.Slot * 0.53f) / BattleRules.LookFlickerStep);
+            uint mix = unchecked(step * 2654435761u) >> 16;
+            return mix % (uint)BattleRules.LookFlickerOdds == 0 ? BattleRules.LookFlickerDim : 1f;
+        }
+
+        //Draw Mark : HUM, HALO and ECHO, drawn behind the picture (FLOAT, JITTER and FLICKER move or fade the picture itself)
+        private void DrawMark(SpriteBatch sb, Fighter f, Art art, Rectangle r, float shade, float a)
+        {
+            LookMark mark = MarkOf(f);
+            if (mark == LookMark.Hum || mark == LookMark.Halo)
+            {
+                bool hum = mark == LookMark.Hum;
+                float size = hum ? BattleRules.LookHumSize : BattleRules.LookHaloSize;
+                float beat = 0.5f + 0.5f * (float)Math.Sin(worldTime * (hum ? BattleRules.LookHumSpeed : BattleRules.LookHaloSpeed));
+                float power = hum ? BattleRules.LookHumPower * beat : BattleRules.LookHaloPower * beat * Flashing;
+                Rectangle glow = r;
+                glow.Inflate((int)(r.Width * size), (int)(r.Height * size * 0.6f));
+                Gfx.DrawGlowBox(sb, glow, (hum ? Palette.Paper : Color.White) * (power * a));
+            }
+            else if (mark == LookMark.Echo)
+            {
+                for (int k = 2; k >= 1; k--)
+                {
+                    float strength = BattleRules.LookEchoAlpha / k;
+                    Vector2 feet = new Vector2(r.Center.X + BattleRules.LookEchoStep * k, r.Bottom - BattleRules.LookEchoStep * 0.4f * k);
+                    art.Player.Draw(sb, art.Set, feet, 2, new Color(shade, shade, shade) * (strength * a));
+                }
+            }
+        }
+
         //Front : the musician the conductor points at, big, from behind (an empty frame until the art comes)
         private void DrawFront(SpriteBatch sb)
         {
             if (fore == null) return;
             Rectangle r = DrawBox(fore);
-            float a = SwapAlpha() * (fore.Down ? 0.35f : 1f);
+            Look down;
+            float sink = looks.TryGetValue(fore, out down) && down.Fall > 0f ? Smooth(down.Fall) : 1f;   // STAND IN MOVES : it fades as it sinks
+            float a = SwapAlpha() * (fore.Down ? MathHelper.Lerp(1f, BattleRules.StageDownFade, sink) : 1f);
 
             Gfx.DrawGlowBox(sb, new Rectangle(r.X - 20, r.Bottom - 30, r.Width + 40, 60), Color.Black * (0.7f * a));
             Art art = ArtOf(fore);

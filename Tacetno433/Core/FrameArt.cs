@@ -156,9 +156,39 @@ namespace Tacetno433.Core
                 set = null;                                // a broken file must never stop the fight
             }
 
-            if (set != null) Loaded++;
+            if (set != null)
+            {
+                StandStill(set);
+                Loaded++;
+            }
             cache[id] = set;
             return set;
+        }
+
+        //Stand Still (STAND IN MOVES, 1 Nov) : a set handed over with no idle stands on the first frame of its attack (or of
+        //whatever it has), so the character is never drawn as nothing. The page plays every other missing move with
+        //something near it, or moves the picture itself (BattleScreen PlayArt).
+        private static void StandStill(FrameSet set)
+        {
+            if (set.Find("idle") != null) return;
+            FrameAnim from = set.Find("attack");
+            if (from == null)
+                foreach (FrameAnim any in set.Anims.Values)
+                {
+                    from = any;
+                    break;
+                }
+            if (from == null || from.Pictures.Length == 0) return;
+            set.Anims["idle"] = new FrameAnim
+            {
+                Name = "idle",
+                Loop = true,
+                Pictures = new[] { from.Pictures[0] },
+                Sources = new[] { from.Sources[0] },
+                Offsets = new[] { from.Offsets[0] },
+                Times = new[] { DefaultFrameTime },
+                Length = DefaultFrameTime,
+            };
         }
 
         //Picture : one plain PNG of the battle art (a backdrop layer), or null

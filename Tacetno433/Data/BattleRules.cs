@@ -370,6 +370,36 @@
         public static float[] StageParallax = { 0.18f, 0.4f, 0.75f, 1f, 1.25f };   // far, mid, stage floor, fighters, front : how much each layer follows the camera
         public static float StageDepthDim = 0.16f;        // each enemy further back is this much darker
 
+        //Look Feel (Beta1 1 Nov, docs/BETA1_DIRECTION.md 24) : SHARED LOOKS, the small mark of an enemy that wears another's
+        //picture (Data/Enemy.cs LookMark), and the STAND IN MOVES the code plays when a move has no picture yet.
+        //Only Screens/BattleScreen.Stage.cs and BattleScreen.cs read these. Pixels are the 1280 x 720 page's (2 = 1 pixel of art).
+        public static float LookFloatLift = 26f;          // FLOAT : it hangs this high above its shadow
+        public static float LookFloatBob = 6f;            //   and bobs this much up and down
+        public static float LookFloatSpeed = 1.6f;        //   this fast (about 4 seconds a bob)
+        public static float LookHumPower = 0.16f;         // HUM : the pale glow round it at its brightest
+        public static float LookHumSize = 0.4f;           //   it reaches this share of the picture's size past its edges
+        public static float LookHumSpeed = 1.2f;          //   swelling and falling this fast
+        public static float LookJitterEvery = 1.1f;       // JITTER : it snaps sideways once every this many seconds
+        public static float LookJitterTime = 0.12f;       //   stays there this long
+        public static float LookJitterStep = 8f;          //   this far (pixels), left and right in turn
+        public static float LookFlickerStep = 0.09f;      // FLICKER : one blink is this long
+        public static int LookFlickerOdds = 14;           //   about one step in this many it is out
+        public static float LookFlickerDim = 0.25f;       //   and this faint while it is out
+        public static float LookEchoStep = 22f;           // ECHO : each copy stands this far behind the one before (right and up the floor)
+        public static float LookEchoAlpha = 0.28f;        //   the first copy this strong, the second half that
+        public static float LookHaloPower = 0.22f;        // HALO : the white glow behind it at its brightest
+        public static float LookHaloSize = 0.25f;         //   it reaches this share of the picture's size past its edges
+        public static float LookHaloSpeed = 7f;           //   beating this fast (about one beat a second)
+        public static float StageRushTime = 0.55f;        // STAND IN MOVES : an enemy with no attack picture rushes at the band and back this long
+        public static float StageRushX = 70f;             //   this far toward the band (pixels)
+        public static float StageRushY = 16f;             //   and this far toward the camera
+        public static float StageShiverTime = 0.3f;       //   a hit with no hurt picture : the picture shivers this long
+        public static float StageShiverPixels = 5f;       //   this far each way
+        public static float StageShiverSpeed = 60f;       //   this fast
+        public static float StageFallTime = 0.6f;         //   a musician down with no KO picture : the picture sinks this long
+        public static float StageFallDrop = 60f;          //   this far down
+        public static float StageDownFade = 0.35f;        //   a musician down is this faint (with or without the picture)
+
         //Hit Feel (Beta1 round 4) : what a blow looks like where it lands (Core/HitFx.cs). Nothing flies : the musician
         //strikes and the light happens on the enemy. Strings SLASH, winds SHOT, percussion SMASH, the SIGNATURE CROSS.
         public static float HitSize = 105f;               // the size of a blow's light (pixels), more for a stronger blow

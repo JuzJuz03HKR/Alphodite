@@ -96,6 +96,9 @@ namespace Tacetno433.Screens
             public float Flash;
             public float Knock;
             public float Gone;         // SILENCED : 0 = standing, 0..1 while it dissolves into the hole, 1 = gone
+            public float Shiver;       // STAND IN MOVES (1 Nov, BattleScreen.Stage.cs) : a hit with no hurt picture, 1 = just hit, fades to 0
+            public float Rush;         //   an enemy's attack with no attack picture : 0 = still, 0..1 while it rushes at the band and back
+            public float Fall;         //   a musician down with no KO picture : 0 = standing, 0..1 while it sinks, held at 1 while down
         }
         private Dictionary<Fighter, Look> looks = new Dictionary<Fighter, Look>();
 
@@ -359,11 +362,19 @@ namespace Tacetno433.Screens
                 hudPops.Update(dt);
                 if (shake > 0f) shake = Math.Max(0f, shake - dt * 3.5f);
                 if (jab > 0f) jab = Math.Max(0f, jab - dt * 5f);                 // ACTION : the jump back from a blow
-                foreach (Look look in looks.Values)
+                foreach (KeyValuePair<Fighter, Look> pair in looks)
                 {
+                    Look look = pair.Value;
                     look.Flash = Math.Max(0f, look.Flash - dt * 5f);
                     look.Knock = Math.Max(0f, look.Knock - dt * 6f);
                     if (look.Gone > 0f && look.Gone < 1f) look.Gone = Math.Min(1f, look.Gone + dt / BattleRules.TurnDissolveTime);
+
+                    //STAND IN MOVES : the code's own moves for the pictures not drawn yet
+                    look.Shiver = Math.Max(0f, look.Shiver - dt / BattleRules.StageShiverTime);
+                    if (look.Rush > 0f) look.Rush += dt / BattleRules.StageRushTime;
+                    if (look.Rush >= 1f) look.Rush = 0f;
+                    if (!pair.Key.Down) look.Fall = 0f;                                           // back up (a new fight, a heal)
+                    else if (look.Fall > 0f) look.Fall = Math.Min(1f, look.Fall + dt / BattleRules.StageFallTime);
                 }
             }
 
@@ -1234,6 +1245,7 @@ namespace Tacetno433.Screens
             Rectangle r = BoxOf(f);
             Look look;
             if (looks.TryGetValue(f, out look) && look.Knock > 0f) r.X += (int)((f.IsEnemy ? 14f : -18f) * look.Knock * look.Knock);
+            if (look != null) r = StandInPose(f, look, r);                  // STAND IN MOVES and SHARED LOOKS (BattleScreen.Stage.cs)
             if (!f.IsEnemy && f == fore)
             {
                 r.X += (int)SwapOffset();

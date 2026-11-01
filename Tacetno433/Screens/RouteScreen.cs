@@ -428,8 +428,7 @@ namespace Tacetno433.Screens
         {
             RunState run = Game.CurrentRun;
             RouteNode node = run.Options[index];
-            run.Chosen = node;
-            run.RecordStop(node.Type);
+            run.PickPlace(node);                        // written down, and the place rolls its own dice (the shop's shelves, the chest)
             optionMotion[index].Press();
             SoundBank.Play(Sfx.PathChosen);
             Lens.ZoomAt = Center(run.Map, node.Row, node.Column);

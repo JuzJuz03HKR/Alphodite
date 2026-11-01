@@ -29,6 +29,19 @@ namespace Tacetno433.Data
     //   InTheDark    THE BLIND CANTOR    five notes on everyone, every arrow hidden until late : Bach lost his sight at the end
     public enum BossMove { None, Lacrimosa, TheNinth, Italien, TeDeum, OnOneString, InTheDark }
 
+    //LookMark : SHARED LOOKS (Beta1 1 Nov, docs/BETA1_DIRECTION.md 24). The team draws 3 or 4 enemy looks and every enemy
+    //wears one, so two enemies in the same picture need a small mark of their own, taken from who they are. The code draws
+    //it on the borrowed picture (Screens/BattleScreen.Stage.cs DrawMark, numbers in BattleRules Look Feel), black, white
+    //and grey like the rest of TACET. An enemy drawn in its own picture shows none of it.
+    //   None     as drawn
+    //   Float    it hangs above its shadow and bobs slowly          THE LULL (a lullaby), DEAD AIR (only air)
+    //   Hum      a soft pale glow round it swells and falls          ROOM TONE (the sound of the room, holding the others up)
+    //   Jitter   it snaps a step sideways now and then               STUTTER (it cannot finish a word)
+    //   Flicker  it blinks out for a moment now and then             THE CUE (it waits in the wings)
+    //   Echo     two faint copies of it stand behind it              THE ROUND (the same tune sung again and again)
+    //   Halo     a white glow behind it beats fast                   WHITE NOISE (every beat, all the time)
+    public enum LookMark { None, Float, Hum, Jitter, Flicker, Echo, Halo }
+
     //EnemyTrait : the one rule a shape of TACET bends. BattleState and the duel check these by
     //name. A trait is always told to the player BEFORE it matters: the first banner of the duel
     //explains it the first time it is met (round 14), its name sits on the enemy's plate, and the
@@ -133,6 +146,15 @@ namespace Tacetno433.Data
         public string PhaseLine = "";
         public TurnKit HollowOf = TurnKit.None;
 
+        //SHARED LOOKS (Beta1 1 Nov, docs/BETA1_DIRECTION.md 24, docs/ASSET_LIST.md 1.2) : the pictures it wears in a fight.
+        //Its own file (Content/Art/Battle/Enemies/<its name>) comes first if it ever gets one, then Looks in order : a look the
+        //team may not draw (the_damper) is followed by one they will. LookShade (1 = as drawn, less is darker) and Mark tell
+        //it apart from the others in the same picture, and count only on a borrowed picture. Bosses have their own art.
+        //docs/asset_list.py LOOK_OF is the same table for the art list, change both.
+        public string[] Looks = new string[0];
+        public float LookShade = 1f;
+        public LookMark Mark = LookMark.None;
+
         //Move At : the move of its list at this place, round again at the end
         public EnemyMove MoveAt(int index)
         {
@@ -173,12 +195,14 @@ namespace Tacetno433.Data
                         TraitText = "The f, mf and p marks on its notes fade before they reach you. Remember them.",
                         Kind = EnemyKind.Normal, Song = SongList.Twinkle, Pattern = new int[] { 4, 0, 3, 4, 0, 0, 5, 0 }, Tone = Palette.ToneD, Temper = 5 },
             new Enemy { Name = "DEAD AIR",
+                        Looks = new[] { "the_damper", "static" }, LookShade = 0.6f, Mark = LookMark.Float,   // SHARED LOOKS
                         TurnHp = 50, TurnSpeed = 4, Phrases = new[] { "L R", "D D U" }, TurnTraitText = "A note you miss hits 50 percent harder.",  Title = "It waits between your notes.",
                         Moves = new[] { Hit, Charge },
                         Trait = EnemyTrait.FillsGaps, TraitName = "FILLS THE GAPS", TraitFloor = 2,
                         TraitText = "A note you miss or let pass hits 50 percent harder.",
                         Kind = EnemyKind.Normal, Song = SongList.OdeToJoy, Pattern = new int[] { 0, 4, 0, 4, 0, 4, 0, 5 }, Tone = Palette.ToneE },
             new Enemy { Name = "THE LULL",
+                        Looks = new[] { "hush" }, LookShade = 0.9f, Mark = LookMark.Float,   // SHARED LOOKS
                         TurnHp = 60, TurnSpeed = 2, Phrases = new[] { "D D", "U D U" }, TurnTraitText = "Every third turn it hums instead of attacking and gets back 12 life.",  Title = "Soft, patient, and never finished.",
                         Trait = EnemyTrait.Lullaby, TraitName = "LULLABY", TraitFloor = 2,
                         TraitText = "Round three slows down instead of speeding up.",
@@ -207,6 +231,7 @@ namespace Tacetno433.Data
             //Round 15 : notes 5, Temper 0. Playing is free, so soft notes on every beat were nothing,
             //now it is a reading test : a note on every beat, any mark, and no rest at all.
             new Enemy { Name = "WHITE NOISE",
+                        Looks = new[] { "the_mute_choir" }, Mark = LookMark.Halo,   // SHARED LOOKS
                         TurnHp = 110, TurnSpeed = 6, Phrases = new[] { "L R L R", "U D U D" }, TurnTraitText = "One note more in every attack, and parrying it gives no BREATH.",    Title = "Every beat, all the time, forever.",
                         Trait = EnemyTrait.NoRest, TraitName = "NO REST", TraitFloor = 1,
                         TraitText = "It never stops, so silent beats give back only half the breath.",
@@ -243,27 +268,32 @@ namespace Tacetno433.Data
             //the bar (STUTTER, THE ROUND). THE CUE and THE DAMPER were about CALL until it went away (29 Oct).
             //TurnPower 0 : each note hits the average of the Pattern, like the others.
             new Enemy { Name = "ROOM TONE",
+                        Looks = new[] { "hush" }, LookShade = 0.8f, Mark = LookMark.Hum,   // SHARED LOOKS
                         TurnHp = 45, TurnSpeed = 2, Phrases = new[] { "D", "U D" }, TurnTraitText = "While it stands, the other enemies take 30 percent less.", Title = "The sound of an empty room, holding the others up.",
                         Trait = EnemyTrait.HoldsTheRoom, TraitName = "HOLDS THE ROOM", TraitFloor = 2,
                         TraitText = "While it stands, the other enemies take 30 percent less.",
                         Kind = EnemyKind.Normal, Pattern = new int[] { 4, 0, 4, 0, 4, 0, 4, 0 }, Tone = Palette.ToneE },
             new Enemy { Name = "THE CUE",
+                        Looks = new[] { "static" }, LookShade = 0.85f, Mark = LookMark.Flicker,   // SHARED LOOKS
                         TurnHp = 55, TurnSpeed = 5, Phrases = new[] { "R L", "U" }, TurnTraitText = "It always strikes the musician who played the last skill.", Title = "It waits in the wings for whoever takes the solo.",
                         Trait = EnemyTrait.OnCue, TraitName = "ON CUE", TraitFloor = 2,
                         TraitText = "It always strikes the musician who played the last skill.",
                         Kind = EnemyKind.Normal, Pattern = new int[] { 4, 0, 4, 0, 4, 0, 4, 0 }, Tone = Palette.ToneC },
             new Enemy { Name = "THE DAMPER",
+                        Looks = new[] { "hush" }, LookShade = 0.65f,   // SHARED LOOKS
                         TurnHp = 42, TurnSpeed = 3, Phrases = new[] { "D D", "L R" }, TurnTraitText = "While it stands, an ATTACK gives 1 less BREATH.", Title = "A felt hand resting on every string.",
                         Moves = new[] { Hit, Guard }, GuardBlock = 14,
                         Trait = EnemyTrait.FeltHand, TraitName = "FELT HAND", TraitFloor = 2,
                         TraitText = "While it stands, an ATTACK gives 1 less BREATH.",
                         Kind = EnemyKind.Normal, Pattern = new int[] { 4, 0, 4, 0, 4, 0, 4, 0 }, Tone = Palette.ToneD },
             new Enemy { Name = "STUTTER",
+                        Looks = new[] { "static" }, Mark = LookMark.Jitter,   // SHARED LOOKS
                         TurnHp = 36, TurnSpeed = 7, Phrases = new[] { "L", "R", "U" }, TurnTraitText = "It cuts in twice a turn, after the 1st and the 3rd move, one note each time.", Title = "It cannot finish a word, so it never stops starting.",
                         Trait = EnemyTrait.TwiceABar, TraitName = "TWICE A TURN", TraitFloor = 2,
                         TraitText = "It cuts in twice a turn, after the 1st and the 3rd move, one note each time.",
                         Kind = EnemyKind.Normal, Pattern = new int[] { 4, 4, 4, 4, 4, 4, 4, 4 }, Tone = Palette.ToneB },
             new Enemy { Name = "THE ROUND",
+                        Looks = new[] { "the_mute_choir" }, LookShade = 0.9f, Mark = LookMark.Echo,   // SHARED LOOKS
                         TurnHp = 115, TurnSpeed = 4, Phrases = new[] { "D D D", "L R L R" }, TurnTraitText = "It always strikes the musician who plays first in the turn.", Title = "It sings your turn back at you, in your own order.",
                         Moves = new[] { Hit, Hit, Charge },
                         Trait = EnemyTrait.FirstInLine, TraitName = "FIRST IN LINE", TraitFloor = 1,
@@ -300,6 +330,7 @@ namespace Tacetno433.Data
         //Practice : the enemy of the tutorial's practice fight (Alpha 7, step 9, BattleRules PRACTICE).
         //It is not in All, so it never turns up in a run and the save file never sees it. No trait.
         public static Enemy Practice = new Enemy { Name = "PRACTICE",
+                        Looks = new[] { "hush" },                                                     // SHARED LOOKS
                         TurnHp = BattleRules.TurnPracticeHp, TurnSpeed = BattleRules.TurnPracticeSpeed, Phrases = new[] { "D", "L R" },
                         Kind = EnemyKind.Normal, Pattern = new int[] { BattleRules.TurnPracticePower } };
 

@@ -49,8 +49,8 @@ namespace Tacetno433.Data
 
         //Run Resources
         public int Shards = 0;
-        public int PlaceSeed;                // the dice of the place the band walked into (the shop's shelves, the treasure), saved with the run,
-                                             // so leaving the game and coming back finds the same shelves (RunFlow.Enter)
+        public int PlaceSeed;                // the dice of the place the band walked into (the shop's shelves, the treasure), rolled when the
+                                             // place is picked (PickPlace), saved with the run, so coming back finds the same shelves
         public int LastRounds;               // Alpha 7 : rounds the last turn battle took, for the result page
 
         //REHEARSAL (Beta1 31 Oct, Data/Rehearsal.cs) : the star a won fight gives, picked on the page after the result
@@ -396,6 +396,17 @@ namespace Tacetno433.Data
         public bool AnyToTrain
         {
             get { return LeastTrained() != null; }
+        }
+
+        //Pick Place (1 Nov) : the band picks a place on the map. The stop is written down and the place rolls its own dice
+        //(PlaceSeed : the shop's shelves, the chest), so no two places share them. A run loaded from the save does not
+        //come through here, it keeps the dice it saved (RunFlow.Continue). Before 1 Nov the dice were never rolled in a
+        //real run, so every shop sold the same shelves (docs/BETA1_DIRECTION.md 22.7).
+        public void PickPlace(RouteNode node)
+        {
+            Chosen = node;
+            RecordStop(node.Type);
+            PlaceSeed = Rng.Next(1, int.MaxValue);
         }
 
         //Journey : called when a path is picked, and when the run ends on it
