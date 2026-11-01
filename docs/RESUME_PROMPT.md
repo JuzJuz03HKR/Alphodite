@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| (ว่าง) | | |
+| 1 พ.ย. (แชท /system Finalize12) | A2 แผนที่ 16.14 ข้อ 5 (คำต่อคำ `USER_BRIEFS.md` 13.65) : จุดบนแผนที่บอกรางวัลด้วยคำเดียว (ซ้อม ของ เงิน ฟื้นเลือด) / ลดแถวที่ไม่มีอะไรให้เลือก / เซฟเก่า `map=` ต้องโหลดได้ | `Data/FloorMap.cs` `Data/RunState.cs` `Data/RouteNode.cs` `Screens/RouteScreen.cs` `Data/SaveFile.cs` `Data/BattleRules.cs` `Core/DebugShots*.cs` (และเอกสาร) |
 
 ---
 
