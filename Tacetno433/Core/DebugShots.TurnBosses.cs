@@ -47,6 +47,18 @@ namespace Tacetno433.Core
             every += " " + requiem.Attacks;
             report += Same("big every third", "2 3 False 5", every);
 
+            //TEST ROOM (Beta1 31 Oct) : BigAttackFirst plans the boss's BIG ATTACK as its very first attack (THE TELL at once), the
+            //ordinary enemy beside it keeps its own plan, and once the BIG ATTACK is played the next one is TurnBigEvery attacks away
+            TurnBattle first = new TurnBattle(band, new List<Enemy> { EnemyNamed("THE STAFF"), EnemyNamed("HUSH") }, 1, new Random(433));
+            Tough(first);
+            first.BigAttackFirst();
+            Fighter firstBoss = first.Enemies[0];
+            string firstLine = firstBoss.Attacks + " " + firstBoss.IntentBig + " " + first.Enemies[1].IntentBig;
+            ToEnemyTurn(first, firstBoss);
+            first.TakeEnemyAttack(null);
+            firstLine += " " + firstBoss.BigIn + " " + firstBoss.IntentBig;
+            report += Same("test room big first", "0 True False 3 False", firstLine);
+
             //THE TURN : one hit takes REQUIEM from 201 of 400 to half. The attack it shows stays, the next one is LACRIMOSA,
             //then every second attack
             t = new TurnBattle(band, new List<Enemy> { EnemyNamed("REQUIEM") }, 1, new Random(433));

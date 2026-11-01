@@ -265,7 +265,13 @@ namespace Tacetno433
             //ESC opens it, unless the page is using ESC to close something of its own.
             if (active)
             {
-                if (Pause.Open) Pause.Update(dt);
+                //TEST ROOM (Beta1 31 Oct) : while a test plays, F2 drops it and goes back to the test page from anywhere
+                if (TestRoomScreen.Running && Input.KeyPressed(Keys.F2) && !Screens.Busy && !(Screens.Current is TestRoomScreen))
+                {
+                    Pause.Open = false;
+                    Screens.Change(new TestRoomScreen());
+                }
+                else if (Pause.Open) Pause.Update(dt);
                 else if (Input.KeyPressed(Keys.Escape) && CanOpenPause() && !Screens.Current.UsesEscape) Pause.Show();
                 else Screens.Update(dt);
             }

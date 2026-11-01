@@ -31,6 +31,10 @@ namespace Tacetno433.Data
         //Enabled : the capture tool switches this off, so its sample runs never touch real saves
         public static bool Enabled = true;
 
+        //Test Run : TEST ROOM (Beta1 31 Oct, Screens/TestRoomScreen.cs). While a test plays, its run and the ARCHIVE are never
+        //written or deleted, so the player's CONTINUE and APPLAUSE stay as they were. Settings still save.
+        public static bool TestRun;
+
         //Pretend Run : DEVELOPER TOOL ONLY. The capture tool sets it to picture the title page
         //with CONTINUE on it, without any real file. Never set in play.
         public static bool PretendRun;
@@ -83,7 +87,7 @@ namespace Tacetno433.Data
 
         public static void DeleteRun()
         {
-            if (!Enabled) return;
+            if (!Enabled || TestRun) return;                // TEST ROOM : a lost test never throws the real run away
             try
             {
                 if (File.Exists(RunPath)) File.Delete(RunPath);
@@ -114,6 +118,7 @@ namespace Tacetno433.Data
         //Archive Save : the ECHOES and the upgrade levels of the ARCHIVE (Alpha 7). Kept for good, apart from the run.
         public static void SaveArchive()
         {
+            if (TestRun) return;                            // TEST ROOM : a test's APPLAUSE is never kept
             List<string> lines = new List<string>();
             lines.Add("version=" + Version);
             lines.Add("echoes=" + Archive.Echoes);
@@ -155,7 +160,7 @@ namespace Tacetno433.Data
         //only which enemy it was against, so it starts again from its first round.
         public static void SaveRun(RunState run)
         {
-            if (run == null || run.RunComplete) return;
+            if (run == null || run.RunComplete || TestRun) return;      // TEST ROOM : a test run is never written
 
             List<string> lines = new List<string>();
             lines.Add("version=" + Version);

@@ -256,6 +256,7 @@ namespace Tacetno433.Screens
                 battle.Signature = Math.Min(battle.SignatureNeed, Archive.Level(Archive.Signature) * BattleRules.ArchiveSignaturePerLevel);
             signatureName = run.Conductor.SignatureNameAt(battle.SignatureLevel);           // SIGNATURE GROWS : STORM after the first boss
             bondLine = BondList.OpeningLine(band, run.Conductor.Turn, enemies);              // BONDS
+            TestRoomScreen.TweakFight(battle);                                               // TEST ROOM : a boss test's BIG ATTACK or half life
             Arrange();
             SoundBank.PlayMusic(RunFlow.FightMusic(run));
         }

@@ -2549,6 +2549,19 @@ namespace Tacetno433.Battle
             Events.Add(new TurnEvent(TurnEventKind.BossTurn, boss, 0));
         }
 
+        //Big Attack First : TEST ROOM (Beta1 31 Oct, Screens/TestRoomScreen.cs). Called right after the fight is made : every boss
+        //with a BIG ATTACK plans it as its first attack, so the first plan shows it (THE TELL) without three turns of waiting.
+        public void BigAttackFirst()
+        {
+            for (int i = 0; i < Enemies.Count; i++)
+            {
+                Fighter e = Enemies[i];
+                if (e.Down || e.Enemy.Kind != EnemyKind.Boss || e.Enemy.Big == BossMove.None) continue;
+                e.BigIn = 1;
+                PlanIntent(e);
+            }
+        }
+
         private void Heal(Fighter f, int amount)
         {
             if (amount <= 0 || f.Down) return;

@@ -160,6 +160,7 @@ namespace Tacetno433.Screens
         {
             //No Run : the title page is outside any run
             Game.CurrentRun = null;
+            TestRoomScreen.StopTests(Game);                    // TEST ROOM : the tests are over, saving is back on (before CONTINUE is read)
 
             //Menu Lines : CONTINUE first when there is a saved run, and it starts chosen
             SaveFile.CheckRunMode();                           // Alpha 7 : a run from the other battle is not offered
@@ -260,6 +261,14 @@ namespace Tacetno433.Screens
             {
                 int answer = askBox.Update(dt);
                 if (answer == 1) Act(confirmFor);
+                return;
+            }
+
+            //TEST ROOM (Beta1 31 Oct) : F2 opens the team's test page (Screens/TestRoomScreen.cs), the menu never shows it
+            if (TestRoomScreen.On && Input.KeyPressed(Keys.F2))
+            {
+                SoundBank.Play(Sfx.UiConfirm);
+                Game.Screens.Change(new TestRoomScreen());
                 return;
             }
 

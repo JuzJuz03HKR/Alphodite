@@ -468,6 +468,24 @@ namespace Tacetno433.Core
             SaveFile.SaveRun(keep);
             report += Same("this mode", "True", SaveFile.HasRun.ToString());
 
+            //TEST ROOM (Beta1 31 Oct) : while the tests play nothing of theirs is kept. A test run lost on floor 3 pays its APPLAUSE in
+            //memory (Archive.Pay), is saved and deletes the run, none of which reaches the files. The title page (StopTests) ends
+            //the tests and puts the APPLAUSE back, so the saved run is still the one before (floor 1) and the APPLAUSE as it was.
+            SaveFile.SaveArchive();
+            int echoesBefore = Archive.Echoes;
+            TestRoomScreen.StartTests();
+            RunState lostTest = SampleRun(game, "savecheck");
+            lostTest.Floor = 3;
+            int paid = Archive.Pay(lostTest, false);
+            SaveFile.SaveRun(lostTest);
+            SaveFile.DeleteRun();
+            TestRoomScreen.StopTests(game);
+            int echoesAfter = Archive.Echoes;
+            SaveFile.LoadArchive();
+            RunState realBack = SaveFile.LoadRun(game);
+            report += Same("test room", "True " + echoesBefore + " " + echoesBefore + " " + keep.Floor,
+                           (paid > 0) + " " + echoesAfter + " " + Archive.Echoes + " " + (realBack != null ? realBack.Floor.ToString() : "none"));
+
             SaveFile.DeleteRun();
             report += Same("delete", "False", SaveFile.HasRun.ToString());
 
@@ -818,6 +836,8 @@ namespace Tacetno433.Core
             if (names[index] == "pauseask" && frames == waits[index] - 30) { game.Pause.Show(); game.Pause.AskReturn(); }          //   and the box asking first
             if (names[index] == "battlepause" && frames == waits[index] - 30) game.Pause.Show();                                    //   and over a fight
             if (names[index] == "titlequit" && frames == waits[index] - 10) Input.PretendPress = Keys.Escape;
+            if (names[index] == "titletest" && frames == 30) Input.PretendPress = Keys.F2;               // TEST ROOM (31 Oct) : F2 on the title page
+            if (names[index] == "testback" && frames == 150) Input.PretendPress = Keys.F2;                //   F2 in a test (THE WINGS), back to the TEST ROOM
             if (names[index] == "shopleave" && frames == waits[index] - 10) Input.PretendPress = Keys.Enter;
             if (names[index] == "guide2" && frames == 10) Input.PretendPress = Keys.Right;
             if (names[index] == "guide3" && (frames == 10 || frames == 20)) Input.PretendPress = Keys.Right;
@@ -963,6 +983,7 @@ namespace Tacetno433.Core
                 screen = new RestScreen();
             }
             if (name == "curtain" || name == "curtainwin") screen = new CurtainCallScreen(name == "curtainwin");
+            if (name.StartsWith("test")) screen = new TestRoomScreen();                // TEST ROOM (Beta1 31 Oct) : the page, or one of its tests
 
             game.Screens.ChangeNow(screen);
 
@@ -979,6 +1000,25 @@ namespace Tacetno433.Core
             if (name == "tutorialbreath") ((TutorialScreen)screen).JumpForPicture(TutorialScreen.LessonOf("Breath"), 7.6f);   // the duel only
             if (name == "tutorialready") ((TutorialScreen)screen).JumpForPicture(TutorialScreen.LessonOf("Finish"), 0f);
             if (name == "tutorialroll") ((TutorialScreen)screen).JumpForPicture(TutorialScreen.LessonOf("Roll"), 5.8f);
+            if (name.StartsWith("test") && name != "testroom") StartTest(game, name);
+        }
+
+        //Start Test : TEST ROOM (Beta1 31 Oct), test + the name of a test (TestRoomScreen.Test) and a number for its value, started
+        //the way its button starts it : testbossbig15 = THE STAFF at its BIG ATTACK (its place in EnemyList.All), testevent6 = the
+        //seventh event, testenemy1 = DEAD AIR, testwings, testresultwin. The page changes with its wipe, so take the picture later (@90).
+        private static void StartTest(TacetGame game, string name)
+        {
+            if (name == "testback")                                                   // THE WINGS, left again with F2 (After Draw)
+            {
+                TestRoomScreen.Launch(game, TestRoomScreen.Test.Wings, 0);
+                return;
+            }
+            int cut = name.Length;
+            while (cut > 4 && char.IsDigit(name[cut - 1])) cut--;
+            TestRoomScreen.Test test;
+            if (!Enum.TryParse(name.Substring(4, cut - 4), true, out test)) return;
+            int value = cut < name.Length ? int.Parse(name.Substring(cut)) : 0;
+            TestRoomScreen.Launch(game, test, value);
         }
 
         //Pack Names : the enemies of a fight, for the save check
