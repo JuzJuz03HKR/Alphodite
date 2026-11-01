@@ -51,7 +51,7 @@
 4. ✅ เหตุการณ์แบบทางเลือกเสี่ยง (11.7 ข้อ 21) แชท Finalize14 (`BETA1_DIRECTION.md` 28 คำต่อคำ `USER_BRIEFS.md` 13.71 13.72) : แบบเบา ไอริสเสนอทั้ง 10 เหตุการณ์ ผู้ใช้เลือก 6 (RISKY WAYS จ่ายเลือด 35% 50% หรือสู้ ELITE หรือลุ้นต่ำได้เลือดเต็ม `RunState.PayLife`) + ป้ายของที่ได้ทุกทาง (REWARD TAGS) + ดาว 2 ดวงเลือกปุ่มเอง (`RehearsalScreen.From.Event`) / A LOST SCORE A CRACKED BOW คงเดิม / ผู้ใช้เล่นแล้ว ยังไม่ต้องปรับ (`USER_BRIEFS.md` 13.73)
 
 **ก้อน B QoL** (ทำกับระบบที่นิ่งแล้ว ก่อนจัดหน้าจอรอบสุดท้าย)
-1. ⏭ ข้อเสนอ 10 ข้อ 3 กลุ่ม รอผู้ใช้เลือก (`BETA1_DIRECTION.md` 29 แชท Finalize15 ไล่ 37 หน้าทั้งรัน + อ่านโค้ดการกด) : กลุ่ม 1 WORDS EVERYWHERE (คำกติกามีบรรทัดอธิบายทุกหน้า) / BAND LIFE (เลือดรายคนบนแถบบน + เห็นผลก่อนเลือก) / HOW TO PLAY ในเมนูพัก / BOND เห็นก่อนเลือก / กลุ่ม 2 ข้อเล็กที่ไม่ตรงกัน 4 ข้อ / กลุ่ม 3 ปุ่มลัดทุกหน้า กับจำชื่อวง
+1. ✅ แชท Finalize15 (`BETA1_DIRECTION.md` 29 ผู้ใช้เลือก 8 ข้อจาก 10 ทำรวดเดียว 13.75) : WORDS EVERYWHERE คำกติกามีบรรทัดอธิบายทุกหน้า / BAND LIFE เลือดรายคนบนแถบบน + เห็นผลก่อนเลือก / HOW TO PLAY ในเมนูพัก / LIFE 46 / 54 / ป้าย W T ท้ายรัน / WHY NOT / NUMBER KEYS / LAST NAME KEPT / ไม่ทำ BOND เห็นก่อนเลือก กับซ่อน LANGUAGE THAI / รอผู้ใช้ Rebuild ลอง (29.9)
 
 **ก้อน C GUI จัดหน้าจอรอบสุดท้าย** (หน้าจอต้องใช้ได้โดยไม่มีภาพ ไอคอนเป็นตัวย่อในกรอบสี 23.8 / ข้อ 9 = `ASSET_LIST.md` ข้อ 9)
 1. เอากรอบว่างของช่องที่ทีมไม่วาดออกทุกหน้า รวมป้าย FAR กับ STAGE FLOOR ของหน้าต่อสู้ (ข้อ 9 ข้อ 4)
@@ -110,7 +110,7 @@
 ### 00.4 build และทดสอบ
 - Visual Studio 2026 (.NET 9) เปิด `Tacetno433.sln` แล้ว Rebuild ต้องได้ 0 error 0 warning เครื่องใหม่ (เช่นโน้ตบุ๊คอีกเครื่อง) clone หรือ pull branch `Beta1` ล่าสุดก่อนเสมอ
 - แชท cloud : `/build` (เครื่องใหม่ลง dotnet-sdk-8.0 กับรัน `.claude/skills/build/shader_setup.sh` ก่อน ดู `.claude/skills/build/SKILL.md`)
-- `--shots turncheck` 201/201 / `--shots savecheck` 43/43 (1 พ.ย. หลัง A4 เหตุการณ์แบบเบา รันซ้ำในแชท Finalize15 ผ่านเท่าเดิม) / `--shots turnsim` ใช้ 12 หรือ 24 seed (`TACET_SIM_SEED` 4330 กับ 1 ถึง 23 รันพร้อมกันได้)
+- `--shots turncheck` 204/204 / `--shots savecheck` 44/44 (1 พ.ย. หลังก้อน B QoL แชท Finalize15 : ข้อใหม่ life preview / why not breath / why not muted / last band name) / `--shots turnsim` ใช้ 12 หรือ 24 seed (`TACET_SIM_SEED` 4330 กับ 1 ถึง 23 รันพร้อมกันได้)
 - **ผู้ใช้ 31 ต.ค. : คนจริงเล่นแล้วเกมง่ายมาก ห้ามใช้ตัวเลขตัวจำลองตัดสินหรือรายงานว่ายากง่าย** (`BETA1_DIRECTION.md` 14.6) ใช้เทียบก่อนหลังเท่านั้น / ค่าล่าสุด (30 ต.ค. หลังก้อน 2) : NORMAL STRONG ราว 63% MAESTRO EXPERT ราว 83% (24 seed) กับตัวจำลองนิสัยใหม่ที่เลือกสกิลตามค่าและเดินเส้นทาง ส่วน 54% ของ 29 ต.ค. เป็นของนิสัยก่อนหน้า วัดเทียบต้องใช้ตัวจำลองตัวเดียวกัน (`TACET_SIM_NOPATH=1` ปิดเส้นทาง)
 - `TACET_SIM_SET` ลองตัวเลขโดยไม่ build ใหม่ ตาราง MUSICIANS ในรายงานบอกว่าวงที่มีแต่ละคนชนะเท่าไร
 - ชีต `docs/TACET_Balance.xlsx` : หลังแก้ตัวเลข `python3 docs/turn_balance_tabs.py <turnsim.txt>` (แท็บ Turn ทั้งหมดกับ Turn Skills)

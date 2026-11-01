@@ -1573,6 +1573,7 @@ TEST ROOM (31 ต.ค. `BETA1_DIRECTION.md` 22) : `testroom` หน้าเท�
 SHARED LOOKS (1 พ.ย. `BETA1_DIRECTION.md` 24) : `battlelooks1` (ตัวที่ใช้ภาพ hush) `battlelooks2` (static) `battlelooks3` (elite) ยืนเรียงกัน เครื่องหมายขึ้นเมื่อมีไฟล์ของแบบใน `Content/Art/Battle/Enemies/`
 ENCORE (1 พ.ย. `BETA1_DIRECTION.md` 27) : ชื่อหน้าใดก็ได้เติม `encore` ท้าย = หน้าเดิมแต่ THE UNHEARING ชนะ ENCORE 1 แล้ว THE METRONOME ชนะรันแรก FANNY ยังไม่เคย และรันอยู่ ENCORE 2 เช่น `galleryencore` `detailencore` `curtainwinencore` `routeencore` / หน้าอื่นทุกหน้าถือว่ายังไม่มีใครชนะ
 RISKY WAYS (1 พ.ย. `BETA1_DIRECTION.md` 28) : `event0` ถึง `event9` = เหตุการณ์ตามลำดับ `EventList.All` (`event` = A STREET MUSICIAN `eventchair` = THE EMPTY CHAIR) / `eventpaid0` ถึง `eventpaid9` = กดทางที่ 3 ที่เฟรม 40 เช่น `eventpaid0@100` / `rehearsalevent` = หน้าซ้อม 2 ดาวของเหตุการณ์ เฟรม 40 ให้ดาวแรก (`rehearsalevent@140` = ดาวที่สอง)
+BLOCK B QoL (1 พ.ย. `BETA1_DIRECTION.md` 29) : `lifetip` = แผนที่ เมาส์อยู่บน LIFE (เลือดรายคน BAND LIFE) / `pauseguide` = HOW TO PLAY ที่เมนูพักยืมมา / บรรทัดคำ WORDS EVERYWHERE ดูได้ที่ `teampickfull` `detail` `rehearsal` / ป้ายเลข NUMBER KEYS ที่ `rest` `shop` `luthier` `rehearsal`
 
 ```bash
 Tacetno433.exe --shots title,battle,result --out C:\pictures --scale 1.5 --steady

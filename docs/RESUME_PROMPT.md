@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 1 พ.ย. แชท /system (Finalize15) | ก้อน B QoL ข้อ 1 2 3 5 6 8 9 10 ที่ผู้ใช้เลือก (`BETA1_DIRECTION.md` 29.6) ทำรวดเดียว | `Data/Words.cs` `Data/RunState.cs` `Core/Ui.cs` `Core/RunHud.cs` `Core/BandColumn.cs` `Core/Settings.cs` `Data/SaveFile.cs` `Screens/` (TeamPick ConductorDetail MotifReward Rehearsal Rest Event Pause Guide CurtainCall Battle Shop Luthier BandName) `Battle/TurnBattle.cs` `Core/DebugShots*.cs` เอกสาร |
+| (ว่าง) | | |
 
 ---
 
@@ -64,8 +64,11 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 
 ## สถานะล่าสุด (1 พ.ย.)
 
-**1 พ.ย. แชท /system (Finalize15) : ก้อน B QoL กำลังทำรวดเดียว (ผู้ใช้เลือก 13.75 : ข้อ 1 2 3 5 6 8 9 10)**
-ความคืบหน้า : ✅ ข้อ 1 WORDS EVERYWHERE `b3ce95d` / ✅ ข้อ 2 BAND LIFE `26aefc4` (turncheck 202/202 ข้อใหม่ life preview / ภาพใหม่ `lifetip`) / ⏭ ข้อ 3 HOW TO PLAY ในเมนูพัก / แล้ว 5 6 8 / 9 / 10 / แล้วรายงานครั้งเดียว
+**1 พ.ย. แชท /system (Finalize15) : ✅ ก้อน B QoL เสร็จ (ผู้ใช้เลือก 8 ข้อ ทำรวดเดียว) หยุดรอผู้ใช้ Rebuild ลอง** (คำต่อคำ `USER_BRIEFS.md` 13.74 13.75 รายละเอียด `BETA1_DIRECTION.md` 29.7)
+✅ 1 WORDS EVERYWHERE `b3ce95d` / 2 BAND LIFE `26aefc4` / 3 HOW TO PLAY ในเมนูพัก `150be1b` / 5 6 8 LIFE 46 / 54 ป้าย W T WHY NOT `229cfb6` / 9 NUMBER KEYS `305ac80` / 10 LAST NAME KEPT `8b83124` / ไม่ทำข้อ 4 กับ 7
+✅ build 0/0 turncheck 204/204 savecheck 44/44 / แคป 1280×720 และ `--scale 1.5` (ใหม่ `lifetip` `pauseguide`) / BOM คงเดิม / งานอยู่บน GitHub / ตาราง "แชทที่กำลังทำงาน" ว่าง
+⚠️ ยังไม่เห็นในภาพ : บรรทัดคำบนการ์ดรางวัล ร้าน tooltip ของ GIFT / คำเด้ง WHY NOT / ตัวอย่างเลือดของ REST (29.8)
+**ถัดไป** : ผู้ใช้ Rebuild ลอง (29.9) / แล้วก้อน C GUI จัดหน้าจอรอบสุดท้าย (`HANDOFF.md` 00.3 ข้อ C6 แถบการ์ดของวง ❓ ถามก่อน) / PLAYTEST FINALE ยัง 1 PERFECT (`PlaytestSignatureNeed` ห้ามแก้จนผู้ใช้บอก)
 
 **1 พ.ย. แชท /system (Finalize15) : ก้อน B QoL ข้อเสนอเสร็จ รอผู้ใช้เลือก ยังไม่แตะโค้ด** (คำต่อคำ `USER_BRIEFS.md` 13.74 ข้อเสนอเต็ม `BETA1_DIRECTION.md` 29)
 ✅ เครื่องในแชทนี้ clone มาตามหลัง GitHub 58 commit (ข้อความ forced update มาจาก clone แบบตื้น ไม่ใช่ force push จริง) pull แล้ว / build 0/0 turncheck 201/201 savecheck 43/43 / แคป 37 หน้าทั้งรัน + อ่านโค้ดการกดทุกหน้า
