@@ -368,7 +368,7 @@ namespace Tacetno433.Core
             run.RecordStop(NodeType.Shop);
             run.Chosen = run.Options[Math.Min(1, run.Options.Length - 1)];
             run.CurrentEvent = EventList.All[2];
-            run.Maestro = true;                                                         // MAESTRO MODE is kept too
+            run.Encore = 3;                                                             // ENCORE is kept too (MAESTRO MODE until 1 Nov)
             run.WingsRested = true;                                                     // THE WINGS (BOSSES) : rested, the free star taken, 2 bought
             run.WingsFreeStar = true;
             run.WingsBought = 2;
@@ -401,7 +401,7 @@ namespace Tacetno433.Core
                 report += Same("conductor", run.Conductor.Name, back.Conductor.Name);
                 report += Same("band", run.BandName, back.BandName);
                 report += Same("floor / stage", run.Floor + "/" + run.Stage + "/" + run.StagesThisFloor, back.Floor + "/" + back.Stage + "/" + back.StagesThisFloor);
-                report += Same("maestro", run.Maestro.ToString(), back.Maestro.ToString());
+                report += Same("encore", run.Encore.ToString(), back.Encore.ToString());
                 report += Same("shards / dice", run.Shards + "/" + run.PlaceSeed, back.Shards + "/" + back.PlaceSeed);
                 report += Same("stamina", run.StaminaValue, back.StaminaValue);
                 report += Same("record", run.BattlesWon + "/" + run.PerfectsTotal + "/" + run.BestCombo, back.BattlesWon + "/" + back.PerfectsTotal + "/" + back.BestCombo);
@@ -444,13 +444,14 @@ namespace Tacetno433.Core
             }
 
             //Settings : change them, save, scramble, load, compare, then put the defaults back
-            Settings.Master = 0.35f; Settings.Sfx = 0.6f; Settings.Music = 0.1f; Settings.Language = 1; Settings.SetTiming(0.045f); Settings.Maestro = true; Settings.ClearFight = true;
+            //(ENCORE 1 Nov : MAESTRO MODE is not a setting any more, it was the part between the timing and CLEAR FIGHT)
+            Settings.Master = 0.35f; Settings.Sfx = 0.6f; Settings.Music = 0.1f; Settings.Language = 1; Settings.SetTiming(0.045f); Settings.ClearFight = true;
             SaveFile.SaveSettings();
-            Settings.Master = 1f; Settings.Sfx = 1f; Settings.Music = 1f; Settings.Language = 0; Settings.SetTiming(0f); Settings.Maestro = false; Settings.ClearFight = false;
+            Settings.Master = 1f; Settings.Sfx = 1f; Settings.Music = 1f; Settings.Language = 0; Settings.SetTiming(0f); Settings.ClearFight = false;
             SaveFile.LoadSettings();
-            report += Same("settings", "0.35/0.6/0.1/1/" + Settings.TimingLabel(0.045f) + "/True/True",
-                           Settings.Master + "/" + Settings.Sfx + "/" + Settings.Music + "/" + Settings.Language + "/" + Settings.TimingLabel(Settings.TimingOffset) + "/" + Settings.Maestro + "/" + Settings.ClearFight);
-            Settings.Master = 0.8f; Settings.Sfx = 0.8f; Settings.Music = 0.55f; Settings.Language = 0; Settings.SetTiming(0f); Settings.Maestro = false; Settings.ClearFight = false;
+            report += Same("settings", "0.35/0.6/0.1/1/" + Settings.TimingLabel(0.045f) + "/True",
+                           Settings.Master + "/" + Settings.Sfx + "/" + Settings.Music + "/" + Settings.Language + "/" + Settings.TimingLabel(Settings.TimingOffset) + "/" + Settings.ClearFight);
+            Settings.Master = 0.8f; Settings.Sfx = 0.8f; Settings.Music = 0.55f; Settings.Language = 0; Settings.SetTiming(0f); Settings.ClearFight = false;
 
             //KEEPSAKE (Alpha 7) : CONTINUE keeps exactly the saved motifs, it does not roll the keepsake again
             int keptKeepsake = Archive.All[Archive.Keepsake].Level;
@@ -485,6 +486,30 @@ namespace Tacetno433.Core
             RunState realBack = SaveFile.LoadRun(game);
             report += Same("test room", "True " + echoesBefore + " " + echoesBefore + " " + keep.Floor,
                            (paid > 0) + " " + echoesAfter + " " + Archive.Echoes + " " + (realBack != null ? realBack.Floor.ToString() : "none"));
+
+            //ENCORE (1 Nov) : the levels won with each conductor come back from archive.txt and every pick starts at the highest
+            //open level : THE UNHEARING (3) won ENCORE 2 so ENCORE 3 is picked, THE METRONOME (1) won a first concert, FANNY (8)
+            //none. A run saved before 1 Nov has maestro=1 in the place of encore= : it loads as ENCORE 2, the old MAESTRO MODE.
+            int[] keptWon = (int[])Encore.Won.Clone();
+            for (int i = 0; i < Encore.Won.Length; i++) Encore.Won[i] = -1;
+            Encore.Won[3] = 2;
+            Encore.Won[1] = 0;
+            SaveFile.SaveArchive();
+            for (int i = 0; i < Encore.Won.Length; i++) Encore.Won[i] = 4;
+            SaveFile.LoadArchive();
+            report += Same("encore archive", "2 0 -1 3 1 0", Encore.Won[3] + " " + Encore.Won[1] + " " + Encore.Won[8] + " " + Encore.Picked(ConductorList.All[3])
+                           + " " + Encore.Picked(ConductorList.All[1]) + " " + Encore.Picked(ConductorList.All[8]));
+            SaveFile.SaveRun(keep);
+            string runFile = Path.Combine(outDir, "run.txt");
+            string[] runLines = File.ReadAllLines(runFile);
+            for (int i = 0; i < runLines.Length; i++)
+                if (runLines[i].StartsWith("encore=")) runLines[i] = "maestro=1";
+            File.WriteAllLines(runFile, runLines);
+            RunState oldMaestro = SaveFile.LoadRun(game);
+            report += Same("old maestro", "2", oldMaestro != null ? oldMaestro.Encore.ToString() : "none");
+            for (int i = 0; i < keptWon.Length; i++) Encore.Won[i] = keptWon[i];
+            Encore.PickAll();
+            SaveFile.SaveArchive();
 
             SaveFile.DeleteRun();
             report += Same("delete", "False", SaveFile.HasRun.ToString());
@@ -785,7 +810,7 @@ namespace Tacetno433.Core
         {
             RunState run = new RunState();
             run.Start(conductor, game.StoryFont, RouteNodeInfo.CaptionWrapWidth);
-            run.Maestro = simMaestro;                                                   // MAESTRO MODE
+            run.Encore = simMaestro ? BattleRules.EncoreTiming : 0;                     // MAESTRO MODE (ENCORE 2 since 1 Nov)
             run.BandName = "SIM";
             if (startMotif != null) run.AddMotif(startMotif);
             bool alive = true;
@@ -1037,7 +1062,22 @@ namespace Tacetno433.Core
         {
             Settings.ClearFight = name.EndsWith("clear");                                 // Beta1 step 6 : the same picture with CLEAR FIGHT on (battleclear, battleparryclear)
             if (Settings.ClearFight) name = name.Substring(0, name.Length - 5);
+
+            //ENCORE (1 Nov) : a name ending in "encore" is the same page with some levels won (THE UNHEARING won ENCORE 1, THE
+            //METRONOME a first concert, FANNY none) and the run at ENCORE 2 : galleryencore detailencore curtainwinencore routeencore.
+            //Every other page has nothing won, so a picture never depends on the pages taken before it.
+            bool encoreShot = name.EndsWith("encore");
+            if (encoreShot) name = name.Substring(0, name.Length - 6);
+            for (int i = 0; i < Encore.Won.Length; i++) Encore.Won[i] = -1;
+            if (encoreShot)
+            {
+                Encore.Won[3] = 1;
+                Encore.Won[1] = 0;
+            }
+            Encore.PickAll();
+
             RunState run = SampleRun(game, name);
+            if (encoreShot) run.Encore = 2;
             game.CurrentRun = run;
             game.Pause.Open = false;
             SaveFile.PretendRun = name == "titlecontinue";

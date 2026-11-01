@@ -39,7 +39,26 @@ namespace Tacetno433.Data
         public int Stage = 1;
         public int StagesThisFloor = 8;      // the boss sits on this stage number
         public bool RunComplete;             // true once the last boss is beaten
-        public bool Maestro;                 // MAESTRO MODE : hard from the first fight, NORMAL when false (29 Sep, BattleRules)
+        public int Encore;                   // ENCORE (1 Nov, in place of MAESTRO MODE) : 0 a first concert, 1 to 5 each adds one rule (BattleRules ENCORE)
+        public int EncoreOpened;             // ENCORE : the level this run's win opened (Encore.Win), for the curtain call. Not saved
+
+        //Maestro : the old duel's MAESTRO MODE (29 Sep), the same as ENCORE's timing rule (ENCORE 2 and up)
+        public bool Maestro
+        {
+            get { return Encore >= BattleRules.EncoreTiming; }
+        }
+
+        //Encore At : this rule of ENCORE is on for the run (the run's level is this one or higher)
+        public bool EncoreAt(int level)
+        {
+            return Encore >= level;
+        }
+
+        //Rest Share : ENCORE 4, the free rests (REST's RECOVER, the rest on the way into THE WINGS) heal less
+        public float RestShare
+        {
+            get { return EncoreAt(BattleRules.EncoreRest) ? BattleRules.EncoreRestShare : 1f; }
+        }
 
         //Run Party : THE BAND OF THREE (Beta1, 29 Oct, docs/BETA1_DIRECTION.md 8), picked at the start and together all run
         public List<Musician> Roster = new List<Musician>();       // the band, BattleRules.BandSize musicians
@@ -539,7 +558,9 @@ namespace Tacetno433.Data
             if (kind == EnemyKind.Elite) return BattleRules.TurnEliteEscort[f];
             if (kind == EnemyKind.Boss) return BattleRules.TurnBossEscort[f];
             bool late = Stage * 2 > StagesThisFloor;
-            return (late ? BattleRules.TurnPackLate[f] : BattleRules.TurnPackEarly[f]) - 1;
+            int pack = late ? BattleRules.TurnPackLate[f] : BattleRules.TurnPackEarly[f];
+            if (EncoreAt(BattleRules.EncorePacks)) pack = Math.Max(pack, Math.Min(pack + 1, BattleRules.EncorePackMost));   // ENCORE 3 : one more
+            return pack - 1;
         }
 
         //Battle Finish : called once the player has seen the outcome

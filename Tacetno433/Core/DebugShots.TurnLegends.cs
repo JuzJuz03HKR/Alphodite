@@ -163,6 +163,7 @@ namespace Tacetno433.Core
             report += TurnCheckWords();                                                // WORDS (Beta1 31 Oct, 16.14 item 3)
             report += TurnCheckNumbers();                                              // NO LIMIT (Beta1 31 Oct, numbers past 999)
             report += TurnCheckBigs();                                                 // BOSSES (Beta1 31 Oct, the named BIG ATTACKs)
+            report += TurnCheckEncore();                                               // ENCORE (Beta1 1 Nov, in place of MAESTRO MODE)
             return report;
         }
 

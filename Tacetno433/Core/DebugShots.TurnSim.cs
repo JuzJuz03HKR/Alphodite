@@ -492,7 +492,7 @@ namespace Tacetno433.Core
         {
             TurnBattle b = new TurnBattle(band, enemies, floor, rng, startHp, 0);
             b.Kit = kit;
-            b.Maestro = maestro;
+            b.Encore = maestro ? BattleRules.EncoreTiming : 0;          // MAESTRO in the simulation = ENCORE 2, the old MAESTRO MODE's rules
 
             for (int step = 0; step < 900 && b.Step != TurnStep.Won && b.Step != TurnStep.Lost; step++)
             {

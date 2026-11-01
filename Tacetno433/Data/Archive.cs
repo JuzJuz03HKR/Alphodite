@@ -72,17 +72,18 @@ namespace Tacetno433.Data
             run.EchoesPaid = true;
             run.EchoesEarned = EchoesFor(run, won);
             Echoes += run.EchoesEarned;
+            if (won) run.EncoreOpened = Encore.Win(run);       // ENCORE : a won run opens its conductor's next level, saved with the rest
             SaveFile.SaveArchive();
             return run.EchoesEarned;
         }
 
-        //Echoes For : what a finished run leaves behind. MAESTRO pays more.
+        //Echoes For : what a finished run leaves behind. Each level of ENCORE pays a little more.
         public static int EchoesFor(RunState run, bool won)
         {
             int floors = won ? BattleRules.FloorsPerRun : Math.Max(0, run.Floor - 1);
             int echoes = run.BattlesWon * BattleRules.EchoesPerWin + floors * BattleRules.EchoesPerFloor;
             if (won) echoes += BattleRules.EchoesRunWon;
-            if (run.Maestro) echoes = (int)Math.Round(echoes * BattleRules.EchoesMaestro);     // MAESTRO
+            if (run.Encore > 0) echoes = (int)Math.Round(echoes * (1f + run.Encore * BattleRules.EchoesEncore));     // ENCORE
             return echoes;
         }
     }

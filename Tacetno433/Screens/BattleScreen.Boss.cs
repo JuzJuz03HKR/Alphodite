@@ -428,8 +428,8 @@ namespace Tacetno433.Screens
             Gfx.Bar(sb, bar, boss.Hp / (float)Math.Max(1, boss.MaxHp), Palette.Stage * a, Palette.Paper * a);
             if (!boss.Down) DrawLifePreview(sb, bar, boss, LossOf(boss), 0, a);
 
-            //Half Mark : a diamond at half life, broken into two halves flying apart after THE TURN
-            float half = bar.X + bar.Width * BattleRules.TurnBigPhase;
+            //Half Mark : a diamond at half life (three quarters on ENCORE 5), broken into two halves flying apart after THE TURN
+            float half = bar.X + bar.Width * battle.BigPhase;
             if (!boss.SecondHalf) Gfx.Diamond(sb, half, bar.Center.Y, 6, Palette.Highlight * a);
             else if (bossHalfBreak > 0f)
             {

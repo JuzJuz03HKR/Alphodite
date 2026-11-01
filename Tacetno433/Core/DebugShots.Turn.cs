@@ -442,7 +442,7 @@ namespace Tacetno433.Core
             int keptChair = Archive.All[Archive.FirstChair].Level;
             run.Floor = 2;
             run.BattlesWon = 4;
-            run.Maestro = false;
+            run.Encore = 0;
             int earned = Archive.EchoesFor(run, false);
             Archive.Echoes = 29;
             bool tooPoor = Archive.Buy(Archive.Life);
@@ -504,10 +504,10 @@ namespace Tacetno433.Core
                          + " " + BattleState.RankIndexOf(BattleState.RankScoreOf(0, 0, 1f)) + " " + BattleState.RankIndexOf(BattleState.RankScoreOf(2, 10, 0.5f));
             report += Same("rank", "1 0 0 3", ranks);
 
-            //MAESTRO : TACET's notes hit MaestroTurnDamage harder (1.3 since the band of three : HUSH's note 10, it was 9 at 1.15)
+            //ENCORE 1 (MAESTRO MODE until 1 Nov) : TACET's notes hit MaestroTurnDamage harder (1.3 since the band of three : HUSH's note 10, it was 9 at 1.15)
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
-            b.Maestro = true;
-            report += Same("maestro notes", "10", b.Enemies[0].IntentNotes[0].ToString());
+            b.Encore = BattleRules.EncoreHits;
+            report += Same("encore 1 notes", "10", b.Enemies[0].IntentNotes[0].ToString());
 
             //PACKS : ordinary enemies that join a fight. Floor 1 early 0, floor 1 elite 0, floor 3 late 3, floor 3 boss 2
             RunState run = new RunState();

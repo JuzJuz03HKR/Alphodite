@@ -87,6 +87,7 @@ namespace Tacetno433.Screens
             "PERFECTs fill the diamonds. Full, SPACE plays the " + Words.Finale + ".",
             "A musician who falls gets up with 1 life after the fight.",
             "Every run earns " + Words.Applause + ". Spend it in THE ARCHIVE.",
+            "Win a run to open " + Words.Encore + " : the same conductor again, with one more rule.",
             "Strokes judged early or late? Settings has a STROKE TIMING test.",
         };
 

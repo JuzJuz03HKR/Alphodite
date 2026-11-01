@@ -24,10 +24,6 @@ namespace Tacetno433.Core
         //Full Screen : applied by TacetGame.ApplyFullscreen
         public static bool Fullscreen;
 
-        //MAESTRO MODE : the mode the next run starts in, picked on the conductor pages and
-        //remembered for next time (29 Sep). false is NORMAL.
-        public static bool Maestro;
-
         //Less Flashing (Beta1) : for players who find flashes hard to look at. The battle drops the IMPACT FRAME
         //and turns its flashes and shaking down (BattleRules.LessFlash).
         public static bool ReduceFlashing;

@@ -45,6 +45,9 @@ namespace Tacetno433.Screens
         private int[] counts = new int[4];
         private string headline = "";
         private string subline = "";
+        private const string EncoreCall = "ENCORE!";     // ENCORE (1 Nov) : the audience calls the band back after a won run
+        private string encoreLine = "";                  //   which level the win opened, "" when it opened none (made in Load)
+        private float encoreCallW;
         private float time;
         private UiMotion titleMotion = new UiMotion();
 
@@ -74,6 +77,11 @@ namespace Tacetno433.Screens
             {
                 counts[3] = Archive.Pay(run, won);                 // given once, maybe already when the last fight was lost
                 countNames[3] = Words.Applause;
+
+                //ENCORE (1 Nov) : a won run opens its conductor's next level (Archive.Pay). The call names it, or the top level won.
+                if (won && run.EncoreOpened > 0) encoreLine = Encore.Labels[run.EncoreOpened] + " IS OPEN";
+                else if (won && run.Encore >= BattleRules.EncoreTop) encoreLine = Encore.Labels[BattleRules.EncoreTop] + " WON";
+                encoreCallW = Gfx.TextWidth(Game.BigFont, EncoreCall, TextSize.Subtitle);
             }
 
             run.SyncOrder();
@@ -235,6 +243,14 @@ namespace Tacetno433.Screens
             Gfx.TextSpaced(sb, Game.Font, "CURTAIN CALL", 90, 44, Palette.PaperDim * a, TextSize.Label, 6f);
             Gfx.Text(sb, Game.LogoFont, headline, 84 - (1f - a) * slide, 64, Palette.Highlight * a, TextSize.Logo * 0.85f);
             Gfx.Text(sb, Game.StoryFont, subline, 92, 160, Palette.Paper * b, TextSize.Story);
+
+            //ENCORE : the call under the subline in the conductor's colour, and the level it opened
+            if (encoreLine.Length > 0)
+            {
+                float call = UiMotion.Between(time, 0.6f, BattleRules.UiEnterTime);
+                Gfx.Text(sb, Game.BigFont, EncoreCall, 92, 192, run.Conductor.SpotAt(time) * call, TextSize.Subtitle);
+                Gfx.TextSpaced(sb, Game.Font, encoreLine, 92 + encoreCallW + 16f, 202, Palette.Paper * call, TextSize.Tiny, 3f);
+            }
 
             //Names Under The Bow
             int count = run.Order.Count + 1;

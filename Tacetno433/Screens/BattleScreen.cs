@@ -250,7 +250,7 @@ namespace Tacetno433.Screens
             List<Enemy> enemies = new List<Enemy>(run.Battle.Pack);
             battle = new TurnBattle(band, enemies, run.Floor, run.Rng, life, Archive.Level(Archive.Life) * BattleRules.ArchiveLifePerLevel);
             battle.GiveMotifs(run.Motifs);                                                   // the motifs the band carries
-            battle.Maestro = run.Maestro;                                                    // MAESTRO
+            battle.Encore = run.Encore;                                                      // ENCORE (1 Nov, MAESTRO MODE until then)
             battle.Kit = run.Conductor.Turn;                                                 // the conductor's PASSIVE and SIGNATURE
 
             //ARCHIVE : DEEP BREATH and WARM UP, bought between runs (step 7)
@@ -336,10 +336,10 @@ namespace Tacetno433.Screens
             Game.IsMouseVisible = view != View.Swipe;
         }
 
-        //Ring Time : how long a ring takes to close (MAESTRO is quicker)
+        //Ring Time : how long a ring takes to close (quicker from ENCORE 2, as MAESTRO MODE was)
         private float RingTime
         {
-            get { return battle.Maestro ? BattleRules.MaestroTurnRingTime : BattleRules.TurnRingTime; }
+            get { return battle.TightTiming ? BattleRules.MaestroTurnRingTime : BattleRules.TurnRingTime; }
         }
 
         //======================================================================================

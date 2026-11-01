@@ -44,7 +44,7 @@ namespace Tacetno433.Screens
         }
 
         //Picks : the words of the top rows, which stay chosen
-        private enum Pick { None, Conductor, Band, Floor, Stars, Gifts }
+        private enum Pick { None, Conductor, Band, Floor, Stars, Gifts, Encore }
 
         //Fight Tweak : what the next fight changes once it is made (BattleScreen.Load calls TweakFight)
         private enum Tweak { None, BigFirst, HalfLife }
@@ -67,12 +67,15 @@ namespace Tacetno433.Screens
         private static int floorPick = 1;
         private static int starsPick;                                       // 0 none, 1 one star on every move, 2 all three
         private static int giftsPick;                                       // 0 none, 1 every gift the band can find
+        private static int encorePick;                                      // ENCORE (1 Nov) : any level, open or not, for testing
         private static int lastFocus;
         private static Tweak pendingTweak;
 
         //ARCHIVE kept : a test run's APPLAUSE is given in memory (Archive.Pay), so the values from before the tests come back after
         private static int keptEchoes;
         private static int[] keptLevels = new int[0];
+        private static int[] keptEncoreWon = new int[0];                    // ENCORE : a test run won opens a level in memory only
+        private static int[] keptEncorePick = new int[0];
 
         private static readonly string[] floorWords = { "1", "2", "3" };
         private static readonly string[] starsWords = { "NONE", "1 EACH", "3 EACH" };
@@ -106,7 +109,7 @@ namespace Tacetno433.Screens
         private UiMotion backMotion = new UiMotion();
 
         //Prepared Text and Places : made in Load, never in Draw
-        private float[] pickX = new float[6];           // where each pick's heading starts (by Pick)
+        private float[] pickX = new float[7];           // where each pick's heading starts (by Pick)
         private List<string> bossNames = new List<string>();
         private List<string> bossBigs = new List<string>();
         private List<float> bossBigX = new List<float>();
@@ -160,6 +163,8 @@ namespace Tacetno433.Screens
             keptEchoes = Archive.Echoes;
             keptLevels = new int[Archive.All.Length];
             for (int i = 0; i < keptLevels.Length; i++) keptLevels[i] = Archive.All[i].Level;
+            keptEncoreWon = (int[])Encore.Won.Clone();
+            keptEncorePick = (int[])Encore.Pick.Clone();
         }
 
         //Stop Tests : the title page opens. Saving is back on and the ARCHIVE is as it was before the tests.
@@ -170,6 +175,8 @@ namespace Tacetno433.Screens
             SaveFile.TestRun = false;
             Archive.Echoes = keptEchoes;
             for (int i = 0; i < keptLevels.Length && i < Archive.All.Length; i++) Archive.All[i].Level = keptLevels[i];
+            for (int i = 0; i < keptEncoreWon.Length && i < Encore.Won.Length; i++) Encore.Won[i] = keptEncoreWon[i];
+            for (int i = 0; i < keptEncorePick.Length && i < Encore.Pick.Length; i++) Encore.Pick[i] = keptEncorePick[i];
             pendingTweak = Tweak.None;
             game.CurrentRun = null;
         }
@@ -187,7 +194,7 @@ namespace Tacetno433.Screens
                 for (int i = 0; i < battle.Enemies.Count; i++)
                 {
                     Fighter f = battle.Enemies[i];
-                    if (f.Enemy.Kind == EnemyKind.Boss) f.Hp = Math.Min(f.Hp, (int)(f.MaxHp * BattleRules.TurnBigPhase) + 1);
+                    if (f.Enemy.Kind == EnemyKind.Boss) f.Hp = Math.Min(f.Hp, (int)(f.MaxHp * battle.BigPhase) + 1);
                 }
         }
 
@@ -284,7 +291,7 @@ namespace Tacetno433.Screens
         {
             RunState run = new RunState();
             run.Start(ConductorList.Shown[conductorPick], game.StoryFont, RouteNodeInfo.CaptionWrapWidth);
-            run.Maestro = Settings.Maestro;                                                 // MAESTRO MODE as the player set it
+            run.Encore = encorePick;                                                        // ENCORE as picked on this page (open or not)
             run.BandName = "TEST BAND";
             run.Floor = floorPick;
             run.BeginFloor();                                                               // the picked floor's own map
@@ -423,6 +430,9 @@ namespace Tacetno433.Screens
             x += GroupGap;
             pickX[(int)Pick.Floor] = x;
             for (int i = 0; i < floorWords.Length; i++) x = AddChip(Pick.Floor, i + 1, floorWords[i], x, PickRow1);
+            x += GroupGap;
+            pickX[(int)Pick.Encore] = x;
+            for (int i = 0; i <= BattleRules.EncoreTop; i++) x = AddChip(Pick.Encore, i, Encore.Digits[i], x, PickRow1);
 
             //Row 2 : BAND, STARS and GIFTS
             x = Left;
@@ -550,6 +560,7 @@ namespace Tacetno433.Screens
                 case Pick.Floor: return floorPick == it.Value;
                 case Pick.Stars: return starsPick == it.Value;
                 case Pick.Gifts: return giftsPick == it.Value;
+                case Pick.Encore: return encorePick == it.Value;
             }
             return false;
         }
@@ -640,6 +651,7 @@ namespace Tacetno433.Screens
                 if (it.Pick == Pick.Floor) floorPick = it.Value;
                 if (it.Pick == Pick.Stars) starsPick = it.Value;
                 if (it.Pick == Pick.Gifts) giftsPick = it.Value;
+                if (it.Pick == Pick.Encore) encorePick = it.Value;
                 if (it.Pick == Pick.Band)
                 {
                     if (bandPick.Contains(it.Value)) bandPick.Remove(it.Value);
@@ -696,6 +708,7 @@ namespace Tacetno433.Screens
             Color head = Palette.LineGrey * a;
             Gfx.TextSpaced(sb, Game.Font, "CONDUCTOR", pickX[(int)Pick.Conductor], PickRow1 - 20, head, TextSize.Tiny, 2f);
             Gfx.TextSpaced(sb, Game.Font, "FLOOR", pickX[(int)Pick.Floor], PickRow1 - 20, head, TextSize.Tiny, 2f);
+            Gfx.TextSpaced(sb, Game.Font, Words.Encore, pickX[(int)Pick.Encore], PickRow1 - 20, head, TextSize.Tiny, 2f);
             Gfx.TextSpaced(sb, Game.Font, "BAND  PICK 3, THE FIRST STANDS IN FRONT", pickX[(int)Pick.Band], PickRow2 - 20, head, TextSize.Tiny, 2f);
             Gfx.TextSpaced(sb, Game.Font, "STARS ON EVERY MOVE", pickX[(int)Pick.Stars], PickRow2 - 20, head, TextSize.Tiny, 2f);
             Gfx.TextSpaced(sb, Game.Font, "GIFTS", pickX[(int)Pick.Gifts], PickRow2 - 20, head, TextSize.Tiny, 2f);

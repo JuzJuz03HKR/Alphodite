@@ -54,6 +54,7 @@ namespace Tacetno433.Data
         public const string Workshop = "WORKSHOP";    // LUTHIER in the code : a place where one ATTACK gets a star, free
         public const string Wings = "THE WINGS";      // BOSSES (Beta1 31 Oct) : the REST just before the boss, rest and rehearse in one
         public const string Applause = "APPLAUSE";    // ECHOES in the code : what a run leaves behind, spent in THE ARCHIVE
+        public const string Encore = "ENCORE";        // (1 Nov, in place of MAESTRO MODE) a won run opens its conductor's next level, one more rule each (Data/Encore.cs)
         public const string Shards = "SHARDS";
         public const string Star = "STAR";            // REHEARSAL : one star for one button of the band (a won fight, the WORKSHOP, a REST)
         public const string Gift = "GIFT";            // MOTIF in the code : what an ELITE, a TREASURE or a boss leaves

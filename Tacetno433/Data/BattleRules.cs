@@ -57,7 +57,7 @@
         public static int[] TurnPackLate = { 2, 3, 4 };       //              in the second half
         public static int[] TurnEliteEscort = { 0, 1, 2 };    // ordinary enemies that come with an ELITE
         public static int[] TurnBossEscort = { 0, 1, 2 };     // and with the BOSS
-        public static float MaestroTurnDamage = 1.3f;            // MAESTRO : each of TACET's notes hits this much harder (1 = as NORMAL :
+        public static float MaestroTurnDamage = 1.3f;            // ENCORE 1 since 1 Nov (MAESTRO until then) : each of TACET's notes hits this much harder (1 = as NORMAL :
                                                               // its narrower windows already make it hard). THE BAND OF THREE (29 Oct) : was 1.15,
                                                               // the band's life x1.5 left MAESTRO EXPERT at 80 percent, 1.3 is 68-71 (was 64)
         public static int TurnShardsPerEscort = 6;            // shards for each enemy beyond the first
@@ -266,12 +266,26 @@
         public static int EchoesPerWin = 3;            // each fight won
         public static int EchoesPerFloor = 10;         // each floor cleared
         public static int EchoesRunWon = 25;           // the whole run won
-        public static float EchoesMaestro = 1.5f;      // MAESTRO pays more
+        public static float EchoesEncore = 0.25f;      // ENCORE : this much more for each level (ENCORE 2 pays x1.5, as MAESTRO MODE did)
         public static int ArchiveLifePerLevel = 2;     // STRONGER BAND
         public static int ArchiveBreathPerLevel = 1;   // DEEP BREATH
         public static int ArchiveSignaturePerLevel = 2;// WARM UP
         public static int ArchiveShardsPerLevel = 20;  // SAVINGS
         public static int ArchiveFirstChairTier = 1;   // FIRST CHAIR (29 Oct, was FULL STAGE) : the first musician picked starts with their weapon this many tiers up
+
+        //ENCORE (Beta1 1 Nov, Data/Encore.cs, docs/BETA1_DIRECTION.md 27, the user's pick in place of MAESTRO MODE) : a won run
+        //opens the next ENCORE of its conductor, up to EncoreTop. Each level adds ONE rule on top of the ones under it, and the
+        //level each rule starts at is written below. ENCORE 1 and 2 together are the old MAESTRO MODE (its Maestro numbers are
+        //kept and used here), so a player who played MAESTRO finds nothing easier.
+        public const int EncoreTop = 5;
+        public const int EncoreHits = 1;               // TACET's notes hit MaestroTurnDamage harder
+        public const int EncoreTiming = 2;             // the ring closes in MaestroTurnRingTime, with the Maestro windows and shakes
+        public const int EncorePacks = 3;              // one more enemy in an ordinary fight
+        public const int EncoreRest = 4;               // REST and THE WINGS heal less
+        public const int EncoreBoss = 5;               // a boss reaches PHASE 2 (THE TURN in the code) sooner
+        public static int EncorePackMost = 4;          // ENCORE 3 : never more enemies than this in one fight (the stage has places for four)
+        public static float EncoreRestShare = 0.6f;    // ENCORE 4 : the free rests heal this share of what they heal without it
+        public static float EncoreBigPhase = 0.75f;    // ENCORE 5 : PHASE 2 starts at this share of a boss's life (TurnBigPhase without it)
 
         //Turn Motifs (step 6) : what the 21 motifs do in the turn battle (their TurnText in Data/Motif.cs).
         //ROSIN keeps FamilyMotifPower, STEADY PULSE keeps SteadyWindowBonus, ENCORE and PATRON'S PURSE work on the result page.
@@ -315,7 +329,7 @@
         //speed, never eased, so the eye can count it (docs/research/ALPHA7_qte_parry.md).
         public static float TurnRingTime = 1.1f;          // from a note showing to the moment to swipe
         public static float TurnLateReveal = 0.5f;        // FALSE NOTES (STATIC) : its hidden note shows its arrow once the ring is this far closed
-        public static float MaestroTurnRingTime = 0.8f;   // MAESTRO
+        public static float MaestroTurnRingTime = 0.8f;   // ENCORE 2 since 1 Nov (MAESTRO until then), with the Maestro windows and shakes
         public static float TurnNoteGap = 0.55f;          // between the notes of one enemy attack
         public static float TurnPause = 0.8f;             // after a turn, before the next one starts
         public static float TurnHitStop = 0.075f;         // the band and TACET freeze for a moment on a PERFECT
@@ -772,7 +786,7 @@
         public static float[] FloorPower = { 0.8f, 1.25f, 2.1f };
 
         //MAESTRO MODE (29 Sep) : the player picks NORMAL or MAESTRO on the conductor pages
-        //(RunState.Maestro, Settings.Maestro). A friend found even the first floor too quick, so
+        //(RunState.Maestro, ENCORE 2 and up since 1 Nov, Settings.Maestro until then). A friend found even the first floor too quick, so
         //NORMAL is every number above, made gentler. MAESTRO is hard from the first fight:
         //full speed on every floor, no gentle fights, every special note from floor one (the
         //roll, the held note and the pairs), a wrong size keeps only 30 percent, narrow windows,

@@ -246,18 +246,31 @@ namespace Tacetno433.Battle
             get { return Step == TurnStep.PlayerTurn ? OrderMoves[OrderIndex] : null; }
         }
 
-        //MAESTRO MODE : narrower timing windows, more shakes for a roll and harder notes.
-        //Set after the fight is made, so the attacks already shown are planned again with the harder notes.
-        private bool maestro;
-        public bool Maestro
+        //ENCORE (1 Nov, in place of MAESTRO MODE) : the run's level, 0 for a first concert (BattleRules ENCORE, Data/Encore.cs).
+        //In the fight ENCORE 1 makes TACET's notes harder, ENCORE 2 is the old MAESTRO timing (TightTiming) and ENCORE 5 brings
+        //PHASE 2 sooner (BigPhase). Set after the fight is made, so the attacks already shown are planned again with the harder notes.
+        private int encore;
+        public int Encore
         {
-            get { return maestro; }
+            get { return encore; }
             set
             {
-                maestro = value;
+                encore = value;
                 for (int i = 0; i < Enemies.Count; i++)
                     if (!Enemies[i].Down && Enemies[i].Planned) PlanIntent(Enemies[i]);
             }
+        }
+
+        //Tight Timing : ENCORE 2, the old MAESTRO MODE's narrower windows and more shakes for a roll (and a faster ring, BattleScreen)
+        public bool TightTiming
+        {
+            get { return encore >= BattleRules.EncoreTiming; }
+        }
+
+        //Big Phase : the share of a boss's life where PHASE 2 starts (THE TURN), sooner on ENCORE 5
+        public float BigPhase
+        {
+            get { return encore >= BattleRules.EncoreBoss ? BattleRules.EncoreBigPhase : BattleRules.TurnBigPhase; }
         }
 
         //Battle Start : startHp is each musician's life carried in from the run, or null for full life.
@@ -672,8 +685,8 @@ namespace Tacetno433.Battle
             if (trait && e.Trait == EnemyTrait.NoRest) count++;              // NO REST (WHITE NOISE)
             if (trait && e.Trait == EnemyTrait.TwiceABar) count = 1;         // TWICE A BAR (STUTTER) : one note each time
             int power = e.TurnPower > 0 ? e.TurnPower : e.SongNotePower();                  // SongNotePower = the average of its Pattern notes
-            float maestroHit = Maestro ? BattleRules.MaestroTurnDamage : 1f;                 // MAESTRO
-            int hit = Math.Max(1, (int)Math.Round(power * BattleRules.TurnNoteDamage * BattleRules.TurnFloorDamage[Floor - 1] * maestroHit));
+            float encoreHit = encore >= BattleRules.EncoreHits ? BattleRules.MaestroTurnDamage : 1f;    // ENCORE 1 (the old MAESTRO number)
+            int hit = Math.Max(1, (int)Math.Round(power * BattleRules.TurnNoteDamage * BattleRules.TurnFloorDamage[Floor - 1] * encoreHit));
 
             //CHARGE : the wind up plays nothing and shows the blow to come. The blow is ONE note of its phrase, TurnChargePower
             //times as hard (no CADENZA, no notes coming back), so a single parry decides it.
@@ -2068,8 +2081,8 @@ namespace Tacetno433.Battle
         public Grade Judge(float offset, bool rightWay)
         {
             float steady = Has(MotifId.SteadyPulse) ? BattleRules.SteadyWindowBonus : 0f;           // STEADY PULSE
-            float perfect = (Maestro ? BattleRules.MaestroPerfectWindow : BattleRules.PerfectWindow) + steady;   // MAESTRO
-            float good = (Maestro ? BattleRules.MaestroGoodWindow : BattleRules.GoodWindow) + steady;
+            float perfect = (TightTiming ? BattleRules.MaestroPerfectWindow : BattleRules.PerfectWindow) + steady;   // ENCORE 2
+            float good = (TightTiming ? BattleRules.MaestroGoodWindow : BattleRules.GoodWindow) + steady;
             bool parry = Step == TurnStep.EnemyTurn;
 
             if (parry && Kit == TurnKit.Lully)                                                      // STEADY HAND (THE KING'S BATON)
@@ -2094,8 +2107,8 @@ namespace Tacetno433.Battle
         //Roll Grade : how many shakes a roll note got (TREMOLO)
         public Grade RollGrade(int shakes)
         {
-            int perfect = Maestro ? BattleRules.MaestroTurnRollPerfect : BattleRules.TurnRollPerfect;   // MAESTRO
-            int good = Maestro ? BattleRules.MaestroTurnRollGood : BattleRules.TurnRollGood;
+            int perfect = TightTiming ? BattleRules.MaestroTurnRollPerfect : BattleRules.TurnRollPerfect;   // ENCORE 2
+            int good = TightTiming ? BattleRules.MaestroTurnRollGood : BattleRules.TurnRollGood;
             if (Taught()) perfect = Math.Max(good, perfect - BattleRules.TurnLessonShakes);         // THE LESSON (QUANTZ)
             if (Has(MotifId.Accelerando)) shakes *= BattleRules.TurnAccelerandoShakes;              // ACCELERANDO
             if (shakes >= perfect || (shakes >= good && CapriceTurns > 0)) return Grade.Perfect;   // CAPRICE : one better
@@ -2109,7 +2122,7 @@ namespace Tacetno433.Battle
         {
             get
             {
-                float late = (Maestro ? BattleRules.MaestroGoodWindow : BattleRules.GoodWindow) + (Has(MotifId.SteadyPulse) ? BattleRules.SteadyWindowBonus : 0f);
+                float late = (TightTiming ? BattleRules.MaestroGoodWindow : BattleRules.GoodWindow) + (Has(MotifId.SteadyPulse) ? BattleRules.SteadyWindowBonus : 0f);   // ENCORE 2
                 if (Step == TurnStep.EnemyTurn && Kit == TurnKit.Lully) late += BattleRules.TurnLullyWindow;                       // STEADY HAND
                 return late;
             }
@@ -2537,10 +2550,10 @@ namespace Tacetno433.Battle
                 if (!f.IsEnemy) StepAside(f);                                                // SHIELD : a fallen musician stands in front of nobody
                 Events.Add(new TurnEvent(TurnEventKind.Down, f, 0));
             }
-            else if (f.IsEnemy && !f.SecondHalf && f.Enemy.Kind == EnemyKind.Boss && f.Hp <= f.MaxHp * BattleRules.TurnBigPhase) TurnOver(f);
+            else if (f.IsEnemy && !f.SecondHalf && f.Enemy.Kind == EnemyKind.Boss && f.Hp <= f.MaxHp * BigPhase) TurnOver(f);
         }
 
-        //THE TURN (BOSSES, Beta1 31 Oct) : a boss's life fell to half. The attack it shows stays (the player wrote the turn
+        //THE TURN (BOSSES, Beta1 31 Oct) : a boss's life fell to half (three quarters on ENCORE 5, BigPhase). The attack it shows stays (the player wrote the turn
         //against it), the one after is its BIG ATTACK, then every TurnBigEveryLate attacks. The screen stops for a moment.
         private void TurnOver(Fighter boss)
         {

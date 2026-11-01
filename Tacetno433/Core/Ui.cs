@@ -26,7 +26,7 @@ namespace Tacetno433.Core
     //   Panel       the dark box with corner marks that holds content
     //   Pips        a row of small diamonds, used like rarity stars
     //   Tooltip     a box that explains whatever the mouse is over
-    //   ModeSwitch  NORMAL or MAESTRO, the chosen half filled (29 Sep, the conductor pages)
+    //   EncorePicker  ENCORE 0 to 5 on the conductor pages, the picked level filled (1 Nov, MAESTRO MODE's ModeSwitch until then)
     //
     //The fonts are handed over once by TacetGame, so every call stays short.
     public static class Ui
@@ -515,28 +515,52 @@ namespace Tacetno433.Core
             return w;
         }
 
-        //Mode Switch : NORMAL or MAESTRO side by side, the chosen half filled, a one line reminder
-        //under it (MAESTRO MODE, 29 Sep). The conductor pages flip Settings.Maestro on a click or M.
-        public const string ModeKey = "M";
-        private const string NormalLine = "Slower. Easier to keep up.";
-        private const string MaestroLine = "Full speed from the first fight.";
+        //Encore Picker : ENCORE on the conductor pages (1 Nov, Data/Encore.cs, in the place of MAESTRO MODE's NORMAL / MAESTRO
+        //switch). Drawn only once the conductor has won a run (open 1 or more), so a first run has nothing to pick. One cell
+        //for each level 0 to EncoreTop : the open ones carry their number and take a click (EncoreClicked), the picked one is a
+        //white plate, the ones still shut are a faint dash so the player sees how far the ladder goes. The line under it says
+        //what the picked level adds (Encore.Lines). The pages step it with E (EncoreKey).
+        public const string EncoreKey = "E";
 
-        public static void ModeSwitch(SpriteBatch sb, Rectangle box, bool maestro, bool hover, float alpha)
+        public static void EncorePicker(SpriteBatch sb, Rectangle box, int open, int picked, float alpha)
         {
-            int half = box.Width / 2;
-            ModeHalf(sb, new Rectangle(box.X, box.Y, half, box.Height), "NORMAL", !maestro, alpha);
-            ModeHalf(sb, new Rectangle(box.X + half, box.Y, box.Width - half, box.Height), "MAESTRO", maestro, alpha);
-            Gfx.RectOutline(sb, box, (hover ? Palette.Highlight : Palette.LineGrey) * alpha, 1);
+            if (open <= 0) return;
+            for (int i = 0; i <= BattleRules.EncoreTop; i++)
+            {
+                Rectangle cell = EncoreCell(box, i);
+                if (i > open)
+                {
+                    Gfx.Rect(sb, cell.Center.X - 4, cell.Center.Y, 8, 2, Palette.LineGrey * (0.5f * alpha));     // still shut
+                    continue;
+                }
+                bool over = Input.MouseOver(cell);
+                if (i == picked) Gfx.Rect(sb, cell, Palette.Paper * alpha);
+                Color ink = i == picked ? Palette.Ink : (over ? Palette.Paper : Palette.PaperDim);
+                Gfx.TextCentered(sb, Font, Encore.Digits[i], cell.Center.X, cell.Center.Y, ink * alpha, TextSize.Label);
+            }
+            Gfx.RectOutline(sb, box, (Input.MouseOver(box) ? Palette.Highlight : Palette.LineGrey) * alpha, 1);
 
-            Gfx.TextSpaced(sb, Font, "MODE", box.X, box.Y - 20, Palette.LineGrey * alpha, TextSize.Tiny, 2f);
-            KeyChipRight(sb, ModeKey, box.Right, box.Y - 13, Palette.PaperDim * alpha);
-            Gfx.TextRight(sb, StoryFont, maestro ? MaestroLine : NormalLine, box.Right, box.Bottom + 5, Palette.PaperDim * alpha, TextSize.StorySmall);
+            Gfx.TextSpaced(sb, Font, Words.Encore, box.X, box.Y - 20, Palette.LineGrey * alpha, TextSize.Tiny, 2f);
+            KeyChipRight(sb, EncoreKey, box.Right, box.Y - 13, Palette.PaperDim * alpha);
+            Gfx.TextRight(sb, StoryFont, Encore.Lines[picked], box.Right, box.Bottom + 5, Palette.PaperDim * alpha, TextSize.StorySmall);
         }
 
-        private static void ModeHalf(SpriteBatch sb, Rectangle r, string word, bool on, float alpha)
+        //Encore Cell : where level i sits in the picker, the box split into equal cells (the last one takes what is left)
+        public static Rectangle EncoreCell(Rectangle box, int i)
         {
-            if (on) Gfx.Rect(sb, r, Palette.Paper * alpha);
-            Gfx.TextSpacedCentered(sb, Font, word, r.Center.X, r.Center.Y - 8, (on ? Palette.Ink : Palette.PaperDim) * alpha, TextSize.Label, 2f);
+            int cells = BattleRules.EncoreTop + 1;
+            int w = box.Width / cells;
+            int x = box.X + i * w;
+            int right = i == cells - 1 ? box.Right : x + w;
+            return new Rectangle(x, box.Y, right - x, box.Height);
+        }
+
+        //Encore Clicked : the open level a click landed on, -1 for none (a shut level is none)
+        public static int EncoreClicked(Rectangle box, int open)
+        {
+            for (int i = 0; i <= open && i <= BattleRules.EncoreTop; i++)
+                if (Input.ClickedOn(EncoreCell(box, i))) return i;
+            return -1;
         }
 
         //Mouse Icon : a mouse seen from above, the LEFT button filled, the one the baton needs

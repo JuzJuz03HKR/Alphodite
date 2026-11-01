@@ -44,7 +44,7 @@ namespace Tacetno433.Screens
         private Rectangle backButton = new Rectangle(70, 616, 170, 46);
         private Rectangle lastButton = new Rectangle(400, 614, 50, 50);    // the arrows either side of TAKE THE BATON
         private Rectangle nextButton = new Rectangle(830, 614, 50, 50);
-        private Rectangle modeBox = new Rectangle(976, 612, 234, 38);      // NORMAL or MAESTRO, MAESTRO MODE
+        private Rectangle modeBox = new Rectangle(976, 612, 234, 38);      // ENCORE (1 Nov, MAESTRO MODE's switch until then)
 
         //Detail Data
         private int index;
@@ -147,7 +147,8 @@ namespace Tacetno433.Screens
 
             //Motion : TAKE THE BATON is the page's main action, so it stands pointed at (white) unless another button is
             bool look = phase == Phase.Look;
-            bool elsewhere = Input.MouseOver(backButton) || Input.MouseOver(lastButton) || Input.MouseOver(nextButton) || Input.MouseOver(modeBox);
+            bool elsewhere = Input.MouseOver(backButton) || Input.MouseOver(lastButton) || Input.MouseOver(nextButton)
+                          || (Encore.Open(c) > 0 && Input.MouseOver(modeBox));
             chooseMotion.Update(dt, look && !elsewhere);
             backMotion.Update(dt, look && Input.MouseOver(backButton));
             lastMotion.Update(dt, look && index > 0 && Input.MouseOver(lastButton));
@@ -190,8 +191,8 @@ namespace Tacetno433.Screens
                 return;
             }
 
-            //Detail Mode : NORMAL or MAESTRO, the same switch as the gallery
-            if (Input.ClickedOn(modeBox) || Input.KeyPressed(Keys.M)) ConductorSelectScreen.FlipMode();
+            //Detail ENCORE : this conductor's level for the run, the same picker as the gallery (once they have won a run)
+            ConductorSelectScreen.EncoreInput(c, modeBox);
 
             //Detail Confirm
             if (Input.KeyPressed(Keys.Enter) || Input.KeyPressed(Keys.Space) || Input.ClickedOn(chooseButton))
@@ -227,7 +228,7 @@ namespace Tacetno433.Screens
             //Run Begin : build a fresh run. The band is picked first (THE BAND OF THREE), then named, then the first movement's card
             Game.CurrentRun = new RunState();
             Game.CurrentRun.Start(c, Game.StoryFont, RouteNodeInfo.CaptionWrapWidth);
-            Game.CurrentRun.Maestro = Settings.Maestro;                                  // MAESTRO MODE
+            Game.CurrentRun.Encore = Encore.Picked(c);                                   // ENCORE, 0 until this conductor has won a run
             SoundBank.Play(Sfx.UiConfirm);
             Game.Screens.SweepNext(chooseButton.Center.ToVector2(), RingSweep.Kind.Light);     // RING SWEEP : the run begins
             Game.Screens.Change(new TeamPickScreen());
@@ -409,7 +410,7 @@ namespace Tacetno433.Screens
             Ui.Command(sb, backButton, "BACK", "ESC", backMotion, low, false);
             DrawArrow(sb, lastButton, false, index > 0, lastMotion, low);
             DrawArrow(sb, nextButton, true, index < ConductorList.Shown.Length - 1, nextMotion, low);
-            Ui.ModeSwitch(sb, modeBox, Settings.Maestro, Input.MouseOver(modeBox), low);
+            Ui.EncorePicker(sb, modeBox, Encore.Open(c), Encore.Picked(c), low);
 
             DrawLetterbox(sb);
         }

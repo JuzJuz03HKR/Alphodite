@@ -50,7 +50,7 @@ namespace Tacetno433.Screens
 
         //Gallery Buttons
         private Rectangle backButton = new Rectangle(36, 650, 170, 42);
-        private static Rectangle modeBox = new Rectangle(1010, 634, 234, 38);   // NORMAL or MAESTRO, MAESTRO MODE
+        private static Rectangle modeBox = new Rectangle(1010, 634, 234, 38);   // ENCORE (1 Nov, MAESTRO MODE's switch until then)
 
         //Gallery State
         private enum Phase { Look, Walk }
@@ -202,8 +202,8 @@ namespace Tacetno433.Screens
                 return;
             }
 
-            //Gallery Mode : NORMAL or MAESTRO for the run about to start
-            if (Input.ClickedOn(modeBox) || Input.KeyPressed(Keys.M)) FlipMode();
+            //Gallery ENCORE : the pointed conductor's level for the run about to start (once they have won a run)
+            EncoreInput(ConductorList.Shown[index], modeBox);
 
             //Gallery Back
             if (Input.KeyPressed(Keys.Escape) || Input.ClickedOn(backButton))
@@ -242,12 +242,15 @@ namespace Tacetno433.Screens
             walkTime = 0f;
         }
 
-        //Flip Mode : MAESTRO MODE on or off, remembered in the settings file for the next run.
-        //The profile page uses it too, the switch sits on both conductor pages.
-        public static void FlipMode()
+        //Encore Input : ENCORE on both conductor pages (1 Nov, Data/Encore.cs, MAESTRO MODE's switch until then). A click on an
+        //open level picks it, E steps one level up and from the top back to 0. Nothing until the conductor has won a run.
+        public static void EncoreInput(Conductor c, Rectangle box)
         {
-            Settings.Maestro = !Settings.Maestro;
-            SaveFile.SaveSettings();
+            if (Encore.Open(c) <= 0) return;
+            int clicked = Ui.EncoreClicked(box, Encore.Open(c));
+            if (clicked >= 0) Encore.Choose(c, clicked);
+            else if (Input.KeyPressed(Keys.E)) Encore.StepUp(c);
+            else return;
             SoundBank.Play(Sfx.UiMove);
         }
 
@@ -459,6 +462,9 @@ namespace Tacetno433.Screens
                 //Numeral : in the conductor's colour when pointed (menu6)
                 Gfx.Text(sb, Game.LogoFont, numerals[Math.Min(i, numerals.Length - 1)], r.X - 16, r.Y - 66, Color.Lerp(Palette.LineGrey, spot, e) * (0.9f * a), 0.8f);
 
+                //ENCORE (1 Nov) : once a run is won with this conductor, a diamond for each level over the panel, filled for the won ones
+                if (Encore.Open(c) > 0) DrawEncoreMarks(sb, c, r, a);
+
                 //Name : a stroke of the conductor's colour under it when pointed, and the key that steps inside. NAME FIT : a
                 //name on two lines leaves out BASED ON, its real name is in it already (FANNY MENDELSSOHN AND ???).
                 float nameY = r.Bottom + 14;
@@ -484,8 +490,24 @@ namespace Tacetno433.Screens
             //Buttons and Hint
             float low = Words(0.25f);
             Ui.Command(sb, backButton, "BACK", "ESC", backMotion, low, false);
-            Ui.ModeSwitch(sb, modeBox, Settings.Maestro, Input.MouseOver(modeBox), low);
+            Ui.EncorePicker(sb, modeBox, Encore.Open(pointed), Encore.Picked(pointed), low);
             Gfx.TextSpacedCentered(sb, Game.Font, "CLICK A PAINTING TO STEP INSIDE", CenterX, 694, Palette.LineGrey * low, TextSize.Tiny, 3f);
+        }
+
+        //Encore Marks : the word ENCORE and one diamond for each level at the top right of a panel, the levels won filled in
+        //the light colour, the rest hollow. They come with the first won run, so the player sees how far the ladder goes.
+        private static void DrawEncoreMarks(SpriteBatch sb, Conductor c, Rectangle r, float a)
+        {
+            int won = Encore.WonLevels(c);
+            float x = r.Right - 6f;
+            float y = r.Y - 16f;
+            for (int k = BattleRules.EncoreTop; k >= 1; k--)
+            {
+                if (k <= won) Gfx.Diamond(sb, x, y, 5, Palette.Highlight * a);
+                else Gfx.DiamondOutline(sb, x, y, 5, Palette.LineGrey * a, 1f);
+                x -= 14f;
+            }
+            Gfx.TextSpacedRight(sb, Ui.Font, Data.Words.Encore, x - 2f, y - 8f, Palette.LineGrey * a, TextSize.Tiny, 2f);   // Data. : this page has its own Words()
         }
     }
 }

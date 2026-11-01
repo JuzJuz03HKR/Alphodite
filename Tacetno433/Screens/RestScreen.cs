@@ -91,7 +91,7 @@ namespace Tacetno433.Screens
             }
 
             optionTexts[Breathe] = Gfx.WrapText(Game.StoryFont, "Sit down, close your eyes. The band gets back "
-                                   + (int)(BattleRules.BreatheRecover * 100) + " percent of its " + BattleRules.LifeWordLower + ".", CardW - 40, TextSize.StorySmall);
+                                   + (int)Math.Round(BattleRules.BreatheRecover * run.RestShare * 100) + " percent of its " + BattleRules.LifeWordLower + ".", CardW - 40, TextSize.StorySmall);
             optionTexts[Rehearse] = Gfx.WrapText(Game.StoryFont, "Practise until it sings. "
                                    + "One move of the band gets a star, as after a fight won.", CardW - 40, TextSize.StorySmall);
             optionTexts[DeepRest] = Gfx.WrapText(Game.StoryFont, "Pay for a real bed. The band gets back all of its " + BattleRules.LifeWordLower + ".",
@@ -131,7 +131,7 @@ namespace Tacetno433.Screens
             if (!run.WingsRested)
             {
                 int before = run.Stamina;
-                run.ChangeStamina((int)(run.MaxStamina * BattleRules.WingsRecover));
+                run.ChangeStamina((int)(run.MaxStamina * BattleRules.WingsRecover * run.RestShare));          // less on ENCORE 4
                 run.WingsRested = true;
                 restedLine = "The band rests in the wings.   " + BattleRules.LifeWord + " " + NumberText.Signed(run.Stamina - before);
                 SoundBank.Play(Sfx.RestRecover);
@@ -231,7 +231,7 @@ namespace Tacetno433.Screens
             if (option == Breathe)
             {
                 int before = run.Stamina;
-                run.ChangeStamina((int)(run.MaxStamina * BattleRules.BreatheRecover));
+                run.ChangeStamina((int)(run.MaxStamina * BattleRules.BreatheRecover * run.RestShare));        // less on ENCORE 4
                 SoundBank.Play(Sfx.RestRecover);
                 Done("RESTED", "The band breathes slowly together. " + BattleRules.LifeWord + " " + NumberText.Signed(run.Stamina - before) + ".");
             }

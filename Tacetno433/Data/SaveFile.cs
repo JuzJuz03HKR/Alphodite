@@ -109,7 +109,6 @@ namespace Tacetno433.Data
             lines.Add("language=" + Settings.Language);
             lines.Add("fullscreen=" + (Settings.Fullscreen ? 1 : 0));
             lines.Add("timing=" + Number(Settings.TimingOffset));
-            lines.Add("maestro=" + (Settings.Maestro ? 1 : 0));
             lines.Add("lessflash=" + (Settings.ReduceFlashing ? 1 : 0));
             lines.Add("clearfight=" + (Settings.ClearFight ? 1 : 0));
             Write(SettingsPath, lines);
@@ -125,6 +124,7 @@ namespace Tacetno433.Data
             List<string> levels = new List<string>();
             for (int i = 0; i < Archive.All.Length; i++) levels.Add(Archive.All[i].Level.ToString());
             lines.Add("levels=" + string.Join(",", levels));
+            lines.Add("encore=" + string.Join(",", Encore.Won));       // ENCORE (1 Nov) : the highest level won with each conductor, -1 none
             Write(ArchivePath, lines);
         }
 
@@ -137,6 +137,12 @@ namespace Tacetno433.Data
             int[] levels = GetList(v, "levels");
             for (int i = 0; i < Archive.All.Length && i < levels.Length; i++)
                 Archive.All[i].Level = Math.Max(0, Math.Min(Archive.All[i].Prices.Length, levels[i]));
+
+            //ENCORE (1 Nov) : a file from before has no encore= line, every conductor starts with nothing won
+            int[] won = GetList(v, "encore");
+            for (int i = 0; i < Encore.Won.Length && i < won.Length; i++)
+                Encore.Won[i] = Math.Max(-1, Math.Min(BattleRules.EncoreTop, won[i]));
+            Encore.PickAll();
         }
 
         //Settings Load : called once when the game starts. A missing file keeps the defaults.
@@ -151,7 +157,6 @@ namespace Tacetno433.Data
             Settings.Language = GetInt(v, "language", 0) == 1 ? 1 : 0;
             Settings.Fullscreen = GetInt(v, "fullscreen", 0) == 1;
             Settings.SetTiming(GetFloat(v, "timing", 0f));
-            Settings.Maestro = GetInt(v, "maestro", 0) == 1;
             Settings.ReduceFlashing = GetInt(v, "lessflash", 0) == 1;
             Settings.ClearFight = GetInt(v, "clearfight", 0) == 1;
         }
@@ -171,7 +176,7 @@ namespace Tacetno433.Data
             lines.Add("floor=" + run.Floor);
             lines.Add("stage=" + run.Stage);
             lines.Add("stages=" + run.StagesThisFloor);
-            lines.Add("maestro=" + (run.Maestro ? 1 : 0));          // MAESTRO MODE, a save from before 29 Sep has none : NORMAL
+            lines.Add("encore=" + run.Encore);                      // ENCORE (1 Nov), maestro= until then
             lines.Add("shards=" + run.Shards);
             lines.Add("placeseed=" + run.PlaceSeed);                // the shop's shelves and the treasure (29 Oct), the same after CONTINUE
             lines.Add("stamina=" + run.Stamina);
@@ -276,7 +281,10 @@ namespace Tacetno433.Data
             run.Stage = GetInt(v, "stage", 1);
             run.StagesThisFloor = GetInt(v, "stages", 8);
             //NO MORE ERAS (29 Oct) : a save from before keeps an era= line, it is read past. The movement follows the floor.
-            run.Maestro = GetInt(v, "maestro", 0) == 1;
+            //ENCORE (1 Nov) : a save from before has maestro= (1 = MAESTRO MODE) in its place. MAESTRO MODE is ENCORE 2 now,
+            //its rules are ENCORE 1 and 2. A save from before 29 Sep has neither : a first concert.
+            int oldMaestro = GetInt(v, "maestro", 0) == 1 ? BattleRules.EncoreTiming : 0;
+            run.Encore = Math.Max(0, Math.Min(BattleRules.EncoreTop, GetInt(v, "encore", oldMaestro)));
             run.Shards = GetInt(v, "shards", 0);
             run.PlaceSeed = GetInt(v, "placeseed", 0);
             run.MaxStamina = GetInt(v, "maxstamina", run.MaxStamina);
