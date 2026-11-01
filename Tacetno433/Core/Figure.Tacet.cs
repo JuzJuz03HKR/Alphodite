@@ -6,20 +6,25 @@ using Tacetno433.Data;
 namespace Tacetno433.Core
 {
     //Figure Tacet (Beta1 1 Nov, MATH ART) : TACET's fighters, the four looks every enemy wears (Data/Enemy.cs Looks,
-    //docs/ASSET_LIST.md 1.2) and the six bosses. Black with a white edge, a white light inside, drawn in blocks of 2 game
-    //pixels (PIXEL LOOK) : TACET is the silence breaking the picture, the band is the light (the user let Iris mix the two
-    //looks, 13.79). Each shape comes from the enemy's own words :
-    //   hush             "The first thing to go is the echo."  a veil with a finger on its lips, its echoes drift away
-    //   static           "It sounds like something. It is not."  blocks that never sit still
-    //   the_damper       "A felt hand resting on every string."  a heavy body behind a great felt pad
-    //   the_mute_choir   "A hundred mouths, open, making nothing."  rows of open mouths under a pale halo
-    //   requiem          the piece never finished : a broken halo, a body that ends in loose staff lines, falling tears (LACRIMOSA)
-    //   the_nameless_master  a blank mask and a shadow that copies it a moment late (the name that was taken, ITALIEN)
-    //   the_devil_s_string   one string through its heart, a scroll for a head with horns, the bow as a scythe
-    //   the_deaf_crown   a crown and two great hands that give orders, lightning between them, no ears (THE NINTH)
-    //   the_staff        the staff that beat time on its own foot : it slams the floor, its body hangs from it (TE DEUM)
+    //docs/ASSET_LIST.md 1.2) and the six bosses. TACET is music's word for "be silent", so every one of them is built from
+    //the signs of silence in a score (the user 13.82 : the music in the enemies too) and from its own words :
+    //   hush             "The first thing to go is the echo."  its body is the quarter rest, a finger on its lips, its echoes
+    //                    drift away as hollow squares
+    //   static           "It sounds like something. It is not."  note heads with no stems that never sit still, broken staff
+    //                    lines. LEVEL 2 : a note that walks, its stem for a body, its flag for a cape
+    //   the_damper       "A felt hand resting on every string."  the whole rest hanging from its line, a great felt pad
+    //                    pressed on four strings
+    //   the_mute_choir   "A hundred mouths, open, making nothing."  hollow note heads for heads, open mouths, a robe of spikes
+    //   requiem          the piece never finished : a broken halo, staff lines that stop, a quill for a blade, tears (LACRIMOSA)
+    //   the_nameless_master  a blank mask, an empty frame where the name was, a shadow that copies it a moment late (ITALIEN)
+    //   the_devil_s_string   one string through its heart, a violin's scroll for a head with horns, the bow as a scythe
+    //   the_deaf_crown   a crown over an empty face (it cannot hear), two great hands that give orders, lightning (THE NINTH)
+    //   the_staff        the conductor's staff it beat time with on its own foot : it slams the floor, its body is a banner of
+    //                    the five staff lines (TE DEUM)
     //   the_blind_cantor a blindfold, organ pipes for wings, voices going out one after another in rings (IN THE DARK)
-    //LEVEL 2 gives each one a body under the same parts (arms, a hood, legs).
+    //The look (the user's references 13.79 13.81) : sharp black shapes with a white edge, white cut through them where the eyes
+    //and signs are, drawn in blocks of 2 game pixels with scanlines (PIXEL LOOK, BattleScreen.Stage.cs). LEVEL 2 gives each one
+    //thin limbs under the same shapes.
     public partial class Figure
     {
         private const int Hush = 0;
@@ -57,7 +62,7 @@ namespace Tacetno433.Core
             }
         }
 
-        //Set Up Tacet : how loose each part is, and the chains (hems, tails, banners)
+        //Set Up Tacet : how loose each part is (SYMBOLS 13.80 : no hems or tails, shapes only)
         private void SetUpTacet()
         {
             design = DesignOf(Key);
@@ -68,7 +73,7 @@ namespace Tacetno433.Core
             bodyLoose[FootA] = 0.3f;
             bodyLoose[FootB] = 0.3f;
             bodyLoose[Extra] = 1f;
-            chainCount = 0;                                                  // SYMBOLS (13.80) : no hems or tails, shapes only
+            chainCount = 0;
         }
 
         //======================================================================================
@@ -80,6 +85,7 @@ namespace Tacetno433.Core
             float bob = (float)Math.Sin(clock * 1.6f + seed) * 0.014f;
             float s = move == "attack" ? Strike() : 0f;
             float lunge = Math.Max(0f, s) * 0.08f - Math.Max(0f, -s) * 0.03f;      // forward is toward the band
+            float raise = Math.Max(0f, -s);                                        // drawn back before the blow
             bool body2 = Level == 2;
             float orbit = clock * 0.9f + seed;
             want[Extra] = Local((float)Math.Cos(orbit) * 0.3f, -0.6f + (float)Math.Sin(orbit) * 0.12f);
@@ -87,20 +93,20 @@ namespace Tacetno433.Core
             switch (design)
             {
                 case Static:
-                    Set(Head, 0f + lunge, -0.86f + bob);
+                    Set(Head, 0f + lunge, -0.84f + bob);
                     Set(Chest, 0f + lunge * 0.7f, body2 ? -0.62f : -0.56f + bob);
-                    Set(Hip, 0f, -0.4f + bob * 0.5f);
-                    Set(HandA, 0.17f + lunge * 1.6f, -0.52f + bob);
-                    Set(HandB, -0.17f, -0.5f + bob);
+                    Set(Hip, 0f, -0.38f + bob * 0.5f);
+                    Set(HandA, 0.17f + lunge * 1.6f, -0.52f + bob - raise * 0.1f);
+                    Set(HandB, -0.15f, -0.5f + bob);
                     Set(FootA, -0.08f, 0f);
                     Set(FootB, 0.08f, 0f);
                     break;
                 case Damper:
-                    Set(Head, 0.1f + lunge, -0.66f + bob * 0.5f);
-                    Set(Chest, 0f + lunge * 0.5f, -0.64f + bob * 0.5f);
-                    Set(Hip, -0.02f, -0.34f);
-                    Set(HandA, 0.25f + lunge * 1.8f, -0.42f + bob - Math.Max(0f, -s) * 0.12f);
-                    Set(HandB, -0.19f, -0.38f + bob * 0.5f);
+                    Set(Head, 0.06f + lunge, -0.66f + bob * 0.5f);
+                    Set(Chest, 0f + lunge * 0.5f, -0.74f + bob * 0.5f);
+                    Set(Hip, -0.02f, -0.36f);
+                    Set(HandA, 0.25f + lunge * 1.8f, -0.42f + bob - raise * 0.14f);
+                    Set(HandB, -0.21f, -0.38f + bob * 0.5f);
                     Set(FootA, -0.12f, 0f);
                     Set(FootB, 0.1f, 0f);
                     break;
@@ -110,49 +116,49 @@ namespace Tacetno433.Core
                     Set(Hip, 0f, -0.3f + bob * 0.5f);
                     Set(HandA, 0.15f + lunge * 0.5f, -0.86f + bob * 1.2f);
                     Set(HandB, -0.15f, -0.85f + bob * 0.8f);
-                    Set(FootA, 0.33f + lunge * 1.5f, -0.6f + bob);
-                    Set(FootB, -0.33f, -0.62f + bob);
+                    Set(FootA, 0.33f + lunge * 1.5f, -0.64f + bob - raise * 0.1f);
+                    Set(FootB, -0.33f, -0.66f + bob);
                     break;
                 case Requiem:
-                    Set(Head, 0f, -0.8f + bob);
-                    Set(Chest, 0f + lunge * 0.5f, -0.84f + bob);
-                    Set(Hip, 0f, -0.48f + bob);
-                    Set(HandA, 0.24f + lunge * 1.6f, -0.55f + bob * 1.4f);
-                    Set(HandB, -0.21f, -0.5f + bob * 1.2f);
-                    Set(FootA, -0.08f, -0.18f);
-                    Set(FootB, 0.08f, -0.18f);
+                    Set(Head, 0f + lunge * 0.4f, -0.83f + bob);
+                    Set(Chest, 0f + lunge * 0.4f, -0.72f + bob);
+                    Set(Hip, 0f, -0.42f + bob);
+                    Set(HandA, 0.27f + lunge * 1.6f, -0.52f + bob * 1.4f - raise * 0.18f);
+                    Set(HandB, -0.22f, -0.5f + bob * 1.2f);
+                    Set(FootA, -0.08f, -0.08f);
+                    Set(FootB, 0.08f, -0.08f);
                     break;
                 case Nameless:
-                    Set(Head, 0f + lunge, (body2 ? -0.86f : -0.72f) + bob);
+                    Set(Head, 0f + lunge, (body2 ? -0.86f : -0.76f) + bob);
                     Set(Chest, 0f + lunge * 0.6f, -0.7f + bob);
                     Set(Hip, 0f, -0.45f + bob * 0.5f);
-                    Set(HandA, 0.2f + lunge * 1.6f, -0.55f + bob);
+                    Set(HandA, 0.22f + lunge * 1.6f, -0.56f + bob - raise * 0.12f);
                     Set(HandB, -0.18f, -0.5f + bob);
                     Set(FootA, -0.07f, 0f);
                     Set(FootB, 0.07f, 0f);
                     want[Extra] = body[Head].At + new Vector2(-0.11f * Facing, 0.03f) * Height;   // the shadow, late
                     break;
                 case Devil:
-                    Set(Head, 0.02f + lunge * 0.6f, -0.8f + bob);
-                    Set(Chest, 0.02f + lunge * 0.4f, -0.62f + bob);
-                    Set(Hip, 0.02f, -0.42f + bob * 0.6f);
-                    Set(HandA, 0.2f + lunge * 1.5f, -0.58f + bob - Math.Max(0f, -s) * 0.15f);
-                    Set(HandB, -0.16f, -0.52f + bob);
+                    Set(Head, 0.03f + lunge * 0.6f, -0.82f + bob);
+                    Set(Chest, 0.03f + lunge * 0.4f, -0.66f + bob);
+                    Set(Hip, 0.03f, -0.44f + bob * 0.6f);
+                    Set(HandA, 0.22f + lunge * 1.5f, -0.6f + bob - raise * 0.15f);
+                    Set(HandB, -0.16f, -0.5f + bob);
                     Set(FootA, -0.06f, 0f);
                     Set(FootB, 0.08f, 0f);
                     break;
                 case Crown:
-                    Set(Head, 0f + lunge * 0.4f, -0.88f + bob);
+                    Set(Head, 0f + lunge * 0.4f, -0.86f + bob);
                     Set(Chest, 0f + lunge * 0.3f, -0.7f + bob * 0.6f);
                     Set(Hip, 0f, -0.4f + bob * 0.3f);
-                    Set(HandA, 0.32f + lunge * 2f, -0.56f + bob * 1.5f - Math.Max(0f, -s) * 0.2f);
+                    Set(HandA, 0.33f + lunge * 2f, -0.56f + bob * 1.5f - raise * 0.2f);
                     Set(HandB, -0.3f, -0.62f + bob * 1.3f);
                     Set(FootA, -0.12f, 0f);
                     Set(FootB, 0.12f, 0f);
                     break;
                 case Staff:
                     float beat = StaffBeat();
-                    Set(Head, 0.01f, -0.86f + bob - beat * 0.04f);
+                    Set(Head, 0.01f, -0.88f + bob - beat * 0.04f);
                     Set(Chest, 0f, -0.8f + bob - beat * 0.04f);
                     Set(Hip, -0.01f, -0.5f + bob * 0.6f - beat * 0.03f);
                     Set(HandA, 0.12f + lunge, -0.62f - beat * 0.05f);
@@ -169,15 +175,20 @@ namespace Tacetno433.Core
                     Set(FootA, -0.08f, 0f);
                     Set(FootB, 0.08f, 0f);
                     break;
-                default:
-                    Set(Head, 0.02f + lunge, -0.66f + bob);
-                    Set(Chest, 0f + lunge * 0.5f, -0.93f + bob * 1.3f);
-                    Set(Hip, -0.01f, -0.42f + bob);
-                    Set(HandA, 0.08f + lunge * 0.8f, -0.75f + bob);
-                    Set(HandB, -0.17f, -0.42f + bob);
-                    Set(FootA, -0.2f, -0.06f);
-                    Set(FootB, 0.18f, -0.06f);
+                default:                                                                 // hush
+                    Set(Head, 0.03f + lunge, -0.8f + bob);
+                    Set(Chest, 0f + lunge * 0.5f, -0.64f + bob);
+                    Set(Hip, -0.02f, -0.4f + bob);
+                    Set(HandA, 0.1f + lunge * 0.6f, -0.76f + bob);
+                    Set(HandB, -0.15f + lunge * 1.2f, -0.38f + bob - raise * 0.08f);
+                    Set(FootA, -0.06f, -0.12f);
+                    Set(FootB, 0.06f, -0.12f);
                     break;
+            }
+            for (int b = 0; b < bits.Length; b++)
+            {
+                float a = clock * (0.5f + 0.1f * b) + b * 2.1f + seed;
+                bitWant[b] = want[Chest] + new Vector2((float)Math.Cos(a) * 0.3f * Facing, (float)Math.Sin(a) * 0.16f) * Height;
             }
             weaponWant = 0f;
             weapon2Want = 0f;
@@ -254,9 +265,10 @@ namespace Tacetno433.Core
 
         private float tGrow;          // the part being drawn is this much bigger all round (the white edge pass)
         private Color tColor;
+        private static readonly Color BodyInk = new Color(20, 20, 24);       // a little above the hole's black, so a body reads in front of it
 
         //Draw Tacet : three passes. The edge (every part a little bigger, in white), the body (every part in black over it, so
-        //only the outline of the whole stays white), then the white lights inside.
+        //only the outline of the whole stays white), then the white cut through it (eyes, signs).
         private void DrawTacet(float alpha, float flash, float light, float mark)
         {
             float block = BattleRules.FigurePixel;
@@ -274,10 +286,8 @@ namespace Tacetno433.Core
             tGrow = 0f;
             tColor = fill;
             DrawTacetParts();
-            DrawTacetLights(alpha * (0.6f + 0.4f * light), flash);
+            DrawTacetLights(alpha * (0.6f + 0.4f * light));
         }
-
-        private static readonly Color BodyInk = new Color(20, 20, 24);       // a little above the hole's black, so a body reads in front of it
 
         private void DrawShards(float block, Color edge, Color fill)
         {
@@ -289,14 +299,24 @@ namespace Tacetno433.Core
                     float size = s.Size + (pass == 0 ? block * 2f : 0f);
                     Color c = pass == 0 ? edge : fill;
                     Vector2 at = s.At + Shift;
+                    Vector2 d = new Vector2((float)Math.Cos(s.Angle), (float)Math.Sin(s.Angle));
                     if (s.Shape == 1) Shapes.Box(at, size, size * 0.7f, s.Angle, c);
-                    else if (s.Shape == 2) Shapes.Kite(at - new Vector2((float)Math.Cos(s.Angle), (float)Math.Sin(s.Angle)) * size, at + new Vector2((float)Math.Cos(s.Angle), (float)Math.Sin(s.Angle)) * size, size * 0.45f, 0.4f, c);
+                    else if (s.Shape == 2) Shapes.Kite(at - d * size, at + d * size, size * 0.45f, 0.4f, c);
                     else Shapes.Polygon(at, size * 0.7f, 4, s.Angle, c);
                 }
             }
         }
 
+        //======================================================================================
         //TACET helpers : every part through these, so the edge pass makes it bigger by tGrow
+        //======================================================================================
+
+        //P : a point near a part, x toward the band, y down, in shares of the height
+        private Vector2 P(Vector2 from, float x, float y)
+        {
+            return from + new Vector2(x * Facing, y) * Height;
+        }
+
         private void TCircle(Vector2 at, float r)
         {
             Shapes.Circle(at + Shift, r + tGrow, tColor);
@@ -345,248 +365,288 @@ namespace Tacetno433.Core
             Shapes.Crescent(at + Shift, r, from, to, thick + tGrow * 2f, tColor);
         }
 
-        private void TArc(Vector2 at, float r, float from, float to, float thick)
+        //T Hand : a hand of TACET, a diamond (THE DEAF CROWN's great hands that give orders, THE BLIND CANTOR's that feel the way)
+        private void THand(Vector2 at, float size)
         {
-            Shapes.Arc(at + Shift, r, from, to, thick + tGrow * 2f, thick + tGrow * 2f, tColor);
+            Shapes.Polygon(at + Shift, size + tGrow * 1.4f, 4, 0f, tColor);
         }
 
-        //T Limb : an arm or a leg (LEVEL 2), one straight tapered bar like the band's (SYMBOLS, no elbows or knees)
-        private void TLimb(Vector2 root, Vector2 end, float length, float wide, float thin, float side)
+        //T Claws : three thin spikes from a hand
+        private void TClaws(Vector2 at, float length)
         {
-            TLine(root, end, wide, thin);
-        }
-
-        //Teardrop : round at the bottom, sharp at the top (a veil, a tear)
-        private void TDrop(Vector2 tip, Vector2 bulb, float r)
-        {
-            Vector2 d = bulb - tip;
-            float length = d.Length();
-            if (length < 0.01f) return;
-            d /= length;
-            Vector2 n = new Vector2(-d.Y, d.X);
-            int k = 0;
-            line[k++] = tip;
-            for (int i = 0; i <= 12; i++)
+            for (int k = 0; k < 3; k++)
             {
-                float a = -MathHelper.PiOver2 + MathHelper.Pi * i / 12f;
-                line[k++] = bulb + n * ((float)Math.Sin(-a) * r) + d * ((float)Math.Cos(a) * r);
+                float a = 1.1f + k * 0.35f;
+                Vector2 d = new Vector2((float)Math.Cos(a) * Facing, (float)Math.Sin(a));
+                TLine(at, at + d * length, 0.022f * Height, 0.004f * Height);
             }
-            TPoly(k);
         }
 
-        //Draw Tacet Parts : the black body of each design (drawn twice, see DrawTacet)
+        //Note Head : a tilted oval, the sign of a note (STATIC's false notes, the choir's hollow heads)
+        private float NoteTilt
+        {
+            get { return -0.42f * Facing; }
+        }
+
+        //======================================================================================
+        //The designs : black bodies (drawn twice, see DrawTacet)
+        //======================================================================================
+
         private void DrawTacetParts()
         {
-            float h = Height;
-            bool body2 = Level == 2;
-            Vector2 head = body[Head].At, chest = body[Chest].At, hip = body[Hip].At;
-            Vector2 handA = body[HandA].At, handB = body[HandB].At;
             switch (design)
             {
-                case Static:
-                    if (body2)
-                    {
-                        TBox(Glitch(head, 0), 0.17f * h, 0.15f * h, 0f);
-                        TBox(Glitch(chest, 1), 0.3f * h, 0.26f * h, 0f);
-                        TBox(Glitch(hip, 2), 0.24f * h, 0.12f * h, 0f);
-                        TLine(Glitch(chest + new Vector2(0.15f * Facing, -0.08f) * h, 3), handA, 0.07f * h, 0.06f * h);
-                        TLine(Glitch(chest + new Vector2(-0.15f * Facing, -0.08f) * h, 4), handB, 0.07f * h, 0.06f * h);
-                        TLine(hip + new Vector2(-0.07f * Facing, 0f) * h, body[FootA].At, 0.08f * h, 0.07f * h);
-                        TLine(hip + new Vector2(0.07f * Facing, 0f) * h, body[FootB].At, 0.08f * h, 0.07f * h);
-                    }
-                    else
-                    {
-                        for (int k = 0; k < 8; k++)
-                        {
-                            float w = (0.1f + 0.12f * Hash(k, 41)) * h;
-                            float hh = (0.06f + 0.1f * Hash(k, 43)) * h;
-                            Vector2 at = chest + new Vector2((Hash(k, 45) - 0.5f) * 0.42f * Facing, (Hash(k, 47) - 0.5f) * 0.5f) * h;
-                            TBox(Glitch(at, k), w, hh, 0f);
-                        }
-                    }
-                    break;
-
-                case Damper:
-                    if (body2)
-                    {
-                        TLimb(hip + new Vector2(-0.08f * Facing, 0f) * h, body[FootA].At, 0.34f * h, 0.12f * h, 0.09f * h, Facing);
-                        TLimb(hip + new Vector2(0.08f * Facing, 0f) * h, body[FootB].At, 0.34f * h, 0.12f * h, 0.09f * h, Facing);
-                        TLimb(chest + new Vector2(-0.14f * Facing, 0.02f) * h, handB, 0.34f * h, 0.1f * h, 0.07f * h, Facing);
-                        line[0] = chest + new Vector2(-0.2f * Facing, -0.06f) * h;
-                        line[1] = chest + new Vector2(0.18f * Facing, -0.1f) * h;
-                        line[2] = hip + new Vector2(0.16f * Facing, 0f) * h;
-                        line[3] = hip + new Vector2(-0.18f * Facing, 0.02f) * h;
-                        TPoly(4);
-                        TCircle(head, 0.08f * h);
-                        TLimb(chest + new Vector2(0.14f * Facing, -0.04f) * h, handA, 0.36f * h, 0.12f * h, 0.09f * h, -Facing);
-                    }
-                    else
-                    {
-                        line[0] = chest + new Vector2(-0.16f * Facing, 0f) * h;
-                        line[1] = chest + new Vector2(0.14f * Facing, 0f) * h;
-                        line[2] = Local(0.22f, -0.02f);
-                        line[3] = Local(-0.25f, -0.02f);
-                        TPoly(4);
-                    }
-                    TEllipse(handA, 0.085f * h, 0.17f * h, 0f);                                          // the felt pad
-                    break;
-
-                case Choir:
-                    //A HUNDRED MOUTHS : a pyramid of round heads (one, two, three) on a tall body, each a mouth open on nothing
-                    line[0] = chest + new Vector2(-0.08f * Facing, 0.02f) * h;
-                    line[1] = chest + new Vector2(0.08f * Facing, 0.02f) * h;
-                    line[2] = hip + new Vector2(0.2f * Facing, 0.26f) * h;
-                    line[3] = hip + new Vector2(-0.22f * Facing, 0.26f) * h;
-                    TPoly(4);
-                    if (body2)
-                    {
-                        TLimb(chest + new Vector2(0.06f * Facing, 0.04f) * h, body[FootA].At, 0f, 0.05f * h, 0.03f * h, 0f);
-                        TLimb(chest + new Vector2(-0.06f * Facing, 0.04f) * h, body[FootB].At, 0f, 0.05f * h, 0.03f * h, 0f);
-                        THand(body[FootA].At, 0.035f * h);
-                        THand(body[FootB].At, 0.035f * h);
-                    }
-                    for (int k = 0; k < 6; k++) TCircle(ChoirHead(k), 0.06f * h);
-                    break;
-
-                case Requiem:
-                    if (body2)
-                    {
-                        TLimb(chest + new Vector2(0.1f * Facing, 0.05f) * h, handA, 0.4f * h, 0.06f * h, 0.03f * h, -Facing);
-                        TLimb(chest + new Vector2(-0.1f * Facing, 0.05f) * h, handB, 0.4f * h, 0.06f * h, 0.03f * h, Facing);
-                    }
-                    TDrop(chest + new Vector2(0f, -0.08f) * h, hip, 0.16f * h);
-                    for (int k = 0; k < 5; k++)                                                          // the staff lines it ends in
-                    {
-                        float y = hip.Y + (0.14f + k * 0.065f) * h;
-                        float gap = (float)Math.Sin(clock * 0.7f + k * 1.3f) * 0.05f * h;
-                        float wide = (0.3f - k * 0.035f) * h;
-                        TBox(new Vector2(hip.X - wide * 0.3f + gap, y), wide * 0.45f, 0.022f * h, 0f);
-                        TBox(new Vector2(hip.X + wide * 0.35f - gap, y), wide * 0.3f, 0.022f * h, 0f);
-                    }
-                    break;
-
-                case Nameless:
-                    for (int twin = 0; twin < 2; twin++)
-                    {
-                        Vector2 move1 = twin == 0 ? body[Extra].At - head : Vector2.Zero;               // the shadow first, behind
-                        if (body2)
-                        {
-                            line[0] = chest + move1 + new Vector2(-0.13f * Facing, 0f) * h;
-                            line[1] = chest + move1 + new Vector2(0.12f * Facing, 0f) * h;
-                            line[2] = hip + move1 + new Vector2(0.09f * Facing, 0.05f) * h;
-                            line[3] = hip + move1 + new Vector2(-0.1f * Facing, 0.05f) * h;
-                            TPoly(4);
-                            TLimb(hip + move1 + new Vector2(-0.05f * Facing, 0f) * h, body[FootA].At + move1, 0.46f * h, 0.06f * h, 0.035f * h, Facing);
-                            TLimb(hip + move1 + new Vector2(0.05f * Facing, 0f) * h, body[FootB].At + move1, 0.46f * h, 0.06f * h, 0.035f * h, Facing);
-                            TLimb(chest + move1 + new Vector2(0.1f * Facing, 0f) * h, handA + move1, 0.32f * h, 0.05f * h, 0.03f * h, -Facing);
-                            TLimb(chest + move1 + new Vector2(-0.1f * Facing, 0f) * h, handB + move1, 0.32f * h, 0.05f * h, 0.03f * h, Facing);
-                        }
-                        line[0] = head + move1 + new Vector2(0f, -0.13f) * h;                            // the mask : a blank diamond
-                        line[1] = head + move1 + new Vector2(0.085f * Facing, 0f) * h;
-                        line[2] = head + move1 + new Vector2(0f, 0.15f) * h;
-                        line[3] = head + move1 + new Vector2(-0.085f * Facing, 0f) * h;
-                        TPoly(4);
-                    }
-                    break;
-
-                case Devil:
-                    if (body2)
-                    {
-                        TLine(chest, hip, 0.07f * h, 0.05f * h);
-                        TLimb(hip, body[FootA].At, 0.46f * h, 0.045f * h, 0.025f * h, Facing);
-                        TLimb(hip, body[FootB].At, 0.46f * h, 0.045f * h, 0.025f * h, Facing);
-                        TLimb(chest + new Vector2(-0.05f * Facing, 0f) * h, handB, 0.34f * h, 0.035f * h, 0.02f * h, Facing);
-                        TLimb(chest + new Vector2(0.05f * Facing, 0f) * h, handA, 0.34f * h, 0.035f * h, 0.02f * h, -Facing);
-                    }
-                    else TDrop(chest + new Vector2(0f, -0.04f) * h, hip, 0.09f * h);
-                    TCircle(head, 0.07f * h);                                                          // the scroll
-                    TCrescent(head + new Vector2(-0.04f * Facing, -0.03f) * h, 0.09f * h, -2.6f, -1.5f, 0.03f * h);   // horns
-                    TCrescent(head + new Vector2(0.04f * Facing, -0.03f) * h, 0.09f * h, -1.6f, -0.5f, 0.03f * h);
-                    TLine(handA - new Vector2(0f, -0.05f) * h, handA + new Vector2(0.02f * Facing, -0.36f) * h, 0.018f * h, 0.012f * h);   // the bow's stick
-                    TCrescent(handA + new Vector2(-0.06f * Facing, -0.36f) * h, 0.16f * h, Facing > 0f ? -0.2f : MathHelper.Pi - 1.2f,
-                              Facing > 0f ? 1.2f : MathHelper.Pi + 0.2f, 0.045f * h);                    // its blade, a scythe
-                    break;
-
-                case Crown:
-                    if (body2)
-                    {
-                        TLimb(chest + new Vector2(0.17f * Facing, 0f) * h, handA, 0.42f * h, 0.09f * h, 0.05f * h, -Facing);
-                        TLimb(chest + new Vector2(-0.17f * Facing, 0f) * h, handB, 0.42f * h, 0.09f * h, 0.05f * h, Facing);
-                    }
-                    line[0] = chest + new Vector2(-0.22f * Facing, -0.02f) * h;
-                    line[1] = chest + new Vector2(0.22f * Facing, -0.02f) * h;
-                    line[2] = hip + new Vector2(0.24f * Facing, 0.22f) * h;
-                    line[3] = hip + new Vector2(-0.26f * Facing, 0.22f) * h;
-                    TPoly(4);
-                    TCircle(head + new Vector2(0f, 0.09f) * h, 0.085f * h);
-                    for (int k = 0; k < 5; k++)                                                          // the crown's points
-                    {
-                        float x = (-0.1f + k * 0.05f) * Facing;
-                        float tall = (k == 2 ? 0.13f : (k == 1 || k == 3 ? 0.1f : 0.075f)) * h;
-                        TKite(head + new Vector2(x * h, 0.03f * h), head + new Vector2(x * h, 0.03f * h - tall), 0.045f * h, 0.15f);
-                    }
-                    TBox(head + new Vector2(0f, 0.035f) * h, 0.26f * h, 0.035f * h, 0f);
-                    THand(handA, 0.075f * h);
-                    THand(handB, 0.075f * h);
-                    break;
-
-                case Staff:
-                    float beat = StaffBeat();
-                    Vector2 foot = Local(0.13f, 0f) + new Vector2(0f, -beat * 0.12f * h);
-                    TLine(foot, foot + new Vector2(0f, -0.96f * h), 0.03f * h, 0.025f * h);                // the staff
-                    TBox(foot + new Vector2(0f, -0.98f * h), 0.06f * h, 0.06f * h, MathHelper.PiOver4);
-                    TCircle(foot + new Vector2(0f, -0.9f * h), 0.03f * h);
-                    line[0] = chest + new Vector2(-0.16f * Facing, 0f) * h;
-                    line[1] = chest + new Vector2(0.1f * Facing, 0f) * h;
-                    line[2] = hip + new Vector2(0.08f * Facing, 0.1f) * h;
-                    line[3] = hip + new Vector2(-0.14f * Facing, 0.1f) * h;
-                    TPoly(4);
-                    TCircle(head, 0.065f * h);
-                    if (body2)
-                    {
-                        TLimb(chest + new Vector2(0.08f * Facing, 0f) * h, new Vector2(foot.X, handA.Y), 0.3f * h, 0.05f * h, 0.035f * h, -Facing);
-                        TLimb(chest + new Vector2(-0.1f * Facing, 0f) * h, handB, 0.3f * h, 0.05f * h, 0.035f * h, Facing);
-                        TLimb(hip + new Vector2(0.04f * Facing, 0f) * h, body[FootB].At, 0.5f * h, 0.06f * h, 0.035f * h, Facing);
-                    }
-                    break;
-
-                case Cantor:
-                    for (int k = 0; k < 6; k++)                                                          // organ pipes for wings
-                    {
-                        float tall = (0.3f + 0.22f * (float)Math.Sin(k * 0.9f + 0.4f)) * h;
-                        float x = (0.16f + k * 0.055f) * h;
-                        TBox(chest + new Vector2(x * Facing, -tall * 0.35f), 0.04f * h, tall, 0f);
-                        TBox(chest + new Vector2(-x * Facing, -tall * 0.35f), 0.04f * h, tall, 0f);
-                    }
-                    line[0] = chest + new Vector2(-0.14f * Facing, -0.04f) * h;
-                    line[1] = chest + new Vector2(0.14f * Facing, -0.04f) * h;
-                    line[2] = hip + new Vector2(0.17f * Facing, 0.3f) * h;
-                    line[3] = hip + new Vector2(-0.19f * Facing, 0.3f) * h;
-                    TPoly(4);
-                    TCircle(head, 0.085f * h);
-                    if (body2)
-                    {
-                        TLimb(chest + new Vector2(0.1f * Facing, 0f) * h, handA, 0.4f * h, 0.05f * h, 0.03f * h, -Facing);
-                        TLimb(chest + new Vector2(0.06f * Facing, 0.04f) * h, handB, 0.36f * h, 0.045f * h, 0.03f * h, -Facing);
-                    }
-                    THand(handA, 0.075f * h);
-                    THand(handB, 0.05f * h);
-                    break;
-
-                default:                                                                                 // hush
-                    if (body2)
-                    {
-                        line[0] = chest + new Vector2(0f, -0.02f) * h;                                   // the hood and cloak
-                        line[1] = Local(0.2f, -0.06f) + new Vector2(0f, hip.Y - Local(0f, -0.42f).Y);
-                        line[2] = Local(-0.02f, 0.01f) + new Vector2(0f, hip.Y - Local(0f, -0.42f).Y);
-                        line[3] = Local(-0.24f, -0.06f) + new Vector2(0f, hip.Y - Local(0f, -0.42f).Y);
-                        TPoly(4);
-                        TLimb(chest + new Vector2(-0.06f * Facing, 0.24f) * h, handB, 0.36f * h, 0.06f * h, 0.035f * h, Facing);
-                        TLimb(chest + new Vector2(0.09f * Facing, 0.25f) * h, handA, 0.24f * h, 0.055f * h, 0.035f * h, Facing);
-                    }
-                    else TDrop(chest, hip, 0.21f * h);
-                    break;
+                case Static: PartsStatic(); break;
+                case Damper: PartsDamper(); break;
+                case Choir: PartsChoir(); break;
+                case Requiem: PartsRequiem(); break;
+                case Nameless: PartsNameless(); break;
+                case Devil: PartsDevil(); break;
+                case Crown: PartsCrown(); break;
+                case Staff: PartsStaff(); break;
+                case Cantor: PartsCantor(); break;
+                default: PartsHush(); break;
             }
+        }
+
+        //HUSH : the quarter rest, a slanted hood on top, two blades slanting opposite ways, a hook at the bottom
+        private void PartsHush()
+        {
+            float h = Height;
+            Vector2 head = body[Head].At, chest = body[Chest].At, hip = body[Hip].At;
+            if (Level == 2)
+            {
+                TLine(P(chest, 0.07f, 0f), body[HandA].At, 0.035f * h, 0.018f * h);
+                TLine(P(chest, -0.09f, 0.03f), body[HandB].At, 0.035f * h, 0.018f * h);
+                TClaws(body[HandB].At, 0.07f * h);
+            }
+            line[0] = P(head, -0.07f, -0.09f); line[1] = P(head, 0.07f, -0.05f); line[2] = P(head, 0.065f, 0.075f); line[3] = P(head, -0.075f, 0.065f);
+            TPoly(4);
+            line[0] = P(chest, -0.05f, -0.05f); line[1] = P(chest, 0.11f, 0.03f); line[2] = P(chest, 0.03f, 0.17f); line[3] = P(chest, -0.12f, 0.08f);
+            TPoly(4);
+            line[0] = P(hip, 0.09f, -0.14f); line[1] = P(hip, -0.09f, -0.04f); line[2] = P(hip, -0.03f, 0.09f); line[3] = P(hip, 0.14f, 0f);
+            TPoly(4);
+            TCrescent(P(hip, 0.02f, 0.15f), 0.07f * h, 0.3f, 2.8f, 0.05f * h);
+        }
+
+        //STATIC : false notes. LEVEL 1 a crowd of note heads with no stems, LEVEL 2 one note walking on its stem
+        private void PartsStatic()
+        {
+            float h = Height;
+            Vector2 head = body[Head].At, chest = body[Chest].At, hip = body[Hip].At;
+            if (Level == 2)
+            {
+                Vector2 stemTop = P(head, -0.08f, 0.02f);
+                Vector2 stemFoot = P(hip, -0.06f, 0.08f);
+                TLine(stemFoot, body[FootA].At, 0.03f * h, 0.01f * h);
+                TLine(stemFoot, body[FootB].At, 0.03f * h, 0.01f * h);
+                TLine(stemTop, stemFoot, 0.032f * h, 0.026f * h);                      // the stem is its body
+                line[0] = P(head, -0.075f, 0.06f); line[1] = P(head, 0.09f, 0.17f); line[2] = P(head, 0.03f, 0.25f); line[3] = P(head, -0.07f, 0.14f);
+                TPoly(4);                                                              // the flag is its cape
+                TLine(P(head, -0.06f, 0.13f), body[HandA].At, 0.026f * h, 0.015f * h);
+                TEllipse(Glitch(body[HandA].At, 5), 0.036f * h, 0.026f * h, NoteTilt);
+                TEllipse(Glitch(head, 0), 0.095f * h, 0.068f * h, NoteTilt);
+                return;
+            }
+            for (int k = 0; k < 7; k++)
+            {
+                float rx = (0.065f + 0.03f * Hash(k, 41)) * h;
+                Vector2 at = chest + new Vector2((Hash(k, 45) - 0.5f) * 0.42f * Facing, (Hash(k, 47) - 0.5f) * 0.52f) * h;
+                TEllipse(Glitch(at, k), rx, rx * 0.72f, NoteTilt);
+            }
+        }
+
+        //THE DAMPER : the whole rest, a heavy block hanging from its line, and the felt pad it presses down
+        private void PartsDamper()
+        {
+            float h = Height;
+            Vector2 chest = body[Chest].At, hip = body[Hip].At;
+            if (Level == 2)
+            {
+                TLine(P(hip, -0.08f, 0f), body[FootA].At, 0.09f * h, 0.07f * h);
+                TLine(P(hip, 0.07f, 0f), body[FootB].At, 0.09f * h, 0.07f * h);
+                TLine(P(chest, -0.18f, 0.03f), body[HandB].At, 0.07f * h, 0.05f * h);
+                TBox(P(chest, 0.05f, -0.08f), 0.12f * h, 0.08f * h, 0f);
+            }
+            TBox(chest, 0.46f * h, 0.05f * h, 0f);                                     // the line it hangs from
+            TBox(P(chest, 0f, 0.16f), 0.32f * h, 0.25f * h, 0f);                       // the whole rest
+            TLine(P(chest, 0.12f, 0.07f), body[HandA].At, 0.05f * h, 0.04f * h);
+            TEllipse(body[HandA].At, 0.075f * h, 0.15f * h, 0f);                        // the felt pad
+        }
+
+        //THE MUTE CHOIR : a pyramid of hollow note heads on a robe that ends in spikes
+        private void PartsChoir()
+        {
+            float h = Height;
+            Vector2 chest = body[Chest].At, hip = body[Hip].At;
+            if (Level == 2)
+            {
+                TLine(P(chest, 0.06f, 0.04f), body[FootA].At, 0.05f * h, 0.022f * h);
+                TLine(P(chest, -0.06f, 0.04f), body[FootB].At, 0.05f * h, 0.022f * h);
+                TClaws(body[FootA].At, 0.06f * h);
+                TClaws(body[FootB].At, 0.06f * h);
+            }
+            int k = 0;
+            line[k++] = P(chest, -0.08f, 0.02f);
+            line[k++] = P(chest, 0.08f, 0.02f);
+            for (int i = 0; i <= 8; i++)                                               // the hem : spikes
+            {
+                float t = i / 8f;
+                float x = MathHelper.Lerp(0.22f, -0.24f, t);
+                line[k++] = P(hip, x, i % 2 == 0 ? 0.3f : 0.2f);
+            }
+            TPoly(k);
+            for (int i = 0; i < 6; i++) TEllipse(ChoirHead(i), 0.068f * h, 0.055f * h, NoteTilt);
+        }
+
+        //REQUIEM : a tall robe with points at the shoulders, a hood, a quill for a blade, staff lines that stop below it
+        private void PartsRequiem()
+        {
+            float h = Height;
+            Vector2 head = body[Head].At, chest = body[Chest].At, hip = body[Hip].At;
+            if (Level == 2)
+            {
+                TLine(P(chest, 0.1f, 0.02f), body[HandA].At, 0.045f * h, 0.025f * h);
+                TLine(P(chest, -0.1f, 0.02f), body[HandB].At, 0.045f * h, 0.025f * h);
+                TClaws(body[HandB].At, 0.08f * h);
+            }
+            TKite(body[HandA].At, P(body[HandA].At, 0.05f, -0.32f), 0.06f * h, 0.15f);    // the quill
+            line[0] = P(chest, -0.12f, 0f); line[1] = P(chest, 0.11f, 0f); line[2] = P(hip, 0.17f, 0.28f); line[3] = P(hip, -0.19f, 0.28f);
+            TPoly(4);
+            TKite(P(chest, -0.11f, 0f), P(chest, -0.2f, -0.09f), 0.05f * h, 0.3f);
+            TKite(P(chest, 0.1f, 0f), P(chest, 0.18f, -0.08f), 0.05f * h, 0.3f);
+            line[0] = P(head, -0.07f, -0.08f); line[1] = P(head, 0f, -0.13f); line[2] = P(head, 0.07f, -0.08f); line[3] = P(head, 0.06f, 0.07f); line[4] = P(head, -0.06f, 0.07f);
+            TPoly(5);
+            for (int k = 0; k < 5; k++)                                                // the piece never finished : lines that stop
+            {
+                float y = 0.31f + k * 0.045f;
+                float gap = (float)Math.Sin(clock * 0.7f + k * 1.3f) * 0.04f;
+                float wide = 0.3f - k * 0.04f;
+                TBox(P(hip, -wide * 0.25f + gap, y), wide * 0.42f * h, 0.02f * h, 0f);
+                TBox(P(hip, wide * 0.32f - gap, y), wide * 0.26f * h, 0.02f * h, 0f);
+            }
+        }
+
+        //THE NAMELESS MASTER : a tailcoat, a blank diamond mask, and its shadow a moment behind (drawn first)
+        private void PartsNameless()
+        {
+            float h = Height;
+            Vector2 head = body[Head].At, chest = body[Chest].At, hip = body[Hip].At;
+            for (int twin = 0; twin < 2; twin++)
+            {
+                Vector2 m = twin == 0 ? body[Extra].At - head : Vector2.Zero;
+                if (Level == 2)
+                {
+                    TLine(P(hip, -0.04f, 0f) + m, body[FootA].At + m, 0.04f * h, 0.012f * h);
+                    TLine(P(hip, 0.04f, 0f) + m, body[FootB].At + m, 0.04f * h, 0.012f * h);
+                    TLine(P(chest, 0.1f, 0.01f) + m, body[HandA].At + m, 0.035f * h, 0.018f * h);
+                    TLine(P(chest, -0.1f, 0.01f) + m, body[HandB].At + m, 0.035f * h, 0.018f * h);
+                    TLine(body[HandA].At + m, P(body[HandA].At, 0.14f, -0.2f) + m, 0.014f * h, 0.006f * h);   // its pen, its baton
+                }
+                TKite(P(hip, -0.03f, 0f) + m, P(hip, -0.16f, 0.36f) + m, 0.08f * h, 0.15f);
+                TKite(P(hip, 0.03f, 0f) + m, P(hip, -0.04f, 0.34f) + m, 0.06f * h, 0.15f);
+                line[0] = P(chest, -0.12f, 0f) + m; line[1] = P(chest, 0.11f, 0f) + m; line[2] = P(hip, 0.05f, 0f) + m; line[3] = P(hip, -0.06f, 0f) + m;
+                TPoly(4);
+                line[0] = P(head, 0f, -0.12f) + m; line[1] = P(head, 0.08f, 0f) + m; line[2] = P(head, 0f, 0.14f) + m; line[3] = P(head, -0.08f, 0f) + m;
+                TPoly(4);
+            }
+        }
+
+        //THE DEVIL'S STRING : a thin twisted body, a violin's scroll for a head with two horns, the bow as a scythe
+        private void PartsDevil()
+        {
+            float h = Height;
+            Vector2 head = body[Head].At, chest = body[Chest].At, hip = body[Hip].At;
+            if (Level == 2)
+            {
+                TLine(hip, body[FootA].At, 0.04f * h, 0.01f * h);
+                TLine(hip, body[FootB].At, 0.04f * h, 0.01f * h);
+                TLine(P(chest, -0.06f, 0.01f), body[HandB].At, 0.03f * h, 0.015f * h);
+                TClaws(body[HandB].At, 0.07f * h);
+                TLine(P(chest, 0.06f, 0.01f), body[HandA].At, 0.03f * h, 0.015f * h);
+            }
+            line[0] = P(chest, -0.07f, 0f); line[1] = P(chest, 0.08f, 0.02f); line[2] = P(hip, 0.02f, 0.05f); line[3] = P(hip, -0.05f, 0.04f);
+            TPoly(4);
+            TKite(P(hip, -0.01f, 0.02f), P(hip, -0.06f, 0.38f), 0.1f * h, 0.12f);
+            TCircle(head, 0.065f * h);
+            TCrescent(P(head, -0.04f, -0.03f), 0.09f * h, -2.6f, -1.5f, 0.03f * h);   // horns
+            TCrescent(P(head, 0.04f, -0.03f), 0.09f * h, -1.6f, -0.5f, 0.03f * h);
+            Vector2 top = P(body[HandA].At, 0.02f, -0.38f);
+            TLine(P(body[HandA].At, 0f, 0.05f), top, 0.018f * h, 0.012f * h);          // the bow's stick
+            TCrescent(P(top, -0.06f, 0f), 0.16f * h, Facing > 0f ? -0.2f : MathHelper.Pi - 1.2f, Facing > 0f ? 1.2f : MathHelper.Pi + 0.2f, 0.045f * h);
+        }
+
+        //THE DEAF CROWN : a broad robe with spikes at the shoulders, a crown over a face that is not there, two great hands
+        private void PartsCrown()
+        {
+            float h = Height;
+            Vector2 head = body[Head].At, chest = body[Chest].At, hip = body[Hip].At;
+            if (Level == 2)
+            {
+                TLine(P(chest, 0.2f, 0f), body[HandA].At, 0.08f * h, 0.045f * h);
+                TLine(P(chest, -0.2f, 0f), body[HandB].At, 0.08f * h, 0.045f * h);
+            }
+            line[0] = P(chest, -0.24f, -0.02f); line[1] = P(chest, 0.24f, -0.02f); line[2] = P(hip, 0.26f, 0.36f); line[3] = P(hip, -0.28f, 0.36f);
+            TPoly(4);
+            TKite(P(chest, -0.2f, -0.02f), P(chest, -0.3f, -0.14f), 0.07f * h, 0.3f);
+            TKite(P(chest, 0.2f, -0.02f), P(chest, 0.3f, -0.14f), 0.07f * h, 0.3f);
+            TCircle(P(head, 0f, 0.09f), 0.085f * h);
+            for (int k = 0; k < 5; k++)                                                // the crown's points
+            {
+                float x = -0.1f + k * 0.05f;
+                float tall = (k == 2 ? 0.13f : (k == 1 || k == 3 ? 0.1f : 0.075f)) * h;
+                TKite(P(head, x, 0.03f), P(head, x, 0.03f) + new Vector2(0f, -tall), 0.045f * h, 0.15f);
+            }
+            TBox(P(head, 0f, 0.035f), 0.26f * h, 0.035f * h, 0f);
+            THand(body[HandA].At, 0.075f * h);
+            THand(body[HandB].At, 0.075f * h);
+        }
+
+        //THE STAFF : the staff it beat time with, slamming the floor, its body a banner hanging from the top
+        private void PartsStaff()
+        {
+            float h = Height;
+            Vector2 head = body[Head].At, chest = body[Chest].At, hip = body[Hip].At;
+            float beat = StaffBeat();
+            Vector2 foot = Local(0.13f, 0f) + new Vector2(0f, -beat * 0.12f * h);
+            TLine(foot, foot + new Vector2(0f, -0.96f * h), 0.03f * h, 0.025f * h);
+            TBox(foot + new Vector2(0f, -0.98f * h), 0.06f * h, 0.06f * h, MathHelper.PiOver4);
+            TCircle(foot + new Vector2(0f, -0.9f * h), 0.03f * h);
+            if (Level == 2)
+            {
+                TLine(P(chest, 0.08f, 0f), new Vector2(foot.X, body[HandA].At.Y), 0.05f * h, 0.035f * h);
+                TLine(P(chest, -0.1f, 0f), body[HandB].At, 0.05f * h, 0.035f * h);
+                TLine(P(hip, 0.04f, 0f), body[FootB].At, 0.06f * h, 0.03f * h);
+                TLine(P(hip, -0.05f, 0f), P(hip, -0.12f, 0.3f), 0.05f * h, 0.03f * h);   // the leg it hurt, hanging
+            }
+            line[0] = P(chest, -0.17f, 0f); line[1] = P(chest, 0.1f, 0f); line[2] = P(hip, 0.09f, 0.22f); line[3] = P(hip, -0.02f, 0.14f); line[4] = P(hip, -0.15f, 0.24f);
+            TPoly(5);                                                                  // the banner, a swallowtail
+            TCircle(head, 0.06f * h);
+            TBox(P(head, 0f, -0.05f), 0.15f * h, 0.03f * h, 0f);
+        }
+
+        //THE BLIND CANTOR : a robe, organ pipes for wings, two hands feeling the way
+        private void PartsCantor()
+        {
+            float h = Height;
+            Vector2 head = body[Head].At, chest = body[Chest].At, hip = body[Hip].At;
+            for (int k = 0; k < 6; k++)                                                // organ pipes for wings
+            {
+                float tall = (0.3f + 0.22f * (float)Math.Sin(k * 0.9f + 0.4f)) * h;
+                float x = 0.16f + k * 0.055f;
+                TBox(P(chest, x, 0f) + new Vector2(0f, -tall * 0.35f), 0.04f * h, tall, 0f);
+                TBox(P(chest, -x, 0f) + new Vector2(0f, -tall * 0.35f), 0.04f * h, tall, 0f);
+            }
+            if (Level == 2)
+            {
+                TLine(P(chest, 0.1f, 0f), body[HandA].At, 0.05f * h, 0.03f * h);
+                TLine(P(chest, 0.06f, 0.04f), body[HandB].At, 0.045f * h, 0.03f * h);
+            }
+            line[0] = P(chest, -0.14f, -0.04f); line[1] = P(chest, 0.14f, -0.04f); line[2] = P(hip, 0.17f, 0.3f); line[3] = P(hip, -0.19f, 0.3f);
+            TPoly(4);
+            TCircle(head, 0.085f * h);
+            THand(body[HandA].At, 0.05f * h);
+            THand(body[HandB].At, 0.05f * h);
         }
 
         //Choir Head : where THE MUTE CHOIR's heads sit, a pyramid of one, two and three over its body, each bobbing on its own
@@ -594,78 +654,95 @@ namespace Tacetno433.Core
         {
             int row = k == 0 ? 0 : (k < 3 ? 1 : 2);
             int col = k == 0 ? 0 : (k < 3 ? k - 1 : k - 3);
-            float x = (col - row * 0.5f) * 0.13f;
-            float y = -0.27f + row * 0.12f;
+            float x = (col - row * 0.5f) * 0.14f;
+            float y = -0.28f + row * 0.12f;
             float bob = (float)Math.Sin(clock * 2f + k * 1.3f) * 0.006f;
             return body[Chest].At + new Vector2(x * Facing, y + bob) * Height;
         }
 
-        //Glitch : STATIC's blocks jump to a new place every so often, each on its own beat
+        //Glitch : STATIC's shapes jump to a new place every so often, each on its own beat
         private Vector2 Glitch(Vector2 at, int k)
         {
+            if (design != Static) return at;
             int step = (int)((clock + k * 0.37f) * 7f);
             if (Hash(step, k) > 0.7f) return at + new Vector2((Hash(step, k + 19) - 0.5f) * 0.12f * Height, 0f);
             return at;
         }
 
-        //T Hand : a hand of TACET, a diamond (THE DEAF CROWN's great hands that give orders, THE BLIND CANTOR's that feel the way)
-        private void THand(Vector2 at, float size)
-        {
-            Shapes.Polygon(at + Shift, size + tGrow * 1.4f, 4, 0f, tColor);
-        }
+        //======================================================================================
+        //The designs : the white cut through them (eyes and the signs of silence), never the band's colours
+        //======================================================================================
 
-        //Draw Tacet Lights : the white inside, where TACET's silence shows (never the band's colours, CLAUDE.md colours)
-        private void DrawTacetLights(float alpha, float flash)
+        private void DrawTacetLights(float alpha)
         {
             float h = Height;
             Color white = Color.White * alpha;
             Color grey = Palette.PaperDim * alpha;
             Vector2 head = body[Head].At + Shift, chest = body[Chest].At + Shift, hip = body[Hip].At + Shift;
+            float slant = -0.25f * Facing;
             switch (design)
             {
                 case Static:
                     {
-                        bool on = Hash((int)(clock * 9f), 3) > 0.25f;
-                        if (on) Shapes.Box(Glitch(chest, 9) + new Vector2(0f, -0.02f * h), 0.32f * h, 0.012f * h, 0f, white);
-                        for (int k = 0; k < 5; k++)
+                        for (int k = 0; k < 5; k++)                                    // broken staff lines behind the false notes
                         {
-                            int step = (int)(clock * 6f) + k * 13;
-                            Vector2 at = chest + new Vector2((Hash(step, 5) - 0.5f) * 0.5f, (Hash(step, 9) - 0.5f) * 0.6f) * h;
-                            Shapes.Box(at, BattleRules.FigurePixel, BattleRules.FigurePixel, 0f, grey);
+                            int step = (int)(clock * 5f) + k * 7;
+                            float x = (Hash(step, k) - 0.5f) * 0.2f;
+                            Vector2 at = P(chest, x, -0.12f + k * 0.06f);
+                            Shapes.Box(at, (0.08f + 0.12f * Hash(step, k + 3)) * h, BattleRules.FigurePixel, 0f, grey);
+                        }
+                        if (Hash((int)(clock * 9f), 3) > 0.2f)                         // its one eye, flickering
+                        {
+                            Vector2 eye = Level == 2 ? Glitch(body[Head].At, 0) + Shift : chest;
+                            Shapes.Box(eye, 0.05f * h, 0.01f * h, NoteTilt, white);
                         }
                     }
                     break;
                 case Damper:
-                    Shapes.Box(head + new Vector2(0.02f * Facing, 0f) * h, 0.11f * h, 0.012f * h, 0f, white);   // the slit
-                    Shapes.Ring(body[HandA].At + Shift, 0.06f * h, 0.008f * h, grey);                     // the felt's seam
+                    Shapes.Box(P(chest, 0.05f, 0.11f), 0.13f * h, 0.012f * h, 0f, white);      // the slit
+                    for (int k = 0; k < 4; k++)                                                // the strings under the pad
+                        Shapes.Box(P(body[HandA].At + Shift, -0.02f, 0.17f + k * 0.022f), 0.24f * h, BattleRules.FigurePixel, 0f, grey);
                     break;
                 case Choir:
                     for (int k = 0; k < 6; k++)
                     {
                         float open = 0.35f + 0.65f * (0.5f + 0.5f * (float)Math.Sin(clock * 2.4f + k * 1.9f));
-                        Vector2 at = ChoirHead(k) + Shift + new Vector2(0f, 0.012f * h);
-                        Shapes.Ellipse(at, 0.026f * h, 0.034f * h * open + BattleRules.FigurePixel, 0f, white, white);
-                        Shapes.Ellipse(at, 0.016f * h, 0.026f * h * open, 0f, Color.Black * alpha, Color.Black * alpha);
+                        Vector2 at = ChoirHead(k) + Shift;
+                        Shapes.Ellipse(at, 0.04f * h, 0.03f * h, NoteTilt, white, white);              // hollow : a whole note
+                        Shapes.Ellipse(at, 0.022f * h, 0.022f * h * open, 0f, Color.Black * alpha, Color.Black * alpha);   // open on nothing
                     }
                     break;
                 case Requiem:
-                    Shapes.Arc(head, 0.2f * h, -1.2f, 3.6f, 0.014f * h, 0.006f * h, white);              // the broken halo
-                    Shapes.Circle(chest + new Vector2(0f, 0.12f) * h, 0.022f * h, white);
-                    for (int k = 0; k < 5; k++)                                                          // LACRIMOSA : the tears
+                    Shapes.Arc(P(head, 0f, -0.02f), 0.2f * h, -1.2f, 3.6f, 0.014f * h, 0.006f * h, white);   // the broken halo
+                    Shapes.Box(head, 0.06f * h, 0.01f * h, 0f, white);                                      // the face, a slit
+                    for (int k = 0; k < 5; k++)                                                             // a staff that stops
                     {
-                        float t = (clock * 0.45f + k * 0.21f) % 1f;
-                        Vector2 at = head + new Vector2((Hash(k, 61) - 0.5f) * 0.32f * h, (0.1f + t * 0.75f) * h);
+                        float wide = (0.13f - k * 0.02f) * h;
+                        Vector2 start = P(chest, -0.07f, 0.09f + k * 0.026f);
+                        Shapes.Box(start + new Vector2(wide * 0.5f * Facing, 0f), wide, BattleRules.FigurePixel, 0f, white);
+                    }
+                    for (int k = 0; k < 4; k++)                                                             // LACRIMOSA : the tears
+                    {
+                        float t = (clock * 0.45f + k * 0.25f) % 1f;
+                        Vector2 at = head + new Vector2((Hash(k, 61) - 0.5f) * 0.05f * h, (0.03f + t * 0.5f) * h);
                         Shapes.Circle(at, 0.009f * h, white * (1f - t));
                         Shapes.Kite(at, at - new Vector2(0f, 0.03f * h), 0.018f * h, 0.1f, white * (1f - t));
                     }
                     break;
                 case Nameless:
-                    Shapes.Box(head + new Vector2(0f, 0.01f) * h, 0.11f * h, 0.006f * h, 0f, grey);      // where its face was
-                    Shapes.Circle(chest + new Vector2(0f, 0.06f) * h, 0.014f * h, white);
+                    {
+                        Vector2 frame = P(chest, 0f, 0.11f);                                       // the frame where its name was, empty
+                        float w = 0.13f * h, hh = 0.06f * h, t = BattleRules.FigurePixel;
+                        Shapes.Box(frame - new Vector2(0f, hh * 0.5f), w, t, 0f, white);
+                        Shapes.Box(frame + new Vector2(0f, hh * 0.5f), w, t, 0f, white);
+                        Shapes.Box(frame - new Vector2(w * 0.5f, 0f), t, hh, 0f, white);
+                        Shapes.Box(frame + new Vector2(w * 0.5f, 0f), t, hh, 0f, white);
+                        Shapes.Box(head + new Vector2(0f, 0.01f * h), t, 0.18f * h, 0f, grey);     // a crack down the blank mask
+                    }
                     break;
                 case Devil:
                     {
-                        float top = -0.2f * h;                                                           // ON ONE STRING : it shivers
+                        float top = -0.2f * h;                                                     // ON ONE STRING : it shivers
                         for (int i = 0; i < 16; i++)
                         {
                             float t = i / 15f;
@@ -676,50 +753,69 @@ namespace Tacetno433.Core
                         }
                         Shapes.Stroke(line, lineW, 16, white, white * 0.5f, false);
                         Shapes.Arc(head, 0.04f * h, clock * 2f, clock * 2f + 4.5f, 0.012f * h, 0.004f * h, white);   // the scroll's curl
+                        Shapes.Box(P(head, 0.03f, 0.02f), 0.04f * h, 0.01f * h, slant, white);                       // an eye
                     }
                     break;
                 case Crown:
-                    if (Hash((int)(clock * 11f), 2) > 0.45f)                                             // lightning between the hands
                     {
-                        Vector2 a = body[HandA].At + Shift, b = body[HandB].At + Shift;
-                        int seedStep = (int)(clock * 11f);
-                        for (int i = 0; i < 9; i++)
+                        Vector2 face = P(head, 0f, 0.09f) + new Vector2(0f, 0f);                   // it cannot hear : the face is empty
+                        Shapes.Ring(face, 0.055f * h, 0.012f * h, white);
+                        if (Hash((int)(clock * 11f), 2) > 0.45f)                                   // lightning between the hands
                         {
-                            float t = i / 8f;
-                            Vector2 p = Vector2.Lerp(a, b, t) + new Vector2(0f, -(float)Math.Sin(t * MathHelper.Pi) * 0.2f * h);
-                            if (i > 0 && i < 8) p += new Vector2((Hash(seedStep, i) - 0.5f) * 0.06f * h, (Hash(seedStep, i + 9) - 0.5f) * 0.06f * h);
-                            line[i] = p;
-                            lineW[i] = 0.007f * h;
+                            Vector2 a = body[HandA].At + Shift, b = body[HandB].At + Shift;
+                            int seedStep = (int)(clock * 11f);
+                            for (int i = 0; i < 9; i++)
+                            {
+                                float t = i / 8f;
+                                Vector2 p = Vector2.Lerp(a, b, t) + new Vector2(0f, -(float)Math.Sin(t * MathHelper.Pi) * 0.2f * h);
+                                if (i > 0 && i < 8) p += new Vector2((Hash(seedStep, i) - 0.5f) * 0.06f * h, (Hash(seedStep, i + 9) - 0.5f) * 0.06f * h);
+                                line[i] = p;
+                                lineW[i] = 0.007f * h;
+                            }
+                            Shapes.Stroke(line, lineW, 9, white, white, false);
                         }
-                        Shapes.Stroke(line, lineW, 9, white, white, false);
                     }
-                    Shapes.Circle(head + new Vector2(0f, 0.035f) * h, 0.012f * h, white);
                     break;
                 case Staff:
                     {
-                        float t = ((clock + seed) % 1.7f - 0.45f) / 0.8f;                                // TE DEUM : the beat on the floor
+                        for (int k = 0; k < 5; k++)                                                // its banner is a staff : five lines
+                        {
+                            Vector2 a = P(chest, -0.15f, 0.05f + k * 0.035f);
+                            Vector2 b = P(chest, 0.08f, 0.05f + k * 0.035f);
+                            Shapes.Line(a, b, BattleRules.FigurePixel, white);
+                        }
+                        Shapes.Box(head, 0.05f * h, 0.01f * h, 0f, white);
+                        float t = ((clock + seed) % 1.7f - 0.45f) / 0.8f;                         // TE DEUM : the beat on the floor
                         if (t > 0f && t < 1f)
                         {
                             Vector2 foot = Local(0.13f, 0f) + Shift;
                             Shapes.Arc(foot, 0.1f * h + t * 0.4f * h, MathHelper.Pi, MathHelper.TwoPi, 0.01f * h * (1f - t), 0.01f * h * (1f - t), white * (1f - t));
                         }
-                        Shapes.Circle(head, 0.012f * h, white);
                     }
                     break;
                 case Cantor:
-                    Shapes.Box(head + new Vector2(0f, -0.005f) * h, 0.19f * h, 0.035f * h, 0f, white);   // the blindfold
-                    for (int k = 0; k < 3; k++)                                                          // voices, one after another
+                    Shapes.Box(P(head, 0f, -0.005f), 0.19f * h, 0.035f * h, 0f, white);           // the blindfold
+                    for (int k = 0; k < 6; k++)                                                    // each pipe's mouth
+                    {
+                        float tall = (0.3f + 0.22f * (float)Math.Sin(k * 0.9f + 0.4f)) * h;
+                        float x = 0.16f + k * 0.055f;
+                        Shapes.Box(P(chest, x, 0f) + new Vector2(0f, tall * 0.05f), 0.022f * h, 0.012f * h, 0f, grey);
+                        Shapes.Box(P(chest, -x, 0f) + new Vector2(0f, tall * 0.05f), 0.022f * h, 0.012f * h, 0f, grey);
+                    }
+                    for (int k = 0; k < 3; k++)                                                    // voices, one after another
                     {
                         float t = (clock * 0.5f + k / 3f) % 1f;
                         Shapes.Ring(head, (0.1f + t * 0.4f) * h, 0.006f * h * (1f - t), white * (0.8f * (1f - t)));
                     }
                     break;
-                default:                                                                                 // hush
+                default:                                                                           // hush
                     {
-                        Vector2 finger = Level == 2 ? body[HandA].At + Shift + new Vector2(-0.005f * Facing, -0.06f) * h : head;
-                        Shapes.Box(finger, 0.024f * h, 0.13f * h, 0f, white);                             // a finger on its lips
-                        Shapes.Circle(finger + new Vector2(0f, -0.065f * h), 0.012f * h, white);
-                        for (int k = 0; k < 5; k++)                                                      // the echo going away
+                        Shapes.Box(P(head, -0.005f, -0.012f), 0.032f * h, 0.009f * h, slant, white);   // two slits for eyes
+                        Shapes.Box(P(head, 0.04f, -0.024f), 0.028f * h, 0.009f * h, slant, white);
+                        Vector2 finger = Level == 2 ? body[HandA].At + Shift + new Vector2(0f, -0.03f * h) : P(head, 0.025f, 0.035f);
+                        Shapes.Box(finger, 0.013f * h, 0.075f * h, 0f, white);                        // a finger on its lips
+                        Shapes.Circle(finger + new Vector2(0f, -0.037f * h), 0.009f * h, white);
+                        for (int k = 0; k < 5; k++)                                                    // the echo going away
                         {
                             float t = (clock * 0.22f + k * 0.2f) % 1f;
                             float a = -2.4f + t * 2.6f;
