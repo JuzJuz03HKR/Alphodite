@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 1 พ.ย. แชท /system (Finalize15) | ก้อน B QoL : ไล่ทั้งรันด้วย TEST ROOM กับภาพ `--shots` อ่านโค้ดส่วนการกดและการไปหน้าถัดไป แล้วเสนอรายการ QoL ให้ผู้ใช้เลือกก่อน ยังไม่แตะโค้ด | ตอนเสนอ : `docs/BETA1_DIRECTION.md` `docs/USER_BRIEFS.md` `docs/RESUME_PROMPT.md` `docs/HANDOFF.md` / ตอนทำ : บอกในแถวนี้หลังผู้ใช้เลือก |
+| 1 พ.ย. แชท /system (Finalize15) | ก้อน B QoL ข้อ 1 2 3 5 6 8 9 10 ที่ผู้ใช้เลือก (`BETA1_DIRECTION.md` 29.6) ทำรวดเดียว | `Data/Words.cs` `Data/RunState.cs` `Core/Ui.cs` `Core/RunHud.cs` `Core/BandColumn.cs` `Core/Settings.cs` `Data/SaveFile.cs` `Screens/` (TeamPick ConductorDetail MotifReward Rehearsal Rest Event Pause Guide CurtainCall Battle Shop Luthier BandName) `Battle/TurnBattle.cs` `Core/DebugShots*.cs` เอกสาร |
 
 ---
 
