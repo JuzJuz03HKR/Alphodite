@@ -60,11 +60,74 @@ namespace Tacetno433.Core
         private struct Legend
         {
             public int Weapon;                // 0 IL CANNONE, 1 FLUTE RAPIER, 2 TWIN HAMMERS, 3 THE SCARRED SHIELD, 4 HORN CHAKRAM
-            public float BodyWide;            // the body triangle, shares of the height
-            public float BodyTall;
+            public float Shoulder;            // half the shoulders, toward TACET (the near one is a little wider), shares of the height
             public float Core;                // the head's radius
+            public Plane[] Coat;              // the planes of the body (STYLE, round 4)
+            public float Size;                // how tall against the others (the heavy ones a little taller)
+            public float Limb;                // how thick the arms and legs of LEVEL 2 are
         }
         private Legend legend;
+
+        //Plane : one flat piece of a legend's body (STYLE, round 4, the user 13.84 : like ZZZ, CZN, Expedition 33, Worldless).
+        //Numbers in pairs (across, down) in shares of the height from the middle of the shoulders : across toward TACET, down
+        //along the body. LIT is the whole piece in light, SHADE the part turned from it, laid on top (TWO TONES, like cel
+        //shading). The lower a corner is, the more it trails behind when the body moves (HEM SWING).
+        private struct Plane
+        {
+            public float[] Lit;
+            public float[] Shade;
+            public Plane(float[] lit, float[] shade)
+            {
+                Lit = lit;
+                Shade = shade;
+            }
+        }
+
+        //PROPORTIONS (the user 13.85 : like real characters, slim and cool, a heavy one big, tall and solid) : the shoulders are
+        //wide and the waist narrow (a V), the coat flows down behind, the legs are long. The slim three (PAGANINI QUANTZ PUNTO)
+        //are drawn at their size, the heavy two (PFUNDT DUPORT) a little taller with thick shoulders (Legend.Size).
+
+        //PAGANINI : slim and sharp, two points at the shoulders, two long tails like a bow's blades (the devil's violinist)
+        private static readonly Plane[] coatPaganini =
+        {
+            new Plane(new[] { 0f, 0.21f, 0.04f, 0.21f, -0.06f, 0.6f }, new[] { 0f, 0.21f, 0.04f, 0.21f, -0.06f, 0.6f }),
+            new Plane(new[] { -0.045f, 0.2f, 0f, 0.22f, -0.165f, 0.66f }, null),
+            new Plane(new[] { -0.096f, 0.01f, 0.086f, -0.006f, 0.034f, 0.21f, -0.045f, 0.215f }, new[] { 0.01f, 0.004f, 0.086f, -0.006f, 0.034f, 0.21f, 0f, 0.212f }),
+            new Plane(new[] { -0.098f, 0.012f, -0.058f, 0.004f, -0.115f, -0.06f }, null),
+            new Plane(new[] { 0.05f, -0.002f, 0.086f, -0.006f, 0.098f, -0.056f }, new[] { 0.05f, -0.002f, 0.086f, -0.006f, 0.098f, -0.056f }),
+        };
+
+        //QUANTZ : slim and upright, a high collar, a long narrow coat behind like the flute itself (the king's flute master)
+        private static readonly Plane[] coatQuantz =
+        {
+            new Plane(new[] { -0.048f, 0.2f, 0.034f, 0.2f, 0.03f, 0.6f, -0.046f, 0.6f }, new[] { 0f, 0.2f, 0.034f, 0.2f, 0.03f, 0.6f, 0f, 0.6f }),
+            new Plane(new[] { -0.082f, 0.01f, 0.072f, 0f, 0.032f, 0.21f, -0.042f, 0.21f }, new[] { 0.004f, 0.005f, 0.072f, 0f, 0.032f, 0.21f, 0f, 0.21f }),
+            new Plane(new[] { -0.058f, 0.014f, 0.05f, 0.012f, -0.02f, -0.075f }, new[] { 0f, 0.013f, 0.05f, 0.012f, -0.02f, -0.075f }),
+        };
+
+        //PFUNDT : heavy, broad shoulders and a thick waist, a short skirt, a drum on each shoulder (who tunes the thunder)
+        private static readonly Plane[] coatPfundt =
+        {
+            new Plane(new[] { -0.092f, 0.24f, 0.082f, 0.24f, 0.104f, 0.37f, -0.114f, 0.37f }, new[] { 0f, 0.24f, 0.082f, 0.24f, 0.104f, 0.37f, 0f, 0.37f }),
+            new Plane(new[] { -0.15f, 0.02f, 0.14f, 0.008f, 0.078f, 0.25f, -0.088f, 0.25f }, new[] { 0.01f, 0.014f, 0.14f, 0.008f, 0.078f, 0.25f, 0f, 0.25f }),
+        };
+
+        //DUPORT : heavy and steady, square shoulders, a long coat, the cello's shape on the back and its spike below
+        private static readonly Plane[] coatDuport =
+        {
+            new Plane(new[] { -0.092f, 0.23f, 0.082f, 0.23f, 0.102f, 0.52f, -0.114f, 0.52f }, new[] { 0f, 0.23f, 0.082f, 0.23f, 0.102f, 0.52f, 0f, 0.52f }),
+            new Plane(new[] { -0.14f, 0f, 0.13f, -0.006f, 0.08f, 0.24f, -0.092f, 0.24f }, new[] { 0.008f, -0.003f, 0.13f, -0.006f, 0.08f, 0.24f, 0f, 0.24f }),
+            new Plane(new[] { -0.152f, -0.014f, -0.086f, -0.014f, -0.086f, 0.046f, -0.152f, 0.046f }, null),
+            new Plane(new[] { 0.078f, -0.02f, 0.14f, -0.02f, 0.14f, 0.04f, 0.078f, 0.04f }, new[] { 0.078f, -0.02f, 0.14f, -0.02f, 0.14f, 0.04f, 0.078f, 0.04f }),
+        };
+
+        //PUNTO : slim above, the coat flaring into the horn's bell below the waist (louder than Beethoven)
+        private static readonly Plane[] coatPunto =
+        {
+            new Plane(new[] { -0.045f, 0.2f, -0.056f, 0.29f, -0.08f, 0.37f, -0.118f, 0.44f, -0.17f, 0.5f, 0.15f, 0.5f, 0.106f, 0.44f, 0.072f, 0.37f, 0.05f, 0.29f, 0.038f, 0.2f },
+                      new[] { 0f, 0.2f, 0.038f, 0.2f, 0.05f, 0.29f, 0.072f, 0.37f, 0.106f, 0.44f, 0.15f, 0.5f, 0f, 0.5f }),
+            new Plane(new[] { -0.086f, 0.004f, 0.076f, -0.004f, 0.036f, 0.2f, -0.045f, 0.2f }, new[] { 0.006f, 0f, 0.076f, -0.004f, 0.036f, 0.2f, 0f, 0.2f }),
+        };
 
         private const int Cannone = 0;
         private const int Rapier = 1;
@@ -77,12 +140,18 @@ namespace Tacetno433.Core
         {
             switch (key)
             {
-                case "quantz": return new Legend { Weapon = Rapier, BodyWide = 0.18f, BodyTall = 0.27f, Core = 0.058f };
-                case "pfundt": return new Legend { Weapon = Hammers, BodyWide = 0.25f, BodyTall = 0.26f, Core = 0.064f };
-                case "duport": return new Legend { Weapon = Shield, BodyWide = 0.24f, BodyTall = 0.29f, Core = 0.062f };
-                case "punto": return new Legend { Weapon = Chakram, BodyWide = 0.21f, BodyTall = 0.28f, Core = 0.06f };
-                default: return new Legend { Weapon = Cannone, BodyWide = 0.18f, BodyTall = 0.31f, Core = 0.06f };   // paganini
+                case "quantz": return new Legend { Weapon = Rapier, Shoulder = 0.07f, Core = 0.041f, Coat = coatQuantz, Size = 1f, Limb = 0.024f };
+                case "pfundt": return new Legend { Weapon = Hammers, Shoulder = 0.14f, Core = 0.043f, Coat = coatPfundt, Size = 1.07f, Limb = 0.042f };
+                case "duport": return new Legend { Weapon = Shield, Shoulder = 0.13f, Core = 0.042f, Coat = coatDuport, Size = 1.05f, Limb = 0.038f };
+                case "punto": return new Legend { Weapon = Chakram, Shoulder = 0.075f, Core = 0.041f, Coat = coatPunto, Size = 1f, Limb = 0.026f };
+                default: return new Legend { Weapon = Cannone, Shoulder = 0.085f, Core = 0.04f, Coat = coatPaganini, Size = 0.99f, Limb = 0.024f };   // paganini
             }
+        }
+
+        //H : the height a design is drawn at (a legend's Size, so the heavy ones stand taller)
+        private float H
+        {
+            get { return Height * (Of == Sort.Musician ? legend.Size : 1f); }
         }
 
         //Set Up Body : how loose each part is (the band has no chains any more : no hair, no clothes, 13.80)
@@ -188,8 +257,8 @@ namespace Tacetno433.Core
             float bobA = (float)Math.Sin(clock * 1.3f + seed + 1f) * 0.008f * drift;
             float bobB = (float)Math.Sin(clock * 1.1f + seed + 2.3f) * 0.008f * drift;
             float bobF = (float)Math.Sin(clock * 1.5f + seed + 3.1f) * 0.006f * drift;
-            float footY = floating ? -0.31f : -0.02f;
-            float tall = legend.BodyTall;
+            float footY = floating ? -0.13f : -0.01f;
+            float tall = 0.28f;
 
             if (down)
             {
@@ -209,13 +278,13 @@ namespace Tacetno433.Core
                 return;
             }
 
-            want[Head] = Local(0.02f + lean * 1.4f, -0.8f + breath * 1.3f + duck);
-            want[Chest] = Local(0f + lean, -0.72f + breath + duck);
-            want[Hip] = Local(-0.01f + lean * 0.3f, -0.72f + tall + breath * 0.6f + duck * 0.6f);
+            want[Head] = Local(0.036f + lean * 1.4f, -0.845f + breath * 1.3f + duck);              // STANCE : leaning toward TACET
+            want[Chest] = Local(0.012f + lean, -0.75f + breath + duck);
+            want[Hip] = Local(-0.012f + lean * 0.3f, -0.75f + tall + breath * 0.6f + duck * 0.6f);
             want[HandA] = Local(handA.X + lean, handA.Y + duck + bobA);
             want[HandB] = Local(handB.X + lean * 0.5f, handB.Y + duck + bobB);
-            want[FootA] = Local(-0.065f, footY + bobF);
-            want[FootB] = Local(0.055f, footY - bobF);
+            want[FootA] = Local(-0.09f, footY + bobF);                                            // the back foot takes the weight
+            want[FootB] = Local(0.085f, footY - 0.01f - bobF);
             float orbit = clock * 1.2f + seed;
             want[Extra] = want[Head] + new Vector2((float)Math.Cos(orbit) * Facing, (float)Math.Sin(orbit) * 0.35f) * (0.11f * Height);
             Vector2 middle = (want[Chest] + want[Hip]) * 0.5f;
@@ -291,179 +360,230 @@ namespace Tacetno433.Core
             silhouette = false;
         }
 
+        private Vector2 windNow;                                  // the wind of this frame (Update keeps it), for HEM SWING
+        private static readonly Color BodyShade = new Color(198, 200, 216);
+
+        //Draw Band (STYLE, round 4) : a tall figure leaning toward TACET, its body a few flat planes in two tones with an edge
+        //of the legend's colour, the instrument's mark on the coat, a ring of the legend's colour tilted behind the head.
+        //LEVEL 1 : the planes float apart with small gaps (a body of pieces, the parts on springs). LEVEL 2 : joined, with legs
+        //and arms as long tapered bars.
         private void DrawBand(float alpha, float flash)
         {
-            float h = Height;
+            float h = H;
+            bool floating = Level == 1;
             Color white = C(Color.Lerp(BodyTop, Color.White, flash), alpha);
+            Color shade = C(Color.Lerp(BodyShade, Color.White, flash * 0.8f), alpha);
             Color low = C(Color.Lerp(BodyLow, Color.White, flash), alpha);
             Color edge = C(Color.Lerp(Tint, Hot, flash), alpha);
             Vector2 head = body[Head].At;
             Vector2 chest = body[Chest].At;
             Vector2 hip = body[Hip].At;
-
-            //The body follows its two springs (chest and hip), so it leans and swings by itself
             Vector2 down1 = hip - chest;
             float tall = Math.Max(0.0001f, down1.Length());
             down1 /= tall;
             Vector2 across = new Vector2(-down1.Y, down1.X) * -Facing;              // toward TACET when standing
+            across = Vector2.Normalize(across + new Vector2(0f, -0.09f));          // STANCE : the far shoulder a little higher
 
-            //BITS : behind everything
+            //HEM SWING : the lower the corner, the more it trails behind the body's move, and the wind and a breeze move it
+            Vector2 trail = (body[Hip].At - want[Hip]) * 1.6f + new Vector2(windNow.X * 0.012f + (float)Math.Sin(clock * 1.1f + seed) * 0.006f * h, 0f);
+
             DrawBits(white, edge);
 
-            //LEVEL 2 : the legs and the far arm, behind the body (straight tapered bars, no knees or elbows)
-            if (Level == 2)
+            //Legs and the far arm, behind the coat (LEVEL 2 bars, LEVEL 1 small floating feet)
+            if (!floating)
             {
-                Shapes.Taper(TorsoPoint(2, chest, hip, down1, across), body[FootB].At, 0.03f * h, 0.006f * h, low);
-                Shapes.Taper(TorsoPoint(3, chest, hip, down1, across), body[FootA].At, 0.034f * h, 0.006f * h, low);
-                Shapes.Taper(TorsoPoint(0, chest, hip, down1, across), body[HandA].At, 0.026f * h, 0.014f * h, low);
+                float limb = legend.Limb * h;
+                Shapes.Taper(hip + across * (0.035f * h), body[FootB].At, limb * 1.25f, 0.004f * h, low);
+                Shapes.Taper(hip - across * (0.04f * h), body[FootA].At, limb * 1.4f, 0.004f * h, shade);
+                Shapes.Taper(Shoulder(true, chest, down1, across), body[HandA].At, limb, limb * 0.5f, low);
             }
             else
             {
-                DrawFoot(body[FootA].At, 0.045f * h, low);
-                DrawFoot(body[FootB].At, 0.04f * h, low);
+                DrawFoot(body[FootA].At, 0.04f * h, low);
+                DrawFoot(body[FootB].At, 0.036f * h, low);
             }
 
-            //BODY : the instrument's shape
-            DrawTorso(chest, hip, down1, across, tall, white, low, edge, alpha);
-
-            //LEVEL 2 : the neck and the near arm over the body
-            if (Level == 2)
+            //The coat : the edge light first (every plane in the legend's colour, moved toward TACET), then the planes
+            Plane[] coat = legend.Coat;
+            Vector2 rim = across * (0.007f * h);
+            for (int i = 0; i < coat.Length; i++)
             {
-                Shapes.Taper(chest, head + new Vector2(0f, legend.Core * 0.8f * h), 0.028f * h, 0.02f * h, low);
-                Shapes.Taper(TorsoPoint(1, chest, hip, down1, across), body[HandB].At, 0.026f * h, 0.015f * h, white);
+                int n = PlanePoints(coat[i].Lit, i, chest, down1, across, trail, rim, floating);
+                Shapes.Fill(line, n, edge);
+            }
+            for (int i = 0; i < coat.Length; i++)
+            {
+                int n = PlanePoints(coat[i].Lit, i, chest, down1, across, trail, Vector2.Zero, floating);
+                Shapes.FillShaded(line, n, white, low, chest.Y - 0.05f * h, chest.Y + 0.6f * h);
+                if (coat[i].Shade != null)
+                {
+                    n = PlanePoints(coat[i].Shade, i, chest, down1, across, trail, Vector2.Zero, floating);
+                    Shapes.Fill(line, n, shade);
+                }
+            }
+            DrawCoatMarks(chest, down1, across, trail, white, shade, edge, alpha, floating);
+
+            //LEVEL 2 : the neck and the near arm over the coat
+            if (!floating)
+            {
+                Shapes.Taper(chest, head + new Vector2(0f, legend.Core * 0.8f * h), 0.024f * h, 0.018f * h, shade);
+                Shapes.Taper(Shoulder(false, chest, down1, across), body[HandB].At, legend.Limb * 1.08f * h, legend.Limb * 0.55f * h, white);
             }
 
             //Weapon and hands
             DrawWeapons(alpha, flash);
-            DrawHand(body[HandA].At, 0.026f * h, white);
-            if (Level == 2 || legend.Weapon == Hammers || legend.Weapon == Shield) DrawHand(body[HandB].At, 0.022f * h, white);
+            DrawHand(body[HandA].At, 0.024f * h, white);
+            if (!floating || legend.Weapon == Hammers || legend.Weapon == Shield) DrawHand(body[HandB].At, 0.02f * h, white);
             if (legend.Weapon == Shield) DrawShield(body[HandB].At + new Vector2(0.03f * Facing, 0.02f) * h, weapon2.At * 0.25f, alpha, flash);
 
-            //Core : the head, a white ball in a ring of the legend's colour (its light is in the GLOW picture, GlowBand)
+            //Head : the ring of the legend's colour tilted behind it (PUNTO's is the horn's coil), then the head in two tones
+            DrawHalo(head, edge);
             float r = legend.Core * h;
-            Shapes.Circle(head, r * 1.25f, silhouette ? Color.Black * alpha : C(Tint, 0.28f * alpha));
-            Shapes.Circle(head, r, edge);
-            Shapes.Circle(head, r * 0.72f, C(Color.Lerp(Hot, Color.White, 0.6f + 0.4f * flash), alpha));
+            Shapes.Circle(head, r, white);
+            int k = 0;
+            for (int i = 0; i <= 10; i++)                                           // the half turned from the light
+            {
+                float a = -MathHelper.PiOver2 + MathHelper.Pi * i / 10f;
+                line[k++] = head + (across * (float)Math.Cos(a) + new Vector2(0f, (float)Math.Sin(a))) * r;
+            }
+            line[k++] = head + new Vector2(0f, r * 0.9f);
+            Shapes.Fill(line, k, shade);
         }
 
-        //Draw Torso : the body is the shape of the legend's instrument (13.82). Laid on its EDGE LIGHT first (the same shape in
-        //the legend's colour, moved a little toward TACET), so a thin line of colour runs down the side that faces the hole.
-        private void DrawTorso(Vector2 chest, Vector2 hip, Vector2 down1, Vector2 across, float tall, Color white, Color low, Color edge, float alpha)
+        //Plane Points : one plane's corners on the page into line (its count back). LEVEL 1 moves each plane a little away from
+        //the middle of the body and lets it bob on its own (a body of floating pieces).
+        private int PlanePoints(float[] pts, int index, Vector2 chest, Vector2 down1, Vector2 across, Vector2 trail, Vector2 shift, bool floating)
         {
-            float h = Height;
-            Vector2 rim = across * (0.008f * h);
-            Color cut = Color.Black * alpha;                                        // a cut through the body (f holes)
+            float h = H;
+            int n = pts.Length / 2;
+            Vector2 apart = Vector2.Zero;
+            if (floating)
+            {
+                float ca = 0f, cd = 0f;
+                for (int i = 0; i < n; i++)
+                {
+                    ca += pts[i * 2];
+                    cd += pts[i * 2 + 1];
+                }
+                Vector2 out1 = new Vector2(ca / n, cd / n - 0.22f);
+                if (out1.LengthSquared() > 0.00001f) out1.Normalize();
+                apart = (across * out1.X + down1 * out1.Y) * (0.016f * h) + new Vector2(0f, (float)Math.Sin(clock * 1.3f + index * 1.7f + seed) * 0.006f * h);
+            }
+            for (int i = 0; i < n; i++)
+            {
+                float a = pts[i * 2];
+                float d = pts[i * 2 + 1];
+                float swing = MathHelper.Clamp((d - 0.15f) / 0.45f, 0f, 1f);
+                line[i] = chest + across * (a * h) + down1 * (d * h) + trail * (swing * swing) + apart + shift;
+            }
+            return n;
+        }
+
+        //Coat Point : one point on the coat, the same way PlanePoints places corners (for the marks)
+        private Vector2 CoatPoint(float a, float d, Vector2 chest, Vector2 down1, Vector2 across, Vector2 trail)
+        {
+            float swing = MathHelper.Clamp((d - 0.15f) / 0.45f, 0f, 1f);
+            return chest + across * (a * H) + down1 * (d * H) + trail * (swing * swing);
+        }
+
+        //Shoulder : where an arm leaves the body (the far one toward TACET)
+        private Vector2 Shoulder(bool far, Vector2 chest, Vector2 down1, Vector2 across)
+        {
+            float half = far ? legend.Shoulder : -legend.Shoulder * 1.1f;
+            return chest + across * (half * H) + down1 * (0.02f * H);
+        }
+
+        //Coat Marks : the instrument on the coat (13.82, the music in the characters)
+        private void DrawCoatMarks(Vector2 chest, Vector2 down1, Vector2 across, Vector2 trail, Color white, Color shade, Color edge, float alpha, bool floating)
+        {
+            float h = H;
+            Color cut = silhouette ? Color.Black * alpha : new Color(30, 30, 36) * alpha;
             switch (legend.Weapon)
             {
-                case Rapier:                                                        // QUANTZ : the flute, a slim tube with its keys
+                case Rapier:                                                        // QUANTZ : the flute's keys down the back, a slit below
+                    for (int k = 0; k < 6; k++) Shapes.Circle(CoatPoint(-0.004f, 0.07f + k * 0.07f, chest, down1, across, trail), 0.011f * h, edge);
+                    line[0] = CoatPoint(-0.007f, 0.56f, chest, down1, across, trail);
+                    line[1] = CoatPoint(0.007f, 0.56f, chest, down1, across, trail);
+                    line[2] = CoatPoint(0f, 0.4f, chest, down1, across, trail);
+                    Shapes.Fill(line, 3, cut);
+                    break;
+
+                case Hammers:                                                       // PFUNDT : a drum on each shoulder, one on the back
                     {
-                        float half = 0.055f * h;
-                        line[0] = chest - across * half; line[1] = chest + across * half; line[2] = hip + across * half; line[3] = hip - across * half;
-                        FillLit(line, 4, white, low, chest.Y, hip.Y, edge, rim);
-                        Shapes.Circle(chest, half, white);
-                        Shapes.Circle(hip, half, low);
-                        for (int k = 0; k < 5; k++) Shapes.Circle(chest + down1 * (tall * (0.18f + k * 0.16f)), 0.013f * h, edge);
+                        Vector2 near = CoatPoint(-0.145f, 0.035f, chest, down1, across, trail);
+                        Vector2 far = CoatPoint(0.135f, 0.035f, chest, down1, across, trail);
+                        Shapes.Circle(far, 0.056f * h, shade);
+                        Shapes.Ring(far, 0.05f * h, 0.01f * h, edge);
+                        Shapes.Circle(near, 0.066f * h, white);
+                        Shapes.Ring(near, 0.059f * h, 0.012f * h, edge);
+                        Shapes.Ring(CoatPoint(0f, 0.15f, chest, down1, across, trail), 0.05f * h, 0.006f * h, edge);
                     }
                     break;
 
-                case Hammers:                                                       // PFUNDT : the timpani, a round drum head
-                    {
-                        float r = 0.15f * h;
-                        Vector2 middle = chest + down1 * (tall * 0.5f);
-                        Shapes.Circle(middle + rim, r, edge);
-                        Shapes.Ellipse(middle, r, r, 0f, white, low);
-                        Shapes.Ring(middle, r * 0.9f, 0.012f * h, edge);
-                        Shapes.Ring(middle, r * 0.45f, 0.004f * h, low);
-                        for (int k = 0; k < 6; k++)                                 // the tuning lugs round the rim
-                        {
-                            float a = MathHelper.TwoPi * k / 6f + 0.26f;
-                            Vector2 out1 = new Vector2((float)Math.Cos(a), (float)Math.Sin(a));
-                            Shapes.Box(middle + out1 * (r * 1.04f), 0.035f * h, 0.018f * h, a, edge);
-                        }
-                    }
+                case Shield:                                                        // DUPORT : the cello's shape on the back, its spike below
+                    Shapes.Ring(CoatPoint(0f, 0.12f, chest, down1, across, trail), 0.045f * h, 0.006f * h, edge);
+                    Shapes.Ring(CoatPoint(0f, 0.27f, chest, down1, across, trail), 0.062f * h, 0.006f * h, edge);
+                    Shapes.Kite(CoatPoint(0f, 0.42f, chest, down1, across, trail), CoatPoint(0f, 0.57f, chest, down1, across, trail), 0.022f * h, 0.15f, edge);
                     break;
 
-                case Shield:                                                        // DUPORT : the cello, a broad block on its spike
+                case Chakram:                                                       // PUNTO : the bell's rim at the hem
                     {
-                        line[0] = chest - across * (0.13f * h); line[1] = chest + across * (0.12f * h);
-                        line[2] = hip + across * (0.1f * h); line[3] = hip - across * (0.11f * h);
-                        FillLit(line, 4, white, low, chest.Y, hip.Y, edge, rim);
-                        Shapes.Kite(hip, hip + down1 * (0.15f * h), 0.024f * h, 0.15f, edge);   // the endpin
-                    }
-                    break;
-
-                case Chakram:                                                       // PUNTO : the horn, a bell flaring down from a coil
-                    {
-                        int n = 10;
-                        for (int i = 0; i < n; i++)
-                        {
-                            float t = (float)i / (n - 1);
-                            float half = (0.03f + 0.13f * (float)Math.Pow(t, 2.3)) * h;
-                            line[i] = chest + down1 * (tall * t) - across * half;
-                            line[2 * n - 1 - i] = chest + down1 * (tall * t) + across * half;
-                        }
-                        FillLit(line, 2 * n, white, low, chest.Y, hip.Y, edge, rim);
                         float rot = (float)Math.Atan2(across.Y, across.X);
-                        Shapes.Ellipse(hip, 0.16f * h, 0.022f * h, rot, edge, edge);                  // the bell's mouth
-                        Shapes.Ring(chest + down1 * (0.07f * h), 0.045f * h, 0.011f * h, edge);       // the coil
+                        Shapes.Ellipse(CoatPoint(-0.01f, 0.52f, chest, down1, across, trail), 0.2f * h, 0.018f * h, rot, edge, edge);
                     }
                     break;
 
-                default:                                                            // PAGANINI : the violin, a sharp triangle, two f holes
+                default:                                                            // PAGANINI : the violin's two f holes cut in the back
+                    for (int side = -1; side <= 1; side += 2)
                     {
-                        float half = legend.BodyWide * 0.5f * h;
-                        line[0] = chest - across * (half * 1.12f); line[1] = chest + across * half; line[2] = hip;
-                        FillLit(line, 3, white, low, chest.Y, hip.Y, edge, rim);
-                        for (int side = -1; side <= 1; side += 2)
+                        for (int k = 0; k < 6; k++)
                         {
-                            Vector2 top = chest + down1 * (tall * 0.22f) + across * (side * 0.032f * h);
-                            for (int k = 0; k < 6; k++)
-                            {
-                                float t = k / 5f;
-                                line[k] = top + down1 * (0.13f * h * t) + across * ((float)Math.Sin(t * MathHelper.TwoPi) * 0.011f * h * side);
-                                lineW[k] = (0.004f + 0.004f * (float)Math.Sin(t * MathHelper.Pi)) * h;
-                            }
-                            Shapes.Stroke(line, lineW, 6, cut, cut, false);
-                            Shapes.Circle(line[0], 0.006f * h, cut);
-                            Shapes.Circle(line[5], 0.006f * h, cut);
+                            float t = k / 5f;
+                            float a = side * 0.03f + (float)Math.Sin(t * MathHelper.TwoPi) * 0.01f * side;
+                            line[k] = CoatPoint(a, 0.06f + 0.11f * t, chest, down1, across, trail);
+                            lineW[k] = (0.004f + 0.004f * (float)Math.Sin(t * MathHelper.Pi)) * h;
                         }
+                        Shapes.Stroke(line, lineW, 6, cut, cut, false);
+                        Shapes.Circle(line[0], 0.0055f * h, cut);
+                        Shapes.Circle(line[5], 0.0055f * h, cut);
                     }
                     break;
             }
         }
 
-        //Torso Point : where the bars of LEVEL 2 join the body. 0 the far shoulder, 1 the near shoulder, 2 the far leg, 3 the near leg
-        private Vector2 TorsoPoint(int which, Vector2 chest, Vector2 hip, Vector2 down1, Vector2 across)
+        //Halo : the ring of the legend's colour tilted behind the head. PUNTO's is the horn's coil, a spiral.
+        private void DrawHalo(Vector2 head, Color edge)
         {
-            float h = Height;
-            float tall = Vector2.Distance(chest, hip);
-            float shoulder, leg;
-            Vector2 legRoot = hip;
-            switch (legend.Weapon)
+            float h = H;
+            Vector2 middle = head + new Vector2(-0.012f * Facing, -0.016f) * h;
+            float tilt = -0.32f * Facing;
+            float cos = (float)Math.Cos(tilt);
+            float sin = (float)Math.Sin(tilt);
+            int n = 28;
+            for (int i = 0; i < n; i++)
             {
-                case Rapier: shoulder = 0.05f; leg = 0.03f; break;
-                case Hammers:
-                    shoulder = 0.12f;
-                    leg = 0.06f;
-                    legRoot = chest + down1 * (tall * 0.5f + 0.13f * h);
-                    break;
-                case Shield: shoulder = 0.12f; leg = 0.08f; break;
-                case Chakram: shoulder = 0.05f; leg = 0.09f; break;
-                default: shoulder = legend.BodyWide * 0.45f; leg = 0.02f; legRoot = hip - down1 * (0.03f * h); break;
+                float a = MathHelper.TwoPi * i / n;
+                float rx = 0.068f * h;
+                float ry = 0.021f * h;
+                if (legend.Weapon == Chakram)
+                {
+                    float t = (float)i / (n - 1);
+                    a = MathHelper.TwoPi * 1.6f * t + clock * 0.8f;
+                    rx = MathHelper.Lerp(0.072f, 0.026f, t) * h;
+                    ry = rx * 0.32f;
+                }
+                float x = (float)Math.Cos(a) * rx;
+                float y = (float)Math.Sin(a) * ry;
+                line[i] = middle + new Vector2(x * cos - y * sin, x * sin + y * cos);
+                lineW[i] = 0.0055f * h;
             }
-            switch (which)
-            {
-                case 0: return chest + across * (shoulder * h) + down1 * (0.02f * h);
-                case 1: return chest - across * (shoulder * 1.1f * h) + down1 * (0.02f * h);
-                case 2: return legRoot + across * (leg * h);
-                default: return legRoot - across * (leg * h);
-            }
+            Shapes.Stroke(line, lineW, n, edge, edge, legend.Weapon != Chakram);
         }
 
         //Draw Bits : the three small shapes floating round the figure, of the instrument's family
         private void DrawBits(Color white, Color edge)
         {
-            float h = Height;
+            float h = H;
             for (int b = 0; b < bits.Length; b++)
             {
                 Vector2 at = bits[b].At;
@@ -471,25 +591,16 @@ namespace Tacetno433.Core
                 float turn = clock * (0.6f + 0.3f * b) + b;
                 switch (legend.Weapon)
                 {
-                    case Rapier: Shapes.Circle(at, 0.012f * h, c); break;                                        // puffs of air
-                    case Hammers: Shapes.Ring(at, 0.018f * h, 0.005f * h, c); break;                             // rings of a beat
-                    case Shield: Shapes.Box(at, 0.026f * h, 0.026f * h, turn, c); break;                         // blocks
-                    case Chakram: Shapes.Polygon(at, 0.02f * h, 3, turn, c); break;                              // sparks of the bell
+                    case Rapier: Shapes.Circle(at, 0.01f * h, c); break;                                         // puffs of air
+                    case Hammers: Shapes.Ring(at, 0.016f * h, 0.005f * h, c); break;                             // rings of a beat
+                    case Shield: Shapes.Box(at, 0.022f * h, 0.022f * h, turn, c); break;                         // blocks
+                    case Chakram: Shapes.Polygon(at, 0.017f * h, 3, turn, c); break;                             // sparks of the bell
                     default:                                                                                     // strings
-                        Vector2 d = new Vector2((float)Math.Cos(turn), (float)Math.Sin(turn)) * (0.035f * h);
-                        Shapes.Line(at - d, at + d, 0.007f * h, c);
+                        Vector2 d = new Vector2((float)Math.Cos(turn), (float)Math.Sin(turn)) * (0.03f * h);
+                        Shapes.Line(at - d, at + d, 0.006f * h, c);
                         break;
                 }
             }
-        }
-
-        //Fill Lit : a filled part with its edge light under it
-        private static void FillLit(Vector2[] p, int n, Color top, Color low, float fromY, float toY, Color edge, Vector2 rim)
-        {
-            for (int i = 0; i < n; i++) p[i] += rim;
-            Shapes.Fill(p, n, edge);
-            for (int i = 0; i < n; i++) p[i] -= rim;
-            Shapes.FillShaded(p, n, top, low, fromY, toY);
         }
 
         //Foot : a small triangle pointing at the floor
@@ -543,7 +654,7 @@ namespace Tacetno433.Core
         //into a long blade with a bright line down its middle like a string
         private void DrawCannone(Vector2 grip, float angle, float alpha, float flash)
         {
-            float h = Height;
+            float h = H;
             Vector2 d = Way(angle);
             Color metal = WeaponColor(alpha, flash);
             float rot = (float)Math.Atan2(d.Y, d.X);
@@ -557,7 +668,7 @@ namespace Tacetno433.Core
         //FLUTE RAPIER : a straight tube with its keys, a cup over the hand, a point
         private void DrawRapier(Vector2 grip, float angle, float alpha, float flash)
         {
-            float h = Height;
+            float h = H;
             Vector2 d = Way(angle);
             Color metal = WeaponColor(alpha, flash);
             Color shine = ShineColor(alpha);
@@ -571,7 +682,7 @@ namespace Tacetno433.Core
         //TWIN HAMMERS : one timpani stick, a felt ball at its end with a glint
         private void DrawHammer(Vector2 grip, float angle, float alpha, float flash)
         {
-            float h = Height;
+            float h = H;
             Vector2 d = Way(angle);
             Color stick = C(Color.Lerp(BodyTop, Color.White, flash), 0.9f * alpha);
             Color felt = WeaponColor(alpha, flash);
@@ -583,7 +694,7 @@ namespace Tacetno433.Core
         //THE SCARRED SHIELD : the cello's body held up as a shield, and the scar across it
         private void DrawShield(Vector2 middle, float tilt, float alpha, float flash)
         {
-            float h = Height;
+            float h = H;
             Color face = WeaponColor(alpha, flash);
             Vector2 up = new Vector2((float)Math.Sin(tilt) * Facing, -(float)Math.Cos(tilt));
             Vector2 side = new Vector2(-up.Y, up.X);
@@ -602,7 +713,7 @@ namespace Tacetno433.Core
         //The short bow DUPORT strikes with from behind the shield
         private void DrawBow(Vector2 grip, float angle, float alpha, float flash)
         {
-            float h = Height;
+            float h = H;
             Vector2 d = Way(angle);
             Shapes.Kite(grip - d * (0.02f * h), grip + d * (0.31f * h), 0.016f * h, 0.1f, WeaponColor(alpha, flash));
             Shapes.Line(grip + d * (0.02f * h), grip + d * (0.27f * h), 0.003f * h, ShineColor(alpha));
@@ -612,7 +723,7 @@ namespace Tacetno433.Core
         //comes back (THROW).
         private void DrawChakram(Vector2 grip, float alpha, float flash)
         {
-            float h = Height;
+            float h = H;
             Color metal = WeaponColor(alpha, flash);
             Vector2 middle = ChakramAt(grip);
             float spin = clock * (move == "attack" ? 22f : 2.2f) * Facing;
@@ -631,7 +742,7 @@ namespace Tacetno433.Core
         //Chakram At : where the ring is. Held beside the hand, thrown out and back during an ATTACK (THROW)
         private Vector2 ChakramAt(Vector2 grip)
         {
-            Vector2 held = grip + new Vector2(0.06f * Facing, -0.02f) * Height;
+            Vector2 held = grip + new Vector2(0.06f * Facing, -0.02f) * H;
             if (move != "attack") return held;
             float s = Math.Max(0f, Strike());
             Vector2 far = Local(0.85f, -0.6f);
@@ -645,7 +756,7 @@ namespace Tacetno433.Core
         //Glow Band : the core's light, and the weapon's light along its length (small lights, stronger in the cut)
         private void GlowBand(SpriteBatch sb, float alpha)
         {
-            float h = Height;
+            float h = H;
             float power = BattleRules.FigureGlow * alpha;
             float strike = move == "attack" ? Math.Max(0f, Strike()) : 0f;
             float glow = power * (0.45f + strike * 0.7f);
@@ -681,9 +792,8 @@ namespace Tacetno433.Core
                     }
                     break;
             }
-            Vector2 head = body[Head].At;
-            Gfx.DrawGlow(sb, head.X, head.Y, legend.Core * 2.6f * h, Tint * (power * 0.9f));
-            Gfx.DrawGlow(sb, head.X, head.Y, legend.Core * 1.1f * h, Color.White * (power * 0.7f));
+            Vector2 head = body[Head].At;                                     // the ring behind the head glows a little
+            Gfx.DrawGlow(sb, head.X, head.Y - 0.016f * h, legend.Core * 2.4f * h, Tint * (power * 0.45f));
         }
     }
 }

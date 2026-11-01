@@ -276,6 +276,7 @@ namespace Tacetno433.Core
             dt = Math.Min(dt, 1f / 30f);                                  // a slow frame must not throw the springs
             clock += dt;
             moveTime += dt;
+            windNow = wind;
 
             //CARRY : a big jump in one frame (a new place, the first frame) takes every part with it
             if (!placed)
@@ -361,7 +362,7 @@ namespace Tacetno433.Core
         //Local : a point of the design (shares of the height, x forward, y down from the feet) on the page
         private Vector2 Local(float x, float y)
         {
-            return Feet + new Vector2(x * Facing, y) * Height;
+            return Feet + new Vector2(x * Facing, y) * H;                  // H : a legend's own size (Figure.Band.cs)
         }
 
         //Local Way : a way of the design (an angle, 0 = forward, a quarter turn = down) on the page
