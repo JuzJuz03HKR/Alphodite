@@ -64,6 +64,11 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 
 ## สถานะล่าสุด (1 พ.ย.)
 
+**1 พ.ย. แชท /system (Finalize14) : /update ปิดแชท ผู้ใช้จะเปิดแชทใหม่** (คำต่อคำ `USER_BRIEFS.md` 13.73)
+✅ ผู้ใช้เล่น A4 เหตุการณ์แบบเบาแล้ว "เล่นแล้ว ยังไม่ต้องปรับอะไรในตอนนี้" (`BETA1_DIRECTION.md` 28 commit `d121f74` และ commit ปิดแชทนี้) / งานทั้งหมดอยู่บน GitHub / ตาราง "แชทที่กำลังทำงาน" ว่าง / ก้อน A ระบบครบ 4 ข้อแล้ว (`HANDOFF.md` 00.3)
+**งานถัดไป : ก้อน B QoL** (`HANDOFF.md` 00.3 ยังไม่มีรายการ) : ไอริสไล่เล่นทั้งรันด้วย TEST ROOM (F2 ที่ Title `Screens/TestRoomScreen.cs`) กับภาพ `--shots` (ชื่อหน้า `PROJECT_STATUS.md` หัวข้อ 11 รวม `event0` ถึง `event9` `eventpaid0` ถึง `eventpaid9` `rehearsalevent`) แล้วเสนอรายการ QoL ให้ผู้ใช้เลือกก่อนเขียนโค้ด / หลัก : คนเล่นครั้งแรกเข้าใจทันที (13.35) /
+วิธีทำงาน 13.40 ทำทีละข้อ จบแล้วบันทึก commit push หยุดรอ / ทางเสี่ยงของเหตุการณ์อาจทำให้เกมง่ายขึ้น วัดตอน G (28.5) / PLAYTEST FINALE ยัง 1 PERFECT (`PlaytestSignatureNeed` ห้ามแก้จนผู้ใช้บอก)
+
 **1 พ.ย. แชท /system (Finalize14) : ✅ A4 เหตุการณ์แบบเบา เสร็จ หยุดรอผู้ใช้** (คำต่อคำ `USER_BRIEFS.md` 13.71 13.72 รายละเอียด `BETA1_DIRECTION.md` 28)
 ✅ เสนอก่อน (28.3) ผู้ใช้เลือก 6 เหตุการณ์ ป้ายของที่ได้ เลือกปุ่มของดาวเอง ราคาเลือด 35% / 50% (28.7) / ไม่ทำ A LOST SCORE A CRACKED BOW กับลุ้นพลาดเจ็บขึ้น
 ✅ ทางเสี่ยงใหม่ (28.8) : METRONOME จ่ายเลือด RARE GIFT / STREET MUSICIAN จ่ายเลือด 2 STARS / SILENT AUDIENCE กับ EMPTY CHAIR สู้ ELITE / TEA HOUSE ลุ้นต่ำได้เลือดเต็ม / TUNING FORK จ่ายเลือด ATTACK ทุกคน +1 ดาว / จ่ายเลือดได้เมื่อเลือดทั้งวงมากกว่าราคา (`RunState.PayLife`) / ป้ายของที่ได้ทุกทาง / หน้าซ้อมหลายดาว (`RehearsalScreen.From.Event`)
