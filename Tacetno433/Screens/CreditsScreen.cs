@@ -84,9 +84,7 @@ namespace Tacetno433.Screens
 
             //TACET and the page's light : the dark, still room of HOW TO PLAY
             Dark = new TacetVoid();
-            Lens.Ambient = 0.42f;
-            Lens.SpotPower = 0f;
-            Lens.Vignette = 0.6f;
+            StillRoom.Light(Lens);                                            // STILL ROOM : the menu pages' one room (Core/StillRoom.cs)
             nextMotion.Snap(true);
 
             SoundBank.PlayMusic(Music.Title);
@@ -108,7 +106,7 @@ namespace Tacetno433.Screens
 
             //TACET : far up in the corner, still
             Dark.Update(dt, 0.3f);
-            Dark.PlaceOnPage(Hole, 22f * UiMotion.EaseBack(MathHelper.Clamp(time / 0.6f, 0f, 1f)) * (1f + 0.03f * (float)Math.Sin(time * 0.6f)), 0f, 0f, 0f);
+            StillRoom.Hole(Dark, Hole, 22f, time);
 
             //POINT : NEXT stays lit unless the mouse points at PREV or BACK
             bool last = page >= Credits.Pages.Length - 1;
@@ -163,36 +161,17 @@ namespace Tacetno433.Screens
             get { return false; }
         }
 
-        //Back : the dark room and the rings lying on its floor, as HOW TO PLAY
+        //Back : the menu pages' one dark room (STILL ROOM, Core/StillRoom.cs), the same as HOW TO PLAY
         public override void DrawBack(SpriteBatch sb)
         {
-            Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.StageDeep);
-            Gfx.DrawGlowBox(sb, new Rectangle(200, 60, 1100, 640), Palette.Paper * 0.05f);
-            float a = UiMotion.Between(time, 0.1f, 0.8f);
-            for (int k = 0; k < 4; k++)
-            {
-                float rx = 240f + k * 150f;
-                Ornament.FloorRing(sb, 700f, 640f, rx, rx * 0.16f, Palette.Paper * ((0.1f - k * 0.02f) * a), a);
-            }
+            StillRoom.Back(sb, time);
         }
 
-        //World : the bits the hole pulls in, and the list's frame, a thin line with a ring on each corner (menu3)
+        //World : the bits the hole pulls in, and the list's frame (STILL ROOM)
         public override void DrawWorld(SpriteBatch sb)
         {
             Dark.DrawDebris(sb, false);
-            float a = UiMotion.Between(time, 0.15f, 0.5f);
-            Gfx.Rect(sb, listBox, Palette.Void * (0.45f * a));
-            Gfx.RectOutline(sb, listBox, Palette.LineGrey * (0.4f * a), 1);
-            Corner(sb, listBox.X, listBox.Y, a);
-            Corner(sb, listBox.Right, listBox.Y, a);
-            Corner(sb, listBox.X, listBox.Bottom, a);
-            Corner(sb, listBox.Right, listBox.Bottom, a);
-        }
-
-        private static void Corner(SpriteBatch sb, float x, float y, float a)
-        {
-            Gfx.Circle(sb, x, y, 4f, Palette.StageDeep * a);
-            Gfx.CircleOutline(sb, x, y, 4f, Palette.PaperDim * a, 1f);
+            StillRoom.Frame(sb, listBox, time);
         }
 
         //Lights : a soft light on the list, a softer one on the page's name

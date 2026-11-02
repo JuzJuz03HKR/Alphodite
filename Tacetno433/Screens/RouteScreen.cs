@@ -91,6 +91,7 @@ namespace Tacetno433.Screens
         //BOSSES (Beta1 31 Oct, docs/BETA1_DIRECTION.md 21.3 point 1) : the floor's boss stands at the end of the map from the
         //first step, its name over it and its BIG ATTACK under the name. The card says its rule and what its BIG ATTACK does.
         private Enemy boss;
+        private Portrait bossFace;                    // LINKED (the user 13.139) : the boss on its card is the figure its fight draws
         private string bossName = "";
         private string bossBig = "";
         private string bossCardLine = "";
@@ -179,6 +180,7 @@ namespace Tacetno433.Screens
             boss = run.BossOfFloor;
             if (boss != null)
             {
+                bossFace = new Portrait(Figure.Sort.Boss, ArtBank.Key(boss.Name), Color.White, Color.White, Portrait.Frame.Whole, 77);   // as BattleScreen.Boss.cs
                 bossName = boss.Name;
                 bossBig = boss.BigName.Length > 0 ? Words.BigAttack + "   " + boss.BigName : "";
                 string rule = boss.TraitName.Length > 0 ? Gfx.WrapText(Game.StoryFont, boss.TraitName + " : " + boss.TurnTraitText, CardW - 28, TextSize.StorySmall, 3) : "";
@@ -333,6 +335,7 @@ namespace Tacetno433.Screens
             if (Game.CurrentRun == null) { Game.Screens.Change(new TitleScreen()); return; }
             RunState run = Game.CurrentRun;
             RouteNode[] options = run.Options;
+            if (bossFace != null && cardNode != null && cardNode.Type == NodeType.Boss) bossFace.Update(dt);   // its springs, while its card shows
 
             //WALK : the camera walks to the band's row, slowing to a stop, and on toward the chosen place while it dives
             float walk = UiMotion.EaseOut(MathHelper.Clamp(time / BattleRules.UiRouteWalk, 0f, 1f));
@@ -817,7 +820,12 @@ namespace Tacetno433.Screens
 
             Rectangle art = new Rectangle(card.Center.X - CardArtW / 2, card.Y + 16, CardArtW, CardArtH);
             Texture2D picture = ArtBank.RouteOf(cardNode.Type);
-            if (picture != null) sb.Draw(picture, art, Color.White * a);
+            if (isBoss && bossFace != null)                                              // LINKED (2 Nov) : the boss itself, the same
+            {                                                                            //   figure as in its fight and THE TELL
+                Gfx.Rect(sb, art, Palette.Void * a);
+                bossFace.Draw(sb, art, a);
+            }
+            else if (picture != null) sb.Draw(picture, art, Color.White * a);
             else PlaceArt.Draw(sb, art, PlaceArt.Of(cardNode.Type), time, a);         // PLACE ART (block C) : the place drawn by the code
 
             int tx = card.X + 14;

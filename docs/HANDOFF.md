@@ -164,6 +164,29 @@
 | หน้าเทส | TEST ROOM | F2 ที่หน้าแรก | `Screens/TestRoomScreen.cs` |
 | แถบบนของรัน | ซ้ายชื่อวง / ขวา LIFE SHARDS GIFTS / ใต้แถบขวาป้าย GIFT | ทุกหน้าในรัน | `Core/RunHud.cs` |
 
+### 00.7 ชิ้นกลาง LINKED : ของที่ขึ้นหลายหน้าวาดจากชิ้นเดียว แก้ที่เดียวทุกหน้าเปลี่ยนตาม (ผู้ใช้ 2 พ.ย. `USER_BRIEFS.md` 13.139)
+
+กติกา : ตัวละคร ศัตรู บอส วาทยากร โน้ต ไอคอน ปุ่ม ห้อง ที่ขึ้นมากกว่าหนึ่งหน้า ต้องเรียกชิ้นกลางในตารางนี้ **ห้ามก๊อปโค้ดวาดไปไว้ในหน้าจอ** / ทำหน้าใหม่หรือของใหม่ที่จะขึ้นหลายหน้า ใส่ชิ้นกลางก่อนแล้วเพิ่มแถวที่นี่ / แก้ชิ้นกลางแล้วแคปทุกหน้าในคอลัมน์ขวาดูก่อน commit
+
+| ของ | ชิ้นกลาง (แก้ที่นี่ที่เดียว) | ขึ้นที่หน้า |
+|---|---|---|
+| นักดนตรี 5 คน | `Core/Figure.cs` `Core/Figure.Band.cs` (ตัวในไฟต์) และ `Core/LegendArt.cs` Portrait ที่ใช้ Figure ตัวเดียวกัน | หน้าต่อสู้ ไฟต์ฝึก (TUTORIAL) การ์ดเพื่อนในไฟต์ THE AUDITION หน้าวง หน้าซ้อม WORKSHOP ร้าน ตั้งชื่อวง เหตุการณ์ ที่พัก CURTAIN CALL |
+| ศัตรู TACET 4 แบบ | `Core/Figure.Tacet.cs` | หน้าต่อสู้ ไฟต์ฝึก |
+| บอส 6 ตัว | `Core/Figure.Tacet.cs` (ภาพในไฟต์) และ Portrait WHOLE (`LegendArt.cs`) | หน้าต่อสู้ THE TELL THE STRIKE **การ์ดบอสบนแผนที่ (2 พ.ย. เดิมเป็นภาพสถานที่)** |
+| วาทยากร | ภาพจริง `Content/Art/Conductors/` (`Core/ArtBank.cs`) ยังไม่มีภาพ = `LegendArt.Sigil` / ป้าย EARLY ACCESS `Ui.EarlyAccess` | หน้าเลือก โปรไฟล์ cut in FINALE (ภาพ) หน้าวงและที่อื่น (เครื่องหมาย 13.106) |
+| บรรยากาศและไม้บาตองของวาทยากร | `Core/ConductorAura.cs` `Core/ConductorWeather.cs` `Core/Baton.cs` | หน้าเลือก โปรไฟล์ / ทุกหน้าในรัน / หน้าที่ตวัด |
+| โน้ต วงแหวน ลูกศร | `Core/NoteGlyph.cs` | หน้าต่อสู้ ไฟต์ฝึก HOW TO PLAY (2 พ.ย. เพิ่ม RUSH) |
+| ไอคอน GIFT | `Core/MotifArt.cs` | ร้าน รางวัล หีบ เหตุการณ์ THE AUDITION หน้าวง แถบบน ไฟต์ CURTAIN CALL |
+| สถานที่ | `Core/PlaceArt.cs` | แผนที่ ร้าน ที่พัก เหตุการณ์ WORKSHOP |
+| ห้องมืดของหน้าเมนู | **`Core/StillRoom.cs` (2 พ.ย. เดิมแต่ละหน้าก๊อปกันเอง 4 ชุด)** | THE ARCHIVE SETTINGS HOW TO PLAY CREDITS และเมนูพักที่ยืมสองหน้านั้น |
+| ปุ่ม ป้าย แผง แถบชื่อหน้า ขั้นหน้า เลขปุ่ม ตัวเลือก | `Core/Ui.cs` | ทุกหน้า |
+| กล่องถามยืนยัน | `Core/ConfirmBox.cs` | หน้า Title ร้าน เมนูพัก |
+| แถบบนของรัน (ชีวิต เงิน ของ) | `Core/RunHud.cs` | แผนที่ หน้าวง ร้าน ที่พัก เหตุการณ์ WORKSHOP รางวัล หน้าซ้อม |
+| ความมืด TACET | `Core/TacetVoid.cs` | เกือบทุกหน้า |
+| เปลี่ยนหน้า | `Core/SlantWipe.cs` `Core/Curtain.cs` `Core/RingSweep.cs` | ทุกหน้า |
+| ตัวเลขใหญ่ / ตัวเลขเป็นคำ | `Core/PixelDigits.cs` / `Core/NumberText.cs` | ไฟต์ ตัวเลขในปุ่ม ทุกหน้า |
+| สี / ขนาดตัวอักษร / คำกติกา | `Core/Palette.cs` / `Core/TextSize.cs` / `Data/Words.cs` | ทุกหน้า |
+
 ## 0.0 แผนที่โค้ด Beta1 (ฉากต่อสู้ใหม่ + VFX, 28 ต.ค. รอบ 1–6)
 
 ภาพของหน้าต่อสู้แยกจากกติกาทั้งหมด (`Battle/TurnBattle.cs` ไม่มีโค้ดวาด) · เอกสาร `BATTLE_SCENE_2_3D_CHANGE.md` ข้อ 9–14 · ตัวเลขใน `BattleRules` หัวข้อ Stage Feel, Stage Void, Hit Feel, Turn Feel

@@ -211,18 +211,16 @@ namespace Tacetno433.Screens
 
             //TACET and the page's light : the dark, still room of THE ARCHIVE (borrowed by the pause menu, none of this shows)
             if (!fromPause) Dark = new TacetVoid();
-            Lens.Ambient = 0.42f;
-            Lens.SpotPower = 0f;
-            Lens.Vignette = 0.6f;
+            StillRoom.Light(Lens);                                            // STILL ROOM : the menu pages' one room (Core/StillRoom.cs)
 
             lastMouse = Input.MousePos;
             if (!fromPause) SoundBank.PlayMusic(Music.Title);
         }
 
-        //Hole Size : opens a little past its size and settles, then breathes very slowly
+        //Hole Size : opens a little past its size and settles, then breathes very slowly (STILL ROOM)
         private float HoleSize()
         {
-            return HoleRadius * UiMotion.EaseBack(MathHelper.Clamp(time / 0.6f, 0f, 1f)) * (1f + 0.03f * (float)Math.Sin(time * 0.6f));
+            return StillRoom.HoleSize(HoleRadius, time);
         }
 
         public override void Update(float dt)
@@ -573,17 +571,10 @@ namespace Tacetno433.Screens
             Gfx.DrawGlow(sb, HelpX + HelpW / 2f, 300f, 300f, Color.White * (0.16f * UiMotion.Between(time, 0.2f, 0.6f)));
         }
 
-        //Room : the dark room and the rings on its floor, the same as THE ARCHIVE's
+        //Room : the dark room and the rings on its floor, the menu pages' one room (STILL ROOM, Core/StillRoom.cs)
         private void DrawRoom(SpriteBatch sb)
         {
-            Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.StageDeep);
-            Gfx.DrawGlowBox(sb, new Rectangle(200, 60, 1100, 640), Palette.Paper * 0.05f);
-            float a = UiMotion.Between(time, 0.1f, 0.8f);
-            for (int k = 0; k < 4; k++)
-            {
-                float rx = 240f + k * 150f;
-                Ornament.FloorRing(sb, 700f, 640f, rx, rx * 0.16f, Palette.Paper * ((0.1f - k * 0.02f) * a), a);
-            }
+            StillRoom.Back(sb, time);
         }
 
         //Spine : the thin line the rows hang on, drawing itself down, with a gap round each row's circle

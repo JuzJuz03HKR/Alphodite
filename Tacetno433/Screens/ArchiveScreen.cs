@@ -64,9 +64,7 @@ namespace Tacetno433.Screens
             Refresh();
 
             Dark = new TacetVoid();
-            Lens.Ambient = 0.42f;
-            Lens.SpotPower = 0f;
-            Lens.Vignette = 0.6f;
+            StillRoom.Light(Lens);                                            // STILL ROOM : the menu pages' one room (Core/StillRoom.cs)
         }
 
         private void Refresh()
@@ -91,7 +89,7 @@ namespace Tacetno433.Screens
 
             //TACET : far above, still, breathing very slowly
             Dark.Update(dt, 0.3f);
-            Dark.PlaceOnPage(Hole, 30f * UiMotion.EaseBack(MathHelper.Clamp(time / 0.6f, 0f, 1f)) * (1f + 0.03f * (float)Math.Sin(time * 0.6f)), 0f, 0f, 0f);
+            StillRoom.Hole(Dark, Hole, 30f, time);
 
             //Echoes : the number counts down to what is left after a purchase
             float t = MathHelper.Clamp(echoClock / BattleRules.UiCountTime, 0f, 1f);
@@ -164,14 +162,7 @@ namespace Tacetno433.Screens
         //Back : what the hole bends, the dark room and the rings lying on its floor (menu7)
         public override void DrawBack(SpriteBatch sb)
         {
-            Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.StageDeep);
-            Gfx.DrawGlowBox(sb, new Rectangle(200, 60, 1100, 640), Palette.Paper * 0.05f);
-            float a = UiMotion.Between(time, 0.1f, 0.8f);
-            for (int k = 0; k < 4; k++)
-            {
-                float rx = 240f + k * 150f;
-                Ornament.FloorRing(sb, 700f, 640f, rx, rx * 0.16f, Palette.Paper * ((0.1f - k * 0.02f) * a), a);
-            }
+            StillRoom.Back(sb, time);
         }
 
         //World : the bits the hole pulls in, the spine the rows hang on, a circle for each row

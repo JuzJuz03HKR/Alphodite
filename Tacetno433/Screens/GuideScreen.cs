@@ -83,7 +83,8 @@ namespace Tacetno433.Screens
 
         //Drawing Data : the made-up examples in the pictures, kept out of Draw so drawing never allocates
         private static string[] demoSizes = { "p", "mf", "f" };
-        private static string[] demoKinds = { "HOLD", "SHAKE", "AGAIN" };   // ONE RULE (Beta1 29 Oct) : the three notes that are not a plain swing
+        private static string[] demoKinds = { "HOLD", "SHAKE", "AGAIN", Words.Rush };   // ONE RULE (Beta1 29 Oct) : the notes that are not a plain swing, RUSH since BLOCK G (2 Nov)
+        private const float KindStep = 90f;                                    //   how far apart they sit
         private static string[] demoBeats = { "1", "2", "3", "4" };
         private static string[] keyNames = turnBattle ? new string[] { "1 2 3", "ENTER", "SPACE", "TAB", "ESC" } : new string[] { "SPACE", "TAB", "ESC" };
         private static string[] keyJobs = turnBattle
@@ -136,9 +137,7 @@ namespace Tacetno433.Screens
             if (!fromPause)
             {
                 Dark = new TacetVoid();
-                Lens.Ambient = 0.42f;
-                Lens.SpotPower = 0f;
-                Lens.Vignette = 0.6f;
+                StillRoom.Light(Lens);                                        // STILL ROOM : the menu pages' one room (Core/StillRoom.cs)
             }
             if (fromPause) backButton = new Rectangle(40, 646, 250, 46);
             nextMotion.Snap(true);
@@ -155,7 +154,7 @@ namespace Tacetno433.Screens
             if (Dark != null)
             {
                 Dark.Update(dt, 0.3f);
-                Dark.PlaceOnPage(Hole, 26f * UiMotion.EaseBack(MathHelper.Clamp(time / 0.6f, 0f, 1f)) * (1f + 0.03f * (float)Math.Sin(time * 0.6f)), 0f, 0f, 0f);
+                StillRoom.Hole(Dark, Hole, 26f, time);
             }
 
             //POINT : NEXT stays lit unless the mouse points at PREV or BACK
@@ -211,48 +210,23 @@ namespace Tacetno433.Screens
             get { return false; }
         }
 
-        //Back : what the hole bends, the dark room and the rings lying on its floor (menu7)
+        //Back : what the hole bends, the dark room and the rings lying on its floor (menu7, STILL ROOM)
         public override void DrawBack(SpriteBatch sb)
         {
-            Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.StageDeep);
-            Gfx.DrawGlowBox(sb, new Rectangle(200, 60, 1100, 640), Palette.Paper * 0.05f);
-            float a = UiMotion.Between(time, 0.1f, 0.8f);
-            for (int k = 0; k < 4; k++)
-            {
-                float rx = 240f + k * 150f;
-                Ornament.FloorRing(sb, 700f, 640f, rx, rx * 0.16f, Palette.Paper * ((0.1f - k * 0.02f) * a), a);
-            }
+            StillRoom.Back(sb, time);
         }
 
-        //World : the bits the hole pulls in, and the drawing's frame, a thin line with a ring on each corner (menu3)
+        //World : the bits the hole pulls in, and the drawing's frame, a thin line with a ring on each corner (menu3, STILL ROOM)
         public override void DrawWorld(SpriteBatch sb)
         {
             Dark.DrawDebris(sb, false);
-            float a = UiMotion.Between(time, 0.15f, 0.5f);
-            Gfx.Rect(sb, artBox, Palette.Void * (0.45f * a));
-            Gfx.RectOutline(sb, artBox, Palette.LineGrey * (0.4f * a), 1);
-            Corner(sb, artBox.X, artBox.Y, a);
-            Corner(sb, artBox.Right, artBox.Y, a);
-            Corner(sb, artBox.X, artBox.Bottom, a);
-            Corner(sb, artBox.Right, artBox.Bottom, a);
+            StillRoom.Frame(sb, artBox, time);
         }
 
         //World Flat : DrawWorld without the hole's pull (no TacetVoid while borrowed by the pause menu)
         private void DrawWorldFlat(SpriteBatch sb)
         {
-            float a = UiMotion.Between(time, 0.15f, 0.5f);
-            Gfx.Rect(sb, artBox, Palette.Void * (0.45f * a));
-            Gfx.RectOutline(sb, artBox, Palette.LineGrey * (0.4f * a), 1);
-            Corner(sb, artBox.X, artBox.Y, a);
-            Corner(sb, artBox.Right, artBox.Y, a);
-            Corner(sb, artBox.X, artBox.Bottom, a);
-            Corner(sb, artBox.Right, artBox.Bottom, a);
-        }
-
-        private static void Corner(SpriteBatch sb, float x, float y, float a)
-        {
-            Gfx.Circle(sb, x, y, 4f, Palette.StageDeep * a);
-            Gfx.CircleOutline(sb, x, y, 4f, Palette.PaperDim * a, 1f);
+            StillRoom.Frame(sb, artBox, time);
         }
 
         //Lights : a soft light on the drawing, a softer one on the words
@@ -390,15 +364,17 @@ namespace Tacetno433.Screens
             NoteGlyph.Note(sb, Game.BigFont, nx, ny, Flick.Right, 1.7f, a, false);
             Gfx.TextSpacedCentered(sb, Game.Font, "ARROW : SWING THAT WAY", nx, ny + 74, Palette.Highlight * a, TextSize.Tiny, 2f);
 
-            //The Others : a held note, a roll and a spark, each with the word the fight shows under it
-            float kx = ox + 380f;
+            //The Others : a held note, a roll, a spark and a RUSH, each with the word the fight shows under it. Drawn by NoteGlyph,
+            //the same pieces the fight draws its notes with (LINKED : change a note there and it changes here)
+            float kx = ox + 360f;
             float ky = 210f;
             NoteGlyph.Note(sb, Game.BigFont, kx, ky, Flick.Down, 0.9f, a, false);
             NoteGlyph.FermataSign(sb, kx, ky - (NoteGlyph.NoteRadius + 18f) * 0.9f, 9f, Palette.Highlight * a);
-            NoteGlyph.RollNote(sb, kx + 110f, ky, 0.9f, a);
-            NoteGlyph.Spark(sb, kx + 220f, ky, 14f, Palette.Highlight * a);
+            NoteGlyph.RollNote(sb, kx + KindStep, ky, 0.9f, a);
+            NoteGlyph.Spark(sb, kx + KindStep * 2f, ky, 14f, Palette.Highlight * a);
+            NoteGlyph.RushNote(sb, Game.BigFont, kx + KindStep * 3f, ky, Flick.Up, 0.9f, a, false);
             for (int k = 0; k < demoKinds.Length; k++)
-                Gfx.TextSpacedCentered(sb, Game.Font, demoKinds[k], kx + 110f * k, ky + 44, Palette.Highlight * a, TextSize.Label, 2f);
+                Gfx.TextSpacedCentered(sb, Game.Font, demoKinds[k], kx + KindStep * k, ky + 44, Palette.Highlight * a, TextSize.Label, 2f);
 
             //Ring : swing just as the ring meets the note
             float cx = ox + 490f;
