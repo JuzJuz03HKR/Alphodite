@@ -444,6 +444,20 @@ namespace Tacetno433.Core
 #endif
             text = Lang.Of(text);
             if (ThaiText.Has(text)) return WrapThai(font, text, maxWidth, scale);
+            if (text.IndexOf('\n') >= 0)                                   // a "\n" already in the line starts a new one : each
+            {                                                              // part wraps on its own (ONE IDEA A LINE, HOW TO PLAY)
+                string[] parts = text.Split('\n');
+                string joined = "";
+                for (int p = 0; p < parts.Length; p++)
+                    joined += (p > 0 ? "\n" : "") + WrapWords(font, parts[p], maxWidth, scale);
+                return joined;
+            }
+            return WrapWords(font, text, maxWidth, scale);
+        }
+
+        //Wrap Words : one English line cut at its spaces
+        private static string WrapWords(SpriteFont font, string text, float maxWidth, float scale)
+        {
             string[] words = text.Split(' ');
             string result = "";
             string line = "";

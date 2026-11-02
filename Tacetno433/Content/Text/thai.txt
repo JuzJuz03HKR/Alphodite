@@ -3,7 +3,7 @@ Your turn. Press ENTER (PLAY) : the whole band attacks.	ตาของเรา
 Its turn. Hold the left button and swipe the arrow's way as the ring closes.	ตาของศัตรู กดเมาส์ซ้ายค้างไว้ แล้วตวัดตามลูกศรตอนวงแหวนหดถึง
 Click a musician, then 2 or 3 : a skill. Skills cost BREATH.	คลิกนักดนตรี แล้วกด 2 หรือ 3 เพื่อใช้สกิล สกิลใช้ BREATH
 CLICK A MUSICIAN, THEN AN ENEMY OR A SKILL   /   ENTER = PLAY	คลิกนักดนตรี แล้วคลิกศัตรูหรือสกิล   /   ENTER = เล่นตานี้
-That is the whole fight. Now win it.	นี่คือทั้งหมดของการต่อสู้ ทีนี้ชนะให้ได้ (ที่นี่ ปู่ ปี่ น้ำ ฟ้า ฝั่ง ญี่ปุ่น ฎีกา ฏุ)
+That is the whole fight. Now win it.	นี่คือทั้งหมดของการต่อสู้ ทีนี้ชนะให้ได้
 = loses this much life at the end of its turn, then 1 less	= เสียเลือดเท่านี้ตอนจบตาของมัน แล้วลดลงทีละ 1
 = every point hits 15 percent harder. A MISS loses it all	= ทุกแต้มตีแรงขึ้น 15 เปอร์เซ็นต์ โดน MISS แล้วหายหมด
 = no skills for this many turns. ATTACK still works	= ใช้สกิลไม่ได้ตามจำนวนตานี้ ATTACK ยังใช้ได้
@@ -40,7 +40,7 @@ The note says it all	โน้ตบอกทุกอย่าง
 One turn at a time	ทีละตา
 Click to choose. When a ring shows, hold the LEFT MOUSE BUTTON and swing.	คลิกเพื่อเลือก เมื่อวงแหวนขึ้น กดเมาส์ซ้ายค้างแล้วตวัด
 ARROW : which way to swing. RING : swing as it closes. That is all a note asks.	ลูกศร : ตวัดไปทางนั้น วงแหวน : ตวัดตอนมันหดถึง โน้ตขอแค่นั้น
-Your turn : give each musician a move, ENTER (PLAY) plays them in order. ATTACK hits by itself, a skill asks for a swing. TACET's notes : swipe back at each one to block it. BREATH pays for skills. CHARGE : one big note next turn, a full STUN bar breaks it. ARMOR : it takes your hits first. A ring on an enemy : your move goes there. Point at an icon to read it. Win a fight : one move gets a star. Three stars : its legend. Gifts stay all run. Same icon as a legend : made for them.	ตาของเรา : เลือกท่าให้นักดนตรีทุกคน ENTER (PLAY) เล่นตามลำดับ ATTACK ตีเอง สกิลต้องตวัด โน้ตของ TACET : ตวัดกลับเพื่อปัดทีละตัว BREATH ใช้จ่ายค่าสกิล CHARGE : ตาหน้ามาโน้ตใหญ่ 1 ตัว แถบ STUN เต็มทำลายได้ ARMOR : รับการโจมตีของเราก่อนเลือด วงแหวนบนศัตรู : ท่าของเราไปที่ตัวนั้น ชี้ไอคอนเพื่ออ่าน ชนะไฟต์ : ท่าหนึ่งได้ 1 ดาว ครบ 3 ดาว : ร่างในตำนาน GIFT อยู่ทั้งรัน ไอคอนเดียวกับนักดนตรี : ทำมาเพื่อเขา
+Your turn : a move each, then ENTER (PLAY).\nATTACK hits by itself, a skill asks for a swing.\nTACET's notes : swipe back at each one to block it.\nBREATH : pays for skills.\nCHARGE : a big note next turn. Full STUN breaks it.\nARMOR : it takes your hits first.\nA ring on an enemy : your move goes there.\nPoint at an icon to read it.\nWin a fight : a move gets a star. Three stars : its legend.\nGifts stay all run. A legend's icon : made for them.	ตาของเรา : เลือกท่าให้ทุกคน แล้ว ENTER (PLAY)\nATTACK ตีเอง สกิลต้องตวัดตามโน้ต\nโน้ตของ TACET : ตวัดกลับเพื่อปัดทีละตัว\nBREATH : ใช้จ่ายค่าสกิล\nCHARGE : ตาหน้ามาโน้ตใหญ่ STUN เต็มแล้วพัง\nARMOR : รับการตีของเราก่อนเลือด\nวงแหวนบนศัตรู : ท่าไปที่ตัวนั้น ชี้ไอคอนเพื่ออ่าน\nชนะไฟต์ : ท่าหนึ่งได้ 1 ดาว 3 ดาว = ร่างในตำนาน\nGIFT อยู่ทั้งรัน ไอคอนเดียวกับนักดนตรี = ของเขา
 FINALE  (WHEN THE DIAMONDS ARE FULL)	FINALE  (เมื่อเพชรเต็ม)
 THE BAND  (ON THE ROUTE)	THE BAND  (บนแผนที่)
 Ah, musicians. Everything on these shelves once belonged to a song that stopped.	อา นักดนตรีนี่เอง ของทุกชิ้นบนชั้นนี้เคยเป็นของเพลงที่หยุดเล่นไปแล้ว

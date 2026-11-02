@@ -58,12 +58,18 @@ namespace Tacetno433.Screens
             turnBattle ? "ARROW : which way to swing. RING : swing as it closes. That is all a note asks."
                  : "ARROW : which way. LETTER : how far (p small, mf middle, f big). RING : stop as it closes.",
 
-            turnBattle ? "Your turn : give each musician a move, ENTER (" + Words.Play + ") plays them in order. ATTACK hits by itself, a skill asks for a swing. "
-                   + "TACET's notes : swipe back at each one to block it. BREATH pays for skills. "
-                   + Words.Charge + " : one big note next turn, a full " + Words.Stun + " bar breaks it. " + Words.Armor + " : it takes your hits first. "   // ENEMY MOVES (Beta1 30 Oct), WORDS (31 Oct)
-                   + "A ring on an enemy : your move goes there. Point at an icon to read it. "                   // MARKS AND AIM (30 Oct)
-                   + "Win a fight : one move gets a star. Three stars : its legend. "                             // REHEARSAL (31 Oct)
-                   + "Gifts stay all run. Same icon as a legend : made for them."                                 // GIFTS (31 Oct)
+            //ONE IDEA A LINE (Beta1 2 Nov, block F3) : each rule on its own line ("\n"), so the page reads as a list of "X : Y" and the
+            //Thai, which has no full stops, does not run the rules together (Content/Text/thai.txt has the same lines)
+            turnBattle ? "Your turn : a move each, then ENTER (" + Words.Play + ").\n"
+                   + "ATTACK hits by itself, a skill asks for a swing.\n"
+                   + "TACET's notes : swipe back at each one to block it.\n"
+                   + "BREATH : pays for skills.\n"
+                   + Words.Charge + " : a big note next turn. Full " + Words.Stun + " breaks it.\n"          // ENEMY MOVES (Beta1 30 Oct), WORDS (31 Oct)
+                   + Words.Armor + " : it takes your hits first.\n"
+                   + "A ring on an enemy : your move goes there.\n"                                            // MARKS AND AIM (30 Oct)
+                   + "Point at an icon to read it.\n"
+                   + "Win a fight : a move gets a star. Three stars : its legend.\n"                            // REHEARSAL (31 Oct)
+                   + "Gifts stay all run. A legend's icon : made for them."                                     // GIFTS (31 Oct)
                  : "Win a note, push the line. Lose a note, lose breath. "
                    + "Push the line all the way to win. Let silent beats pass to breathe."
         };
