@@ -89,7 +89,7 @@ namespace Tacetno433.Screens
             "The main fader. Every sound in the game is measured against this one.",
             BattleRules.TurnBattleOn ? "Button clicks, baton strokes, and every hit in a fight." : "Button clicks, baton strokes, and every clash in a duel.",
             "The track playing behind the page you are on.",
-            "Which language the game is written in. Only English is written so far, so the choice is remembered but the words do not change yet.",
+            "Which language the game is written in. Leave this page and the game starts again in it (in the pause menu, the next time the game starts).",
             "Fills the whole monitor without changing its resolution, so other programs are left where they are and alt tab is instant. The picture keeps its shape and black bars fill whatever is left over.",
             BattleRules.TurnBattleOn
                 ? "If your strokes feel on time but the game calls them late, move this to the right. Early, to the left. Press ENTER or TEST and the game measures it for you."
@@ -105,6 +105,7 @@ namespace Tacetno433.Screens
             "Hold the left button and stroke the baton, any way, on every flash. The first two strokes are practice.";
 
         private string[] helpWrapped = new string[RowCount];
+        private int languageAtStart = Settings.Language;   // THAI TEXT : the language when the page opened
         private string savedWrapped = "";
         private string testWrapped = "";
 
@@ -283,6 +284,7 @@ namespace Tacetno433.Screens
                 SoundBank.Play(Sfx.UiBack);
                 SaveFile.SaveSettings();
                 if (fromPause) Closed = true;
+                else if (Settings.Language != languageAtStart) Game.Restart();   // THAI TEXT : a new language, a fresh start
                 else Game.Screens.Change(new TitleScreen());
             }
         }

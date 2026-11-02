@@ -1,0 +1,362 @@
+= loses this much life at the end of its turn, then 1 less
+= every point hits 15 percent harder. A MISS loses it all
+= no skills for this many turns. ATTACK still works
+= takes half of every hit until their next turn
+= their next move plays again
+= DUPORT stands in front and takes their hits
+= their next skill is easier to swipe and hits harder
+= takes the band's damage before its life. IL CANNONE goes through
+= it loses its next turn and takes 50 percent more damage
+= it moves in the middle of your turn
+= its notes hit the marked musician. Swipe back to block them
+= next turn one big note. STUN it or hit it with TIMPANI ROLL to break it
+= this turn it gains this much ARMOR and does not attack
+= this turn it heals instead of attacking
+= its CHARGE was broken, the big note will not come
+= its notes hit every musician standing
+CLICK A FRIEND OR PRESS ITS NUMBER   /   RIGHT CLICK = BACK
+SWIPE THE WAY THE ARROW POINTS AS THE RING CLOSES
+SWIPE THE ARROW'S WAY TO BLOCK EACH NOTE
+RUSH : THE NEXT ARROW COMES RIGHT AWAY, SWIPE IT FAST
+MUTED : NO SKILLS THIS TURN, ATTACK STILL WORKS
+DECREE : A SKILL THIS TURN HURTS WHOEVER PLAYS IT
+DECREE : AN ATTACK THIS TURN HURTS WHOEVER PLAYS IT (NO MOVE = ATTACK)
+A skill is a few notes. Swipe each arrow as its ring closes.
+Its next attack ends in a HOLD. Press ENTER and get ready.
+HOLD : swipe it, then keep the button down until it ends.
+The diamonds are full. Press SPACE for the FINALE.
+4 swipes : DOWN, LEFT, RIGHT, UP.
+The hall is full. Nobody makes a sound.
+Somewhere, a note was left unfinished.
+Four minutes and thirty-three seconds. Then nothing.
+Your baton
+The note says it all
+One turn at a time
+Click to choose. When a ring shows, hold the LEFT MOUSE BUTTON and swing.
+ARROW : which way to swing. RING : swing as it closes. That is all a note asks.
+Your turn : give each musician a move, ENTER (PLAY) plays them in order. ATTACK hits by itself, a skill asks for a swing. TACET's notes : swipe back at each one to block it. BREATH pays for skills. CHARGE : one big note next turn, a full STUN bar breaks it. ARMOR : it takes your hits first. A ring on an enemy : your move goes there. Point at an icon to read it. Win a fight : one move gets a star. Three stars : its legend. Gifts stay all run. Same icon as a legend : made for them.
+FINALE  (WHEN THE DIAMONDS ARE FULL)
+THE BAND  (ON THE ROUTE)
+Ah, musicians. Everything on these shelves once belonged to a song that stopped.
+Come in, come in. Mind the silence by the door, it bites.
+A fine choice. It still remembers how to sing.
+Sold. The silence will hate that.
+Take good care of it. I will not be buying it back.
+Not enough shards, I am afraid. Come back a little richer.
+That is all I have of those for now.
+Your band is already in perfect tune.
+Something else from the back, then. It costs a little more every time.
+There. A fresh shelf. Mind the dust.
+A note TACET lands costs life. Block it as the ring closes.
+PERFECT blocks the whole note. GOOD blocks half.
+Block every note of an attack PERFECT and the musician hits back : COUNTER.
+Give each musician a move, then ENTER plays the turn in that order.
+ATTACK hits by itself. Only skills and blocks need a swing.
+Point at any icon in a fight to read what it does.
+Skills cost BREATH. ATTACKS and PERFECT blocks give it back.
+The shop sells what makes the whole band stronger. Play well, earn more shards.
+A CUT IN enemy moves in the middle of your turn. Silence it early.
+Attacks and PERFECT blocks fill the enemy's STUN bar. Full, it is STUNNED and loses a turn.
+Every third attack most bosses make a BIG ATTACK : one more note, and harder.
+PERFECTs fill the diamonds. Full, SPACE plays the FINALE.
+A musician who falls gets up with 1 life after the fight.
+Every run earns APPLAUSE. Spend it in THE ARCHIVE.
+Win a run to open ENCORE : the same conductor again, with one more rule.
+Strokes judged early or late? Settings has a STROKE TIMING test.
+Every musician has 2 more life.
+Every fight starts with 1 more BREATH.
+The FINALE starts 2 diamonds fuller.
+Every run starts with 20 more shards.
+Every run starts with a gift for the band.
+The first musician you pick starts with 1 star on their ATTACK.
+BOND OP. 5 : THE CELLO SONATAS, BERLIN 1796  -  FIRST MOVE OF A FIGHT x1.5
+DUPORT : Berlin again, maestro. The cello remembers its part.
+BOND OP. 17 : THE HORN SONATA, VIENNA 1800  -  FIRST MOVE OF A FIGHT x1.5
+PUNTO : The horn first, maestro. As in Vienna.
+BOND THE ROYAL THEME : QUANTZ'S PUPIL GAVE BACH THE THEME  -  FIRST MOVE OF A FIGHT x1.5
+QUANTZ : The king's theme. Play it as he never could.
+BOND LEIPZIG : PFUNDT PLAYED IN FELIX'S GEWANDHAUS  -  FIRST MOVE OF A FIGHT x1.5
+PFUNDT : Felix kept the time in Leipzig. Tonight it is yours.
+BOND THE DEVIL : AGAINST THE DEVIL'S STRING, PAGANINI HITS x1.5
+PAGANINI : So you are the one they meant.
+He wrote music like clockwork, and the clock never asked permission. Under his baton the ensemble never tires, because it never hurries.
+THE ART OF FUGUE
+THE ART OF FUGUE II
+He wrote it deaf, and it was the loudest thing ever written.
+Silence took his ears first and he kept writing anyway. He is the only conductor who is not afraid of TACET getting closer.
+Some of her songs were printed under her brother's name.
+She wrote hundreds of pieces and was told to keep them at home. Her brother's shadow plays beside her, and no one says his name.
+The score
+Every hit and step
+The type
+A band against silence. Thank you for playing.
+Every track here is free to use. Thank you to the people who share their music.
+Ready made sounds, cut and levelled for TACET.
+Both fonts are free under the SIL Open Font License 1.1.
+No extra rules.
++ Enemies hit harder.
++ A faster ring and tighter timing.
++ One more enemy in normal fights.
++ Resting heals less.
++ Bosses reach PHASE 2 sooner.
+Each note that gets through adds 1 BURN.
+ECHO FADES : Each note that gets through adds 1 BURN.
+A note you miss hits 50 percent harder.
+FILLS THE GAPS : A note you miss hits 50 percent harder.
+Every third turn it hums instead of attacking and gets back 12 life.
+LULLABY : Every third turn it hums instead of attacking and gets back 12 life.
+One note of each attack hides its arrow behind a ? until late.
+FALSE NOTES : One note of each attack hides its arrow behind a ? until late.
+A note you miss leaves the target MUTED for a turn.
+SILENT MOUTHS : A note you miss leaves the target MUTED for a turn.
+One note more in every attack, and parrying it gives no BREATH.
+NO REST : One note more in every attack, and parrying it gives no BREATH.
+Below half life it swaps left and right and plays faster.
+UNFINISHED : Below half life it swaps left and right and plays faster.
+Eight fast notes. Block all eight and the piece breaks off.
+THE PIECE BREAKS OFF
+It plays on, faster, the wrong way round.
+It answers with the notes of the last skill your band played.
+ANSWER BETTER : It answers with the notes of the last skill your band played.
+It plays back every note of your last skills, under its own name.
+THE NAME COMES BACK
+It signs your music with its own name.
+Each of its attacks steals 1 BREATH.
+THE BARGAIN : Each of its attacks steals 1 BREATH.
+Ten fast notes, all one way. Each one that gets through takes 1 BREATH.
+Three strings snap. It plays on with one.
+HOLDS THE ROOM : While it stands, the other enemies take 30 percent less.
+ON CUE : It always strikes the musician who played the last skill.
+FELT HAND : While it stands, an ATTACK gives 1 less BREATH.
+TWICE A TURN : It cuts in twice a turn, after the 1st and the 3rd move, one note each time.
+FIRST IN LINE : It always strikes the musician who plays first in the turn.
+DECREE : Each turn it bans SKILLS or ATTACKS, and breaking the ban hurts. It never takes a COUNTER.
+It still cannot hear you. It only shouts louder.
+THE COURT : While its court stands it takes half.
+The staff comes down on everyone, then the floor shakes. Block the blow and it strikes its own foot.
+It beats the floor harder. The court bows.
+BY TOUCH : It strikes the seats in turn, front to back. A note you miss comes back in its next attack.
+Five notes on everyone, every arrow hidden until the last moment.
+THE LIGHT COMES BACK
+The candles go out, one by one.
+On a music stand in an empty hall, a metronome ticks out of time. Every few beats it skips, and the silence in the skip is a little too deep.
+Try to repair it
+It clicks back into time, and something small and bright falls out of its case.
+It snaps at the fingers. The band gets hurt trying to hold the tempo.
+Smash it and sell the brass
+The brass is worth something. The silence it leaves behind is not.
+Wind it by hand until it holds
+It bites every hand that holds it. Then it ticks true, and something bright drops out of its case.
+Someone plays alone for an audience that never comes. They look up when your band arrives, and for the first time tonight they smile.
+Pay for a lesson
+One old trick, played slowly. Your band will not forget it.
+Play along with them
+The duet teaches your player something new.
+You fall out of step. It is tiring to be out of step.
+Play with them until dawn
+By morning nobody can stand, and nobody has ever played better.
+Every seat is taken. Nobody moves, nobody coughs, nobody has a face. They are waiting for someone to play.
+Perform for them
+The hall does not clap. It leaves shards on the seats instead.
+The silence swallows every note. The band walks off drained.
+Bow, and leave quietly
+A small rest in the dark does the band good.
+Play loud enough to wake them
+Every faceless head turns at once. This was never an audience.
+Sheets of music are scattered down a corridor, still wet with ink. Some bars have been scratched out so hard the paper tore.
+Gather every page
+Among the pages is a mark you can keep.
+Read the torn bars aloud
+The torn bars were the best part. Your player remembers them.
+The notes make no sense, and trying costs something.
+Face it
+The echo takes a shape. It is stronger than it sounded.
+Slip past it
+You hold your breath all the way past it.
+An old tea house, still open. The owner says musicians drink for free, as long as somebody plays something first.
+Rest and drink
+Warm tea, a quiet room. The band feels like itself again.
+Play the owner's favourite
+The owner hums along, then locks the door and lets you sleep. You wake up whole.
+Nobody listens. You pay for the tea after all.
+In the dark pit one chair still has its stand, and on the stand one part, a single line of music for an instrument your band does not have. The ink is wet. Someone was meant to play it tonight.
+Find the one who plays it
+A player steps out of the dark, plays the part once, and leaves something behind.
+Play it yourselves
+The line is strange and beautiful. Your player keeps it.
+The part is written for someone else. It fights every note.
+Wait in the dark for its player
+Something sits down in the chair. It is not who you were waiting for.
+Another band is playing your road, louder than you. Their leader points a bow at you and waits to see what you do.
+Take the challenge
+They stop playing. Something under their music was never a band at all.
+Pay them to play for you
+For once someone else does the work. The band sits and listens.
+Walk the other way
+Their laughter follows you a little way down the road.
+A tuning fork lies on the stones, still ringing, though nobody is near. The note it holds is almost the right one.
+Strike it and listen
+The note settles in your ear and stays there.
+It rings far too loud. Everyone flinches.
+Pocket it to sell
+Good steel. Somebody will pay for it.
+Tune the whole band to it
+The note runs through every string and every player. It hurts, and then the whole band rings true.
+An open case, and in it a bow with a long crack down the stick. It might hold for one more piece.
+Play it as it is
+It holds. Playing it that lightly teaches something new.
+It snaps mid phrase and the whip of it stings.
+Sell the horsehair
+Old horsehair, but good. A few shards for it.
+Close the case
+You leave it for whoever owned it.
+QUANTZ heals 50 percent more.
+PFUNDT's skills fill STUN 50 percent more.
+The first note of an attack parried PERFECT gives 1 more BREATH.
+Every fight starts with 2 more BREATH.
+Skills that reach everyone are 25 percent stronger.
+After a win, 15 percent more life comes back.
+A skill note you MISS still plays, at 60 percent.
+Every fight starts with 1 VOLUME on each musician.
+The last note of a skill, PERFECT, hits 30 percent harder.
+Once a fight, a musician who would fall stays up with 1 life.
+The band's first hit of every fight is twice as hard.
+A COUNTER hits twice as hard.
+Every shake in a roll counts twice.
+A held note always counts as held to the end.
+A spark that lands does its skill twice.
+An ATTACK fills STUN twice as much.
+The FINALE needs 4 PERFECTs instead of 6.
+Enemies under a quarter of their life take 50 percent more.
+The first move of every turn is 50 percent stronger.
+While QUANTZ stands, every musician heals 3 after every turn.
+When every move of a turn is an ATTACK at one enemy, the last one hits twice as hard.
+The last musician to play in a turn gets GUARD.
+They say the devil taught those hands. Nobody asks twice.
+THE KING'S FLUTE MASTER
+Taught a king the flute. Three hundred concertos, one listener.
+WHO TUNES THE THUNDER
+One turn of the hand, and the thunder changes key.
+SCARRED BY AN EMPEROR
+An emperor once tried this cello and left a scar. It plays louder for it.
+Once more famous than Beethoven, and plays like nobody said otherwise.
+ATTACK adds 1 BURN.
+5 quick cuts. Each adds 1 BURN.
+5 quick cuts. Each adds 2 BURN.
+6 cuts, all one way. The last one x3.
+6 cuts all one way, 2 BURN each. The last one x3.
+Also hits every enemy that has BURN.
+One big held shot. Goes through ARMOR. Also hits every enemy with BURN.
+ATTACK heals the most hurt of the band 4.
+Heals the whole band 4 per note.
+3 notes. Heals the whole band 4 per note.
+Also clears BURN and MUTED.
+Heals the whole band 4 per note. Clears BURN and MUTED.
+FOCUS x1.3
+FOCUS x1.6
+A friend gets FOCUS : their next skill x1.6.
+Every friend gets FOCUS : their next skill x1.6.
+A friend taught plays their next move again, at half.
+Every friend gets FOCUS : their next skill x1.6, played again at half.
+ATTACK hits twice.
+Shake fast. +40 STUN. Breaks a CHARGE.
+Shake fast. +40 STUN on every enemy. Breaks a CHARGE.
+PERFECT : the first enemy is STUNNED at once.
+Every enemy, +40 STUN. PERFECT : the first one is STUNNED at once.
+Every enemy aims at PFUNDT, who gets GUARD. Their next attacks lose 1 note.
+Every enemy aims at PFUNDT, who takes only a third. Their next attacks lose 1 note.
+Every enemy's next attack loses 2 notes.
+Every enemy aims at PFUNDT, who takes only a third. Their next attacks lose 2 notes.
+ATTACK gives DUPORT GUARD : half damage.
+Protect a friend : their hits land on DUPORT, a third.
+Protect every friend : their hits land on DUPORT, a third.
+A blow taken for a friend hits back as hard.
+Protect every friend, take a third. Every blow taken hits back.
+x2 AFTER A HIT
+x3 AFTER A HIT
+2 thrusts. x3 if DUPORT was just hit.
+3 thrusts. x3 if DUPORT was just hit.
+Always x3, hit or not.
+3 thrusts. Always x3.
+ATTACK hits the next enemy too.
+Every musician gets 2 VOLUME per note.
+AFTER PUNTO x1.3
+AFTER PUNTO x1.5
+After FANFARE, everyone after PUNTO in the turn hits x1.5.
+Every musician gets 2 VOLUME per note. Everyone after PUNTO hits x1.5.
+4 throws, a new enemy each. Hit again = half.
+4 throws, a new enemy each. Hit again = whole.
+The last throw hits every enemy.
+4 throws, a new enemy each. The last one hits every enemy.
+A fight with TACET. Win it for a star, and shards.
+Something is waiting here. A person, a gift, or a fight.
+Spend shards to make the whole band stronger.
+Harder than it looks. A gift to choose, a star, and more shards.
+Heal up, or rehearse one move for a star. The band chooses one.
+The last room of this floor. It has been waiting for you.
+A door out of this era. The world changes around you.
+An instrument maker. One ATTACK gets a star, free.
+A chest left in the wings. One gift inside, free.
+4 quick cuts. Each adds 1 BURN.
+One big held shot. Hold it = harder. Goes through ARMOR.
+Heals the whole band 3 per note.
+A friend gets FOCUS for their next skill.
+Shake fast. Big STUN. Breaks a CHARGE.
+Every enemy aims at PFUNDT, who gets GUARD.
+A hit and a spark. Each adds 1 BURN.
+4 notes up and down. Each adds 1 BURN.
+Heals one musician. Hold it = more.
+Shake fast. Heals everyone 3, 3 BREATH back.
+3 big hits. Each adds STUN.
+A big hit and a spark. Each adds STUN.
+Protect a friend : their hits land on DUPORT, halved.
+2 thrusts. Twice as hard if DUPORT was just hit.
+Every musician gets 1 VOLUME per note.
+3 throws, a new enemy each. Hit again = half.
+Hits every enemy. Hold it = harder.
+2 big hits and a roll. Big STUN.
+loses this much life at the end of its turn, then 1 less
+every point hits 15 percent harder. A MISS loses it all
+fills the bar under its life. Full, it is STUNNED
+it loses its next turn and takes 50 percent more damage
+no skills for this many turns. ATTACK still works
+takes half of every hit until their next turn
+takes the band's damage before its life. IL CANNONE goes through
+this turn it gains this much ARMOR and does not attack
+their next skill is easier to swipe and hits harder
+DUPORT stands in front and takes their hits
+their next move plays again
+its notes hit the marked musician. Swipe back to block them
+next turn one big note. STUN it or hit it with TIMPANI ROLL to break it
+its CHARGE was broken, the big note will not come
+it moves in the middle of your turn
+this turn it heals instead of attacking
+its notes hit every musician standing
+the boss's own big move. Block every note and it is STUNNED
+the conductor's big move. PERFECTs fill the diamonds, SPACE plays it. It breaks every CHARGE and gives FORTE
+comes right after the note before it. Swipe its arrow, fast
+5 PERFECTs in a row by one musician. Their next move is bigger
+after a FINALE the band hits 25 percent harder this TURN
+PERFECTs in a row. Every 10 make the band hit 5 percent harder
+=  loses this much life at the end of its turn, then 1 less
+=  every point hits 15 percent harder. A MISS loses it all
+=  it loses its next turn and takes 50 percent more damage
+=  fills the bar under its life. Full, it is STUNNED
+=  no skills for this many turns. ATTACK still works
+=  takes half of every hit until their next turn
+=  takes the band's damage before its life. IL CANNONE goes through
+=  their next skill is easier to swipe and hits harder
+=  DUPORT stands in front and takes their hits
+=  their next move plays again
+=  next turn one big note. STUN it or hit it with TIMPANI ROLL to break it
+BURN  =  loses this much life at the end of its turn, then 1 less
+VOLUME  =  every point hits 15 percent harder. A MISS loses it all
+STUNNED  =  it loses its next turn and takes 50 percent more damage
+STUN  =  fills the bar under its life. Full, it is STUNNED
+MUTED  =  no skills for this many turns. ATTACK still works
+GUARD  =  takes half of every hit until their next turn
+ARMOR  =  takes the band's damage before its life. IL CANNONE goes through
+FOCUS  =  their next skill is easier to swipe and hits harder
+SHIELD  =  DUPORT stands in front and takes their hits
+ECHO  =  their next move plays again
+CHARGE  =  next turn one big note. STUN it or hit it with TIMPANI ROLL to break it

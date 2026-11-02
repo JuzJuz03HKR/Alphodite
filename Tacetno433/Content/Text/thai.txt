@@ -1,0 +1,474 @@
+# THAI WORD LIST (Data/Lang.cs) : the English exactly as the game has it, a TAB, then the Thai. "\\n" is a new line.
+Your turn. Press ENTER (PLAY) : the whole band attacks.	ตาของเรา กด ENTER (PLAY) ทั้งวงโจมตีพร้อมกัน
+Its turn. Hold the left button and swipe the arrow's way as the ring closes.	ตาของศัตรู กดเมาส์ซ้ายค้างไว้ แล้วตวัดตามลูกศรตอนวงแหวนหดถึง
+Click a musician, then 2 or 3 : a skill. Skills cost BREATH.	คลิกนักดนตรี แล้วกด 2 หรือ 3 เพื่อใช้สกิล สกิลใช้ BREATH
+CLICK A MUSICIAN, THEN AN ENEMY OR A SKILL   /   ENTER = PLAY	คลิกนักดนตรี แล้วคลิกศัตรูหรือสกิล   /   ENTER = เล่นตานี้
+That is the whole fight. Now win it.	นี่คือทั้งหมดของการต่อสู้ ทีนี้ชนะให้ได้ (ที่นี่ ปู่ ปี่ น้ำ ฟ้า ฝั่ง ญี่ปุ่น ฎีกา ฏุ)
+= loses this much life at the end of its turn, then 1 less	= เสียเลือดเท่านี้ตอนจบตาของมัน แล้วลดลงทีละ 1
+= every point hits 15 percent harder. A MISS loses it all	= ทุกแต้มตีแรงขึ้น 15 เปอร์เซ็นต์ โดน MISS แล้วหายหมด
+= no skills for this many turns. ATTACK still works	= ใช้สกิลไม่ได้ตามจำนวนตานี้ ATTACK ยังใช้ได้
+= takes half of every hit until their next turn	= รับความเสียหายแค่ครึ่งเดียวจนถึงตาถัดไปของเขา
+= their next move plays again	= ท่าถัดไปของเขาเล่นซ้ำอีกครั้ง
+= DUPORT stands in front and takes their hits	= DUPORT ยืนบังข้างหน้าและรับการโจมตีแทน
+= their next skill is easier to swipe and hits harder	= สกิลถัดไปของเขาตวัดง่ายขึ้นและแรงขึ้น
+= takes the band's damage before its life. IL CANNONE goes through	= รับความเสียหายจากวงก่อนเลือด IL CANNONE ทะลุได้
+= it loses its next turn and takes 50 percent more damage	= เสียตาถัดไป และโดนแรงขึ้น 50 เปอร์เซ็นต์
+= it moves in the middle of your turn	= มันแทรกเข้ามากลางตาของเรา
+= its notes hit the marked musician. Swipe back to block them	= โน้ตของมันพุ่งใส่นักดนตรีที่ถูกเล็ง ตวัดกลับเพื่อปัด
+= next turn one big note. STUN it or hit it with TIMPANI ROLL to break it	= ตาหน้ามาโน้ตใหญ่ 1 ตัว ทำให้ STUN หรือตีด้วย TIMPANI ROLL เพื่อทำลาย
+= this turn it gains this much ARMOR and does not attack	= ตานี้มันได้ ARMOR เท่านี้ และไม่โจมตี
+= this turn it heals instead of attacking	= ตานี้มันฟื้นเลือดแทนการโจมตี
+= its CHARGE was broken, the big note will not come	= CHARGE ของมันพังแล้ว โน้ตใหญ่จะไม่มา
+= its notes hit every musician standing	= โน้ตของมันโดนนักดนตรีทุกคนที่ยังยืนอยู่
+CLICK A FRIEND OR PRESS ITS NUMBER   /   RIGHT CLICK = BACK	คลิกเพื่อน หรือกดเลขของเขา   /   คลิกขวา = ย้อนกลับ
+SWIPE THE WAY THE ARROW POINTS AS THE RING CLOSES	ตวัดตามลูกศรตอนวงแหวนหดถึงโน้ต
+SWIPE THE ARROW'S WAY TO BLOCK EACH NOTE	ตวัดตามลูกศรเพื่อปัดโน้ตทีละตัว
+RUSH : THE NEXT ARROW COMES RIGHT AWAY, SWIPE IT FAST	RUSH : ลูกศรถัดไปมาทันที ตวัดให้ไว
+MUTED : NO SKILLS THIS TURN, ATTACK STILL WORKS	MUTED : ตานี้ใช้สกิลไม่ได้ ATTACK ยังใช้ได้
+DECREE : A SKILL THIS TURN HURTS WHOEVER PLAYS IT	DECREE : ตานี้ใครใช้สกิลจะเจ็บเอง
+DECREE : AN ATTACK THIS TURN HURTS WHOEVER PLAYS IT (NO MOVE = ATTACK)	DECREE : ตานี้ใครใช้ ATTACK จะเจ็บเอง (ไม่เลือกท่า = ATTACK)
+A skill is a few notes. Swipe each arrow as its ring closes.	สกิลมีโน้ตหลายตัว ตวัดตามลูกศรแต่ละตัวตอนวงแหวนหดถึง
+Its next attack ends in a HOLD. Press ENTER and get ready.	การโจมตีถัดไปของมันจบด้วย HOLD กด ENTER แล้วเตรียมตัว
+HOLD : swipe it, then keep the button down until it ends.	HOLD : ตวัด แล้วกดเมาส์ค้างไว้จนจบ
+The diamonds are full. Press SPACE for the FINALE.	เพชรเต็มแล้ว กด SPACE เพื่อใช้ FINALE
+4 swipes : DOWN, LEFT, RIGHT, UP.	ตวัด 4 ครั้ง : ลง ซ้าย ขวา ขึ้น
+The hall is full. Nobody makes a sound.	โรงเต็มทุกที่นั่ง ไม่มีใครส่งเสียง
+Somewhere, a note was left unfinished.	ที่ไหนสักแห่ง มีโน้ตที่ยังเล่นไม่จบ
+Four minutes and thirty-three seconds. Then nothing.	สี่นาทีสามสิบสามวินาที แล้วก็ไม่มีอะไรอีกเลย
+Your baton	ไม้บาตองของคุณ
+The note says it all	โน้ตบอกทุกอย่าง
+One turn at a time	ทีละตา
+Click to choose. When a ring shows, hold the LEFT MOUSE BUTTON and swing.	คลิกเพื่อเลือก เมื่อวงแหวนขึ้น กดเมาส์ซ้ายค้างแล้วตวัด
+ARROW : which way to swing. RING : swing as it closes. That is all a note asks.	ลูกศร : ตวัดไปทางนั้น วงแหวน : ตวัดตอนมันหดถึง โน้ตขอแค่นั้น
+Your turn : give each musician a move, ENTER (PLAY) plays them in order. ATTACK hits by itself, a skill asks for a swing. TACET's notes : swipe back at each one to block it. BREATH pays for skills. CHARGE : one big note next turn, a full STUN bar breaks it. ARMOR : it takes your hits first. A ring on an enemy : your move goes there. Point at an icon to read it. Win a fight : one move gets a star. Three stars : its legend. Gifts stay all run. Same icon as a legend : made for them.	ตาของเรา : เลือกท่าให้นักดนตรีทุกคน ENTER (PLAY) เล่นตามลำดับ ATTACK ตีเอง สกิลต้องตวัด โน้ตของ TACET : ตวัดกลับเพื่อปัดทีละตัว BREATH ใช้จ่ายค่าสกิล CHARGE : ตาหน้ามาโน้ตใหญ่ 1 ตัว แถบ STUN เต็มทำลายได้ ARMOR : รับการโจมตีของเราก่อนเลือด วงแหวนบนศัตรู : ท่าของเราไปที่ตัวนั้น ชี้ไอคอนเพื่ออ่าน ชนะไฟต์ : ท่าหนึ่งได้ 1 ดาว ครบ 3 ดาว : ร่างในตำนาน GIFT อยู่ทั้งรัน ไอคอนเดียวกับนักดนตรี : ทำมาเพื่อเขา
+FINALE  (WHEN THE DIAMONDS ARE FULL)	FINALE  (เมื่อเพชรเต็ม)
+THE BAND  (ON THE ROUTE)	THE BAND  (บนแผนที่)
+Ah, musicians. Everything on these shelves once belonged to a song that stopped.	อา นักดนตรีนี่เอง ของทุกชิ้นบนชั้นนี้เคยเป็นของเพลงที่หยุดเล่นไปแล้ว
+Come in, come in. Mind the silence by the door, it bites.	เข้ามาเลย ระวังความเงียบตรงประตูหน่อย มันกัดนะ
+A fine choice. It still remembers how to sing.	เลือกได้ดี มันยังจำวิธีร้องเพลงได้อยู่
+Sold. The silence will hate that.	ขายแล้ว ความเงียบต้องเกลียดแน่
+Take good care of it. I will not be buying it back.	ดูแลมันดีๆ ล่ะ ฉันไม่รับซื้อคืนนะ
+Not enough shards, I am afraid. Come back a little richer.	SHARDS ไม่พอนะ รวยกว่านี้แล้วค่อยมาใหม่
+That is all I have of those for now.	ของแบบนั้นตอนนี้มีเท่านี้แหละ
+Your band is already in perfect tune.	วงของคุณตั้งเสียงเป๊ะอยู่แล้ว
+Something else from the back, then. It costs a little more every time.	งั้นเอาของจากหลังร้านมาให้ใหม่ ราคาขึ้นทุกครั้งนะ
+There. A fresh shelf. Mind the dust.	นี่ไง ชั้นใหม่ ระวังฝุ่นด้วย
+A note TACET lands costs life. Block it as the ring closes.	โน้ตของ TACET ที่โดนตัวทำให้เสียเลือด ปัดตอนวงแหวนหดถึง
+PERFECT blocks the whole note. GOOD blocks half.	PERFECT ปัดได้ทั้งหมด GOOD ปัดได้ครึ่งเดียว
+Block every note of an attack PERFECT and the musician hits back : COUNTER.	ปัดทุกโน้ตของการโจมตีได้ PERFECT นักดนตรีจะสวนกลับ : COUNTER
+Give each musician a move, then ENTER plays the turn in that order.	เลือกท่าให้นักดนตรีทุกคน แล้ว ENTER เล่นตานั้นตามลำดับ
+ATTACK hits by itself. Only skills and blocks need a swing.	ATTACK ตีเอง มีแค่สกิลกับการปัดที่ต้องตวัด
+Point at any icon in a fight to read what it does.	ในไฟต์ ชี้ไอคอนไหนก็ได้เพื่ออ่านว่ามันทำอะไร
+Skills cost BREATH. ATTACKS and PERFECT blocks give it back.	สกิลใช้ BREATH ส่วน ATTACK กับการปัด PERFECT ได้คืน
+The shop sells what makes the whole band stronger. Play well, earn more shards.	ร้านขายของที่ทำให้ทั้งวงเก่งขึ้น เล่นเก่ง ได้ SHARDS มากขึ้น
+A CUT IN enemy moves in the middle of your turn. Silence it early.	ศัตรูแบบ CUT IN แทรกกลางตาของเรา จัดการมันก่อน
+Attacks and PERFECT blocks fill the enemy's STUN bar. Full, it is STUNNED and loses a turn.	การโจมตีกับการปัด PERFECT เติมแถบ STUN ของศัตรู เต็มเมื่อไหร่ มันจะ STUNNED เสียหนึ่งตา
+Every third attack most bosses make a BIG ATTACK : one more note, and harder.	บอสส่วนใหญ่ใช้ BIG ATTACK ทุกการโจมตีที่สาม : โน้ตเพิ่ม 1 ตัวและแรงกว่า
+PERFECTs fill the diamonds. Full, SPACE plays the FINALE.	PERFECT เติมเพชร เต็มเมื่อไหร่ กด SPACE ใช้ FINALE
+A musician who falls gets up with 1 life after the fight.	นักดนตรีที่ล้มจะลุกขึ้นพร้อมเลือด 1 หลังจบไฟต์
+Every run earns APPLAUSE. Spend it in THE ARCHIVE.	ทุกรันได้ APPLAUSE เอาไปใช้ใน THE ARCHIVE
+Win a run to open ENCORE : the same conductor again, with one more rule.	ชนะรันเพื่อเปิด ENCORE : เล่นวาทยากรคนเดิมอีกครั้ง กติกาเพิ่ม 1 ข้อ
+Strokes judged early or late? Settings has a STROKE TIMING test.	ตวัดแล้วเกมบอกว่าเร็วหรือช้าไป? ใน SETTINGS มีทดสอบ STROKE TIMING
+Every musician has 2 more life.	นักดนตรีทุกคนเลือดเพิ่ม 2
+Every fight starts with 1 more BREATH.	ทุกไฟต์เริ่มด้วย BREATH เพิ่ม 1
+The FINALE starts 2 diamonds fuller.	FINALE เริ่มด้วยเพชรเต็มขึ้น 2 เม็ด
+Every run starts with 20 more shards.	ทุกรันเริ่มด้วย SHARDS เพิ่ม 20
+Every run starts with a gift for the band.	ทุกรันเริ่มพร้อม GIFT 1 ชิ้นให้วง
+The first musician you pick starts with 1 star on their ATTACK.	นักดนตรีคนแรกที่เลือกเริ่มด้วย 1 ดาวที่ ATTACK
+DUPORT : Berlin again, maestro. The cello remembers its part.	DUPORT : เบอร์ลินอีกแล้ว มาเอสโตร เชลโลยังจำท่อนของมันได้
+PUNTO : The horn first, maestro. As in Vienna.	PUNTO : ฮอร์นนำก่อน มาเอสโตร เหมือนที่เวียนนา
+QUANTZ : The king's theme. Play it as he never could.	QUANTZ : ทำนองของพระราชา เล่นให้ดีกว่าที่พระองค์เคยเล่น
+PFUNDT : Felix kept the time in Leipzig. Tonight it is yours.	PFUNDT : ที่ไลพ์ซิก เฟลิกซ์เป็นคนคุมจังหวะ คืนนี้เป็นหน้าที่ของคุณ
+PAGANINI : So you are the one they meant.	PAGANINI : ที่แท้ก็แกนี่เองที่พวกเขาพูดถึง
+He wrote music like clockwork, and the clock never asked permission. Under his baton the ensemble never tires, because it never hurries.	เขาแต่งเพลงเหมือนกลไกนาฬิกา และนาฬิกาไม่เคยขออนุญาตใคร ใต้ไม้บาตองของเขา วงไม่เคยเหนื่อย เพราะไม่เคยรีบ
+He wrote it deaf, and it was the loudest thing ever written.	เขาแต่งมันตอนหูหนวก และมันคือเพลงที่ดังที่สุดเท่าที่เคยมีมา
+Silence took his ears first and he kept writing anyway. He is the only conductor who is not afraid of TACET getting closer.	ความเงียบเอาหูของเขาไปก่อน แต่เขาก็ยังแต่งต่อ เขาคือวาทยากรคนเดียวที่ไม่กลัวเมื่อ TACET เข้ามาใกล้
+Some of her songs were printed under her brother's name.	เพลงบางเพลงของเธอถูกพิมพ์ในชื่อของน้องชาย
+She wrote hundreds of pieces and was told to keep them at home. Her brother's shadow plays beside her, and no one says his name.	เธอแต่งเพลงหลายร้อยชิ้น แต่ถูกบอกให้เก็บไว้ในบ้าน เงาของน้องชายเล่นอยู่ข้างเธอ และไม่มีใครเอ่ยชื่อเขา
+The score	ดนตรีประกอบ
+Every hit and step	ทุกเสียงตีและก้าวเดิน
+The type	ตัวอักษร
+A band against silence. Thank you for playing.	วงดนตรีที่สู้กับความเงียบ ขอบคุณที่เล่น
+Every track here is free to use. Thank you to the people who share their music.	ทุกเพลงในนี้ใช้ได้ฟรี ขอบคุณทุกคนที่แบ่งปันเพลงของตัวเอง
+Ready made sounds, cut and levelled for TACET.	เสียงสำเร็จรูป ตัดและปรับระดับให้เข้ากับ TACET
+No extra rules.	ไม่มีกติกาเพิ่ม
++ Enemies hit harder.	+ ศัตรูตีแรงขึ้น
++ A faster ring and tighter timing.	+ วงแหวนเร็วขึ้น จังหวะแคบลง
++ One more enemy in normal fights.	+ ไฟต์ธรรมดามีศัตรูเพิ่ม 1 ตัว
++ Resting heals less.	+ พักแล้วฟื้นเลือดน้อยลง
++ Bosses reach PHASE 2 sooner.	+ บอสเข้า PHASE 2 เร็วขึ้น
+Each note that gets through adds 1 BURN.	โน้ตที่ปัดไม่ได้แต่ละตัวเพิ่ม BURN 1
+ECHO FADES : Each note that gets through adds 1 BURN.	ECHO FADES : โน้ตที่ปัดไม่ได้แต่ละตัวเพิ่ม BURN 1
+A note you miss hits 50 percent harder.	โน้ตที่พลาดจะแรงขึ้น 50 เปอร์เซ็นต์
+FILLS THE GAPS : A note you miss hits 50 percent harder.	FILLS THE GAPS : โน้ตที่พลาดจะแรงขึ้น 50 เปอร์เซ็นต์
+Every third turn it hums instead of attacking and gets back 12 life.	ทุกตาที่สาม มันฮัมเพลงแทนการโจมตีและได้เลือดคืน 12
+LULLABY : Every third turn it hums instead of attacking and gets back 12 life.	LULLABY : ทุกตาที่สาม มันฮัมเพลงแทนการโจมตีและได้เลือดคืน 12
+One note of each attack hides its arrow behind a ? until late.	ทุกการโจมตีมีโน้ต 1 ตัวซ่อนลูกศรไว้หลัง ? จนเกือบถึง
+FALSE NOTES : One note of each attack hides its arrow behind a ? until late.	FALSE NOTES : ทุกการโจมตีมีโน้ต 1 ตัวซ่อนลูกศรไว้หลัง ? จนเกือบถึง
+A note you miss leaves the target MUTED for a turn.	โน้ตที่พลาดทำให้เป้าหมายโดน MUTED 1 ตา
+SILENT MOUTHS : A note you miss leaves the target MUTED for a turn.	SILENT MOUTHS : โน้ตที่พลาดทำให้เป้าหมายโดน MUTED 1 ตา
+One note more in every attack, and parrying it gives no BREATH.	ทุกการโจมตีมีโน้ตเพิ่ม 1 ตัว และการปัดไม่ได้ BREATH คืน
+NO REST : One note more in every attack, and parrying it gives no BREATH.	NO REST : ทุกการโจมตีมีโน้ตเพิ่ม 1 ตัว และการปัดไม่ได้ BREATH คืน
+Below half life it swaps left and right and plays faster.	เลือดต่ำกว่าครึ่ง มันสลับซ้ายขวาและเล่นเร็วขึ้น
+UNFINISHED : Below half life it swaps left and right and plays faster.	UNFINISHED : เลือดต่ำกว่าครึ่ง มันสลับซ้ายขวาและเล่นเร็วขึ้น
+Eight fast notes. Block all eight and the piece breaks off.	โน้ตเร็ว 8 ตัว ปัดได้ครบ 8 เพลงจะขาดกลางคัน
+THE PIECE BREAKS OFF	เพลงขาดกลางคัน
+It plays on, faster, the wrong way round.	มันเล่นต่อ เร็วขึ้น และกลับหัวกลับหาง
+It answers with the notes of the last skill your band played.	มันตอบโต้ด้วยโน้ตของสกิลล่าสุดที่วงเราเล่น
+ANSWER BETTER : It answers with the notes of the last skill your band played.	ANSWER BETTER : มันตอบโต้ด้วยโน้ตของสกิลล่าสุดที่วงเราเล่น
+It plays back every note of your last skills, under its own name.	มันเล่นทุกโน้ตจากสกิลล่าสุดของเรากลับมา ในชื่อของมันเอง
+THE NAME COMES BACK	ชื่อคืนกลับมา
+It signs your music with its own name.	มันเซ็นชื่อตัวเองลงบนเพลงของเรา
+Each of its attacks steals 1 BREATH.	ทุกการโจมตีของมันขโมย BREATH 1
+THE BARGAIN : Each of its attacks steals 1 BREATH.	THE BARGAIN : ทุกการโจมตีของมันขโมย BREATH 1
+Ten fast notes, all one way. Each one that gets through takes 1 BREATH.	โน้ตเร็ว 10 ตัว ไปทางเดียวกันหมด ตัวที่ปัดไม่ได้เอา BREATH ไปตัวละ 1
+Three strings snap. It plays on with one.	สายขาดสามเส้น มันเล่นต่อด้วยเส้นเดียว
+HOLDS THE ROOM : While it stands, the other enemies take 30 percent less.	HOLDS THE ROOM : ระหว่างที่มันยังยืนอยู่ ศัตรูตัวอื่นรับความเสียหายน้อยลง 30 เปอร์เซ็นต์
+ON CUE : It always strikes the musician who played the last skill.	ON CUE : มันตีนักดนตรีที่ใช้สกิลล่าสุดเสมอ
+FELT HAND : While it stands, an ATTACK gives 1 less BREATH.	FELT HAND : ระหว่างที่มันยังยืนอยู่ ATTACK ได้ BREATH น้อยลง 1
+TWICE A TURN : It cuts in twice a turn, after the 1st and the 3rd move, one note each time.	TWICE A TURN : มันแทรกสองครั้งต่อตา หลังท่าที่ 1 และท่าที่ 3 ครั้งละ 1 โน้ต
+FIRST IN LINE : It always strikes the musician who plays first in the turn.	FIRST IN LINE : มันตีนักดนตรีที่เล่นคนแรกของตาเสมอ
+DECREE : Each turn it bans SKILLS or ATTACKS, and breaking the ban hurts. It never takes a COUNTER.	DECREE : ทุกตามันห้ามใช้สกิลหรือ ATTACK ฝ่าฝืนแล้วเจ็บ และมันไม่โดน COUNTER
+It still cannot hear you. It only shouts louder.	มันยังไม่ได้ยินเรา มันแค่ตะโกนดังขึ้น
+THE COURT : While its court stands it takes half.	THE COURT : ระหว่างที่ข้าราชบริพารยังยืนอยู่ มันรับความเสียหายแค่ครึ่งเดียว
+The staff comes down on everyone, then the floor shakes. Block the blow and it strikes its own foot.	คทาฟาดลงใส่ทุกคน แล้วพื้นก็สั่น ปัดได้ มันจะฟาดโดนเท้าตัวเอง
+It beats the floor harder. The court bows.	มันกระแทกพื้นแรงขึ้น ข้าราชบริพารก้มคำนับ
+BY TOUCH : It strikes the seats in turn, front to back. A note you miss comes back in its next attack.	BY TOUCH : มันตีไล่ที่นั่งจากหน้าไปหลัง โน้ตที่พลาดจะกลับมาในการโจมตีครั้งถัดไป
+Five notes on everyone, every arrow hidden until the last moment.	โน้ต 5 ตัวใส่ทุกคน ลูกศรซ่อนไว้จนวินาทีสุดท้าย
+THE LIGHT COMES BACK	แสงกลับมาแล้ว
+The candles go out, one by one.	เทียนดับลงทีละเล่ม
+On a music stand in an empty hall, a metronome ticks out of time. Every few beats it skips, and the silence in the skip is a little too deep.	บนแท่นวางโน้ตในโรงที่ว่างเปล่า เมโทรนอมเดินผิดจังหวะ ทุกไม่กี่จังหวะมันจะข้ามไป และความเงียบตรงที่ข้ามนั้นลึกเกินไปหน่อย
+Try to repair it	ลองซ่อมดู
+It clicks back into time, and something small and bright falls out of its case.	มันกลับมาเดินตรงจังหวะ แล้วมีของชิ้นเล็กส่องประกายหล่นออกมาจากกล่อง
+It snaps at the fingers. The band gets hurt trying to hold the tempo.	มันงับนิ้ว วงบาดเจ็บตอนพยายามประคองจังหวะ
+Smash it and sell the brass	ทุบแล้วเอาทองเหลืองไปขาย
+The brass is worth something. The silence it leaves behind is not.	ทองเหลืองพอขายได้ราคา ส่วนความเงียบที่มันทิ้งไว้ไม่มีค่าอะไร
+Wind it by hand until it holds	ไขลานด้วยมือจนมันเดินนิ่ง
+It bites every hand that holds it. Then it ticks true, and something bright drops out of its case.	มันงับทุกมือที่จับมัน แล้วก็เดินตรงจังหวะ มีของส่องประกายหล่นออกมาจากกล่อง
+Someone plays alone for an audience that never comes. They look up when your band arrives, and for the first time tonight they smile.	ใครคนหนึ่งเล่นดนตรีอยู่คนเดียวให้ผู้ชมที่ไม่เคยมา เขาเงยหน้าขึ้นเมื่อวงของเรามาถึง และยิ้มเป็นครั้งแรกในคืนนี้
+Pay for a lesson	จ่ายค่าเรียน
+One old trick, played slowly. Your band will not forget it.	เทคนิคเก่าหนึ่งท่า เล่นให้ดูช้าๆ วงของเราจะไม่ลืม
+Play along with them	เล่นไปด้วยกัน
+The duet teaches your player something new.	การเล่นคู่สอนอะไรใหม่ๆ ให้นักดนตรีของเรา
+You fall out of step. It is tiring to be out of step.	เราหลุดจังหวะ การเล่นหลุดจังหวะมันเหนื่อย
+Play with them until dawn	เล่นกับเขาจนรุ่งเช้า
+By morning nobody can stand, and nobody has ever played better.	พอเช้า ไม่มีใครยืนไหว และไม่มีใครเคยเล่นได้ดีขนาดนี้มาก่อน
+Every seat is taken. Nobody moves, nobody coughs, nobody has a face. They are waiting for someone to play.	ที่นั่งเต็มทุกที่ ไม่มีใครขยับ ไม่มีใครไอ ไม่มีใครมีหน้า พวกเขากำลังรอให้ใครสักคนเล่น
+Perform for them	เล่นให้พวกเขาฟัง
+The hall does not clap. It leaves shards on the seats instead.	โรงไม่ปรบมือ แต่ทิ้ง SHARDS ไว้บนที่นั่งแทน
+The silence swallows every note. The band walks off drained.	ความเงียบกลืนทุกโน้ต วงเดินลงเวทีอย่างหมดแรง
+Bow, and leave quietly	โค้งคำนับ แล้วจากไปเงียบๆ
+A small rest in the dark does the band good.	พักสักหน่อยในความมืดก็ดีกับวง
+Play loud enough to wake them	เล่นให้ดังจนพวกเขาตื่น
+Every faceless head turns at once. This was never an audience.	หัวไร้หน้าทุกหัวหันมาพร้อมกัน นี่ไม่เคยเป็นผู้ชมเลย
+Sheets of music are scattered down a corridor, still wet with ink. Some bars have been scratched out so hard the paper tore.	แผ่นโน้ตกระจายเต็มทางเดิน หมึกยังไม่แห้ง บางห้องถูกขีดฆ่าแรงจนกระดาษขาด
+Gather every page	เก็บทุกหน้า
+Among the pages is a mark you can keep.	ในกองกระดาษมีเครื่องหมายที่เก็บไว้ได้
+Read the torn bars aloud	อ่านห้องที่ขาดออกเสียง
+The torn bars were the best part. Your player remembers them.	ห้องที่ขาดคือท่อนที่ดีที่สุด นักดนตรีของเราจำมันได้
+The notes make no sense, and trying costs something.	โน้ตอ่านไม่ออก และการพยายามก็มีราคาต้องจ่าย
+Face it	เผชิญหน้ากับมัน
+The echo takes a shape. It is stronger than it sounded.	เสียงสะท้อนกลายเป็นร่าง มันแข็งแกร่งกว่าที่ได้ยิน
+Slip past it	แอบผ่านไป
+You hold your breath all the way past it.	เรากลั้นหายใจตลอดทางที่ผ่านมันไป
+An old tea house, still open. The owner says musicians drink for free, as long as somebody plays something first.	ร้านน้ำชาเก่าที่ยังเปิดอยู่ เจ้าของบอกว่านักดนตรีดื่มฟรี ขอแค่มีใครเล่นอะไรสักเพลงก่อน
+Rest and drink	พักดื่มชา
+Warm tea, a quiet room. The band feels like itself again.	ชาอุ่นๆ ห้องเงียบๆ วงรู้สึกเป็นตัวเองอีกครั้ง
+Play the owner's favourite	เล่นเพลงโปรดของเจ้าของร้าน
+The owner hums along, then locks the door and lets you sleep. You wake up whole.	เจ้าของฮัมตาม แล้วล็อกประตูให้เรานอน ตื่นมาก็หายดีทุกคน
+Nobody listens. You pay for the tea after all.	ไม่มีใครฟัง สุดท้ายเราก็ต้องจ่ายค่าชา
+In the dark pit one chair still has its stand, and on the stand one part, a single line of music for an instrument your band does not have. The ink is wet. Someone was meant to play it tonight.	ในหลุมวงที่มืดมิด เก้าอี้ตัวหนึ่งยังมีแท่นวางโน้ต บนแท่นมีโน้ตหนึ่งแนว สำหรับเครื่องดนตรีที่วงเราไม่มี หมึกยังเปียก มีใครสักคนควรได้เล่นมันคืนนี้
+Find the one who plays it	ตามหาคนที่เล่นมัน
+A player steps out of the dark, plays the part once, and leaves something behind.	นักดนตรีคนหนึ่งก้าวออกมาจากความมืด เล่นท่อนนั้นครั้งเดียว แล้วทิ้งของบางอย่างไว้
+Play it yourselves	เล่นเอง
+The line is strange and beautiful. Your player keeps it.	ทำนองแปลกแต่งดงาม นักดนตรีของเราเก็บมันไว้
+The part is written for someone else. It fights every note.	โน้ตเขียนมาให้คนอื่น มันขัดขืนทุกโน้ต
+Wait in the dark for its player	รอคนเล่นในความมืด
+Something sits down in the chair. It is not who you were waiting for.	มีบางอย่างนั่งลงบนเก้าอี้ ไม่ใช่คนที่เรารอ
+Another band is playing your road, louder than you. Their leader points a bow at you and waits to see what you do.	อีกวงกำลังเล่นบนเส้นทางของเรา ดังกว่าเรา หัวหน้าวงชี้คันชักมาที่เราแล้วรอดูว่าเราจะทำอะไร
+Take the challenge	รับคำท้า
+They stop playing. Something under their music was never a band at all.	พวกเขาหยุดเล่น สิ่งที่อยู่ใต้เพลงของพวกเขาไม่เคยเป็นวงดนตรีเลย
+Pay them to play for you	จ้างให้เขาเล่นให้
+For once someone else does the work. The band sits and listens.	นานๆ ทีมีคนอื่นทำงานแทน วงได้นั่งฟังสบายๆ
+Walk the other way	เดินไปอีกทาง
+Their laughter follows you a little way down the road.	เสียงหัวเราะของพวกเขาตามมาอีกหน่อยตามทาง
+A tuning fork lies on the stones, still ringing, though nobody is near. The note it holds is almost the right one.	ส้อมเสียงวางอยู่บนก้อนหิน ยังสั่นดังอยู่ทั้งที่ไม่มีใครอยู่ใกล้ เสียงที่มันค้างไว้เกือบจะตรงเป๊ะ
+Strike it and listen	เคาะแล้วฟัง
+The note settles in your ear and stays there.	เสียงนั้นติดหูและอยู่ตรงนั้น
+It rings far too loud. Everyone flinches.	มันดังเกินไปมาก ทุกคนสะดุ้ง
+Pocket it to sell	เก็บใส่กระเป๋าไว้ขาย
+Good steel. Somebody will pay for it.	เหล็กดี ต้องมีคนจ่ายเงินซื้อแน่
+Tune the whole band to it	ตั้งเสียงทั้งวงตามมัน
+The note runs through every string and every player. It hurts, and then the whole band rings true.	เสียงนั้นวิ่งผ่านทุกสายและทุกคน เจ็บ แล้วทั้งวงก็เสียงตรงเป๊ะ
+An open case, and in it a bow with a long crack down the stick. It might hold for one more piece.	กล่องที่เปิดอยู่ ข้างในมีคันชักร้าวยาวตลอดก้าน อาจทนได้อีกสักเพลง
+Play it as it is	เล่นทั้งอย่างนั้น
+It holds. Playing it that lightly teaches something new.	มันทนไหว การเล่นเบามือขนาดนั้นสอนอะไรใหม่ๆ
+It snaps mid phrase and the whip of it stings.	มันหักกลางวลี แรงสะบัดของมันแสบมาก
+Sell the horsehair	ขายขนหางม้า
+Old horsehair, but good. A few shards for it.	ขนหางม้าเก่าแต่ดี ได้ SHARDS นิดหน่อย
+Close the case	ปิดกล่อง
+You leave it for whoever owned it.	เราปล่อยมันไว้ให้เจ้าของ
+QUANTZ heals 50 percent more.	QUANTZ ฮีลมากขึ้น 50 เปอร์เซ็นต์
+PFUNDT's skills fill STUN 50 percent more.	สกิลของ PFUNDT เติม STUN มากขึ้น 50 เปอร์เซ็นต์
+The first note of an attack parried PERFECT gives 1 more BREATH.	โน้ตแรกของการโจมตีที่ปัดได้ PERFECT ให้ BREATH เพิ่ม 1
+Every fight starts with 2 more BREATH.	ทุกไฟต์เริ่มด้วย BREATH เพิ่ม 2
+Skills that reach everyone are 25 percent stronger.	สกิลที่ไปถึงทุกคนแรงขึ้น 25 เปอร์เซ็นต์
+After a win, 15 percent more life comes back.	ชนะแล้ว เลือดคืนมากขึ้น 15 เปอร์เซ็นต์
+A skill note you MISS still plays, at 60 percent.	โน้ตสกิลที่ MISS ยังเล่นอยู่ ที่ 60 เปอร์เซ็นต์
+Every fight starts with 1 VOLUME on each musician.	ทุกไฟต์ นักดนตรีทุกคนเริ่มด้วย VOLUME 1
+The last note of a skill, PERFECT, hits 30 percent harder.	โน้ตสุดท้ายของสกิล ถ้า PERFECT แรงขึ้น 30 เปอร์เซ็นต์
+Once a fight, a musician who would fall stays up with 1 life.	ไฟต์ละครั้ง นักดนตรีที่กำลังจะล้มจะยืนอยู่ได้ด้วยเลือด 1
+The band's first hit of every fight is twice as hard.	การตีครั้งแรกของวงในทุกไฟต์แรงเป็นสองเท่า
+A COUNTER hits twice as hard.	COUNTER แรงเป็นสองเท่า
+Every shake in a roll counts twice.	ทุกการเขย่าในโน้ตรัวนับสองครั้ง
+A held note always counts as held to the end.	โน้ตค้างนับว่าค้างจนจบเสมอ
+A spark that lands does its skill twice.	โน้ตประกายที่โดนทำให้สกิลทำงานสองครั้ง
+An ATTACK fills STUN twice as much.	ATTACK เติม STUN เป็นสองเท่า
+The FINALE needs 4 PERFECTs instead of 6.	FINALE ใช้ PERFECT แค่ 4 ครั้งแทน 6
+Enemies under a quarter of their life take 50 percent more.	ศัตรูที่เลือดเหลือไม่ถึงหนึ่งในสี่ โดนแรงขึ้น 50 เปอร์เซ็นต์
+The first move of every turn is 50 percent stronger.	ท่าแรกของทุกตาแรงขึ้น 50 เปอร์เซ็นต์
+While QUANTZ stands, every musician heals 3 after every turn.	ระหว่างที่ QUANTZ ยังยืนอยู่ นักดนตรีทุกคนฟื้นเลือด 3 หลังจบทุกตา
+When every move of a turn is an ATTACK at one enemy, the last one hits twice as hard.	ถ้าทุกท่าในตาเป็น ATTACK ใส่ศัตรูตัวเดียว ท่าสุดท้ายแรงเป็นสองเท่า
+The last musician to play in a turn gets GUARD.	นักดนตรีคนสุดท้ายที่เล่นในตาได้ GUARD
+They say the devil taught those hands. Nobody asks twice.	ว่ากันว่าปีศาจสอนมือคู่นั้น ไม่มีใครกล้าถามซ้ำ
+THE KING'S FLUTE MASTER	ครูฟลุตของพระราชา
+Taught a king the flute. Three hundred concertos, one listener.	สอนพระราชาเป่าฟลุต แต่งคอนแชร์โตสามร้อยเพลง ผู้ฟังคนเดียว
+WHO TUNES THE THUNDER	ผู้ตั้งเสียงฟ้าร้อง
+One turn of the hand, and the thunder changes key.	หมุนมือครั้งเดียว ฟ้าร้องก็เปลี่ยนคีย์
+SCARRED BY AN EMPEROR	รอยแผลจากจักรพรรดิ
+An emperor once tried this cello and left a scar. It plays louder for it.	จักรพรรดิเคยลองเล่นเชลโลตัวนี้และทิ้งรอยแผลไว้ มันเลยเล่นดังขึ้นเพราะแผลนั้น
+Once more famous than Beethoven, and plays like nobody said otherwise.	เคยดังกว่าเบโทเฟน และเล่นราวกับไม่มีใครเคยบอกว่าไม่ใช่
+ATTACK adds 1 BURN.	ATTACK เพิ่ม BURN 1
+5 quick cuts. Each adds 1 BURN.	ฟันเร็ว 5 ครั้ง แต่ละครั้งเพิ่ม BURN 1
+5 quick cuts. Each adds 2 BURN.	ฟันเร็ว 5 ครั้ง แต่ละครั้งเพิ่ม BURN 2
+6 cuts, all one way. The last one x3.	ฟัน 6 ครั้ง ทางเดียวกันหมด ครั้งสุดท้าย x3
+6 cuts all one way, 2 BURN each. The last one x3.	ฟัน 6 ครั้ง ทางเดียวกันหมด ครั้งละ BURN 2 ครั้งสุดท้าย x3
+Also hits every enemy that has BURN.	โดนศัตรูทุกตัวที่มี BURN ด้วย
+One big held shot. Goes through ARMOR. Also hits every enemy with BURN.	ยิงค้างนัดใหญ่ 1 นัด ทะลุ ARMOR และโดนศัตรูทุกตัวที่มี BURN
+ATTACK heals the most hurt of the band 4.	ATTACK ฮีลคนที่เจ็บที่สุดในวง 4
+Heals the whole band 4 per note.	ฮีลทั้งวงโน้ตละ 4
+3 notes. Heals the whole band 4 per note.	3 โน้ต ฮีลทั้งวงโน้ตละ 4
+Also clears BURN and MUTED.	ล้าง BURN กับ MUTED ด้วย
+Heals the whole band 4 per note. Clears BURN and MUTED.	ฮีลทั้งวงโน้ตละ 4 ล้าง BURN กับ MUTED
+A friend gets FOCUS : their next skill x1.6.	เพื่อนได้ FOCUS : สกิลถัดไปของเขา x1.6
+Every friend gets FOCUS : their next skill x1.6.	เพื่อนทุกคนได้ FOCUS : สกิลถัดไปของเขา x1.6
+A friend taught plays their next move again, at half.	เพื่อนที่ได้รับการสอนเล่นท่าถัดไปซ้ำอีกครึ่งหนึ่ง
+Every friend gets FOCUS : their next skill x1.6, played again at half.	เพื่อนทุกคนได้ FOCUS : สกิลถัดไป x1.6 และเล่นซ้ำอีกครึ่งหนึ่ง
+ATTACK hits twice.	ATTACK ตีสองครั้ง
+Shake fast. +40 STUN. Breaks a CHARGE.	เขย่าเร็วๆ +40 STUN ทำลาย CHARGE
+Shake fast. +40 STUN on every enemy. Breaks a CHARGE.	เขย่าเร็วๆ +40 STUN ใส่ศัตรูทุกตัว ทำลาย CHARGE
+PERFECT : the first enemy is STUNNED at once.	PERFECT : ศัตรูตัวแรก STUNNED ทันที
+Every enemy, +40 STUN. PERFECT : the first one is STUNNED at once.	ศัตรูทุกตัว +40 STUN  PERFECT : ตัวแรก STUNNED ทันที
+Every enemy aims at PFUNDT, who gets GUARD. Their next attacks lose 1 note.	ศัตรูทุกตัวเล็งไปที่ PFUNDT ซึ่งได้ GUARD การโจมตีครั้งถัดไปของพวกมันโน้ตหายไป 1 ตัว
+Every enemy aims at PFUNDT, who takes only a third. Their next attacks lose 1 note.	ศัตรูทุกตัวเล็งไปที่ PFUNDT ซึ่งรับแค่หนึ่งในสาม การโจมตีครั้งถัดไปของพวกมันโน้ตหายไป 1 ตัว
+Every enemy's next attack loses 2 notes.	การโจมตีครั้งถัดไปของศัตรูทุกตัวโน้ตหายไป 2 ตัว
+Every enemy aims at PFUNDT, who takes only a third. Their next attacks lose 2 notes.	ศัตรูทุกตัวเล็งไปที่ PFUNDT ซึ่งรับแค่หนึ่งในสาม การโจมตีครั้งถัดไปของพวกมันโน้ตหายไป 2 ตัว
+ATTACK gives DUPORT GUARD : half damage.	ATTACK ให้ DUPORT ได้ GUARD : รับแค่ครึ่ง
+Protect a friend : their hits land on DUPORT, a third.	ปกป้องเพื่อน : การโจมตีที่เพื่อนโดนมาลงที่ DUPORT รับแค่หนึ่งในสาม
+Protect every friend : their hits land on DUPORT, a third.	ปกป้องเพื่อนทุกคน : การโจมตีมาลงที่ DUPORT รับแค่หนึ่งในสาม
+A blow taken for a friend hits back as hard.	การโจมตีที่รับแทนเพื่อนจะสวนกลับแรงเท่ากัน
+Protect every friend, take a third. Every blow taken hits back.	ปกป้องเพื่อนทุกคน รับแค่หนึ่งในสาม ทุกการโจมตีที่รับแทนจะสวนกลับ
+x2 AFTER A HIT	x2 หลังโดนตี
+x3 AFTER A HIT	x3 หลังโดนตี
+2 thrusts. x3 if DUPORT was just hit.	แทง 2 ครั้ง x3 ถ้า DUPORT เพิ่งโดนตี
+3 thrusts. x3 if DUPORT was just hit.	แทง 3 ครั้ง x3 ถ้า DUPORT เพิ่งโดนตี
+Always x3, hit or not.	x3 เสมอ จะโดนตีหรือไม่ก็ตาม
+3 thrusts. Always x3.	แทง 3 ครั้ง x3 เสมอ
+ATTACK hits the next enemy too.	ATTACK โดนศัตรูตัวถัดไปด้วย
+Every musician gets 2 VOLUME per note.	นักดนตรีทุกคนได้ VOLUME 2 ต่อโน้ต
+AFTER PUNTO x1.3	หลัง PUNTO x1.3
+AFTER PUNTO x1.5	หลัง PUNTO x1.5
+After FANFARE, everyone after PUNTO in the turn hits x1.5.	หลัง FANFARE ทุกคนที่เล่นหลัง PUNTO ในตานั้นตี x1.5
+Every musician gets 2 VOLUME per note. Everyone after PUNTO hits x1.5.	นักดนตรีทุกคนได้ VOLUME 2 ต่อโน้ต ทุกคนที่เล่นหลัง PUNTO ตี x1.5
+4 throws, a new enemy each. Hit again = half.	ขว้าง 4 ครั้ง เปลี่ยนเป้าทุกครั้ง โดนตัวเดิมซ้ำ = ครึ่งเดียว
+4 throws, a new enemy each. Hit again = whole.	ขว้าง 4 ครั้ง เปลี่ยนเป้าทุกครั้ง โดนตัวเดิมซ้ำ = เต็ม
+The last throw hits every enemy.	การขว้างครั้งสุดท้ายโดนศัตรูทุกตัว
+4 throws, a new enemy each. The last one hits every enemy.	ขว้าง 4 ครั้ง เปลี่ยนเป้าทุกครั้ง ครั้งสุดท้ายโดนศัตรูทุกตัว
+A fight with TACET. Win it for a star, and shards.	ไฟต์กับ TACET ชนะแล้วได้ดาวกับ SHARDS
+Something is waiting here. A person, a gift, or a fight.	มีบางอย่างรออยู่ที่นี่ อาจเป็นคน ของ หรือไฟต์
+Spend shards to make the whole band stronger.	ใช้ SHARDS ทำให้ทั้งวงเก่งขึ้น
+Harder than it looks. A gift to choose, a star, and more shards.	ยากกว่าที่เห็น ได้เลือก GIFT ได้ดาว และ SHARDS มากกว่า
+Heal up, or rehearse one move for a star. The band chooses one.	ฟื้นเลือด หรือซ้อมท่าหนึ่งให้ได้ดาว วงเลือกได้อย่างเดียว
+The last room of this floor. It has been waiting for you.	ห้องสุดท้ายของชั้นนี้ มันรอเราอยู่
+A door out of this era. The world changes around you.	ประตูออกจากยุคนี้ โลกรอบตัวเปลี่ยนไป
+An instrument maker. One ATTACK gets a star, free.	ช่างทำเครื่องดนตรี ATTACK หนึ่งท่าได้ดาวฟรี
+A chest left in the wings. One gift inside, free.	หีบที่ถูกทิ้งไว้หลังเวที ข้างในมี GIFT 1 ชิ้น ฟรี
+4 quick cuts. Each adds 1 BURN.	ฟันเร็ว 4 ครั้ง แต่ละครั้งเพิ่ม BURN 1
+One big held shot. Hold it = harder. Goes through ARMOR.	ยิงค้างนัดใหญ่ 1 นัด ค้างไว้ = แรงขึ้น ทะลุ ARMOR
+Heals the whole band 3 per note.	ฮีลทั้งวงโน้ตละ 3
+A friend gets FOCUS for their next skill.	เพื่อนได้ FOCUS สำหรับสกิลถัดไป
+Shake fast. Big STUN. Breaks a CHARGE.	เขย่าเร็วๆ STUN เยอะ ทำลาย CHARGE
+Every enemy aims at PFUNDT, who gets GUARD.	ศัตรูทุกตัวเล็งไปที่ PFUNDT ซึ่งได้ GUARD
+A hit and a spark. Each adds 1 BURN.	ตี 1 ครั้งกับประกาย 1 ครั้ง แต่ละครั้งเพิ่ม BURN 1
+4 notes up and down. Each adds 1 BURN.	4 โน้ตขึ้นลง แต่ละตัวเพิ่ม BURN 1
+Heals one musician. Hold it = more.	ฮีลนักดนตรี 1 คน ค้างไว้ = มากขึ้น
+Shake fast. Heals everyone 3, 3 BREATH back.	เขย่าเร็วๆ ฮีลทุกคน 3 ได้ BREATH คืน 3
+3 big hits. Each adds STUN.	ตีหนัก 3 ครั้ง แต่ละครั้งเพิ่ม STUN
+A big hit and a spark. Each adds STUN.	ตีหนัก 1 ครั้งกับประกาย 1 ครั้ง แต่ละครั้งเพิ่ม STUN
+Protect a friend : their hits land on DUPORT, halved.	ปกป้องเพื่อน : การโจมตีที่เพื่อนโดนมาลงที่ DUPORT รับแค่ครึ่ง
+2 thrusts. Twice as hard if DUPORT was just hit.	แทง 2 ครั้ง แรงเป็นสองเท่าถ้า DUPORT เพิ่งโดนตี
+Every musician gets 1 VOLUME per note.	นักดนตรีทุกคนได้ VOLUME 1 ต่อโน้ต
+3 throws, a new enemy each. Hit again = half.	ขว้าง 3 ครั้ง เปลี่ยนเป้าทุกครั้ง โดนตัวเดิมซ้ำ = ครึ่งเดียว
+Hits every enemy. Hold it = harder.	โดนศัตรูทุกตัว ค้างไว้ = แรงขึ้น
+2 big hits and a roll. Big STUN.	ตีหนัก 2 ครั้งกับโน้ตรัว STUN เยอะ
+loses this much life at the end of its turn, then 1 less	เสียเลือดเท่านี้ตอนจบตาของมัน แล้วลดลงทีละ 1
+every point hits 15 percent harder. A MISS loses it all	ทุกแต้มตีแรงขึ้น 15 เปอร์เซ็นต์ โดน MISS แล้วหายหมด
+fills the bar under its life. Full, it is STUNNED	เติมแถบใต้เลือดของมัน เต็มเมื่อไหร่ มันจะ STUNNED
+it loses its next turn and takes 50 percent more damage	เสียตาถัดไป และโดนแรงขึ้น 50 เปอร์เซ็นต์
+no skills for this many turns. ATTACK still works	ใช้สกิลไม่ได้ตามจำนวนตานี้ ATTACK ยังใช้ได้
+takes half of every hit until their next turn	รับความเสียหายแค่ครึ่งเดียวจนถึงตาถัดไปของเขา
+takes the band's damage before its life. IL CANNONE goes through	รับความเสียหายจากวงก่อนเลือด IL CANNONE ทะลุได้
+this turn it gains this much ARMOR and does not attack	ตานี้มันได้ ARMOR เท่านี้ และไม่โจมตี
+their next skill is easier to swipe and hits harder	สกิลถัดไปของเขาตวัดง่ายขึ้นและแรงขึ้น
+DUPORT stands in front and takes their hits	DUPORT ยืนบังข้างหน้าและรับการโจมตีแทน
+their next move plays again	ท่าถัดไปของเขาเล่นซ้ำอีกครั้ง
+its notes hit the marked musician. Swipe back to block them	โน้ตของมันพุ่งใส่นักดนตรีที่ถูกเล็ง ตวัดกลับเพื่อปัด
+next turn one big note. STUN it or hit it with TIMPANI ROLL to break it	ตาหน้ามาโน้ตใหญ่ 1 ตัว ทำให้ STUN หรือตีด้วย TIMPANI ROLL เพื่อทำลาย
+its CHARGE was broken, the big note will not come	CHARGE ของมันพังแล้ว โน้ตใหญ่จะไม่มา
+it moves in the middle of your turn	มันแทรกเข้ามากลางตาของเรา
+this turn it heals instead of attacking	ตานี้มันฟื้นเลือดแทนการโจมตี
+its notes hit every musician standing	โน้ตของมันโดนนักดนตรีทุกคนที่ยังยืนอยู่
+the boss's own big move. Block every note and it is STUNNED	ท่าใหญ่ของบอส ปัดได้ทุกโน้ต มันจะ STUNNED
+the conductor's big move. PERFECTs fill the diamonds, SPACE plays it. It breaks every CHARGE and gives FORTE	ท่าใหญ่ของวาทยากร PERFECT เติมเพชร กด SPACE เพื่อใช้ ทำลายทุก CHARGE และให้ FORTE
+comes right after the note before it. Swipe its arrow, fast	มาติดๆ หลังโน้ตตัวก่อน ตวัดตามลูกศรให้ไว
+5 PERFECTs in a row by one musician. Their next move is bigger	นักดนตรีคนเดียวได้ PERFECT ติดกัน 5 ครั้ง ท่าถัดไปของเขาจะแรงขึ้น
+after a FINALE the band hits 25 percent harder this TURN	หลัง FINALE วงตีแรงขึ้น 25 เปอร์เซ็นต์ใน TURN นี้
+PERFECTs in a row. Every 10 make the band hit 5 percent harder	PERFECT ติดกัน ทุก 10 ครั้งวงตีแรงขึ้น 5 เปอร์เซ็นต์
+=  loses this much life at the end of its turn, then 1 less	=  เสียเลือดเท่านี้ตอนจบตาของมัน แล้วลดลงทีละ 1
+=  every point hits 15 percent harder. A MISS loses it all	=  ทุกแต้มตีแรงขึ้น 15 เปอร์เซ็นต์ โดน MISS แล้วหายหมด
+=  it loses its next turn and takes 50 percent more damage	=  เสียตาถัดไป และโดนแรงขึ้น 50 เปอร์เซ็นต์
+=  fills the bar under its life. Full, it is STUNNED	=  เติมแถบใต้เลือดของมัน เต็มเมื่อไหร่ มันจะ STUNNED
+=  no skills for this many turns. ATTACK still works	=  ใช้สกิลไม่ได้ตามจำนวนตานี้ ATTACK ยังใช้ได้
+=  takes half of every hit until their next turn	=  รับความเสียหายแค่ครึ่งเดียวจนถึงตาถัดไปของเขา
+=  takes the band's damage before its life. IL CANNONE goes through	=  รับความเสียหายจากวงก่อนเลือด IL CANNONE ทะลุได้
+=  their next skill is easier to swipe and hits harder	=  สกิลถัดไปของเขาตวัดง่ายขึ้นและแรงขึ้น
+=  DUPORT stands in front and takes their hits	=  DUPORT ยืนบังข้างหน้าและรับการโจมตีแทน
+=  their next move plays again	=  ท่าถัดไปของเขาเล่นซ้ำอีกครั้ง
+=  next turn one big note. STUN it or hit it with TIMPANI ROLL to break it	=  ตาหน้ามาโน้ตใหญ่ 1 ตัว ทำให้ STUN หรือตีด้วย TIMPANI ROLL เพื่อทำลาย
+BURN  =  loses this much life at the end of its turn, then 1 less	BURN  =  เสียเลือดเท่านี้ตอนจบตาของมัน แล้วลดลงทีละ 1
+VOLUME  =  every point hits 15 percent harder. A MISS loses it all	VOLUME  =  ทุกแต้มตีแรงขึ้น 15 เปอร์เซ็นต์ โดน MISS แล้วหายหมด
+STUNNED  =  it loses its next turn and takes 50 percent more damage	STUNNED  =  เสียตาถัดไป และโดนแรงขึ้น 50 เปอร์เซ็นต์
+STUN  =  fills the bar under its life. Full, it is STUNNED	STUN  =  เติมแถบใต้เลือดของมัน เต็มเมื่อไหร่ มันจะ STUNNED
+MUTED  =  no skills for this many turns. ATTACK still works	MUTED  =  ใช้สกิลไม่ได้ตามจำนวนตานี้ ATTACK ยังใช้ได้
+GUARD  =  takes half of every hit until their next turn	GUARD  =  รับความเสียหายแค่ครึ่งเดียวจนถึงตาถัดไปของเขา
+ARMOR  =  takes the band's damage before its life. IL CANNONE goes through	ARMOR  =  รับความเสียหายจากวงก่อนเลือด IL CANNONE ทะลุได้
+FOCUS  =  their next skill is easier to swipe and hits harder	FOCUS  =  สกิลถัดไปของเขาตวัดง่ายขึ้นและแรงขึ้น
+SHIELD  =  DUPORT stands in front and takes their hits	SHIELD  =  DUPORT ยืนบังข้างหน้าและรับการโจมตีแทน
+ECHO  =  their next move plays again	ECHO  =  ท่าถัดไปของเขาเล่นซ้ำอีกครั้ง
+CHARGE  =  next turn one big note. STUN it or hit it with TIMPANI ROLL to break it	CHARGE  =  ตาหน้ามาโน้ตใหญ่ 1 ตัว ทำให้ STUN หรือตีด้วย TIMPANI ROLL เพื่อทำลาย
+4 swipes : FANNY strikes every enemy while ??? heals every musician. Grows at each boss.	ตวัด 4 ครั้ง : FANNY ตีศัตรูทุกตัว ขณะที่ ??? ฮีลนักดนตรีทุกคน เก่งขึ้นทุกครั้งที่ชนะบอส
+4 swipes : every musician gets ECHO, their next move plays again. Better swipes, stronger ECHO. Grows at each boss.	ตวัด 4 ครั้ง : นักดนตรีทุกคนได้ ECHO ท่าถัดไปเล่นซ้ำอีกครั้ง ตวัดดี ECHO ยิ่งแรง เก่งขึ้นทุกครั้งที่ชนะบอส
+4 swipes : life back for every musician, and BURN and MUTED are gone. Better swipes, more life.	ตวัด 4 ครั้ง : นักดนตรีทุกคนได้เลือดคืน และ BURN กับ MUTED หายไป ตวัดดี ได้เลือดมากขึ้น
+4 swipes : strikes every enemy and fills its STUN bar. Better swipes, bigger strike. Grows at each boss.	ตวัด 4 ครั้ง : ฟาดศัตรูทุกตัวและเติมแถบ STUN ตวัดดี ฟาดแรงขึ้น เก่งขึ้นทุกครั้งที่ชนะบอส
+A MISS takes only half of a musician's VOLUME.	MISS เอา VOLUME ของนักดนตรีไปแค่ครึ่งเดียว
+A fight that is easier to read : bigger numbers, a solid plate behind every name and attack, each attack says who it is for, and the rest goes darker while you swing. The rules stay the same. Turn it on and off to compare.	ไฟต์ที่อ่านง่ายขึ้น : ตัวเลขใหญ่ขึ้น มีแผ่นทึบหลังทุกชื่อและการโจมตี การโจมตีบอกว่าใส่ใคร และส่วนอื่นมืดลงตอนตวัด กติกาเหมือนเดิม ลองเปิดปิดเทียบดู
+A musician healed to full gets GUARD until their next turn.	นักดนตรีที่ถูกฮีลจนเต็มได้ GUARD จนถึงตาถัดไปของเขา
+A skill short of BREATH can still be played. Each missing BREATH costs 6 life.	สกิลที่ BREATH ไม่พอยังใช้ได้ BREATH ที่ขาดแต่ละแต้มเสียเลือด 6
+ARROW : SWING THAT WAY	ลูกศร : ตวัดไปทางนั้น
+ARROWS  CHOOSE   /   ENTER  GO	ลูกศร  เลือก   /   ENTER  ไป
+ARROWS  CHOOSE   /   ENTER OR 1 TO 6  BUY	ลูกศร  เลือก   /   ENTER หรือ 1 ถึง 6  ซื้อ
+ARROWS OR MOUSE  /  ENTER TO CONFIRM  /  ESC TO QUIT	ลูกศรหรือเมาส์  /  ENTER ยืนยัน  /  ESC ออก
+An enemy that gets STUNNED loses 10 percent of its life at once.	ศัตรูที่โดน STUNNED เสียเลือด 10 เปอร์เซ็นต์ทันที
+An enemy their skill hits plays 1 note fewer next time (2 at least).	ศัตรูที่โดนสกิลของเขาจะเล่นโน้ตน้อยลง 1 ตัวในครั้งถัดไป (อย่างน้อย 2)
+Answers whatever she hears, faster and one step better.	ตอบทุกเสียงที่ได้ยิน เร็วกว่าและดีกว่าหนึ่งขั้น
+At 9 BURN an enemy bursts : 27 damage, then its BURN is gone.	BURN ถึง 9 ศัตรูจะระเบิด : ความเสียหาย 27 แล้ว BURN หายไป
+At full VOLUME a musician's next hit is twice as hard, then their VOLUME is gone.	VOLUME เต็ม การตีครั้งถัดไปของนักดนตรีแรงเป็นสองเท่า แล้ว VOLUME หายไป
+BREATH  :  SKILLS SPEND IT, HITS GIVE IT BACK	BREATH  :  สกิลใช้ การตีได้คืน
+Blocking TACET's notes is easier : both windows are wider.	ปัดโน้ตของ TACET ง่ายขึ้น : ช่วงจังหวะทั้งสองกว้างขึ้น
+Button clicks, baton strokes, and every hit in a fight.	เสียงปุ่ม เสียงตวัดไม้ และทุกการตีในไฟต์
+CLICK = PICK OR PUT BACK	คลิก = เลือกหรือเอาออก
+CLICK A MOVE   /   IT COUNTS FROM THE NEXT FIGHT	คลิกท่า   /   มีผลตั้งแต่ไฟต์ถัดไป
+CLICK A MUSICIAN   /   FREE, ONE WEAPON PER VISIT	คลิกนักดนตรี   /   ฟรี มาครั้งละหนึ่งอาวุธ
+CLICK A PAINTING TO STEP INSIDE	คลิกภาพเพื่อเข้าไปดู
+CLICK A WARE TO BUY IT	คลิกของเพื่อซื้อ
+CLICK AN ENEMY   /   RIGHT CLICK = BACK	คลิกศัตรู   /   คลิกขวา = ย้อนกลับ
+CLICK OR ENTER TO GO	คลิกหรือ ENTER เพื่อไป
+Can hold one note longer than anyone thinks is possible.	ลากโน้ตเดียวได้นานกว่าที่ใครจะคิดว่าเป็นไปได้
+Choose a gift	เลือก GIFT
+Choose a great upgrade	เลือกการอัปเกรดครั้งใหญ่
+Choose your band of three	เลือกวงสามคนของคุณ
+DRAG = CHANGE THE ORDER   /   THE FIRST ONE STANDS IN FRONT	ลาก = เปลี่ยนลำดับ   /   คนแรกยืนหน้าสุด
+DUPORT takes 2 less from every enemy note, 1 at least.	DUPORT รับความเสียหายจากโน้ตศัตรูน้อยลงตัวละ 2 (อย่างน้อย 1)
+DUPORT's LANCE hits every enemy.	LANCE ของ DUPORT โดนศัตรูทุกตัว
+Damage left over when an enemy falls silent goes on to the next one.	ความเสียหายที่เหลือตอนศัตรูล้ม ไปต่อที่ตัวถัดไป
+ESC OR RIGHT CLICK TO STOP	ESC หรือคลิกขวาเพื่อหยุด
+EVERY RUN EARNS APPLAUSE	ทุกรันได้ APPLAUSE
+Each musician's first move of a fight is twice as strong.	ท่าแรกในไฟต์ของนักดนตรีแต่ละคนแรงเป็นสองเท่า
+Each turn it bans SKILLS or ATTACKS, and breaking the ban hurts. It never takes a COUNTER.	ทุกตามันห้ามใช้สกิลหรือ ATTACK ฝ่าฝืนแล้วเจ็บ และมันไม่โดน COUNTER
+Every ATTACK of the band gets a star : more power for the whole band.	ATTACK ของทุกคนในวงได้ดาว : ทั้งวงแรงขึ้น
+Every hit on an enemy with BURN adds 1 more BURN.	ทุกการตีใส่ศัตรูที่มี BURN เพิ่ม BURN อีก 1
+Everyone plays every fight, the first one in front.	ทุกคนลงทุกไฟต์ คนแรกยืนหน้าสุด
+FOCUS : NEXT SKILL x1.3	FOCUS : สกิลถัดไป x1.3
+Fills the whole monitor without changing its resolution, so other programs are left where they are and alt tab is instant. The picture keeps its shape and black bars fill whatever is left over.	เต็มจอโดยไม่เปลี่ยนความละเอียดของจอ โปรแกรมอื่นอยู่ที่เดิม สลับหน้าต่างได้ทันที ภาพคงสัดส่วน ที่เหลือเป็นแถบดำ
+HITS GO TO QUANTZ	การโจมตีไปที่ QUANTZ
+Hits 30 percent harder against an enemy whose next attack has 3 notes or more.	ตีแรงขึ้น 30 เปอร์เซ็นต์ใส่ศัตรูที่การโจมตีถัดไปมี 3 โน้ตขึ้นไป
+Hits 50 percent harder against an enemy that is STUNNED.	ตีแรงขึ้น 50 เปอร์เซ็นต์ใส่ศัตรูที่ STUNNED
+Hold the left button and stroke the baton, any way, on every flash. The first two strokes are practice.	กดเมาส์ซ้ายค้างแล้วตวัดไปทางไหนก็ได้ทุกครั้งที่แสงวาบ สองครั้งแรกเป็นการซ้อม
+IN THE DARK : Five notes on everyone, every arrow hidden until the last moment.	IN THE DARK : โน้ต 5 ตัวใส่ทุกคน ลูกศรซ่อนไว้จนวินาทีสุดท้าย
+ITALIEN : It plays back every note of your last skills, under its own name.	ITALIEN : มันเล่นทุกโน้ตจากสกิลล่าสุดของเรากลับมา ในชื่อของมันเอง
+If your strokes feel on time but the game calls them late, move this to the right. Early, to the left. Press ENTER or TEST and the game measures it for you.	ถ้ารู้สึกว่าตวัดตรงจังหวะแต่เกมบอกว่าช้า เลื่อนไปทางขวา ถ้าบอกว่าเร็ว เลื่อนไปทางซ้าย กด ENTER หรือ TEST แล้วเกมจะวัดให้
+It always strikes the musician who played the last skill.	มันตีนักดนตรีที่ใช้สกิลล่าสุดเสมอ
+It always strikes the musician who plays first in the turn.	มันตีนักดนตรีที่เล่นคนแรกของตาเสมอ
+It cuts in twice a turn, after the 1st and the 3rd move, one note each time.	มันแทรกสองครั้งต่อตา หลังท่าที่ 1 และท่าที่ 3 ครั้งละ 1 โน้ต
+It gets a star. Three stars make it a legend.	ท่านี้ได้ดาว ครบ 3 ดาวกลายเป็นร่างในตำนาน
+It stays with the band until the run ends. The icon shows who it is for.	อยู่กับวงจนจบรัน ไอคอนบอกว่าทำมาเพื่อใคร
+It strikes the seats in turn, front to back. A note you miss comes back in its next attack.	มันตีไล่ที่นั่งจากหน้าไปหลัง โน้ตที่พลาดจะกลับมาในการโจมตีครั้งถัดไป
+LACRIMOSA : Eight fast notes. Block all eight and the piece breaks off.	LACRIMOSA : โน้ตเร็ว 8 ตัว ปัดได้ครบ 8 เพลงจะขาดกลางคัน
+LEFT RIGHT  TURN THE PAGE   /   ESC  BACK	ซ้าย ขวา  พลิกหน้า   /   ESC  ย้อนกลับ
+Learned by ear in a courtyard and has never read a page.	หัดด้วยหูในลานบ้าน ไม่เคยอ่านโน้ตเลยสักหน้า
+Music master to the Sun King. He beat time with a heavy staff, struck his own foot with it, and the wound killed him. His Hollow has no legs and leans on that staff.	ครูดนตรีของราชาแห่งดวงอาทิตย์ เขาเคาะจังหวะด้วยคทาหนัก ฟาดโดนเท้าตัวเองจนแผลคร่าชีวิต ร่างกลวงของเขาไม่มีขาและพิงคทาไว้
+Name your ensemble	ตั้งชื่อวงของคุณ
+ON ONE STRING : Ten fast notes, all one way. Each one that gets through takes 1 BREATH.	ON ONE STRING : โน้ตเร็ว 10 ตัว ไปทางเดียวกันหมด ตัวที่ปัดไม่ได้เอา BREATH ไปตัวละ 1
+One hit from him and the whole floor knows about it.	ตีทีเดียว ทั้งชั้นก็รู้กันหมด
+One weapon, made sharper	อาวุธหนึ่งชิ้น ลับให้คมขึ้น
+Options are saved the moment you leave this page, and come back the next time the game starts.	ตั้งค่าจะถูกบันทึกทันทีที่ออกจากหน้านี้ และกลับมาเหมือนเดิมเมื่อเปิดเกมครั้งหน้า
+PAGANINI's skills cost 4 life and hit 30 percent harder.	สกิลของ PAGANINI ใช้เลือด 4 และแรงขึ้น 30 เปอร์เซ็นต์
+PERFECT HITS AND BLOCKS FILL IT	การตีและการปัดแบบ PERFECT เติมมัน
+PFUNDT's skills take 2 notes off an enemy's next attack, down to 1.	สกิลของ PFUNDT ลดโน้ตในการโจมตีถัดไปของศัตรู 2 ตัว (เหลืออย่างน้อย 1)
+Pay for a real bed. The band gets back all of its life.	จ่ายค่าเตียงจริงๆ วงได้เลือดคืนทั้งหมด
+Point at a column to read it. Drag one to change the order.	ชี้เสาเพื่ออ่าน ลากเพื่อเปลี่ยนลำดับ
+Practise until it sings. One move of the band gets a star, as after a fight won.	ซ้อมจนมันร้องเพลงได้ ท่าหนึ่งของวงได้ดาว เหมือนตอนชนะไฟต์
+Rehearse one move	ซ้อมหนึ่งท่า
+Rehearse two moves	ซ้อมสองท่า
+SELECT ONE TO BEGIN	เลือกหนึ่งคนเพื่อเริ่ม
+SWING ON THE RING	ตวัดตรงวงแหวน
+Short of BREATH, their skills take 6 life for each BREATH missing.	ถ้า BREATH ไม่พอ สกิลของเขาใช้เลือด 6 ต่อ BREATH ที่ขาด
+Sit down, close your eyes. The band gets back 40 percent of its life.	นั่งลง หลับตา วงได้เลือดคืน 40 เปอร์เซ็นต์
+THE BAND FELL  -  THE RUN ENDS HERE	วงล้มแล้ว  -  รันจบตรงนี้
+THE CLOSER THE LOUDER : The less life the band has left, the harder it hits, up to 50 percent.	THE CLOSER THE LOUDER : วงเหลือเลือดน้อยเท่าไหร่ ยิ่งตีแรงขึ้น สูงสุด 50 เปอร์เซ็นต์
+THEIR HITS ON QUANTZ x0.5	การโจมตีที่ QUANTZ โดน x0.5
+TYPE A NAME   /   BACKSPACE TO DELETE   /   ENTER TO CONFIRM	พิมพ์ชื่อ   /   BACKSPACE ลบ   /   ENTER ยืนยัน
+Take what is inside	เอาของข้างใน
+The PERFECT and GOOD timing windows are wider.	ช่วงจังหวะ PERFECT กับ GOOD กว้างขึ้น
+The PERFECT last note of his skills takes 2 off each note of the enemy's next attack.	โน้ตสุดท้ายของสกิลเขาถ้า PERFECT ลดความแรงทุกโน้ตในการโจมตีถัดไปของศัตรูลง 2
+The dark ahead repeats your footsteps half a beat late. It is waiting for you to play first. It will not wait forever.	ความมืดข้างหน้าเลียนเสียงฝีเท้าของเราช้าไปครึ่งจังหวะ มันรอให้เราเล่นก่อน และมันจะไม่รอตลอดไป
+The fight's camera shakes with every big blow. Off stops the shaking only, the camera still moves in on the action.	กล้องในไฟต์สั่นทุกครั้งที่ตีหนัก ปิดแล้วหยุดแค่การสั่น กล้องยังขยับเข้าหาฉากต่อสู้
+The first MISS of every fight counts as GOOD.	MISS ครั้งแรกของทุกไฟต์นับเป็น GOOD
+The first note of every skill is twice as strong.	โน้ตแรกของทุกสกิลแรงเป็นสองเท่า
+The last silence is broken. The music goes on.	ความเงียบสุดท้ายแตกสลาย ดนตรีเล่นต่อไป
+The less life the band has left, the harder it hits, up to 50 percent.	วงเหลือเลือดน้อยเท่าไหร่ ยิ่งตีแรงขึ้น สูงสุด 50 เปอร์เซ็นต์
+The main fader. Every sound in the game is measured against this one.	ตัวปรับเสียงหลัก ทุกเสียงในเกมอิงจากตัวนี้
+The music stopped here. It can always start again.	ดนตรีหยุดตรงนี้ แต่เริ่มใหม่ได้เสมอ
+The musician who plays right after them in the turn hits harder.	นักดนตรีที่เล่นต่อจากเขาในตานั้นตีแรงขึ้น
+The track playing behind the page you are on.	เพลงที่เล่นอยู่หลังหน้าที่คุณเปิดอยู่
+The voices take turns, one musician each : FANNY hits 25 percent harder, ??? heals 50 percent more.	สองเสียงผลัดกัน คนละหนึ่งนักดนตรี : FANNY ตีแรงขึ้น 25 เปอร์เซ็นต์ ??? ฮีลมากขึ้น 50 เปอร์เซ็นต์
+There is time for one thing before moving on.	มีเวลาทำได้อย่างเดียวก่อนไปต่อ
+This is what the world will call you.	นี่คือชื่อที่โลกจะเรียกคุณ
+Turns down the white flashes and the shaking of big hits, and leaves out the frame where the picture turns black and white. For anyone who finds flashing light hard to look at.	ลดแสงวาบสีขาวกับการสั่นของการตีหนัก และตัดเฟรมที่ภาพกลายเป็นขาวดำ สำหรับคนที่ดูแสงกะพริบแล้วไม่สบายตา
+UP DOWN  CHOOSE   /   LEFT RIGHT  CHANGE   /   DRAG THE SLIDERS	ขึ้น ลง  เลือก   /   ซ้าย ขวา  เปลี่ยน   /   ลากแถบเลื่อนได้
+WHAT DO YOU DO	คุณจะทำอะไร
+WHO PLAYS IN WHAT ORDER, AND HOW SHARP THEIR WEAPONS ARE	ใครเล่นลำดับไหน และอาวุธคมแค่ไหน
+When THE SCAR gives DUPORT VOLUME, the whole band gets it too.	เมื่อ THE SCAR ให้ VOLUME กับ DUPORT ทั้งวงได้ด้วย
+Which language the game is written in. Leave this page and the game starts again in it (in the pause menu, the next time the game starts).	ภาษาของเกม ออกจากหน้านี้แล้วเกมจะเปิดใหม่เป็นภาษานั้น (ถ้าเปลี่ยนในเมนูพัก จะมีผลตอนเปิดเกมครั้งหน้า)
+While it stands, an ATTACK gives 1 less BREATH.	ระหว่างที่มันยังยืนอยู่ ATTACK ได้ BREATH น้อยลง 1
+While it stands, the other enemies take 30 percent less.	ระหว่างที่มันยังยืนอยู่ ศัตรูตัวอื่นรับความเสียหายน้อยลง 30 เปอร์เซ็นต์
+Won fights pay 30 percent more shards.	ชนะไฟต์ได้ SHARDS มากขึ้น 30 เปอร์เซ็นต์
+You do not play the notes.	คุณไม่ได้เล่นโน้ตเอง
+You lead the band that does.	คุณนำวงที่เล่นมัน
+Your conductor's weather over the stage and the pages of a run : the storm's rain, the rainbow light, the sky of stars. Off leaves the stage plain.	บรรยากาศของวาทยากรบนเวทีและหน้าต่างๆ ในรัน : ฝนของพายุ แสงสีรุ้ง ท้องฟ้าเต็มดาว ปิดแล้วเวทีจะเรียบๆ
+the left button raises the baton	เมาส์ซ้ายยกไม้บาตองขึ้น
+The beat is not yours to move.	จังหวะไม่ใช่ของคุณที่จะขยับ
+Nine notes out of time, it cannot hear the beat. Block them all and it hears you.	โน้ต 9 ตัวผิดจังหวะ มันไม่ได้ยินจังหวะ ปัดได้ครบแล้วมันจะได้ยินเรา
+All four fonts are free under the SIL Open Font License 1.1.	ฟอนต์ทั้งสี่ใช้ได้ฟรีภายใต้ SIL Open Font License 1.1
+Cadson Demak. The Thai titles and sentences.	Cadson Demak หัวข้อและประโยคภาษาไทย
+Cadson Demak, The Chakra Petch Project Authors. The Thai labels and buttons.	Cadson Demak, The Chakra Petch Project Authors ป้ายและปุ่มภาษาไทย

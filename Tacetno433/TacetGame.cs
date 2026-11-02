@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -114,6 +115,7 @@ namespace Tacetno433
             SaveFile.Enabled = !DebugShots.Active;
             SaveFile.LoadSettings();
             SaveFile.LoadArchive();                     // Alpha 7 : the ARCHIVE's echoes and upgrades
+            if (DebugShots.Thai) Settings.Language = 1; // THAI TEXT : --thai, the capture tool's pictures in Thai
 
             Font = Content.Load<SpriteFont>("MainFont");
             BigFont = Content.Load<SpriteFont>("BigFont");
@@ -136,7 +138,22 @@ namespace Tacetno433
             SharpText.Add(BigFont, "BigFont");
             SharpText.Add(StoryFont, "StoryFont");
             SharpText.Add(LogoFont, "LogoFont");
+
+            //THAI TEXT (block F3) : each font's Thai partner (Core/ThaiText.cs), with its own sharp copies, and the word list put
+            //in place before any page makes its lines (Data/Lang.cs). The line spacings are a share of the English font's.
+            SpriteFont thaiMain = Content.Load<SpriteFont>("ThaiMainFont");
+            SpriteFont thaiBig = Content.Load<SpriteFont>("ThaiBigFont");
+            SpriteFont thaiStory = Content.Load<SpriteFont>("ThaiStoryFont");
+            ThaiText.Pair(Font, thaiMain, "ChakraPetch-Medium", BattleRules.ThaiLineMain, 1f);
+            ThaiText.Pair(BigFont, thaiBig, "Trirong-SemiBold", BattleRules.ThaiLineBig, 1f);
+            ThaiText.Pair(StoryFont, thaiStory, "Trirong-Medium", BattleRules.ThaiLineStory, 1f);
+            ThaiText.Pair(LogoFont, thaiBig, "Trirong-SemiBold", 1f, LogoFont.LineSpacing / (float)BigFont.LineSpacing);
+            SharpText.Add(thaiMain, "ThaiMainFont");
+            SharpText.Add(thaiBig, "ThaiBigFont");
+            SharpText.Add(thaiStory, "ThaiStoryFont");
             SharpText.Choose(Services, Content.RootDirectory, Sharp.Scale);
+            Lang.Load(Path.Combine(AppContext.BaseDirectory, Content.RootDirectory, "Text", "thai.txt"));
+            Lang.Apply();
 
             //Shared UI Pieces : hand the fonts over once
             Ui.Font = Font;
@@ -176,6 +193,27 @@ namespace Tacetno433
                 DebugShots.Begin(this);
             else
                 Screens.ChangeNow(new TitleScreen());
+        }
+
+        //Restart (THAI TEXT, block F3) : the game starts again, here. The pages make their lines once, so a new language needs a
+        //fresh start (Data/Lang.cs). The same program is started again and this one closes (a run is kept at its last path).
+        public void Restart()
+        {
+            try
+            {
+                string me = Environment.ProcessPath ?? "";
+                System.Diagnostics.ProcessStartInfo start = new System.Diagnostics.ProcessStartInfo(me);
+                start.UseShellExecute = false;
+                start.WorkingDirectory = AppContext.BaseDirectory;
+                if (Path.GetFileNameWithoutExtension(me).ToLowerInvariant() == "dotnet")
+                    start.ArgumentList.Add(System.Reflection.Assembly.GetEntryAssembly().Location);   // started as "dotnet Tacetno433.dll"
+                System.Diagnostics.Process.Start(start);
+            }
+            catch (Exception)
+            {
+                //No new start (a locked machine) : the new language comes the next time the player opens the game
+            }
+            Exit();
         }
 
         //Full Screen : switched on and off by the settings page.

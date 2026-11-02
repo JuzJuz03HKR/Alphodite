@@ -32,7 +32,7 @@ namespace Tacetno433.Data
             "A band against silence. Thank you for playing.",
             "Every track here is free to use. Thank you to the people who share their music.",
             "Ready made sounds, cut and levelled for TACET.",
-            "Both fonts are free under the SIL Open Font License 1.1.",
+            "All four fonts are free under the SIL Open Font License 1.1.",
         };
 
         public static readonly Credit[][] Lines =
@@ -68,6 +68,8 @@ namespace Tacetno433.Data
             {
                 new Credit("CORMORANT GARAMOND", "The Cormorant Project Authors (Catharsis Fonts). The titles and the sentences.", "OFL"),
                 new Credit("SAIRA SEMI CONDENSED", "The Saira Project Authors (Omnibus-Type). The labels, the buttons and the numbers.", "OFL"),
+                new Credit("TRIRONG", "Cadson Demak. The Thai titles and sentences.", "OFL"),
+                new Credit("CHAKRA PETCH", "Cadson Demak, The Chakra Petch Project Authors. The Thai labels and buttons.", "OFL"),
             },
         };
     }

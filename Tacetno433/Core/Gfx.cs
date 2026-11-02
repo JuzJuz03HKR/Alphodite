@@ -1,6 +1,7 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Tacetno433.Data;
 
 namespace Tacetno433.Core
 {
@@ -416,8 +417,33 @@ namespace Tacetno433.Core
 
         //Text Wrap : cut a long sentence into lines that fit inside maxWidth.
         //DrawString already understands "\n" so we just insert them.
+        //THAI TEXT (block F3) : the line is first put in the player's language (Data/Lang.cs). Thai has no spaces between
+        //words, so a Thai line also breaks at its zero width spaces (ThaiText.Break), and a piece still too long breaks
+        //between two letters (never inside a letter's marks).
         public static string WrapText(SpriteFont font, string text, float maxWidth, float scale)
         {
+#if DEBUG
+            See(text);
+            string done = WrapLine(font, text, maxWidth, scale);
+            if (WrapOut != null) WrapOut.Add(done);
+            return done;
+        }
+
+        //SEEN (block F3, --shots ... --seen, Debug only) : every line a page asks to draw or wrap, before the word list, to
+        //make the Thai word list from what the player really sees (Core/DebugShots.cs WriteSeen, docs/lang/make_keys.py)
+        public static System.Collections.Generic.HashSet<string> Seen;
+        public static readonly System.Collections.Generic.HashSet<string> WrapOut = new System.Collections.Generic.HashSet<string>();
+
+        private static void See(string s)
+        {
+            if (Seen != null && s != null && s.Length > 1) Seen.Add(s);
+        }
+
+        private static string WrapLine(SpriteFont font, string text, float maxWidth, float scale)
+        {
+#endif
+            text = Lang.Of(text);
+            if (ThaiText.Has(text)) return WrapThai(font, text, maxWidth, scale);
             string[] words = text.Split(' ');
             string result = "";
             string line = "";
@@ -437,6 +463,54 @@ namespace Tacetno433.Core
                 }
             }
             return result + line;
+        }
+
+        //Wrap Thai : the pieces between spaces and breaks, joined back with what stood between them (a space, or nothing for a
+        //break), a new line wherever the next piece would not fit
+        private static string WrapThai(SpriteFont font, string text, float maxWidth, float scale)
+        {
+            string result = "";
+            string[] paragraphs = text.Split('\n');
+            for (int p = 0; p < paragraphs.Length; p++)
+            {
+                if (p > 0) result += "\n";
+                string para = paragraphs[p];
+                string line = "";
+                int from = 0;
+                while (from <= para.Length)
+                {
+                    int to = from;
+                    while (to < para.Length && para[to] != ' ' && para[to] != ThaiText.Break) to++;
+                    string piece = para.Substring(from, to - from);
+                    string glue = from > 0 && para[from - 1] == ' ' ? " " : "";
+                    string test = line.Length == 0 ? piece : line + glue + piece;
+                    if (ThaiText.SizeOf(font, test).X * scale > maxWidth && line.Length > 0)
+                    {
+                        result += line + "\n";
+                        line = piece;
+                    }
+                    else line = test;
+
+                    //Too Long : a piece wider than the line on its own breaks between two letters
+                    while (ThaiText.SizeOf(font, line).X * scale > maxWidth && line.Length > 1)
+                    {
+                        int cut = line.Length - 1;
+                        while (cut > 1 && ThaiText.SizeOf(font, line.Substring(0, cut)).X * scale > maxWidth) cut--;
+                        while (cut > 1 && IsThaiMark(line[cut])) cut--;
+                        result += line.Substring(0, cut) + "\n";
+                        line = line.Substring(cut);
+                    }
+                    from = to + 1;
+                }
+                result += line;
+            }
+            return result;
+        }
+
+        //Thai Mark : a vowel or tone mark that belongs to the letter before it (a line never breaks before one)
+        private static bool IsThaiMark(char c)
+        {
+            return c == '\u0E31' || (c >= '\u0E34' && c <= '\u0E3A') || (c >= '\u0E47' && c <= '\u0E4E');
         }
 
         //Text Wrap Limited : same as WrapText but never returns more than maxLines.
@@ -466,36 +540,84 @@ namespace Tacetno433.Core
             return Sharp.Scale == 1f ? (int)v : Sharp.Snap(v);
         }
 
+        //Put : a line already in the player's language, top left at (x, y). A Thai line goes to its partner font, moved down
+        //onto the baseline the English font would have used (THAI TEXT).
+        private static void Put(SpriteBatch sb, SpriteFont font, string s, float x, float y, Color color, float rotation, Vector2 origin, float scale)
+        {
+            if (ThaiText.Has(s))
+            {
+                float size;
+                float down;
+                SpriteFont thai = ThaiText.FontFor(font, out size, out down);
+                Vector2 at = new Vector2(x, y);
+                if (rotation == 0f) at.Y += down * scale;
+                else at += new Vector2(-(float)Math.Sin(rotation), (float)Math.Cos(rotation)) * (down * scale);
+                SharpText.Draw(sb, thai, s, new Vector2(Whole(at.X), Whole(at.Y)), color, rotation, origin / size, scale * size);
+                return;
+            }
+            SharpText.Draw(sb, font, s, new Vector2(Whole(x), Whole(y)), color, rotation, origin, scale);
+        }
+
+        //Measure : SpriteFont.MeasureString in the player's language (a Thai line with its partner font, ThaiText.SizeOf).
+        //Every page that needs a line's size uses this, never font.MeasureString.
+        public static Vector2 Measure(SpriteFont font, string s)
+        {
+            s = Lang.Of(s);
+            if (ThaiText.Has(s)) return ThaiText.SizeOf(font, s);
+            return font.MeasureString(s);
+        }
+
         //Draw Text : normal top-left text
         public static void Text(SpriteBatch sb, SpriteFont font, string s, float x, float y, Color color, float scale)
         {
-            SharpText.Draw(sb, font, s, new Vector2(Whole(x), Whole(y)), color, 0f, Vector2.Zero, scale);
+#if DEBUG
+            See(s);
+#endif
+            Put(sb, font, Lang.Of(s), x, y, color, 0f, Vector2.Zero, scale);
         }
 
         //Draw Text Centered : text centred on a point
         public static void TextCentered(SpriteBatch sb, SpriteFont font, string s, float cx, float cy, Color color, float scale)
         {
-            Vector2 size = font.MeasureString(s) * scale;
-            SharpText.Draw(sb, font, s, new Vector2(Whole(cx - size.X / 2f), Whole(cy - size.Y / 2f)),
-                           color, 0f, Vector2.Zero, scale);
+#if DEBUG
+            See(s);
+#endif
+            s = Lang.Of(s);
+            Vector2 size = Measure(font, s) * scale;
+            Put(sb, font, s, cx - size.X / 2f, cy - size.Y / 2f, color, 0f, Vector2.Zero, scale);
         }
 
         //Draw Text Right : text ending at a point
         public static void TextRight(SpriteBatch sb, SpriteFont font, string s, float rightX, float y, Color color, float scale)
         {
-            Vector2 size = font.MeasureString(s) * scale;
-            SharpText.Draw(sb, font, s, new Vector2(Whole(rightX - size.X), Whole(y)), color, 0f, Vector2.Zero, scale);
+#if DEBUG
+            See(s);
+#endif
+            s = Lang.Of(s);
+            Vector2 size = Measure(font, s) * scale;
+            Put(sb, font, s, rightX - size.X, y, color, 0f, Vector2.Zero, scale);
+        }
+
+        //Fit Scale : scale, made smaller when the line would be wider than room (a Thai line is often longer than its English,
+        //THAI TEXT). Never smaller than 70 percent : past that the line has to be shortened in the word list instead.
+        public static float FitScale(SpriteFont font, string s, float scale, float room)
+        {
+            float width = TextWidth(font, s, scale);
+            if (width <= room || width <= 0f) return scale;
+            return Math.Max(scale * 0.7f, scale * room / width);
         }
 
         //Text Width : how wide a line will be
         public static float TextWidth(SpriteFont font, string s, float scale)
         {
-            return font.MeasureString(s).X * scale;
+            return Measure(font, s).X * scale;
         }
 
-        //Spaced Width : how wide a line will be when drawn with TextSpaced
+        //Spaced Width : how wide a line will be when drawn with TextSpaced (a Thai line is never spaced out, THAI TEXT)
         public static float SpacedWidth(SpriteFont font, string s, float scale, float tracking)
         {
+            s = Lang.Of(s);
+            if (ThaiText.Has(s)) return ThaiText.SizeOf(font, s).X * scale;
             float width = 0f;
             for (int i = 0; i < s.Length; i++)
             {
@@ -507,13 +629,23 @@ namespace Tacetno433.Core
         }
 
         //Draw Spaced Text : letters pulled apart, the look of "W O R L D   V I E W".
-        //tracking is the extra gap in pixels after every letter.
+        //tracking is the extra gap in pixels after every letter. THAI TEXT : Thai is never pulled apart (its marks would come
+        //off their letters), a Thai line is drawn whole.
         public static void TextSpaced(SpriteBatch sb, SpriteFont font, string s, float x, float y, Color color, float scale, float tracking)
         {
+#if DEBUG
+            See(s);
+#endif
+            s = Lang.Of(s);
+            if (ThaiText.Has(s))
+            {
+                Put(sb, font, s, x, y, color, 0f, Vector2.Zero, scale);
+                return;
+            }
             for (int i = 0; i < s.Length; i++)
             {
                 string letter = LetterOf(s[i]);
-                Text(sb, font, letter, x, y, color, scale);
+                Put(sb, font, letter, x, y, color, 0f, Vector2.Zero, scale);
                 x += font.MeasureString(letter).X * scale + tracking;
             }
         }
@@ -532,8 +664,17 @@ namespace Tacetno433.Core
         //turned line. (x, cy) is the left end of the line at the middle of the letters, which stays put as it turns.
         public static void TextSpacedTurned(SpriteBatch sb, SpriteFont font, string s, float x, float cy, Color color, float scale, float tracking, float angle)
         {
+#if DEBUG
+            See(s);
+#endif
+            s = Lang.Of(s);
             Vector2 along = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
             Vector2 origin = new Vector2(0f, font.LineSpacing / 2f);
+            if (ThaiText.Has(s))
+            {
+                Put(sb, font, s, x, cy, color, angle, origin, scale);
+                return;
+            }
             float run = 0f;
             for (int i = 0; i < s.Length; i++)
             {
@@ -548,7 +689,10 @@ namespace Tacetno433.Core
         //x is the RIGHT edge of the column, because the letters hang to the left of it.
         public static void TextVertical(SpriteBatch sb, SpriteFont font, string s, float x, float y, Color color, float scale)
         {
-            SharpText.Draw(sb, font, s, new Vector2(Whole(x), Whole(y)), color, MathHelper.PiOver2, Vector2.Zero, scale);
+#if DEBUG
+            See(s);
+#endif
+            Put(sb, font, Lang.Of(s), x, y, color, MathHelper.PiOver2, Vector2.Zero, scale);
         }
 
         private static string LetterOf(char c)

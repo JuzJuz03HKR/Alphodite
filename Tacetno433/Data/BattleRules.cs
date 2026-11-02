@@ -1207,5 +1207,13 @@
         public static bool AimArc = true;              // AIM ARC : dots from the command to the enemy being picked (false : no arc, the ring only)
         public static float AimLockTime = 0.16f;       // RETICLE : seconds a ring takes to close in on a new target
         public static float AimFaint = 0.32f;          // the ones that could still be picked, this bright
+
+        //======================================================================================
+        //Thai Feel (Beta1 2 Nov, block F3, Core/ThaiText.cs) : a Thai line's spacing, a share of the English font's it stands in for
+        //(Thai stacks vowels and tone marks above and below its letters, so its lines need a little more room)
+        //======================================================================================
+        public static float ThaiLineMain = 1.2f;       // MainFont's partner, Chakra Petch
+        public static float ThaiLineBig = 1.15f;       // BigFont's partner, Trirong
+        public static float ThaiLineStory = 1.3f;      // StoryFont's partner, Trirong
     }
 }

@@ -721,7 +721,8 @@ namespace Tacetno433.Screens
             Gfx.Rect(sb, strip.X, strip.Y, strip.Width, 1, Palette.LineGrey * (0.6f * shown));
             Gfx.CircleOutline(sb, strip.X, strip.Y, 3f, Palette.Paper * shown, 1f);
             Ui.Tag(sb, "NOTE", strip.X + 14, strip.Y + 10, true, shown);
-            Gfx.Text(sb, Game.StoryFont, tips[index], strip.X + 76, strip.Y + 9, Palette.Paper * (a * shown), TextSize.StorySmall);
+            float tipRoom = strip.Width - 76 - 24 - tips.Length * 12;                                   // up to the tip dots
+            Gfx.Text(sb, Game.StoryFont, tips[index], strip.X + 76, strip.Y + 9, Palette.Paper * (a * shown), Gfx.FitScale(Game.StoryFont, tips[index], TextSize.StorySmall, tipRoom));
 
             //Tip Dots : which tip out of how many, the one on show a ring round a dot
             for (int i = 0; i < tips.Length; i++)

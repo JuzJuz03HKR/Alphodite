@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<XnaContent xmlns:Graphics="Microsoft.Xna.Framework.Content.Pipeline.Graphics">
+  <!-- THAI (Beta1 2 Nov, block F3) : Trirong Medium (OFL, Fonts/OFL-Trirong.txt, Cadson Demak), the Thai partner of StoryFont (Cormorant Garamond Bold) (Core/ThaiText.cs).
+       The user picked Trirong + Chakra Petch for Thai on 28 Oct. It holds English too, so a line with Thai in it is drawn
+       wholly with this font.
+       SHARP SCREEN twin : the same letters drawn 3x bigger, see Core/SharpText.cs. Change the Size of all four together. -->
+  <Asset Type="Graphics:FontDescription">
+    <FontName>Fonts/Trirong-Medium.ttf</FontName>
+    <Size>42</Size>
+    <Spacing>0</Spacing>
+    <UseKerning>true</UseKerning>
+    <Style>Regular</Style>
+    <CharacterRegions>
+      <CharacterRegion>
+        <Start>&#32;</Start>
+        <End>&#126;</End>
+      </CharacterRegion>
+      <CharacterRegion>
+        <Start>&#3585;</Start>
+        <End>&#3642;</End>
+      </CharacterRegion>
+      <CharacterRegion>
+        <Start>&#3647;</Start>
+        <End>&#3675;</End>
+      </CharacterRegion>
+    </CharacterRegions>
+  </Asset>
+</XnaContent>

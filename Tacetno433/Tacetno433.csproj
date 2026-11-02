@@ -42,6 +42,8 @@
   <!-- Beta1 screens : the fonts are free (SIL Open Font License), their licence texts travel with the game -->
   <ItemGroup>
     <None Include="Content\Fonts\OFL-*.txt" CopyToOutputDirectory="PreserveNewest" />
+    <!-- THAI TEXT (block F3, 2 Nov) : the Thai word list, read straight from the folder (Data/Lang.cs) -->
+    <None Include="Content\Text\*.txt" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.*" />

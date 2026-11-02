@@ -125,6 +125,90 @@
 /processorParam:TextureFormat=Color
 /build:LogoFont_3x.spritefont
 
+#begin ThaiMainFont.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Color
+/build:ThaiMainFont.spritefont
+
+#begin ThaiMainFont_15x.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Color
+/build:ThaiMainFont_15x.spritefont
+
+#begin ThaiMainFont_2x.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Color
+/build:ThaiMainFont_2x.spritefont
+
+#begin ThaiMainFont_3x.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Color
+/build:ThaiMainFont_3x.spritefont
+
+#begin ThaiBigFont.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Color
+/build:ThaiBigFont.spritefont
+
+#begin ThaiBigFont_15x.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Color
+/build:ThaiBigFont_15x.spritefont
+
+#begin ThaiBigFont_2x.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Color
+/build:ThaiBigFont_2x.spritefont
+
+#begin ThaiBigFont_3x.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Color
+/build:ThaiBigFont_3x.spritefont
+
+#begin ThaiStoryFont.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Color
+/build:ThaiStoryFont.spritefont
+
+#begin ThaiStoryFont_15x.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Color
+/build:ThaiStoryFont_15x.spritefont
+
+#begin ThaiStoryFont_2x.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Color
+/build:ThaiStoryFont_2x.spritefont
+
+#begin ThaiStoryFont_3x.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Color
+/build:ThaiStoryFont_3x.spritefont
+
 #begin Effects/Post.fx
 /importer:EffectImporter
 /processor:EffectProcessor

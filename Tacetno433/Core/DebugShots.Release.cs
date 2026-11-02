@@ -12,6 +12,7 @@ namespace Tacetno433.Core
         public static bool Active;
         public static float Scale = 1f;
         public static bool Steady;
+        public static bool Thai;
         public static RenderTarget2D Target;
 
         public static void Parse(string[] args) { }

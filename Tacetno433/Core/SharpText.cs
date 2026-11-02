@@ -28,11 +28,11 @@ namespace Tacetno433.Core
             public string Name;                      // its content name (MainFont ...)
             public SpriteFont Big;                   // the bigger copy, null when the screen does not need one
             public float Size;                       // how much bigger the copy was made (1.5, 2 or 3)
-            public int[] Index = new int[128];       // a letter's place in Font.Glyphs, the same place in Big.Glyphs
+            public int[] Index = new int[0x0E80];    // a letter's place in Font.Glyphs, the same place in Big.Glyphs (THAI : up to the Thai block)
             public int Fallback;                     // the place of DefaultCharacter ('?'), for any letter the font lacks
         }
 
-        private static readonly Twin[] twins = new Twin[4];
+        private static readonly Twin[] twins = new Twin[8];   // the four fonts of the game and their three Thai partners (THAI TEXT)
         private static int count;
         private static ContentManager content;       // the twins' own loader, emptied when the screen size changes
         private static float loadedSize;
@@ -95,19 +95,25 @@ namespace Tacetno433.Core
         }
 
         //Draw : SpriteBatch.DrawString, sharp at any screen size. The same arguments, no SpriteEffects.
+        //THAI TEXT (block F3) : a Thai partner font always takes the long way below, which moves the marks that the font alone
+        //would put in the wrong place (ThaiText.Offset) and skips the line breaks that are never drawn (ThaiText.Break).
         public static void Draw(SpriteBatch sb, SpriteFont font, string text, Vector2 position, Color color, float rotation, Vector2 origin, float scale)
         {
             Twin twin = Find(font);
-            if (twin == null || twin.Big == null)
+            bool thai = ThaiText.IsThaiFont(font);
+            if (!thai && (twin == null || twin.Big == null))
             {
                 sb.DrawString(font, text, position, color, rotation, origin, scale, SpriteEffects.None, 0f);
                 return;
             }
 
+            SpriteFont bigFont = twin != null && twin.Big != null ? twin.Big : font;   // a Thai font in the window : itself
             SpriteFont.Glyph[] small = font.Glyphs;
-            SpriteFont.Glyph[] big = twin.Big.Glyphs;
-            Texture2D page = twin.Big.Texture;
-            float shrink = 1f / twin.Size;
+            SpriteFont.Glyph[] big = bigFont.Glyphs;
+            Texture2D page = bigFont.Texture;
+            float shrink = bigFont == font ? 1f : 1f / twin.Size;
+            int[] index = twin != null ? twin.Index : null;
+            int fallback = twin != null ? twin.Fallback : 0;
             float cos = 1f, sin = 0f;
             if (rotation != 0f)
             {
@@ -122,7 +128,7 @@ namespace Tacetno433.Core
             for (int i = 0; i < text.Length; i++)
             {
                 char c = text[i];
-                if (c == '\r') continue;
+                if (c == '\r' || c == ThaiText.Break) continue;
                 if (c == '\n')
                 {
                     penX = 0f;
@@ -131,7 +137,7 @@ namespace Tacetno433.Core
                     continue;
                 }
 
-                int g = c < 128 ? twin.Index[c] : twin.Fallback;
+                int g = index == null ? ThaiText.GlyphIndex(font, c) : (c < index.Length ? index[c] : fallback);
                 ref SpriteFont.Glyph s = ref small[g];
                 ref SpriteFont.Glyph b = ref big[g];
 
@@ -145,12 +151,13 @@ namespace Tacetno433.Core
                 }
                 else
                 {
-                    float lead = penX + font.Spacing;
+                    float lead = penX + (thai && ThaiText.TakesNoRoom(c) ? 0f : font.Spacing);   // THAI TEXT : a mark adds no gap
                     penX = lead + s.LeftSideBearing;
                     inkX = lead + b.LeftSideBearing * shrink;
                 }
-                float lx = (inkX + b.Cropping.X * shrink - origin.X) * scale;
-                float ly = (penY + b.Cropping.Y * shrink - origin.Y) * scale;
+                Vector2 mark = thai ? ThaiText.Offset(font, text, i) : Vector2.Zero;          // THAI TEXT : STACK, TALL, DEEP
+                float lx = (inkX + b.Cropping.X * shrink + mark.X - origin.X) * scale;
+                float ly = (penY + b.Cropping.Y * shrink + mark.Y - origin.Y) * scale;
                 penX += s.Width + s.RightSideBearing;
 
                 Vector2 at;

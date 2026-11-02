@@ -44,11 +44,18 @@ namespace Tacetno433.Core
         //and a slow cloud machine runs several updates between two pictures.
         public static bool Steady;
 
+        //Thai (block F3, 2 Nov) : "--thai" takes the pictures with the game in Thai (TacetGame puts Settings.Language to 1)
+        public static bool Thai;
+
         //Args Parse : called from Program before the game is made
         public static void Parse(string[] args)
         {
             for (int i = 0; i < args.Length; i++)
+            {
                 if (args[i] == "--steady") Steady = true;
+                if (args[i] == "--thai") Thai = true;
+                if (args[i] == "--seen") Gfx.Seen = new HashSet<string>();          // SEEN (block F3) : write seen.txt at the end
+            }
             for (int i = 0; i < args.Length - 1; i++)
             {
                 if (args[i] == "--out") outDir = args[i + 1];
@@ -175,6 +182,21 @@ namespace Tacetno433.Core
 
             //Sound Check (block E, 2 Nov) : every sound the code names, found or missing and from which folder, and every
             //track started for a moment to see that it really plays (Audio/SoundBank.cs Report)
+            //TEXT DUMP (block F3) : every string the game holds, with where it lives, for the Thai word list (docs/lang/)
+            if (names[0] == "textdump")
+            {
+                File.WriteAllText(Path.Combine(outDir, "textdump.txt"), Data.Lang.Dump());
+                game.Exit();
+                return;
+            }
+
+            //THAI CHECK (block F3) : each Thai font's letters as the content pipeline built them, and the marks' moves
+            if (names[0] == "thaicheck")
+            {
+                File.WriteAllText(Path.Combine(outDir, "thaicheck.txt"), ThaiCheck(game));
+                game.Exit();
+                return;
+            }
             if (names[0] == "soundcheck")
             {
                 File.WriteAllText(Path.Combine(outDir, "soundcheck.txt"), Audio.SoundBank.Report());
@@ -1048,6 +1070,7 @@ namespace Tacetno433.Core
 
             index++;
             frames = 0;
+            if (Gfx.Seen != null) WriteSeen();                                      // SEEN (block F3) : every line so far, after each page
             if (index >= names.Length)
             {
                 game.Exit();
@@ -1082,6 +1105,39 @@ namespace Tacetno433.Core
         {
             int index = name[name.Length - 1] - '0';
             return Math.Max(0, Math.Min(ConductorList.All.Length - 1, index));
+        }
+
+        //Write Seen (SEEN, block F3) : every line the pages asked to draw or wrap, before the word list, one a line ("\n" kept as
+        //the two letters), the lines that were only the output of a wrap left out. For docs/lang/make_keys.py.
+        private static void WriteSeen()
+        {
+            List<string> lines = new List<string>();
+            foreach (string s in Gfx.Seen)
+                if (!Gfx.WrapOut.Contains(s)) lines.Add(s.Replace("\r", "").Replace("\n", "\\n"));
+            lines.Sort(StringComparer.Ordinal);
+            File.WriteAllLines(Path.Combine(outDir, "seen.txt"), lines);
+        }
+
+        //Thai Check : the glyph numbers of a few Thai letters in each font (LeftSideBearing, Width, RightSideBearing, Cropping)
+        private static string ThaiCheck(TacetGame game)
+        {
+            string r = "TACET THAI CHECK\r\n";
+            string[] names = { "ThaiMainFont", "ThaiBigFont", "ThaiStoryFont" };
+            char[] letters = { 'x', '\u0E01', '\u0E34', '\u0E48', '\u0E31', '\u0E49', '\u0E33', '\u0E1B', '\u0E38' };
+            foreach (string n in names)
+            {
+                SpriteFont f = game.Content.Load<SpriteFont>(n);
+                r += n + "  LineSpacing " + f.LineSpacing + "  Spacing " + f.Spacing + "\r\n";
+                foreach (char c in letters)
+                {
+                    int i = f.Characters.IndexOf(c);
+                    if (i < 0) { r += "  U+" + ((int)c).ToString("X4") + " missing\r\n"; continue; }
+                    SpriteFont.Glyph g = f.Glyphs[i];
+                    r += "  U+" + ((int)c).ToString("X4") + "  lsb " + g.LeftSideBearing + "  w " + g.Width + "  rsb " + g.RightSideBearing
+                       + "  crop " + g.Cropping + "  bounds " + g.BoundsInTexture + "\r\n";
+                }
+            }
+            return r;
         }
 
         //Page Open : build a sample run that suits the page, then show it.
