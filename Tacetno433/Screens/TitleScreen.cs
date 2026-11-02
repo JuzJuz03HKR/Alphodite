@@ -495,8 +495,7 @@ namespace Tacetno433.Screens
 
             //Inner Ring : starts from the top and goes round
             float inner = UiMotion.Between(clock, 0.15f, 0.6f);
-            float ringScale = UiArt.Logo != null ? 1.3f : 1f;                                    // TITLE ART : outside the logo's ring
-            Ornament.TickRing(sb, hx, hy, BattleRules.TitleHoleRadius * InnerRing * ringScale, 72, time * 0.03f, inner, Palette.Paper * 0.35f);
+            Ornament.TickRing(sb, hx, hy, BattleRules.TitleHoleRadius * InnerRing, 72, time * 0.03f, inner, Palette.Paper * 0.35f);
 
             //Middle Ring : faint, so the eye joins the hole to the menu
             float orbit = UiMotion.Between(clock, 0.25f, 0.7f);
@@ -576,10 +575,9 @@ namespace Tacetno433.Screens
             if (logo == null) return;
             float a = UiMotion.Between(clock, 0.35f, 0.7f);
             if (a <= 0f) return;
-            float ring = BattleRules.TitleHoleRadius * BattleRules.TitleLogoHole * 1.08f;
-            float w = 2f * ring / BattleRules.TitleLogoRing;
+            float w = 2f * LogoRing() / BattleRules.TitleLogoRing;
             float h = w * logo.Height / (float)logo.Width;
-            Rectangle r = new Rectangle((int)(BattleRules.TitleHoleX - w / 2f), (int)(BattleRules.TitleHoleY - h * BattleRules.TitleLogoRingY), (int)w, (int)h);
+            Rectangle r = new Rectangle((int)(BattleRules.TitleHoleX - w * BattleRules.TitleLogoRingX), (int)(BattleRules.TitleHoleY - h * BattleRules.TitleLogoRingY), (int)w, (int)h);
             sb.End();
             sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearClamp, null, null, null, Sharp.Transform);
             sb.Draw(logo, r, Color.White * a);
@@ -587,8 +585,15 @@ namespace Tacetno433.Screens
             Sharp.Begin(sb);
         }
 
+        //Logo Ring : how wide the logo's ring is on the page, round the rim of the hole (the size the hole has in the game)
+        private static float LogoRing()
+        {
+            return BattleRules.TitleHoleRadius * BattleRules.TitleLogoHole * 1.08f;
+        }
+
         //Poster (TITLE ART) : the team's poster in the middle, as tall as the page allows, pushing in slowly, its light added
-        //over black. It fades out over the title's own opening.
+        //over black. As the title's own opening starts under it, it flies into the hole and shrinks until its ring lies on the
+        //logo's ring (FLIGHT), fading, so the poster's name becomes the logo's name instead of both showing at once.
         private void DrawPoster(SpriteBatch sb)
         {
             Texture2D poster = UiArt.Poster;
@@ -605,6 +610,17 @@ namespace Tacetno433.Screens
                 w = TacetGame.ScreenW - 40f;
             }
             Rectangle r = new Rectangle((int)(TacetGame.ScreenW / 2f - w / 2f), (int)(TacetGame.ScreenH / 2f - h / 2f), (int)w, (int)h);
+            float leave = MathHelper.Clamp((posterClock - (BattleRules.TitlePosterTime - BattleRules.TitlePosterFade)) / BattleRules.TitlePosterFade, 0f, 1f);
+            if (leave > 0f && UiArt.Logo != null)                                               // FLIGHT
+            {
+                float e = leave * leave * (3f - 2f * leave);
+                float w1 = 2f * LogoRing() / BattleRules.TitlePosterRing;
+                float h1 = w1 * poster.Height / (float)poster.Width;
+                float x1 = BattleRules.TitleHoleX - w1 * BattleRules.TitlePosterRingX;
+                float y1 = BattleRules.TitleHoleY - h1 * BattleRules.TitlePosterRingY;
+                r = new Rectangle((int)MathHelper.Lerp(r.X, x1, e), (int)MathHelper.Lerp(r.Y, y1, e), (int)MathHelper.Lerp(r.Width, w1, e), (int)MathHelper.Lerp(r.Height, h1, e));
+                a = UiMotion.EaseOut(fadeIn) * (1f - leave * leave);
+            }
             if (PosterCovers) Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Color.Black);
             sb.End();
             sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearClamp, null, null, null, Sharp.Transform);

@@ -625,9 +625,16 @@
         public static float TitleHoleY = 300f;
         public static float TitleHoleRadius = 92f;
         public static float TitleOrbit = 860f;            //   the big thin ring round the hole that the menu sits on (pixels)
-        public static float TitleLogoRing = 0.747f;       // TITLE ART (block C item 2) : the team's logo (Content/Art/Ui/Title/logo.png) has its ring this share
-        public static float TitleLogoRingY = 0.467f;      //   of the picture's width wide, its middle this share of the height down (measured 2 Nov)
-        public static float TitleLogoHole = 2.2f;         //   with the logo the hole opens this many times wider, its rim on the logo's ring
+        public static float TitleLogoRing = 0.772f;       // TITLE ART (block C item 2) : the team's logo (Content/Art/Ui/Title/logo.png) has its ring this share
+        public static float TitleLogoRingX = 0.51f;       //   of the picture's width wide, its middle this share of the width across
+        public static float TitleLogoRingY = 0.49f;       //   and this share of the height down (measured on the team's file 2 Nov)
+        public static float TitleArtFloor = 14f;          //   the hand drawn black has a faint grey grain : this much (of 255) is taken off every pixel as it loads
+        public static float TitleLogoFeather = 0.12f;     //   and the logo fades to nothing over this share of its size at each edge, so no pale box shows
+        public static float TitleLogoHole = 1f;           //   the hole keeps the size it has in the game, the logo's ring round its rim (the user 13.108 : mix
+                                                          //   the logo with the page, do not replace it all ; 2.2 made the hole fit a big logo)
+        public static float TitlePosterRing = 0.676f;     //   the team's poster (poster.png) has its ring this share of its width wide,
+        public static float TitlePosterRingX = 0.52f;     //   its middle this share of the width across
+        public static float TitlePosterRingY = 0.45f;     //   and this share of the height down (measured on the team's file 2 Nov)
         public static float TitlePosterTime = 3.4f;       //   the team's poster (poster.png) opens the game this long the first time, a click skips it
         public static float TitlePosterFade = 0.8f;       //   fading in, and out into the title, this long
         public static float TitleReveal = 1.6f;           //   the first opening of the game : the hole opens, the rings draw, the logo and menu come in
