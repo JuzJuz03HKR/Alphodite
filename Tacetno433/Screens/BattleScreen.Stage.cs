@@ -291,6 +291,9 @@ namespace Tacetno433.Screens
             cues.Stars0 = RehearsalList.StarsOf(m, 0);
             cues.Stars1 = RehearsalList.StarsOf(m, 1);
             cues.Stars2 = RehearsalList.StarsOf(m, 2);
+            Fighter aim = AimOf(f);                                       // ONE NOTE ONE BLOW : where the blow is going (PUNTO's ring)
+            cues.Aimed = aim != null;
+            if (aim != null) cues.TargetAt = CenterOf(DrawBox(aim));
             figure.Cues = cues;
         }
 
@@ -347,7 +350,11 @@ namespace Tacetno433.Screens
             float want = view == View.Swipe ? 1f : 0f;
             focus = MoveTowards(focus, want, dt * BattleRules.StageFocusSpeed);
             actionCam.Update(dt);                                      // ACTION : the camera moves on through a hit stop
-            if (frozen) return;
+            if (frozen)
+            {
+                FreezeFigures(dt);                                     // ONE NOTE ONE BLOW : the stop holds a blow on its hit
+                return;
+            }
 
             float worldDt = dt * MathHelper.Lerp(1f, BattleRules.StageFocusSlow, WorldFocus);
             worldTime += worldDt;
@@ -624,7 +631,7 @@ namespace Tacetno433.Screens
             if (swipeFor == SwipeFor.Skill)
             {
                 jab = 1f;
-                PlayArt(battle.Current, "attack");
+                if (FigureOf(battle.Current) == null) PlayArt(battle.Current, "attack");   // a figure struck already (NoteBlow)
             }
             else
             {
@@ -673,7 +680,16 @@ namespace Tacetno433.Screens
             if (move == null || move.Skill == null || user == null || user.IsEnemy) return;
 
             HitColors colors = SpotOf(user);
-            jab = Math.Max(jab, 0.6f);
+            Figure figure = FigureOf(user);
+            if (holding)                                                             // HOLD : the charge stays planted and trembles (Figure.Charge)
+            {
+                if (figure == null) jab = Math.Max(jab, 0.6f);
+            }
+            else
+            {
+                jab = Math.Max(jab, 0.6f);
+                if (figure != null) figure.Tap(lastWay, build);                      // ROLL : a small blow with the other hand each shake
+            }
             actionCam.Shake(BattleRules.CamShake * 0.35f);
             if (!move.Skill.HitsEnemy)
             {
@@ -695,6 +711,119 @@ namespace Tacetno433.Screens
                 Look look;
                 if (looks.TryGetValue(e, out look)) look.Knock = Math.Max(look.Knock, 0.5f);
             }
+        }
+
+        //======================================================================================
+        //ONE NOTE ONE BLOW (MATH ART round 6 part 5, 2 Nov, docs/BETA1_DIRECTION.md 32.21) : the figures' blows, note by note.
+        //Core/Figure.cs does the poses, these only say when. The rules are not touched : each note lands when it always did.
+        //======================================================================================
+
+        //Figure Of : the code's figure of a fighter (MATH ART), null for one shown by a picture
+        private Figure FigureOf(Fighter f)
+        {
+            return f != null ? ArtOf(f).Figure : null;
+        }
+
+        //Tell Blows : every frame of a swipe, before its note is answered. The one who plays a skill winds up toward the
+        //note's way (Ready). On TACET's turn the enemy winds up, the one in front raises the guard (Brace), and the enemy's
+        //blow lands ON the note's beat (EnemyBlow), or sooner if the parry comes early (Land).
+        private void TellBlows(QteNote n, float now)
+        {
+            float dueIn = n.Due - now;
+            bool last = next == notes.Count - 1;
+            if (swipeFor == SwipeFor.Skill)
+            {
+                Figure f = FigureOf(battle.Current);
+                if (f != null && !rolling) f.Ready(n.Way, dueIn, last);
+                return;
+            }
+            if (swipeFor != SwipeFor.Parry || battle.Current == null || !battle.Current.IsEnemy) return;
+            Figure guard = FigureOf(battle.HitTarget(battle.Current));
+            if (guard != null) guard.Brace(dueIn);
+            Figure enemy = FigureOf(battle.Current);
+            if (enemy == null || struckNote == next) return;
+            if (dueIn > 0f) enemy.Ready(n.Way, dueIn, last);
+            else EnemyBlow(n);
+        }
+
+        //Enemy Blow : TACET's blow for the note being answered, once
+        private void EnemyBlow(QteNote n)
+        {
+            if (struckNote == next) return;
+            struckNote = next;
+            Figure enemy = FigureOf(battle.Current);
+            if (enemy != null) enemy.Blow(n.Way, true, next == notes.Count - 1);
+        }
+
+        //Note Blow : a note was answered (Land). A skill's note is the musician's blow at once (a MISS cuts the air, the last
+        //is the FINISHER), a parried note is TACET's blow on the one in front's guard (a MISS shows as the hurt of the hit)
+        private void NoteBlow(Grade grade, bool last)
+        {
+            bool landed = grade == Grade.Perfect || grade == Grade.Good;
+            if (swipeFor == SwipeFor.Skill)
+            {
+                Figure f = FigureOf(battle.Current);
+                if (f == null) return;
+                Fighter reached = HitInEvents();                                     // CHAKRAM : the throw goes where this note hit
+                if (reached != null) throwAt = reached;
+                f.Blow(lastWay != Flick.None ? lastWay : notes[next].Way, landed, last);
+                return;
+            }
+            if (swipeFor != SwipeFor.Parry || battle.Current == null || !battle.Current.IsEnemy) return;
+            EnemyBlow(notes[next]);
+            Figure guard = FigureOf(battle.HitTarget(battle.Current));
+            if (guard != null && landed) guard.Guard(grade == Grade.Perfect);
+        }
+
+        //Hold Blow : a HOLD note was caught. A skill's : the musician holds the charge (let go as the blow when it ends). TACET's :
+        //its blow lands and the guard stays up.
+        private void HoldBlow(Grade grade)
+        {
+            if (swipeFor == SwipeFor.Skill)
+            {
+                Figure f = FigureOf(battle.Current);
+                if (f != null) f.Charge(lastWay);
+                return;
+            }
+            if (swipeFor != SwipeFor.Parry || battle.Current == null || !battle.Current.IsEnemy) return;
+            EnemyBlow(notes[next]);
+            Figure guard = FigureOf(battle.HitTarget(battle.Current));
+            if (guard != null) guard.Guard(grade == Grade.Perfect);
+        }
+
+        //Hit In Events : the first enemy the rules just hurt (read before ShowEvents clears them)
+        private Fighter HitInEvents()
+        {
+            for (int i = 0; i < battle.Events.Count; i++)
+            {
+                TurnEvent e = battle.Events[i];
+                if (e.Kind == TurnEventKind.Damage && e.Who != null && e.Who.IsEnemy) return e.Who;
+            }
+            return null;
+        }
+
+        //Freeze Figures : while the hit stop holds the world, a cut just begun still reaches its hit (Figure.Freeze)
+        private void FreezeFigures(float dt)
+        {
+            Figure f = FigureOf(fore);
+            if (f != null) f.Freeze(dt);
+            for (int i = 0; i < battle.Enemies.Count; i++)
+            {
+                f = FigureOf(battle.Enemies[i]);
+                if (f != null) f.Freeze(dt);
+            }
+        }
+
+        //Aim Of : who the one in front's blow is at this frame, for PUNTO's ring (an ATTACK's target, the enemy a skill's
+        //last note reached, else the skill's target), null when none stands
+        private Fighter AimOf(Fighter f)
+        {
+            if (view == View.Strike && striker == f) return strikeTarget;
+            if (view != View.Swipe || battle.Current != f || swipeFor != SwipeFor.Skill) return null;
+            if (throwAt != null && !throwAt.Down) return throwAt;
+            BarMove move = battle.CurrentMove;
+            if (move != null && move.Target != null && move.Target.IsEnemy && !move.Target.Down) return move.Target;
+            return FirstStanding();
         }
 
         //======================================================================================

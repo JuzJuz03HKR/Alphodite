@@ -150,6 +150,10 @@ namespace Tacetno433.Screens
         private Flick lastWay;         // the way of the last stroke, the blow's light follows it
         private float jab;             // the musician in front jumps at the enemy for a moment (1 = just now)
 
+        //ONE NOTE ONE BLOW (MATH ART round 6 part 5, 2 Nov) : the code's figures strike note by note (BattleScreen.Stage.cs)
+        private int struckNote = -1;   // the note of TACET's attack whose blow has landed (on its beat, or when parried early)
+        private Fighter throwAt;       // the enemy the last note of a skill reached (PUNTO's ring flies there)
+
         //Prepared Text : every word on this page is made in Load or Update, never in Draw
         private Dictionary<Fighter, string> shortName = new Dictionary<Fighter, string>();
         private Dictionary<Fighter, string> maxLabel = new Dictionary<Fighter, string>();
@@ -759,7 +763,8 @@ namespace Tacetno433.Screens
             }
             ShowEvents();                                                              // BORROWED BREATH may cost life
             BeginSwipe(SwipeFor.Skill);
-            PlayArt(battle.Current, "skill");
+            throwAt = null;
+            if (FigureOf(battle.Current) == null) PlayArt(battle.Current, "skill");   // a figure winds up note by note instead (TellBlows)
         }
 
         //Signature : the 4/4 shape
@@ -780,8 +785,10 @@ namespace Tacetno433.Screens
             Fighter enemy = battle.Current;
             hitBy = enemy;
             hitSignature = false;
-            PlayArt(enemy, "attack");
-            PlayArt(battle.HitTarget(enemy), "parry");                                    // SHIELD : the one standing in front parries
+            struckNote = -1;
+            if (FigureOf(enemy) == null) PlayArt(enemy, "attack");                        // ONE NOTE ONE BLOW : a figure strikes note by note
+            Fighter guard = battle.HitTarget(enemy);                                      //   (TellBlows), a picture keeps its one move
+            if (FigureOf(guard) == null) PlayArt(guard, "parry");                         // SHIELD : the one standing in front parries
             notes.Clear();
             for (int i = 0; i < enemy.IntentNotes.Length; i++)                                     // BOSSES : TE DEUM ends in a SHAKE
                 AddNote(i < enemy.IntentKinds.Length ? enemy.IntentKinds[i] : NoteKind.Swipe, enemy.IntentWays[i], i < enemy.IntentLate.Length && enemy.IntentLate[i]);   // FALSE NOTES
@@ -874,6 +881,7 @@ namespace Tacetno433.Screens
                 UpdateHold(dt);
                 return;
             }
+            TellBlows(n, now);                                         // ONE NOTE ONE BLOW : the wind up as the ring closes (BattleScreen.Stage.cs)
             if (n.Kind == NoteKind.Roll)
             {
                 UpdateRoll(n, now);
@@ -909,6 +917,7 @@ namespace Tacetno433.Screens
                     holdDown = 0f;
                     holdTick = 0f;
                     holdGrade = grade;
+                    HoldBlow(grade);                                   // ONE NOTE ONE BLOW : the charge (a skill) or the guard held (TACET's turn)
                     return;
                 }
                 Land(grade, 1f);
@@ -999,6 +1008,7 @@ namespace Tacetno433.Screens
 
             if (swipeFor == SwipeFor.Parry)
             {
+                NoteBlow(grade, last);                                                   // ONE NOTE ONE BLOW : TACET's blow meets the guard
                 battle.ParryNote(next, grade);
                 judgeWord = perfect ? "PARRY" : (landed ? "GOOD" : "MISS");
                 if (perfect) qteEffects.SpawnSparks(HitX, HitY, 10, 1f);
@@ -1013,6 +1023,7 @@ namespace Tacetno433.Screens
                 if (swipeFor == SwipeFor.Skill)
                 {
                     battle.SkillNote(next, results[next]);                               // NOTE BY NOTE : the blow lands now
+                    NoteBlow(grade, last);                                               // ONE NOTE ONE BLOW : the musician's blow, on this frame
                     ShowEvents();
                 }
                 SwipeAction(grade, last);

@@ -462,6 +462,39 @@
         public static float FigureMirrorDepth = 0.17f;    //   fading out this share of its height under its feet
         public static float FigureFloorLight = 0.1f;      // FLOOR LIGHT : the soft pool of light each figure gives the floor under it (a legend's in its own colour)
 
+        //Attack Feel (Beta1 2 Nov, MATH ART round 6 part 5, docs/BETA1_DIRECTION.md 32.21) : how the code's fighters strike.
+        //ONE NOTE ONE BLOW : every note is one blow, on both sides, landing the moment the game judges it. The rules do not
+        //change and the damage lands when it always did, these only move the figures (they are looks, not balance, so
+        //docs/TACET_Balance.xlsx does not show them). A blow is KEY POSES joined in time (Core/Figure.cs) : READY or WIND
+        //(the wind up), CUT (fast, it ends on the hit), HOLD (kept a moment), BACK (home again).
+        //Seconds, in three weights : light (PAGANINI QUANTZ THE NOISE), medium (DUPORT PUNTO THE MUTE THE EMPTY CHOIR), heavy (PFUNDT).
+        public static float[] AttackWind = { 0.10f, 0.14f, 0.24f };      // the wind up (ZZZ : a heavy blow winds up long, a light one is quick)
+        public static float[] AttackCut = { 0.05f, 0.06f, 0.07f };       //   the blow itself, ending on the hit
+        public static float[] AttackHold = { 0.06f, 0.08f, 0.12f };      //   the pose kept on the hit (with a PERFECT's hit stop, more)
+        public static float[] AttackBack = { 0.25f, 0.30f, 0.35f };      //   home again, eased
+        public static float AttackWindBoss = 0.3f;                       // every boss winds up this long before a note
+        public static float AttackWindHeaviest = 0.35f;                  //   THE WEIGHT and THE STAFF this long
+        public static float AttackLean = 0.18f;                          // the whole body leans into a blow about this far (radians, each design takes a share)
+        public static float AttackStep = 26f;                            //   and steps about this far (units of the legends' sketch, 237 to their height)
+        public static float AttackRush = 0.2f;                           // TACET lunges about this share of its height at the band
+        public static float AttackStance = 0.22f;                        // READY : while its phrase plays a legend keeps this share of the first wind up (a fighting stance)
+        public static float AttackSettle = 0.1f;                         //   and eases into a new wind up from wherever it is in at most this long
+        public static float AttackBodyStiff = 2.2f;                      // the body's springs pull this much harder during a blow, so the whole body carries the weapon
+        public static float AttackFinisher = 1.25f;                      // FINISHER : the last note of a skill reaches this much further
+        public static float AttackFinisherHold = 2f;                     //   and is held this much longer
+        public static float AttackMiss = 0.5f;                           // a MISS : the blow is this big, it cuts the air
+        public static float AttackTap = 0.45f;                           // ROLL : each shake is a small blow this big
+        public static float AttackTapTime = 0.04f;                       //   cut in this long, held as long, home in four times that
+        public static float AttackChargeTime = 0.12f;                    // HOLD : the charged pose is reached in this long
+        public static float AttackChargeShake = 1.6f;                    //   and it trembles this much by the end of the hold (sketch units)
+        public static float AttackBraceTime = 0.3f;                      // TACET's turn : the one in front starts raising the guard this long before a note
+        public static float AttackBrace = 0.45f;                         //   this share of the way
+        public static float AttackGuardTime = 0.04f;                     // GUARD : snapped up in this long
+        public static float AttackGuardHold = 0.16f;                     //   and held this long
+        public static float AttackGuardPush = 0.45f;                     // GOOD : the guard holds but is pushed back, a knock this share of FigureKnock
+        public static float AttackSecondBeat = 0.09f;                    // TWO BEATS : PFUNDT's other hand comes down this long after the first
+        public static float AttackShadowLate = 0.22f;                    // THE NAMELESS MASTER : the shadow behind it strikes again this late
+
         //Hit Feel (Beta1 round 4) : what a blow looks like where it lands (Core/HitFx.cs). Nothing flies : the musician
         //strikes and the light happens on the enemy. Strings SLASH, winds SHOT, percussion SMASH, the SIGNATURE CROSS.
         public static float HitSize = 105f;               // the size of a blow's light (pixels), more for a stronger blow

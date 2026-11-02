@@ -152,6 +152,8 @@ namespace Tacetno433.Core
             public int Stars1;          //   of the first skill
             public int Stars2;          //   of the second skill
             public int Frame;           // the stage's frame when these were last told (a life lost while off stage is not a payment)
+            public Vector2 TargetAt;    // ONE NOTE ONE BLOW : the enemy this blow is at, on the page (PUNTO's ring flies there)
+            public bool Aimed;          //   there is one
         }
         public LegendCues Cues;
 
@@ -282,53 +284,69 @@ namespace Tacetno433.Core
             return pivot + new Vector2(d.X * cos - d.Y * sin, d.X * sin + d.Y * cos);
         }
 
-        //Pose Band : standing as the sketch has them, breathing, every floating part bobbing on its own beat, the weapon ready.
-        //ATTACK swings it (Strike), PARRY raises it, KO lets everything fall. Both levels use the same parts and poses, so F4
-        //swaps between them smoothly. (The attacks themselves are the next step after the characters, 13.89.)
+        //Pose Band : standing as the sketch has them, breathing, every floating part bobbing on its own beat, the weapon ready
+        //(BandRest). A blow joins the legend's KEY POSES (BandKey, ONE NOTE ONE BLOW in Figure.cs), KO lets everything fall.
+        //Both levels use the same parts and poses, so F4 swaps between them smoothly.
         private void PoseBand()
         {
+            KeyPose rest = BandRest();
+            if (down)
+            {
+                //KO : the parts drop to the floor one after another and lie there (the springs pull them down loose). The body
+                //lies along the floor, so the shapes drawn on it lie down too (the body's frame turns with Chest and Hip).
+                float t = Ease(moveTime / BattleRules.StageFallTime);
+                want[Head] = Sk(Vector2.Lerp(rest.Head, new Vector2(150f, 240f), t));
+                want[Chest] = Sk(Vector2.Lerp(rest.Chest, new Vector2(132f, 246f), t));
+                want[Hip] = Sk(Vector2.Lerp(rest.Hip, new Vector2(132f - (legend.Hip.Y - legend.Chest.Y), 250f), t));
+                want[HandA] = Sk(Vector2.Lerp(rest.HandA, new Vector2(176f, 252f), t));
+                want[HandB] = Sk(Vector2.Lerp(rest.HandB, new Vector2(60f, 254f), t));
+                want[FootA] = Sk(Vector2.Lerp(rest.FootA, new Vector2(84f, 260f), t));
+                want[FootB] = Sk(Vector2.Lerp(rest.FootB, new Vector2(100f, 260f), t));
+                want[Extra] = want[Head];
+                for (int b = 0; b < bits.Length; b++) bitWant[b] = Sk(new Vector2(70f + b * 26f, 258f));     // they fall too
+                weaponWant = MathHelper.Lerp(legend.Rest, 1.45f, t);
+                weapon2Want = MathHelper.Lerp(legend.Rest2, 1.5f, t);
+                pose = rest;
+                return;
+            }
+
+            pose = PoseNow(rest);
+            KeyPose k = pose;
+
+            //LEAN : the whole figure tips round its feet (the body's frame follows, so the shapes tip with it)
+            Vector2 pivot = new Vector2(SketchMiddle, SketchFloor);
+            want[Head] = Sk(LeanRound(k.Head, pivot, k.Lean * 1.15f + legend.Nod * 0.2f));
+            want[Chest] = Sk(LeanRound(k.Chest, pivot, k.Lean));
+            want[Hip] = Sk(LeanRound(k.Hip, pivot, k.Lean * 0.8f));
+            want[HandA] = Sk(k.HandA);
+            want[HandB] = Sk(k.HandB);
+            want[FootA] = Sk(k.FootA);
+            want[FootB] = Sk(k.FootB);
+            float orbit = clock * 1.2f + seed;
+            want[Extra] = want[Head] + new Vector2((float)Math.Cos(orbit) * Facing, (float)Math.Sin(orbit) * 0.35f) * (0.11f * Height);
+
+            //BITS : each design's small floating shapes, at the places the sketch has them, bobbing and turning slowly
+            bool floating = Level == 1;
+            for (int b = 0; b < bits.Length; b++)
+            {
+                Vector2 spot = BitSpot(b);
+                float a = clock * (0.5f + 0.13f * b) + b * 2.1f + seed;
+                float swing = floating ? 1f : 0.7f;
+                bitWant[b] = Sk(spot + new Vector2((float)Math.Cos(a) * 5f, (float)Math.Sin(a * 1.3f) * 4f) * swing);
+            }
+            weaponWant = k.Angle;
+            weapon2Want = k.Angle2;
+        }
+
+        //Band Rest : the legend standing as the sketch has them this frame, as a key (Head, Chest and Hip before the lean,
+        //hands and feet where they are). The lean of a hurt and the duck of a legend walking in are here too.
+        private KeyPose BandRest()
+        {
             float breath = (float)Math.Sin(clock * 1.9f + seed) * 1.2f;               // sketch units
-            float rest = legend.Rest;
-            float angle = rest;
-            float angle2 = legend.Rest2;
             float lean = legend.Lean;
             float duck = 0f;
             bool floating = Level == 1;
-            Vector2 head = legend.Head + new Vector2(0f, breath * 1.3f);
-            Vector2 chest = legend.Chest + new Vector2(0f, breath);
-            Vector2 hip = legend.Hip + new Vector2(0f, breath * 0.6f);
-            Vector2 handA = legend.HandA + new Vector2(0f, breath);
-            Vector2 handB = legend.HandB + new Vector2(0f, breath);
-            Vector2 footA = legend.FootA;
-            Vector2 footB = legend.FootB;
-            float reach = Vector2.Distance(legend.HandA, legend.Shoulder);
-
-            if (move == "attack")
-            {
-                float s = Strike();
-                float from, to;
-                SwingAngles(out from, out to);
-                angle = s < 0f ? MathHelper.Lerp(rest, from, -s) : MathHelper.Lerp(rest, to, s);
-                handA = legend.Shoulder + new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)) * reach;
-                lean += 0.06f * s;
-                if (legend.Weapon == Hammers)
-                {
-                    float late = MathHelper.Clamp((moveTime - 0.07f) / BattleRules.TurnStrikeTime, 0f, 1f);
-                    float s2 = Strike2(late);
-                    angle2 = s2 < 0f ? MathHelper.Lerp(angle2, from, -s2) : MathHelper.Lerp(angle2, to, s2);
-                    handB = new Vector2(84f, 104f) + new Vector2((float)Math.Cos(angle2), (float)Math.Sin(angle2)) * 40f;
-                }
-            }
-            else if (move == "parry")
-            {
-                float t = MathHelper.Clamp(moveTime / 0.08f, 0f, 1f);
-                angle = MathHelper.Lerp(rest, -1.35f, t);
-                angle2 = MathHelper.Lerp(angle2, -1.2f, t);
-                handA = Vector2.Lerp(handA, legend.Shoulder + new Vector2(14f, -22f), t);
-                if (legend.Weapon == Hammers) handB = Vector2.Lerp(handB, new Vector2(132f, 112f), t);
-                lean -= 0.035f;
-            }
-            else if (move == "hurt") lean -= 0.07f * (1f - moveTime / BattleRules.StageShiverTime);
+            if (move == "hurt") lean -= 0.07f * (1f - moveTime / BattleRules.StageShiverTime);
             else if (move == "enter") duck = -5f * (float)Math.Sin(MathHelper.Clamp(moveTime / BattleRules.StageSwapTime, 0f, 1f) * MathHelper.Pi);
 
             //FLOAT : at LEVEL 1 the parts drift each on its own slow beat, at LEVEL 2 they hold together
@@ -338,52 +356,395 @@ namespace Tacetno433.Core
             float bobF = (float)Math.Sin(clock * 1.5f + seed + 3.1f) * 1.4f * drift;
             float lift = floating ? 4f : 0f;                                           // LEVEL 1 : the feet hover a little over the floor
 
-            if (down)
-            {
-                //KO : the parts drop to the floor one after another and lie there (the springs pull them down loose). The body
-                //lies along the floor, so the shapes drawn on it lie down too (the body's frame turns with Chest and Hip).
-                float t = Ease(moveTime / BattleRules.StageFallTime);
-                want[Head] = Sk(Vector2.Lerp(head, new Vector2(150f, 240f), t));
-                want[Chest] = Sk(Vector2.Lerp(chest, new Vector2(132f, 246f), t));
-                want[Hip] = Sk(Vector2.Lerp(hip, new Vector2(132f - (legend.Hip.Y - legend.Chest.Y), 250f), t));
-                want[HandA] = Sk(Vector2.Lerp(handA, new Vector2(176f, 252f), t));
-                want[HandB] = Sk(Vector2.Lerp(handB, new Vector2(60f, 254f), t));
-                want[FootA] = Sk(Vector2.Lerp(footA, new Vector2(84f, 260f), t));
-                want[FootB] = Sk(Vector2.Lerp(footB, new Vector2(100f, 260f), t));
-                want[Extra] = want[Head];
-                for (int b = 0; b < bits.Length; b++) bitWant[b] = Sk(new Vector2(70f + b * 26f, 258f));     // they fall too
-                weaponWant = MathHelper.Lerp(rest, 1.45f, t);
-                weapon2Want = MathHelper.Lerp(angle2, 1.5f, t);
-                return;
-            }
-
-            //LEAN : the whole figure tips round its feet (the body's frame follows, so the shapes tip with it)
             Vector2 pivot = new Vector2(SketchMiddle, SketchFloor);
-            head = LeanRound(head + new Vector2(0f, duck), pivot, lean * 1.15f + legend.Nod * 0.2f);
-            chest = LeanRound(chest + new Vector2(0f, duck), pivot, lean);
-            hip = LeanRound(hip + new Vector2(0f, duck * 0.6f), pivot, lean * 0.8f);
-            handA = LeanRound(handA + new Vector2(0f, duck + bobA), pivot, lean);
-            handB = LeanRound(handB + new Vector2(0f, duck + bobB), pivot, lean * 0.6f);
-            want[Head] = Sk(head);
-            want[Chest] = Sk(chest);
-            want[Hip] = Sk(hip);
-            want[HandA] = Sk(handA);
-            want[HandB] = Sk(handB);
-            want[FootA] = Sk(footA + new Vector2(0f, -lift + bobF));
-            want[FootB] = Sk(footB + new Vector2(0f, -lift - bobF * 0.7f));
-            float orbit = clock * 1.2f + seed;
-            want[Extra] = want[Head] + new Vector2((float)Math.Cos(orbit) * Facing, (float)Math.Sin(orbit) * 0.35f) * (0.11f * Height);
+            KeyPose k = new KeyPose();
+            k.Head = legend.Head + new Vector2(0f, breath * 1.3f + duck);
+            k.Chest = legend.Chest + new Vector2(0f, breath + duck);
+            k.Hip = legend.Hip + new Vector2(0f, breath * 0.6f + duck * 0.6f);
+            k.HandA = LeanRound(legend.HandA + new Vector2(0f, breath + duck + bobA), pivot, lean);
+            k.HandB = LeanRound(legend.HandB + new Vector2(0f, breath + duck + bobB), pivot, lean * 0.6f);
+            k.FootA = legend.FootA + new Vector2(0f, -lift + bobF);
+            k.FootB = legend.FootB + new Vector2(0f, -lift - bobF * 0.7f);
+            k.Angle = legend.Rest;
+            k.Angle2 = legend.Rest2;
+            k.Lean = lean;
+            return k;
+        }
 
-            //BITS : each design's small floating shapes, at the places the sketch has them, bobbing and turning slowly
-            for (int b = 0; b < bits.Length; b++)
+        //Sketch Of : a point of the page as a point of the sketch, where the figure stands now (the other way from Sk)
+        private Vector2 SketchOf(Vector2 page)
+        {
+            return new Vector2(SketchMiddle + (page.X - Feet.X) / (H * Facing) * SketchHeight, SketchFloor + (page.Y - Feet.Y) / H * SketchHeight);
+        }
+
+        //======================================================================================
+        //KEY POSES : the five legends' blows (ONE NOTE ONE BLOW, docs/BETA1_DIRECTION.md 32.21.4)
+        //======================================================================================
+
+        //Each legend fights the way their instrument is played, and each note's way changes the blow (ACTION : the baton's
+        //way). The sketch's units, x toward TACET : the Head, Chest and Hip before the lean, the hands and feet where they go.
+        //The numbers that every design shares (how far a body leans and steps) come from BattleRules Attack Feel.
+        //   PAGANINI  DOWN-BOW : the bow drawn hard down like a violin played too hard, the way is the way the bow goes. IL CANNONE
+        //             : the violin raised and aimed like a cannon, the string snaps, the body jolts back (ZZZ, Ellen's three cuts)
+        //   QUANTZ    LUNGE : still with a hand behind the back like a teacher, then a long low step and a straight thrust,
+        //             heels together again. Her skills are the teacher's : the rapier conducts, and points at a friend (Miyabi)
+        //   PFUNDT    TWO BEATS : both fists high, the drum stretched, then one hand down and the other, the drum squashed.
+        //             TIMPANI ROLL shakes hand after hand, the last note both together (Koleda's hammer)
+        //   DUPORT    SHIELD BASH : the spike set, the whole slab leaning in, a step. LANCE's last thrust is the spike itself
+        //             shooting out from under the slab. To guard he plants the spike and stands as a wall (Caesar's shield)
+        //   PUNTO     SPIN THROW : the arm drawn far back, the body uncoiling, the ring thrown in an arc that reaches the enemy
+        //             as the hit lands (Cues.TargetAt), then caught again. FANFARE : the bell raised and blown
+        private KeyPose BandKey(KeyOf kind, KeyPose rest)
+        {
+            switch (legend.Weapon)
             {
-                Vector2 spot = BitSpot(b);
-                float a = clock * (0.5f + 0.13f * b) + b * 2.1f + seed;
-                float swing = floating ? 1f : 0.7f;
-                bitWant[b] = Sk(spot + new Vector2((float)Math.Cos(a) * 5f, (float)Math.Sin(a * 1.3f) * 4f) * swing);
+                case Rapier: return QuantzKey(kind, rest);
+                case Hammers: return PfundtKey(kind, rest);
+                case Shield: return DuportKey(kind, rest);
+                case Chakram: return PuntoKey(kind, rest);
+                default: return PaganiniKey(kind, rest);
             }
-            weaponWant = angle;
-            weapon2Want = angle2;
+        }
+
+        //Body : a key from the rest pose, the whole body leaned by lean (a share of AttackLean) and shifted (sketch units),
+        //the light of the blow set
+        private static KeyPose Body(KeyPose rest, float lean, float dx, float dy, float light)
+        {
+            KeyPose k = rest;
+            k.Lean = rest.Lean + lean * BattleRules.AttackLean;
+            k.Head += new Vector2(dx * 1.1f, dy);
+            k.Chest += new Vector2(dx, dy);
+            k.Hip += new Vector2(dx * 0.6f, dy * 0.6f);
+            k.Light = light;
+            return k;
+        }
+
+        //Weapon : the key's first weapon, at this angle turning this way, held in this hand
+        private static void Weapon(ref KeyPose k, float x, float y, float angle, int turn)
+        {
+            k.HandA = new Vector2(x, y);
+            k.Angle = angle;
+            k.Turn = turn;
+        }
+
+        //Other : the key's second hand (and its weapon, PFUNDT's back stick)
+        private static void Other(ref KeyPose k, float x, float y, float angle, int turn)
+        {
+            k.HandB = new Vector2(x, y);
+            k.Angle2 = angle;
+            k.Turn2 = turn;
+        }
+
+        //Paganini Key : DOWN-BOW, the bow's way is the baton's way (down, up, along to TACET, back) and CAPRICE's four cuts
+        //turn from one to the next. IL CANNONE (the second skill) aims, then fires and jolts back.
+        private KeyPose PaganiniKey(KeyOf kind, KeyPose rest)
+        {
+            KeyPose k;
+            if (kind == KeyOf.Guard)
+            {
+                k = Body(rest, guardClean ? -0.3f : -0.7f, -2f, 0f, 0.2f);
+                Weapon(ref k, 152f, 98f, -1.45f, -1);                                // the blade up in front
+                k.HandB = new Vector2(128f, 116f);
+                return k;
+            }
+            bool cannon = Cues.Button == 2;
+            if (kind == KeyOf.Charge || (cannon && kind == KeyOf.Wound))
+            {
+                k = Body(rest, -0.35f, -4f, 0f, 0.4f);                               // IL CANNONE : the violin raised and aimed
+                Weapon(ref k, 156f, 94f, -0.1f, 0);
+                k.HandB = new Vector2(138f, 104f);                                   //   held in both hands
+                k.Aim = 1f;
+                return k;
+            }
+            if (cannon)
+            {
+                k = Body(rest, -0.8f, -10f, -2f, 1f);                                //   the shot : the body jolts back, the muzzle kicks up
+                Weapon(ref k, 140f, 82f, -0.6f, -1);
+                k.HandB = new Vector2(120f, 100f);
+                k.Aim = 1f;
+                return k;
+            }
+            bool wound = kind == KeyOf.Wound;
+            switch (blowWay)
+            {
+                case Flick.Up:                                                        // UP-BOW : from low behind, up through the front
+                    k = wound ? Body(rest, -0.35f, -4f, 2f, 0f) : Body(rest, 0.6f, 6f, -4f, 1f);
+                    if (wound) { Weapon(ref k, 100f, 196f, 2.2f, 1); k.HandB = new Vector2(70f, 104f); }
+                    else { Weapon(ref k, 178f, 70f, -1.0f, -1); k.HandB = new Vector2(60f, 140f); }
+                    break;
+                case Flick.Right:                                                     // along to TACET : round over the top to straight ahead
+                    k = wound ? Body(rest, -0.45f, -6f, 0f, 0f) : Body(rest, 0.8f, 10f, 2f, 1f);
+                    if (wound) { Weapon(ref k, 86f, 104f, -2.75f, 1); k.HandB = new Vector2(140f, 136f); }
+                    else { Weapon(ref k, 200f, 116f, 0.2f, 1); k.HandB = new Vector2(60f, 112f); k.FootB = rest.FootB + new Vector2(10f, 0f); }
+                    break;
+                case Flick.Left:                                                      // back : reached out, then drawn back down past her
+                    k = wound ? Body(rest, 0.25f, 4f, 0f, 0f) : Body(rest, -0.55f, -6f, 2f, 1f);
+                    if (wound) { Weapon(ref k, 184f, 92f, -0.6f, -1); k.HandB = new Vector2(66f, 120f); }
+                    else { Weapon(ref k, 94f, 150f, 2.4f, 1); k.HandB = new Vector2(150f, 110f); }
+                    break;
+                default:                                                              // DOWN-BOW : high behind the head, then hard down in front
+                    k = wound ? Body(rest, -0.7f, -6f, -2f, 0f) : Body(rest, 0.9f, 8f, 6f, 1f);
+                    if (wound) { Weapon(ref k, 100f, 34f, -2.6f, 1); k.HandB = new Vector2(64f, 140f); k.FootB = rest.FootB + new Vector2(2f, -4f); }
+                    else
+                    {
+                        Weapon(ref k, 196f, 170f, 1.05f, 1);
+                        k.HandB = new Vector2(54f, 98f);
+                        k.FootA = rest.FootA + new Vector2(-4f, -3f);                // on her toes
+                        k.FootB = rest.FootB + new Vector2(10f, 0f);
+                    }
+                    break;
+            }
+            return k;
+        }
+
+        //Quantz Key : LUNGE, the height of the thrust is the baton's way (up a rising thrust, down a low one, back a flick of
+        //the tip). SOFT AIR conducts with the rapier, THE LESSON raises it, then points it back at the friend who learns.
+        private KeyPose QuantzKey(KeyOf kind, KeyPose rest)
+        {
+            KeyPose k;
+            Vector2 pivot = new Vector2(SketchMiddle, SketchFloor);
+            if (kind == KeyOf.Guard)
+            {
+                k = Body(rest, guardClean ? -0.2f : -0.6f, -2f, 0f, 0.2f);
+                Weapon(ref k, 138f, 92f, -1.15f, -1);                                // a high parry
+                return k;
+            }
+            bool wound = kind == KeyOf.Wound || kind == KeyOf.Charge;
+            if (Cues.Button == 1)                                                     // SOFT AIR : the rapier as a baton
+            {
+                bool low = blowWay == Flick.Down;
+                k = wound ? Body(rest, low ? -0.1f : 0.1f, 0f, -2f, 0f) : Body(rest, low ? 0.2f : -0.15f, 2f, low ? 2f : -3f, 1f);
+                if (wound) Weapon(ref k, low ? 140f : 144f, low ? 84f : 128f, low ? -1.2f : 0.5f, low ? -1 : 1);
+                else Weapon(ref k, low ? 150f : 146f, low ? 132f : 80f, low ? 0.55f : -1.3f, low ? 1 : -1);
+                return k;
+            }
+            if (Cues.Button == 2)                                                     // THE LESSON : raised, then pointed at the friend
+            {
+                bool point = blowWay != Flick.Up;
+                k = wound ? Body(rest, 0f, 0f, 0f, 0f) : Body(rest, point ? -0.2f : -0.1f, point ? -4f : 0f, point ? 0f : -4f, 1f);
+                if (wound) Weapon(ref k, point ? 136f : 140f, point ? 70f : 110f, point ? -1.4f : -0.4f, 0);
+                else if (point) Weapon(ref k, 88f, 116f, 2.35f, 0);                  //   back and down, at the band
+                else Weapon(ref k, 132f, 66f, -1.45f, -1);
+                return k;
+            }
+            switch (blowWay)
+            {
+                case Flick.Left:                                                      // a flick of the tip, back over her head
+                    k = wound ? Body(rest, 0.1f, 2f, 0f, 0f) : Body(rest, -0.2f, -4f, 0f, 1f);
+                    if (wound) Weapon(ref k, 172f, 108f, 0.15f, 1);
+                    else Weapon(ref k, 134f, 96f, -1.95f, -1);
+                    return k;
+                case Flick.Up:
+                case Flick.Down:
+                default:
+                    {
+                        if (wound)
+                        {
+                            k = Body(rest, -0.15f, -4f, 0f, 0f);                     // drawn back, the front foot lifting to step
+                            Weapon(ref k, 124f, 110f, -0.14f, 0);
+                            k.FootB = rest.FootB + new Vector2(4f, -5f);
+                            return k;
+                        }
+                        float step = BattleRules.AttackStep * 1.3f;                  // the LUNGE : a long low step and a straight thrust
+                        float low = blowWay == Flick.Down ? 22f : (blowWay == Flick.Up ? 6f : 12f);
+                        k = Body(rest, 0.55f, step, low, 1f);
+                        float y = blowWay == Flick.Down ? 150f : (blowWay == Flick.Up ? 84f : 108f);
+                        float a = blowWay == Flick.Down ? 0.42f : (blowWay == Flick.Up ? -0.55f : -0.05f);
+                        Weapon(ref k, 216f, y, a, 0);
+                        k.FootB = new Vector2(legend.FootB.X + step * 2.3f, SketchFloor);   // the front foot far forward
+                        k.FootA = new Vector2(legend.FootA.X - 5f, SketchFloor);
+                        k.HandB = LeanRound(legend.HandB + new Vector2(step * 0.8f, low), pivot, k.Lean * 0.6f);   // the hand stays behind her back
+                        return k;
+                    }
+            }
+        }
+
+        //Pfundt Key : TWO BEATS, the hand that strikes is the blow's side (0 the front, 1 the back, 2 both). Down pounds the
+        //floor, up is an upper cut, along to TACET a hook, back a swing back. THUNDER CALL beats both sticks on his own drum.
+        private KeyPose PfundtKey(KeyOf kind, KeyPose rest)
+        {
+            KeyPose k;
+            if (kind == KeyOf.Guard)
+            {
+                k = Body(rest, guardClean ? -0.2f : -0.6f, -2f, 0f, 0.2f);          // the two sticks crossed in front
+                Weapon(ref k, 146f, 102f, -2.1f, -1);
+                Other(ref k, 128f, 98f, -1.0f, 0);
+                return k;
+            }
+            bool wound = kind == KeyOf.Wound || kind == KeyOf.Charge;
+            if (wound)
+            {
+                k = Body(rest, -0.2f, 0f, -10f, 0f);                                 // both fists high, the drum stretched
+                k.Squash = -0.25f;
+                if (blowWay == Flick.Up && blowSide != 2)
+                {
+                    Weapon(ref k, 128f, 196f, 1.9f, 1);                               //   (an upper cut starts low)
+                    Other(ref k, 96f, 60f, -2.1f, 0);
+                    if (blowSide == 1) { Weapon(ref k, 150f, 52f, -2.3f, -1); Other(ref k, 110f, 198f, 1.9f, 1); }
+                    return k;
+                }
+                Weapon(ref k, 150f, 50f, -2.3f, -1);
+                Other(ref k, 124f, 46f, -2.1f, 0);
+                return k;
+            }
+            k = Body(rest, 0.45f, 4f, 10f, 1f);                                      // the drum squashed by the blow
+            k.Squash = blowSide == 2 ? 1.3f : 1f;
+            if (Cues.Button == 2)                                                     // THUNDER CALL : both sticks on the skin of his drum
+            {
+                k = Body(rest, 0.1f, 0f, 8f, 1f);
+                k.Squash = 1.3f;
+                Weapon(ref k, 150f, 84f, 2.32f, 1);
+                Other(ref k, 76f, 84f, 0.67f, 0);
+                return k;
+            }
+            float x = 170f, y = 206f, a = 0.75f;                                      // DOWN : the floor pounded
+            if (blowWay == Flick.Up) { x = 172f; y = 72f; a = -1.2f; }               // UP : an upper cut
+            else if (blowWay == Flick.Right) { x = 186f; y = 124f; a = 0.1f; }       // a hook at TACET
+            else if (blowWay == Flick.Left) { x = 126f; y = 152f; a = 2.2f; }        // a swing back
+            int turn = blowWay == Flick.Up ? -1 : 1;
+            if (blowSide == 1)                                                        // the back hand strikes, the front one bounces up
+            {
+                Weapon(ref k, 164f, 112f, -0.6f, 0);
+                Other(ref k, x - 28f, y + 4f, a + 0.15f, turn);
+            }
+            else if (blowSide == 2)                                                   // FINISHER : both together
+            {
+                Weapon(ref k, x, y, a, turn);
+                Other(ref k, x - 30f, y + 4f, a + 0.15f, turn);
+            }
+            else
+            {
+                Weapon(ref k, x, y, a, turn);
+                Other(ref k, 124f, 50f, -2.1f, 0);                                   //   the other still up, the second beat to come
+            }
+            return k;
+        }
+
+        //Duport Key : SHIELD BASH, the slab leans in at the baton's angle (up a rising bash, down a slam). SHIELD stands as a
+        //wall (the spike set, the lance planted), LANCE's last thrust shoots the spike out from under the slab.
+        private KeyPose DuportKey(KeyOf kind, KeyPose rest)
+        {
+            KeyPose k;
+            if (kind == KeyOf.Guard || kind == KeyOf.Charge || (Cues.Button == 1 && kind == KeyOf.Wound))
+            {
+                float lean = kind == KeyOf.Charge ? 0.45f : (kind == KeyOf.Guard && !guardClean ? -0.25f : 0.3f);
+                k = Body(rest, lean, 4f, 0f, 0.3f);                                  // THE WALL : the slab forward, the lance planted
+                Weapon(ref k, 162f, 134f, 1.45f, 1);
+                k.HandB = new Vector2(84f, 146f);
+                k.FootA = new Vector2(legend.FootA.X, SketchFloor);
+                return k;
+            }
+            bool wound = kind == KeyOf.Wound;
+            if (Cues.Button == 1)                                                     // SHIELD let go : a push forward
+            {
+                k = Body(rest, 0.9f, 14f, 2f, 1f);
+                Weapon(ref k, 176f, 132f, 1.3f, 1);
+                k.FootA = new Vector2(legend.FootA.X + 10f, SketchFloor);
+                return k;
+            }
+            if (Cues.Button == 2 && blowLast)                                         // LANCE's last : the spike shoots out
+            {
+                k = wound ? Body(rest, -0.5f, -6f, -4f, 0f) : Body(rest, -0.3f, -4f, -6f, 1f);
+                if (wound) { Weapon(ref k, 140f, 124f, -0.25f, 0); k.FootA = new Vector2(100f, 256f); }
+                else { Weapon(ref k, 200f, 118f, -0.08f, 0); k.FootA = new Vector2(214f, 236f); }
+                return k;
+            }
+            switch (blowWay)
+            {
+                case Flick.Up:                                                        // a rising bash from a crouch
+                    k = wound ? Body(rest, -0.4f, -6f, 6f, 0f) : Body(rest, 0.8f, 18f, -10f, 1f);
+                    if (wound) Weapon(ref k, 138f, 140f, 0.2f, 0);
+                    else Weapon(ref k, 178f, 96f, -0.6f, -1);
+                    break;
+                case Flick.Down:                                                      // risen, then slammed down
+                    k = wound ? Body(rest, -0.4f, -4f, -8f, 0f) : Body(rest, 1.35f, 20f, 14f, 1f);
+                    if (wound) Weapon(ref k, 140f, 110f, -0.7f, 0);
+                    else Weapon(ref k, 180f, 150f, 0.35f, 1);
+                    break;
+                case Flick.Left:                                                      // the lance swept back
+                    k = wound ? Body(rest, 0.3f, 6f, 0f, 0f) : Body(rest, -0.6f, -10f, 2f, 1f);
+                    if (wound) Weapon(ref k, 176f, 118f, -0.2f, 0);
+                    else Weapon(ref k, 110f, 150f, 2.5f, 1);
+                    break;
+                default:                                                              // SHIELD BASH : rocked back, then the whole slab in, a step
+                    k = wound ? Body(rest, -0.65f, -8f, 0f, 0f) : Body(rest, 1.2f, 22f, 4f, 1f);
+                    if (wound) Weapon(ref k, 136f, 128f, -0.3f, 0);
+                    else
+                    {
+                        Weapon(ref k, 186f, 126f, -0.1f, 0);
+                        k.HandB = new Vector2(98f, 142f);
+                        k.FootA = new Vector2(legend.FootA.X + 12f, SketchFloor);
+                    }
+                    break;
+            }
+            k.FootA = wound ? new Vector2(legend.FootA.X - 2f, SketchFloor) : k.FootA;   // the spike stays set in the floor
+            return k;
+        }
+
+        //Punto Key : SPIN THROW, the arm drawn far back and the ring thrown (the ATTACK throws the ring in the hand, CHAKRAM the
+        //coil off the waist). The baton's way is the ring's arc (Throw Lift). FANFARE raises the bell and both arms.
+        private KeyPose PuntoKey(KeyOf kind, KeyPose rest)
+        {
+            KeyPose k;
+            if (kind == KeyOf.Guard)
+            {
+                k = Body(rest, guardClean ? -0.2f : -0.6f, -2f, 0f, 0.2f);
+                Weapon(ref k, 150f, 78f, rest.Angle, 0);                              // the ring held up before the head
+                k.HandB = new Vector2(90f, 120f);
+                return k;
+            }
+            bool wound = kind == KeyOf.Wound || kind == KeyOf.Charge;
+            if (Cues.Button == 1)                                                     // FANFARE : a breath in, then the bell raised and blown
+            {
+                k = wound ? Body(rest, -0.2f, -2f, 3f, 0.2f) : Body(rest, -0.7f, -2f, -8f, 1f);
+                if (wound) { Weapon(ref k, 150f, 100f, rest.Angle, 0); k.HandB = new Vector2(88f, 116f); }
+                else { Weapon(ref k, 178f, 62f, rest.Angle, 0); k.HandB = new Vector2(70f, 74f); }
+                return k;
+            }
+            if (wound)
+            {
+                k = Body(rest, -0.55f, -8f, 2f, 0f);                                 // coiled : the arm far back, the other forward
+                Weapon(ref k, 70f, 112f, rest.Angle, 0);
+                k.HandB = new Vector2(150f, 112f);
+                k.FootB = rest.FootB + new Vector2(4f, -4f);
+                return k;
+            }
+            k = Body(rest, 0.9f, 12f, 0f, 1f);                                       // uncoiled : the arm out, the ring away
+            Weapon(ref k, 192f, 98f, rest.Angle, 0);
+            k.HandB = new Vector2(80f, 132f);
+            k.FootA = rest.FootA + new Vector2(-2f, -4f);
+            k.Throw = 1f;
+            return k;
+        }
+
+        //Throw Lift : how high the ring's arc rises, a share of the way (up a lob over, down skimming the floor, back a wide
+        //curve round)
+        private float ThrowLift
+        {
+            get
+            {
+                switch (blowWay)
+                {
+                    case Flick.Up: return 0.42f;
+                    case Flick.Down: return -0.1f;
+                    case Flick.Left: return 0.26f;
+                    default: return 0.16f;
+                }
+            }
+        }
+
+        //Thrown At : where a thrown ring is, from where it leaves (home) to the target and back. Out it rises on its arc, on
+        //its way back (BACK) it comes in lower.
+        private Vector2 ThrownAt(Vector2 home)
+        {
+            float t = MathHelper.Clamp(pose.Throw, 0f, 1f);
+            if (t <= 0f) return home;
+            Vector2 to = Cues.Aimed ? Cues.TargetAt : Local(0.85f, -0.5f);
+            Vector2 d = to - home;
+            float lift = phase == Phase.Back ? -0.12f : ThrowLift;
+            Vector2 mid = (home + to) * 0.5f + new Vector2(0f, -Math.Abs(d.X) * lift);
+            float u = 1f - t;
+            return home * (u * u) + mid * (2f * u * t) + to * (t * t);
         }
 
         //Bit Spot : where each design's floating shapes sit in the sketch (embers, leaves, dust by the feet, drops, sparks)
@@ -404,30 +765,20 @@ namespace Tacetno433.Core
             }
         }
 
-        //Strike 2 : the second hammer's swing, a little after the first (the same beats as Strike)
-        private float Strike2(float p)
-        {
-            float saved = moveTime;
-            moveTime = p * BattleRules.TurnStrikeTime;
-            float s = Strike();
-            moveTime = saved;
-            return s;
-        }
-
         //Tick Band : the timers of the LEGEND CUES (Figure.cs Update calls it once a frame)
         private void TickBand(float dt)
         {
             if (Of != Sort.Musician) return;
             bleed = Math.Max(0f, bleed - dt / BattleRules.FigureBleedTime);
 
-            //IL CANNONE : the LIFE STRING leaves the head as the shot lands, then grows back
-            bool cannon = legend.Weapon == Cannone && move == "attack" && Cues.Button == 2;
-            if (cannon && Strike() > 0f) stringLeft = Math.Min(stringLeft, 1f - Strike());
+            //IL CANNONE : the LIFE STRING leaves the head as the shot is let go (its blow's light), then grows back
+            bool cannon = legend.Weapon == Cannone && Cues.Button == 2 && (phase == Phase.Cut || phase == Phase.Hold);
+            if (cannon) stringLeft = Math.Min(stringLeft, 1f - pose.Light);
             else stringLeft = Math.Min(1f, stringLeft + dt * BattleRules.FigureStringGrow);
 
             //TURN OF THE HAND : PFUNDT's key turns slowly, fast while a skill plays, fastest in TIMPANI ROLL's roll
             float spin = BattleRules.FigureKeyIdle;
-            if (move == "attack" && Cues.Button > 0) spin = Cues.Button == 1 ? BattleRules.FigureKeyRoll : BattleRules.FigureKeySkill;
+            if (Blowing && Cues.Button > 0) spin = Cues.Button == 1 ? BattleRules.FigureKeyRoll : BattleRules.FigureKeySkill;
             keySpeed = MathHelper.Lerp(keySpeed, spin, Math.Min(1f, dt * 4f));
             keyTurn += keySpeed * dt;
 
@@ -476,11 +827,12 @@ namespace Tacetno433.Core
             headSin = (float)Math.Sin(headTurn);
         }
 
-        //T : a point of the sketch on the body (its frame)
+        //T : a point of the sketch on the body (its frame). SQUASH : a blow presses the body, shorter and wider (PFUNDT's drum).
         private Vector2 T(float x, float y)
         {
-            float dx = (x - legend.Chest.X) * k * Facing;
-            float dy = (y - legend.Chest.Y) * k;
+            float squash = pose.Squash;
+            float dx = (x - legend.Chest.X) * k * Facing * (1f + 0.06f * squash);
+            float dy = (y - legend.Chest.Y) * k * (1f - 0.12f * squash);
             return frameChest + new Vector2(dx * frameCos - dy * frameSin, dx * frameSin + dy * frameCos);
         }
 
@@ -653,9 +1005,13 @@ namespace Tacetno433.Core
             if (bleed > 0f) sway += (float)Math.Sin(clock * 31f) * 0.12f * bleed;
             DropShape(Hd(112, 46), HA(-MathHelper.PiOver2), 14f * k, 12.5f * k, sway * Facing, pale, Color.Lerp(pale, edge, 0.35f));
 
-            //Front hand : a needle pointing forward, holding IL CANNONE at its tip
+            //Front hand : a needle pointing forward, holding IL CANNONE at its tip. It turns as the arm does (from the
+            //shoulder to the hand), so in a big swing it stays an arm and does not spin with the blade.
             Vector2 grip = body[HandA].At;
-            Vector2 needle = Way(weapon.At - legend.Rest);
+            Vector2 arm = grip - T(legend.Shoulder.X, legend.Shoulder.Y);
+            Vector2 armRest = new Vector2((legend.HandA.X - legend.Shoulder.X) * Facing, legend.HandA.Y - legend.Shoulder.Y);
+            float turn = arm.LengthSquared() > 1f ? MathHelper.WrapAngle((float)(Math.Atan2(arm.Y, arm.X) - Math.Atan2(armRest.Y, armRest.X))) : 0f;
+            Vector2 needle = Way(turn);
             Shapes.Kite(grip - needle * (27f * k), grip, 8f * k, 0.38f, white);
             DrawCannone(grip, weapon.At);
         }
@@ -828,9 +1184,9 @@ namespace Tacetno433.Core
         //the six one after another (KEY RUN), a scale played down.
         private float KeyLight(int i)
         {
-            if (move == "attack" && Cues.Button > 0)
+            if (Blowing && Cues.Button > 0)
             {
-                float run = moveTime / BattleRules.FigureKeyRunTime * 6f - i;
+                float run = phraseTime / BattleRules.FigureKeyRunTime * 6f - i;
                 if (run > 0f && run < 2.5f) return 1f - run / 2.5f;
                 return run >= 2.5f ? 0.15f : 0f;
             }
@@ -1231,20 +1587,16 @@ namespace Tacetno433.Core
             //The pipe from the head down to the coil
             Bow3(Hd(122, 73), T(128, 100), T(121, 118), 1.3f * k, C(Tint, drawAlpha * 0.8f));
 
-            //THE COIL : round the waist (CHAKRAM throws it, WHIRLWIND doubles it)
-            float thrown = move == "attack" && Cues.Button == 2 ? Math.Max(0f, Strike()) : 0f;
+            //THE COIL : round the waist (CHAKRAM throws it at the enemy and catches it again, WHIRLWIND doubles it)
+            float thrown = Cues.Button == 2 ? pose.Throw : 0f;
             float stay = 1f - MathHelper.Clamp(thrown * 3f, 0f, 1f);
             if (stay > 0.02f)
             {
                 DrawCoil(0f, C(Tint, drawAlpha * stay));
                 if (Legendary(Cues.Stars2)) DrawCoil(7f, C(Tint, drawAlpha * stay * 0.75f));
             }
-            if (thrown > 0f)                                                                // the coil flying as a ring
-            {
-                Vector2 waist = T(118, 132);
-                Vector2 far = Local(0.85f, -0.45f);
-                DrawRing(Vector2.Lerp(waist, far, thrown * thrown), 13f * k, clock * 22f * Facing, false);
-            }
+            if (thrown > 0.01f)                                                             // the coil flying as a ring
+                DrawRing(ThrownAt(T(118, 132)), 13f * k, clock * 22f * Facing, false);
 
             if (!floating) Limb(T(126, 96), body[HandA].At, TW(0.4f) * (6f * k), legend.Limb * k, 1.2f * k, white);
 
@@ -1257,7 +1609,8 @@ namespace Tacetno433.Core
 
             //Front hand and the chakram
             Vector2 grip = body[HandA].At;
-            DrawRing(ChakramAt(grip), 15f * k, clock * (move == "attack" && Cues.Button <= 0 ? 22f : 2.2f) * Facing, Legendary(Cues.Stars0));
+            bool spinning = Cues.Button <= 0 && pose.Throw > 0.01f;
+            DrawRing(ChakramAt(grip), 15f * k, clock * (spinning ? 22f : 2.2f) * Facing, Legendary(Cues.Stars0));
             Shapes.Circle(grip, 3.8f * k, white);
         }
 
@@ -1289,14 +1642,13 @@ namespace Tacetno433.Core
             if (wide) Shapes.Ring(middle, r + 7f * k, 1.2f * k, C(Tint, drawAlpha * 0.8f));
         }
 
-        //Chakram At : where the held ring is. Beside the hand, thrown out and back during an ATTACK (THROW)
+        //Chakram At : where the held ring is. Beside the hand, and in an ATTACK (SPIN THROW) thrown at the enemy, reaching it
+        //as the hit lands, then back into the hand (ThrownAt)
         private Vector2 ChakramAt(Vector2 grip)
         {
             Vector2 held = grip + new Vector2(22f * Facing, -8f) * k;
-            if (move != "attack" || Cues.Button > 0) return held;
-            float s = Math.Max(0f, Strike());
-            Vector2 far = Local(0.85f, -0.6f);
-            return Vector2.Lerp(held, far, s * s);
+            if (Cues.Button > 0) return held;
+            return ThrownAt(held);
         }
 
         //======================================================================================
@@ -1488,7 +1840,7 @@ namespace Tacetno433.Core
             SetFrame();
             GlowFloor(sb, 0.5f, Tint * (BattleRules.FigureFloorLight * alpha));          // FLOOR LIGHT : its own colour on the floor under it
             float power = BattleRules.FigureGlow * alpha;
-            float strike = move == "attack" ? Math.Max(0f, Strike()) : 0f;
+            float strike = MathHelper.Clamp(pose.Light, 0f, 1f);                          // the blow's light, strongest on the hit
             float tier = 1f + 0.25f * Math.Min(Cues.Stars0, RehearsalList.Most);
             float blade = power * (0.4f + strike * 0.7f) * tier;
             Vector2 grip = body[HandA].At;

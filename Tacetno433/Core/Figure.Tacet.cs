@@ -149,60 +149,26 @@ namespace Tacetno433.Core
         //Pose : TACET
         //======================================================================================
 
+        //Pose Tacet : standing as its card in the sketch has it (TacetRest), a blow joining its KEY POSES (TacetKey, ONE NOTE
+        //ONE BLOW in Figure.cs). Every point is a share of its height, x toward the band.
         private void PoseTacet()
         {
-            float bob = (float)Math.Sin(clock * 1.6f + seed) * 0.014f;
-            float s = move == "attack" ? Strike() : 0f;
-            float lunge = Math.Max(0f, s) * 0.08f - Math.Max(0f, -s) * 0.03f;      // forward is toward the band
-            float raise = Math.Max(0f, -s);                                        // drawn back before the blow
+            KeyPose rest = TacetRest();
+            pose = down ? rest : PoseNow(rest);
+            KeyPose k = pose;
+            want[Head] = Local(k.Head.X, k.Head.Y);
+            want[Chest] = Local(k.Chest.X, k.Chest.Y);
+            want[Hip] = Local(k.Hip.X, k.Hip.Y);
+            want[HandA] = Local(k.HandA.X, k.HandA.Y);
+            want[HandB] = Local(k.HandB.X, k.HandB.Y);
+            want[FootA] = Local(k.FootA.X, k.FootA.Y);
+            want[FootB] = Local(k.FootB.X, k.FootB.Y);
             float orbit = clock * 0.9f + seed;
             want[Extra] = Local((float)Math.Cos(orbit) * 0.3f, -0.6f + (float)Math.Sin(orbit) * 0.12f);
-
-            switch (design)
+            if (design == Nameless)                                                      // THE NAMELESS MASTER : its shadow is the master a moment late
             {
-                case Static:                                                             // THE NOISE : a nervous twitch
-                    {
-                        int step = (int)((clock + seed) * 6f);
-                        LookRest(lunge + (Hash(step, 3) - 0.5f) * 0.014f, bob + (Hash(step, 5) - 0.5f) * 0.012f, 0.4f);
-                    }
-                    break;
-                case Damper:                                                             // THE WEIGHT : slow and heavy, its blow presses down
-                    LookRest(lunge * 0.4f, bob * 0.5f + Math.Max(0f, s) * 0.05f, 0.6f);
-                    break;
-                case Choir:                                                              // THE EMPTY CHOIR : LEVEL 2's hands up, leading the silence
-                    LookRest(lunge * 0.6f, bob, 0.4f);
-                    Set(HandA, 0.2f + lunge, -0.86f + bob * 1.2f);
-                    Set(HandB, -0.2f, -0.85f + bob * 0.8f);
-                    break;
-                case Requiem:                                                            // REQUIEM : tall and still, the quill swings on its blow
-                    LookRest(lunge * 0.6f, bob, 0.4f);
-                    Set(HandA, -0.124f + Math.Max(0f, s) * 0.45f, -0.44f + bob - raise * 0.1f - Math.Max(0f, s) * 0.08f);
-                    break;
-                case Nameless:                                                           // THE NAMELESS MASTER : it bows into its blow
-                    LookRest(lunge * 0.7f, bob, 0.4f);
-                    want[Extra] = body[Chest].At;                                        //   its shadow rides the loose Extra spring, so it comes a moment late
-                    break;
-                case Devil:                                                              // THE DEVIL'S STRING : its blow draws the scythe across its own string
-                    LookRest(lunge * 0.5f, bob, 0.3f);
-                    Set(HandA, 0.22f + Math.Max(0f, s) * 0.42f - raise * 0.04f, -0.5f + bob - raise * 0.08f + Math.Max(0f, s) * 0.06f);
-                    break;
-                case Crown:                                                              // THE DEAF CROWN : the bust stands still, the hand gives orders
-                    LookRest(lunge * 0.3f, bob * 0.5f, 0.6f);
-                    Set(HandA, -0.36f + Math.Max(0f, s) * 0.55f, -0.69f + bob * 1.5f - raise * 0.1f + Math.Max(0f, s) * 0.12f);
-                    break;
-                case Staff:                                                              // THE STAFF : it rises a little as it lifts the staff, the staff swings on its blow
-                    {
-                        float y = bob * 0.5f - StaffBeat() * 0.012f;
-                        LookRest(lunge * 0.5f, y, 0.5f);
-                        Set(HandA, 0.22f + Math.Max(0f, s) * 0.3f, -0.5f + y - raise * 0.06f);
-                    }
-                    break;
-                case Cantor:                                                             // THE BLIND CANTOR : it sways a little, as if listening
-                    LookRest(lunge * 0.5f + (float)Math.Sin(clock * 0.7f + seed) * 0.008f, bob, 0.5f);
-                    break;
-                default:                                                                 // THE MUTE : it leans into its blow
-                    LookRest(lunge, bob, 0.2f);
-                    break;
+                Vector2 late = Shadow(k.Chest);
+                want[Extra] = Local(late.X * 1.2f, late.Y);
             }
             for (int b = 0; b < bits.Length; b++)
             {
@@ -213,32 +179,242 @@ namespace Tacetno433.Core
             weapon2Want = 0f;
         }
 
-        private void Set(int part, float x, float y)
+        //Tacet Rest : how each one stands and breathes, as a key (the four looks the same way, a boss with its hand where its
+        //card has it)
+        private KeyPose TacetRest()
         {
-            want[part] = Local(x, y);
+            float bob = (float)Math.Sin(clock * 1.6f + seed) * 0.014f;
+            KeyPose k;
+            switch (design)
+            {
+                case Static:                                                             // THE NOISE : a nervous twitch
+                    {
+                        int step = (int)((clock + seed) * 6f);
+                        k = LookRest((Hash(step, 3) - 0.5f) * 0.014f, bob + (Hash(step, 5) - 0.5f) * 0.012f, 0.4f);
+                    }
+                    break;
+                case Damper:                                                             // THE WEIGHT : slow and heavy
+                    k = LookRest(0f, bob * 0.5f, 0.6f);
+                    break;
+                case Choir:                                                              // THE EMPTY CHOIR : LEVEL 2's hands up, leading the silence
+                    k = LookRest(0f, bob, 0.4f);
+                    k.HandA = new Vector2(0.2f, -0.86f + bob * 1.2f);
+                    k.HandB = new Vector2(-0.2f, -0.85f + bob * 0.8f);
+                    break;
+                case Requiem:                                                            // REQUIEM : tall and still, the quill held ready
+                    k = LookRest(0f, bob, 0.4f);
+                    k.HandA = new Vector2(-0.124f, -0.44f + bob);
+                    break;
+                case Nameless:
+                    k = LookRest(0f, bob, 0.4f);
+                    break;
+                case Devil:                                                              // THE DEVIL'S STRING : the bow hand by its string
+                    k = LookRest(0f, bob, 0.3f);
+                    k.HandA = new Vector2(0.22f, -0.5f + bob);
+                    break;
+                case Crown:                                                              // THE DEAF CROWN : the bust stands still, the hand gives orders
+                    k = LookRest(0f, bob * 0.5f, 0.6f);
+                    k.HandA = new Vector2(-0.36f, -0.69f + bob * 1.5f);
+                    break;
+                case Staff:                                                              // THE STAFF : beating time on its own foot between blows
+                    {
+                        float beat = StaffBeat();
+                        float y = bob * 0.5f - beat * 0.012f;
+                        k = LookRest(0f, y, 0.5f);
+                        float lift = beat * 16f / LookTall;
+                        k.HandA = new Vector2(0.22f, -0.5f + y - lift);                  // the top of the staff
+                        k.HandB = StaffTip + new Vector2(0f, -lift);                    // its tip over its own foot
+                    }
+                    break;
+                case Cantor:                                                             // THE BLIND CANTOR : it sways a little, as if listening
+                    k = LookRest((float)Math.Sin(clock * 0.7f + seed) * 0.008f, bob, 0.5f);
+                    break;
+                default:                                                                 // THE MUTE
+                    k = LookRest(0f, bob, 0.2f);
+                    break;
+            }
+            return k;
         }
 
         //Look Rest : the four looks stand the same way (the sketch rides on the Chest spring, see LOOK FRAME). x is the push
-        //toward the band, y the bob, follow how much of the push the Hip takes (less = it leans more into the blow)
-        private void LookRest(float x, float y, float follow)
+        //toward the band, y the bob, follow how much of the push the Hip takes (less = it leans more into it)
+        private static KeyPose LookRest(float x, float y, float follow)
         {
-            Set(Head, x * 1.2f, -0.8f + y);
-            Set(Chest, x, -0.5f + y);
-            Set(Hip, x * follow, -0.2f + y * 0.5f);
-            Set(HandA, 0.22f + x * 1.6f, -0.5f + y);
-            Set(HandB, -0.2f, -0.45f + y);
-            Set(FootA, -0.08f, 0f);
-            Set(FootB, 0.08f, 0f);
+            KeyPose k = new KeyPose();
+            k.Head = new Vector2(x * 1.2f, -0.8f + y);
+            k.Chest = new Vector2(x, -0.5f + y);
+            k.Hip = new Vector2(x * follow, -0.2f + y * 0.5f);
+            k.HandA = new Vector2(0.22f + x * 1.6f, -0.5f + y);
+            k.HandB = new Vector2(-0.2f, -0.45f + y);
+            k.FootA = new Vector2(-0.08f, 0f);
+            k.FootB = new Vector2(0.08f, 0f);
+            return k;
         }
 
+        //Staff Tip : where THE STAFF's tip rests, just over its own rotting foot (the sketch's 150, 252)
+        private static readonly Vector2 StaffTip = new Vector2(-(150f - LookMiddle) / LookTall, (252f - LookFloor) / LookTall);
+
         //Staff Beat : THE STAFF beats time on its own foot every 1.7 seconds. 1 = the staff lifted highest, then it comes down
-        //fast to 0 : the slam, at 0.45 of each beat (TE DEUM)
+        //fast to 0 : the slam, at 0.45 of each beat (TE DEUM). Not while it strikes (its blows are its own).
         private float StaffBeat()
         {
+            if (Blowing) return 0f;
             float t = (clock + seed) % 1.7f;
             if (t < 0.35f) return Ease(t / 0.35f);
             if (t < 0.45f) return 1f - (t - 0.35f) / 0.1f;
             return 0f;
+        }
+
+        //======================================================================================
+        //KEY POSES : TACET's blows (ONE NOTE ONE BLOW, docs/BETA1_DIRECTION.md 32.21.4)
+        //======================================================================================
+
+        //Every one winds up while the note's ring closes and strikes on the note's beat. The four looks lunge about AttackRush
+        //of their height at the band, a boss keeps its monument still and moves the part that tells its story 30 to 50% of
+        //its height. In shares of the height, x toward the band :
+        //   THE MUTE        leans back, then jabs its finger out like a "shh!"
+        //   THE NOISE       comes closer in jumps, like a picture losing its signal (Steps), its bits burst on the blow
+        //   THE WEIGHT      lifted slowly on its cords (the longest wind up), then dropped to press, squashed, slowly back
+        //   THE EMPTY CHOIR hands raised like a conductor's, then closed and cut down (a cut off), every mouth lit
+        //   THE DEAF CROWN  the great hand raised open, then brought down as a conductor's down beat, the head never turning
+        //   REQUIEM         the quill raised and turned back, then one stroke of handwriting down at the band
+        //   THE NAMELESS MASTER  bows into its blow, its brother's shadow strikes again a moment late (only a look, one hit)
+        //   THE STAFF       the staff lifted high (long), then slammed on the floor before the band, a wave running to them.
+        //                   The last note of TE DEUM it slams on its own foot.
+        //   THE DEVIL'S STRING  the bow drawn across its one string like a saw, the string shaking
+        //   THE BLIND CANTOR    hardly moves : it tips its head to listen for the band, then a voice goes out of its chest
+        private KeyPose TacetKey(KeyOf kind, KeyPose rest)
+        {
+            KeyPose k = rest;
+            if (kind == KeyOf.Guard) return k;                                           // TACET does not block
+            bool wound = kind == KeyOf.Wound || kind == KeyOf.Charge;
+            float r = BattleRules.AttackRush;
+            k.Light = wound ? 0f : 1f;
+            switch (design)
+            {
+                case Static:                                                             // THE NOISE : closer in jumps, then the cloud bursts
+                    Push(ref k, wound ? r * 0.9f : r * 1.1f, 0f, 0.6f);
+                    if (wound) k.Light = 0.3f;
+                    break;
+                case Damper:                                                             // THE WEIGHT : lifted, then dropped to press
+                    if (wound)
+                    {
+                        Push(ref k, 0f, -0.12f, 1f);
+                        k.Squash = -0.15f;
+                    }
+                    else
+                    {
+                        Push(ref k, r * 0.25f, 0.08f, 0.6f);
+                        k.Squash = 1f;
+                    }
+                    break;
+                case Choir:                                                              // THE EMPTY CHOIR : hands up, then a cut off
+                    k.Show = 1f;
+                    if (wound)
+                    {
+                        Push(ref k, 0f, -0.04f, 1f);
+                        k.HandA = new Vector2(0.34f, -1.04f);
+                        k.HandB = new Vector2(-0.12f, -1.02f);
+                        k.Light = 0.2f;
+                    }
+                    else
+                    {
+                        Push(ref k, r * 0.3f, 0.02f, 0.5f);
+                        k.HandA = new Vector2(0.4f, -0.6f);
+                        k.HandB = new Vector2(-0.02f, -0.58f);
+                        k.Aim = 1f;                                                      //   the hands closed
+                    }
+                    break;
+                case Requiem:                                                            // REQUIEM : the quill raised and turned back, then one stroke down
+                    if (wound)
+                    {
+                        Push(ref k, -r * 0.2f, 0f, 0.5f);
+                        k.HandA = new Vector2(-0.2f, -0.7f);
+                        k.Aim = -0.5f;
+                    }
+                    else
+                    {
+                        Push(ref k, r * 0.4f, 0f, 0.4f);
+                        k.HandA = new Vector2(0.14f, -0.34f);
+                        k.Aim = 1f;
+                    }
+                    break;
+                case Nameless:                                                           // THE NAMELESS MASTER : leaned back, then a deep bow into it
+                    if (wound) Push(ref k, -r * 0.3f, 0f, 0.3f);
+                    else Push(ref k, r * 0.9f, 0.02f, 0.25f);
+                    break;
+                case Devil:                                                              // THE DEVIL'S STRING : the bow pushed out, then drawn across its string
+                    if (wound) k.HandA = new Vector2(0.02f, -0.62f);
+                    else
+                    {
+                        Push(ref k, r * 0.3f, 0f, 0.5f);
+                        k.HandA = new Vector2(0.46f, -0.42f);
+                    }
+                    break;
+                case Crown:                                                              // THE DEAF CROWN : the hand raised, then the down beat
+                    if (wound) k.HandA = new Vector2(-0.44f, -1.04f);
+                    else
+                    {
+                        Push(ref k, r * 0.15f, 0f, 0.6f);
+                        k.HandA = new Vector2(-0.06f, -0.48f);
+                    }
+                    break;
+                case Staff:                                                              // THE STAFF : lifted high, then slammed down
+                    if (wound)
+                    {
+                        k.HandA = new Vector2(0.16f, -0.68f);
+                        k.HandB = StaffTip + new Vector2(0.03f, -0.16f);
+                    }
+                    else if (blowLast)                                                   //   TE DEUM's last : on its own foot
+                    {
+                        k.HandA = new Vector2(0.2f, -0.46f);
+                        k.HandB = StaffTip + new Vector2(0.01f, 0f);
+                    }
+                    else
+                    {
+                        Push(ref k, r * 0.15f, 0f, 0.6f);
+                        k.HandA = new Vector2(0.36f, -0.43f);
+                        k.HandB = new Vector2((LookMiddle - 96f) / LookTall, 0f);           //   on the floor before the band
+                    }
+                    break;
+                case Cantor:                                                             // THE BLIND CANTOR : the head tipped to listen, then the voice
+                    if (wound) k.Head += new Vector2(0.07f, 0.01f);
+                    break;
+                default:                                                                 // THE MUTE : leaned back, then the "shh!"
+                    if (wound) Push(ref k, -r * 0.25f, 0.01f, 0f);
+                    else
+                    {
+                        Push(ref k, r, -0.02f, 0.3f);
+                        k.Aim = 1f;                                                      //   the finger jabbed out
+                    }
+                    break;
+            }
+            return k;
+        }
+
+        //Push : the whole body moved by (x, y), the head a little more and the hip only follow of it (so it leans into it)
+        private static void Push(ref KeyPose k, float x, float y, float follow)
+        {
+            k.Head += new Vector2(x * 1.3f, y);
+            k.Chest += new Vector2(x, y);
+            k.Hip += new Vector2(x * follow, y * 0.7f);
+            k.HandA += new Vector2(x, y);
+            k.HandB += new Vector2(x, y);
+        }
+
+        //Shadow : THE NAMELESS MASTER's brother, the master's chest a moment ago (AttackShadowLate), so every move it makes,
+        //blows too, the shadow makes again after it. A short memory of where the chest was, one place a frame (60 a second).
+        private readonly Vector2[] trail = new Vector2[40];
+        private int trailAt;
+        private int trailCount;
+
+        private Vector2 Shadow(Vector2 chest)
+        {
+            trailAt = (trailAt + 1) % trail.Length;
+            trail[trailAt] = chest;
+            if (trailCount < trail.Length) trailCount++;
+            int back = Math.Min(trailCount - 1, (int)Math.Round(BattleRules.AttackShadowLate * 60f));
+            return trail[(trailAt - back + trail.Length) % trail.Length];
         }
 
         //======================================================================================
@@ -436,7 +612,7 @@ namespace Tacetno433.Core
             lookLean = MathHelper.Clamp(lookLean, -0.4f, 0.4f);
             lookCos = (float)Math.Cos(lookLean);
             lookSin = (float)Math.Sin(lookLean);
-            lookStrike = move == "attack" ? Math.Max(0f, Strike()) : 0f;
+            lookStrike = MathHelper.Clamp(pose.Light, 0f, 1f);                  // ONE NOTE ONE BLOW : the light of its blow
         }
 
         //S : a point of the sketch on the body (it moves with it)
@@ -555,6 +731,7 @@ namespace Tacetno433.Core
         private void DrawLook(float alpha, float light)
         {
             SetLook();
+            if (noiseBlink > 0f) alpha *= 0.3f;                                    // THE NOISE : it blinks out as it jumps (Steps)
             float glow = alpha * (0.6f + 0.4f * light);
             switch (design)
             {
@@ -588,7 +765,7 @@ namespace Tacetno433.Core
             n = Cubic(S(108, 118), S(105, 140), S(105, 160), S(109, 182), 8, line, 0);
             LightLine(n, 2.4f * lookK, white);                                     // the slit
             Diamond(S(108, 150), 5f, 7f, Color.White * alpha);                     // the core
-            Shapes.Box(S(108, 137.8f - lookStrike * 12f), 24f * lookK, 3.6f * lookK, lookLean, lookFill);   // the finger
+            Shapes.Box(S(108f - 26f * pose.Aim, 137.8f - 2f * pose.Aim), 24f * lookK, 3.6f * lookK, lookLean, lookFill);   // the finger, jabbed out on its blow ("shh!")
             Shapes.Ellipse(S(121, 232), 46f * lookK, 3.6f * lookK, lookLean, white * 0.85f, white * 0.85f);   // the hem's light
             DrawCracks(MuteCracks, white);
         }
@@ -691,7 +868,8 @@ namespace Tacetno433.Core
                 Limb(S(96, 140), PartAt(FootA), 0.04f, 0.026f);
                 Limb(S(144, 140), PartAt(FootB), 0.04f, 0.026f);
             }
-            int n = RoundBox(120, 116, 76, 60, 10);                                // the block
+            float press = pose.Squash;                                             // the block, squashed as it presses (stretched as it is lifted)
+            int n = RoundBox(120, 116f + 4f * press, 76f * (1f + 0.08f * press), 60f * (1f - 0.14f * press), 10);
             Shell(n, 1f);
             Shapes.Ellipse(S(120, 150), 34f * lookK, 3f * lookK, lookLean, white * 0.9f, white * 0.9f);
             Diamond(S(120, 150), 4f, 4f, Color.White * alpha);
@@ -699,7 +877,7 @@ namespace Tacetno433.Core
             for (int k = 0; k < 4; k++)                                              // the strings
             {
                 float y = 156f + k * 6f;
-                Shapes.Bend(S(84, y), S(120, 178f + k * 2f + lookStrike * 10f), S(156, y), 9, bent);
+                Shapes.Bend(S(84, y), S(120, 178f + k * 2f + lookStrike * 16f), S(156, y), 9, bent);
                 line[0] = SF(34, y);
                 for (int i = 0; i < 9; i++) line[1 + i] = bent[i];
                 line[10] = SF(206, y);
@@ -758,6 +936,32 @@ namespace Tacetno433.Core
             OvalLine(LookCore(), 4f, 5f, 1.6f, white);
             Shapes.Circle(LookCore(), 1.8f * lookK + 0.6f, Color.White * alpha);
             DrawCracks(ChoirCracks, white);
+            if (Level == 1 && pose.Show > 0.02f)                                     // its blow : two hands appear, raised, then closed for the cut off
+            {
+                ChoirHand(PartAt(HandA), pose.Show);
+                ChoirHand(PartAt(HandB), pose.Show);
+            }
+        }
+
+        //Choir Hand : a floating black hand of THE EMPTY CHOIR's conductor (LEVEL 1 shows it only in a blow). Open : a palm
+        //and three fingers up. Closed (pose.Aim 1, the cut off) : a fist.
+        private void ChoirHand(Vector2 at, float fade)
+        {
+            float open = 1f - MathHelper.Clamp(pose.Aim, 0f, 1f);
+            Shapes.Ellipse(at, 7f * lookK + lookEdge, 6f * lookK + lookEdge, lookLean, lookRim * fade, lookRim * fade);
+            Shapes.Ellipse(at, 7f * lookK, 6f * lookK, lookLean, lookFill * fade, lookFill * fade);
+            if (open < 0.05f) return;
+            for (int f = 0; f < 3; f++)
+            {
+                float a = -MathHelper.PiOver2 + (f - 1) * 0.42f;
+                Vector2 way = new Vector2((float)Math.Cos(a), (float)Math.Sin(a));
+                Vector2 tip = at + way * ((7f + 9f * open) * lookK);
+                Vector2 side = new Vector2(-way.Y, way.X) * (2f * lookK);
+                line[0] = at + way * (4f * lookK) + side;
+                line[1] = tip;
+                line[2] = at + way * (4f * lookK) - side;
+                Shell(3, fade);
+            }
         }
 
         private static readonly float[] ChoirCracks = { 76, 116, 82, 124, 78, 130, 146, 88, 140, 96, 144, 104, 124, 56, 118, 63, 122, 70 };
@@ -989,9 +1193,8 @@ namespace Tacetno433.Core
         //Since Blow : 0 to 1 over the half second after its blow lands, -1 the rest of the time
         private float SinceBlow()
         {
-            if (move != "attack") return -1f;
-            float t = (moveTime - BattleRules.TurnStrikeImpact) / 0.5f;
-            return t >= 0f && t < 1f ? t : -1f;
+            if (hitAge < 0f || hitAge >= 0.5f) return -1f;
+            return hitAge / 0.5f;
         }
 
         //Robe : a body of the sketch, four corners from its shoulders (top) to its hem (foot). Lit on the band's side, its far
@@ -1212,12 +1415,26 @@ namespace Tacetno433.Core
             line[0] = S(140, 72); line[1] = S(146, 75); line[2] = S(141, 78);      //   a piece of it, fallen
             Shell(3, 1f);
 
-            n = Cubic(S(146, 162) + hand, S(172, 128) + hand, S(196, 96) + hand, S(218, 60) + hand, 10, line, 0);   // the quill, a blade
-            n = CubicMore(S(218, 60) + hand, S(206, 100) + hand, S(186, 134) + hand, S(152, 168) + hand, 10, line, n);
+            //The quill, a blade. ONE NOTE ONE BLOW : it turns round the hand holding it (cocked back as it winds up, its tip
+            //swept down at the band on the blow, one stroke of handwriting)
+            quillGrip = S(147.5f, 164.5f) + hand;
+            quillTurn = -pose.Aim * 1.9f;
+            n = Cubic(Quill(146, 162, hand), Quill(172, 128, hand), Quill(196, 96, hand), Quill(218, 60, hand), 10, line, 0);
+            n = CubicMore(Quill(218, 60, hand), Quill(206, 100, hand), Quill(186, 134, hand), Quill(152, 168, hand), 10, line, n);
             Shell(n, 1f);
-            Shapes.Line(S(150, 166) + hand, S(216, 62) + hand, 1f * lookK, dark * alpha);
-            Shapes.Polygon(S(147.5f, 164.5f) + hand, 6.4f * lookK, 4, lookLean, lit * alpha);   // the hand on it
+            Shapes.Line(Quill(150, 166, hand), Quill(216, 62, hand), 1f * lookK, dark * alpha);
+            Shapes.Polygon(quillGrip, 6.4f * lookK, 4, lookLean, lit * alpha);                   // the hand on it
             Shapes.Polygon(S(90, 159), 5.7f * lookK, 4, lookLean, lit * alpha);                 // the hand the lines leave
+            float after = SinceBlow();
+            if (after >= 0f)                                                       // LACRIMOSA : after its stroke, tears fall from the blade's edge
+                for (int k = 0; k < 3; k++)
+                {
+                    Vector2 at = Vector2.Lerp(Quill(152, 168, hand), Quill(214, 64, hand), 0.3f + k * 0.25f) + new Vector2(0f, after * after * 46f * lookK);
+                    float size = (3.2f - k * 0.4f) * lookK;
+                    Color tear = Color.White * (alpha * (1f - after));
+                    Shapes.Circle(at, size * 0.6f, tear);
+                    Shapes.Kite(at, at - new Vector2(0f, size * 1.8f), size * 1.1f, 0.15f, tear);
+                }
 
             for (int k = 0; k < 3; k++)                                            // LACRIMOSA : tears running down
             {
@@ -1240,6 +1457,17 @@ namespace Tacetno433.Core
                 RequiemCrack(0, Color.White * alpha, 1.6f);
                 RequiemCrack(1, Color.White * alpha, 1.6f);
             }
+        }
+
+        //Quill : a point of REQUIEM's quill (its sketch place moved by the hand's swing), turned round the hand by quillTurn
+        private Vector2 quillGrip;
+        private float quillTurn;
+
+        private Vector2 Quill(float x, float y, Vector2 hand)
+        {
+            Vector2 d = S(x, y) + hand - quillGrip;
+            float cos = (float)Math.Cos(quillTurn), sin = (float)Math.Sin(quillTurn);
+            return quillGrip + new Vector2(d.X * cos - d.Y * sin, d.X * sin + d.Y * cos);
         }
 
         private static readonly float[] RequiemEnds = { 34, 30, 38, 33, 40 };
@@ -1340,25 +1568,33 @@ namespace Tacetno433.Core
             Shell(n - 1, 1f);
             line[0] = SF(144, 250); line[1] = SF(148, 256);                       //   cracked through
             LightLine(2, 1.3f * lookK, (white ? bossInk : Color.White) * alpha);
-            float since = (clock + seed) % 1.7f - 0.45f;                          //   after each slam bits of it fall
-            for (int k = 0; k < 3; k++)
-            {
-                float t = (since - k * 0.07f) / 0.6f;
-                if (t < 0f || t > 1f) continue;
-                Vector2 from = SF(149f + k * 3f, 246f + k), to = SF(157f + k * 5f, 261f);
-                Vector2 at = new Vector2(MathHelper.Lerp(from.X, to.X, t), MathHelper.Lerp(from.Y, to.Y, t * t));
-                Crumb(at, (2.6f - k * 0.4f) * lookK, t * 5f + k, 1f - t * t * t);
-            }
+            bool onFoot = phase == Phase.None || blowLast;                        //   its own beat between blows, and TE DEUM's last blow, land on the foot
+            float since = phase == Phase.None ? (clock + seed) % 1.7f - 0.45f : (hitAge >= 0f ? hitAge : -1f);
+            if (onFoot)                                                           //   after each slam on it bits of it fall
+                for (int k = 0; k < 3; k++)
+                {
+                    float t = (since - k * 0.07f) / 0.6f;
+                    if (t < 0f || t > 1f) continue;
+                    Vector2 from = SF(149f + k * 3f, 246f + k), to = SF(157f + k * 5f, 261f);
+                    Vector2 at = new Vector2(MathHelper.Lerp(from.X, to.X, t), MathHelper.Lerp(from.Y, to.Y, t * t));
+                    Crumb(at, (2.6f - k * 0.4f) * lookK, t * 5f + k, 1f - t * t * t);
+                }
             Crumb(SF(160, 260), 1.6f * lookK, 0.7f, 1f);                          //   one already on the floor
             BossCracks(StaffCracks, alpha);
 
-            float ring = since / 0.8f;                                            // TE DEUM : the beat goes out along the floor
+            Vector2 top = S(162, 48) + BossSwing(0.22f, -0.5f), tip = StaffFoot();   // the staff, lifted between beats, lifted and slammed in a blow
+            float ring = since / 0.8f;                                            // TE DEUM : each slam goes out along the floor
             if (ring > 0f && ring < 1f)
             {
                 float wide = 1.6f * lookK * (1f - ring);
-                Shapes.Arc(SF(150, 262), (14f + ring * 70f) * lookK, MathHelper.Pi, MathHelper.TwoPi, wide, wide, Color.White * (0.55f * alpha * (1f - ring)));
+                Color wave = Color.White * (0.55f * alpha * (1f - ring));
+                if (onFoot) Shapes.Arc(SF(150, 262), (14f + ring * 70f) * lookK, MathHelper.Pi, MathHelper.TwoPi, wide, wide, wave);
+                else                                                              //   a blow's slam : the wave runs along the floor to the band
+                {
+                    Vector2 at = new Vector2(tip.X + Facing * ring * 230f * lookK, SF(150, 262).Y);
+                    Shapes.Arc(at, (12f + ring * 16f) * lookK, MathHelper.Pi, MathHelper.TwoPi, wide * 1.4f, wide * 1.4f, wave);
+                }
             }
-            Vector2 top = S(162, 48) + StaffLift() + BossSwing(0.22f, -0.5f), tip = StaffFoot();   // the staff, lifted between beats, swung on its blow
             Shapes.Line(top, tip, 4f * lookK + lookEdge * 2f, lookRim);
             Shapes.Line(top, tip, 4f * lookK, lit);
             Vector2 knob = top + (S(162.5f, 44f) - S(162f, 48f));
@@ -1370,16 +1606,11 @@ namespace Tacetno433.Core
             BossCore(tip, 5f, 6f, alpha);
         }
 
-        //Staff Lift : how high the staff is lifted between beats, page pixels
-        private Vector2 StaffLift()
-        {
-            return new Vector2(0f, -StaffBeat() * 16f * lookK);
-        }
-
-        //Staff Foot : the staff's tip, where it comes down on the rotting foot (its core). It swings less than the top.
+        //Staff Foot : the staff's tip (its core), where the HandB spring has it : over its rotting foot between blows, lifted
+        //and slammed on the floor before the band in a blow (TacetKey)
         private Vector2 StaffFoot()
         {
-            return S(150, 252) + StaffLift() + BossSwing(0.22f, -0.5f) * 0.25f;
+            return PartAt(HandB);
         }
 
         private static readonly float[][] StaffCracks =
@@ -1487,6 +1718,8 @@ namespace Tacetno433.Core
                 }
             }
             Robe(112, 104, 136, 262, 74, 166, alpha);
+            Vector2 keep = Shift;                                                 // the head and its blindfold tip to listen (the Head spring's own move)
+            Shift += body[Head].At - Local(0f, -0.8f) - (body[Chest].At - Local(0f, -0.5f));
             BossHead(120, 88, 16f, 20f, alpha);
             float flap = (float)Math.Sin(clock * 2.2f + seed) * 2.5f;            // the blindfold's two ends in the air
             Blade(S(102, 82), S(86, 86), S(76, 96 + flap * 0.5f), S(66, 112 + flap),
@@ -1496,6 +1729,7 @@ namespace Tacetno433.Core
             Shapes.Box(S(120, 84.5f), 36f * lookK, 9f * lookK, lookLean, ink);   // the blindfold
             Shapes.Line(S(104, 79), S(136, 79), 1.2f * lookK, Color.White * alpha);   //   light leaking at its edges
             Shapes.Line(S(104, 90.5f), S(136, 90.5f), 1f * lookK, Color.White * alpha);
+            Shift = keep;
             Vector2 heart = S(120, 146);
             for (int k = 0; k < 3; k++)                                           // voices going out, one after another
             {
@@ -1583,12 +1817,14 @@ namespace Tacetno433.Core
                         Gfx.DrawGlow(sb, p.X, p.Y, 0.05f * h, Color.White * (power * (0.3f + 0.9f * lookStrike)));
                     }
                     break;
-                case Staff:                                                          // TE DEUM : the slam lights the floor
+                case Staff:                                                          // TE DEUM : the slam lights the floor where it lands
                     {
-                        float t = ((clock + seed) % 1.7f - 0.45f) / 0.4f;
+                        bool idle = phase == Phase.None;
+                        float t = idle ? ((clock + seed) % 1.7f - 0.45f) / 0.4f : (hitAge >= 0f ? hitAge / 0.4f : -1f);
                         if (t > 0f && t < 1f)
                         {
                             Vector2 floor = SF(150, 262);
+                            if (!idle && !blowLast) floor.X = StaffFoot().X;
                             Gfx.DrawGlow(sb, floor.X, floor.Y, 0.14f * h, Color.White * (power * 1.6f * (1f - t)));
                         }
                     }
