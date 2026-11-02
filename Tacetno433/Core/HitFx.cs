@@ -5,9 +5,10 @@ using Tacetno433.Data;
 
 namespace Tacetno433.Core
 {
-    //Hit Style : how a blow looks where it lands (HitFx). The last five are the five legends' own skills (Beta1 block D,
+    //Hit Style : how a blow looks where it lands (HitFx). Caprice to Roll are the five legends' own skills (Beta1 block D,
     //2 Nov, Core/HitFx.Skills.cs) : CAPRICE and IL CANNONE (PAGANINI), LANCE (DUPORT), CHAKRAM (PUNTO), TIMPANI ROLL (PFUNDT).
-    public enum HitStyle { Slash, Shot, Smash, Cross, Ink, Lightning, Caprice, Cannon, Lance, Chakram, Roll }
+    //Prism is FANNY's FINALE on each enemy (block D item 2, Core/HitFx.Finale.cs).
+    public enum HitStyle { Slash, Shot, Smash, Cross, Ink, Lightning, Caprice, Cannon, Lance, Chakram, Roll, Prism }
 
     //Hit Flair : what a musician's own colour adds to every blow (round 4, the user asked) :
     //SPARKLE = golden twinkles and glitter, FLAME = tongues of fire and embers
@@ -151,7 +152,7 @@ namespace Tacetno433.Core
         private readonly Pending[] pending = new Pending[8];
 
         private readonly Stroke[] strokes = new Stroke[32];
-        private readonly Burst[] bursts = new Burst[16];
+        private readonly Burst[] bursts = new Burst[32];
         private readonly Ring[] rings = new Ring[16];
         private readonly Bit[] bits = new Bit[384];
         private readonly Twinkle[] twinkles = new Twinkle[48];
@@ -256,6 +257,7 @@ namespace Tacetno433.Core
         public void Hit(HitStyle style, Rectangle box, float power, HitColors c, int tier = 0, Flick swing = Flick.None)
         {
             if (SkillHit(style, box, power, c, tier, swing)) return;                // a legend's own skill (HitFx.Skills.cs)
+            if (FinaleHit(style, box, power)) return;                                // a conductor's FINALE (HitFx.Finale.cs)
             Vector2 at = new Vector2(box.Center.X, box.Y + box.Height * 0.45f);
             float size = (0.75f + 0.35f * power) * BattleRules.HitSize * (1f + BattleRules.HitTierSize * tier);
             float lean = (float)(random.NextDouble() - 0.5) * 0.6f;
@@ -628,6 +630,7 @@ namespace Tacetno433.Core
             impactAge += dt;
             focusAge += dt;
             UpdateSkills(dt, frozen);                                                 // the skills' own pieces (HitFx.Skills.cs)
+            UpdateFinale(dt, frozen);                                                 // the FINALE's glass and months (HitFx.Finale.cs)
 
             //Pending blows land when their wait is over (the clock runs through the hit stop, they are part of it)
             for (int i = 0; i < pending.Length; i++)
@@ -737,6 +740,7 @@ namespace Tacetno433.Core
             focusAge = 99f;
             impactAge = 99f;
             ClearSkills();
+            ClearFinale();
         }
 
         //======================================================================================
@@ -749,6 +753,7 @@ namespace Tacetno433.Core
             DrawFocus(sb);
             for (int i = 0; i < flames.Length; i++) if (flames[i].On && flames[i].Age >= 0f) DrawFlame(sb, flames[i]);
             DrawSkills(sb);                                                           // the skills' own pieces under the cuts
+            DrawFinale(sb);                                                           // the FINALE's cracks, glass and months
             for (int i = 0; i < rings.Length; i++) if (rings[i].On) DrawRing(sb, rings[i]);
             for (int i = 0; i < bursts.Length; i++) if (bursts[i].On) DrawBurst(sb, bursts[i]);
             for (int i = 0; i < strokes.Length; i++) if (strokes[i].On && strokes[i].Age > 0f) DrawStroke(sb, strokes[i]);

@@ -281,8 +281,8 @@ namespace Tacetno433.Core
 
         //STORM : THE UNHEARING. Grey cloud arcs turning round the middle, rain leaning in the wind, and a red bolt that strikes
         //through the ring every SigilBoltEvery seconds and stays as a faint ember between strikes (so a still frame still reads).
-        private static Color BoltRed = new Color(255, 52, 40);
-        private static Color BoltHot = new Color(255, 214, 196);
+        private static Color BoltRed { get { return Palette.StormRed; } }
+        private static Color BoltHot { get { return Palette.StormRedHot; } }
 
         private static void StormLines(SpriteBatch sb, Rectangle box, Vector2 mid, float r, float time, float a)
         {
@@ -344,8 +344,8 @@ namespace Tacetno433.Core
         //RIFT : THE UNSIGNED. Two cuts side by side through the world, one blow of two blades (a slash, never a cross) :
         //Felix's behind, a black band whose edges burn purple and blue, Fanny's in front, a white line split into the rainbow
         //with prism cracks leaving it.
-        private static Color FelixPurple = new Color(150, 70, 255);
-        private static Color FelixBlue = new Color(60, 90, 255);
+        private static Color FelixPurple { get { return Palette.SpotBrother; } }
+        private static Color FelixBlue { get { return Palette.SpotBrotherDeep; } }
 
         private static void RiftLines(SpriteBatch sb, Rectangle box, Vector2 mid, float r, float time, float a)
         {

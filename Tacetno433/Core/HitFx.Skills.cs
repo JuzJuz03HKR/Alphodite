@@ -23,11 +23,16 @@ namespace Tacetno433.Core
     {
         //SPACE CUT : a cut that splits the picture of the stage for a moment. DMC's Judgement Cut and ZZZ's Miyabi cut
         //space itself; TACET's version cuts the silence : what shows between the two halves is the black behind the world.
+        //Mode : a skill's cut opens and closes by itself (CutQuick). FANNY's FINALE writes cracks that stand as a hairline
+        //(CutWaiting) until THE BREAK opens them all together (CutBroken, Core/HitFx.Finale.cs). Prism 1 = its edges run
+        //through the rainbow.
+        private const byte CutQuick = 0, CutWaiting = 1, CutBroken = 2;
         private struct SpaceCut
         {
             public bool On;
+            public byte Mode;
             public Vector2 At;
-            public float Angle, Age, Reach, Slide, Gap;
+            public float Angle, Age, Reach, Slide, Gap, Prism;
             public Color Tint;
         }
         private readonly SpaceCut[] spaceCuts = new SpaceCut[PostChain.MostCuts];
@@ -309,7 +314,7 @@ namespace Tacetno433.Core
                 if (!spaceCuts[i].On) { slot = i; oldest = -1f; break; }
                 if (spaceCuts[i].Age > oldest) { oldest = spaceCuts[i].Age; slot = i; }
             }
-            spaceCuts[slot] = new SpaceCut { On = true, At = at, Angle = angle, Age = 0f, Reach = reach, Slide = slide, Gap = gap, Tint = tint };
+            spaceCuts[slot] = new SpaceCut { On = true, Mode = CutQuick, At = at, Angle = angle, Age = 0f, Reach = reach, Slide = slide, Gap = gap, Tint = tint };
         }
 
         private void AddSeam(Vector2 a, Vector2 b, HitColors c)
@@ -347,7 +352,7 @@ namespace Tacetno433.Core
             {
                 if (!spaceCuts[i].On) continue;
                 spaceCuts[i].Age += dt;
-                if (spaceCuts[i].Age > CutOpenTime + CutHoldTime + CutCloseTime) spaceCuts[i].On = false;
+                if (spaceCuts[i].Age > CutLife(spaceCuts[i].Mode)) spaceCuts[i].On = false;
             }
             for (int i = 0; i < thrusts.Length; i++)
             {
@@ -416,22 +421,51 @@ namespace Tacetno433.Core
             return 1f - t * t * (3f - 2f * t);
         }
 
+        //Cut Life : how long a cut of this mode stays
+        private static float CutLife(byte mode)
+        {
+            if (mode == CutWaiting) return BattleRules.FinaleCrackWait + CrackFadeTime;
+            if (mode == CutBroken) return BreakEnd;
+            return CutOpenTime + CutHoldTime + CutCloseTime;
+        }
+
+        //Cut Open Of : how far a cut is open now, by its mode
+        private static float CutOpenOf(SpaceCut c)
+        {
+            if (c.Mode == CutWaiting)
+            {
+                float fade = 1f - MathHelper.Clamp((c.Age - BattleRules.FinaleCrackWait) / CrackFadeTime, 0f, 1f);
+                return BattleRules.FinaleCrackHair * Math.Min(1f, c.Age / 0.04f) * fade;
+            }
+            if (c.Mode == CutBroken) return BreakOpen(c.Age);
+            return CutOpen(c.Age);
+        }
+
+        //Cut Reach Of : a written crack runs out across the stage from where it was cut (FinaleCrackDraw)
+        private static float CutReachOf(SpaceCut c)
+        {
+            if (c.Mode != CutWaiting) return c.Reach;
+            return c.Reach * Ease(Math.Min(1f, c.Age / BattleRules.FinaleCrackDraw));
+        }
+
         //Cuts Now : the SPACE CUTS open this frame, for Post.fx (Core/PostChain.cs SetCuts). They stand on the page in the
         //fighters' layer; shift is how far that layer has moved with the camera. LESS FLASHING opens them half as far.
-        public void CutsNow(Vector2 shift, Vector4[] where, Vector4[] tint, Vector4[] shape)
+        //Returns how far THE BREAK has dropped the world's pieces (CutFall, 0 when nothing is broken).
+        public float CutsNow(Vector2 shift, Vector4[] where, Vector4[] tint, Vector4[] shape)
         {
             float soft = Settings.ReduceFlashing ? 0.5f : 1f;
             int n = 0;
             for (int i = 0; i < spaceCuts.Length && n < where.Length; i++)
             {
                 if (!spaceCuts[i].On) continue;
-                float open = CutOpen(spaceCuts[i].Age);
+                float open = CutOpenOf(spaceCuts[i]);
                 if (open <= 0.001f) continue;
                 Vector2 at = spaceCuts[i].At - shift;
                 Color c = spaceCuts[i].Tint;
-                where[n] = new Vector4(at.X / TacetGame.ScreenW, at.Y / TacetGame.ScreenH, spaceCuts[i].Angle, open * soft);
-                tint[n] = new Vector4(c.R / 255f, c.G / 255f, c.B / 255f, spaceCuts[i].Reach / TacetGame.ScreenH);
-                shape[n] = new Vector4(spaceCuts[i].Slide / TacetGame.ScreenH, spaceCuts[i].Gap / TacetGame.ScreenH, 0f, 0f);
+                float angle = spaceCuts[i].Angle;
+                where[n] = new Vector4(at.X / TacetGame.ScreenW, at.Y / TacetGame.ScreenH, (float)Math.Cos(angle), (float)Math.Sin(angle));
+                tint[n] = new Vector4(c.R / 255f, c.G / 255f, c.B / 255f, CutReachOf(spaceCuts[i]) / TacetGame.ScreenH);
+                shape[n] = new Vector4(spaceCuts[i].Slide / TacetGame.ScreenH, spaceCuts[i].Gap / TacetGame.ScreenH, open * soft, spaceCuts[i].Prism);
                 n++;
             }
             for (int i = n; i < where.Length; i++)
@@ -440,6 +474,7 @@ namespace Tacetno433.Core
                 tint[i] = Vector4.Zero;
                 shape[i] = Vector4.Zero;
             }
+            return BreakFall() * soft;
         }
 
         //======================================================================================

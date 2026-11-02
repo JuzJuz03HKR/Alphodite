@@ -39,6 +39,17 @@ patch('Tacetno433/Screens/BattleScreen.cs',
         {
             NextStep();                                                                 // the first bar is being written
             string probeWhat = System.Environment.GetEnvironmentVariable("TACET_PROBE");
+            if (probeWhat == "finale")                                                  // a FINALE from its cut in : TACET_KIT=fanny|bach|beethoven TACET_LEVEL=0..2
+            {
+                string kit = System.Environment.GetEnvironmentVariable("TACET_KIT") ?? "fanny";
+                battle.Kit = kit == "bach" ? TurnKit.Bach : kit == "beethoven" ? TurnKit.Beethoven : TurnKit.Fanny;
+                battle.Floor = 1 + int.Parse(System.Environment.GetEnvironmentVariable("TACET_LEVEL") ?? "0");
+                for (int i = 0; i < ConductorList.All.Length; i++)
+                    if (ConductorList.All[i].Turn == battle.Kit) signatureName = ConductorList.All[i].SignatureNameAt(battle.SignatureLevel);
+                battle.Signature = battle.SignatureNeed;
+                StartSignature();
+                return;
+            }
             if (probeWhat == "skill1" || probeWhat == "skill2")
             {
                 battle.Breath = 10;
@@ -50,6 +61,7 @@ patch('Tacetno433/Screens/BattleScreen.cs',
                 if (setup.Contains("charge")) { aimed.Charge = 2; aimed.ChargeHit = 24; }
                 if (setup.Contains("armor")) aimed.Block = 22;
                 if (setup.Contains("stun")) aimed.Staggered = true;
+                if (setup.Contains("echo")) { front.Echo = 1f; front.EchoLeft = 1; }   // FUGUE : the skill plays again in gold
                 battle.PlanSkill(front, ps, pat);
                 battle.PlayBar();
                 NextStep();

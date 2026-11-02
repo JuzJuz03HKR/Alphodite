@@ -89,6 +89,10 @@ namespace Tacetno433.Core
         //Lightning Blue (round 6, the user asked) : THE UNHEARING's LIGHTNING glows blue. The glow, then its hot core.
         public static Color LightningBlue = new Color(40, 170, 255);
         public static Color LightningBlueHot = new Color(170, 230, 255);
+        //Storm Red (block D item 2, the user 13.90 and 13.119 : "blue first, then red") : THE UNHEARING's lightning once his
+        //FINALE has grown (STORM), the red of his art and of his SIGIL (Core/LegendArt.cs). The glow, then its hot core.
+        public static Color StormRed = new Color(255, 52, 40);
+        public static Color StormRedHot = new Color(255, 214, 196);
 
         //Conductor Colours (Beta1, 29 Oct, the user gave each conductor a theme, docs/CHARACTER_DESIGN.md 4) : each of the
         //three conductors' own colour, for the parts of the pages that are theirs (Conductor.Spot : the gallery, the profile,
@@ -99,6 +103,10 @@ namespace Tacetno433.Core
         public static Color SpotPrism = new Color(214, 206, 255);
         public static Color SpotHoly = new Color(255, 204, 104);
         public static Color SpotHolyHot = new Color(255, 242, 200);
+        //Brother : FANNY's brother (??? on the screen), the purple and blue of his cut through the world (THE UNSIGNED's SIGIL,
+        //Core/LegendArt.cs, and his voice in her FINALE, Core/HitFx.Finale.cs). The user 13.87 : purple, blue and black.
+        public static Color SpotBrother = new Color(150, 70, 255);
+        public static Color SpotBrotherDeep = new Color(60, 90, 255);
 
         //Prism : the rainbow a crystal throws, going once round all the colours for every 1 that t grows. Mix it with white
         //for the pale shimmer of the crystal itself (Conductor.SpotAt).

@@ -44,11 +44,12 @@ namespace Tacetno433.Core
         private static readonly Vector4[] cutWhere = new Vector4[MostCuts];
         private static readonly Vector4[] cutTint = new Vector4[MostCuts];
         private static readonly Vector4[] cutShape = new Vector4[MostCuts];
+        private static float cutFall;                                     // THE BREAK (FANNY's FINALE) : how far the world's pieces have dropped
 
         //Set Cuts : this frame's cuts, from a battle's HitFx (shift : how far the fighters' layer has moved with the camera)
         public static void SetCuts(HitFx hits, Vector2 shift)
         {
-            hits.CutsNow(shift, cutWhere, cutTint, cutShape);
+            cutFall = hits.CutsNow(shift, cutWhere, cutTint, cutShape);
         }
         private static RenderTarget2D softA;
         private static RenderTarget2D softB;
@@ -313,7 +314,10 @@ namespace Tacetno433.Core
                 cuts.SetValue(cutWhere);
                 post.Parameters["CutTints"].SetValue(cutTint);
                 post.Parameters["CutShapes"].SetValue(cutShape);
+                EffectParameter fall = post.Parameters["CutFall"];
+                if (fall != null) fall.SetValue(cutFall);
             }
+            cutFall = 0f;
             System.Array.Clear(cutWhere, 0, MostCuts);                                   //   used once : the next frame sets its own
             System.Array.Clear(cutTint, 0, MostCuts);
             System.Array.Clear(cutShape, 0, MostCuts);

@@ -390,6 +390,7 @@ namespace Tacetno433.Screens
             UpdateStage(dt, hitStop > 0f);
             hits.Update(dt, hitStop > 0f);
             UpdateTells(dt);                                                                // TELLS : armor plates, charge, stars, the cards (BattleScreen.Tells.cs)
+            UpdateFinale(dt);                                                               // FINALE : HOLY's sky, the falling stars, STORM (BattleScreen.Finale.cs)
             UpdateShow(dt);
             gesture.Update(dt, view == View.Swipe && Input.MouseDown());
             baton.Update(dt, gesture.Held);
@@ -795,6 +796,7 @@ namespace Tacetno433.Screens
             bossCut = false;
             hitBy = null;
             hitSignature = true;
+            FinaleBegins();                                                            // the conductor's own look (BattleScreen.Finale.cs)
         }
 
         //Parry : the enemy's notes fly in one by one
@@ -1070,6 +1072,7 @@ namespace Tacetno433.Screens
                 //SIGNATURE : the conductor's name for it fills the screen for a moment, then back to the bar
                 if (practice) Learn(Lesson.Signature);
                 battle.UseSignature(results);
+                FinaleStrike();                                                          // PRISM breaks the world, HOLY's guiding star flares, STORM
                 judgeWord = signatureName;
                 judgeLife = 1.6f;
                 qteEffects.SpawnFlare(HitX, HitY, 1f);
@@ -1107,6 +1110,7 @@ namespace Tacetno433.Screens
         private void ShowEvents()
         {
             popStack.Clear();
+            echoVoice = false;                                                             // FUGUE : the blows after an ECHO are its own
             int bolts = 0;                                                                 // LIGHTNING : strikes so far
             for (int i = 0; i < battle.Events.Count; i++)
             {
@@ -1160,7 +1164,8 @@ namespace Tacetno433.Screens
                 {
                     //The striker's colours : a musician's own colour on an enemy (round 4 : the number too),
                     //white for the SIGNATURE, TACET's INK on a musician
-                    HitColors colors = !e.Who.IsEnemy ? HitColors.Plain : (hitSignature ? SignatureColors() : SpotOf(hitBy));
+                    bool voice = echoVoice && e.Who.IsEnemy;                                    // FUGUE : the echo's blow, a second voice in gold
+                    HitColors colors = !e.Who.IsEnemy ? HitColors.Plain : (hitSignature ? SignatureColors() : (voice ? HolyColors : SpotOf(hitBy)));
 
                     //A hit : a pixel number (bigger for a big hit), the fighter flashes and is knocked back
                     Color number = e.Who.IsEnemy ? colors.Tint : Palette.PaperDim;
@@ -1181,14 +1186,16 @@ namespace Tacetno433.Screens
                     if (style == HitStyle.Lightning)
                     {
                         if (bolts == 0) AddStageLight(new Vector2(TacetGame.ScreenW / 2f, 300f), 1100f, BattleRules.HitBoltFlash, 0.4f, Color.Lerp(Color.White, colors.Tint, 0.6f));
-                        hits.HitLater(style, DrawBox(e.Who), power, colors, BattleRules.HitBoltStagger * bolts);
+                        if (battle.SignatureLevel >= 2) { if (bolts == 0) GreatBoltNow(colors); }    // STORM II : one great bolt for them all (BattleScreen.Finale.cs)
+                        else hits.HitLater(style, DrawBox(e.Who), power, colors, BattleRules.HitBoltStagger * bolts);
                         bolts++;
                     }
                     else
                     {
                         int tier = !hitSignature && hitBy != null && !hitBy.IsEnemy ? hitBy.Musician.Rehearsed : 0;   // WEAPON TIERS
                         Flick swing = view == View.Swipe && swipeFor == SwipeFor.Skill ? lastWay : Flick.None;     // ACTION : cut the way the baton swung
-                        hits.Hit(style, DrawBox(e.Who), power, colors, tier, swing);
+                        if (voice) hits.HitLater(style, DrawBox(e.Who), power, colors, BattleRules.FinaleEchoDelay);   // the answer comes a moment after
+                        else hits.Hit(style, DrawBox(e.Who), power, colors, tier, swing);
                         if (style == HitStyle.Caprice && lastSkillNote) hits.CapriceFinish(DrawBox(e.Who), colors);   // CAPRICE : the last cut sets every seam alight
                     }
 
@@ -1235,7 +1242,14 @@ namespace Tacetno433.Screens
                 else if (e.Kind == TurnEventKind.GuardUp) effects.SpawnPop(x, y, Words.Guard, Palette.KindDefend, 0.8f);
                 else if (e.Kind == TurnEventKind.Mute) effects.SpawnPop(x, y, Words.Muted, Palette.PaperDim, 0.7f);
                 else if (e.Kind == TurnEventKind.Skip) effects.SpawnPop(x, y, Words.Stunned, Palette.PaperDim, 0.7f);
-                else if (e.Kind == TurnEventKind.Echo) effects.SpawnPop(x, box.Y - 60, "ECHO", Palette.Highlight, 0.7f);       // FUGUE
+                else if (e.Kind == TurnEventKind.Echo)                                                                 // FUGUE
+                {
+                    effects.SpawnPop(x, box.Y - 60, Words.Echo, Palette.Highlight, 0.7f);
+                    if (e.Who.IsEnemy) continue;
+                    if (hitSignature) HolyComets(e.Who);                                        // HOLY : a guiding star comes down to them
+                    else if (e.Who == hitBy) echoVoice = true;                                 // their move plays again : the gold voice answers
+                    else AddCardFx(CardLook.Echo, e.Who, Palette.SpotHoly);                    // KING'S LESSON : an echo given to a friend
+                }
                 else if (e.Kind == TurnEventKind.Quieter) effects.SpawnPop(x, box.Y - 70, "QUIETER", Palette.Paper, 0.7f);    // THE WHOLE FLOOR
                 else if (e.Kind == TurnEventKind.Thorns) effects.SpawnPop(x, box.Y - 70, "DECREE", Palette.Accent, 0.8f);     // DECREE broken
                 //BOSSES (Beta1 31 Oct) : THE TURN plays at the next step, a BIG ATTACK blocked whole, TE DEUM's own foot
@@ -1855,6 +1869,44 @@ namespace Tacetno433.Screens
                 StageHit(box.Center.ToVector2(), style != HitStyle.Ink, 1f, colors.Tint);
                 if (style != HitStyle.Ink) SpawnNumber(new Vector2(box.Center.X, box.Y - 34), 24, false, true, name == "battlegold" || name == "battlefire" ? colors.Tint : Palette.Highlight);
             }
+            else if (name == "battlecracks" || name == "battleprism" || name == "battleholy" || name == "battlestorm" || name == "battlestorm1"
+                     || name == "battlejahr" || name == "battlejahr1" || name == "battlefugue1" || name == "battlefugue2")
+            {
+                //Block D item 2 (2 Nov) : a FINALE as if its four strokes were PERFECT. battlecracks = FANNY's four cracks written,
+                //battleprism = her strike at TWO VOICES (the world cut, her brother's heal on the cards), battlejahr1 = DAS JAHR (it
+                //breaks like glass, the months), battlejahr = DAS JAHR II, battleholy = THE METRONOME's strike at FUGUE (the 4/4 of
+                //stars, the stars coming down), battlefugue1 = THE ART OF FUGUE (stars over the whole field), battlefugue2 = THE ART OF
+                //FUGUE II (the shafts of light), battlestorm1 = THE UNHEARING's STORM (red bolts, rain), battlestorm = STORM II (the
+                //great bolt). FINALE GROWS (13.119).
+                bool holy = name == "battleholy" || name.StartsWith("battlefugue");
+                battle.Kit = holy ? TurnKit.Bach : name.StartsWith("battlestorm") ? TurnKit.Beethoven : TurnKit.Fanny;
+                battle.Floor = name.EndsWith("1") ? 2 : (name == "battlejahr" || name == "battlefugue2" || name == "battlestorm" ? 3 : 1);
+                for (int i = 0; i < ConductorList.All.Length; i++)
+                    if (ConductorList.All[i].Turn == battle.Kit) signatureName = ConductorList.All[i].SignatureNameAt(battle.SignatureLevel);
+                for (int i = 0; i < battle.Party.Count; i++) battle.Party[i].Hp = Math.Max(1, battle.Party[i].MaxHp / 2);
+                battle.Signature = battle.SignatureNeed;
+                StartSignature();
+                cutIn = 0f;
+                for (int beat = 0; beat < TurnBattle.SignatureShape.Length; beat++)
+                {
+                    lastWay = TurnBattle.SignatureShape[beat];
+                    FinaleStroke(beat);
+                    holyDrawn[beat] = 0.5f;                                                   // HOLY : every thread already run
+                }
+                for (int i = 0; i < holyLit.Length; i++) holyLit[i] = 0.5f;
+                holySky = 1f;
+                if (name != "battlecracks")
+                {
+                    battle.Events.Clear();
+                    NoteResult[] perfect = new NoteResult[TurnBattle.SignatureShape.Length];
+                    for (int i = 0; i < perfect.Length; i++) perfect[i] = new NoteResult(Grade.Perfect, 1f);
+                    battle.UseSignature(perfect);
+                    FinaleStrike();
+                    ShowEvents();
+                    view = View.Pause;
+                    viewTime = 0f;
+                }
+            }
             else if (name == "battlebolt" || name == "battleimpact" || name == "battleboltsoft")
             {
                 if (name == "battleboltsoft") Settings.ReduceFlashing = true;                 // the bolt itself, without the turns
@@ -1903,6 +1955,7 @@ namespace Tacetno433.Screens
             actionCam.Shown(Flashing, 1f + hits.ImpactZoom * BattleRules.HitImpactZoom, out camAt, out camZoom, out camTurn, out camShift);
             if (PostChain.Final != null) PostChain.ShowFinal(sb, camAt, camZoom, camTurn, camShift, Color.White);
             else Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.StageDeep);
+            DrawFinaleSky(sb);                                                    // FINALE : HOLY's stars and STORM's rain over the world
 
             //Panel : a dark band along the bottom, fading in from above, so the musician in front stands into it
             for (int i = 0; i < 8; i++)
@@ -1918,9 +1971,11 @@ namespace Tacetno433.Screens
             if (view != View.Over) DrawReticles(sb);                              //   and the rings on the ones a move is aimed at
             DrawBossRing(sb, planning);                                           // BOSS SHOW : its BIG ATTACK comes this turn
             EndCameraBatch(sb);
+            DrawFinaleStars(sb);                                                  // FINALE : HOLY's 4/4 of stars over the plates
 
             DrawBand(sb, planning);
             DrawCardTells(sb);                                                    // TELLS : the band's skills on their cards
+            DrawComets(sb);                                                       // FINALE : HOLY's guiding stars landing on the cards
             DrawIcons(sb, false);                                                 // MARKS AND AIM : THE BAND's statuses
             DrawForeMarks(sb);
             DrawBarStrip(sb, planning);
@@ -1979,11 +2034,16 @@ namespace Tacetno433.Screens
         //turn, move it back and slide. Times Sharp.Transform, like every batch of a page (SHARP SCREEN).
         private void BeginCameraBatch(SpriteBatch sb)
         {
-            Matrix push = Matrix.CreateTranslation(-camAt.X, -camAt.Y, 0f) * Matrix.CreateScale(camZoom, camZoom, 1f)
-                        * Matrix.CreateRotationZ(camTurn) * Matrix.CreateTranslation(camAt.X + camShift.X, camAt.Y + camShift.Y, 0f);
-            sb.End();
-            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, null, null, null, push * Sharp.Transform);
+            BeginCameraBatch(sb, BlendState.AlphaBlend);
         }
+
+        //Camera Batch In A Blend : the same, with light added (the FINALE's stars) or blended
+        private void BeginCameraBatch(SpriteBatch sb, BlendState blend)
+        {
+            sb.End();
+            sb.Begin(SpriteSortMode.Deferred, blend, SamplerState.LinearClamp, null, null, null, CameraPush() * Sharp.Transform);
+        }
+
 
         private static void EndCameraBatch(SpriteBatch sb)
         {

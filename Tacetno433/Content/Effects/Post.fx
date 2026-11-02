@@ -79,10 +79,13 @@ float Blur;             //             IMPACT FRAME : the world smeared towards 
 float2 Center;          //             IMPACT FRAME : where the blow landed (0..1 of the screen)
 float Lod;              // Down : which copy of SCENE and GLOW is the page's own size (0 in the 1280 x 720 window)
 
-// SPACE CUT (Beta1 block D, 2 Nov) : up to four cuts that split the picture of the world for a moment (Core/HitFx.Skills.cs)
-float4 Cuts[4];         //             xy where it is (0..1 of the screen), z its angle, w how open (0 = closed, 1 = wide)
+// SPACE CUT (Beta1 block D, 2 Nov) : up to four cuts that split the picture of the world for a moment (Core/HitFx.Skills.cs,
+// FANNY's FINALE in Core/HitFx.Finale.cs)
+float4 Cuts[4];         //             xy where it is (0..1 of the screen), zw its way (the cosine and sine of its angle, worked out once by the game)
 float4 CutTints[4];     //             rgb the colour of its edges, a its half length (in screen heights)
-float4 CutShapes[4];    //             x how far the two halves slide along it, y how wide the black gap is (screen heights)
+float4 CutShapes[4];    //             x how far the two halves slide along it, y how wide the black gap is (screen heights),
+                        //             z how open (0 = closed, 1 = wide), w PRISM : 0 = its edges in its own colour, 1 = the rainbow runs along them
+float CutFall;          //             THE BREAK : how far the pieces between whole cuts have dropped (screen heights, 0 = none)
 
 struct VertexShaderOutput
 {
@@ -102,14 +105,41 @@ float Hash(float2 p)
     return frac(sin(dot(p, float2(12.9898, 78.233))) * 43758.5453);
 }
 
+//Hue : the rainbow, red at 0 and round every colour once as h grows by 1 (FANNY's PRISM)
+float3 Hue(float h)
+{
+    return saturate(abs(frac(h + float3(0.0, 2.0 / 3.0, 1.0 / 3.0)) * 6.0 - 3.0) - 1.0);
+}
+
+//Piece Of : which piece of the broken world a point is in (THE BREAK). Every WHOLE cut (longer than the screen) splits the
+//world in two, so the sides a point is on, one bit for each cut, name its piece : 0 to 15.
+float PieceOf(float2 uv)
+{
+    const float aspect = 1280.0 / 720.0;
+    float piece = 0.0;
+    float bit = 1.0;
+    [unroll] for (int i = 0; i < 4; i++)
+    {
+        float2 d = (uv - Cuts[i].xy) * float2(aspect, 1.0);
+        float whole = step(1.5, CutTints[i].a) * step(0.0001, CutShapes[i].z);
+        piece += step(0.0, dot(d, float2(-Cuts[i].w, Cuts[i].z))) * bit * whole;
+        bit *= 2.0;
+    }
+    return piece;
+}
+
 //SPACE CUT : where this pixel reads the world from while the cuts are open, how deep it is in a cut's black gap (dark),
 //and the light of the cut's edges on it (edge).
-//ADVANCED PART : a cut is a line through Cuts[i].xy at angle z. For each pixel, side is how far it is from the line
-//(plus on one side, minus on the other) and along is how far down the line. Every pixel on one side reads the picture
-//from a little further along the line and away from it, the other side the other way, so the two halves of the world
-//slide apart like the two halves of something cut (DMC's Judgement Cut, ZZZ's Miyabi). span fades the slide out
+//ADVANCED PART : a cut is a line through Cuts[i].xy going the way Cuts[i].zw. For each pixel, side is how far it is from
+//the line (plus on one side, minus on the other) and along is how far down the line. Every pixel on one side reads the
+//picture from a little further along the line and away from it, the other side the other way, so the two halves of the
+//world slide apart like the two halves of something cut (DMC's Judgement Cut, ZZZ's Miyabi). span fades the slide out
 //towards the cut's ends, so it is a tear in the picture, not a line across the whole screen. What shows in the gap is
-//black : the silence behind the world.
+//black : the silence behind the world. A PRISM cut's edges run through the rainbow along it (FANNY's crystal).
+//THE BREAK (FANNY's FINALE) : while CutFall is above 0, the pieces the whole cuts make also drop, each by its own amount
+//(a steady random number from its piece's name). A pixel reads the world from higher up; if that point is in another
+//piece, nothing of this pixel's piece has fallen here : black, the silence between the pieces of glass. A pixel whose
+//point is near its piece's own edge is that piece of glass's edge : it catches the rainbow.
 float2 CutUV(float2 uv, out float dark, out float3 edge)
 {
     const float aspect = 1280.0 / 720.0;
@@ -119,21 +149,42 @@ float2 CutUV(float2 uv, out float dark, out float3 edge)
     edge = float3(0.0, 0.0, 0.0);
     [unroll] for (int i = 0; i < 4; i++)
     {
-        float2 dir = float2(cos(Cuts[i].z), sin(Cuts[i].z));
+        float2 dir = Cuts[i].zw;
         float2 across = float2(-dir.y, dir.x);
         float2 d = (uv - Cuts[i].xy) * square;
         float along = dot(d, dir);
         float side = dot(d, across);
         float span = saturate(1.0 - abs(along) / max(CutTints[i].a, 0.001));
         span = span * span * (3.0 - 2.0 * span);
-        float k = Cuts[i].w * span;
+        float k = CutShapes[i].z * span;
         float s = side >= 0.0 ? 1.0 : -1.0;
         float gap = CutShapes[i].y * k;
         moved -= (dir * (s * CutShapes[i].x * k) + across * (s * gap)) / square;
         dark = max(dark, (1.0 - smoothstep(gap * 0.55, gap + 0.0005, abs(side))) * step(0.0001, k));
         float rim = saturate(1.0 - abs(abs(side) - gap) / 0.0035) * k;
         float haze = saturate(1.0 - abs(side) / 0.045) * k;
-        edge += CutTints[i].rgb * (rim * 1.4 + haze * 0.3) + float3(1.0, 1.0, 1.0) * (rim * rim * 0.9);
+        float3 tint = lerp(CutTints[i].rgb, Hue(along * 1.4 + s * 0.1 + Time * 0.3), CutShapes[i].w);
+        edge += tint * (rim * (1.4 - 0.4 * CutShapes[i].w) + haze * (0.3 - 0.2 * CutShapes[i].w)) + float3(1.0, 1.0, 1.0) * (rim * rim * 0.9);
+    }
+
+    [branch] if (CutFall > 0.0001)
+    {
+        float piece = PieceOf(uv);
+        float drop = 0.55 + 0.9 * Hash(float2(piece, 3.7));
+        float drift = Hash(float2(piece, 9.1)) - 0.5;
+        moved -= float2(drift * 0.4, drop) * CutFall / square;
+        float there = PieceOf(moved);
+        float apart = step(0.5, abs(there - piece));
+        dark = max(dark, apart);
+        float near = 1.0;
+        [unroll] for (int j = 0; j < 4; j++)
+        {
+            float2 d2 = (moved - Cuts[j].xy) * square;
+            float whole = step(1.5, CutTints[j].a) * step(0.0001, CutShapes[j].z);
+            near = min(near, lerp(1.0, abs(dot(d2, float2(-Cuts[j].w, Cuts[j].z))), whole));
+        }
+        float glint = saturate(1.0 - near / 0.004) * (1.0 - apart) * saturate(CutFall * 60.0);
+        edge += Hue(moved.x * 1.7 + moved.y * 0.8 + Time * 0.4) * (glint * 1.3) + float3(1.0, 1.0, 1.0) * (glint * glint * 0.7);
     }
     return moved;
 }

@@ -48,7 +48,7 @@ namespace Tacetno433.Screens
         private const int MostPlates = 6;
 
         //Card Fx : a skill seen on a band card for a moment
-        private enum CardLook { Heal, Breeze, Lesson, Shield, Volume, Guard, Call, Price }
+        private enum CardLook { Heal, Breeze, Lesson, Shield, Volume, Guard, Call, Price, Rift, Echo }
         private struct CardFx
         {
             public bool On;
@@ -123,7 +123,8 @@ namespace Tacetno433.Screens
             Color by = hitBy != null && !hitBy.IsEnemy ? SpotOf(hitBy).Tint : Palette.Paper;
             Skill playing = PlayingSkill;
             bool breeze = playing != null && hitBy != null && SkillStyleName(hitBy, playing) == "SOFT AIR";
-            if (e.Kind == TurnEventKind.Heal) AddCardFx(breeze ? CardLook.Breeze : CardLook.Heal, e.Who, by);
+            bool brother = hitSignature && battle.Kit == TurnKit.Fanny;                       // TWO VOICES : her brother heals the band
+            if (e.Kind == TurnEventKind.Heal) AddCardFx(brother ? CardLook.Rift : (breeze ? CardLook.Breeze : CardLook.Heal), e.Who, brother ? Palette.SpotBrother : by);
             else if (e.Kind == TurnEventKind.Lesson) AddCardFx(CardLook.Lesson, e.Who, by);
             else if (e.Kind == TurnEventKind.Shield) AddCardFx(CardLook.Shield, e.Who, by);
             else if (e.Kind == TurnEventKind.Crescendo) AddCardFx(CardLook.Volume, e.Who, by);
@@ -422,6 +423,23 @@ namespace Tacetno433.Screens
 
         private void DrawCardTells(SpriteBatch sb)
         {
+            //ECHO kept (FUGUE, block D item 2) : a small gold star for each move the echo will play, over the face's corner
+            for (int i = 0; i < battle.Party.Count; i++)
+            {
+                Fighter f = battle.Party[i];
+                if (f.Echo <= 0f || f.Down) continue;
+                Rectangle face = CardFace(i);
+                int stars = Math.Max(1, Math.Min(3, f.EchoLeft));
+                for (int k = 0; k < stars; k++)
+                {
+                    float x = face.X + 7f + k * 11f;
+                    float y = face.Y + 7f;
+                    float breathe = 0.8f + 0.2f * (float)Math.Sin(time * 3f + k * 1.3f + i);
+                    Gfx.DrawGlow(sb, x, y, 13f, Palette.SpotHoly * (0.55f * breathe));
+                    Gfx.Star(sb, x, y, 5f * breathe, Palette.SpotHolyHot);
+                }
+            }
+
             //THE LESSON kept : a thin gold lens round the face until the skill it helps is played
             for (int i = 0; i < battle.Party.Count; i++)
             {
@@ -526,6 +544,40 @@ namespace Tacetno433.Screens
                             float p = (t * 1.5f + k / 3f) % 1f;
                             float r = face.Width * (0.3f + 0.7f * p);
                             Gfx.EllipseOutline(sb, c.X, c.Y, r, r, cardFx[n].Tint * (fade * (1f - p)), 2f);
+                        }
+                        break;
+
+                    case CardLook.Rift:                                                      // TWO VOICES : her brother's cut opens across the face,
+                        {                                                                    //   purple and blue, and the life rises out of it
+                            float open = Smooth(Math.Min(1f, t * 4f)) * fade;
+                            Vector2 a = new Vector2(face.X + 2f, face.Y + face.Height * 0.25f);
+                            Vector2 b = new Vector2(face.Right - 2f, face.Y + face.Height * 0.75f);
+                            for (int k = 0; k < 4; k++)                                          // the burning edge, flickering
+                            {
+                                float wave = 0.5f + 0.5f * (float)Math.Sin(time * 17f + k * 1.9f);
+                                Vector2 off = new Vector2(1f, -1f) * ((k - 1.5f) * 2.2f * open);
+                                Color edge = Color.Lerp(Palette.SpotBrother, Palette.SpotBrotherDeep, k / 3f) * ((0.45f + 0.4f * wave) * open);
+                                Gfx.Line(sb, a + off, b + off, edge, 1.5f);
+                            }
+                            Gfx.Line(sb, a, b, Palette.Void * open, 3f * open + 1f);
+                            Gfx.DrawGlow(sb, c.X, c.Y, face.Width * 0.8f, Palette.SpotBrother * (0.3f * fade));
+                        }
+                        goto case CardLook.Heal;
+
+                    case CardLook.Echo:                                                      // ECHO : a guiding star lands on the face
+                        {
+                            float land = 1f - Math.Min(1f, t * 3f);
+                            Gfx.DrawGlow(sb, c.X, c.Y, face.Width * (0.7f + 0.5f * land), Palette.SpotHoly * (0.45f * fade));
+                            Gfx.Star(sb, c.X, c.Y, 6f + 12f * land, Palette.SpotHolyHot * fade);
+                            float r = face.Width * (0.3f + 0.6f * Smooth(t));
+                            Gfx.EllipseOutline(sb, c.X, c.Y, r, r, Palette.SpotHoly * (fade * (1f - t)), 2f);
+                            for (int k = 0; k < 6; k++)                                          // gold motes drifting up
+                            {
+                                float p = (t * 1.2f + k * 0.17f) % 1f;
+                                float x = face.X + 5f + (k * 17 % (face.Width - 8));
+                                float y = face.Bottom - p * (face.Height + 12f);
+                                Gfx.Rect(sb, x, y, 2f, 2f, Palette.SpotHolyHot * (fade * (1f - p)));
+                            }
                         }
                         break;
 

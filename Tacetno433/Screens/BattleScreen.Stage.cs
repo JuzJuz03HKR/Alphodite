@@ -482,19 +482,26 @@ namespace Tacetno433.Screens
             return hits.ImpactAt - stageCam * BattleRules.StageParallax[3];
         }
 
-        //Signature Colours : the conductor's SIGNATURE in its own colours. THE UNHEARING's LIGHTNING glows blue (round 6),
-        //the others are white until the user gives them a colour.
+        //Signature Colours : the conductor's SIGNATURE in its own colours. THE UNHEARING's LIGHTNING glows blue (round 6), red once
+        //it has grown into STORM (the user : "blue first, then red", 13.90 and 13.119),
+        //FANNY's PRISM is the white of her crystal, THE METRONOME's HOLY his gold (block D item 2), the hidden conductors white.
         private HitColors SignatureColors()
         {
+            if (battle.Kit == TurnKit.Beethoven && battle.SignatureLevel >= 1) return new HitColors(Palette.StormRed, Palette.StormRedHot, HitFlair.None);   // STORM : red (13.119)
             if (battle.Kit == TurnKit.Beethoven) return new HitColors(Palette.LightningBlue, Palette.LightningBlueHot, HitFlair.None);
+            if (battle.Kit == TurnKit.Fanny) return new HitColors(Palette.SpotPrism, Color.White, HitFlair.None);
+            if (battle.Kit == TurnKit.Bach) return HolyColors;
             return HitColors.Plain;
         }
 
-        //Signature Style : how the conductor's SIGNATURE lands. LIGHTNING strikes from the sky (THE UNHEARING, round 6),
-        //the others cut a CROSS until they get their own.
+        //Signature Style : how the conductor's SIGNATURE lands. LIGHTNING strikes from the sky (THE UNHEARING, round 6), PRISM
+        //breaks on each enemy (FANNY, block D item 2, the world's break is BattleScreen.Finale.cs), the others cut a CROSS.
+        //THE METRONOME's FUGUE strikes nobody : its stars go to the band (BattleScreen.Finale.cs).
         private HitStyle SignatureStyle()
         {
-            return battle.Kit == TurnKit.Beethoven ? HitStyle.Lightning : HitStyle.Cross;
+            if (battle.Kit == TurnKit.Beethoven) return HitStyle.Lightning;
+            if (battle.Kit == TurnKit.Fanny) return HitStyle.Prism;
+            return HitStyle.Cross;
         }
 
         //Style Of : how a musician's blows look, by their instrument's family. Strings cut (SLASH), winds blast (SHOT),
@@ -683,7 +690,9 @@ namespace Tacetno433.Screens
             }
             else
             {
-                //SIGNATURE : each stroke of the 4/4 is a beat of the conductor's light on TACET, the strike comes after the fourth
+                //SIGNATURE : each stroke of the 4/4 is a beat of the conductor's light on TACET, the strike comes after the fourth.
+                //FANNY's strokes write cracks, THE METRONOME's light stars (block D item 2, BattleScreen.Finale.cs).
+                if (FinaleStroke(next)) return;
                 HitColors c = SignatureColors();
                 AddStageLight(EnemiesCenter(), 520f, 0.25f * strength * streak, 0.3f, Color.Lerp(Color.White, c.Tint, 0.6f));
                 hits.Star(EnemiesCenter() - new Vector2(0f, 60f), BattleRules.HitSize * (0.5f + 0.25f * streak), c);

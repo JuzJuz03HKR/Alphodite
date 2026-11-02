@@ -343,6 +343,30 @@ namespace Tacetno433.Core
             }
         }
 
+        //Quad : a four cornered shape filled in rows two pixels tall (PIXEL x2). It must bulge outward everywhere, so every
+        //row crosses it in one piece : from the leftmost edge crossing to the rightmost. (The AURA's prism glass and the FINALE's)
+        public static void Quad(SpriteBatch sb, Vector2[] p, Color color)
+        {
+            float top = Math.Min(Math.Min(p[0].Y, p[1].Y), Math.Min(p[2].Y, p[3].Y));
+            float bottom = Math.Max(Math.Max(p[0].Y, p[1].Y), Math.Max(p[2].Y, p[3].Y));
+            for (float y = (float)Math.Floor(top * 0.5f) * 2f; y < bottom; y += 2f)
+            {
+                float row = y + 1f;
+                float left = float.MaxValue;
+                float right = float.MinValue;
+                for (int k = 0; k < 4; k++)
+                {
+                    Vector2 a = p[k];
+                    Vector2 b = p[(k + 1) % 4];
+                    if ((row < a.Y) == (row < b.Y)) continue;             // this edge does not cross the row
+                    float x = a.X + (row - a.Y) / (b.Y - a.Y) * (b.X - a.X);
+                    left = Math.Min(left, x);
+                    right = Math.Max(right, x);
+                }
+                if (right > left) Rect(sb, left, y, right - left, 2f, color);
+            }
+        }
+
         //Draw Star : a four pointed star (REHEARSAL, 31 Oct), a diamond whose sides curve in, drawn in rows like the diamond
         public static void Star(SpriteBatch sb, float cx, float cy, float size, Color color)
         {

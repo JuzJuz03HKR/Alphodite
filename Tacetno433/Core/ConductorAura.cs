@@ -309,7 +309,7 @@ namespace Tacetno433.Core
             shardHue = new float[n];
             for (int i = 0; i < n; i++)
             {
-                //A long sliver with four corners, a little different each time but always bulging outward (FillQuad)
+                //A long sliver with four corners, a little different each time but always bulging outward (Gfx.Quad)
                 float length = ShardPlaces[i].Z;
                 float wide = length * (0.5f + 0.2f * (float)dice.NextDouble());
                 shardShape[i] = new Vector2[]
@@ -358,7 +358,7 @@ namespace Tacetno433.Core
 
                 float a = power * BattleRules.UiAuraSeeThrough;
                 float hue = shardHue[i] + time * 0.12f;
-                FillQuad(sb, corners, Color.Lerp(Palette.Paper, Palette.Prism(hue), 0.35f) * (0.14f * a));
+                Gfx.Quad(sb, corners, Color.Lerp(Palette.Paper, Palette.Prism(hue), 0.35f) * (0.14f * a));
                 for (int k = 0; k < 4; k++)
                     Gfx.Line(sb, corners[k], corners[(k + 1) % 4], Palette.Paper * (0.55f * a), 1f);
                 Gfx.Line(sb, corners[0], corners[2], Palette.Paper * (0.22f * a), 1f);         // the ridge down the crystal
@@ -501,30 +501,6 @@ namespace Tacetno433.Core
         private static void Polyline(SpriteBatch sb, Vector2[] points, Color color, float thickness)
         {
             for (int k = 1; k < points.Length; k++) Gfx.Line(sb, points[k - 1], points[k], color, thickness);
-        }
-
-        //Fill Quad : a four cornered shape filled in rows two pixels tall (PIXEL x2). It must bulge outward everywhere,
-        //so every row crosses it in one piece : from the leftmost edge crossing to the rightmost.
-        private static void FillQuad(SpriteBatch sb, Vector2[] p, Color color)
-        {
-            float top = Math.Min(Math.Min(p[0].Y, p[1].Y), Math.Min(p[2].Y, p[3].Y));
-            float bottom = Math.Max(Math.Max(p[0].Y, p[1].Y), Math.Max(p[2].Y, p[3].Y));
-            for (float y = (float)Math.Floor(top * 0.5f) * 2f; y < bottom; y += 2f)
-            {
-                float row = y + 1f;
-                float left = float.MaxValue;
-                float right = float.MinValue;
-                for (int k = 0; k < 4; k++)
-                {
-                    Vector2 a = p[k];
-                    Vector2 b = p[(k + 1) % 4];
-                    if ((row < a.Y) == (row < b.Y)) continue;             // this edge does not cross the row
-                    float x = a.X + (row - a.Y) / (b.Y - a.Y) * (b.X - a.X);
-                    left = Math.Min(left, x);
-                    right = Math.Max(right, x);
-                }
-                if (right > left) Gfx.Rect(sb, left, y, right - left, 2f, color);
-            }
         }
 
         //Cone : a beam of light from a narrow top to a wide foot, in rows four pixels tall (the light map is soft anyway)

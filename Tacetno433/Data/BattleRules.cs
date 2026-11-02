@@ -473,6 +473,26 @@
         public static float SkillSawSpin = 26f;           //   how fast it spins (radians a second)
         public static float SkillRollStep = 0.07f;        // TIMPANI ROLL : the wait between its rings on the floor
 
+        //Finale Feel (block D item 2, 2 Nov, Core/HitFx.Finale.cs) : FANNY's and Bach's FINALE. Screen numbers, not balance.
+        public static float FinaleCrackDraw = 0.12f;      // PRISM : a stroke's crack runs across the stage in this long
+        public static float FinaleCrackHair = 0.16f;      //   how open a written crack stands while it waits for the break (a hairline)
+        public static float FinaleCrackWait = 4f;         //   a written crack closes by itself after this long if no break comes
+        public static float FinaleBreakHold = 0.8f;       //   THE BREAK : how long the world stays broken
+        public static float FinaleBreakClose = 0.5f;      //   then how long it takes to close again
+        public static float FinaleBreakSlide = 30f;       //   how far the pieces slide along each crack (page pixels)
+        public static float FinaleBreakGap = 10f;         //   how wide each crack opens (page pixels)
+        public static float FinaleBreakFall = 0.05f;      //   how far the pieces drop while it is broken (screen heights, a piece drops 0.55 to 1.45 of it)
+        public static int FinaleGlass = 30;               //   the pieces of glass thrown off the cracks (DAS JAHR II twice as many)
+        public static float FinaleMonthRing = 230f;       // DAS JAHR : the ring of twelve months round the enemies (page pixels across)
+        public static float FinaleHolyWide = 190f;        // HOLY : the 4/4 the strokes light, its half width ...
+        public static float FinaleHolyTall = 120f;        //   ... and half height (page pixels)
+        public static float FinaleHolyLift = 150f;        //   how far above the enemies' middle it hangs
+        public static int FinaleHolyStars = 260;          //   the countless small stars of the warm sky
+        public static float FinaleHolyDark = 0.55f;       //   how much of the stage's light goes as the sky fills (the room goes dark round him)
+        public static float FinaleHolyFall = 0.55f;       //   a guiding star takes this long to come down to a musician
+        public static float FinaleHolyFade = 2.2f;        //   the sky fades away in this long after the strike
+        public static float FinaleEchoDelay = 0.16f;      // ECHO : the second voice answers this long after the first blow
+
         //Tell Feel (block D, 2 Nov, Screens/BattleScreen.Tells.cs) : what TACET's moves look like on their bodies and the band's
         //skills on the cards. Screen numbers, not balance.
         public static float TellPlateReach = 0.62f;       // ARMOR : the ring the plates float on, a share of the enemy's bigger side
