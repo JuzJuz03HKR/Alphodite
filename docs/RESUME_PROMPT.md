@@ -64,6 +64,15 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 
 ## สถานะล่าสุด (2 พ.ย.)
 
+**2 พ.ย. ปิดแชท /system ต่อจาก FINALE11 (/update) : ผู้ใช้ลองก้อน G ครบแล้ว "ยังไม่ต้องแก้อะไร" (คำต่อคำ `USER_BRIEFS.md` 13.130 `BETA1_DIRECTION.md` 46.5)**
+✅ ก้อน G แกนเกมเสร็จและผ่านการลองบนเครื่องจริง (เหลือ G6 ท่าโจมตี กับรีวิวความยากตอนท้าย) / งานทั้งหมดอยู่บน GitHub / build 0/0 turncheck 220/220 savecheck 44/44 / `docs/TACET_Balance.xlsx` อัปเดตแล้ว / ตาราง "แชทที่กำลังทำงาน" ว่าง
+❓ **ถามผู้ใช้ก่อนเริ่มก้อน E (ยังไม่ได้ตอบ)** : 1 เสียงตี ปัด โดน ใช้เสียงธรรมดาแบบเกมทั่วไป หรือยังผสมเสียงเครื่องดนตรีตาม 16.14 / 2 คลัง `SoundLibrary/` ได้มาจากไหน (`HANDOFF.md` ก้อน H ข้อ 1 : ไม่มีที่มาและสิทธิ์ ห้ามติดไปกับเกม)
+**งานถัดไป (ผู้ใช้ 13.129 : เร่งทำระบบให้เสร็จ แล้วรีวิวทั้งเกม polish ก่อน publish)** :
+1. **ก้อน E เสียง** (แผน `BETA1_DIRECTION.md` 45.6 + ทิศเพลง 13.127 13.128) : ไฟล์ใน Drive `soundgame` (เสียงตี 3 GUI 4 เพลง 13 รายการ รายชื่อ 45.6 / ตัวค้นของ Drive คืนไม่ครบ อ่านรายชื่อจากหน้าโฟลเดอร์แชร์ลิงก์ด้วย curl แล้วโหลดไฟล์ทาง `drive.usercontent.google.com/download?id=<id>&export=download`) / ศึกษาการใช้เพลงของ Worldless ก่อน แล้วไอริสลองทำเพลงประกอบเอง (ไม่สร้างเพลงจากโน้ตตอนตี) / ของยืมเก็บ Drive ไม่เข้า repo เกมอ่านจากโฟลเดอร์ในเครื่องตอนรัน ไม่ผ่าน `Content.mgcb` / ชื่อเสียงกับการเล่น `Audio/SoundBank.cs` (SfxFiles MusicFiles PlayMusic) เพลงไฟต์ `Screens/RunFlow.cs` `FightMusic` / จุดเล่นในไฟต์ 49 จุด `ASSET_LIST.md` S3 ต่อที่ `Screens/BattleScreen.cs` (`Land` `ShowEvents` `FinishSwipe` ของ FINALE) กับ `Screens/BattleScreen.Stage.cs` (`NoteBlow`) / เครดิตทุกไฟล์ `docs/CREDITS.md` + หน้าเครดิตในเกม (ป้าย ของเรา ฟรี ยืม)
+2. ป้าย **EARLY ACCESS** ของ THE METRONOME : `Screens/ConductorSelectScreen.cs` `Screens/ConductorDetailScreen.cs` (เตรียม string ตอนโหลด)
+3. **ก้อน F** : Tutorial ใหม่ให้ตรง Beta1 (`Screens/TutorialScreen.cs` `TutorialScreen.Practice.cs` ไฟต์ฝึก `new BattleScreen(true)` สอน RUSH HOLD FINALE SOLO ด้วย) / เนื้อเรื่องคร่าวๆ หรือไม่มี / ภาษาไทย (Trirong + Chakra Petch ต้องวางสระวรรณยุกต์เอง 45.2)
+4. G6 ท่าโจมตีตาม Worldless (`Core/Figure.cs` `Core/Figure.Band.cs` `Core/Figure.Tacet.cs`) / ก้อน H build (ปิด TEST ROOM `TestRoomScreen.On`) / แล้วรีวิวทั้งเกม polish ความยาก (ตัวที่ขยับได้มากสุด `TurnSignatureNeed` 46.3)
+
 **2 พ.ย. แชท /system ต่อจาก FINALE11 : ✅ ก้อน G แกนเกมเสร็จ** (`BETA1_DIRECTION.md` 46 : FINALE 10 PERFECT + ทุก CHARGE เสียท่า + FORTE / โน้ต RUSH / RUSH TAIL / THE SILENCE GROWS / COMBO คูณ / SOLO) commit `33bfe87` + ปรับตัวเลข + เอกสาร / build 0/0 turncheck 220/220 savecheck 44/44 / ตัวจำลองเทียบก่อนหลัง STRONG ทั้งรัน 39% → 16% (46.3 ห้ามใช้ตัดสินยากง่าย) / ตาราง "แชทที่กำลังทำงาน" ว่าง / **ผู้ใช้ยังไม่ได้ Rebuild ลอง (สิ่งที่ให้ลอง 46.4)** / ผู้ใช้สั่งเร่งทำระบบที่เหลือแล้วรีวิวทั้งเกมกับ polish ก่อน publish (13.129)
 **ถัดไป** : ก้อน E เสียง (แผน 45.6 + ทิศเพลง 13.127 13.128 : เพลงประกอบธรรมดา ศึกษา Worldless ไอริสลองทำเอง / ❓ ถามผู้ใช้เรื่องเสียงตีก่อน / `SoundLibrary/` ยังไม่รู้ที่มาและสิทธิ์) + ป้าย EARLY ACCESS ของ THE METRONOME → ก้อน F Tutorial ภาษาไทย → G6 ท่าโจมตี → ก้อน H build (ปิด TEST ROOM) → รีวิวทั้งเกม polish
 
