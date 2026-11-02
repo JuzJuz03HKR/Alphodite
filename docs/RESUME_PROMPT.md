@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 2 พ.ย. แชท /system ต่อจาก FINALE3 | รอบ 6 ส่วนที่ 4 เวที (`BETA1_DIRECTION.md` 32.14 ข้อ 4 กับ 32.11 ข้อ 7 : ลดประกายแค่พอ แสงบนพื้นใต้ตัว เงาสะท้อน เงาใต้คนหน้าเวทีไปไว้ใต้เท้า) | `Core/TacetVoid.cs` `Screens/BattleScreen.Stage.cs` `Core/Figure*.cs` `Data/BattleRules.cs` (Stage Feel Figure Feel) `Content/Effects/*.fx` `Core/DebugShots*.cs` เอกสาร |
+| (ว่าง) | | |
 
 ---
 
@@ -63,6 +63,11 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 ---
 
 ## สถานะล่าสุด (2 พ.ย.)
+
+**2 พ.ย. แชท /system (ต่อจาก FINALE3) : ผู้ใช้ลองส่วน 2 กับ 3 แล้ว ยังไม่ต้องแก้ ✅ รอบ 6 ส่วนที่ 4 เวที เสร็จ หยุดรอผู้ใช้ Rebuild ลอง** (คำต่อคำ `USER_BRIEFS.md` 13.99 ผลกับสิ่งที่ให้ลอง `BETA1_DIRECTION.md` 32.20)
+✅ `db7bb75` : ศัตรูบังแสงของหลุม (SILHOUETTE ใน `Core/Shapes.cs` `DrawTacetSilhouettes`) / เม็ดแสงรอบหลุมจางลงในไฟต์ (`StageVoidGrain` `Grain` ใน `Void.fx`) / เงาสะท้อนบนพื้น (MIRROR `Figure.DrawReflection` `DrawTacetReflections`) / แสงบนพื้นใต้ตัว (`Figure.GlowFloor`) / เงากับแอ่งไฟของนักดนตรีคนหน้าใต้เท้า (`DrawFront` `ForeFeetY`) / build 0/0 turncheck 204/204 savecheck 44/44 / ภาพเทียบก่อนกับหลังดูแล้ว (หน้า Title ไม่เปลี่ยน) / งานอยู่บน GitHub / ตาราง "แชทที่กำลังทำงาน" ว่าง
+⚠️ ผู้ใช้ยังไม่ได้ Rebuild ลองส่วน 4 / ไอริสตัดสินเอง 4 ข้อ (32.20) / เงาสะท้อนของศัตรูดำแทบไม่เห็น (ตั้งใจ ปรับ `FigureMirrorAlpha` ได้)
+**งานถัดไป** : ผู้ใช้ Rebuild ลอง (ถ้าเจออะไรแก้ก่อน) / แล้วส่วน 5 ท่าโจมตีของทุกตัว (13.89 / `Core/Figure.cs` `Strike` `BattleRules.TurnStrikeTime` `TurnStrikeImpact` / นักดนตรี 5 คนใน `Core/Figure.Band.cs` TACET 4 แบบกับบอส 6 ตัวใน `Core/Figure.Tacet.cs` `PoseTacet`) / ทำทีละส่วน จบแล้วหยุดรอ (13.92) / PLAYTEST FINALE ยัง 1 PERFECT (`PlaytestSignatureNeed` ห้ามแก้จนผู้ใช้บอก) / แคปใน cloud ใช้ `/build` ถ้าจะดูท่าตีให้แก้เฉพาะสำเนาให้ตัวละครตีวน (32.19)
 
 **2 พ.ย. แชท /system (ต่อจาก FINALE3) : ✅ รอบ 6 ส่วนที่ 3 จบ บอสอีก 4 ตัวจากสเก็ตช์ หยุดรอผู้ใช้ Rebuild ลอง** (คำต่อคำ `USER_BRIEFS.md` 13.98 ผลกับสิ่งที่ให้ลอง `BETA1_DIRECTION.md` 32.19)
 ✅ `3ab8950` : THE NAMELESS MASTER (`DrawNameless`) THE STAFF (`DrawStaff`) THE DEVIL'S STRING (`DrawDevil`) THE BLIND CANTOR (`DrawCantor`) ใน `Core/Figure.Tacet.cs` / ชิ้นที่ใช้ร่วม `Robe` `BossHead` `BossCore` `BossCracks` `Blade` `BossSwing` `SinceBlow` / ลบโค้ดบอสรอบ 5 / build 0/0 turncheck 204/204 savecheck 44/44 / ภาพ `battleboss3` ถึง `6` `battlebossturn3` ถึง `6` (1280×720 และ `--scale 1.5`) ดูแล้ว / REQUIEM ภาพเดิมทุกพิกเซล / งานอยู่บน GitHub / ตาราง "แชทที่กำลังทำงาน" ว่าง
