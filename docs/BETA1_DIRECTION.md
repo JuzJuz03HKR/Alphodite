@@ -2923,3 +2923,27 @@ TACET ขาวดำเทา
 3. แคปทีละเฟรมด้วยวิธี PROBE ของ 32.22 (แก้แค่สำเนาใน scratchpad : TACET_AUTO TACET_PROBE TACET_NORING) ดูแล้วปรับตัวเลข Skill Feel จนดูดี
 4. ทำส่วนที่เหลือของ 37.3 : เกราะของศัตรู (แผ่นเกราะตาม `Fighter.Block` บิ่นตอน Blocked หลุดตอนหมด PIERCE ปลิวออกด้านหลัง) / CHARGE (`Fighter.Charge` 2 = ง้างแล้ว) BREAK (`ChargeBroken`) / ดาวมึนตอน `Staggered` / ภาพบนการ์ดของวงสำหรับ SOFT AIR THE LESSON SHIELD FANFARE THUNDER CALL THE HUNTING CALL THE DEVIL'S BARGAIN (วาดหลัง `DrawBand` ใน `BattleScreen.Draw`) / TURN OF THE HAND ที่โน้ตของศัตรู
 5. แล้วต่อ D2 (FINALE ของ FANNY = SPACE CUT ใหญ่ทั้งจอ ปริซึม ตามธีม 13.87 / Bach แสงทองดาวนับล้าน) D3 D5 D4 D6 D9 ตามลำดับเดิม ทำยาวได้ตาม 13.114 บันทึก commit push ทุกก้อน
+
+## 38. ก้อน D รอบยาว ต่อในแชท FINALE10 (2 พ.ย. คำต่อคำ `USER_BRIEFS.md` 13.117 13.118)
+
+### 38.1 ผู้ใช้สั่ง
+"เริ่มเลย" ทำ 37.4 ต่อ / **FINALE คง 1 PERFECT ตั้งใจไว้เพื่อเทสระบบ** (`PlaytestSignatureNeed` ยังห้ามแก้ ถามก่อนก้อน G) / **ทำไอคอนเกมจากโลโก้เลย** (E3) / ท้ายแชท โทเคนผู้ใช้ใกล้หมด สั่งบันทึกแล้วไปทำต่อกับ AI อีกตัว (13.118)
+
+### 38.2 ทำแล้ว (ทุกอย่างอยู่บน GitHub build 0/0 turncheck 205/205)
+1. **E3 ไอคอนเกม** : `Tacetno433/Icon.ico` (16 24 32 48 64 96 128 256 / 48 ขึ้นไปมีชื่อ TACET 4'33 / 32 ลงมาเหลือวงแหวนของหลุม เพราะตัวหนังสือเล็กเกินอ่าน / มุมมน) `Icon.bmp` 256 แบบวงแหวน (Windows ย่อเองบนแถบหน้าต่างกับทาสก์บาร์) / สร้างใหม่ `python3 docs/team_art/make_icon.py docs/team_art/logo.png Tacetno433` ได้ไฟล์เดิมทุกไบต์
+2. **รูปเรฟ 18 ภาพ** `docs/art_refs/vfx/` + `_sheet.jpg` (Miyabi Vergil Acheron Worldless CZN) ที่มาใน `docs/art_refs/README.md` สิ่งที่เรียน `docs/research/FINALE9_vfx.md` หัวข้อ "รูปเรฟ" / ได้แค่รูปปกกับเฟรม 25 50 75% ของ YouTube และภาพ Steam (คลิปโหลดไม่ได้ 403 ไม่หาทางเลี่ยง)
+3. **สกิล 5 ท่าต่อสายแล้ว** : `SkillStyle` `PlayingSkill` (`Screens/BattleScreen.Stage.cs` หาสกิลจากปุ่ม ไม่ใช่ชื่อ เพราะร่างในตำนานเปลี่ยนชื่อ) / CAPRICE = SPACE CUT ทุกโน้ต (`PostChain.SetCuts` ใน PreDraw) เส้นยาวแบบ Miyabi โน้ตสุดท้าย `CapriceFinish` (`lastSkillNote` ใน `BattleScreen.cs`) / IL CANNONE กดค้าง = `Gather` ที่ `Figure.SoundPoint` (`Core/Figure.Band.cs`) ปล่อย = ลำทะลุ / LANCE หนามสีไพลิน / CHAKRAM วงเลื่อย / TIMPANI ROLL วงบนพื้นทุกการเขย่า / ตัวเลข Skill Feel ปรับแล้ว (`SkillCapriceReach` 1.25 `SkillCutSlide` 22 `SkillCutGap` 7)
+4. **TELLS** ไฟล์ใหม่ `Screens/BattleScreen.Tells.cs` ตัวเลข `BattleRules` หัวข้อ Tell Feel : ARMOR แผ่นเกราะเทาเข้มขอบซีดลอยรอบตัว (แผ่นละส่วนของเกราะ) โดนแล้วบิ่น หมดแล้วแตกร่วง PIERCE ปลิวออกด้านหลัง / CHARGE (Charge 2) เศษดำถูกดูดเข้าแกน (`Figure.Heart` ใน `Core/Figure.Tacet.cs`) แกนกระพริบ วงบีบ / BREAK `HitFx.Shatter` / STUNNED ดาว 3 ดวงวนหัว / THE TURN OF THE HAND กุญแจหมุน โน้ตหล่น / การ์ดของวง : ฮีลเม็ดกลม SOFT AIR มีริบบิ้นลม THE LESSON เลนส์ปิดรอบหน้า (ค้างจนใช้) SHIELD กระจกโค้ง VOLUME ลูกศรทอง THUNDER CALL หนังกลอง + วงกลิ้งไปถึงศัตรูทุกตัว (`HitFx.Rumble`) THE HUNTING CALL วงแตร จ่ายเลือด (DEVIL'S BARGAIN THE PACT) เปลวไฟตามการ์ด
+
+### 38.3 ไอริสตัดสินเอง
+ไฟลุกของ CAPRICE เก็บไว้โน้ตสุดท้าย แต่ละโน้ตเหลือเส้นสะอาดกับรอยไหม้ (ภาพแรกเป็นแท่งพิกเซลรก) / ศัตรู CHARGE 1 (ประกาศว่าจะชาร์จ) ยังไม่มีภาพ มีแค่ไอคอน CHG เพราะยังไม่ได้รวบพลัง / ดาวมึน สีทองซีด / แผ่นเกราะ 6 แผ่นรอบตัวทั้งวง (มองไกลคล้ายวงเล็ง ถ้าผู้ใช้สับสนให้ลดเป็นครึ่งวงด้านหน้า แก้ `PlateAngle`)
+
+### 38.4 สิ่งที่ให้ผู้ใช้ลองหลัง Rebuild (หน้าต่อสู้)
+CAPRICE ของ PAGANINI : ภาพเวทีแยกตามแนวฟันทุกโน้ต โน้ตสุดท้ายรอยลุกพร้อมกัน / IL CANNONE กดค้างไฟรวมที่ไวโอลินซ้ายจอ ปล่อยลำทะลุ / LANCE ของ DUPORT / CHAKRAM ของ PUNTO / TIMPANI ROLL ของ PFUNDT ใส่ศัตรูที่ชาร์จอยู่ (แตก BROKEN) / ศัตรูตั้งเกราะ (แผ่นรอบตัว) แล้วตีจนหมด / การ์ดของวงมุมซ้ายบนตอนใช้ SOFT AIR THE LESSON SHIELD FANFARE THUNDER CALL / ไอคอนเกมบนทาสก์บาร์
+
+### 38.5 วิธีแคปทีละเฟรมใน cloud (ใช้ต่อได้)
+สคริปต์อยู่ `.claude/skills/build/film/` : ตั้ง `SP=<โฟลเดอร์ scratch>` / ทำ shader ตาม `/build` ก่อน / `probe_build.sh` (สำเนา + `probe_patch.py` : เล่น PERFECT เอง `TACET_AUTO=1` / คนหน้าเล่นปุ่ม `TACET_PROBE=skill1|skill2` / `TACET_SETUP=armor charge stun` ใส่สถานะให้ศัตรูตัวแรก / หน้าเดียวกันแคปต่อเนื่อง) / `film.sh <หน้า> skill1 <จาก> <ถึง> <ทีละ> <โฟลเดอร์>` (หน้า `battlelegend1-5` = คนหน้า PAGANINI QUANTZ PFUNDT DUPORT PUNTO / โน้ตแรกราวเฟรม 66 โน้ตละ 33 เฟรม) / `sheet.py <โฟลเดอร์> <ไฟล์> <คอลัมน์> <กว้าง>` ต่อภาพเป็นตาราง
+
+### 38.6 งานถัดไป (AI ตัวถัดไปทำต่อ ตาม 13.114 ทำยาวได้ ไม่ต้องหยุดถามทีละข้อ)
+37.4 ข้อ 5 : **D2** FINALE ของ FANNY = SPACE CUT ใหญ่หลายรอยทั้งจอ ขอบปริซึมรุ้ง แผ่นกระจกร่วง (เรฟ `dmc_jce_*`) และ Bach แสงทองดาวนับล้าน (`SignatureStyle` `SignatureColors` ใน `Screens/BattleScreen.Stage.cs` ตอนนี้ CROSS ขาว / `PostChain.MostCuts` 4 ถ้าจะผ่าเยอะกว่านี้ต้องแก้ `Post.fx` ด้วย) / FINALE ที่โตหลังบอส STORM THE ART OF FUGUE DAS JAHR → **D3** ดาวขั้นสูงกับร่างในตำนาน (`HitFx` tier) → **D5** บอส (`Screens/BattleScreen.Boss.cs`) → **D4** GIFT ทำงานมีเอฟเฟกต์ (`TurnEventKind.Gift`) → **D6** COMBO → **D9** ตั้งค่ากราฟิก / ทุกก้อน build turncheck แคปดู commit push / ต่อด้วยก้อน E F G H (`HANDOFF.md` 00.3)
+

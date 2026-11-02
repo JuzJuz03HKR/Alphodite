@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 2 พ.ย. แชท /system FINALE10 | ก้อน D รอบยาว `BETA1_DIRECTION.md` 37.4 (รูปเรฟ VFX ต่อสายสกิล SPACE CUT ส่วนที่เหลือของ 37.3 แล้ว D2 D3 D5 D4 D6 D9) + E3 ไอคอนเกมจากโลโก้ | `Core/HitFx*.cs` `Core/Figure*.cs` `Core/PostChain.cs` `Content/Effects/Post.fx` `Screens/BattleScreen*.cs` `Data/BattleRules.cs` `Core/ConductorAura.cs` `Icon.ico` `Icon.bmp` `docs/art_refs/vfx/` `docs/research/` |
+| (ว่าง) | | |
 
 ---
 
@@ -64,11 +64,10 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 
 ## สถานะล่าสุด (2 พ.ย.)
 
-**2 พ.ย. แชท /system FINALE10 (กำลังทำ ก้อน D รอบยาวต่อจาก FINALE9 คำต่อคำ `USER_BRIEFS.md` 13.117)** : network เปิดแล้ว (โหลดรูปได้ / YouTube ไม่ให้โหลดคลิป 403 ไม่ได้หาทางเลี่ยง)
-✅ E3 ไอคอนเกมจากโลโก้ (`Tacetno433/Icon.ico` `Icon.bmp` สร้างใหม่ `python3 docs/team_art/make_icon.py docs/team_art/logo.png Tacetno433`) / ✅ 37.4 ข้อ 1 รูปเรฟ 18 ภาพ `docs/art_refs/vfx/` (ที่มาใน README ของโฟลเดอร์ สิ่งที่เรียน `docs/research/FINALE9_vfx.md` หัวข้อ "รูปเรฟ") / ✅ ข้อ 2 กับ 3 ต่อสายสกิล 5 ท่า + SPACE CUT แล้วปรับจากภาพทีละเฟรม (`SkillStyle` `PlayingSkill` ใน `Screens/BattleScreen.Stage.cs` / `Figure.SoundPoint` / `lastSkillNote` / `PostChain.SetCuts` ใน PreDraw) turncheck 205/205
-⏳ ข้อ 4 กำลังทำ : ไฟล์ใหม่ `Screens/BattleScreen.Tells.cs` (แผ่นเกราะ ARMOR / CHARGE ดูดเศษเข้าแกน / BREAK `HitFx.Shatter` / ดาวมึน STUNNED / ภาพบนการ์ดของวงตอนฮีล กัน เสริม) + `Figure.Heart` ใน `Core/Figure.Tacet.cs`
-วิธีแคปใน cloud (สำเนา ไม่แตะ repo) : `scratchpad/probe_patch.py` + `probe_build.sh` + `film.sh <หน้า> skill1|skill2 <จาก> <ถึง> <ทีละ> <โฟลเดอร์>` (หน้า `battlelegend1-5` = คนหน้า PAGANINI QUANTZ PFUNDT DUPORT PUNTO) / สคริปต์อยู่ใน scratchpad ของแชทนี้ ถ้าหายให้เขียนใหม่ตาม `BETA1_DIRECTION.md` 32.22 กับ 38
-PLAYTEST FINALE คง 1 PERFECT ตั้งใจไว้เพื่อเทสระบบ (13.117)
+**2 พ.ย. แชท /system FINALE10 ปิดแชท (โทเคนผู้ใช้ใกล้หมด 13.118) : ✅ ไอคอนเกม ✅ รูปเรฟ VFX ✅ สกิล 5 ท่าหน้าตาตามชื่อ + SPACE CUT ✅ TELLS เกราะ ชาร์จ ดาวมึน การ์ดของวง** (คำต่อคำ `USER_BRIEFS.md` 13.117 13.118 รายละเอียด `BETA1_DIRECTION.md` 38)
+✅ งานทั้งหมดอยู่บน GitHub / build 0/0 turncheck 205/205 (กติกาไม่เปลี่ยน savecheck ไม่ได้รันซ้ำ) / ตาราง "แชทที่กำลังทำงาน" ว่าง / ผู้ใช้ยังไม่ได้ Rebuild ลอง (สิ่งที่ให้ลอง 38.4)
+⚠️ PLAYTEST FINALE คง 1 PERFECT ตั้งใจไว้เพื่อเทสระบบ (13.117 ห้ามแก้ ถามก่อนก้อน G) / THE METRONOME ยังไม่มีอาร์ต / ภาพที่ส่งระหว่างไอริสทำงานไม่ถูกเก็บเป็นไฟล์
+**งานถัดไป** : `BETA1_DIRECTION.md` 38.6 (D2 FINALE FANNY กับ Bach → D3 → D5 → D4 → D6 → D9) ทำยาวได้ตาม 13.114 / วิธีแคปทีละเฟรม 38.5 สคริปต์ `.claude/skills/build/film/`
 
 
 **2 พ.ย. แชท /system FINALE9 หยุดกลางทาง : ⏳ ก้อน D รอบยาว ไอริสค้นเองแล้ว (ผลค้น `docs/research/FINALE9_vfx.md`) วางระบบ VFX ของสกิลกับ SPACE CUT ไว้ในโค้ดแล้ว ยังไม่ได้ต่อสาย / ผู้ใช้จะเปิดแชทใหม่และเปิด network ให้โหลดรูปได้** (คำต่อคำ `USER_BRIEFS.md` 13.114 ถึง 13.116 รายละเอียด `BETA1_DIRECTION.md` 37)
