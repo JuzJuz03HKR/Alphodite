@@ -11,8 +11,12 @@ namespace Tacetno433.Data
     public enum Family { String, Wind, Percussion }
 
     //Spot Look (Beta1 round 4) : a musician's own colour and what it adds to their blows (Palette spot colours,
-    //Core/HitFx.cs). GOLD = golden sparkles, RED = flames. Only two for now, the user picks the real ones with the art.
-    public enum SpotLook { Gold, Red }
+    //Core/HitFx.cs). GOLD = golden sparkles, RED = flames, the two the user asked to try first.
+    //ELEMENTS (Beta1 2 Nov, MATH ART round 6, docs/BETA1_DIRECTION.md 32.4 32.11) : each legend has the colour of one of the
+    //band's five elements, the user left the colours to Iris (13.87) and said yes to these (13.90) :
+    //   FIRE PAGANINI blood red / WIND QUANTZ sea green / EARTH PFUNDT copper / WATER DUPORT sapphire / LIGHT PUNTO brass.
+    //New looks go at the end (the old two stay for the hidden musicians).
+    public enum SpotLook { Gold, Red, Fire, Wind, Earth, Water, Light }
 
     //MusicianTrait : the one thing each musician does that nobody else does.
     //Every trait comes straight from the line written about them, and TurnBattle (BattleState in the old duel) checks
@@ -48,7 +52,7 @@ namespace Tacetno433.Data
         public string Instrument = "";
         public string Culture = "";
         public Family Family = Family.String;
-        public SpotLook Spot = SpotLook.Gold;  // their colour in a fight (round 4 : strings and percussion GOLD, winds RED for now)
+        public SpotLook Spot = SpotLook.Gold;  // their colour in a fight (round 6 : each legend's element, see SpotLook)
 
         //Legend (Beta1, 29 Oct, docs/CHARACTER_DESIGN.md 5) : the user's five are real musicians who became legends on
         //their instrument. The name the legends give them, and the weapon their instrument becomes (the user's theme :
@@ -147,7 +151,7 @@ namespace Tacetno433.Data
             //0 : violin. Niccolo Paganini (1782 - 1840) : rumour said he sold his soul to the devil. His Guarneri violin, the
             //one he called his cannon (Il Cannone), was left to Genoa in his will. IL CANNONE : the violin is the guard of a
             //sword and the bow its blade, and it hits like a cannon.
-            new Musician { Name = "PAGANINI", Instrument = "VIOLIN",    Culture = "EUROPEAN", Family = Family.String,     Cue = 0, Spot = SpotLook.Gold,
+            new Musician { Name = "PAGANINI", Instrument = "VIOLIN",    Culture = "EUROPEAN", Family = Family.String,     Cue = 0, Spot = SpotLook.Fire,
                            Epithet = "THE DEVIL'S VIOLINIST", Weapon = "IL CANNONE",
                            Power = 5, Sample = "violin", SampleNote = 60, ThemeColor = Palette.ToneB,
                            Key = GiftKey.Dissonance, Trait = MusicianTrait.DevilsBargain, TraitName = "THE DEVIL'S BARGAIN",
@@ -156,7 +160,7 @@ namespace Tacetno433.Data
 
             //1 : flute. Johann Joachim Quantz (1697 - 1773) : the flute teacher of Frederick the Great, about 300 concertos
             //for the king's evening concerts. The king was the one who gave Bach the theme of the Musical Offering (1747).
-            new Musician { Name = "QUANTZ",   Instrument = "FLUTE",     Culture = "EUROPEAN", Family = Family.Wind,       Cue = 1, Spot = SpotLook.Red,
+            new Musician { Name = "QUANTZ",   Instrument = "FLUTE",     Culture = "EUROPEAN", Family = Family.Wind,       Cue = 1, Spot = SpotLook.Wind,
                            Epithet = "THE KING'S FLUTE MASTER", Weapon = "FLUTE RAPIER",
                            Power = 4, Sample = "flute", SampleNote = 72, ThemeColor = Palette.ToneC,
                            Key = GiftKey.Heal, Trait = MusicianTrait.BreathControl, TraitName = "BREATH CONTROL",
@@ -165,7 +169,7 @@ namespace Tacetno433.Data
 
             //2 : timpani. Ernst Pfundt (1806 - 1871) : the timpanist of the Leipzig Gewandhaus, credited with the crank timpani
             //that tune with a turn of the hand, and the author of a book on the timpani (Die Pauken, 1849).
-            new Musician { Name = "PFUNDT",   Instrument = "TIMPANI",   Culture = "EUROPEAN", Family = Family.Percussion, Cue = 2, Spot = SpotLook.Gold,
+            new Musician { Name = "PFUNDT",   Instrument = "TIMPANI",   Culture = "EUROPEAN", Family = Family.Percussion, Cue = 2, Spot = SpotLook.Earth,
                            Epithet = "WHO TUNES THE THUNDER", Weapon = "TWIN HAMMERS",
                            Power = 6, Sample = "timpani", SampleNote = 0, ThemeColor = Palette.ToneD,
                            Key = GiftKey.OffBeat, Trait = MusicianTrait.TurnOfTheHand, TraitName = "TURN OF THE HAND",
@@ -195,7 +199,7 @@ namespace Tacetno433.Data
             //6 : cello. Jean-Louis Duport (1749 - 1819) : thought to have played the first Cello Sonatas Op. 5 with Beethoven in
             //Berlin, 1796. The legend of the Duport Stradivarius : Napoleon tried it in 1812 and left a dent that is still there.
             //THE SCARRED SHIELD : the cello is a great shield with the emperor's dent in it, the bow a lance.
-            new Musician { Name = "DUPORT",   Instrument = "CELLO",     Culture = "EUROPEAN", Family = Family.String,     Cue = 2, Spot = SpotLook.Gold,
+            new Musician { Name = "DUPORT",   Instrument = "CELLO",     Culture = "EUROPEAN", Family = Family.String,     Cue = 2, Spot = SpotLook.Water,
                            Epithet = "SCARRED BY AN EMPEROR", Weapon = "THE SCARRED SHIELD",
                            Power = 6, Sample = "cello", SampleNote = 48, ThemeColor = Palette.ToneC,
                            Key = GiftKey.Shield, Trait = MusicianTrait.TheScar, TraitName = "THE SCAR",
@@ -205,7 +209,7 @@ namespace Tacetno433.Data
             //7 : horn. Giovanni Punto (1746 - 1803, born Jan Vaclav Stich in Bohemia) : Beethoven wrote the Horn Sonata Op. 17
             //for them and they played it first together in Vienna, 18 April 1800, when Punto was far more famous than
             //Beethoven. HORN CHAKRAM : the coiled horn is a ring of blades, thrown and caught again.
-            new Musician { Name = "PUNTO",    Instrument = "HORN",      Culture = "EUROPEAN", Family = Family.Wind,       Cue = 0, Spot = SpotLook.Red,
+            new Musician { Name = "PUNTO",    Instrument = "HORN",      Culture = "EUROPEAN", Family = Family.Wind,       Cue = 0, Spot = SpotLook.Light,
                            Epithet = "LOUDER THAN BEETHOVEN", Weapon = "HORN CHAKRAM",
                            Power = 5, Sample = "horn", SampleNote = 48, ThemeColor = Palette.ToneA,
                            Key = GiftKey.Crescendo, Trait = MusicianTrait.HuntingCall, TraitName = "THE HUNTING CALL",

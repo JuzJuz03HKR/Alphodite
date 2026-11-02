@@ -23,6 +23,8 @@ namespace Tacetno433.Core
     //The figure only shows, the battle rules never read it (Battle/TurnBattle.cs). Screens/BattleScreen.Stage.cs tells it
     //where it stands, what it plays and how hard it was hit. Every number is in BattleRules, Figure Feel.
     //The files : Figure.cs (this one, the machinery), Figure.Band.cs (the five legends), Figure.Tacet.cs (TACET and bosses).
+    //Round 6 (2 Nov, docs/BETA1_DIRECTION.md 32) : the legends are drawn from the sketch docs/art_refs/concept_v6.html, LEVEL 1
+    //by default, and their bodies show the fight (Figure.Band.cs LEGEND CUES).
     public partial class Figure
     {
         //FIGURE LEVEL : 1 = shapes only, 2 = a simple body (F4 in a fight, BattleScreen.cs)
@@ -118,6 +120,8 @@ namespace Tacetno433.Core
             public readonly int Count;
             public float Link;
             private float lastDt = 1f / 60f;
+            public int Hold;               // ROOTED : this many links leave the root along RootWay, held (hair leaves the head one way, then falls)
+            public Vector2 RootWay;
 
             public Chain(int count, float link)
             {
@@ -163,13 +167,15 @@ namespace Tacetno433.Core
                 for (int pass = 0; pass < 3; pass++)
                 {
                     At[0] = root;
+                    for (int h = 1; h <= Hold && h < Count; h++) At[h] = root + RootWay * (Link * h);
                     for (int i = 0; i < Count - 1; i++)
                     {
+                        if (i + 1 <= Hold) continue;                           // ROOTED : both ends of this link are held
                         Vector2 d = At[i + 1] - At[i];
                         float length = d.Length();
                         if (length < 0.0001f) continue;
                         float off = (length - Link) / length;
-                        if (i == 0) At[1] -= d * off;                          // the root is held, only the next one moves
+                        if (i <= Hold) At[i + 1] -= d * off;                   // the root (and its held links) stay, only the next one moves
                         else
                         {
                             At[i] += d * (0.5f * off);
@@ -297,6 +303,7 @@ namespace Tacetno433.Core
             if (move == "enter" && moveTime > BattleRules.StageSwapTime) move = "idle";
 
             Pose();
+            TickBand(dt);                                                 // LEGEND CUES : the band's own timers (Figure.Band.cs)
             float scale = Height / 512f;
             float stiff = BattleRules.FigureSpring;
             for (int i = 0; i < body.Length; i++)
@@ -319,7 +326,7 @@ namespace Tacetno433.Core
             for (int c = 0; c < chainCount; c++)
             {
                 chains[c].Link = chainLink[c] * Height;
-                chains[c].Step(ChainRoot(c), pull * chainWeight[c], dt, BattleRules.FigureDrag);
+                chains[c].Step(ChainRoot(c), pull * chainWeight[c] + ChainDrift(c) * scale, dt, BattleRules.FigureDrag);   // DRIFT : a ribbon streams back
             }
             UpdateShards(dt);
         }

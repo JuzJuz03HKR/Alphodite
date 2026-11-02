@@ -177,6 +177,8 @@
 | MATH ART (1 พ.ย.) ตัวละครที่โค้ดวาดแทนภาพทีม : ตัววาดรูปทรง (FEATHER ขอบเนียน) | `Core/Shapes.cs` |
 | MATH ART : ฟิสิกส์ของตัวละคร (SPRINGS CHAINS SHARDS IK) ท่า ATTACK PARRY HURT KO DEATH, F4 สลับระดับ `Figure.Level` | `Core/Figure.cs` · นักดนตรี `Core/Figure.Band.cs` · TACET กับบอส `Core/Figure.Tacet.cs` · ตัวเลข `BattleRules` หัวข้อ Figure Feel |
 | MATH ART : ต่อเข้าหน้าต่อสู้ (MakeFigure, PIXEL LOOK ภาพเล็กของ TACET + SCANLINES, BACKLIGHT, SILHOUETTE บังแสงรอยต่อ, ลมจากไม้บาตอง) | `Screens/BattleScreen.Stage.cs` หัวข้อ MATH ART · หน้าแคป `battlelegend1` ถึง `5` และ `--figure 2` ใน `Core/DebugShots.cs` |
+| รอบ 6 (2 พ.ย.) นักดนตรี 5 คนจากสเก็ตช์ `docs/art_refs/concept_v6.html` : รูปทรงต่อคน (`DrawPaganini` ถึง `DrawPunto`) กรอบตัว `T` กรอบหัว `Hd` ร่างในตำนาน (ดาว 3) | `Core/Figure.Band.cs` · สีธาตุ `SpotLook` ใน `Data/Musician.cs` + `Palette.SpotOf` `SpotHotOf` |
+| รอบ 6 LEGEND CUES : กิมมิคบนตัวบอกสถานะไฟต์ (เลือด ปุ่มที่เล่น VOLUME THE LESSON SHIELD THE HUNTING CALL ดาว) | `Figure.LegendCues` ใน `Core/Figure.Band.cs` · ส่งจาก `TellLegend` `NextAfter` ใน `Screens/BattleScreen.Stage.cs` · ตัวเลข `BattleRules` Figure Feel · หน้าแคป `battlelegendform1-5` `battlelegendcue1-5` |
 | cut-in SIGNATURE, แสงของวง QTE (วาดทับหลังโลกถูกหรี่) | `Screens/BattleScreen.Show.cs` |
 | อ่านภาพ animation ของทีมอาร์ต (PNG / Aseprite) | `Core/FrameArt.cs` · โฟลเดอร์ `Content/Art/Battle/` · แผนอาร์ต `BATTLE_ART_PLAN.md` |
 | LESS FLASHING | `Core/Settings.cs` `ReduceFlashing` · หน้า `Screens/SettingsScreen.cs` แถว 07 · `BattleRules.LessFlash` |

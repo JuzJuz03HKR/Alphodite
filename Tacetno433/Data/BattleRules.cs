@@ -433,6 +433,19 @@
         public static float FigureParryTime = 0.45f;      // a PARRY holds the guard this long
         public static float FigureGlow = 0.5f;            // the band's weapon and core light in the GLOW picture
         public static float FigureBandShade = 0.62f;      // LIT : the band's colours are laid this dark, the stage light on the one in front brings them to white
+        public static float FigureLightShade = 0.9f;      // LIGHT (round 6) : what gives light on a legend (the f hole, a head of light) is laid only this dark
+        public static float FigureBandScale = 0.74f;      // WHOLE LEGEND (round 6) : the legend in front is drawn this share of its box's height, so all of it shows
+        public static float FigureBandLift = 0.26f;       //   standing this share of the box's height over the box's bottom (which is under the commands)
+        //LEGEND CUES (round 6, 2 Nov, Core/Figure.Band.cs) : the fight shown on the legends' bodies
+        public static float FigureBleedTime = 1.4f;       // THE DEVIL'S BARGAIN : PAGANINI's string flickers and the f hole smokes this long after paying in life
+        public static float FigureStringGrow = 1.6f;      // IL CANNONE : the LIFE STRING grows back this share a second after the shot
+        public static float FigureKeyIdle = 0.5f;         // TURN OF THE HAND : PFUNDT's winding key turns this fast at rest (turns a second, in radians)
+        public static float FigureKeySkill = 7f;          //   this fast while a skill plays
+        public static float FigureKeyRoll = 20f;          //   and this fast in TIMPANI ROLL's roll
+        public static float FigureBeatSlow = 0.9f;        // HEARTBEAT : PFUNDT's drum beats this often a second at full life
+        public static float FigureBeatFast = 2.4f;        //   and this often at none
+        public static float FigureKeyRunTime = 0.42f;     // KEY RUN : QUANTZ's six keys light one after another down in this long when a skill plays
+        public static float FigureCallLight = 0.34f;      // THE HUNTING CALL : how strong PUNTO's light falls back at the next musician (a fifth of it when nobody is next)
         public static float FigureBacklight = 0.16f;      // BACKLIGHT : a pale haze behind each of TACET's figures so the black reads on the dark stage
         public static int FigureScanGrey = 44;            // SCANLINES : the grey of the lines across TACET's bodies (0..255)
         public static float FigureScanEvery = 2f;         //   one line every this many blocks

@@ -233,6 +233,7 @@ namespace Tacetno433.Screens
         //WIND : while the baton swings, its speed blows through the hair and the cloth (BattleRules.FigureWind), TACET feels half.
         private void UpdateFigures(float dt)
         {
+            figureFrame++;
             Vector2 wind = Vector2.Zero;
             if (view == View.Swipe && Input.MouseDown())
             {
@@ -251,9 +252,73 @@ namespace Tacetno433.Screens
             Rectangle r = DrawBox(f);
             figure.Feet = new Vector2(r.Center.X, r.Bottom);
             figure.Height = r.Height;
+            if (!f.IsEnemy)                                               // WHOLE LEGEND (round 6) : the box's feet are under the commands,
+            {                                                             //   the legend stands over them, a little smaller, feet and all
+                figure.Feet.Y -= r.Height * BattleRules.FigureBandLift;
+                figure.Height = r.Height * BattleRules.FigureBandScale;
+            }
             figure.Hole = hole;
             if (!f.Down && figure.IsDown) figure.Up();                    // back up (a heal from zero)
+            if (!f.IsEnemy && f.Musician != null) TellLegend(f, figure);  // LEGEND CUES
             figure.Update(dt, wind);
+        }
+
+        //Tell Legend (LEGEND CUES, MATH ART round 6, 2 Nov, docs/BETA1_DIRECTION.md 32.12) : what the fight shows on a legend's
+        //body this frame (Core/Figure.Band.cs) : their life, the button they play, VOLUME, THE LESSON, SHIELD, THE HUNTING CALL
+        //and the stars of each button (three = its LEGEND FORM). The rules are only read, never changed.
+        private int figureFrame;           // LEGEND CUES : counts the frames the figures were moved
+
+        private void TellLegend(Fighter f, Figure figure)
+        {
+            Figure.LegendCues cues = figure.Cues;
+            Musician m = f.Musician;
+            float life = f.MaxHp > 0 ? MathHelper.Clamp((float)f.Hp / f.MaxHp, 0f, 1f) : 0f;
+            BarMove move = battle.Step == TurnStep.PlayerTurn && battle.Current == f ? battle.CurrentMove : null;
+            bool seen = cues.Frame == figureFrame - 1;                    // on stage last frame too
+            if (seen && life < cues.Life - 0.001f && move != null && move.Skill != null && battle.PaysInLife(f)) figure.Bled();   // THE DEVIL'S BARGAIN
+            cues.Frame = figureFrame;
+            cues.Life = life;
+            cues.Button = move == null ? -1 : ButtonOf(m, move.Skill);
+            cues.Volume = f.Crescendo;
+            cues.Taught = f.Lesson;
+            cues.LessonOut = false;
+            for (int i = 0; i < battle.Party.Count; i++)
+                if (battle.Party[i] != f && battle.Party[i].Lesson) cues.LessonOut = true;
+            cues.Covered = f.CoveredBy != null;
+            Fighter next = m.Trait == MusicianTrait.HuntingCall ? NextAfter(f) : null;
+            cues.Calling = next != null;
+            cues.CallTint = next != null ? SpotOf(next).Tint : Color.White;
+            cues.Stars0 = RehearsalList.StarsOf(m, 0);
+            cues.Stars1 = RehearsalList.StarsOf(m, 1);
+            cues.Stars2 = RehearsalList.StarsOf(m, 2);
+            figure.Cues = cues;
+        }
+
+        //Button Of : which button a move is (0 the ATTACK, 1 and 2 the skills)
+        private static int ButtonOf(Musician m, Skill s)
+        {
+            if (s == null) return 0;
+            Skill first = SkillList.First(m);
+            return s == first || s.Name == first.Name ? 1 : 2;
+        }
+
+        //Next After : THE HUNTING CALL, the musician who plays right after this one in the turn (the plan's order while it is
+        //written, the turn's order while it plays, TACET's turns in between do not count), null when nobody does or it has passed
+        private Fighter NextAfter(Fighter f)
+        {
+            if (battle.Step == TurnStep.Won || battle.Step == TurnStep.Lost) return null;
+            bool planning = battle.Step == TurnStep.Plan;
+            List<Fighter> order = planning ? previewOrder : battle.Order;
+            int at = order.IndexOf(f);
+            if (at < 0) return null;
+            for (int i = at + 1; i < order.Count; i++)
+            {
+                Fighter o = order[i];
+                if (o.IsEnemy || o == f || o.Down) continue;
+                if (!planning && battle.OrderIndex > i) return null;      // that turn has been played
+                return o;
+            }
+            return null;
         }
 
         //Figure Look Of : how an enemy's figure is drawn this frame, worked out the way DrawEnemy works out a picture :
@@ -424,11 +489,14 @@ namespace Tacetno433.Screens
 
         //Spot Of : a musician's colours for their blows (Palette spot colours, SpotLook in Data/Musician.cs).
         //The conductor's SIGNATURE and TACET are white for now.
+        //ELEMENTS (round 6, 2 Nov) : each legend's own colour. FIRE and the old RED burn (flames), the others sparkle in their
+        //colour until the elements' own VFX (docs/HANDOFF.md 00.3 part D).
         private static HitColors SpotOf(Fighter f)
         {
             if (f == null || f.IsEnemy || f.Musician == null) return HitColors.Plain;
-            if (f.Musician.Spot == SpotLook.Red) return new HitColors(Palette.SpotRed, Palette.SpotRedHot, HitFlair.Flame);
-            return new HitColors(Palette.SpotGold, Palette.SpotGoldHot, HitFlair.Sparkle);
+            SpotLook look = f.Musician.Spot;
+            HitFlair flair = look == SpotLook.Red || look == SpotLook.Fire ? HitFlair.Flame : HitFlair.Sparkle;
+            return new HitColors(Palette.SpotOf(look), Palette.SpotHotOf(look), flair);
         }
 
         //Stage Hit : a hit lands at a point (where the fighters stand). The dark is thrown (back when the band hits),

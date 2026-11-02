@@ -43,6 +43,49 @@ namespace Tacetno433.Core
         public static Color SpotRed = new Color(255, 48, 30);
         public static Color SpotRedHot = new Color(255, 160, 60);
 
+        //Element Colours (Beta1 2 Nov, MATH ART round 6, docs/BETA1_DIRECTION.md 32.4) : the five legends' own colours, one
+        //element each (SpotLook in Data/Musician.cs). The colour, then its hot core (the pale light at the heart of a glow).
+        //FIRE sits near ATTACK's crimson and LIGHT near BOOST's gold : the shapes of their VFX keep them apart (told to the user).
+        public static Color SpotFire = new Color(255, 45, 85);          // PAGANINI : blood red
+        public static Color SpotFireHot = new Color(255, 225, 231);
+        public static Color SpotWind = new Color(69, 240, 208);         // QUANTZ : sea green
+        public static Color SpotWindHot = new Color(224, 255, 248);
+        public static Color SpotEarth = new Color(255, 138, 61);        // PFUNDT : copper
+        public static Color SpotEarthHot = new Color(255, 227, 199);
+        public static Color SpotWater = new Color(74, 140, 255);        // DUPORT : sapphire
+        public static Color SpotWaterHot = new Color(219, 232, 255);
+        public static Color SpotLight = new Color(255, 197, 58);        // PUNTO : brass
+        public static Color SpotLightHot = new Color(255, 244, 207);
+
+        //Spot Of : a look's colour and its hot core (every page asks here, so a colour changes in one place)
+        public static Color SpotOf(SpotLook look)
+        {
+            switch (look)
+            {
+                case SpotLook.Red: return SpotRed;
+                case SpotLook.Fire: return SpotFire;
+                case SpotLook.Wind: return SpotWind;
+                case SpotLook.Earth: return SpotEarth;
+                case SpotLook.Water: return SpotWater;
+                case SpotLook.Light: return SpotLight;
+                default: return SpotGold;
+            }
+        }
+
+        public static Color SpotHotOf(SpotLook look)
+        {
+            switch (look)
+            {
+                case SpotLook.Red: return SpotRedHot;
+                case SpotLook.Fire: return SpotFireHot;
+                case SpotLook.Wind: return SpotWindHot;
+                case SpotLook.Earth: return SpotEarthHot;
+                case SpotLook.Water: return SpotWaterHot;
+                case SpotLook.Light: return SpotLightHot;
+                default: return SpotGoldHot;
+            }
+        }
+
         //Lightning Blue (round 6, the user asked) : THE UNHEARING's LIGHTNING glows blue. The glow, then its hot core.
         public static Color LightningBlue = new Color(40, 170, 255);
         public static Color LightningBlueHot = new Color(170, 230, 255);

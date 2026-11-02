@@ -22,7 +22,7 @@ namespace Tacetno433.Core
         //Spot Of : a musician's own colour (Musician.Spot)
         public static Color SpotOf(Musician m)
         {
-            return m.Spot == SpotLook.Red ? Palette.SpotRed : Palette.SpotGold;
+            return Palette.SpotOf(m.Spot);                                   // ELEMENTS (round 6) : each legend's own colour
         }
 
         //Picture : the slanted window, the picture in it (or the empty slot), their colour rising when pointed, the edge

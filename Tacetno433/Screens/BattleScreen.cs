@@ -1438,6 +1438,27 @@ namespace Tacetno433.Screens
             NextStep();                                                                 // the first bar is being written
             string pic = name.EndsWith("clear") ? name.Substring(0, name.Length - 5) : name;   // MARKS AND AIM : the same with CLEAR FIGHT on
 
+            //LEGEND CUES (MATH ART round 6, 2 Nov) : battlelegendcue1 to 5, the body of the one in front showing the fight.
+            //1 PAGANINI just paid in life (low), holds THE LESSON and has a SHIELD on her / 2 QUANTZ's lesson is with a friend /
+            //3 PFUNDT low on life (the drum beats fast) / 4 DUPORT with 5 VOLUME (five cracks) / 5 PUNTO calls whoever is next
+            if (pic.StartsWith("battlelegendcue"))
+            {
+                Fighter front = battle.Party[0];
+                Fighter friend = battle.Party.Count > 1 ? battle.Party[1] : front;
+                char who = pic[pic.Length - 1];
+                if (who == '1')
+                {
+                    front.Hp = Math.Max(1, front.MaxHp * 3 / 10);
+                    front.Lesson = true;
+                    front.CoveredBy = friend;
+                    if (ArtOf(front).Figure != null) ArtOf(front).Figure.Bled();
+                }
+                else if (who == '2') friend.Lesson = true;
+                else if (who == '3') front.Hp = Math.Max(1, front.MaxHp / 5);
+                else if (who == '4') front.Crescendo = 5;
+                return;
+            }
+
             //BOSS SHOW (Beta1 31 Oct) : its moments, see Core/DebugShots.cs for the names
             if (pic.StartsWith("battleboss") && boss != null)
             {

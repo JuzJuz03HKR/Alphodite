@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 2 พ.ย. แชท FINALE2 | รอบ 6 ส่วนที่ 1 นักดนตรี 5 คน (`BETA1_DIRECTION.md` 32.14) | `Core/Figure.Band.cs` `Core/Figure.cs` `Data/Musician.cs` `Core/Palette.cs` `Screens/BattleScreen.Stage.cs` `Core/BandColumn.cs` `Core/DebugShots*.cs` เอกสาร |
+| (ว่าง) | | |
 
 ---
 
@@ -63,6 +63,12 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 ---
 
 ## สถานะล่าสุด (2 พ.ย.)
+
+**2 พ.ย. แชท /system (FINALE2) : ✅ รอบ 6 ส่วนที่ 1 นักดนตรี 5 คน เสร็จ หยุดรอผู้ใช้ Rebuild ดู** (คำต่อคำ `USER_BRIEFS.md` 13.93 ผลและสิ่งที่ให้ลอง `BETA1_DIRECTION.md` 32.15)
+✅ รูปทรงใหม่ตามสเก็ตช์ `docs/art_refs/concept_v6.html` (`Core/Figure.Band.cs` เขียนใหม่ทั้งไฟล์ ตัวเลขของสเก็ตช์ตรงๆ 1 คน 1 ฟังก์ชัน กรอบตัว `T` กรอบหัว `Hd` หมุนตามสปริง) แก้ตาม 32.12 ครบ 5 ข้อ / สีธาตุ (`SpotLook` ต่อท้าย Fire Wind Earth Water Light `Palette.SpotOf`) / เห็นเต็มตัวถึงเท้า (`FigureBandScale` 0.74 `FigureBandLift` 0.26) / แสงออกจากที่ที่เสียงออก (`FigureLightShade`)
+✅ LEGEND CUES (`Figure.LegendCues` จาก `TellLegend` ใน `Screens/BattleScreen.Stage.cs`) : สายชีวิตกับควันของ PAGANINI คีย์ที่หายกับวงคีย์บนหัวเพื่อนของ QUANTZ กุญแจหมุนกับหัวใจกลองของ PFUNDT กิ่งแผลตาม VOLUME กับแผ่นน้ำ SHIELD ของ DUPORT แสงกรวยสีคนถัดไปกับขดเอวที่บินได้ของ PUNTO / ร่างในตำนานทุกปุ่ม (ดาว 3) / สายกับริบบิ้นใช้ CHAINS + ROOTED + DRIFT (`Core/Figure.cs`)
+✅ build 0/0 turncheck 204/204 savecheck 44/44 / ภาพใหม่ `battlelegendform1` ถึง `5` `battlelegendcue1` ถึง `5` (+ `battlelegend1` ถึง `5` ที่มีแล้ว) / BOM คงเดิม / งานอยู่บน GitHub / ตาราง "แชทที่กำลังทำงาน" ว่าง
+**งานถัดไป** : ผู้ใช้ Rebuild ลองตาม 32.15 (ถ้าเจออะไรแก้ก่อน) / แล้ว 32.14 ส่วน 2 TACET 4 แบบ (`Core/Figure.Tacet.cs` เลิก PIXEL LOOK กับ SCANLINES ใน `Screens/BattleScreen.Stage.cs` `tacetTarget` `DrawTacetFigures` แสงหลัง แกนขาว ร้าวตามเลือด) แล้วส่วน 3 บอส ส่วน 4 เวที (ย้ายเงาใต้คนหน้าเวทีมาไว้ใต้เท้าใหม่ด้วย) ส่วน 5 ท่าโจมตี / ทำทีละส่วน จบแล้วหยุดรอ (13.92) / PLAYTEST FINALE ยัง 1 PERFECT (`PlaytestSignatureNeed` ห้ามแก้จนผู้ใช้บอก)
 
 **2 พ.ย. แชท /system (FINALE1) : /update ปิดแชท ผู้ใช้เลือกทำทีละส่วน แชทหน้าเริ่มรอบ 6 ส่วนแรก นักดนตรี 5 คน** (คำต่อคำ `USER_BRIEFS.md` 13.89 ถึง 13.92 ลำดับงาน `BETA1_DIRECTION.md` 32.14)
 ✅ แชทนี้ทำ : อ่านและรีวิวรอบ 5 / ข้อเสนอรอบ 6 พร้อมสเก็ตช์ `docs/art_refs/concept_v6.html` (32 ส่งเป็นหน้า Artifact ด้วย ลิงก์อยู่ในแชท ไม่ commit) / ผู้ใช้ตอบ 7 ข้อ (32.11) เพศ (32.13 PAGANINI QUANTZ หญิง PFUNDT DUPORT ชาย PUNTO ไม่ระบุ) / เช็กดีไซน์เพิ่มกิมมิคบนตัวกับร่างในตำนาน (32.12) / แผนสองแชทหน้าบ้านหลังบ้าน `docs/PARALLEL_WORK.md` (เก็บไว้ ยังไม่ใช้)
