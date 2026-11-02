@@ -64,6 +64,13 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 
 ## สถานะล่าสุด (2 พ.ย.)
 
+**2 พ.ย. แชท /system FINALE10 (กำลังทำ ก้อน D รอบยาวต่อจาก FINALE9 คำต่อคำ `USER_BRIEFS.md` 13.117)** : network เปิดแล้ว (โหลดรูปได้ / YouTube ไม่ให้โหลดคลิป 403 ไม่ได้หาทางเลี่ยง)
+✅ E3 ไอคอนเกมจากโลโก้ (`Tacetno433/Icon.ico` `Icon.bmp` สร้างใหม่ `python3 docs/team_art/make_icon.py docs/team_art/logo.png Tacetno433`) / ✅ 37.4 ข้อ 1 รูปเรฟ 18 ภาพ `docs/art_refs/vfx/` (ที่มาใน README ของโฟลเดอร์ สิ่งที่เรียน `docs/research/FINALE9_vfx.md` หัวข้อ "รูปเรฟ") / ✅ ข้อ 2 กับ 3 ต่อสายสกิล 5 ท่า + SPACE CUT แล้วปรับจากภาพทีละเฟรม (`SkillStyle` `PlayingSkill` ใน `Screens/BattleScreen.Stage.cs` / `Figure.SoundPoint` / `lastSkillNote` / `PostChain.SetCuts` ใน PreDraw) turncheck 205/205
+⏳ ข้อ 4 กำลังทำ : ไฟล์ใหม่ `Screens/BattleScreen.Tells.cs` (แผ่นเกราะ ARMOR / CHARGE ดูดเศษเข้าแกน / BREAK `HitFx.Shatter` / ดาวมึน STUNNED / ภาพบนการ์ดของวงตอนฮีล กัน เสริม) + `Figure.Heart` ใน `Core/Figure.Tacet.cs`
+วิธีแคปใน cloud (สำเนา ไม่แตะ repo) : `scratchpad/probe_patch.py` + `probe_build.sh` + `film.sh <หน้า> skill1|skill2 <จาก> <ถึง> <ทีละ> <โฟลเดอร์>` (หน้า `battlelegend1-5` = คนหน้า PAGANINI QUANTZ PFUNDT DUPORT PUNTO) / สคริปต์อยู่ใน scratchpad ของแชทนี้ ถ้าหายให้เขียนใหม่ตาม `BETA1_DIRECTION.md` 32.22 กับ 38
+PLAYTEST FINALE คง 1 PERFECT ตั้งใจไว้เพื่อเทสระบบ (13.117)
+
+
 **2 พ.ย. แชท /system FINALE9 หยุดกลางทาง : ⏳ ก้อน D รอบยาว ไอริสค้นเองแล้ว (ผลค้น `docs/research/FINALE9_vfx.md`) วางระบบ VFX ของสกิลกับ SPACE CUT ไว้ในโค้ดแล้ว ยังไม่ได้ต่อสาย / ผู้ใช้จะเปิดแชทใหม่และเปิด network ให้โหลดรูปได้** (คำต่อคำ `USER_BRIEFS.md` 13.114 ถึง 13.116 รายละเอียด `BETA1_DIRECTION.md` 37)
 ✅ งานอยู่บน GitHub / build 0/0 / ภาพ `battle` `battlelooks1` เหมือนเดิมทุกพิกเซล (ของใหม่ยังไม่ได้เปิดใช้) / turncheck 205/205 / ตาราง "แชทที่กำลังทำงาน" ว่าง
 ✅ กติกาก้อน D เปลี่ยน (13.114) : **ไอริสค้นภาพและข้อมูล VFX เองอย่างละเอียด** (Miyabi ZZZ ฟันผ่ามิติ / Worldless แทง / เกมอื่น) ไม่ต้องรอผู้ใช้ส่งภาพ / ทำยาวได้ ไม่ต้องหยุดถามทีละข้อ / ท้ายสุด polish ทั้งเกม + ทำให้สนุก ไม่ง่ายเกิน ท้าทาย (ก้อน G) / **ค้นแล้วแคปรูปเก็บเป็นเรฟให้ผู้ใช้ดูด้วย (13.115)** ที่ `docs/art_refs/vfx/`
