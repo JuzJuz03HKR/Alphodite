@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 2 พ.ย. แชท /system FINALE5 | รอบ 6 ส่วนที่ 5 ท่าโจมตี : ขั้นแรก (ค้น แคป เสนอ) เสร็จ รอผู้ใช้ตอบ `BETA1_DIRECTION.md` 32.21.5 แล้วเขียนโค้ดท่าตี (`USER_BRIEFS.md` 13.101) | เอกสาร (`BETA1_DIRECTION.md` `USER_BRIEFS.md` `RESUME_PROMPT.md`) ขั้นถัดไป `Core/Figure*.cs` `Screens/BattleScreen.Stage.cs` `Screens/BattleScreen.Boss.cs` `Data/BattleRules.cs` (Figure Feel) `Core/DebugShots*.cs` |
+| (ว่าง) | | |
 
 ---
 
@@ -63,6 +63,12 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 ---
 
 ## สถานะล่าสุด (2 พ.ย.)
+
+**2 พ.ย. แชท /system FINALE5 : /update ปิดแชท ผู้ใช้เอาตามข้อเสนอท่าโจมตีทุกข้อ สั่งทำทั้งหมดรวดเดียวในแชทหน้า** (คำต่อคำ `USER_BRIEFS.md` 13.102 คำตอบกับแผนโค้ด `BETA1_DIRECTION.md` 32.21.6 32.21.7)
+✅ แชทนี้ไม่ได้แตะโค้ดเกม มีแต่เอกสาร (`6e3cca2` `ed99978` และ commit ปิดแชทนี้) / ตาราง "แชทที่กำลังทำงาน" ว่าง
+✅ การตัดสินใจใหม่ : หลักร่วม ONE NOTE ONE BLOW 5 ข้อ (32.21.3) / ท่าของ 15 ตัวตาม 32.21.4 / ทำนักดนตรี TACET บอส รวดเดียวไม่หยุดรอระหว่างกลุ่ม / รอยแสงตามคมอาวุธยังไม่ใส่ (ผู้ใช้ไม่ได้เลือกตรงๆ ใช้กติกาเดิม VFX รอก้อน D)
+⚠️ เครื่อง cloud ของแชทนี้ clone มาเก่า (shallow 31 ต.ค.) ตอน fetch ขึ้น "forced update" แต่ไม่ใช่ประวัติถูกเขียนทับ (เช็กแล้ว) ถ้าแชทหน้าเจอแบบเดียวกันให้ `git fetch --deepen=150 origin Beta1` แล้ว `git merge-base --is-ancestor` ก่อน pull / network บล็อกเว็บอ้างอิงเกือบหมด อ่านได้แค่ผลสรุปของ WebSearch
+**งานถัดไป (แชทหน้า ทำรวดเดียวตาม `BETA1_DIRECTION.md` 32.21.7 ข้อ 1 ถึง 9 แล้วหยุดรอผู้ใช้ Rebuild ลอง)** : ตัวเลข Attack Feel ใน `Data/BattleRules.cs` / `Core/Figure.cs` เปลี่ยน `Strike()` เป็นช่วง READY WIND CUT HOLD BACK ตามน้ำหนัก ช่วง CUT HOLD มือกับอาวุธไม่วิ่งตามสปริง เพิ่ม `Ready` `Blow` `Guard` / `Screens/BattleScreen.cs` `UpdateSwipe` เรียก `Ready` ทุกเฟรม `Land` เรียก `Blow` กับ `Guard` ลบท่าฟันอากาศใน `StartSkill` กับท่าตีครั้งเดียวใน `StartParry` / `Screens/BattleScreen.Stage.cs` `SwipeAction` `ParryAction` `RapidBlow` `TellLegend` (เพิ่ม `Cues.TargetAt` ให้จักรของ PUNTO ถึงเป้า) / `Core/Figure.Band.cs` `PoseBand` ท่าต่อคนตาม `legend.Weapon` / `Core/Figure.Tacet.cs` `PoseTacet` ท่า TACET 4 แบบกับบอส 6 ตัว / build 0/0 turncheck 204/204 savecheck 44/44 แคปด้วย PROBE (ข้างล่าง) ทั้ง 1280×720 และ `--scale 1.5` / PLAYTEST FINALE ยัง 1 PERFECT (`PlaytestSignatureNeed` ห้ามแก้จนผู้ใช้บอก) / VFX ธาตุกับวาทยากรรอภาพ (ก้อน D)
 
 **2 พ.ย. แชท /system FINALE5 : รอบ 6 ส่วน 5 ท่าโจมตี ขั้นแรกเสร็จ (แคปท่าตอนนี้ ค้นเกมอ้างอิง เสนอท่า) หยุดรอผู้ใช้เลือก ยังไม่เขียนโค้ด** (คำต่อคำ `USER_BRIEFS.md` 13.101 ทั้งหมด `BETA1_DIRECTION.md` 32.21)
 ✅ ปัญหา 8 ข้อของท่าตอนนี้ (32.21.1 เช่น ทุกคนสับท่าเดียวกัน อาวุธตามสปริงมาช้ากว่าตัวเลข โน้ตสกิลเริ่มท่าใหม่ทุกโน้ต ศัตรูตีครั้งเดียวแต่โน้ตมาหลายตัว จักรไม่ถึงศัตรู) / ข้อมูลอ้างอิง ZZZ 7 ตัว CZN Worldless (32.21.2 network บล็อกเว็บส่วนใหญ่ อ่านได้แค่ผลสรุปจากการค้น) / ข้อเสนอหลักร่วม 5 ข้อ ONE NOTE ONE BLOW (32.21.3) ท่าต่อตัว 15 ตัว (32.21.4) / คำถาม 4 ข้อ (32.21.5) / ภาพแคปส่งให้ผู้ใช้ในแชทแล้ว ไม่ได้ commit / แถวในตาราง "แชทที่กำลังทำงาน" ยังจอง
