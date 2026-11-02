@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| (ว่าง) | | |
+| 2 พ.ย. แชท /system FINALE6 | รอบ 6 ส่วนที่ 5 ท่าโจมตี ทำทั้งหมดรวดเดียวตาม `BETA1_DIRECTION.md` 32.21.7 ข้อ 1 ถึง 9 (หลัก ONE NOTE ONE BLOW นักดนตรี 5 TACET 4 บอส 6 กติกาไม่เปลี่ยน `USER_BRIEFS.md` 13.102 13.103) | `Data/BattleRules.cs` (Attack Feel) `Core/Figure.cs` `Core/Figure.Band.cs` `Core/Figure.Tacet.cs` `Screens/BattleScreen.cs` `Screens/BattleScreen.Stage.cs` อาจแตะ `Screens/BattleScreen.Boss.cs` `Core/DebugShots*.cs` และเอกสาร |
 
 ---
 
