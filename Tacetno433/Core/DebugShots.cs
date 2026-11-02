@@ -1008,6 +1008,10 @@ namespace Tacetno433.Core
             if (names[index] == "guide3" && (frames == 10 || frames == 20)) Input.PretendPress = Keys.Right;
             if (names[index] == "guide4" && (frames == 10 || frames == 20 || frames == 30)) Input.PretendPress = Keys.Right;
             if (names[index] == "guide5" && (frames == 10 || frames == 20 || frames == 30 || frames == 40)) Input.PretendPress = Keys.Right;
+            if (names[index] == "credits2" && frames == 10) Input.PretendPress = Keys.Right;                       // CREDITS (2 Nov) : its pages
+            if (names[index] == "credits3" && (frames == 10 || frames == 20)) Input.PretendPress = Keys.Right;
+            if (names[index] == "credits4" && (frames == 10 || frames == 20 || frames == 30)) Input.PretendPress = Keys.Right;
+            if (names[index] == "titlecredits" && frames == 30) Input.PretendPress = Keys.C;                       //   C on the title page opens it
 
             //Page Changes (Beta1 screens) : a change starts a few frames in, so the picture shows the cover on its way
             if (frames == 6 && (names[index].StartsWith("wipe") || names[index].StartsWith("sweep")))
@@ -1067,6 +1071,7 @@ namespace Tacetno433.Core
 
         //Page Open : build a sample run that suits the page, then show it.
         //Names: title titlecontinue titlequit guide guide3 guide4 guide5 settings calibrate gallery detail chapter
+        //       credits credits2 credits3 credits4 titlecredits (block E 2 Nov : the CREDITS page, C on the title page)
         //       recruit bandname route pause band (or view) duelbargain dueltrait duelmute duelmirror
         //       duel duelcombo duelboss duelcutin duelpause dueldouble dueltremolo duelfermata duelfire duelrepeat finale
         //       result defeat reward shop shopleave event eventchair rest curtain curtainwin
@@ -1130,6 +1135,7 @@ namespace Tacetno433.Core
 
             GameScreen screen = new TitleScreen();
             if (name.StartsWith("guide")) screen = new GuideScreen();
+            if (name.StartsWith("credits")) screen = new CreditsScreen();                // CREDITS (2 Nov) : credits credits2 credits3 credits4
             if (name.StartsWith("tutorial")) screen = new TutorialScreen();
             if (name == "settings" || name == "calibrate") screen = new SettingsScreen();
             if (name == "gallery") screen = new ConductorSelectScreen(0);                 // Beta1 round 2 : THE UNHEARING pointed, his painting exists

@@ -39,14 +39,14 @@
 | 6 โลโก้ ไม้บาตอง ไอคอนเกม | 0 | 0 | 1 | 2 | 2 |
 | **รวมภาพ** | **3** | **3** | **107** | **2** | **8** |
 
-| หมวดเสียง | ต้องทำ | ไม่บังคับ | มีแล้ว |
+| หมวดเสียง | ไฟล์ | มีแล้ว | มีชุดของทีมทับตอน playtest |
 |---|---|---|---|
-| S1 เพลง | 11 | 0 | 0 |
-| S2 เสียงที่โค้ดเล่นแล้ว | 26 | 0 | 0 |
-| S3 เสียงที่ต้องมีเพิ่ม (ข้อเสนอ) | 47 | 2 | 0 |
+| S1 เพลง | 13 | 13 | 2 |
+| S2 เสียงสั้น (เกมเล่น) | 61 | 61 | 13 |
+| S3 ไม่มีไฟล์ (หน้าดวลเดิม) | 11 | 0 | 0 |
 
 ตัวละครในฉากต่อสู้ 15 ชุด (นักดนตรี 5 ศัตรู 4 แบบที่ใช้ร่วมกัน บอส 6) เป็น math art ที่โค้ดวาดแล้ว ไม่วาด (13.79 13.106) แท็บ Animations เก็บชื่อท่าไว้เผื่อวันหนึ่งมีเวลาวาด
-ตัวเลขในตารางนี้สร้างตอนรันสคริปต์ล่าสุด (1 พ.ย. 2026)
+ตัวเลขในตารางนี้สร้างตอนรันสคริปต์ล่าสุด (2 พ.ย. 2026)
 <!-- /AUTO:summary -->
 
 ## กติกาทุกภาพ
@@ -425,136 +425,133 @@ build สำหรับขาย
 
 # ฝ่ายเสียง
 
-## S0. สถานะตอนนี้
+## S0. สถานะตอนนี้ (2 พ.ย. ก้อน E)
 
-- **ผู้ใช้ทำเสียงใหม่เองทั้งหมด ส่งรวดเดียวพร้อมงานอาร์ตทาง Google Drive** (13.57) รายการ S1 ถึง S3 คือเสียงที่เกมต้องมี ไอริสไม่มีตัวเชื่อม Google Drive ตอนส่งให้แนบในแชทหรือ push เข้า repo
-- **เสียงเก่าเก็บไว้แต่ไม่ใช้** (13.59) : `SoundLibrary/` และ `Content/Audio/Instruments/` อยู่ใน repo ต่อไป เกมไม่เล่น (`SoundBank.InstrumentsOn = false`)
-- เกมเงียบทั้งเกม ยังไม่มีไฟล์เสียงจริง ตัวโหลดข้ามไฟล์ที่ไม่มีไปเงียบๆ และไม่ใส่เสียงชั่วคราว
-- **ไฟต์ของ Beta1 แทบไม่มีจุดเล่นเสียง** ตอนนี้มีแค่เสียงปุ่มกับเพลงไฟต์ (`combo_up` ดังเฉพาะไฟต์ฝึกตอนผ่านบทเรียน) เสียงตี โน้ต ปัด ศัตรู บอส ต้องต่อโค้ดเพิ่ม (ข้อ S3) ทำตอนงานเสียงตามลำดับงาน
-- ทิศทางที่ผู้ใช้วางไว้ (`USER_BRIEFS.md` 13.39) : อาวุธผสมเครื่องดนตรี ตอนตีมีเสียงเครื่องดนตรีผสมเสียงอาวุธ
+- **ของสำเร็จรูปเป็นหลัก (ผู้ใช้ 13.133 ถึง 13.136)** : เกมมีเสียงครบทุกจุดแล้ว เสียงสั้น 61 ไฟล์ เพลง 13 เพลง ทุกไฟล์ใน repo เป็นของฟรี CC0 หรือ CC-BY ที่มาทีละไฟล์ `docs/audio/MANIFEST.md` เครดิต `docs/CREDITS.md` และหน้า CREDITS ในเกม (`Data/Credits.cs`)
+- **ชุดของทีม (TEAM FREE)** : ไฟล์ที่ทีมหามาจากเว็บเสียงฟรีและตรวจแล้วว่าใช้ได้ (ผู้ใช้ 13.138) เสียงตี 3 เสียงปุ่ม 4 Braam ของบอส 6 เพลงหน้าแรกกับเพลงบอส อยู่ใน `Content/Audio/Borrowed/` ที่ git ไม่เก็บ (ไม่ได้จดว่าแต่ละไฟล์มาจากเว็บไหน จึงไม่เอาขึ้น repo สาธารณะ) ไฟล์ชื่อเดียวกันในนั้นชนะไฟล์ฟรีตอนเล่น แตก `TACET_borrowed_audio.zip` ลงโฟลเดอร์นั้นก่อน Rebuild
+- **Worldless OST** (13.135) : ขายเท่านั้น Bandcamp ของ Berlinist ราคา 5 ยูโรขึ้นไป สงวนลิขสิทธิ์ทั้งหมด กับ Steam DLC 18 เพลง ไม่มีแหล่งฟรีที่ถูกต้อง ไอริสไม่โหลดจากเว็บเถื่อน ถ้าทีมซื้อแล้วอยากใช้ใน playtest วางไฟล์ .ogg ชื่อตามช่องของ S1 ใน `Borrowed/` แล้วเขียนเครดิตเพิ่ม
+- สร้างไฟล์ฟรีใหม่ได้ทั้งชุดด้วย `docs/audio/make_sounds.py` (หนึ่งบรรทัดต่อหนึ่งเสียง เปลี่ยนเสียงคือแก้บรรทัดนั้น) / `--shots soundcheck` บอกว่าโหลดอะไรได้บ้าง / กด F3 ในเกมดูจำนวน SFX MUSIC BORROWED BAND
+- `SoundLibrary/` = VSCO 2 Community Edition (CC0) ใช้ได้ / `Content/Audio/Instruments/` 9 ไฟล์ของหน้าดวลเดิม Beta1 ไม่ใช้ เก็บไว้ตามที่ผู้ใช้สั่ง
 
 ## กติกาไฟล์เสียง
 
-- เสียงสั้น : WAV 44.1 kHz 16 bit (mono ได้) เสียงเริ่มทันทีที่ต้นไฟล์ ไม่มีช่วงเงียบข้างหน้า เสียงตีกับเสียงโน้ตควรสั้น เพราะโน้ตมาติดกัน
-- เพลง : OGG (mp3 ก็ได้) เกมเล่นวนทั้งไฟล์ ท้ายเพลงต้องต่อกับต้นเพลงได้เนียน ไม่ต้องจางท้าย เพลงไม่ต้องตรงจังหวะกับโน้ต เกมไม่ผูกโน้ตกับเพลงแล้ว
-- ความดังของทุกไฟล์ใกล้เคียงกัน
-- ใส่ไฟล์ใน `Tacetno433/Content/Audio/Sfx/` หรือ `Tacetno433/Content/Audio/Music/` ชื่อตามตาราง แล้วเพิ่มใน `Content.mgcb` (เสียงสั้นใช้ processor "Sound Effect" เพลงใช้ "Song") กด F3 ในเกมดูจำนวนที่โหลดได้
+- เสียงสั้น : WAV 44.1 kHz 16 bit (mono ได้) เสียงเริ่มทันทีที่ต้นไฟล์ ไม่มีช่วงเงียบข้างหน้า
+- เพลง : OGG Vorbis เท่านั้น เกมเล่นวนทั้งไฟล์
+- ไม่ต้องแก้ `Content.mgcb` : เกมอ่านไฟล์ตรงจาก `Content/Audio/Sfx` `Music` `Borrowed` (`Audio/SoundBank.cs`) ใส่ไฟล์ชื่อตามตารางแล้ว Rebuild ดังเลย
+- หลายจังหวะใช้ไฟล์เดียวกันโดยตั้งใจ (ผู้ใช้ 13.133) คอลัมน์ "เล่นตอน" บอกทุกจุดที่ไฟล์นั้นดัง ชื่อในโค้ดคือ `enum Sfx` กับ `SfxFiles`
 
-## S1. เพลง (โค้ดเล่นแล้ว ใส่ไฟล์แล้วดังเลย)
+## S1. เพลง
 
 <!-- AUTO:music -->
-| ไฟล์ | เสียงอะไร | เล่นที่ไหน | ความยาว | ลำดับ | ป้าย | มีแล้ว | หมายเหตุ |
-|---|---|---|---|---|---|---|---|
-| `title.ogg` | เพลงหน้าแรก | Title, Settings, HOW TO PLAY, TEST ROOM | วนทั้งไฟล์ | ⭐⭐⭐ |  | ยังไม่มี |  |
-| `gallery.ogg` | เพลงเลือกวาทยากร | หน้าเลือกวาทยากรและหน้าโปรไฟล์ | วนทั้งไฟล์ | ⭐⭐ |  | ยังไม่มี |  |
-| `route.ogg` | เพลงแผนที่ | แผนที่, THE AUDITION, หน้าวง | วนทั้งไฟล์ | ⭐⭐⭐ |  | ยังไม่มี |  |
-| `battle.ogg` | เพลงไฟต์ | ไฟต์ธรรมดาและ ELITE | วนทั้งไฟล์ | ⭐⭐⭐ |  | ยังไม่มี |  |
-| `boss.ogg` | เพลงไฟต์บอส | ไฟต์บอสทั้ง 6 ตัว | วนทั้งไฟล์ | ⭐⭐⭐ |  | ยังไม่มี |  |
-| `victory.ogg` | เพลงชนะ | หน้าผลชนะไฟต์, หน้าเลือกรางวัล | วนทั้งไฟล์ | ⭐⭐ |  | ยังไม่มี |  |
-| `defeat.ogg` | เพลงแพ้ | หน้าผลแพ้ | วนทั้งไฟล์ | ⭐⭐ |  | ยังไม่มี |  |
-| `shop.ogg` | เพลงร้าน | ร้าน | วนทั้งไฟล์ | ⭐ |  | ยังไม่มี |  |
-| `event.ogg` | เพลงเหตุการณ์ | หน้าเหตุการณ์ | วนทั้งไฟล์ | ⭐ |  | ยังไม่มี |  |
-| `rest.ogg` | เพลงพัก | ห้องพัก, THE WINGS, WORKSHOP, REHEARSAL | วนทั้งไฟล์ | ⭐ |  | ยังไม่มี |  |
-| `ending.ogg` | เพลงจบรัน | CURTAIN CALL | วนทั้งไฟล์ | ⭐⭐ |  | ยังไม่มี |  |
+| ไฟล์ | เล่นตอน (ชื่อในโค้ด : งาน) | หน้า | ป้าย | ทำจาก (MANIFEST) | มีแล้ว |
+|---|---|---|---|---|---|
+| `title.ogg` | Title | Title, Settings, HOW TO PLAY, CREDITS, TEST ROOM | FREE (ใน repo) / TEAM FREE (ชุดของทีม ไม่อยู่ใน repo) | freesound 610532 "Dark Sad Mood Orchestra Strings Piano Choir Cinematic Music Atmo Ambient Surround" by szegvari, CC0 / Drive soundgame/song/title_music.wav (a free sound site, checked by the team 13.138) | มีแล้ว (ใน repo + ชุดของทีมทับตอน playtest) |
+| `gallery.ogg` | Gallery | หน้าเลือกวาทยากรและหน้าโปรไฟล์ | FREE (ใน repo) | freesound 610996 "Long Time Waiting - Strings String Solo Orchestra Orchestral Sad Dark Mood Drama Synth Atmo Music Surround" by szegvari, CC0 | มีแล้ว (ใน repo) |
+| `route.ogg` | Route | แผนที่, THE AUDITION, หน้าวง | FREE (ใน repo) | freesound 609755 "Dark Sad Mood Thriller Drama Orchestra Piano Keys Cinematic Atmo Music Surround" by szegvari, CC0 | มีแล้ว (ใน repo) |
+| `battle.ogg` | Battle | ไฟต์ธรรมดา | FREE (ใน repo) | freesound 595853 "Old ritual - Fantasy Background Soundscape Haunted Atmo Music Synth Drum Orchestra - Mastered" by szegvari, CC0 | มีแล้ว (ใน repo) |
+| `boss.ogg` | Boss | ไฟต์บอส ครึ่งแรก | FREE (ใน repo) / TEAM FREE (ชุดของทีม ไม่อยู่ใน repo) | freesound 611098 "Force Dance" by szegvari, CC0 (from 20 s : the playtest uses the borrowed boss track) / Drive soundgame/song/Boss_music_1.wav (a free sound site, checked by the team 13.138) | มีแล้ว (ใน repo + ชุดของทีมทับตอน playtest) |
+| `victory.ogg` | Victory | หน้าผลชนะไฟต์, หน้าเลือกรางวัล | FREE (ใน repo) | freesound 577391 "Desert fly Orchestra Atmo" by szegvari, CC0 | มีแล้ว (ใน repo) |
+| `defeat.ogg` | Defeat | หน้าผลแพ้ | FREE (ใน repo) | freesound 609647 "Sad Alone Orchestra Strings Vocal Choir Drama Noise music Mood Surround" by szegvari, CC0 | มีแล้ว (ใน repo) |
+| `shop.ogg` | Shop | ร้าน | FREE (ใน repo) | freesound 577391 "Desert fly Orchestra Atmo" by szegvari, CC0 (from 12 s) | มีแล้ว (ใน repo) |
+| `event.ogg` | Event | หน้าเหตุการณ์ | FREE (ใน repo) | freesound 609755 "Dark Sad Mood Thriller..." by szegvari, CC0 (from 20 s) | มีแล้ว (ใน repo) |
+| `rest.ogg` | Rest | ห้องพัก, THE WINGS, WORKSHOP, REHEARSAL | FREE (ใน repo) | freesound 610996 "Long Time Waiting..." by szegvari, CC0 (from 30 s) | มีแล้ว (ใน repo) |
+| `ending.ogg` | Ending | CURTAIN CALL | FREE (ใน repo) | freesound 610532 "Dark Sad Mood Orchestra..." by szegvari, CC0 (from 25 s) | มีแล้ว (ใน repo) |
+| `elite.ogg` | Elite : BLOCK E : an ELITE's fight | ไฟต์ ELITE | FREE (ใน repo) | freesound 611098 "Force Dance - Orchestra Strings Brass Atmo Atmosphere Ambience Music Surround" by szegvari, CC0 | มีแล้ว (ใน repo) |
+| `boss_turn.ogg` | BossTurn : BLOCK E : a boss after THE TURN, its second half (Honkai: Star Rail and Limbus change the music for a boss's last phase) | ไฟต์บอส หลัง THE TURN (ครึ่งเลือด) | FREE (ใน repo) | freesound 250856 "Epic Orchestra - LOOP" by Joshua Empyre, CC-BY 4.0 (levelled) | มีแล้ว (ใน repo) |
 <!-- /AUTO:music -->
 
-## S2. เสียงสั้นที่โค้ดเล่นแล้ว (ใส่ไฟล์แล้วดังเลย)
+## S2. เสียงสั้นที่เกมเล่น
 
-<!-- AUTO:sfx_now -->
-| ไฟล์ | เสียงอะไร | เล่นที่ไหน | ความยาว | ลำดับ | ป้าย | มีแล้ว | หมายเหตุ |
-|---|---|---|---|---|---|---|---|
-| `ui_move.wav` | เลื่อนเมนูหรือการ์ด | ทุกหน้า | สั้น | ⭐⭐ |  | ยังไม่มี |  |
-| `ui_confirm.wav` | กดปุ่ม | ทุกหน้า | สั้น | ⭐⭐ |  | ยังไม่มี |  |
-| `ui_back.wav` | ถอยกลับ | ทุกหน้า | สั้น | ⭐⭐ |  | ยังไม่มี |  |
-| `ui_denied.wav` | กดสิ่งที่ทำไม่ได้ เช่น BREATH ไม่พอ | ทุกหน้า | สั้น | ⭐⭐ |  | ยังไม่มี |  |
-| `path_chosen.wav` | เลือกห้องบนแผนที่ | แผนที่ | สั้น | ⭐⭐ |  | ยังไม่มี |  |
-| `recruit.wav` | เลือกคนเข้าวง | THE AUDITION | สั้น | ⭐⭐ |  | ยังไม่มี |  |
-| `seat_remove.wav` | เอาคนออกจากวง | THE AUDITION | สั้น | ⭐ |  | ยังไม่มี |  |
-| `seat_pickup.wav` | หยิบเสานักดนตรีเพื่อสลับลำดับ | หน้าวง | สั้น | ⭐ |  | ยังไม่มี |  |
-| `seat_drop.wav` | วางเสานักดนตรีลงที่ใหม่ | หน้าวง | สั้น | ⭐ |  | ยังไม่มี |  |
-| `buy.wav` | ซื้อของ | ร้าน | สั้น | ⭐⭐ |  | ยังไม่มี |  |
-| `motif_get.wav` | ได้ของ GIFT | ร้าน หีบ เหตุการณ์ รางวัลบอส | สั้น | ⭐⭐ |  | ยังไม่มี | ชื่อไฟล์ยังเป็นคำเดิม motif |
-| `rehearse.wav` | ได้ดาวซ้อม | REHEARSAL ร้าน WORKSHOP เหตุการณ์ รางวัล | สั้น | ⭐⭐ |  | ยังไม่มี |  |
-| `rest_recover.wav` | ฟื้นเลือด | ห้องพัก | สั้น | ⭐⭐ |  | ยังไม่มี |  |
-| `page_turn.wav` | เปิดหน้า กล่องถาม เหตุการณ์ เปิดชั้น | หลายหน้า | สั้น | ⭐ |  | ยังไม่มี |  |
-| `check_pass.wav` | เสี่ยงสำเร็จ | เหตุการณ์ | สั้น | ⭐ |  | ยังไม่มี |  |
-| `check_fail.wav` | เสี่ยงไม่สำเร็จ | เหตุการณ์ | สั้น | ⭐ |  | ยังไม่มี |  |
-| `victory.wav` | ชนะไฟต์ (เสียงสั้นตอนขึ้นผล) | หน้าผลชนะ | สั้น | ⭐⭐ |  | ยังไม่มี |  |
-| `defeat.wav` | แพ้ | หน้าผลแพ้ CURTAIN CALL | สั้น | ⭐⭐ |  | ยังไม่มี |  |
-| `run_complete.wav` | ชนะบอสสุดท้าย จบรัน | CURTAIN CALL | สั้น | ⭐⭐ |  | ยังไม่มี |  |
-| `combo_up.wav` | ผ่านบทเรียน หรือจบการทดสอบจังหวะ | ไฟต์ฝึก หน้าฝึก Settings | สั้น | ⭐ |  | ยังไม่มี | ชื่อไฟล์เป็นคำเดิมของหน้าดวล |
-| `beat_tick.wav` | เสียงจับจังหวะตอนทดสอบจังหวะตวัด | Settings หน้าฝึก | สั้น | ⭐ |  | ยังไม่มี | ต้องสั้นและคม |
-| `qte_perfect.wav` | ตวัดโน้ตตรงวงแหวนพอดี PERFECT | หน้าฝึกตวัดไม้ตอนนี้ ไอริสเสนอใช้ในไฟต์ด้วย | สั้น | ⭐⭐⭐ |  | ยังไม่มี |  |
-| `qte_normal.wav` | ตวัดโน้ตโดน (ไม่พอดีวง) | หน้าฝึกตวัดไม้ตอนนี้ ไอริสเสนอใช้ในไฟต์ด้วย | สั้น | ⭐⭐⭐ |  | ยังไม่มี |  |
-| `qte_miss.wav` | พลาดหรือตวัดผิดทาง | หน้าฝึกตวัดไม้ตอนนี้ ไอริสเสนอใช้ในไฟต์ด้วย | สั้น | ⭐⭐⭐ |  | ยังไม่มี |  |
-| `qte_hesitate.wav` | ปล่อยให้เวลาของโน้ตหมด | หน้าฝึกตวัดไม้ตอนนี้ ไอริสเสนอใช้ในไฟต์ด้วย | สั้น | ⭐⭐ |  | ยังไม่มี |  |
-| `note_on.wav` | โน้ตโผล่ | หน้าฝึกตวัดไม้ | สั้น | ⭐ |  | ยังไม่มี |  |
-<!-- /AUTO:sfx_now -->
+<!-- AUTO:sfx -->
+| ไฟล์ | เล่นตอน (ชื่อในโค้ด : งาน) | หน้า | ป้าย | ทำจาก (MANIFEST) | มีแล้ว |
+|---|---|---|---|---|---|
+| `ui_move.wav` | UiMove : moving between menu items or cards / SeatPickUp : lifting a musician off the stage or roster |  | FREE (ใน repo) | "select_002" by Kenney, Interface Sounds, CC0 | มีแล้ว (ใน repo) |
+| `ui_confirm.wav` | UiConfirm : pressing a button |  | FREE (ใน repo) / TEAM FREE (ชุดของทีม ไม่อยู่ใน repo) | "confirmation_003" by Kenney, Interface Sounds, CC0 / Drive soundgame/GUI/some GUI.wav, its first sound (a free sound site, checked by the team 13.138) | มีแล้ว (ใน repo + ชุดของทีมทับตอน playtest) |
+| `ui_back.wav` | UiBack : backing out of a page / SeatRemove : sending a musician back to the bench |  | FREE (ใน repo) | "back_002" by Kenney, Interface Sounds, CC0 | มีแล้ว (ใน repo) |
+| `ui_denied.wav` | UiDenied : trying something that is not allowed |  | FREE (ใน repo) | "error_004" by Kenney, Interface Sounds, CC0 | มีแล้ว (ใน repo) |
+| `path_chosen.wav` | PathChosen : picking a route card |  | FREE (ใน repo) / TEAM FREE (ชุดของทีม ไม่อยู่ใน repo) | "maximize_006" by Kenney, Interface Sounds, CC0 / Drive soundgame/GUI/enter_somthing.wav (a free sound site, checked by the team 13.138) | มีแล้ว (ใน repo + ชุดของทีมทับตอน playtest) |
+| `qte_normal.wav` | SeatDrop : placing a musician into a seat / QteNormal : a middle stroke (PLAY) (Beta1 : a note swiped GOOD) |  | FREE (ใน repo) | "tick_002" by Kenney, Interface Sounds, CC0 | มีแล้ว (ใน repo) |
+| `round_start.wav` | RoundStart : the round banner (Beta1 : the band's turn begins, the baton taps the stand) |  | FREE (ใน repo) | VSCO 2 CE (CC0) claves twice : the baton taps the stand | มีแล้ว (ใน repo) |
+| `beat_tick.wav` | BeatTick : the needle moving onto a new beat |  | FREE (ใน repo) | "tick_001" by Kenney, Interface Sounds, CC0 | มีแล้ว (ใน repo) |
+| `qte_perfect.wav` | QtePerfect : a stroke right on the ring (Beta1 : the bright ring over a PERFECT) |  | FREE (ใน repo) | VSCO 2 CE (CC0) triangle | มีแล้ว (ใน repo) |
+| `qte_miss.wav` | QteMiss : a stroke badly off the ring, or the wrong way / QteHesitate : the beat went by with no stroke |  | FREE (ใน repo) | "swish-2" by artisticdude, Swishes Sound Pack, CC0 : the baton cuts only air | มีแล้ว (ใน repo) |
+| `rest_recover.wav` | RestRecover : a silent beat gave stamina back |  | FREE (ใน repo) | "Healing Spell Impact 12" by lentikula, Healing Spell Impacts, CC0, in untamedpixels' 150 Combat Sound Effects | มีแล้ว (ใน repo) |
+| `victory.wav` | Victory : battle won |  | FREE (ใน repo) | VSCO 2 CE (CC0) glockenspiel glissando up : the light comes back | มีแล้ว (ใน repo) |
+| `defeat.wav` | Defeat : battle lost |  | FREE (ใน repo) | VSCO 2 CE (CC0) gong p, darkened | มีแล้ว (ใน repo) |
+| `recruit.wav` | Recruit : a musician joins |  | FREE (ใน repo) | "confirmation_001" by Kenney, Interface Sounds, CC0 (under the musician's own note) | มีแล้ว (ใน repo) |
+| `combo_up.wav` | ComboUp : the combo grew |  | FREE (ใน repo) | "confirmation_004" by Kenney, Interface Sounds, CC0 | มีแล้ว (ใน repo) |
+| `motif_get.wav` | MotifGet : a motif was taken |  | FREE (ใน repo) | "item gem 01" by rubberduck, 80 CC0 RPG SFX, CC0 | มีแล้ว (ใน repo) |
+| `buy.wav` | Buy : something bought in the shop |  | FREE (ใน repo) | "item coins 01" by rubberduck, 80 CC0 RPG SFX, CC0 | มีแล้ว (ใน repo) |
+| `page_turn.wav` | PageTurn : flipping a page in the guide or opening an event |  | FREE (ใน repo) | "bookFlip2" by Kenney, RPG sound effects, CC0 | มีแล้ว (ใน repo) |
+| `check_pass.wav` | CheckPass : an event check succeeded |  | FREE (ใน repo) | "confirmation_002" by Kenney, Interface Sounds, CC0 | มีแล้ว (ใน repo) |
+| `check_fail.wav` | CheckFail : an event check failed |  | FREE (ใน repo) | "error_006" by Kenney, Interface Sounds, CC0 | มีแล้ว (ใน repo) |
+| `rehearse.wav` | Rehearse : a musician got stronger |  | FREE (ใน repo) | "magical_2" by JaggedStone, Magic Spell SFX, CC0 (the same as skill_boost) | มีแล้ว (ใน repo) |
+| `run_complete.wav` | RunComplete : the last boss fell |  | FREE (ใน repo) | VSCO 2 CE (CC0) Nepalese bells | มีแล้ว (ใน repo) |
+| `weapon_cut.wav` | WeaponCut : a blade or a bow lands (strings : PAGANINI, DUPORT) |  | FREE (ใน repo) / TEAM FREE (ชุดของทีม ไม่อยู่ใน repo) | "knife_slice2" by Kenney, RPG Audio, CC0, in untamedpixels' 150 Combat Sound Effects / Drive soundgame/เสียงตี/Hit_1.wav (a free sound site, checked by the team 13.138) | มีแล้ว (ใน repo + ชุดของทีมทับตอน playtest) |
+| `weapon_shot.wav` | WeaponShot : a shot lands (winds : QUANTZ, PUNTO) |  | FREE (ใน repo) / TEAM FREE (ชุดของทีม ไม่อยู่ใน repo) | "Impact_01" by Cosmo Myzrail Gorynych (CoMiGo), Bleeps and Bloops, CC0, in untamedpixels' 150 Combat Sound Effects / Drive soundgame/เสียงตี/HIt_2.wav (a free sound site, checked by the team 13.138) | มีแล้ว (ใน repo + ชุดของทีมทับตอน playtest) |
+| `weapon_smash.wav` | WeaponSmash : a hammer lands (drums : PFUNDT), and TACET's blows on the band |  | FREE (ใน repo) / TEAM FREE (ชุดของทีม ไม่อยู่ใน repo) | "impact_punch_heavy_002" by Kenney, Impact Sounds, CC0, in untamedpixels' 150 Combat Sound Effects / Drive soundgame/เสียงตี/Hit_3.wav (a free sound site, checked by the team 13.138) | มีแล้ว (ใน repo + ชุดของทีมทับตอน playtest) |
+| `skill_heal.wav` | SkillHeal : a HEAL lands (TACET's own is the same sound, lower) |  | FREE (ใน repo) | "Healing Spell Impact 1" by lentikula, Healing Spell Impacts, CC0, in untamedpixels' 150 Combat Sound Effects | มีแล้ว (ใน repo) |
+| `skill_guard.wav` | SkillGuard : GUARD, SHIELD, TACET's ARMOR UP |  | FREE (ใน repo) | "metal hit 01" by rubberduck, 100 CC0 SFX #2, CC0 | มีแล้ว (ใน repo) |
+| `skill_boost.wav` | SkillBoost : VOLUME, FOCUS, FORTE, a call that lifts the band |  | FREE (ใน repo) | "magical_2" by JaggedStone, Magic Spell SFX, CC0 | มีแล้ว (ใน repo) |
+| `parry_perfect.wav` | ParryPerfect : a note of TACET's met PERFECT |  | FREE (ใน repo) | "sword_clash.9" by StarNinjas, 20 Sword Sound Effects, CC0 | มีแล้ว (ใน repo) |
+| `parry_good.wav` | ParryGood : met, not quite (and a blow ARMOR takes) |  | FREE (ใน repo) | "sword_clash.2" by StarNinjas, 20 Sword Sound Effects, CC0 | มีแล้ว (ใน repo) |
+| `enemy_swing.wav` | EnemySwing : TACET's note on its way, loudest right on the ring : the parry cue (Expedition 33, docs/research/E_music.md) |  | FREE (ใน repo) | "sword.4" by StarNinjas, 20 Sword Sound Effects, CC0 (loudest 0.202 s in : BattleRules.SoundSwingLead) | มีแล้ว (ใน repo) |
+| `band_hurt.wav` | BandHurt : a musician takes a blow |  | FREE (ใน repo) | "impact_punch_heavy_000" by Kenney, Impact Sounds, CC0, in untamedpixels' 150 Combat Sound Effects | มีแล้ว (ใน repo) |
+| `band_down.wav` | BandDown : a musician falls |  | FREE (ใน repo) | "bfh1 metal falling 01" by rubberduck, 75 CC0 breaking falling hit SFX, CC0 : the instrument falls | มีแล้ว (ใน repo) |
+| `enemy_silenced.wav` | EnemySilenced : a shape of TACET breaks into the dark |  | FREE (ใน repo) | "BreakGlass_02" by Cosmo Myzrail Gorynych (CoMiGo), Bleeps and Bloops, CC0, in untamedpixels' 150 Combat Sound Effects with "low_frequency_explosion_001" by Kenney, Sci-fi Sounds, CC0, in untamedpixels' 150 Combat Sound Effects | มีแล้ว (ใน repo) |
+| `enemy_charge.wav` | EnemyCharge : CHARGE : TACET winds up its big move |  | FREE (ใน repo) / TEAM FREE (ชุดของทีม ไม่อยู่ใน repo) | VSCO 2 CE (CC0) timpani roll, swelling / Drive soundgame/song/Fight monter effect : Designed, Braam, Rumbling, Low, Soft SND56543 (a free sound site, checked by the team 13.138) | มีแล้ว (ใน repo + ชุดของทีมทับตอน playtest) |
+| `enemy_broken.wav` | EnemyBroken : BROKEN : the wind up breaks (and a BIG ATTACK blocked whole) |  | FREE (ใน repo) | "BreakGlass_01" by Cosmo Myzrail Gorynych (CoMiGo), Bleeps and Bloops, CC0, in untamedpixels' 150 Combat Sound Effects | มีแล้ว (ใน repo) |
+| `stunned.wav` | Stunned : STUNNED |  | FREE (ใน repo) | VSCO 2 CE (CC0) triangle roll | มีแล้ว (ใน repo) |
+| `skill_fire.wav` | BurnTick : BURN hurts / SkillFire : ELEMENTS : a skill's blow in the musician's own element (Musician.Spot, the colour of its VFX) : |  | FREE (ใน repo) | "Fire Spell Impact 4" by lentikula, Basic Spell Impacts, CC0, in untamedpixels' 150 Combat Sound Effects | มีแล้ว (ใน repo) |
+| `finale_ready.wav` | FinaleReady : the FINALE gauge is full |  | FREE (ใน repo) | VSCO 2 CE (CC0) glockenspiel glissando up | มีแล้ว (ใน repo) |
+| `finale_storm.wav` | FinaleStorm : THE UNHEARING's FINALE (storm) |  | FREE (ใน repo) | "Lightning Spell Impact 3" by lentikula, Basic Spell Impacts, CC0, in untamedpixels' 150 Combat Sound Effects with "thunder 01" by rubberduck, 100 CC0 SFX #2, CC0 | มีแล้ว (ใน repo) |
+| `finale_prism.wav` | FinalePrism : FANNY AND ???'s (crystal) |  | FREE (ใน repo) | "Ice Spell Impact 2" by lentikula, Basic Spell Impacts, CC0, in untamedpixels' 150 Combat Sound Effects with "BreakGlass_02" by Cosmo Myzrail Gorynych (CoMiGo), Bleeps and Bloops, CC0, in untamedpixels' 150 Combat Sound Effects | มีแล้ว (ใน repo) |
+| `finale_holy.wav` | FinaleHoly : THE METRONOME's (holy light) |  | FREE (ใน repo) | "Healing Spell Impact 5" by lentikula, Healing Spell Impacts, CC0, in untamedpixels' 150 Combat Sound Effects with VSCO 2 CE (CC0) Nepalese bells | มีแล้ว (ใน repo) |
+| `boss_entrance.wav` | BossEntrance : a boss rises |  | FREE (ใน repo) / TEAM FREE (ชุดของทีม ไม่อยู่ใน repo) | VSCO 2 CE (CC0) timpani roll into a gong, landing as the boss rises (0.95 s) / Drive soundgame/song/Fight monter effect : Designed, Braam, Airy Rise, Sub Impact, Clean, Classic SND58427, its impact moved to 0.95 s (a free sound site, checked by the team 13.138) | มีแล้ว (ใน repo + ชุดของทีมทับตอน playtest) |
+| `boss_tell.wav` | BossTell : THE TELL : its BIG ATTACK comes this turn |  | FREE (ใน repo) / TEAM FREE (ชุดของทีม ไม่อยู่ใน repo) | VSCO 2 CE (CC0) French horn, a long low D swelling / Drive soundgame/song/Fight monter effect : Designed, Braam, Classic, Soft, Brass, Short (C#) SND56455 (a free sound site, checked by the team 13.138) | มีแล้ว (ใน repo + ชุดของทีมทับตอน playtest) |
+| `boss_strike.wav` | BossStrike : THE STRIKE : its BIG ATTACK begins |  | FREE (ใน repo) / TEAM FREE (ชุดของทีม ไม่อยู่ใน repo) | VSCO 2 CE (CC0) crash cymbals fff / Drive soundgame/song/Fight monter effect : Designed, Braam, Orchestral Impact, Huge, Epic 01 SND58575 (a free sound site, checked by the team 13.138) | มีแล้ว (ใน repo + ชุดของทีมทับตอน playtest) |
+| `boss_turn.wav` | BossTurn : THE TURN : half its life, the white shell breaks |  | FREE (ใน repo) / TEAM FREE (ชุดของทีม ไม่อยู่ใน repo) | "BreakGlass_03" by Cosmo Myzrail Gorynych (CoMiGo), Bleeps and Bloops, CC0, in untamedpixels' 150 Combat Sound Effects with "low_frequency_explosion_000" by Kenney, Sci-fi Sounds, CC0, in untamedpixels' 150 Combat Sound Effects : the white shell breaks / Drive soundgame/song/Fight monter effect : Designed, Braam, Crunchy Baritone SND58610 (a free sound site, checked by the team 13.138) | มีแล้ว (ใน repo + ชุดของทีมทับตอน playtest) |
+| `boss_down.wav` | BossDown : a boss falls |  | FREE (ใน repo) / TEAM FREE (ชุดของทีม ไม่อยู่ใน repo) | VSCO 2 CE (CC0) gong fff / Drive soundgame/song/Fight monter effect : Designed, Braam, Dark, Double Bass, Long SND56476 (a free sound site, checked by the team 13.138) | มีแล้ว (ใน repo + ชุดของทีมทับตอน playtest) |
+| `enemy_turn.wav` | EnemyTurn : TACET's turn begins |  | FREE (ใน repo) | VSCO 2 CE (CC0) gong, very soft | มีแล้ว (ใน repo) |
+| `fight_start.wav` | FightStart : a fight begins |  | FREE (ใน repo) / TEAM FREE (ชุดของทีม ไม่อยู่ใน repo) | VSCO 2 CE (CC0) gong mp / Drive soundgame/GUI/Enter the Fight.wav (a free sound site, checked by the team 13.138) | มีแล้ว (ใน repo + ชุดของทีมทับตอน playtest) |
+| `hold_loop.wav` | HoldLoop : a HOLD note while it is held (it loops) |  | FREE (ใน repo) | VSCO 2 CE (CC0) violin section tremolo, made to loop | มีแล้ว (ใน repo) |
+| `roll_tap.wav` | RollTap : one shake of a ROLL |  | FREE (ใน repo) | VSCO 2 CE (CC0) snare, soft | มีแล้ว (ใน repo) |
+| `skill_wind.wav` | SkillWind : PAGANINI fire, QUANTZ wind, PFUNDT earth, DUPORT water, PUNTO light |  | FREE (ใน repo) | "Wind Spell Impact 5" by lentikula, Druid Spell Impacts, CC0, in untamedpixels' 150 Combat Sound Effects | มีแล้ว (ใน repo) |
+| `skill_earth.wav` | SkillEarth |  | FREE (ใน repo) | "Earth Spell Impact 4" by lentikula, Druid Spell Impacts, CC0, in untamedpixels' 150 Combat Sound Effects | มีแล้ว (ใน repo) |
+| `skill_water.wav` | SkillWater |  | FREE (ใน repo) | "Water Spell Impact 4" by lentikula, Basic Spell Impacts, CC0, in untamedpixels' 150 Combat Sound Effects | มีแล้ว (ใน repo) |
+| `skill_light.wav` | SkillLight |  | FREE (ใน repo) | "Healing Spell Impact 10" by lentikula, Healing Spell Impacts, CC0, in untamedpixels' 150 Combat Sound Effects | มีแล้ว (ใน repo) |
+| `dice.wav` | Dice : the shop's REROLL |  | FREE (ใน repo) / TEAM FREE (ชุดของทีม ไม่อยู่ใน repo) | "stones 01" by rubberduck, 100 CC0 SFX #2, CC0 / Drive soundgame/GUI/Dice event.wav (a free sound site, checked by the team 13.138) | มีแล้ว (ใน repo + ชุดของทีมทับตอน playtest) |
+| `band_cello.wav` | the musician's own note under their blow and when they join (band_<Sample>, Data/Musician.cs) |  | FREE (ใน repo) | VSCO 2 CE (CC0) cello section spiccato, sounds D3 | มีแล้ว (ใน repo) |
+| `band_flute.wav` | the musician's own note under their blow and when they join (band_<Sample>, Data/Musician.cs) |  | FREE (ใน repo) | VSCO 2 CE (CC0) flute staccato, tuned to D6 | มีแล้ว (ใน repo) |
+| `band_horn.wav` | the musician's own note under their blow and when they join (band_<Sample>, Data/Musician.cs) |  | FREE (ใน repo) | VSCO 2 CE (CC0) French horn staccato, sounds F3 | มีแล้ว (ใน repo) |
+| `band_timpani.wav` | the musician's own note under their blow and when they join (band_<Sample>, Data/Musician.cs) |  | FREE (ใน repo) | VSCO 2 CE (CC0) timpani hit, tuned to D2, made fuller | มีแล้ว (ใน repo) |
+| `band_violin.wav` | the musician's own note under their blow and when they join (band_<Sample>, Data/Musician.cs) |  | FREE (ใน repo) | VSCO 2 CE (Versilian Studios, CC0) solo violin spiccato, sounds A5 | มีแล้ว (ใน repo) |
+<!-- /AUTO:sfx -->
 
-## S3. เสียงที่ต้องมีเพิ่ม (ข้อเสนอของไอริส ผู้ใช้ตัดหรือเพิ่มได้ ยังไม่มีจุดเล่นในโค้ด)
+## S3. ชื่อที่ไม่มีไฟล์ (เสียงของหน้าดวลเดิม Beta1 ไม่เล่น)
 
-ชื่อไฟล์ในตารางใช้ได้เลย ไอริสจะต่อโค้ดตามชื่อนี้ตอนงานเสียง ส่วนไหนผู้ใช้อยากเปลี่ยนบอกได้
-
-<!-- AUTO:sfx_new -->
-| ไฟล์ | เสียงอะไร | เล่นที่ไหน | ความยาว | ลำดับ | ป้าย | มีแล้ว | หมายเหตุ |
-|---|---|---|---|---|---|---|---|
-| `hit_paganini.wav` | ATTACK ของ PAGANINI : เสียงไวโอลินผสมเสียงอาวุธ | ไฟต์ | สั้น ไม่เกินราว 0.5 วิ | ⭐⭐⭐ |  | ยังไม่มี | ตีทีละโน้ต เสียงเดียวเล่นซ้ำได้หลายครั้งติดกัน |
-| `hit_quantz.wav` | ATTACK ของ QUANTZ : เสียงฟลุตผสมเสียงอาวุธ | ไฟต์ | สั้น ไม่เกินราว 0.5 วิ | ⭐⭐⭐ |  | ยังไม่มี | ตีทีละโน้ต เสียงเดียวเล่นซ้ำได้หลายครั้งติดกัน |
-| `hit_pfundt.wav` | ATTACK ของ PFUNDT : เสียงทิมปานีผสมเสียงอาวุธ | ไฟต์ | สั้น ไม่เกินราว 0.5 วิ | ⭐⭐⭐ |  | ยังไม่มี | ตีทีละโน้ต เสียงเดียวเล่นซ้ำได้หลายครั้งติดกัน |
-| `hit_duport.wav` | ATTACK ของ DUPORT : เสียงเชลโลผสมเสียงอาวุธ | ไฟต์ | สั้น ไม่เกินราว 0.5 วิ | ⭐⭐⭐ |  | ยังไม่มี | ตีทีละโน้ต เสียงเดียวเล่นซ้ำได้หลายครั้งติดกัน |
-| `hit_punto.wav` | ATTACK ของ PUNTO : เสียงฮอร์นผสมเสียงอาวุธ | ไฟต์ | สั้น ไม่เกินราว 0.5 วิ | ⭐⭐⭐ |  | ยังไม่มี | ตีทีละโน้ต เสียงเดียวเล่นซ้ำได้หลายครั้งติดกัน |
-| `skill_caprice.wav` | CAPRICE กรีดเร็ว 4 ครั้ง (ทีละโน้ต) | ไฟต์ | สั้น ไม่เกินราว 0.5 วิ | ⭐⭐⭐ |  | ยังไม่มี | ตีทีละโน้ต เสียงเดียวเล่นซ้ำได้หลายครั้งติดกัน |
-| `skill_il_cannone.wav` | IL CANNONE ยิงนัดเดียวแรง | ไฟต์ | สั้น ไม่เกินราว 0.5 วิ | ⭐⭐⭐ |  | ยังไม่มี | ตีทีละโน้ต เสียงเดียวเล่นซ้ำได้หลายครั้งติดกัน |
-| `skill_soft_air.wav` | SOFT AIR ฮีลทั้งวง | ไฟต์ | สั้น ไม่เกินราว 0.5 วิ | ⭐⭐⭐ |  | ยังไม่มี | ตีทีละโน้ต เสียงเดียวเล่นซ้ำได้หลายครั้งติดกัน |
-| `skill_the_lesson.wav` | THE LESSON ส่ง FOCUS ให้เพื่อน | ไฟต์ | สั้น ไม่เกินราว 0.5 วิ | ⭐⭐ |  | ยังไม่มี | ตีทีละโน้ต เสียงเดียวเล่นซ้ำได้หลายครั้งติดกัน |
-| `skill_timpani_roll.wav` | TIMPANI ROLL รัวกลอง | ไฟต์ | สั้น ไม่เกินราว 0.5 วิ | ⭐⭐⭐ |  | ยังไม่มี | ตีทีละโน้ต เสียงเดียวเล่นซ้ำได้หลายครั้งติดกัน |
-| `skill_thunder_call.wav` | THUNDER CALL เรียกศัตรูให้หันมา | ไฟต์ | สั้น ไม่เกินราว 0.5 วิ | ⭐⭐ |  | ยังไม่มี | ตีทีละโน้ต เสียงเดียวเล่นซ้ำได้หลายครั้งติดกัน |
-| `skill_shield.wav` | SHIELD ยืนบังเพื่อน | ไฟต์ | สั้น ไม่เกินราว 0.5 วิ | ⭐⭐ |  | ยังไม่มี | ตีทีละโน้ต เสียงเดียวเล่นซ้ำได้หลายครั้งติดกัน |
-| `skill_lance.wav` | LANCE แทงสองครั้ง | ไฟต์ | สั้น ไม่เกินราว 0.5 วิ | ⭐⭐⭐ |  | ยังไม่มี | ตีทีละโน้ต เสียงเดียวเล่นซ้ำได้หลายครั้งติดกัน |
-| `skill_fanfare.wav` | FANFARE เป่าปลุกทั้งวง | ไฟต์ | สั้น ไม่เกินราว 0.5 วิ | ⭐⭐ |  | ยังไม่มี | ตีทีละโน้ต เสียงเดียวเล่นซ้ำได้หลายครั้งติดกัน |
-| `skill_chakram.wav` | CHAKRAM ขว้างวงใบมีด | ไฟต์ | สั้น ไม่เกินราว 0.5 วิ | ⭐⭐⭐ |  | ยังไม่มี | ตีทีละโน้ต เสียงเดียวเล่นซ้ำได้หลายครั้งติดกัน |
-| `qte_hold.wav` | ระหว่างกดค้างโน้ต HOLD | ไฟต์ วงแหวน QTE | วนได้ | ⭐⭐ |  | ยังไม่มี |  |
-| `qte_shake.wav` | รัวไม้ทีละครั้งตอนโน้ต SHAKE | ไฟต์ วงแหวน QTE | สั้น | ⭐⭐ |  | ยังไม่มี |  |
-| `qte_appear.wav` | โน้ตโผล่ในวงแหวน | ไฟต์ วงแหวน QTE | สั้น | ⭐ | ไม่บังคับ | ยังไม่มี |  |
-| `parry_perfect.wav` | ปัดโน้ตของศัตรูได้พอดี | ไฟต์ ตาของศัตรู | สั้น | ⭐⭐⭐ |  | ยังไม่มี |  |
-| `parry_good.wav` | ปัดโดนแต่ไม่พอดี | ไฟต์ ตาของศัตรู | สั้น | ⭐⭐ |  | ยังไม่มี |  |
-| `band_hurt.wav` | นักดนตรีโดนตี | ไฟต์ | สั้น | ⭐⭐⭐ |  | ยังไม่มี |  |
-| `band_ko.wav` | นักดนตรีล้ม | ไฟต์ | สั้น | ⭐⭐ |  | ยังไม่มี |  |
-| `enemy_hit.wav` | โน้ตของศัตรูพุ่งเข้า | ไฟต์ ตาของศัตรู | สั้น | ⭐⭐⭐ |  | ยังไม่มี |  |
-| `enemy_charge.wav` | ศัตรูตั้งท่าชาร์จ CHARGE | ไฟต์ | สั้น | ⭐⭐ |  | ยังไม่มี |  |
-| `enemy_broken.wav` | ท่าชาร์จพัง BROKEN | ไฟต์ | สั้น | ⭐⭐ |  | ยังไม่มี |  |
-| `enemy_armor_up.wav` | ศัตรูตั้งโล่ ARMOR UP | ไฟต์ | สั้น | ⭐⭐ |  | ยังไม่มี |  |
-| `enemy_armor_break.wav` | โล่ ARMOR แตก | ไฟต์ | สั้น | ⭐⭐ |  | ยังไม่มี |  |
-| `enemy_heal.wav` | ศัตรูฮีล HEAL | ไฟต์ | สั้น | ⭐ |  | ยังไม่มี |  |
-| `enemy_stunned.wav` | ศัตรู STUNNED | ไฟต์ | สั้น | ⭐⭐ |  | ยังไม่มี |  |
-| `enemy_die.wav` | ศัตรูสลายเข้าความมืด | ไฟต์ | สั้น | ⭐⭐⭐ |  | ยังไม่มี |  |
-| `burn_tick.wav` | BURN ลดเลือด | ไฟต์ | สั้น | ⭐⭐ |  | ยังไม่มี |  |
-| `volume_up.wav` | ได้ VOLUME | ไฟต์ | สั้น | ⭐⭐ |  | ยังไม่มี |  |
-| `guard_up.wav` | GUARD หรือ SHIELD ขึ้น | ไฟต์ | สั้น | ⭐⭐ |  | ยังไม่มี |  |
-| `muted.wav` | โดน MUTED | ไฟต์ | สั้น | ⭐ |  | ยังไม่มี |  |
-| `finale_ready.wav` | เกจ FINALE เต็ม | ไฟต์ | สั้น | ⭐⭐ |  | ยังไม่มี |  |
-| `finale_the_unhearing.wav` | FINALE ของ THE UNHEARING (พายุ ฟ้าผ่า) | ไฟต์ ตอนภาพ FINALE | 1–2 วิ | ⭐⭐ |  | ยังไม่มี |  |
-| `finale_fanny.wav` | FINALE ของ FANNY AND ??? (ผลึก สองเสียง) | ไฟต์ ตอนภาพ FINALE | 1–2 วิ | ⭐⭐ |  | ยังไม่มี |  |
-| `finale_the_metronome.wav` | FINALE ของ THE METRONOME (แสงศักดิ์สิทธิ์) | ไฟต์ ตอนภาพ FINALE | 1–2 วิ | ⭐⭐ |  | ยังไม่มี |  |
-| `boss_entrance.wav` | บอสเปิดตัว | ไฟต์บอส ENTRANCE | 1–3 วิ | ⭐⭐ |  | ยังไม่มี |  |
-| `boss_tell.wav` | บอสเตือนท่าไม้ตาย | ไฟต์บอส THE TELL | 1–2 วิ | ⭐⭐ |  | ยังไม่มี |  |
-| `boss_strike.wav` | บอสปล่อยท่าไม้ตาย | ไฟต์บอส THE STRIKE | 1–2 วิ | ⭐⭐ |  | ยังไม่มี |  |
-| `boss_turn.wav` | บอสเหลือครึ่งเลือด THE TURN | ไฟต์บอส | 1–2 วิ | ⭐⭐ |  | ยังไม่มี |  |
-| `boss_down.wav` | บอสล้ม | ไฟต์บอส | 1–3 วิ | ⭐⭐ |  | ยังไม่มี |  |
-| `round_start.wav` | เริ่มตาของวง | ไฟต์ | สั้น | ⭐⭐ |  | ยังไม่มี | ชื่อไฟล์มีอยู่แล้วในโค้ด (เคยเป็นป้ายรอบของหน้าดวล) |
-| `turn_enemy.wav` | เริ่มตาของศัตรู | ไฟต์ | สั้น | ⭐⭐ |  | ยังไม่มี |  |
-| `void_ambience.wav` | เสียงหึ่งของความมืด TACET เล่นใต้เพลง | ไฟต์ | วนได้ | ⭐ | ไม่บังคับ | ยังไม่มี |  |
-| `shop_reroll.wav` | REROLL ของในร้าน | ร้าน | สั้น | ⭐ |  | ยังไม่มี |  |
-| `coins.wav` | ได้เงิน | หน้าผลชนะ | สั้น | ⭐ |  | ยังไม่มี |  |
-| `rank_reveal.wav` | ขึ้นอันดับ S A B | หน้าผลชนะ | สั้น | ⭐ |  | ยังไม่มี |  |
-<!-- /AUTO:sfx_new -->
+<!-- AUTO:sfx_old -->
+| ไฟล์ | เล่นตอน (ชื่อในโค้ด : งาน) | หน้า | ป้าย | ทำจาก (MANIFEST) | มีแล้ว |
+|---|---|---|---|---|---|
+| `note_on.wav` | NoteOn : ticking a beat on the score |  |  |  | ไม่มี (เสียงของหน้าดวลเดิม Beta1 ไม่เล่น) |
+| `note_off.wav` | NoteOff : clearing a beat on the score |  |  |  | ไม่มี (เสียงของหน้าดวลเดิม Beta1 ไม่เล่น) |
+| `qte_boost.wav` | QteBoost : a big baton stroke (BOOST) |  |  |  | ไม่มี (เสียงของหน้าดวลเดิม Beta1 ไม่เล่น) |
+| `qte_ease.wav` | QteEase : a small stroke (EASE) |  |  |  | ไม่มี (เสียงของหน้าดวลเดิม Beta1 ไม่เล่น) |
+| `clash_win.wav` | ClashWin : our sound beat theirs on this beat |  |  |  | ไม่มี (เสียงของหน้าดวลเดิม Beta1 ไม่เล่น) |
+| `clash_lose.wav` | ClashLose : theirs beat ours |  |  |  | ไม่มี (เสียงของหน้าดวลเดิม Beta1 ไม่เล่น) |
+| `clash_even.wav` | ClashEven : nobody moved |  |  |  | ไม่มี (เสียงของหน้าดวลเดิม Beta1 ไม่เล่น) |
+| `enemy_boost.wav` | EnemyBoost : TACET revealed a boost |  |  |  | ไม่มี (เสียงของหน้าดวลเดิม Beta1 ไม่เล่น) |
+| `enemy_ease.wav` | EnemyEase : TACET revealed an ease |  |  |  | ไม่มี (เสียงของหน้าดวลเดิม Beta1 ไม่เล่น) |
+| `stamina_empty.wav` | StaminaEmpty : the band ran out of breath |  |  |  | ไม่มี (เสียงของหน้าดวลเดิม Beta1 ไม่เล่น) |
+| `combo_break.wav` | ComboBreak : a combo of two or more ended |  |  |  | ไม่มี (เสียงของหน้าดวลเดิม Beta1 ไม่เล่น) |
+<!-- /AUTO:sfx_old -->
 
 ## S4. ไม่ใช้แล้ว (เก็บไฟล์ไว้ตามที่ผู้ใช้สั่ง)
 
-- เสียงของหน้าดวลเดิมที่ไฟต์ Beta1 ไม่เรียก : `note_off` `qte_boost` `qte_ease` `clash_win` `clash_lose` `clash_even` `enemy_boost` `enemy_ease` `stamina_empty` `combo_break` (`round_start` เอามาใช้ใหม่ในข้อ S3)
-- ทำนองทีละโน้ต `Audio/Phrase/answer_1` ถึง `answer_8` และ `call_1` ถึง `call_8` กับระบบเครื่องดนตรีเล่นตามโน้ตเพลง (`Content/Audio/Instruments/`)
+- ทำนองทีละโน้ต `Audio/Phrase/answer_1` ถึง `answer_8` และ `call_1` ถึง `call_8` กับระบบเครื่องดนตรีเล่นตามโน้ตเพลง (`Content/Audio/Instruments/`) ของหน้าดวลเดิม
 
 ## S5. ลิขสิทธิ์
 
-- เสียงใหม่ผู้ใช้ทำเอง จึงไม่มีปัญหาเรื่องสิทธิ์
-- เสียงเก่าจาก `SoundLibrary/` ไม่ได้ใช้ แต่ไฟล์ใน `Content/Audio/Instruments/` ยังอยู่ใน `Content.mgcb` จึงถูก build ติดไปกับเกม คลังนี้ไม่มีบันทึกว่ามาจากไหน ตอนทำ build สำหรับขายให้เอาออกจาก `Content.mgcb` (เก็บไฟล์ไว้ใน repo) ข้อ 9 ข้อ 14
+- ไฟล์ใน repo ทุกไฟล์เป็น CC0 หรือ CC-BY (ใส่เครดิตแล้วใน `docs/CREDITS.md` และหน้า CREDITS ในเกม) / CC-BY ตัวเดียวคือ "Epic Orchestra - LOOP" ของ Joshua Empyre ต้องมีชื่อเขา ชื่องาน และสัญญาอนุญาตในหน้าเครดิตเสมอ
+- ชุดของทีม (TEAM FREE) ผู้ใช้ตรวจแล้วว่าฟรี ใช้ในเกมได้ (13.138) แต่ไม่ได้จดเว็บที่มา จึงเก็บนอก repo สาธารณะ ใส่ในไฟล์เกมที่แจกได้
+- `SoundLibrary/` = VSCO 2 CE (CC0 ไอริสเทียบไฟล์ทุกไฟล์แล้ว 2 พ.ย.) ใช้และแจกได้ / `Content/Audio/Instruments/` ยังอยู่ใน `Content.mgcb` เกมไม่ใช้ เอาออกจาก mgcb ตอนก้อน H ได้ (เก็บไฟล์ไว้)

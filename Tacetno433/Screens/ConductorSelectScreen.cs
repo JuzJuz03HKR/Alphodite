@@ -465,6 +465,9 @@ namespace Tacetno433.Screens
                 //ENCORE (1 Nov) : once a run is won with this conductor, a diamond for each level over the panel, filled for the won ones
                 if (Encore.Open(c) > 0) DrawEncoreMarks(sb, c, r, a);
 
+                //EARLY ACCESS (2 Nov, the user 13.124) : still waiting for their painting, playable all the same
+                if (ArtBank.GalleryOf(c) == null) Ui.EarlyAccess(sb, r.X + BattleRules.UiGallerySlant * (1f - Pointed(i)) + 14f, r.Y + 24f, a);
+
                 //Name : a stroke of the conductor's colour under it when pointed, and the key that steps inside. NAME FIT : a
                 //name on two lines leaves out BASED ON, its real name is in it already (FANNY MENDELSSOHN AND ???).
                 float nameY = r.Bottom + 14;

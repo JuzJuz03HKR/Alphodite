@@ -39,7 +39,7 @@ GAME = os.path.join(REPO, "Tacetno433")
 MD = os.path.join(DOCS, "ASSET_LIST.md")
 XLSX = os.path.join(DOCS, "TACET_Asset_List.xlsx")
 MGCB = os.path.join(GAME, "Content", "Content.mgcb")
-UPDATED = "1 พ.ย. 2026"
+UPDATED = "2 พ.ย. 2026"
 
 # MonoGame's own icon (checked by eye 1 Nov) : the game icon counts as done once these change
 DEFAULT_ICON_MD5 = {"Icon.ico": "37df66d725ffec0cad491732c2b57ebf", "Icon.bmp": "5243057d8d80845cbe8b5b02137d0807"}
@@ -286,102 +286,95 @@ for r in ART:
 SOUND = []
 
 
-def sound(sec, file, kind, what, where, hooked, length, prio, note="", optional=False):
-    SOUND.append(dict(sec=sec, file=file, kind=kind, what=what, where=where, hooked=hooked, length=length,
-                      prio=prio, note=note, optional=optional))
+# SOUND (block E, 2 Nov, docs/BETA1_DIRECTION.md 47 48) : read from the game itself, so the list and the game never disagree.
+#   Audio/SoundBank.cs     enum Sfx (each sound's job in its comment) and SfxFiles (the file each one plays, same order),
+#                          enum Music and MusicFiles, and each musician's own note band_<Sample> (Data/Musician.cs)
+#   docs/audio/MANIFEST.md each file's label and what it was made from (made by docs/audio/make_sounds.py)
+#   the folders            Content/Audio/Sfx and Music (in the repo), Content/Audio/Borrowed (the team's, never in git)
+SOUNDBANK = os.path.join(GAME, "Audio", "SoundBank.cs")
+MANIFEST_MD = os.path.join(DOCS, "audio", "MANIFEST.md")
+AUDIO = os.path.join(GAME, "Content", "Audio")
+MUSIC_WHERE = {"title": "Title, Settings, HOW TO PLAY, CREDITS, TEST ROOM", "gallery": "หน้าเลือกวาทยากรและหน้าโปรไฟล์",
+               "route": "แผนที่, THE AUDITION, หน้าวง", "battle": "ไฟต์ธรรมดา", "elite": "ไฟต์ ELITE",
+               "boss": "ไฟต์บอส ครึ่งแรก", "boss_turn": "ไฟต์บอส หลัง THE TURN (ครึ่งเลือด)",
+               "victory": "หน้าผลชนะไฟต์, หน้าเลือกรางวัล", "defeat": "หน้าผลแพ้", "shop": "ร้าน", "event": "หน้าเหตุการณ์",
+               "rest": "ห้องพัก, THE WINGS, WORKSHOP, REHEARSAL", "ending": "CURTAIN CALL"}
+LABEL_WORDS = {"FREE": "FREE (ใน repo)", "TEAM FREE": "TEAM FREE (ชุดของทีม ไม่อยู่ใน repo)", "BORROWED": "BORROWED (ยืม ไม่อยู่ใน repo)",
+               "OURS": "OURS"}
 
 
-LOOP = "วนทั้งไฟล์"
-for file, what, where, prio in [
-        ("title", "เพลงหน้าแรก", "Title, Settings, HOW TO PLAY, TEST ROOM", 3),
-        ("gallery", "เพลงเลือกวาทยากร", "หน้าเลือกวาทยากรและหน้าโปรไฟล์", 2),
-        ("route", "เพลงแผนที่", "แผนที่, THE AUDITION, หน้าวง", 3),
-        ("battle", "เพลงไฟต์", "ไฟต์ธรรมดาและ ELITE", 3),
-        ("boss", "เพลงไฟต์บอส", "ไฟต์บอสทั้ง 6 ตัว", 3),
-        ("victory", "เพลงชนะ", "หน้าผลชนะไฟต์, หน้าเลือกรางวัล", 2),
-        ("defeat", "เพลงแพ้", "หน้าผลแพ้", 2),
-        ("shop", "เพลงร้าน", "ร้าน", 1),
-        ("event", "เพลงเหตุการณ์", "หน้าเหตุการณ์", 1),
-        ("rest", "เพลงพัก", "ห้องพัก, THE WINGS, WORKSHOP, REHEARSAL", 1),
-        ("ending", "เพลงจบรัน", "CURTAIN CALL", 2)]:
-    sound("music", "Content/Audio/Music/" + file, "Music", what, where, True, LOOP, prio)
+def read_enum(text, name):
+    """[(member, comment)] of 'public enum <name>' in SoundBank.cs, a comment carried on from the line before when empty"""
+    body = re.search(r"public enum %s\s*\{(.*?)\n\s*\}" % name, text, re.S).group(1)
+    out = []
+    for line in body.split("\n"):
+        m = re.match(r"\s*([A-Z][A-Za-z]*)\s*,?\s*(?://\s*(.*))?$", line)
+        if m:
+            out.append((m.group(1), (m.group(2) or "").strip()))
+    return out
 
-SHORT = "สั้น"
-for file, what, where, prio, note in [
-        ("ui_move", "เลื่อนเมนูหรือการ์ด", "ทุกหน้า", 2, ""),
-        ("ui_confirm", "กดปุ่ม", "ทุกหน้า", 2, ""),
-        ("ui_back", "ถอยกลับ", "ทุกหน้า", 2, ""),
-        ("ui_denied", "กดสิ่งที่ทำไม่ได้ เช่น BREATH ไม่พอ", "ทุกหน้า", 2, ""),
-        ("path_chosen", "เลือกห้องบนแผนที่", "แผนที่", 2, ""),
-        ("recruit", "เลือกคนเข้าวง", "THE AUDITION", 2, ""),
-        ("seat_remove", "เอาคนออกจากวง", "THE AUDITION", 1, ""),
-        ("seat_pickup", "หยิบเสานักดนตรีเพื่อสลับลำดับ", "หน้าวง", 1, ""),
-        ("seat_drop", "วางเสานักดนตรีลงที่ใหม่", "หน้าวง", 1, ""),
-        ("buy", "ซื้อของ", "ร้าน", 2, ""),
-        ("motif_get", "ได้ของ GIFT", "ร้าน หีบ เหตุการณ์ รางวัลบอส", 2, "ชื่อไฟล์ยังเป็นคำเดิม motif"),
-        ("rehearse", "ได้ดาวซ้อม", "REHEARSAL ร้าน WORKSHOP เหตุการณ์ รางวัล", 2, ""),
-        ("rest_recover", "ฟื้นเลือด", "ห้องพัก", 2, ""),
-        ("page_turn", "เปิดหน้า กล่องถาม เหตุการณ์ เปิดชั้น", "หลายหน้า", 1, ""),
-        ("check_pass", "เสี่ยงสำเร็จ", "เหตุการณ์", 1, ""),
-        ("check_fail", "เสี่ยงไม่สำเร็จ", "เหตุการณ์", 1, ""),
-        ("victory", "ชนะไฟต์ (เสียงสั้นตอนขึ้นผล)", "หน้าผลชนะ", 2, ""),
-        ("defeat", "แพ้", "หน้าผลแพ้ CURTAIN CALL", 2, ""),
-        ("run_complete", "ชนะบอสสุดท้าย จบรัน", "CURTAIN CALL", 2, ""),
-        ("combo_up", "ผ่านบทเรียน หรือจบการทดสอบจังหวะ", "ไฟต์ฝึก หน้าฝึก Settings", 1, "ชื่อไฟล์เป็นคำเดิมของหน้าดวล"),
-        ("beat_tick", "เสียงจับจังหวะตอนทดสอบจังหวะตวัด", "Settings หน้าฝึก", 1, "ต้องสั้นและคม"),
-        ("qte_perfect", "ตวัดโน้ตตรงวงแหวนพอดี PERFECT", "หน้าฝึกตวัดไม้ตอนนี้ ไอริสเสนอใช้ในไฟต์ด้วย", 3, ""),
-        ("qte_normal", "ตวัดโน้ตโดน (ไม่พอดีวง)", "หน้าฝึกตวัดไม้ตอนนี้ ไอริสเสนอใช้ในไฟต์ด้วย", 3, ""),
-        ("qte_miss", "พลาดหรือตวัดผิดทาง", "หน้าฝึกตวัดไม้ตอนนี้ ไอริสเสนอใช้ในไฟต์ด้วย", 3, ""),
-        ("qte_hesitate", "ปล่อยให้เวลาของโน้ตหมด", "หน้าฝึกตวัดไม้ตอนนี้ ไอริสเสนอใช้ในไฟต์ด้วย", 2, ""),
-        ("note_on", "โน้ตโผล่", "หน้าฝึกตวัดไม้", 1, "")]:
-    sound("sfx_now", "Content/Audio/Sfx/" + file, "SFX", what, where, True, SHORT, prio, note)
 
-NEW = "ยังไม่มี"
-for file, what, prio in [("hit_" + k, "ATTACK ของ " + n + " : เสียง" + i + "ผสมเสียงอาวุธ", 3) for k, n, i in LEGENDS] + [
-        ("skill_caprice", "CAPRICE กรีดเร็ว 4 ครั้ง (ทีละโน้ต)", 3), ("skill_il_cannone", "IL CANNONE ยิงนัดเดียวแรง", 3),
-        ("skill_soft_air", "SOFT AIR ฮีลทั้งวง", 3), ("skill_the_lesson", "THE LESSON ส่ง FOCUS ให้เพื่อน", 2),
-        ("skill_timpani_roll", "TIMPANI ROLL รัวกลอง", 3), ("skill_thunder_call", "THUNDER CALL เรียกศัตรูให้หันมา", 2),
-        ("skill_shield", "SHIELD ยืนบังเพื่อน", 2), ("skill_lance", "LANCE แทงสองครั้ง", 3),
-        ("skill_fanfare", "FANFARE เป่าปลุกทั้งวง", 2), ("skill_chakram", "CHAKRAM ขว้างวงใบมีด", 3)]:
-    sound("sfx_new", "Content/Audio/Sfx/" + file, "SFX", what, "ไฟต์", False, "สั้น ไม่เกินราว 0.5 วิ", prio,
-          note="ตีทีละโน้ต เสียงเดียวเล่นซ้ำได้หลายครั้งติดกัน")
-for file, what, where, prio, length, optional in [
-        ("qte_hold", "ระหว่างกดค้างโน้ต HOLD", "ไฟต์ วงแหวน QTE", 2, "วนได้", False),
-        ("qte_shake", "รัวไม้ทีละครั้งตอนโน้ต SHAKE", "ไฟต์ วงแหวน QTE", 2, SHORT, False),
-        ("qte_appear", "โน้ตโผล่ในวงแหวน", "ไฟต์ วงแหวน QTE", 1, SHORT, True),
-        ("parry_perfect", "ปัดโน้ตของศัตรูได้พอดี", "ไฟต์ ตาของศัตรู", 3, SHORT, False),
-        ("parry_good", "ปัดโดนแต่ไม่พอดี", "ไฟต์ ตาของศัตรู", 2, SHORT, False),
-        ("band_hurt", "นักดนตรีโดนตี", "ไฟต์", 3, SHORT, False),
-        ("band_ko", "นักดนตรีล้ม", "ไฟต์", 2, SHORT, False),
-        ("enemy_hit", "โน้ตของศัตรูพุ่งเข้า", "ไฟต์ ตาของศัตรู", 3, SHORT, False),
-        ("enemy_charge", "ศัตรูตั้งท่าชาร์จ CHARGE", "ไฟต์", 2, SHORT, False),
-        ("enemy_broken", "ท่าชาร์จพัง BROKEN", "ไฟต์", 2, SHORT, False),
-        ("enemy_armor_up", "ศัตรูตั้งโล่ ARMOR UP", "ไฟต์", 2, SHORT, False),
-        ("enemy_armor_break", "โล่ ARMOR แตก", "ไฟต์", 2, SHORT, False),
-        ("enemy_heal", "ศัตรูฮีล HEAL", "ไฟต์", 1, SHORT, False),
-        ("enemy_stunned", "ศัตรู STUNNED", "ไฟต์", 2, SHORT, False),
-        ("enemy_die", "ศัตรูสลายเข้าความมืด", "ไฟต์", 3, SHORT, False),
-        ("burn_tick", "BURN ลดเลือด", "ไฟต์", 2, SHORT, False),
-        ("volume_up", "ได้ VOLUME", "ไฟต์", 2, SHORT, False),
-        ("guard_up", "GUARD หรือ SHIELD ขึ้น", "ไฟต์", 2, SHORT, False),
-        ("muted", "โดน MUTED", "ไฟต์", 1, SHORT, False),
-        ("finale_ready", "เกจ FINALE เต็ม", "ไฟต์", 2, SHORT, False),
-        ("finale_the_unhearing", "FINALE ของ THE UNHEARING (พายุ ฟ้าผ่า)", "ไฟต์ ตอนภาพ FINALE", 2, "1–2 วิ", False),
-        ("finale_fanny", "FINALE ของ FANNY AND ??? (ผลึก สองเสียง)", "ไฟต์ ตอนภาพ FINALE", 2, "1–2 วิ", False),
-        ("finale_the_metronome", "FINALE ของ THE METRONOME (แสงศักดิ์สิทธิ์)", "ไฟต์ ตอนภาพ FINALE", 2, "1–2 วิ", False),
-        ("boss_entrance", "บอสเปิดตัว", "ไฟต์บอส ENTRANCE", 2, "1–3 วิ", False),
-        ("boss_tell", "บอสเตือนท่าไม้ตาย", "ไฟต์บอส THE TELL", 2, "1–2 วิ", False),
-        ("boss_strike", "บอสปล่อยท่าไม้ตาย", "ไฟต์บอส THE STRIKE", 2, "1–2 วิ", False),
-        ("boss_turn", "บอสเหลือครึ่งเลือด THE TURN", "ไฟต์บอส", 2, "1–2 วิ", False),
-        ("boss_down", "บอสล้ม", "ไฟต์บอส", 2, "1–3 วิ", False),
-        ("round_start", "เริ่มตาของวง", "ไฟต์", 2, SHORT, False),
-        ("turn_enemy", "เริ่มตาของศัตรู", "ไฟต์", 2, SHORT, False),
-        ("void_ambience", "เสียงหึ่งของความมืด TACET เล่นใต้เพลง", "ไฟต์", 1, "วนได้", True),
-        ("shop_reroll", "REROLL ของในร้าน", "ร้าน", 1, SHORT, False),
-        ("coins", "ได้เงิน", "หน้าผลชนะ", 1, SHORT, False),
-        ("rank_reveal", "ขึ้นอันดับ S A B", "หน้าผลชนะ", 1, SHORT, False)]:
-    note = "ชื่อไฟล์มีอยู่แล้วในโค้ด (เคยเป็นป้ายรอบของหน้าดวล)" if file == "round_start" else ""
-    sound("sfx_new", "Content/Audio/Sfx/" + file, "SFX", what, where, False, length, prio, note=note, optional=optional)
+def read_files(text, name):
+    """the file names of 'public static string[] <name> =' in order"""
+    body = re.search(r"public static string\[\] %s\s*=\s*\{(.*?)\};" % name, text, re.S).group(1)
+    return re.findall(r'^\s*"([^"]*)"', body, re.M)
+
+
+def read_manifest():
+    """{file name with its ending: [(label, made of)]}, a file can have a free row and a team row"""
+    rows = {}
+    if not os.path.exists(MANIFEST_MD):
+        return rows
+    for line in open(MANIFEST_MD, encoding="utf-8"):
+        m = re.match(r"\| `([^`]+)` \| ([A-Z ]+) \| (.*) \| ([0-9.]+) \|", line)
+        if m:
+            rows.setdefault(m.group(1), []).append((m.group(2).strip(), m.group(3).strip()))
+    return rows
+
+
+def where_now(sub, file):
+    """which folders hold the file : 'repo' (Sfx or Music), 'team' (Borrowed), both or none"""
+    places = []
+    if os.path.exists(os.path.join(AUDIO, sub, file)):
+        places.append("repo")
+    if os.path.exists(os.path.join(AUDIO, "Borrowed", file)):
+        places.append("team")
+    return places
+
+
+SB_TEXT = open(SOUNDBANK, encoding="utf-8-sig").read()
+MANIFEST_ROWS = read_manifest()
+SOUND = []
+
+
+def sound(sec, file, kind, jobs, where):
+    made = MANIFEST_ROWS.get(file, [])
+    SOUND.append(dict(sec=sec, file=file, kind=kind, jobs=jobs, where=where,
+                      labels=" / ".join(LABEL_WORDS.get(l, l) for l, _ in made),
+                      made=" / ".join(m for _, m in made)))
+
+
+# S1 music : MusicFiles in order, None skipped
+_music = read_enum(SB_TEXT, "Music")
+for (member, note), file in zip(_music, read_files(SB_TEXT, "MusicFiles")):
+    if file:
+        sound("music", file + ".ogg", "Music", member + (" : " + note if note else ""), MUSIC_WHERE.get(file, ""))
+
+# S2 short sounds : one row per file, every job that plays it ; S3 the ones with no file (the old duel's, Beta1 never plays them)
+_jobs = {}
+_order = []
+for (member, note), file in zip(read_enum(SB_TEXT, "Sfx"), read_files(SB_TEXT, "SfxFiles")):
+    if file not in _jobs:
+        _jobs[file] = []
+        _order.append(file)
+    _jobs[file].append(member + (" : " + note if note else ""))
+for file in _order:
+    have_any = os.path.exists(os.path.join(AUDIO, "Sfx", file + ".wav")) or file + ".wav" in MANIFEST_ROWS
+    sound("sfx" if have_any else "sfx_old", file + ".wav", "SFX", " / ".join(_jobs[file]), "")
+for f in sorted(os.listdir(os.path.join(AUDIO, "Sfx"))):
+    if f.startswith("band_") and f[:-4] not in _jobs:
+        sound("sfx", f, "SFX", "the musician's own note under their blow and when they join (band_<Sample>, Data/Musician.cs)", "")
+
 
 # ---------------------------------------------------------------------------------------------
 # what is in the repo
@@ -450,11 +443,13 @@ def have(row):
 
 
 def have_sound(row):
-    for ext in (".wav", ".ogg", ".mp3"):
-        full = os.path.join(GAME, row["file"] + ext)
-        if os.path.exists(full):
-            return ("มีแล้ว" if in_mgcb(row["file"] + ext) else "มีแล้ว (ยังไม่อยู่ใน Content.mgcb)"), True
-    return "ยังไม่มี", False
+    places = where_now("Music" if row["kind"] == "Music" else "Sfx", row["file"])
+    team = any(l != "FREE" for l, _ in MANIFEST_ROWS.get(row["file"], []))
+    if "repo" in places:
+        return ("มีแล้ว (ใน repo + ชุดของทีมทับตอน playtest)" if team else "มีแล้ว (ใน repo)"), True
+    if team or "team" in places:
+        return "มีแล้ว (ชุดของทีมอย่างเดียว แตก zip ลง Borrowed)", True
+    return "ไม่มี (เสียงของหน้าดวลเดิม Beta1 ไม่เล่น)", False
 
 
 for r in ART:
@@ -525,11 +520,11 @@ def summary_md():
                 + ["**%d**" % sum(1 for r in ART if r["done"])])
     text = md_table(["หมวดภาพ", MUST, TIME, NO + " (เกมไม่ต้องมีภาพ)", IRIS, "มีแล้ว"], rows)
     rows = []
-    for sec, title in [("music", "S1 เพลง"), ("sfx_now", "S2 เสียงที่โค้ดเล่นแล้ว"), ("sfx_new", "S3 เสียงที่ต้องมีเพิ่ม (ข้อเสนอ)")]:
+    for sec, title in SOUND_SEC.items():
         items = [r for r in SOUND if r["sec"] == sec]
-        need = [r for r in items if not r["optional"]]
-        rows.append([title, len(need), len(items) - len(need), sum(1 for r in items if r["done"])])
-    text += "\n\n" + md_table(["หมวดเสียง", "ต้องทำ", "ไม่บังคับ", "มีแล้ว"], rows)
+        rows.append([title, len(items), sum(1 for r in items if r["done"]),
+                     sum(1 for r in items if "TEAM FREE" in r["labels"] or "BORROWED" in r["labels"])])
+    text += "\n\n" + md_table(["หมวดเสียง", "ไฟล์", "มีแล้ว", "มีชุดของทีมทับตอน playtest"], rows)
     sets = [r for r in ART if r["kind"] == "set"]
     text += ("\n\nตัวละครในฉากต่อสู้ %d ชุด (นักดนตรี 5 ศัตรู 4 แบบที่ใช้ร่วมกัน บอส 6) เป็น math art ที่โค้ดวาดแล้ว ไม่วาด (13.79 13.106) แท็บ Animations เก็บชื่อท่าไว้เผื่อวันหนึ่งมีเวลาวาด"
              % len(sets))
@@ -569,10 +564,8 @@ def sound_md(sec):
     for r in SOUND:
         if r["sec"] != sec:
             continue
-        name = os.path.basename(r["file"]) + (".ogg" if r["kind"] == "Music" else ".wav")
-        rows.append(["`" + name + "`", r["what"], r["where"], r["length"], STARS[r["prio"]],
-                     "ไม่บังคับ" if r["optional"] else "", r["have"], r["note"]])
-    return md_table(["ไฟล์", "เสียงอะไร", "เล่นที่ไหน", "ความยาว", "ลำดับ", "ป้าย", "มีแล้ว", "หมายเหตุ"], rows)
+        rows.append(["`" + r["file"] + "`", md_escape(r["jobs"]), r["where"], r["labels"], md_escape(r["made"]), r["have"]])
+    return md_table(["ไฟล์", "เล่นตอน (ชื่อในโค้ด : งาน)", "หน้า", "ป้าย", "ทำจาก (MANIFEST)", "มีแล้ว"], rows)
 
 
 # LOOK OF : which shared picture each enemy wears, read from the game's own table (Data/Enemy.cs, SHARED LOOKS 1 Nov) so
@@ -642,7 +635,7 @@ def fill_md():
     text = open(MD, encoding="utf-8").read()
     blocks = {"summary": summary_md(), "musician_anims": anims_md(MUSICIAN_ANIMS), "enemy_anims": anims_md(ENEMY_ANIMS),
               "enemy_map": enemy_map_md(),
-              "music": sound_md("music"), "sfx_now": sound_md("sfx_now"), "sfx_new": sound_md("sfx_new")}
+              "music": sound_md("music"), "sfx": sound_md("sfx"), "sfx_old": sound_md("sfx_old")}
     for sec, _ in SECTIONS:
         blocks[sec] = art_md(sec)
     for name, body in blocks.items():
@@ -674,13 +667,13 @@ ART_COLS = [  # (Thai header, English header, width, team column?)
     ("มีในเกมแล้ว", "In game", 22, False), ("สถานะการดำเนินงาน", "Status", 14, True),
     ("กำหนดส่ง", "Start - Deadline", 20, True), ("ชนิดไฟล์ที่ส่ง", ".File", 16, False),
     ("ที่อยู่ไฟล์ส่งงาน", "Link", 26, True), ("หมายเหตุจากไอริส", "Note", 46, False), ("หมายเหตุของทีม", "Comment", 30, True)]
-SOUND_COLS = [
+SOUND_COLS = [  # In game stays column K and Status column L (the formulas on the first tab count them)
     ("#", "#", 5, False), ("ชื่อไฟล์", "File", 24, False), ("ประเภท", "Type", 8, False), ("หมวด", "Section", 20, False),
-    ("เสียงอะไร", "What", 40, False), ("เล่นที่ไหน", "Where", 32, False), ("โค้ดเล่นแล้ว", "Hooked", 12, False),
-    ("ความยาว", "Length", 16, False), ("ลำดับ", "Priority", 9, False), ("ไม่บังคับ", "Optional", 10, False),
-    ("มีในเกมแล้ว", "In game", 18, False), ("สถานะการดำเนินงาน", "Status", 14, True), ("กำหนดส่ง", "Start - Deadline", 20, True),
-    ("ที่อยู่ไฟล์ส่งงาน", "Link", 26, True), ("หมายเหตุจากไอริส", "Note", 36, False), ("หมายเหตุของทีม", "Comment", 30, True)]
-SOUND_SEC = {"music": "S1 เพลง", "sfx_now": "S2 โค้ดเล่นแล้ว", "sfx_new": "S3 ต้องมีเพิ่ม (ข้อเสนอ)"}
+    ("เล่นตอน (ชื่อในโค้ด)", "Played for", 48, False), ("หน้า", "Where", 30, False), ("ป้าย", "Label", 26, False),
+    ("ทำจาก", "Made of", 48, False), ("โฟลเดอร์ในเกม", "Game folder", 22, False), ("แก้ที่", "Change it in", 26, False),
+    ("มีในเกมแล้ว", "In game", 26, False), ("สถานะการดำเนินงาน", "Status", 14, True), ("กำหนดส่ง", "Start - Deadline", 20, True),
+    ("ที่อยู่ไฟล์ส่งงาน", "Link", 26, True), ("หมายเหตุจากไอริส", "Note", 30, False), ("หมายเหตุของทีม", "Comment", 30, True)]
+SOUND_SEC = {"music": "S1 เพลง", "sfx": "S2 เสียงสั้น (เกมเล่น)", "sfx_old": "S3 ไม่มีไฟล์ (หน้าดวลเดิม)"}
 TEAM_HEADS = {"Status", "Start - Deadline", "Link", "Comment", "Hit frames"} | set(ANIM_COLUMNS)   # the yellow columns
 
 
@@ -817,13 +810,15 @@ def write_sound(wb, kept):
     style_head(ws, SOUND_COLS)
     for n, r in enumerate(SOUND, start=1):
         row = n + 2
-        key = os.path.basename(r["file"]) + (".ogg" if r["kind"] == "Music" else ".wav")
-        values = [n, key, r["kind"], SOUND_SEC[r["sec"]], r["what"], r["where"], "เล่นแล้ว" if r["hooked"] else "ยังไม่มีจุดเล่น",
-                  r["length"], STARS[r["prio"]], "ไม่บังคับ" if r["optional"] else "", r["have"],
-                  kept.get(("Sound", key, "Status"), "NonStart"), kept.get(("Sound", key, "Start - Deadline")),
-                  kept.get(("Sound", key, "Link")), r["note"], kept.get(("Sound", key, "Comment"))]
+        key = r["file"]
+        folder = "Content/Audio/" + ("Music" if r["kind"] == "Music" else "Sfx") + " (+ Borrowed)"
+        note = "Beta1 ไม่เล่น เก็บชื่อไว้ให้หน้าดวลเดิม" if r["sec"] == "sfx_old" else ""
+        values = [n, key, r["kind"], SOUND_SEC[r["sec"]], r["jobs"], r["where"], r["labels"], r["made"], folder,
+                  "docs/audio/make_sounds.py", r["have"],
+                  kept.get(("Sound", key, "Status"), "Done" if r["done"] else "None"), kept.get(("Sound", key, "Start - Deadline")),
+                  kept.get(("Sound", key, "Link")), note, kept.get(("Sound", key, "Comment"))]
         for col, (value, (_, en, _, team)) in enumerate(zip(values, SOUND_COLS), start=1):
-            put(ws, row, col, value, team=team, center=en in ("#", "Type", "Priority", "Status"))
+            put(ws, row, col, value, team=team, center=en in ("#", "Type", "Status"))
     last = len(SOUND) + 2
     ws.auto_filter.ref = "A2:%s%d" % (ws.cell(row=2, column=len(SOUND_COLS)).column_letter, last)
     status_rules(ws, "L3:L%d" % last)

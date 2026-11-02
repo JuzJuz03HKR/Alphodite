@@ -168,6 +168,13 @@ namespace Tacetno433.Screens
         private Vector2 lastMouse;
         private Vector2 spot;                   // the light on the chosen line, easing after it
 
+        //CREDITS (Beta1 2 Nov, block E) : a small word at the bottom left after BETA BUILD, or the C key, opens the credits page.
+        //Kept off the menu ring : seven lines already fill it, and the credits are for those who look for them.
+        private const string CreditsWord = "CREDITS";
+        private const string CreditsKey = "C";
+        private Rectangle creditsBox;           // where a click opens it (Load)
+        private float creditsLit;               // 0 at rest, 1 pointed at, easing
+
         public override void Load()
         {
             //No Run : the title page is outside any run
@@ -219,6 +226,11 @@ namespace Tacetno433.Screens
 
             spot = itemAt[selected];
             lastMouse = Input.MousePos;
+
+            //Credits Box : after BETA BUILD on the bottom line, the word and its key box
+            float creditsX = 82f + Gfx.SpacedWidth(Game.Font, "BETA BUILD", TextSize.Tiny, 2f) + 36f;
+            float creditsW = Gfx.SpacedWidth(Game.Font, CreditsWord, TextSize.Tiny, 2f) + 10f + Gfx.TextWidth(Game.Font, CreditsKey, TextSize.Tiny) + 12f;
+            creditsBox = new Rectangle((int)creditsX - 6, 682, (int)creditsW + 12, 22);
             SoundBank.PlayMusic(Music.Title);
         }
 
@@ -332,6 +344,16 @@ namespace Tacetno433.Screens
             {
                 SoundBank.Play(Sfx.UiConfirm);
                 Game.Screens.Change(new TestRoomScreen());
+                return;
+            }
+
+            //CREDITS : C or a click on the word at the bottom left
+            bool overCredits = Input.MouseOver(creditsBox);
+            creditsLit = MathHelper.Clamp(creditsLit + (overCredits ? dt : -dt) * 6f, 0f, 1f);
+            if (Input.KeyPressed(Keys.C) || Input.ClickedOn(creditsBox))
+            {
+                SoundBank.Play(Sfx.UiConfirm);
+                Game.Screens.Change(new CreditsScreen());
                 return;
             }
 
@@ -702,6 +724,14 @@ namespace Tacetno433.Screens
             float a = UiMotion.Between(clock, 1.2f, 0.4f);
             Gfx.TextSpaced(sb, Game.Font, "ARROWS OR MOUSE  /  ENTER TO CONFIRM  /  ESC TO QUIT", 82, 668, Palette.LineGrey * a, TextSize.Tiny, 2f);
             Gfx.TextSpaced(sb, Game.Font, "BETA BUILD", 82, 688, Palette.LineGrey * (0.7f * a), TextSize.Tiny, 2f);
+
+            //CREDITS : grey like the rest of the line, white with a line under it when pointed at
+            float cx = creditsBox.X + 6f;
+            float wordW = Gfx.SpacedWidth(Game.Font, CreditsWord, TextSize.Tiny, 2f);
+            Color ink = Color.Lerp(Palette.LineGrey, Palette.Paper, creditsLit);
+            Gfx.TextSpaced(sb, Game.Font, CreditsWord, cx, 688, ink * a, TextSize.Tiny, 2f);
+            if (creditsLit > 0f) Gfx.Rect(sb, cx, 703, wordW * creditsLit, 1, Palette.Paper * a);
+            Ui.KeyBox(sb, CreditsKey, cx + wordW + 10f, 694f, Color.Lerp(Palette.LineGrey, Palette.Paper, creditsLit), Palette.Ink, a);
         }
     }
 }

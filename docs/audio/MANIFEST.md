@@ -1,6 +1,6 @@
 # Sound manifest (made by docs/audio/make_sounds.py, do not edit by hand)
 
-Labels : FREE = someone else's CC0 or CC-BY file, cut and levelled here / BORROWED = playtest only, never in the repo (docs/CREDITS.md) / OURS = made here (none yet : ready made first, 13.134)
+Labels : FREE = someone else's CC0 or CC-BY file, cut and levelled here / TEAM FREE = free sounds the team found and checked (13.138), never in the repo / BORROWED = other games' (playtest only, never in the repo, none yet) / OURS = made here (none yet : ready made first, 13.134)
 
 | file | label | made of | seconds |
 |---|---|---|---|
@@ -46,16 +46,16 @@ Labels : FREE = someone else's CC0 or CC-BY file, cut and levelled here / BORROW
 | `boss_turn.wav` | FREE | "BreakGlass_03" by Cosmo Myzrail Gorynych (CoMiGo), Bleeps and Bloops, CC0, in untamedpixels' 150 Combat Sound Effects with "low_frequency_explosion_000" by Kenney, Sci-fi Sounds, CC0, in untamedpixels' 150 Combat Sound Effects : the white shell breaks | 1.78 |
 | `boss_down.wav` | FREE | VSCO 2 CE (CC0) gong fff | 4.0 |
 | `fight_start.wav` | FREE | VSCO 2 CE (CC0) gong mp | 2.0 |
-| `weapon_cut.wav` | BORROWED | Drive soundgame/เสียงตี/Hit_1.wav (source not known yet) | 0.6 |
-| `weapon_shot.wav` | BORROWED | Drive soundgame/เสียงตี/HIt_2.wav (source not known yet) | 0.65 |
-| `weapon_smash.wav` | BORROWED | Drive soundgame/เสียงตี/Hit_3.wav (source not known yet) | 0.5 |
-| `boss_entrance.wav` | BORROWED | Drive soundgame/song/Fight monter effect : Designed, Braam, Airy Rise, Sub Impact, Clean, Classic SND58427, its impact moved to 0.95 s (source not known yet) | 3.6 |
-| `boss_strike.wav` | BORROWED | Drive soundgame/song/Fight monter effect : Designed, Braam, Orchestral Impact, Huge, Epic 01 SND58575 (source not known yet) | 3.0 |
-| `boss_tell.wav` | BORROWED | Drive soundgame/song/Fight monter effect : Designed, Braam, Classic, Soft, Brass, Short (C#) SND56455 (source not known yet) | 3.0 |
-| `boss_turn.wav` | BORROWED | Drive soundgame/song/Fight monter effect : Designed, Braam, Crunchy Baritone SND58610 (source not known yet) | 3.0 |
-| `boss_down.wav` | BORROWED | Drive soundgame/song/Fight monter effect : Designed, Braam, Dark, Double Bass, Long SND56476 (source not known yet) | 5.0 |
-| `enemy_charge.wav` | BORROWED | Drive soundgame/song/Fight monter effect : Designed, Braam, Rumbling, Low, Soft SND56543 (source not known yet) | 2.2 |
-| `fight_start.wav` | BORROWED | Drive soundgame/GUI/Enter the Fight.wav (source not known yet) | 1.8 |
+| `weapon_cut.wav` | TEAM FREE | Drive soundgame/เสียงตี/Hit_1.wav (a free sound site, checked by the team 13.138) | 0.6 |
+| `weapon_shot.wav` | TEAM FREE | Drive soundgame/เสียงตี/HIt_2.wav (a free sound site, checked by the team 13.138) | 0.65 |
+| `weapon_smash.wav` | TEAM FREE | Drive soundgame/เสียงตี/Hit_3.wav (a free sound site, checked by the team 13.138) | 0.5 |
+| `boss_entrance.wav` | TEAM FREE | Drive soundgame/song/Fight monter effect : Designed, Braam, Airy Rise, Sub Impact, Clean, Classic SND58427, its impact moved to 0.95 s (a free sound site, checked by the team 13.138) | 3.6 |
+| `boss_strike.wav` | TEAM FREE | Drive soundgame/song/Fight monter effect : Designed, Braam, Orchestral Impact, Huge, Epic 01 SND58575 (a free sound site, checked by the team 13.138) | 3.0 |
+| `boss_tell.wav` | TEAM FREE | Drive soundgame/song/Fight monter effect : Designed, Braam, Classic, Soft, Brass, Short (C#) SND56455 (a free sound site, checked by the team 13.138) | 3.0 |
+| `boss_turn.wav` | TEAM FREE | Drive soundgame/song/Fight monter effect : Designed, Braam, Crunchy Baritone SND58610 (a free sound site, checked by the team 13.138) | 3.0 |
+| `boss_down.wav` | TEAM FREE | Drive soundgame/song/Fight monter effect : Designed, Braam, Dark, Double Bass, Long SND56476 (a free sound site, checked by the team 13.138) | 5.0 |
+| `enemy_charge.wav` | TEAM FREE | Drive soundgame/song/Fight monter effect : Designed, Braam, Rumbling, Low, Soft SND56543 (a free sound site, checked by the team 13.138) | 2.2 |
+| `fight_start.wav` | TEAM FREE | Drive soundgame/GUI/Enter the Fight.wav (a free sound site, checked by the team 13.138) | 1.8 |
 | `ui_move.wav` | FREE | "select_002" by Kenney, Interface Sounds, CC0 | 0.04 |
 | `ui_confirm.wav` | FREE | "confirmation_003" by Kenney, Interface Sounds, CC0 | 0.32 |
 | `ui_back.wav` | FREE | "back_002" by Kenney, Interface Sounds, CC0 | 0.07 |
@@ -75,9 +75,9 @@ Labels : FREE = someone else's CC0 or CC-BY file, cut and levelled here / BORROW
 | `victory.wav` | FREE | VSCO 2 CE (CC0) glockenspiel glissando up : the light comes back | 2.0 |
 | `defeat.wav` | FREE | VSCO 2 CE (CC0) gong p, darkened | 3.0 |
 | `run_complete.wav` | FREE | VSCO 2 CE (CC0) Nepalese bells | 4.5 |
-| `ui_confirm.wav` | BORROWED | Drive soundgame/GUI/some GUI.wav, its first sound (source not known yet) | 1.2 |
-| `path_chosen.wav` | BORROWED | Drive soundgame/GUI/enter_somthing.wav (source not known yet) | 2.6 |
-| `dice.wav` | BORROWED | Drive soundgame/GUI/Dice event.wav (source not known yet) | 2.42 |
+| `ui_confirm.wav` | TEAM FREE | Drive soundgame/GUI/some GUI.wav, its first sound (a free sound site, checked by the team 13.138) | 1.2 |
+| `path_chosen.wav` | TEAM FREE | Drive soundgame/GUI/enter_somthing.wav (a free sound site, checked by the team 13.138) | 2.6 |
+| `dice.wav` | TEAM FREE | Drive soundgame/GUI/Dice event.wav (a free sound site, checked by the team 13.138) | 2.42 |
 | `title.ogg` | FREE | freesound 610532 "Dark Sad Mood Orchestra Strings Piano Choir Cinematic Music Atmo Ambient Surround" by szegvari, CC0 | 69.7 |
 | `gallery.ogg` | FREE | freesound 610996 "Long Time Waiting - Strings String Solo Orchestra Orchestral Sad Dark Mood Drama Synth Atmo Music Surround" by szegvari, CC0 | 79.5 |
 | `route.ogg` | FREE | freesound 609755 "Dark Sad Mood Thriller Drama Orchestra Piano Keys Cinematic Atmo Music Surround" by szegvari, CC0 | 69.5 |
@@ -91,5 +91,5 @@ Labels : FREE = someone else's CC0 or CC-BY file, cut and levelled here / BORROW
 | `event.ogg` | FREE | freesound 609755 "Dark Sad Mood Thriller..." by szegvari, CC0 (from 20 s) | 49.5 |
 | `rest.ogg` | FREE | freesound 610996 "Long Time Waiting..." by szegvari, CC0 (from 30 s) | 49.5 |
 | `ending.ogg` | FREE | freesound 610532 "Dark Sad Mood Orchestra..." by szegvari, CC0 (from 25 s) | 44.8 |
-| `title.ogg` | BORROWED | Drive soundgame/song/title_music.wav (source not known yet) | 160.6 |
-| `boss.ogg` | BORROWED | Drive soundgame/song/Boss_music_1.wav (source not known yet) | 67.8 |
+| `title.ogg` | TEAM FREE | Drive soundgame/song/title_music.wav (a free sound site, checked by the team 13.138) | 160.6 |
+| `boss.ogg` | TEAM FREE | Drive soundgame/song/Boss_music_1.wav (a free sound site, checked by the team 13.138) | 67.8 |

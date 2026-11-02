@@ -574,6 +574,17 @@ namespace Tacetno433.Core
             Gfx.Rect(sb, cx - 13 * size, cy - 2 * size, 26 * size, 2, Palette.Paper * alpha);
         }
 
+        //Early Access (Beta1 2 Nov, the user 13.124 : no painting of Bach yet, "still being made but playable, an early access
+        //character") : the filled tag and two short lines under it, on a conductor's panel and on their profile. It shows
+        //wherever the painting is missing (Content/Art/Conductors/gallery_<name>.png) and goes away by itself once it comes.
+        public static void EarlyAccess(SpriteBatch sb, float x, float y, float alpha)
+        {
+            Gfx.Rect(sb, x - 6f, y - 6f, 150f, 62f, Palette.Void * (0.55f * alpha));
+            Tag(sb, "EARLY ACCESS", x, y, true, alpha);
+            Gfx.TextSpaced(sb, Font, "STILL BEING MADE", x, y + 24f, Palette.Paper * alpha, TextSize.Tiny, 2f);
+            Gfx.TextSpaced(sb, Font, "PLAYABLE NOW", x, y + 38f, Palette.PaperDim * alpha, TextSize.Tiny, 2f);
+        }
+
         //Tag : a word in a small box. filled tags are for things that matter right now.
         public static void Tag(SpriteBatch sb, string text, float x, float y, bool filled, float alpha)
         {
@@ -586,16 +597,17 @@ namespace Tacetno433.Core
         {
             float w = Gfx.SpacedWidth(Font, text, TextSize.Tiny, 1.5f) + 14f;
             Rectangle box = new Rectangle((int)x, (int)y, (int)w, 18);
+            float textY = box.Center.Y - Font.LineSpacing * TextSize.Tiny / 2f;      // TAG MIDDLE (2 Nov) : centred as in KeyBox, it sat 1.5 pixels low and lost its feet
 
             if (filled)
             {
                 Gfx.Rect(sb, box, Color.Lerp(Palette.Paper, Palette.Ink, ink) * alpha);
-                Gfx.TextSpaced(sb, Font, text, box.X + 7, box.Y + 3, Color.Lerp(Palette.Ink, Palette.Paper, ink) * alpha, TextSize.Tiny, 1.5f);
+                Gfx.TextSpaced(sb, Font, text, box.X + 7, textY, Color.Lerp(Palette.Ink, Palette.Paper, ink) * alpha, TextSize.Tiny, 1.5f);
             }
             else
             {
                 Gfx.RectOutline(sb, box, Color.Lerp(Palette.LineGrey, Palette.InkSoft, ink) * alpha, 1);
-                Gfx.TextSpaced(sb, Font, text, box.X + 7, box.Y + 3, Color.Lerp(Palette.PaperDim, Palette.InkSoft, ink) * alpha, TextSize.Tiny, 1.5f);
+                Gfx.TextSpaced(sb, Font, text, box.X + 7, textY, Color.Lerp(Palette.PaperDim, Palette.InkSoft, ink) * alpha, TextSize.Tiny, 1.5f);
             }
         }
 

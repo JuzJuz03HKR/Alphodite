@@ -10,8 +10,9 @@ BORROWED and BAND files found.
 FOLDERS
   Sfx/       short sounds, WAV 44.1 kHz 16 bit. Free files only (ours, CC0, CC-BY).
   Music/     looping tracks, OGG Vorbis only. Free files only.
-  Borrowed/  the closed playtest's borrowed sounds and music (from other games, or of unknown
-             origin). NEVER COMMITTED : git keeps only its README. Same names as Sfx and Music.
+  Borrowed/  the team's free picks (TEAM FREE : found on free sound sites, the sites not written
+             down) and anything borrowed for the closed playtest (none yet). NEVER COMMITTED :
+             git keeps only its README. Same names as Sfx and Music.
              A file here wins over the free one with the same name.
   Instruments/  the old duel's nine notes (Alpha6, not used by Beta1, kept as the user asked).
 
@@ -26,6 +27,7 @@ HOW A BLOW SOUNDS (the user 13.131)
   drums), then the striker's own instrument, light, the same note every time. Never a tune.
 
 WHERE THE FILES COME FROM
-  docs/CREDITS.md names every file, who made it, its licence and its label : OURS, FREE or
-  BORROWED. The free files are made again with docs/audio/make_sounds.py.
+  docs/CREDITS.md names every file, who made it, its licence and its label : OURS, FREE,
+  TEAM FREE or BORROWED. The free files are made again with docs/audio/make_sounds.py.
+  The CREDITS page of the game (C on the title page) is Data/Credits.cs.
   SoundLibrary/ is VSCO 2 Community Edition by Versilian Studios, CC0 (checked 2 Nov).

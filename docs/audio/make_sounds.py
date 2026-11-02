@@ -18,11 +18,13 @@
 #   magic/magical_2.ogg             JaggedStone, Magic Spell SFX          opengameart.org/content/magic-spell-sfx
 # and the VSCO 2 CE orchestra (CC0) for each musician's own note and a few orchestral ones.
 #
-# Three labels (docs/CREDITS.md) :
+# Four labels (docs/CREDITS.md) :
 #   OURS      made here from CC0 recordings or from noise        -> Tacetno433/Content/Audio/Sfx or Music (in the repo)
 #   FREE      someone else's CC0 or CC-BY file, cut and levelled -> Tacetno433/Content/Audio/Sfx or Music (in the repo)
-#   BORROWED  other games' or of unknown origin (the playtest only, the user 13.125 13.132)
+#   TEAM FREE free sounds the team found on free sound sites and checked (the user 13.138, the Drive folder soundgame).
+#             The site of each file was not written down, so they stay out of the public repo :
 #             -> the folder given with --borrowed, NEVER the repo. Copy it into Tacetno433/Content/Audio/Borrowed.
+#   BORROWED  other games' music or sounds (the closed playtest only, the user 13.125 13.132), the same folder. None yet.
 #
 # Needs : python3 with numpy scipy soundfile, and ffmpeg (for ogg)
 #   pip install numpy scipy soundfile
@@ -451,21 +453,21 @@ def make_fight(B):
     write_wav(S, 'fight_start', fade_out(cut(V('VSCO 1 Percussion/varMetal/Gong/gong_hit_mp.wav'), 2.0), 1.0), 'FREE', 'VSCO 2 CE (CC0) gong mp', mono_out=False)
     if B:
         h1 = land(load(drive('hit/Hit_1.wav')))
-        write_wav(B, 'weapon_cut', fade_out(cut(h1, 0.6), 0.2), 'BORROWED', 'Drive soundgame/เสียงตี/Hit_1.wav (source not known yet)')
+        write_wav(B, 'weapon_cut', fade_out(cut(h1, 0.6), 0.2), 'TEAM FREE', 'Drive soundgame/เสียงตี/Hit_1.wav (a free sound site, checked by the team 13.138)')
         h2 = land(load(drive('hit/HIt_2.wav')))
-        write_wav(B, 'weapon_shot', fade_out(cut(h2, 0.65), 0.2), 'BORROWED', 'Drive soundgame/เสียงตี/HIt_2.wav (source not known yet)')
+        write_wav(B, 'weapon_shot', fade_out(cut(h2, 0.65), 0.2), 'TEAM FREE', 'Drive soundgame/เสียงตี/HIt_2.wav (a free sound site, checked by the team 13.138)')
         h3 = trim(load(drive('hit/Hit_3.wav')))
-        write_wav(B, 'weapon_smash', fade_out(cut(h3, 0.5), 0.15), 'BORROWED', 'Drive soundgame/เสียงตี/Hit_3.wav (source not known yet)')
+        write_wav(B, 'weapon_smash', fade_out(cut(h3, 0.5), 0.15), 'TEAM FREE', 'Drive soundgame/เสียงตี/Hit_3.wav (a free sound site, checked by the team 13.138)')
         f = 'fight/braam_'
         src = 'Drive soundgame/song/Fight monter effect : '
         rise = load(drive(f + 'airy_rise_sub_impact_SND58427.wav'), 4.29 - 0.95)
-        write_wav(B, 'boss_entrance', fade_out(cut(rise, 3.6), 1.6), 'BORROWED', src + 'Designed, Braam, Airy Rise, Sub Impact, Clean, Classic SND58427, its impact moved to 0.95 s (source not known yet)', mono_out=False)
-        write_wav(B, 'boss_strike', fade_out(cut(load(drive(f + 'orchestral_impact_huge_epic_SND58575.wav')), 3.0), 1.2), 'BORROWED', src + 'Designed, Braam, Orchestral Impact, Huge, Epic 01 SND58575 (source not known yet)', mono_out=False)
-        write_wav(B, 'boss_tell', fade_out(cut(trim(load(drive(f + 'classic_soft_brass_short_SND56455.wav'))), 3.0), 1.2), 'BORROWED', src + 'Designed, Braam, Classic, Soft, Brass, Short (C#) SND56455 (source not known yet)', mono_out=False)
-        write_wav(B, 'boss_turn', fade_out(cut(trim(load(drive(f + 'crunchy_baritone_SND58610.wav'))), 3.0), 1.2), 'BORROWED', src + 'Designed, Braam, Crunchy Baritone SND58610 (source not known yet)', mono_out=False)
-        write_wav(B, 'boss_down', fade_out(cut(trim(load(drive(f + 'dark_double_bass_long_SND56476.wav'))), 5.0), 2.0), 'BORROWED', src + 'Designed, Braam, Dark, Double Bass, Long SND56476 (source not known yet)', mono_out=False)
-        write_wav(B, 'enemy_charge', fade_out(cut(trim(load(drive(f + 'rumbling_low_soft_SND56543.wav'))), 2.2), 1.0), 'BORROWED', src + 'Designed, Braam, Rumbling, Low, Soft SND56543 (source not known yet)', mono_out=False)
-        write_wav(B, 'fight_start', fade_out(cut(trim(load(drive('gui/Enter the Fight.wav'))), 1.8), 0.8), 'BORROWED', 'Drive soundgame/GUI/Enter the Fight.wav (source not known yet)', mono_out=False)
+        write_wav(B, 'boss_entrance', fade_out(cut(rise, 3.6), 1.6), 'TEAM FREE', src + 'Designed, Braam, Airy Rise, Sub Impact, Clean, Classic SND58427, its impact moved to 0.95 s (a free sound site, checked by the team 13.138)', mono_out=False)
+        write_wav(B, 'boss_strike', fade_out(cut(load(drive(f + 'orchestral_impact_huge_epic_SND58575.wav')), 3.0), 1.2), 'TEAM FREE', src + 'Designed, Braam, Orchestral Impact, Huge, Epic 01 SND58575 (a free sound site, checked by the team 13.138)', mono_out=False)
+        write_wav(B, 'boss_tell', fade_out(cut(trim(load(drive(f + 'classic_soft_brass_short_SND56455.wav'))), 3.0), 1.2), 'TEAM FREE', src + 'Designed, Braam, Classic, Soft, Brass, Short (C#) SND56455 (a free sound site, checked by the team 13.138)', mono_out=False)
+        write_wav(B, 'boss_turn', fade_out(cut(trim(load(drive(f + 'crunchy_baritone_SND58610.wav'))), 3.0), 1.2), 'TEAM FREE', src + 'Designed, Braam, Crunchy Baritone SND58610 (a free sound site, checked by the team 13.138)', mono_out=False)
+        write_wav(B, 'boss_down', fade_out(cut(trim(load(drive(f + 'dark_double_bass_long_SND56476.wav'))), 5.0), 2.0), 'TEAM FREE', src + 'Designed, Braam, Dark, Double Bass, Long SND56476 (a free sound site, checked by the team 13.138)', mono_out=False)
+        write_wav(B, 'enemy_charge', fade_out(cut(trim(load(drive(f + 'rumbling_low_soft_SND56543.wav'))), 2.2), 1.0), 'TEAM FREE', src + 'Designed, Braam, Rumbling, Low, Soft SND56543 (a free sound site, checked by the team 13.138)', mono_out=False)
+        write_wav(B, 'fight_start', fade_out(cut(trim(load(drive('gui/Enter the Fight.wav'))), 1.8), 0.8), 'TEAM FREE', 'Drive soundgame/GUI/Enter the Fight.wav (a free sound site, checked by the team 13.138)', mono_out=False)
 
 
 def make_ui(B):
@@ -495,10 +497,10 @@ def make_ui(B):
               'VSCO 2 CE (CC0) Nepalese bells', mono_out=False)
     if B:
         g = trim(load(drive('gui/some GUI.wav')))
-        write_wav(B, 'ui_confirm', fade_out(cut(g, 1.2), 0.8), 'BORROWED', 'Drive soundgame/GUI/some GUI.wav, its first sound (source not known yet)', to_peak=-4.0, mono_out=False)
+        write_wav(B, 'ui_confirm', fade_out(cut(g, 1.2), 0.8), 'TEAM FREE', 'Drive soundgame/GUI/some GUI.wav, its first sound (a free sound site, checked by the team 13.138)', to_peak=-4.0, mono_out=False)
         e = trim(load(drive('gui/enter_somthing.wav')))
-        write_wav(B, 'path_chosen', fade_out(cut(e, 2.6), 1.6), 'BORROWED', 'Drive soundgame/GUI/enter_somthing.wav (source not known yet)', mono_out=False)
-        write_wav(B, 'dice', trim(load(drive('gui/Dice event.wav'))), 'BORROWED', 'Drive soundgame/GUI/Dice event.wav (source not known yet)', mono_out=False)
+        write_wav(B, 'path_chosen', fade_out(cut(e, 2.6), 1.6), 'TEAM FREE', 'Drive soundgame/GUI/enter_somthing.wav (a free sound site, checked by the team 13.138)', mono_out=False)
+        write_wav(B, 'dice', trim(load(drive('gui/Dice event.wav'))), 'TEAM FREE', 'Drive soundgame/GUI/Dice event.wav (a free sound site, checked by the team 13.138)', mono_out=False)
 
 
 def make_music(B):
@@ -532,14 +534,15 @@ def make_music(B):
     write_ogg(M, 'rest', load(drive(wait), 30.0), 'FREE', fs + '610996 "Long Time Waiting..."' + sz + ' (from 30 s)', -20)
     write_ogg(M, 'ending', load(drive(dark), 25.0), 'FREE', fs + '610532 "Dark Sad Mood Orchestra..."' + sz + ' (from 25 s)', -19)
     if B:
-        write_ogg(B, 'title', load(drive(s + 'title_music.wav')), 'BORROWED', 'Drive soundgame/song/title_music.wav (source not known yet)', -18)
-        write_ogg(B, 'boss', load(drive(s + 'Boss_music_1.wav')), 'BORROWED', 'Drive soundgame/song/Boss_music_1.wav (source not known yet)', -16)
+        write_ogg(B, 'title', load(drive(s + 'title_music.wav')), 'TEAM FREE', 'Drive soundgame/song/title_music.wav (a free sound site, checked by the team 13.138)', -18)
+        write_ogg(B, 'boss', load(drive(s + 'Boss_music_1.wav')), 'TEAM FREE', 'Drive soundgame/song/Boss_music_1.wav (a free sound site, checked by the team 13.138)', -16)
 
 
 def write_manifest():
     lines = ['# Sound manifest (made by docs/audio/make_sounds.py, do not edit by hand)', '',
              'Labels : FREE = someone else\'s CC0 or CC-BY file, cut and levelled here / '
-             'BORROWED = playtest only, never in the repo (docs/CREDITS.md) / OURS = made here (none yet : ready made first, 13.134)', '',
+             'TEAM FREE = free sounds the team found and checked (13.138), never in the repo / '
+             'BORROWED = other games\' (playtest only, never in the repo, none yet) / OURS = made here (none yet : ready made first, 13.134)', '',
              '| file | label | made of | seconds |', '|---|---|---|---|']
     for name, label, made, sec in MANIFEST:
         lines.append('| `%s` | %s | %s | %s |' % (name, label, made, sec))

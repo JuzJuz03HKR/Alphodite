@@ -517,6 +517,7 @@ namespace Tacetno433.Screens
             if (faceArt != null) ArtBank.DrawOrSlot(sb, faceArt, face, Palette.Paper, d);
             else LegendArt.Sigil(sb, c, face, time, d);                                 // SIGIL (block C) : their mark until the close up comes
             Ornament.CornerBrackets(sb, new Rectangle(face.X - 4, face.Y - 4, face.Width + 8, face.Height + 8), 12, Palette.PaperDim * d, 1);
+            if (ArtBank.GalleryOf(c) == null) Ui.EarlyAccess(sb, face.X + 10, face.Y + 10, d);   // EARLY ACCESS (2 Nov, the user 13.124)
 
             //Record : beside the face, a label over each value like a record card
             float rx = faceBox.Right + 22;
