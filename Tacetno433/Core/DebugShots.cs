@@ -170,6 +170,15 @@ namespace Tacetno433.Core
                 return;
             }
 
+            //Sound Check (block E, 2 Nov) : every sound the code names, found or missing and from which folder, and every
+            //track started for a moment to see that it really plays (Audio/SoundBank.cs Report)
+            if (names[0] == "soundcheck")
+            {
+                File.WriteAllText(Path.Combine(outDir, "soundcheck.txt"), Audio.SoundBank.Report());
+                game.Exit();
+                return;
+            }
+
             //Turn Check (Alpha 7) : scripted turn battles, one PASS or FAIL line per rule (DebugShots.Turn.cs)
             if (names[0] == "turncheck")
             {

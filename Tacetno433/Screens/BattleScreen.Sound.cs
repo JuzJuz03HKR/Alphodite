@@ -27,14 +27,25 @@ namespace Tacetno433.Screens
         private bool planSounded;               // the first bar of the fight is written without the baton's tap (FightStart rang)
         private static readonly Random soundRng = new Random();   // the sounds' own dice : the run's dice (run.Rng) are the rules' alone
 
-        //Sound Hit : a blow lands on an enemy. The weapon of the striker's family, then their instrument, light.
+        //Sound Hit : a blow lands on an enemy. An ATTACK is the weapon of the striker's family, a skill's note their own
+        //element (ELEMENTS, the colour its VFX already has), then their instrument, light, under either.
         private void SoundHit(Fighter striker)
         {
             if (striker == null || striker.IsEnemy) return;
-            Sfx weapon = WeaponOf(StyleOf(striker));
             float pitch = ((float)soundRng.NextDouble() * 2f - 1f) * BattleRules.SoundWeaponPitch;
-            SoundBank.Play(weapon, BattleRules.SoundWeapon, pitch);
+            if (PlayingSkill != null) SoundBank.Play(ElementOf(striker.Musician), BattleRules.SoundWeapon, pitch);
+            else SoundBank.Play(WeaponOf(StyleOf(striker)), BattleRules.SoundWeapon, pitch);
             SoundBank.PlayBand(striker.Musician, BattleRules.SoundBandLayer);
+        }
+
+        private static Sfx ElementOf(Musician m)
+        {
+            if (m == null) return Sfx.WeaponShot;
+            if (m.Spot == SpotLook.Fire || m.Spot == SpotLook.Red) return Sfx.SkillFire;
+            if (m.Spot == SpotLook.Wind) return Sfx.SkillWind;
+            if (m.Spot == SpotLook.Earth) return Sfx.SkillEarth;
+            if (m.Spot == SpotLook.Water) return Sfx.SkillWater;
+            return Sfx.SkillLight;
         }
 
         private static Sfx WeaponOf(HitStyle style)
@@ -63,7 +74,7 @@ namespace Tacetno433.Screens
                         if (hitSignature) SoundBank.Play(Sfx.WeaponSmash, 1f, -0.25f);    // the FINALE's strokes land as one great blow
                         else SoundHit(hitBy);
                         break;
-                    case TurnEventKind.DissonanceTick: SoundBank.Play(Sfx.BurnTick, 0.8f, 0f); break;          // BURN
+                    case TurnEventKind.DissonanceTick: SoundBank.Play(Sfx.BurnTick, 0.45f, 0.15f); break;      // BURN : the fire, softer
                     case TurnEventKind.Heal:
                     case TurnEventKind.Saved:
                         bool theirs = e.Who != null && e.Who.IsEnemy;

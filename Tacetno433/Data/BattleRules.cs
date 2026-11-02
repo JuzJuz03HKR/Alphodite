@@ -671,7 +671,7 @@
         public static float SoundGood = 0.4f;              // the small tick of a GOOD note
         public static float SoundMiss = 0.7f;              // the dull thud of a MISS (a note let pass is this x0.6)
         public static float SoundSwing = 0.75f;            // EnemySwing, the parry cue of each of TACET's notes
-        public static float SoundSwingLead = 0.16f;        //   it starts this long before the note is due : its file is loudest this far in
+        public static float SoundSwingLead = 0.2f;         //   it starts this long before the note is due : its file is loudest this far in (make_sounds.py prints it)
         public static float SoundRepeatGap = 0.035f;       // REPEAT GAP : the same sound again sooner than this (seconds) is not played
         public static float SoundMusicFadeOut = 0.7f;      // seconds a track takes to fade out when the page asks for another
         public static float SoundMusicFadeIn = 1.2f;       //   and the next one to fade in

@@ -83,7 +83,13 @@ namespace Tacetno433.Audio
         EnemyTurn,      // TACET's turn begins
         FightStart,     // a fight begins
         HoldLoop,       // a HOLD note while it is held (it loops)
-        RollTap         // one shake of a ROLL
+        RollTap,        // one shake of a ROLL
+        SkillFire,      // ELEMENTS : a skill's blow in the musician's own element (Musician.Spot, the colour of its VFX) :
+        SkillWind,      //   PAGANINI fire, QUANTZ wind, PFUNDT earth, DUPORT water, PUNTO light
+        SkillEarth,
+        SkillWater,
+        SkillLight,
+        Dice            // the shop's REROLL
     }
 
     //Music : every looping track. None means silence.
@@ -137,9 +143,9 @@ namespace Tacetno433.Audio
             "ui_back",
             "ui_denied",
             "path_chosen",
-            "seat_pickup",
-            "seat_drop",
-            "seat_remove",
+            "ui_move",                  // SeatPickUp : the shared sounds of the pages (the user 13.133)
+            "qte_normal",               // SeatDrop
+            "ui_back",                  // SeatRemove
             "note_on",
             "note_off",
             "round_start",
@@ -186,7 +192,7 @@ namespace Tacetno433.Audio
             "enemy_charge",
             "enemy_broken",
             "stunned",
-            "burn_tick",
+            "skill_fire",               // BurnTick : BURN is PAGANINI's fire, played softer
             "finale_ready",
             "finale_storm",
             "finale_prism",
@@ -199,7 +205,13 @@ namespace Tacetno433.Audio
             "enemy_turn",
             "fight_start",
             "hold_loop",
-            "roll_tap"
+            "roll_tap",
+            "skill_fire",
+            "skill_wind",
+            "skill_earth",
+            "skill_water",
+            "skill_light",
+            "dice"
         };
 
         //Music Files : file names in Content/Audio/Music (or Borrowed), no extension, ogg only (MediaPlayer reads Ogg Vorbis)
@@ -608,6 +620,43 @@ namespace Tacetno433.Audio
             }
             catch (Exception) { }
             song = null;
+        }
+
+        //Report : SOUND CHECK (DebugShots --shots soundcheck). Which file every sound and track uses, and whether each track
+        //starts. Built only for the check, never while playing.
+        public static string Report()
+        {
+            System.Text.StringBuilder r = new System.Text.StringBuilder();
+            r.Append("SOUND CHECK  SFX " + LoadedSfx + " / " + SfxFiles.Length + "  MUSIC " + LoadedMusic + "  BORROWED " + LoadedBorrowed + "  BAND " + LoadedBand + "\r\n\r\n");
+            for (int i = 0; i < SfxFiles.Length; i++)
+            {
+                string from = File.Exists(Path.Combine(AudioFolder("Borrowed"), SfxFiles[i] + ".wav")) ? "BORROWED" : (File.Exists(Path.Combine(AudioFolder("Sfx"), SfxFiles[i] + ".wav")) ? "Sfx" : "-");
+                r.Append(((Sfx)i).ToString().PadRight(16) + SfxFiles[i].PadRight(16) + (sfx[i] != null ? "OK   " : "MISSING ") + from + "\r\n");
+            }
+            r.Append("\r\n");
+            Musician[] all = MusicianList.All;
+            for (int i = 0; i < all.Length; i++)
+                if (all[i].Sample.Length > 0) r.Append("BAND " + all[i].Name.PadRight(10) + "band_" + all[i].Sample + (bandNotes[i] != null ? "  OK" : "  -") + "\r\n");
+            r.Append("\r\n");
+            for (int i = 1; i < MusicFiles.Length; i++)
+            {
+                string result = "-";
+                if (musicPaths[i] != null)
+                {
+                    try
+                    {
+                        Song test = Song.FromUri(MusicFiles[i], new Uri(musicPaths[i]));
+                        MediaPlayer.Volume = 0f;
+                        MediaPlayer.Play(test);
+                        result = "PLAYS " + test.Duration.TotalSeconds.ToString("0.0") + " s  " + MediaPlayer.State + "  " + Path.GetFileName(Path.GetDirectoryName(musicPaths[i]));
+                        MediaPlayer.Stop();
+                        test.Dispose();
+                    }
+                    catch (Exception e) { result = "FAILED " + e.GetType().Name + " " + e.Message; }
+                }
+                r.Append("MUSIC " + ((Music)i).ToString().PadRight(10) + result + "\r\n");
+            }
+            return r.ToString();
         }
 
         //Track Gain : a fight's music sits lower, so the swipe and parry sounds stay clear on top (Worldless keeps its

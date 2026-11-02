@@ -340,7 +340,7 @@ namespace Tacetno433.Screens
             Stock();
             for (int r = 0; r < WareCount; r++) rowMotion[r] = new UiMotion();
             Say(RerolledLine);
-            SoundBank.Play(Sfx.PageTurn);
+            SoundBank.Play(Sfx.Dice);                                                    // BLOCK E : the dice of a new shelf
         }
 
         //Fly : what was bought leaves its shelf for the top bar. A motif's badge is not drawn up there until it lands.

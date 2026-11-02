@@ -166,6 +166,7 @@ namespace Tacetno433.Screens
                 picked.Add(m);
                 pickedAt[i] = time;
                 SoundBank.Play(Sfx.Recruit);
+                SoundBank.PlayBand(m, 0.8f);                                             // BLOCK E : their own instrument answers
                 Bond bond = BondList.Of(m, Game.CurrentRun.Conductor.Turn);              // BONDS : what ties them, said once
                 if (bond != null) Say(bond.Fact);
             }
