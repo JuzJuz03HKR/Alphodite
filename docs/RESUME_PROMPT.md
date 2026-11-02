@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 2 พ.ย. แชท /system ต่อจาก FINALE3 | รอบ 6 ส่วนที่ 3 ต่อ บอส 4 ตัวที่เหลือจากสเก็ตช์ THE NAMELESS MASTER THE STAFF THE DEVIL'S STRING THE BLIND CANTOR (`BETA1_DIRECTION.md` 32.18) | `Core/Figure.Tacet.cs` `Screens/BattleScreen.Boss.cs` `Screens/BattleScreen.Stage.cs` `Data/BattleRules.cs` (Figure Feel) `Core/DebugShots*.cs` เอกสาร |
+| (ว่าง) | | |
 
 ---
 
@@ -63,6 +63,11 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 ---
 
 ## สถานะล่าสุด (2 พ.ย.)
+
+**2 พ.ย. แชท /system (ต่อจาก FINALE3) : ✅ รอบ 6 ส่วนที่ 3 จบ บอสอีก 4 ตัวจากสเก็ตช์ หยุดรอผู้ใช้ Rebuild ลอง** (คำต่อคำ `USER_BRIEFS.md` 13.98 ผลกับสิ่งที่ให้ลอง `BETA1_DIRECTION.md` 32.19)
+✅ `3ab8950` : THE NAMELESS MASTER (`DrawNameless`) THE STAFF (`DrawStaff`) THE DEVIL'S STRING (`DrawDevil`) THE BLIND CANTOR (`DrawCantor`) ใน `Core/Figure.Tacet.cs` / ชิ้นที่ใช้ร่วม `Robe` `BossHead` `BossCore` `BossCracks` `Blade` `BossSwing` `SinceBlow` / ลบโค้ดบอสรอบ 5 / build 0/0 turncheck 204/204 savecheck 44/44 / ภาพ `battleboss3` ถึง `6` `battlebossturn3` ถึง `6` (1280×720 และ `--scale 1.5`) ดูแล้ว / REQUIEM ภาพเดิมทุกพิกเซล / งานอยู่บน GitHub / ตาราง "แชทที่กำลังทำงาน" ว่าง
+⚠️ ผู้ใช้ยังไม่ได้ Rebuild ลอง 32.16 ถึง 32.19 (ตอบ "ทำเลย" ไม่ได้บอกผลลอง) / ไอริสตัดสินเอง 6 ข้อ (32.19) เช่น F4 บอสไม่มีแขนขา / ปลายเขาของ THE DEVIL'S STRING โดนแถบชื่อบอสบังนิดหน่อย
+**งานถัดไป** : ผู้ใช้ Rebuild ลอง (ถ้าเจออะไรแก้ก่อน) / แล้วส่วน 4 เวที (32.14 ข้อ 4 : ลดประกายใน `Core/TacetVoid.cs` แสงบนพื้นใต้ตัวกับเงาสะท้อนใน `Screens/BattleScreen.Stage.cs` ย้ายเงาใต้คนหน้าเวทีมาไว้ใต้เท้าด้วย `DrawFront`) แล้วส่วน 5 ท่าโจมตี (`Core/Figure.cs` `Strike` กับ `BattleRules.TurnStrikeTime` `TurnStrikeImpact`) / ทำทีละส่วน จบแล้วหยุดรอ (13.92) / PLAYTEST FINALE ยัง 1 PERFECT (`PlaytestSignatureNeed` ห้ามแก้จนผู้ใช้บอก) / แคปใน cloud ใช้ `/build` (ติดตั้ง .NET 8 กับ shader ราว 3 นาที) ถ้าจะดูท่าตีของบอส ให้แก้เฉพาะสำเนาให้บอสตีวน (32.19)
 
 **2 พ.ย. แชท /system (FINALE3) : ผู้ใช้ให้ทำต่ออีกราว 5% ✅ REQUIEM จากสเก็ตช์ หยุดและบันทึกแล้ว** (คำต่อคำ `USER_BRIEFS.md` 13.97 ผล `BETA1_DIRECTION.md` 32.18)
 ✅ `128aa55` : REQUIEM (`DrawRequiem`) สีของบอสจากสเก็ตช์รวมที่ `SetBossInks` / build 0/0 turncheck 204/204 savecheck 44/44 / ภาพ `battleboss1` `battlebossturn1` ดูแล้ว / งานอยู่บน GitHub / ตาราง "แชทที่กำลังทำงาน" ว่าง
