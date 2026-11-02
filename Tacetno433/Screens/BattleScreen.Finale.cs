@@ -477,7 +477,7 @@ namespace Tacetno433.Screens
         //Mood Strength : how strong the weather is now (a little stronger at each level of the FINALE that brought it)
         private float MoodStrength
         {
-            get { return moodKind == AuraKind.None ? 0f : moodPower * (0.75f + 0.125f * moodLevel); }
+            get { return moodKind == AuraKind.None ? 0f : Math.Min(1.2f, moodPower * (0.75f + 0.125f * moodLevel) * (1f + BattleRules.ComboWeather * comboGlow)); }   // THE MUSIC SWELLS
         }
 
         //Mood Ambient : the stage's light under the weather (the light map, so the GLOW's stars and light stay bright) :

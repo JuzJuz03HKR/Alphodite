@@ -402,7 +402,7 @@ namespace Tacetno433.Screens
             }
 
             //THE DARK : a spring towards where the balance of life puts it
-            dark.Update(worldDt, MathHelper.Clamp(DarkShare() + BossDark(), 0f, 1f));   // BOSS SHOW : the dark grows in its moments
+            dark.Update(worldDt, MathHelper.Clamp(DarkShare() + BossDark() - ComboLight(), 0f, 1f));   // BOSS SHOW : the dark grows in its moments, THE MUSIC SWELLS pushes it back
 
             //MATH ART : the code's figures move on (where they stand, the baton's wind)
             UpdateFigures(worldDt);

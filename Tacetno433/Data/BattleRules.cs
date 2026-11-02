@@ -506,6 +506,11 @@
         public static float StarMarkGap = 22f;            //   from one star to the next
         public static float StarMarkLift = 70f;           //   how far over the blow's middle the row stands
         public static float GiftPopSize = 22f;            // GIFT AT WORK (block D item 4) : a working gift's badge over the fighter (page pixels)
+        public static int ComboShowFrom = 2;              // COMBO (block D item 6, screen only, no rule) : shown from this many PERFECTs in a row
+        public static int ComboFull = 10;                 //   THE MUSIC SWELLS is at its fullest from this many
+        public static float ComboDarkBack = 0.3f;         //   how far it pushes TACET's dark back then (a share of the stage)
+        public static float ComboWeather = 0.4f;          //   and how much stronger the conductor's weather grows
+        public static float ComboCell = 5f;               //   the number's pixel size
 
         //Tell Feel (block D, 2 Nov, Screens/BattleScreen.Tells.cs) : what TACET's moves look like on their bodies and the band's
         //skills on the cards. Screen numbers, not balance.

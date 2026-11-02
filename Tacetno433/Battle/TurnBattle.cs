@@ -201,6 +201,7 @@ namespace Tacetno433.Battle
         private int perfectRun;        // PERFECTs in a row, for the result page's BEST STREAK
         private int prodigyRun;        // PERFECTs in a row toward the next PRODIGY breath
         public int BestRun;            // the longest run of PERFECTs this fight, for the result page
+        public int PerfectRun { get { return perfectRun; } }   // COMBO (block D item 6) : the PERFECTs in a row now, for the screen only
         public bool FelixVoice;        // TWO VOICES (FANNY MENDELSSOHN AND ???) : false while FANNY's voice leads, true for FELIX's
         public int CapriceTurns;       // CAPRICE (THE HEARTLESS) : turns left in which no swipe is a MISS
         public int Feather;            // FEATHER (THE SHADOWLESS) : free ATTACKs at the end of the band's part of this bar

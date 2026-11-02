@@ -393,6 +393,7 @@ namespace Tacetno433.Screens
             hits.Update(dt, hitStop > 0f);
             UpdateTells(dt);                                                                // TELLS : armor plates, charge, stars, the cards (BattleScreen.Tells.cs)
             UpdateFinale(dt);                                                               // FINALE : HOLY's sky, the falling stars, STORM (BattleScreen.Finale.cs)
+            UpdateCombo(dt);                                                                // COMBO, THE MUSIC SWELLS, LIVE RANK (BattleScreen.Combo.cs)
             UpdateShow(dt);
             gesture.Update(dt, view == View.Swipe && Input.MouseDown());
             baton.Update(dt, gesture.Held);
@@ -2001,6 +2002,7 @@ namespace Tacetno433.Screens
             DrawIcons(sb, false);                                                 // MARKS AND AIM : THE BAND's statuses
             DrawForeMarks(sb);
             DrawBarStrip(sb, planning);
+            DrawLiveRank(sb);                                                     // LIVE RANK : the fight's grade as it stands
             DrawBossBar(sb);                                                      // BOSS SHOW : its life, long, top right
 
             //QTE FOCUS : the world behind is already dark, grey and soft (PostChain), the ring and the notes come on top
@@ -2024,6 +2026,7 @@ namespace Tacetno433.Screens
             EndCameraBatch(sb);
             DrawGiftPops(sb, true);
             hudPops.DrawPops(sb, Game.Font);
+            DrawCombo(sb);                                                       // COMBO : the PERFECTs in a row
 
             if (judgeLife > 0f)
                 Gfx.TextSpacedCentered(sb, Game.BigFont, judgeWord, HitX, HitY + 110f, Palette.Highlight * Math.Min(1f, judgeLife * 2f), TextSize.Subtitle, 3f);
