@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| (ว่าง) | | |
+| 2 พ.ย. แชท /system ต่อจาก FINALE3 | รอบ 6 ส่วนที่ 4 เวที (`BETA1_DIRECTION.md` 32.14 ข้อ 4 กับ 32.11 ข้อ 7 : ลดประกายแค่พอ แสงบนพื้นใต้ตัว เงาสะท้อน เงาใต้คนหน้าเวทีไปไว้ใต้เท้า) | `Core/TacetVoid.cs` `Screens/BattleScreen.Stage.cs` `Core/Figure*.cs` `Data/BattleRules.cs` (Stage Feel Figure Feel) `Content/Effects/*.fx` `Core/DebugShots*.cs` เอกสาร |
 
 ---
 
