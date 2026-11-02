@@ -2479,3 +2479,16 @@ commit `85e8bce` / build 0/0 turncheck 204/204 savecheck 44/44 / ภาพ `batt
 
 ถัดไป (32.14 ส่วน 3 บอส 6 ตัว) : อนุสาวรีย์ขาวแตกเป็นร่างดำตอนครึ่งเลือด (32.6 และส่วน "บอส" ใน `docs/art_refs/concept_v6.html`) ใน `Core/Figure.Tacet.cs` (`PartsRequiem` ถึง `PartsCantor` `DrawTacetSigns` `CorePoint` `GlowTacet` ทางของบอส) ใช้ LOOK FRAME ต่อได้เลย (`SetLook` `S` `SF` `Shell` `ShellQuad` `ShellOval` `Crumb` `LightLine` `Diamond` `OvalLine` `RoundBox` `DrawCracks` `Chip`) / จุดแตกตอนครึ่งเลือดต่อกับ THE TURN ใน `Screens/BattleScreen.Boss.cs` (`bossTurnWaiting` `bossHalfBreak` `BossTurnFirst`) / หน้าแคปที่มีแล้ว `battleboss` `battlebossturn` (`battleboss1` ถึง `6` ยังไม่มี ต้องเพิ่มใน `Core/DebugShots.cs` หรือใช้หน้าเทส F2)
 
+### 32.17 รอบ 6 ส่วนที่ 3 บอส : เริ่มแล้ว ทำ THE MONUMENT ของบอสทุกตัวกับ THE DEAF CROWN (2 พ.ย. แชท /system FINALE3 ผู้ใช้ "ทำอีกสัก 10% แล้วอัพเดท" `USER_BRIEFS.md` 13.96)
+commit `0717e56` / build 0/0 turncheck 204/204 savecheck 44/44 / ภาพ `battleboss` (เฟส 1) `battlebossturn` (เฟส 2) ดูแล้ว
+- **THE MONUMENT ใช้กับบอสทุกตัว** (`Core/Figure.Tacet.cs` `shellOn` `BreakShell` `ShellOn`) : เฟส 1 ตัวขาว ขอบเทา เครื่องหมายบนตัวเป็นสีดำ / **THE TURN** (`BossTurnFirst` ใน `Screens/BattleScreen.Boss.cs` เรียก `BreakShell(true)`) เปลือกขาวแตกเป็นชิ้นขาว 18 ชิ้น (CHIPS ที่ `White`) ตัววาบขาวแล้วกลายเป็นร่างดำ แกนใหญ่และสว่างขึ้น / ไฟต์ที่เริ่มต่ำกว่าครึ่งเลือดแตกเงียบๆ หลัง 1 วิ (`TurnPending` ส่งจาก `UpdateFigure` กันแตกก่อน THE TURN)
+- **THE DEAF CROWN วาดใหม่จากสเก็ตช์** (`DrawCrown` `CrownThorn` `CrownFinger` `CrownCrack`) : รูปปั้นครึ่งตัวสองโทน (ฝั่งวงสว่าง อีกฝั่งเงา) คิ้ว V มงกุฎหนามดำปิดหู ไม้ที่คาบ แกนที่ปลายไม้ มือใหญ่ชูขึ้น (ตอนตีมือฟาดมาข้างหน้า ท่าตีจริงอยู่ส่วน 5) / เฟส 1 ร้าวที่ 75% แสงรั่ว / เฟส 2 ร่างดำ คิ้วกับไม้เป็นสีขาว รอยร้าวสายฟ้าสีขาวเรือง (THE NINTH) / ระดับ 2 ไม่มีแขนขา (เป็นรูปปั้นครึ่งตัว)
+- บอสอีก 5 ตัว (REQUIEM THE NAMELESS MASTER THE DEVIL'S STRING THE STAFF THE BLIND CANTOR) ยังเป็นรูปทรงรอบ 5 แต่มีเฟสอนุสาวรีย์ขาวกับการแตกแล้ว
+
+สิ่งที่ให้ลองหลัง Rebuild (หน้าต่อสู้ไฟต์บอส บอสอยู่ฝั่งขวากลางจอ / หน้า Title กด F2 หน้าเทส เลือกบอสได้ START กับ HALF LIFE)
+- เข้าไฟต์บอส : บอสเป็นสีขาวทั้งตัว (THE DEAF CROWN เป็นรูปปั้นครึ่งตัว มือชูอยู่ทางขวา)
+- ตีบอสจนเลือดเหลือครึ่ง : ตอน THE TURN (จอกลับสีที่มีอยู่แล้ว) เปลือกขาวแตกเป็นชิ้นร่วง ตัววาบขาว แล้วเหลือร่างดำ แกนสว่างขึ้น / THE DEAF CROWN มีรอยร้าวสายฟ้าสีขาว
+- หน้าเทสเลือก HALF LIFE : บอสเริ่มเป็นร่างดำ (แตกเงียบๆ ใน 1 วิ)
+
+ถัดไป (ส่วน 3 ที่เหลือ) : บอสอีก 5 ตัวจากสเก็ตช์ (`docs/art_refs/concept_v6.html` บรรทัดราว 588 ถึง 725 ทีละการ์ด) ทำแบบเดียวกับ `DrawCrown` : เพิ่ม `case` ใน `PoseTacet` ด้วย `LookRest` / ฟังก์ชันวาดของตัวเองที่ใช้ `S` `SF` `Shell` สองโทน (`lit` `dark` `ink` สลับตาม `ShellOn`) / `CorePoint` คืน `S(แกนของสเก็ตช์) - Shift` หลัง `SetLook()` / ลบ `Parts...` กับ `case` ใน `DrawTacetSigns` ของตัวนั้น / เรียกใน `DrawTacet` ก่อนทางเดิม (ดูที่ `design == Crown`) / แคป `battleboss` ได้แค่บอสตัวเดียว ต้องเพิ่มหน้าแคป `battleboss1` ถึง `6` ใน `Core/DebugShots.cs` หรือให้ผู้ใช้ดูผ่านหน้าเทส F2
+
