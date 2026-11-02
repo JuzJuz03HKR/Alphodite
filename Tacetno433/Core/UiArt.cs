@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Tacetno433.Data;
 
@@ -20,8 +19,6 @@ namespace Tacetno433.Core
         public static Texture2D[] Busts = new Texture2D[0];       // lined up with MusicianList.All
         public static Texture2D[] Faces = new Texture2D[0];
         public static Dictionary<string, Texture2D> Icons = new Dictionary<string, Texture2D>();
-        public static Texture2D Logo;                             // TITLE (block C item 2) : Title/logo.png, the team's logo, any size
-        public static Texture2D Poster;                           //   and Title/poster.png, the team's poster, shown as the game opens
         public static int Loaded;
 
         //Load : called once from LoadContent
@@ -31,10 +28,6 @@ namespace Tacetno433.Core
             int musicians = MusicianList.All.Length;
             Busts = new Texture2D[musicians];
             Faces = new Texture2D[musicians];
-            Logo = Picture(device, "Title", "logo");
-            Poster = Picture(device, "Title", "poster");
-            Clean(Logo, BattleRules.TitleArtFloor, BattleRules.TitleLogoFeather);       // TITLE ART : no pale box round them
-            Clean(Poster, BattleRules.TitleArtFloor, 0f);
             for (int i = 0; i < musicians; i++)
             {
                 string key = ArtBank.Key(MusicianList.All[i].Name);
@@ -52,37 +45,6 @@ namespace Tacetno433.Core
                 Texture2D icon = Picture(device, "Icons", name);
                 if (icon != null) Icons[name] = icon;
             }
-        }
-
-        //Clean (TITLE ART, block C item 2) : the team's logo and poster are drawn by hand on black with a faint grey grain in it.
-        //Drawn as added light (so their black is the page's black) that grain would show as a pale box. As each loads, floor
-        //(of 255) is taken off every pixel and the rest stretched back up to white, and edge (a share of the size) fades the
-        //picture to nothing toward its four edges. The files themselves are never changed.
-        //ADVANCED PART : GetData copies the picture's pixels into an array, the loop changes them, SetData puts them back on the
-        //card. It runs once at load (a 1500 x 1500 logo is 2.25 million pixels, a few hundredths of a second), never per frame.
-        //The pixels are premultiplied (alpha 255 for these pictures), so scaling the colour scales the light it adds.
-        private static void Clean(Texture2D picture, float floor, float edge)
-        {
-            if (picture == null) return;
-            int w = picture.Width, h = picture.Height;
-            Color[] pixels = new Color[w * h];
-            picture.GetData(pixels);
-            float stretch = 255f / Math.Max(1f, 255f - floor);
-            for (int y = 0; y < h; y++)
-            {
-                float fadeY = edge > 0f ? Math.Min(1f, Math.Min(y, h - 1 - y) / (h * edge)) : 1f;
-                for (int x = 0; x < w; x++)
-                {
-                    float fade = fadeY;
-                    if (edge > 0f) fade = Math.Min(fade, Math.Min(1f, Math.Min(x, w - 1 - x) / (w * edge)));
-                    fade = fade * fade * (3f - 2f * fade);                                       // smooth, no line where it starts
-                    Color c = pixels[y * w + x];
-                    float k = stretch * fade;
-                    pixels[y * w + x] = new Color((int)(Math.Max(0f, c.R - floor) * k), (int)(Math.Max(0f, c.G - floor) * k),
-                                                  (int)(Math.Max(0f, c.B - floor) * k), (int)(c.A * fade));
-                }
-            }
-            picture.SetData(pixels);
         }
 
         //Picture : Content/Art/Ui/<folder>/<name>.png, or null when it is not there or cannot be read

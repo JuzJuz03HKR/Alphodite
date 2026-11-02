@@ -240,12 +240,6 @@ for key, word in ROUTES:
 art("other", "Content/Art/Baton/baton", "ไม้บาตอง", None, "ยาว 118 หมุนตามการตวัด", PIX1,
     "เคอร์เซอร์ตอนตวัดไม้ในวงแหวน QTE", 2, mgcb=True,
     note="วาดตั้งขึ้น ด้ามล่าง ปลายบน แคนวาสสูง 118 กว้างตามรูป (เกมยืดความสูงภาพเป็น 118)")
-art("other", "Content/Art/Ui/Title/logo", "โลโก้เกม", None, "กลางหลุมหน้า Title", "ภาพวาด",
-    "โลโก้ของเกมเท่านั้น (13.107) : หน้า Title อยู่กลางหลุมขนาดเดิม แทนชื่อที่โค้ดเขียน ของอื่นในหน้าเหมือนเดิม / ใช้ทำไอคอนเกม", 3,
-    size_text="1500×1500 (ขนาดไหนก็ได้)", note="ทีมวาด ใส่ไฟล์แล้ว 2 พ.ย. / พื้นดำได้ (เกมวาดแบบบวกแสง ลบเทาจางกับขอบตอนโหลด ไฟล์ไม่ถูกแก้) / วงแหวนกว้าง 77.2% ของภาพ กลางวง 51% 49% (BattleRules TitleLogoRing)")
-art("other", "Content/Art/Ui/Title/poster", "โปสเตอร์เกม", None, "เต็มความสูงจอ", "ภาพวาด",
-    "เก็บไฟล์ไว้ส่งงาน (13.107) / ในเกม : เปิดเกมครั้งแรกขึ้นก่อน แล้วบินเข้าหลุมของหน้า Title (คลิกข้ามได้)", 3,
-    size_text="1414×2000 (ขนาดไหนก็ได้)", note="ทีมวาด ใส่ไฟล์แล้ว 2 พ.ย. / พื้นดำได้ (เกมวาดแบบบวกแสง)")
 art("other", "Icon.ico", "ไอคอนเกม .ico", None, "ไฟล์ .exe และทาสก์บาร์", "ไอคอน",
     "ไอคอนของไฟล์เกม", 2, kind="gameicon", note="ไอริสทำจากโลโก้ (ไฟล์เดียวใส่ 16 32 48 256) / ตอนนี้ยังเป็นโลโก้ MonoGame")
 art("other", "Icon.bmp", "ไอคอนเกม .bmp", (256, 256), "หน้าต่างเกม", "ไอคอน",
@@ -268,9 +262,9 @@ ENEMY_ANIMS = [("idle", "4–8", "วนซ้ำ", "ทุกช่วงที
                ("death", "4–8", "ครั้งเดียว", "เกมสลายตัวเข้าหลุมให้อยู่แล้ว (ไม่มี ค้างนิ่งระหว่างสลาย)", FREE)]
 ANIM_COLUMNS = ["idle", "attack", "skill", "parry", "hurt", "ko", "enter", "death", "exit", "victory"]
 
-# PLAN (the user, 1 Nov, USER_BRIEFS 13.57 13.58, changed by 13.79 and 13.106 on 2 Nov) : the team draws only the conductors
-# (seen only on the Maestro pages), the logo and the poster. The legends, TACET, the bosses and every page are math art drawn
-# by the code (Core/Figure*.cs, Core/LegendArt.cs, Core/PlaceArt.cs).
+# PLAN (the user, 1 Nov, USER_BRIEFS 13.57 13.58, changed by 13.79 13.106 13.108 on 2 Nov) : the team draws only the conductors
+# (seen only on the Maestro pages). The legends, TACET, the bosses and every page are math art drawn by the code
+# (Core/Figure*.cs, Core/LegendArt.cs, Core/PlaceArt.cs). The logo and the poster are done but not in the game (docs/team_art).
 def plan_of(r):
     name = os.path.basename(r["path"])
     if r["kind"] == "gameicon":
@@ -279,8 +273,6 @@ def plan_of(r):
         if name.startswith("gallery_"):
             return MUST
         return TIME if name.startswith("face_") else NO
-    if name in ("logo", "poster"):
-        return MUST
     return NO                                         # the legends, TACET, the bosses, stages, icons, places, the baton
 
 

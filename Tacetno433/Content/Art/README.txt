@@ -12,7 +12,7 @@ draws : the legends, TACET and the bosses on every page, the places, the cut ins
 Core/LegendArt.cs, Core/PlaceArt.cs). The other folders below stay listed in case the team ever has time.
 
 Nothing in this folder is needed for the game to run. A missing conductor painting is drawn as that
-conductor's mark (SIGIL), a missing logo leaves the title written by the code, a missing poster skips it.
+conductor's mark (SIGIL). The team's logo and poster are kept in docs/team_art, not in the game (the user 13.108).
 
 
 WHERE THINGS GO
@@ -25,7 +25,6 @@ WHERE THINGS GO
     Ui/Faces           face_<name>     112 x 112                                              no entry
     Ui/Icons           skill_  status_  intent_  keyword_ icons, 22 to 26 pixels             no entry
     Conductors         gallery_ 302 x 402, face_ 224 x 224 (cutin_ no longer used)            no entry (2 Nov)
-    Ui/Title           logo, poster    in place (2 Nov), black background is fine (added light)     no entry (2 Nov)
     Places             shop 672 x 470, rest 960 x 236, luthier 520 x 470                      needs an entry
     Events             event_<title>   520 x 430                                              needs an entry
     Route              route_<room>    230 x 142                                              needs an entry
