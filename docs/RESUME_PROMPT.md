@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 2 พ.ย. แชท FINALE7 | ก้อน C GUI ทั้ง 7 ข้อรวดเดียว (`HANDOFF.md` 00.3 / ผู้ใช้ 13.106 : นอกหน้าเลือกวาทยากรเป็น math art ทั้งหมด / ช่องโปสเตอร์กับโลโก้ / แถบการ์ดของวง) + ศึกษาเกมอ้างอิง ZZZ HSR CZN Limbus Worldless | `Screens/` (Title Battle* Rehearsal Event Band BandName CurtainCall Luthier TeamPick Shop Rest Route ConductorDetail) `Core/` (UiArt ArtBank ArtSlot CharacterArt PortraitBox BandColumn Figure* DebugShots*) `Data/BattleRules.cs` `docs/` (REFERENCE_GAMES BETA1_DIRECTION ASSET_LIST HANDOFF) |
+| (ว่าง) | | |
 
 ---
 
@@ -63,6 +63,14 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 ---
 
 ## สถานะล่าสุด (2 พ.ย.)
+
+**2 พ.ย. แชท /system FINALE7 : ✅ ก้อน C GUI ทั้ง 7 ข้อรวดเดียว หยุดรอผู้ใช้ Rebuild ลอง** (คำต่อคำ `USER_BRIEFS.md` 13.106 รายละเอียด `BETA1_DIRECTION.md` 33)
+✅ ผู้ใช้ตัดสินใหม่ : **ภาพอาร์ตจริงมีแค่หน้าเลือกวาทยากร (Gallery กับ Detail) ที่เหลือ math art ทั้งหมด** ทีมวาดแค่วาทยากร โลโก้ โปสเตอร์ (`ASSET_LIST.md` เขียนใหม่ตาม `docs/asset_list.py`) / แถบการ์ดของวงให้ไอริสคิดเองจากเกมตัวอย่าง / ศึกษาเกมอ้างอิงแล้ว `docs/REFERENCE_GAMES.md` (ผลดิบ `docs/research/FINALE7_*.md` WebFetch ถูกบล็อกทุกเว็บ ได้แค่บทสรุปผลค้นกับภาพ Worldless ที่มี)
+✅ commit `9475e89` (โค้ด) และ commit เอกสาร / build 0/0 turncheck 205/205 (ข้อใหม่ command price) savecheck 44/44 / ภาพแคปใน cloud ดูแล้วทุกหน้าที่แก้ ที่ 1280×720 และ `--scale 1.5` / ตาราง "แชทที่กำลังทำงาน" ว่าง
+✅ ที่ทำ : LEGEND ART `Core/LegendArt.cs` (นักดนตรีเป็นตัว math art ในเสาภาพ 5 หน้า ภาพหน้า REHEARSAL 112×112 การ์ดเพื่อน การ์ดเหตุการณ์ บอสใน THE TELL THE STRIKE วงในห้องพัก ขยับได้ ลมจากเมาส์) / SIGIL เครื่องหมายวาทยากร (สายฟ้าแดง รอยฟันสองรอย ดาวนำทาง ใช้ที่เสาวาทยากร CURTAIN CALL FINALE และหน้าเลือกระหว่างรอภาพ) / PLACE ART `Core/PlaceArt.cs` (การ์ดห้อง เหตุการณ์ ร้าน ห้องพัก WORKSHOP ป้าย FAR STAGE FLOOR ออก) / BAND CARDS การ์ดของวงมีหน้า แถบสี เลขลำดับ / LIFE PRICE ใต้ปุ่ม / วาทยากรอ่านตรงจาก `Content/Art/Conductors/` F3 นับ ART UI BATTLE / TITLE ART โลโก้บนหลุมกับโปสเตอร์ตอนเปิดเกม
+⚠️ **โลโก้กับโปสเตอร์ยังไม่เป็นไฟล์ใน repo** (ภาพที่ส่งระหว่างที่ไอริสทำงานไม่ถูกเก็บเป็นไฟล์) ผู้ใช้ push ไปที่ `Tacetno433/Content/Art/Ui/Title/logo.png` กับ `poster.png` หรือส่งใหม่ตอนไอริสไม่ได้ทำงาน / วงแหวนโลโก้วัดจากภาพในแชท ทดสอบด้วยภาพแทนเท่านั้น ต้องเช็กกับไฟล์จริง / ยังไม่ได้ลองบน Windows
+⚠️ PLAYTEST FINALE ยัง 1 PERFECT (`PlaytestSignatureNeed` ห้ามแก้จนผู้ใช้บอก ถามก่อนก้อน G)
+**งานถัดไป** : ผู้ใช้ Rebuild ลองตาม `BETA1_DIRECTION.md` 33.5 แล้วบอกจุดที่อยากปรับ (ตัวเลข `BattleRules` หัวข้อ Legend Art กับ TitleLogo* / ฉากสถานที่ใน `Core/PlaceArt.cs` / SIGIL ใน `LegendArt.Sigil`) / ถ้าได้ไฟล์โลโก้กับโปสเตอร์ วางแล้วเช็กหน้า Title (`--shots title@120,titlereveal@100,titlereveal@185`) แล้วทำไอคอนเกมจากโลโก้ (ก้อน E ข้อ 3) / แล้วก้อน D VFX (`HANDOFF.md` 00.3 ขอภาพอ้างอิง VFX จากผู้ใช้ก่อนทุกชนิด)
 
 **2 พ.ย. แชท /system FINALE6 : /update ปิดแชท ผู้ใช้ลองท่าโจมตีรอบแก้แล้ว ยังไม่โอเค ย้ายไปปรับช่วงท้ายของทั้งเกม แชทหน้าเริ่มก้อน C GUI** (คำต่อคำ `USER_BRIEFS.md` 13.105)
 ✅ งานทั้งหมดของแชทนี้อยู่บน GitHub (`e738486` `ad803d2` ท่าโจมตีรอบแรก / `2ca4836` รอบแก้ / commit เอกสาร) build 0/0 turncheck 204/204 savecheck 44/44 / ตาราง "แชทที่กำลังทำงาน" ว่าง

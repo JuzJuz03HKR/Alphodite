@@ -1,4 +1,4 @@
-ART FOLDER  (Beta1, updated 1 Nov 2026)
+ART FOLDER  (Beta1, updated 2 Nov 2026)
 =======================================
 
 The full list of every picture the game uses is docs/ASSET_LIST.md : the file names, the canvas
@@ -6,12 +6,13 @@ sizes, where each picture shows, which are still missing, and the order to draw 
 The team ticks its work in docs/TACET_Asset_List.xlsx. How to draw them : docs/BATTLE_ART_PLAN.md
 (the battle page) and docs/UI_ART_PLAN.md (every other page).
 
-What the team draws (the user, 1 Nov) : the 3 conductors, the 5 legends, the 6 bosses, 3 or 4 enemy
-looks shared by every enemy, and the logo. Everything else is not drawn : the pages are made to need
-no picture (docs/ASSET_LIST.md, the plan column).
+What the team draws (the user, 2 Nov, USER_BRIEFS 13.106) : only the 3 conductors (they show only on the
+conductor select page and the profile page), the logo and the poster. Everything else is MATH ART the code
+draws : the legends, TACET and the bosses on every page, the places, the cut ins (Core/Figure*.cs,
+Core/LegendArt.cs, Core/PlaceArt.cs). The other folders below stay listed in case the team ever has time.
 
-Nothing in this folder is needed for the game to run. A missing picture is drawn as an EMPTY FRAME
-(a faint box with four corner marks) at the exact place and size the picture will have.
+Nothing in this folder is needed for the game to run. A missing conductor painting is drawn as that
+conductor's mark (SIGIL), a missing logo leaves the title written by the code, a missing poster skips it.
 
 
 WHERE THINGS GO
@@ -23,7 +24,8 @@ WHERE THINGS GO
     Ui/Busts           bust_<name>     160 x 256                                              no entry
     Ui/Faces           face_<name>     112 x 112                                              no entry
     Ui/Icons           skill_  status_  intent_  keyword_ icons, 22 to 26 pixels             no entry
-    Conductors         gallery_ 302 x 402, face_ 224 x 224, cutin_ 180 x 190                  needs a Content.mgcb entry
+    Conductors         gallery_ 302 x 402, face_ 224 x 224 (cutin_ no longer used)            no entry (2 Nov)
+    Ui/Title           logo, poster    any size, black background is fine (drawn as added light)   no entry (2 Nov)
     Places             shop 672 x 470, rest 960 x 236, luthier 520 x 470                      needs an entry
     Events             event_<title>   520 x 430                                              needs an entry
     Route              route_<room>    230 x 142                                              needs an entry

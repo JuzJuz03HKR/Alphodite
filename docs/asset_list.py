@@ -145,12 +145,12 @@ CONDUCTORS = [("the_unhearing", "THE UNHEARING (Beethoven)", "ฟ้าสาย
 for key, name, theme in CONDUCTORS:
     warn = ""
     art("conductors", "Content/Art/Conductors/gallery_" + key, name + " ภาพเต็ม", (302, 402), "302×402", PIX1,
-        "หน้าเลือกวาทยากร หน้าโปรไฟล์ เสาแรกของหน้าวง CURTAIN CALL", 2, mgcb=True, note=theme + warn)
+        "หน้าเลือกวาทยากรกับหน้าโปรไฟล์เท่านั้น (13.106) ระหว่างรอ โค้ดวาดเครื่องหมายของวาทยากร (SIGIL)", 2, note=theme + warn)
     art("conductors", "Content/Art/Conductors/face_" + key, name + " หน้า", (224, 224), "224×224", PIX1,
-        "หน้าโปรไฟล์วาทยากร", 1, mgcb=True, note=warn.strip(" /"))
+        "หน้าโปรไฟล์วาทยากร ระหว่างรอ โค้ดวาดเครื่องหมายของวาทยากร", 1, note=warn.strip(" /"))
     art("conductors", "Content/Art/Conductors/cutin_" + key, name + " ภาพ FINALE", (180, 190), "360×380", PIX2,
-        "หน้าต่อสู้ ตอนใช้ FINALE ทะลุแถบดำบนล่าง", 2, stable=False, mgcb=True,
-        note="โค้ดจะเปลี่ยนให้วาดแบบ pixel คม (ข้อ 9)" + warn)
+        "ไม่ใช้แล้ว (2 พ.ย.) : cut in ของ FINALE วาดเครื่องหมายของวาทยากรด้วยโค้ด", 2, stable=False,
+        note="ผู้ใช้ 13.106 ภาพอาร์ตมีแค่หน้าเลือกวาทยากร" + warn)
 
 # 3 the legends on the other pages (UiArt : Busts, Faces)
 for key, name, inst in LEGENDS:
@@ -240,9 +240,12 @@ for key, word in ROUTES:
 art("other", "Content/Art/Baton/baton", "ไม้บาตอง", None, "ยาว 118 หมุนตามการตวัด", PIX1,
     "เคอร์เซอร์ตอนตวัดไม้ในวงแหวน QTE", 2, mgcb=True,
     note="วาดตั้งขึ้น ด้ามล่าง ปลายบน แคนวาสสูง 118 กว้างตามรูป (เกมยืดความสูงภาพเป็น 118)")
-art("other", "Content/Art/Ui/logo", "โลโก้เกม", None, "หน้า Title", PIX1,
-    "หน้า Title แทนชื่อเกมที่เป็นตัวอักษรตอนนี้ และใช้ทำไอคอนเกม", 3, stable=False, check=False,
-    size_text="แนะนำไม่เกิน 480×200", note="ทีมส่งพร้อมงานอาร์ต / ยังไม่มีช่องในโค้ด ไอริสทำช่องตอนงาน GUI แล้วบอกขนาดแน่นอน พื้นหลังโปร่งใส")
+art("other", "Content/Art/Ui/Title/logo", "โลโก้เกม", None, "หน้า Title วางบนหลุม", "ภาพวาด",
+    "หน้า Title : วงแหวนของโลโก้ทับขอบหลุม TACET ชื่อที่โค้ดเขียนหลบให้ และใช้ทำไอคอนเกม", 3,
+    size_text="ขนาดไหนก็ได้ (ที่ทีมวาด 1500×1500)", note="ทีมวาดเสร็จ ผู้ใช้ส่งในแชท 2 พ.ย. ยังไม่เป็นไฟล์ใน repo / พื้นดำได้ (เกมวาดแบบบวกแสง) / วงแหวนกว้าง 74.7% ของภาพ กลางวงอยู่ 46.7% จากบน (BattleRules TitleLogoRing)")
+art("other", "Content/Art/Ui/Title/poster", "โปสเตอร์เกม", None, "เต็มความสูงจอ", "ภาพวาด",
+    "เปิดเกมครั้งแรก : โปสเตอร์ขึ้นก่อนแล้วจางเข้าหน้า Title (คลิกข้ามได้)", 3,
+    size_text="ขนาดไหนก็ได้ (ที่ทีมวาด 1414×2000)", note="ทีมวาดเสร็จ ผู้ใช้ส่งในแชท 2 พ.ย. ยังไม่เป็นไฟล์ใน repo / พื้นดำได้ (เกมวาดแบบบวกแสง)")
 art("other", "Icon.ico", "ไอคอนเกม .ico", None, "ไฟล์ .exe และทาสก์บาร์", "ไอคอน",
     "ไอคอนของไฟล์เกม", 2, kind="gameicon", note="ไอริสทำจากโลโก้ (ไฟล์เดียวใส่ 16 32 48 256) / ตอนนี้ยังเป็นโลโก้ MonoGame")
 art("other", "Icon.bmp", "ไอคอนเกม .bmp", (256, 256), "หน้าต่างเกม", "ไอคอน",
@@ -265,25 +268,20 @@ ENEMY_ANIMS = [("idle", "4–8", "วนซ้ำ", "ทุกช่วงที
                ("death", "4–8", "ครั้งเดียว", "เกมสลายตัวเข้าหลุมให้อยู่แล้ว (ไม่มี ค้างนิ่งระหว่างสลาย)", FREE)]
 ANIM_COLUMNS = ["idle", "attack", "skill", "parry", "hurt", "ko", "enter", "death", "exit", "victory"]
 
-# PLAN (the user, 1 Nov, USER_BRIEFS 13.57 13.58) : the team draws the 3 conductors, the 5 legends, every boss, 3 or 4
-# enemy looks and the logo, in two tiers. Everything else is not drawn : the pages are made to need no picture.
+# PLAN (the user, 1 Nov, USER_BRIEFS 13.57 13.58, changed by 13.79 and 13.106 on 2 Nov) : the team draws only the conductors
+# (seen only on the Maestro pages), the logo and the poster. The legends, TACET, the bosses and every page are math art drawn
+# by the code (Core/Figure*.cs, Core/LegendArt.cs, Core/PlaceArt.cs).
 def plan_of(r):
     name = os.path.basename(r["path"])
     if r["kind"] == "gameicon":
         return IRIS                                   # made from the team's logo
-    if r["sec"] == "musicians":
-        return MUST
-    if r["sec"] == "enemies":
-        return TIME if name == "the_damper" else MUST
-    if r["sec"] == "bosscut":
-        return TIME
     if r["sec"] == "conductors":
-        return MUST if name.startswith("gallery_") else TIME
-    if r["sec"] == "uimusicians":
-        return MUST if name.startswith("bust_") else TIME
-    if name == "logo":
+        if name.startswith("gallery_"):
+            return MUST
+        return TIME if name.startswith("face_") else NO
+    if name in ("logo", "poster"):
         return MUST
-    return NO                                         # stages, icons, places, events, route cards, the baton
+    return NO                                         # the legends, TACET, the bosses, stages, icons, places, the baton
 
 
 for r in ART:
@@ -540,7 +538,7 @@ def summary_md():
         rows.append([title, len(need), len(items) - len(need), sum(1 for r in items if r["done"])])
     text += "\n\n" + md_table(["หมวดเสียง", "ต้องทำ", "ไม่บังคับ", "มีแล้ว"], rows)
     sets = [r for r in ART if r["kind"] == "set"]
-    text += ("\n\nตัวละครในฉากต่อสู้ %d ชุด (นักดนตรี 5 ศัตรู 4 แบบที่ใช้ร่วมกัน บอส 6) ท่า idle กับ attack ต้องมี ท่าอื่นถ้ามีเวลา รายท่าอยู่แท็บ Animations"
+    text += ("\n\nตัวละครในฉากต่อสู้ %d ชุด (นักดนตรี 5 ศัตรู 4 แบบที่ใช้ร่วมกัน บอส 6) เป็น math art ที่โค้ดวาดแล้ว ไม่วาด (13.79 13.106) แท็บ Animations เก็บชื่อท่าไว้เผื่อวันหนึ่งมีเวลาวาด"
              % len(sets))
     text += "\nตัวเลขในตารางนี้สร้างตอนรันสคริปต์ล่าสุด (" + UPDATED + ")"
     return text
