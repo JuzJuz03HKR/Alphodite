@@ -446,11 +446,14 @@
         public static float FigureBeatFast = 2.4f;        //   and this often at none
         public static float FigureKeyRunTime = 0.42f;     // KEY RUN : QUANTZ's six keys light one after another down in this long when a skill plays
         public static float FigureCallLight = 0.34f;      // THE HUNTING CALL : how strong PUNTO's light falls back at the next musician (a fifth of it when nobody is next)
-        public static float FigureBacklight = 0.16f;      // BACKLIGHT : a pale haze behind each of TACET's figures so the black reads on the dark stage
-        public static int FigureScanGrey = 44;            // SCANLINES : the grey of the lines across TACET's bodies (0..255)
-        public static float FigureScanEvery = 2f;         //   one line every this many blocks
+        public static float FigureBacklight = 0.42f;      // BACKLIGHT : a pale round haze behind each of TACET's figures so the black reads on the dark stage
         public static float FigureGlowTacet = 0.22f;      // TACET's white light inside
-        public static float FigurePixel = 2f;             // PIXEL LOOK : TACET is drawn in blocks this many page pixels wide (2 = like the other pixel effects)
+        public static float FigureTacetEdge = 1.5f;       // TACET LOOK (round 6) : the pale rim round each black body, page pixels (more on a STUNNED one)
+        public static float FigureTacetRim = 0.6f;        //   how bright that rim is, a share of the paper white (never as white as the core)
+        public static int FigureChips = 4;                // CHIPS : a hit knocks this many small bits off TACET's shell (THE NOISE twice as many)
+        public static float FigureChipLife = 0.9f;        //   a chip falls and fades in this long
+        public static float FigureCrackTime = 0.3f;       // CRACKS : at 75 50 25 of its life a new crack runs across the body in this long
+        public static float FigureReleaseTime = 1.1f;     // RELEASE : the light a beaten TACET held rises as a ring this long
         public static float FigureShardHang = 0.35f;      // SILENCED : the shards fly and bounce this long before the hole pulls them in
         public static float FigureShardPull = 22f;        //   how hard the hole pulls
         public static float FigureShardBounce = 0.35f;    //   a shard hitting the floor keeps this share of its speed

@@ -17,8 +17,8 @@ namespace Tacetno433.Core
     //   CHAINS    hair, coat tails, ribbons and tails are ropes of points (the verlet rope of Core/Curtain.cs) that swing
     //             with the body, fall with gravity and blow in the WIND of the baton
     //   SHARDS    a beaten enemy breaks into pieces that fall, bounce on the floor and are pulled into TACET's hole
-    //   LOOK      the band in smooth lines and its own colour (BAND LOOK), TACET black with white edges in blocks of 2 game
-    //             pixels (PIXEL LOOK, drawn small then blown up by Screens/BattleScreen.Stage.cs), the user's pick (13.79)
+    //   LOOK      the band in smooth lines and its own colour (BAND LOOK), TACET as smooth black shells with a pale rim and
+    //             a white light held inside (TACET LOOK, round 6, the user 13.87 : smooth, brighter than the stage, breakable)
     //
     //The figure only shows, the battle rules never read it (Battle/TurnBattle.cs). Screens/BattleScreen.Stage.cs tells it
     //where it stands, what it plays and how hard it was hit. Every number is in BattleRules, Figure Feel.
@@ -219,6 +219,7 @@ namespace Tacetno433.Core
             if (name == "hurt")
             {
                 Knock(BattleRules.FigureKnock);
+                if (Of != Sort.Musician) Chip(BattleRules.FigureChips);         // CHIPS : bits of TACET's shell fly off
                 if (move == "idle") { move = "hurt"; moveTime = 0f; }
                 return;
             }

@@ -86,8 +86,6 @@ namespace Tacetno433.Screens
             public bool Shared;        // SHARED LOOKS : an enemy wearing another's picture (Data/Enemy.cs Looks), its mark is drawn
             public Figure Figure;      // MATH ART (1 Nov) : no picture, the code draws it from shapes (Core/Figure.cs)
         }
-        private static RenderTarget2D tacetTarget;          // PIXEL LOOK : TACET's figures drawn small, then blown up into the SCENE
-        private Vector2 tacetShift;                         //   the part of the camera's move smaller than one block, added when it is laid
         private Dictionary<Fighter, Art> arts = new Dictionary<Fighter, Art>();
         private Texture2D[] layerArt = new Texture2D[4];   // LAYERS : far, middle, stage floor, front (null = empty frame)
         private static readonly string[] layerFile = { "_far", "_mid", "_stage", "_front" };
@@ -258,6 +256,7 @@ namespace Tacetno433.Screens
                 figure.Height = r.Height * BattleRules.FigureBandScale;
             }
             figure.Hole = hole;
+            if (f.IsEnemy) figure.Life = f.MaxHp > 0 ? MathHelper.Clamp((float)f.Hp / f.MaxHp, 0f, 1f) : 0f;   // CRACKS
             if (!f.Down && figure.IsDown) figure.Up();                    // back up (a heal from zero)
             if (!f.IsEnemy && f.Musician != null) TellLegend(f, figure);  // LEGEND CUES
             figure.Update(dt, wind);
@@ -747,9 +746,6 @@ namespace Tacetno433.Screens
             stageCam = cam;
             dark.Place(cam, Horizon);
 
-            //PIXEL LOOK (MATH ART) : TACET's figures into their small picture first, before the page's pictures are begun
-            DrawTacetFigures(device, cam);
-
             //BACK : the movement's backdrop and the floor, alone
             PostChain.BeginBack(device);
             DrawBackdrop(sb, cam);
@@ -880,15 +876,13 @@ namespace Tacetno433.Screens
                 else DrawEnemy(sb, e);
             }
 
-            //PIXEL LOOK : TACET's figures, drawn small in PreDraw (DrawTacetFigures), laid over the scene blown up. Point
-            //sampling keeps the blocks hard. The camera's last part of a block moves the picture (tacetShift).
-            if (tacetDrawn)
+            //TACET LOOK (round 6) : TACET's figures drawn by the code straight onto the scene, smooth, over their BACKLIGHT
+            if (DrawsTacet())
             {
                 sb.End();
-                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, Sharp.Transform);
-                float block = Math.Max(1f, BattleRules.FigurePixel);
-                sb.Draw(tacetTarget, new Vector2(Sharp.Snap(tacetShift.X), Sharp.Snap(tacetShift.Y)), null, Color.White, 0f, Vector2.Zero, block, SpriteEffects.None, 0f);
-                sb.End();
+                Shapes.Begin(sb.GraphicsDevice, Layer(cam, 3), Sharp.Dot);
+                DrawTacetFigures();
+                Shapes.End();
                 sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, Layer(cam, 3));
             }
             DrawFront(sb);
@@ -987,11 +981,10 @@ namespace Tacetno433.Screens
             Art art = ArtOf(f);
             float lift = LiftOf(f);                                                    // FLOAT : the shadow stays on the floor
             Gfx.DrawGlowBox(sb, new Rectangle(r.Center.X - r.Width / 2, r.Bottom + (int)lift - 22, r.Width, 44), Color.Black * ((lift > 0f ? 0.4f : 0.6f) * a));
-            if (art.Figure != null)                                                    // MATH ART : the figure is in the PIXEL LOOK picture,
+            if (art.Figure != null)                                                    // MATH ART : the figure is drawn after every enemy (TACET LOOK),
             {                                                                          //   only its BACKLIGHT, HUM and HALO go behind it here
-                Rectangle haze = r;
-                haze.Inflate(r.Width / 4, r.Height / 8);
-                Gfx.DrawGlowBox(sb, haze, Color.White * (BattleRules.FigureBacklight * shade * a));
+                float tall = art.Figure.Height;                                        // BACKLIGHT : round and soft, brightest behind the middle
+                Gfx.DrawGlow(sb, r.Center.X, r.Bottom - tall * 0.5f, tall * 0.62f, Color.White * (BattleRules.FigureBacklight * shade * a));
                 LookMark glowMark = MarkOf(f);
                 if (gone <= 0f && (glowMark == LookMark.Hum || glowMark == LookMark.Halo)) DrawMark(sb, f, art, r, shade * f.Enemy.LookShade, a * FlickerOf(f));
                 return;
@@ -1135,34 +1128,18 @@ namespace Tacetno433.Screens
         //MATH ART (Beta1 1 Nov, docs/BETA1_DIRECTION.md 31) : the fighters the code draws (Core/Figure.cs)
         //======================================================================================
 
-        private bool tacetDrawn;           // PIXEL LOOK : the small picture holds TACET's figures this frame
-
-        //Draw Tacet Figures (PIXEL LOOK) : every enemy the code draws goes into one small picture, back to front, with hard
-        //edges. DrawFighters then lays it over the scene blown up, so its edges are blocks (BattleRules.FigurePixel).
-        //ADVANCED PART : the camera's move is split in two. The whole blocks of it move the figures inside the small picture,
-        //the rest (less than a block) moves the picture itself when it is laid (tacetShift). So when the camera drifts slowly
-        //a figure keeps the same blocks and glides, its edges do not crawl.
-        private void DrawTacetFigures(GraphicsDevice device, Vector2 cam)
+        //Draws Tacet : at least one enemy on the stage is drawn by the code
+        private bool DrawsTacet()
         {
-            tacetDrawn = false;
-            for (int i = 0; i < battle.Enemies.Count && !tacetDrawn; i++) tacetDrawn = ArtOf(battle.Enemies[i]).Figure != null;
-            if (!tacetDrawn) return;
+            for (int i = 0; i < battle.Enemies.Count; i++)
+                if (ArtOf(battle.Enemies[i]).Figure != null) return true;
+            return false;
+        }
 
-            float block = Math.Max(1f, BattleRules.FigurePixel);
-            int w = (int)(TacetGame.ScreenW / block);
-            int h = (int)(TacetGame.ScreenH / block);
-            if (tacetTarget == null || tacetTarget.IsDisposed || tacetTarget.GraphicsDevice != device || tacetTarget.Width != w || tacetTarget.Height != h)
-            {
-                if (tacetTarget != null) tacetTarget.Dispose();
-                tacetTarget = new RenderTarget2D(device, w, h);
-            }
-            Vector2 offset = -cam * BattleRules.StageParallax[3];
-            Vector2 whole = new Vector2((float)Math.Floor(offset.X / block) * block, (float)Math.Floor(offset.Y / block) * block);
-            tacetShift = offset - whole;
-
-            device.SetRenderTarget(tacetTarget);
-            device.Clear(Color.Transparent);
-            Shapes.Begin(device, Matrix.CreateTranslation(whole.X, whole.Y, 0f) * Matrix.CreateScale(1f / block), 0f);
+        //Draw Tacet Figures (TACET LOOK, round 6 : the user 13.87 asked for smooth edges, the old PIXEL LOOK and SCANLINES
+        //are gone) : every enemy the code draws, back to front, black shells with a pale rim and the light inside
+        private void DrawTacetFigures()
+        {
             for (int i = battle.Enemies.Count - 1; i >= 0; i--)
             {
                 Fighter e = battle.Enemies[i];
@@ -1182,32 +1159,7 @@ namespace Tacetno433.Screens
                 figure.Shift = Vector2.Zero;
                 figure.Draw(alpha, flash, light, mark);
             }
-            Shapes.End();
-
-            //SCANLINES : faint grey lines across every one of TACET's bodies, so a black body still reads in front of the black
-            //hole (TACET is the picture's silence, a dead screen). Only where a figure was drawn : see scanBlend.
-            Shapes.Blending = scanBlend;
-            Shapes.Begin(device, Matrix.CreateScale(1f / block), 0f);
-            Color scan = new Color(BattleRules.FigureScanGrey, BattleRules.FigureScanGrey, BattleRules.FigureScanGrey);
-            for (float y = 0f; y < TacetGame.ScreenH; y += block * BattleRules.FigureScanEvery)
-                Shapes.Box(new Vector2(TacetGame.ScreenW * 0.5f, y + block * 0.5f), TacetGame.ScreenW, block, 0f, scan);
-            Shapes.End();
-            Shapes.Blending = BlendState.AlphaBlend;
         }
-
-        //Scan Blend : adds a line only where something is already drawn.
-        //ADVANCED PART : the blend mixes "line x what is drawn's own see-through amount + what is drawn". Where nothing was
-        //drawn the amount is 0, so the line vanishes, inside a figure it is 1, so the line is added (on the white edge it changes
-        //nothing, white stays white). The see-through amount itself is kept as it was (source x 0 + destination x 1).
-        private static readonly BlendState scanBlend = new BlendState
-        {
-            ColorSourceBlend = Blend.DestinationAlpha,
-            ColorDestinationBlend = Blend.One,
-            ColorBlendFunction = BlendFunction.Add,
-            AlphaSourceBlend = Blend.Zero,
-            AlphaDestinationBlend = Blend.One,
-            AlphaBlendFunction = BlendFunction.Add,
-        };
 
         //Front Silhouette : the musician in front drawn in black into the GLOW picture, over the light of TACET's seam, so the
         //seam's glow passes behind the figure instead of across it (the figure stands in front of it)

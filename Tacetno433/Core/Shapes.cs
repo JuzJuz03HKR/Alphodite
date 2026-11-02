@@ -8,10 +8,9 @@ namespace Tacetno433.Core
     //Every shape is cut into triangles, each corner with its own colour. The triangles wait in one list and go to the card
     //in one go when the list is full or the drawing ends (a BATCH : SpriteBatch does the same for pictures).
     //
-    //   SOFT EDGE   a shape of the band gets a thin band of corners round it that fade to nothing (FEATHER, about one real
-    //               pixel wide), so its edge looks smooth at every screen size : anti aliasing without a shader
-    //   HARD EDGE   FEATHER 0, no band. TACET's shapes are drawn like that into a small picture that is then blown up
-    //               (Figure.cs PIXEL LOOK), so their edges are blocks of 2 game pixels like the stage's other pixel effects
+    //   SOFT EDGE   every shape gets a thin band of corners round it that fade to nothing (FEATHER, about one real pixel
+    //               wide), so its edge looks smooth at every screen size : anti aliasing without a shader
+    //   HARD EDGE   FEATHER 0, no band (the edges are as hard as the triangles)
     //
     //Use : Begin, the shapes, End. Nothing else may draw in between (the sprite batch is ended first, see Figure.cs).
     //Colours are premultiplied like everything else in MonoGame : Color.White * 0.5f is half seen white.
@@ -29,8 +28,8 @@ namespace Tacetno433.Core
         //Feather : how wide the soft edge is, in the units being drawn (0 = a hard edge)
         public static float Feather;
 
-        //Blending : how the triangles mix with what is under them (the usual see-through mix unless a caller asks otherwise,
-        //see BattleScreen.Stage.cs SCANLINES). Set it back to BlendState.AlphaBlend when done.
+        //Blending : how the triangles mix with what is under them (the usual see-through mix unless a caller asks otherwise).
+        //Set it back to BlendState.AlphaBlend when done.
         public static BlendState Blending = BlendState.AlphaBlend;
 
         //Work : the points of one shape while it is cut up (no shape has more than MaxPoints)
