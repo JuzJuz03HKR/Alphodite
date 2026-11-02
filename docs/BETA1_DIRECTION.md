@@ -2404,3 +2404,15 @@ ZZZ กับ CZN เทียบจากความรู้เดิม ไ�
 ### 32.13 เพศของนักดนตรี (2 พ.ย. ผู้ใช้ 13.91)
 PAGANINI QUANTZ หญิง / PFUNDT DUPORT ชาย / **PUNTO ไม่ระบุเพศ** (ท่าทางเป็นกลาง ไม่เติมส่วนโค้งหรือเหลี่ยมตาม 32.12) / ข้อความในเกมยังไม่ใช้ he she (`Line` `TraitText` ใน `Data/Musician.cs` เปลี่ยนทีหลังได้ ถ้าเปลี่ยน PUNTO ใช้ they)
 แผนแยกงานเปลี่ยนเป็นหน้าบ้าน (อาร์ตกับการแสดงผล) กับหลังบ้าน (ระบบ) ตาม 13.91 แผนเดิมฝั่งวงกับฝั่ง TACET ยกเลิก (`docs/PARALLEL_WORK.md`)
+
+### 32.14 ผู้ใช้เลือกทำทีละส่วน (2 พ.ย. คำต่อคำ `USER_BRIEFS.md` 13.92) และลำดับของแชทหน้า
+ไม่แยกสองแชทตอนนี้ แผน `docs/PARALLEL_WORK.md` เก็บไว้ใช้วันหลัง (ข้อ 0 ไม่ได้ทำ ไม่มี `Audio/SoundCues.cs`)
+ทำทีละส่วน จบแต่ละส่วน build 0/0 turncheck 204/204 savecheck 44/44 แคปภาพ (`--scale 1.5` ด้วย) บันทึก commit push แล้วหยุดรอผู้ใช้ดู
+1. **นักดนตรี 5 คน** ตามสเก็ตช์ `docs/art_refs/concept_v6.html` กับ 32.4 32.12 32.13 :
+   รูปทรงใหม่ใน `Core/Figure.Band.cs` (`Legend` `SetUpBody` `PoseBand` `DrawBand` `DrawInstrument` `DrawCore` `GlowBand` : หัวต่อคน เปลวไฟ วงกลมมีวงแหวน วงรี ข้าวหลามตัด วงกลมมีขด / ผมกับริบบิ้นใช้ CHAINS ที่มีแล้ว / ระดับ 2 กับ F4 ต้องยังต่อแขนขาได้) /
+   สีต่อคน : `SpotLook` ใน `Data/Musician.cs` ต่อท้าย enum (ห้ามสลับ) สีใน `Core/Palette.cs` / `SpotOf` ใน `Screens/BattleScreen.Stage.cs` (ราวบรรทัด 428) กับ `Core/BandColumn.cs` `SpotOf` ใช้สีใหม่ ตัวเลขดาเมจสีตามคนอยู่แล้ว /
+   กิมมิคที่ต้องรู้สถานะไฟต์ (คนเล่นถัดไปของ PUNTO สแต็ก THE SCAR บทเรียนที่ให้ไป เลือดที่จ่าย ดาวของปุ่ม) ส่งจาก `UpdateFigure` ใน `Screens/BattleScreen.Stage.cs` / ภาพ `--shots battlelegend1` ถึง `battlelegend5`
+2. **TACET 4 แบบ** : `Core/Figure.Tacet.cs` / เลิก PIXEL LOOK กับ SCANLINES ใน `Screens/BattleScreen.Stage.cs` (`tacetTarget` `DrawTacetFigures`) และตัวเลข `FigurePixel` `FigureScanGrey` `FigureScanEvery` / แสงหลัง (BACKLIGHT) แกนขาว / ร้าวตามเลือดที่ 75 50 25 เศษหลุดตอนโดน ตายแล้วปล่อยแสง (`UpdateShards` ใน `Core/Figure.cs`) / ภาพ `battlelooks1` ถึง `battlelooks3`
+3. **บอส 6 ตัว** อนุสาวรีย์ขาว ครึ่งเลือดแตกเป็นร่างดำ : `Core/Figure.Tacet.cs` + จุด THE TURN ใน `Screens/BattleScreen.Boss.cs` / ภาพ `battleboss1` ถึง `battleboss6` `battlebossturn`
+4. **เวที** : คงฉากหลอกตา 3D (32.11 ข้อ 7) ลดประกายแค่พอให้ตัวละครเด่น (`Core/TacetVoid.cs`) เพิ่มแสงบนพื้นใต้ตัวกับเงาสะท้อน (`Screens/BattleScreen.Stage.cs`)
+5. แล้ว **ท่าโจมตีของทุกตัว** (13.89 `Core/Figure.cs` `Strike` กับเวลา `BattleRules.TurnStrikeTime` `TurnStrikeImpact`) / VFX ธาตุกับ VFX วาทยากรรอภาพจากผู้ใช้ (ก้อน D) / งานระบบ (เสียง build ขาย) ตามก้อน E H ใน `HANDOFF.md` 00.3
