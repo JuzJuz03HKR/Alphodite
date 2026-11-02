@@ -2991,3 +2991,18 @@ D3 ดาวขั้นสูงกับร่างในตำนาน → 
 ### 40.3 สิ่งที่ให้ลองหลัง Rebuild
 หน้าต่อสู้ : ATTACK ของคนที่อาวุธมีดาว (ซ้อมแล้ว) เห็นแถวดาวเหนือศัตรู / สกิลที่มีดาว 3 (หน้าเทส F2 ใส่ดาว) ทุกโน้ตจบด้วยลายธาตุ และโน้ตสุดท้ายขึ้นดาว 3 ดวง / ภาพ cloud `battletier@10` `battlelegendform1-5` + probe skill1 skill2
 ### 40.4 ถัดไป D5 บอส (ENTRANCE THE TELL THE STRIKE THE TURN `Screens/BattleScreen.Boss.cs`) → D4 GIFT → D6 COMBO → D9
+
+## 41. ก้อน D ข้อ 5 บอส VFX หนัก : TACET ทำลายโลกแบบของตัวเอง ขาวกับเทา (2 พ.ย. แชท FINALE11)
+
+### 41.1 หลัก
+สีรุ้งกับทองเป็นของฝั่งผู้เล่น บอสใช้ภาษาเดียวกับ FINALE (ผ่าโลก แตกเป็นกระจก) แต่เป็นขาวเทา = ความเงียบทำลายโลก (`Core/HitFx.Finale.cs` หัวข้อ THE SILENCE BREAKS)
+### 41.2 ทำแล้ว (`Screens/BattleScreen.Boss.cs` หัวข้อ HEAVY VFX)
+- ENTRANCE : ตอนบอสโผล่จากหลุม เสาแสงขาวพุ่งขึ้น วงบนพื้นทีละวง เศษปลิว ความมืดร้าว (`BossRise` `BattleRules.BossRiseAt`)
+- THE TELL : ตาที่ท่าใหญ่จะมา บอสรวบความเงียบ เศษดำถูกดูดเข้าแกน (หน้าตาเดียวกับ CHARGE)
+- THE STRIKE : พอ cut in จบ รอยผ่าขาวยาวฉีกเวทีจากบอสไปหาคนที่โดนเล็ง (`BossTear` `SilenceCut`)
+- THE TURN : โลกร้าวไปกับเปลือกอนุสาวรีย์ 3 รอย ชิ้นโลกกระตุกหล่นนิดหนึ่ง กระจกขาวปลิว (`SilenceBreak`)
+- SILENCED : ตีสุดท้ายโลกแตกเป็นชิ้นหล่น กระจกขาวเต็มจอ เวทีสว่างขาว หยุดนาน (`BossSilenced`)
+- ขอบชิ้นโลกที่แตกเป็นสีขาวสำหรับ TACET สีรุ้งเฉพาะของ FANNY (`Post.fx`) / ตัวเลข `BattleRules` BossRiseAt BossTurnFall BossTurnGlass BossKillFall BossKillGlass BossKillStop / turncheck 205/205
+### 41.3 สิ่งที่ให้ลองหลัง Rebuild
+หน้าต่อสู้บอส (F2 หน้าเทส ไปบอส) : ตอนเปิดไฟต์เสาแสง / ตาที่ท่าใหญ่มาเห็นเศษดำดูดเข้า / ท่าใหญ่มีรอยผ่าขาวหลัง cut in / ครึ่งเลือดโลกร้าว / ฆ่าบอสโลกแตก / ภาพ cloud `battleboss1` `battlebosstell1` `battlebossstrike1@92` `battlebossturn1` `battlebosskill1`
+### 41.4 ถัดไป D4 GIFT มีเอฟเฟกต์ → D6 COMBO → D9 ตั้งค่ากราฟิก
