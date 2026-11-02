@@ -3122,3 +3122,24 @@ D3 ดาวขั้นสูงกับร่างในตำนาน → 
 - **เพลง = เพลงประกอบแบบเกมทั่วไป** ไม่สร้างจากโน้ตตอนตี ศึกษาเกมอื่นก่อน โดยเฉพาะ Worldless ไอริสลองทำเอง (13.127 13.128)
 - **ศึกษาเสียงของเกมที่ใช้อ้างอิงบ่อยด้วย และยืมเพลงหรือเสียงจากเกมเหล่านั้นได้** เพราะใช้แค่ playtest ในงานปิด (13.132) / ไฟล์ยืมห้ามเข้า repo สาธารณะ เก็บโฟลเดอร์ยืมที่ git ไม่เก็บ + Drive `soundgame` / ไอริสโหลดเพลงจากเกมเหล่านั้นเองไม่ได้ (ไม่มีแหล่งที่ถูกต้องให้โหลด) ไอริสเสนอเพลงต่อหน้าจอ ผู้ใช้หาไฟล์มาวาง
 - **`SoundLibrary/` = VSCO 2 Community Edition** (Versilian Studios, สัญญา **CC0 1.0**) : ไอริสเทียบ blob hash ของ git กับ repo `sgossner/VSCO-2-CE` ตรงกันทุกไฟล์ 1164/1164 (2 พ.ย.) → ป้าย "ฟรี" เข้า repo และติดไปกับเกมได้ (แก้ข้อห้ามของ `HANDOFF.md` ก้อน H ข้อ 1 กับ `ASSET_LIST.md` S5) / เครดิตตามที่ README ของชุดเขียน : Recorded by Sam Gossner & Simon Dalzell, sample cutting by Elan Hickler (Soundemote) / ชุดเต็มมีมากกว่าที่ทีมเลือกมา (Brass Keys Percussion Strings Woodwinds ราว 3000 ไฟล์) ไอริสเปิดใช้เพิ่มได้ถ้าต้องการ
+- **ผู้ใช้เพิ่ม (13.133 ถึง 13.136)** : ใช้ไฟล์ซ้ำได้ / **ของสำเร็จรูปเป็นหลัก ไม่ทำเองเยอะ** / Worldless ยืมได้ให้เครดิต / เลือกให้เข้าธีม
+
+### 47.2 ทำแล้ว (2 พ.ย. commit 3 ก้อน)
+- **ระบบ** `Audio/SoundBank.cs` : อ่าน wav/ogg ตรงจากโฟลเดอร์ ไม่ผ่าน mgcb (`Tacetno433.csproj` คัดลอกให้) / **โฟลเดอร์ `Content/Audio/Borrowed/`** git ไม่เก็บ (`.gitignore`) ไฟล์ชื่อเดียวกันในนี้ชนะไฟล์ฟรี / เสียงตี 2 ชั้น / REPEAT GAP / LOOP / เพลงจางเข้าออก DUCK ตอน FINALE กับบอส / THE TURN เปลี่ยนเพลง (`Music.BossTurn`) / ELITE มีเพลงของตัวเอง / ตัวเลข `BattleRules` หัวข้อ Sound Feel
+- **จุดเล่นในไฟต์** `Screens/BattleScreen.Sound.cs` : ATTACK = อาวุธตามตระกูล + เครื่องดนตรีของคนตีเบาๆ / **สกิล = เสียงธาตุของคนนั้น** (ไฟ ลม ดิน น้ำ แสง ตาม `Musician.Spot`) + เครื่องดนตรี / โน้ต PERFECT GOOD MISS / **PARRY CUE** ดาบวืดดังสุดตรงวงแหวน (แบบ E33) แล้วดาบปะทะ / HOLD วน ROLL เคาะ / โดนตี ล้ม / TACET แตกเป็นกระจก / CHARGE BROKEN STUNNED BURN HEAL GUARD BOOST / FINALE 3 คน / บอส 5 จังหวะ / ตาของวง (ไม้บาตองเคาะ) ตาของศัตรู / หน้าร้าน REROLL ทอยเต๋า / THE AUDITION เลือกคนแล้วเครื่องดนตรีเขาดัง
+- **ไฟล์** : เสียงสั้น 61 ไฟล์ (`Content/Audio/Sfx/`) เพลง 13 เพลง (`Content/Audio/Music/`) **ทุกไฟล์ฟรี CC0 หรือ CC-BY** สร้างใหม่ได้ด้วย `docs/audio/make_sounds.py` ที่มาทุกไฟล์ `docs/audio/MANIFEST.md` เครดิต `docs/CREDITS.md` / ชุดยืม 15 ไฟล์จาก Drive (เสียงตี 3 GUI 3 Braam บอส 6 เพลงหน้าแรกกับบอส) อยู่ใน zip ที่ส่งให้ผู้ใช้ `TACET_borrowed_audio.zip` ไม่อยู่ใน repo
+- `SoundLibrary/` = VSCO 2 CE (CC0) ใช้ได้ (47.1)
+- ตรวจ : build 0/0 / `--shots soundcheck` (ใหม่) : SFX 61/72 (ที่ขาด 11 เป็นเสียงหน้าดวลเดิมที่ Beta1 ไม่เรียก) BAND 5 เพลง 13 เพลงเล่นได้ทุกเพลง / ใส่ชุดยืมแล้ว BORROWED 15 เพลงหน้าแรกกับบอสเล่นจาก Borrowed / turncheck savecheck ไม่ได้รันซ้ำ (กติกาไม่เปลี่ยน แก้แค่จุดเล่นเสียงในหน้าจอ)
+
+### 47.3 สิ่งที่ให้ลอง (Rebuild ใน Visual Studio ก่อน)
+- แตก `TACET_borrowed_audio.zip` ไว้ใน `Tacetno433/Content/Audio/Borrowed/` แล้ว Rebuild (ไม่แตก = ได้ชุดฟรีอย่างเดียว) / กด F3 ดูตัวเลข SFX MUSIC BORROWED BAND
+- หน้าต่อสู้ : ATTACK ได้ยินเสียงอาวุธ + เครื่องดนตรีของคนนั้นเบาๆ / สกิลได้ยินธาตุ / ตาศัตรูได้ยินดาบวืดก่อนวงแหวนปิดแล้วปัดตามเสียงได้ / FINALE เพลงเบาลงแล้วเสียงของวาทยากรดัง / บอสครึ่งเลือดเพลงเปลี่ยน
+- ทุกหน้า : เพลงจางเปลี่ยนตามหน้า / ปุ่ม เลื่อน ถอย กดไม่ได้
+
+### 47.4 งานที่เหลือของก้อน E (แชทหน้า)
+1. ผู้ใช้ฟังแล้วบอกไฟล์ที่ไม่ชอบ แก้ที่บรรทัดของไฟล์นั้นใน `docs/audio/make_sounds.py` (บรรทัดละเสียง) แล้วรันใหม่ (แพ็กต้องโหลดตามหัวไฟล์สคริปต์)
+2. ❓ ถามผู้ใช้ที่มาของไฟล์ใน Drive ที่ยังไม่รู้ (Hit_1 HIt_2 Hit_3 / GUI 4 ไฟล์ / Boss_music_1 / title_music / Braam 10 ไฟล์ ชื่อแบบ SNDxxxxx) เพื่อเขียนเครดิต
+3. Worldless (13.135) : ถ้าผู้ใช้มีไฟล์ OST วางใน `Content/Audio/Borrowed/` ชื่อตามช่อง `title gallery route battle elite boss boss_turn victory defeat shop event rest ending` (.ogg) ไฟล์ไหนวางช่องไหนเลือกตามหลัก `docs/research/E_music.md` (ไฟต์ธรรมดาเบา บอสเต็ม) ใส่เครดิตใน `docs/CREDITS.md`
+4. **หน้าเครดิตในเกม** (ยังไม่ทำ) อ่านจาก `docs/CREDITS.md`
+5. ป้าย **EARLY ACCESS** ของ THE METRONOME (ยังไม่ทำ) `Screens/ConductorSelectScreen.cs` `ConductorDetailScreen.cs`
+6. อัปเดต `docs/ASSET_LIST.md` S1 ถึง S5 ให้ตรงไฟล์จริง (`docs/asset_list.py`) / ลบ Instruments ออกจาก mgcb ตอนก้อน H ได้ (ไม่ใช้)

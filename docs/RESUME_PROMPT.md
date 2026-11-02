@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 2 พ.ย. แชท /system Polish and Publish3 | ก้อน E เสียง (ระบบเสียง จุดเล่นเสียง ชุดเสียงกับเพลง เครดิต) + ป้าย EARLY ACCESS ของ THE METRONOME แล้วต่อก้อน F G6 H ตามลำดับ | `Tacetno433/Audio/SoundBank.cs` `Tacetno433/Screens/*.cs` (จุดเล่นเสียง) `Tacetno433/Content/Audio/` `Tacetno433/Tacetno433.csproj` `.gitignore` `docs/CREDITS.md` `docs/ASSET_LIST.md` `docs/asset_list.py` |
+| (ว่าง) | | |
 
 ---
 
@@ -63,6 +63,13 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 ---
 
 ## สถานะล่าสุด (2 พ.ย.)
+
+**2 พ.ย. ปิดแชท /system Polish and Publish3 (token ผู้ใช้เหลือน้อย 13.137) : ✅ ก้อน E เสียง ระบบ + ชุดแรก** (คำต่อคำ `USER_BRIEFS.md` 13.131 ถึง 13.137 รายละเอียด `BETA1_DIRECTION.md` 47)
+✅ เสียงตี = อาวุธ + เครื่องดนตรีบางๆ (ผู้ใช้เลือก 13.131) / สกิล = ธาตุของคนนั้น / PARRY CUE / เพลงจาง DUCK เปลี่ยนเพลงที่ THE TURN / **ของสำเร็จรูปเป็นหลัก (13.134)** ไฟล์ฟรี 61 + 13 เพลงใน repo ชุดยืม 15 ไฟล์ส่งผู้ใช้เป็น zip (ไม่อยู่ใน repo) / `SoundLibrary/` = VSCO 2 CE CC0 / build 0/0 / `--shots soundcheck` ผ่าน (turncheck savecheck ไม่ได้รันซ้ำ กติกาไม่เปลี่ยน) / งานอยู่บน GitHub / ตาราง "แชทที่กำลังทำงาน" ว่าง
+⚠️ ผู้ใช้ยังไม่ได้ Rebuild ฟัง (สิ่งที่ให้ลอง 47.3 : แตก zip ไว้ `Tacetno433/Content/Audio/Borrowed/` ก่อน)
+**งานถัดไป** : 47.4 (ฟังแล้วแก้ทีละบรรทัดใน `docs/audio/make_sounds.py` / ❓ ถามที่มาไฟล์ใน Drive เพื่อเครดิต / Worldless ผู้ใช้วางไฟล์ชื่อตามช่อง / หน้าเครดิตในเกม / ป้าย EARLY ACCESS / ASSET_LIST) → ก้อน F (Tutorial ภาษาไทย) → G6 ท่าโจมตี → ก้อน H build → รีวิว polish
+หมายเหตุเครื่อง cloud : สร้างไฟล์ใหม่ต้องมีแพ็ก OpenGameArt (URL ที่หัว `make_sounds.py`) + VSCO-2-CE (`git clone` ได้) + Drive soundgame (ดาวน์โหลดผ่าน `drive.usercontent.google.com/download?id=<id>&export=download&confirm=t` id อ่านจากหน้าโฟลเดอร์แชร์ ห้ามจดลิงก์ลง repo)
+
 
 **2 พ.ย. ปิดแชท /system ต่อจาก FINALE11 (/update) : ผู้ใช้ลองก้อน G ครบแล้ว "ยังไม่ต้องแก้อะไร" (คำต่อคำ `USER_BRIEFS.md` 13.130 `BETA1_DIRECTION.md` 46.5)**
 ✅ ก้อน G แกนเกมเสร็จและผ่านการลองบนเครื่องจริง (เหลือ G6 ท่าโจมตี กับรีวิวความยากตอนท้าย) / งานทั้งหมดอยู่บน GitHub / build 0/0 turncheck 220/220 savecheck 44/44 / `docs/TACET_Balance.xlsx` อัปเดตแล้ว / ตาราง "แชทที่กำลังทำงาน" ว่าง
