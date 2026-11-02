@@ -472,3 +472,21 @@ Nine notes out of time, it cannot hear the beat. Block them all and it hears you
 All four fonts are free under the SIL Open Font License 1.1.	ฟอนต์ทั้งสี่ใช้ได้ฟรีภายใต้ SIL Open Font License 1.1
 Cadson Demak. The Thai titles and sentences.	Cadson Demak หัวข้อและประโยคภาษาไทย
 Cadson Demak, The Chakra Petch Project Authors. The Thai labels and buttons.	Cadson Demak, The Chakra Petch Project Authors ป้ายและปุ่มภาษาไทย
+3 PERFECTs in a row give 1 BREATH back.	PERFECT ติดกัน 3 ครั้ง ได้ BREATH คืน 1
+A note you miss or let pass hits 50 percent harder.	โน้ตที่พลาดหรือปล่อยผ่านจะแรงขึ้น 50 เปอร์เซ็นต์
+Every attack that hurts them gives 1 VOLUME.	ทุกการโจมตีที่ทำให้เขาเจ็บให้ VOLUME 1
+FOR PUNTO.  VOLUME goes up to 8, not 5.	FOR PUNTO.  VOLUME สูงสุด 8 แทน 5
+FOR THE BAND.  String players hit 1 harder.	FOR THE BAND.  นักดนตรีเครื่องสายตีแรงขึ้น 1
+His ATTACK rings on : a second hit for 40 percent.	ATTACK ของเขาก้องต่อ : ตีซ้ำอีกครั้งที่ 40 เปอร์เซ็นต์
+On skills and the FINALE, PERFECT is easier to hit.	ในสกิลและ FINALE ได้ PERFECT ง่ายขึ้น
+Players from different cultures hit harder together, 5 percent per extra culture.	นักดนตรีต่างวัฒนธรรมตีด้วยกันแรงขึ้น วัฒนธรรมที่เพิ่มขึ้นแต่ละอัน 5 เปอร์เซ็นต์
+VOLUME goes up to 8, not 5.	VOLUME สูงสุด 8 แทน 5
+Your settings are kept. A run in progress is saved at its last path.	ตั้งค่ายังอยู่ครบ รันที่เล่นอยู่ถูกเซฟไว้ที่ทางล่าสุด
+QUIT THE GAME?	ออกจากเกม?
+START A NEW RUN?	เริ่มรันใหม่?
+The saved run will be thrown away. There is only room for one.	รันที่เซฟไว้จะหายไป เก็บได้แค่รันเดียว
+FIRST TIME HERE?	มาครั้งแรกใช่ไหม?
+A short practice fight shows how every fight works. It is also on the title page : TUTORIAL.	ไฟต์ฝึกสั้นๆ จะสอนว่าทุกไฟต์เล่นยังไง ในหน้าแรกก็มี : TUTORIAL
+String players hit 1 harder.	นักดนตรีเครื่องสายตีแรงขึ้น 1
+Their ATTACK gives 1 BREATH more.	ATTACK ของเขาได้ BREATH เพิ่ม 1
+While its court stands it takes half.	ระหว่างที่ข้าราชบริพารยังยืนอยู่ มันรับความเสียหายแค่ครึ่งเดียว
