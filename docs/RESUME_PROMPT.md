@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| (ว่าง) | | |
+| 2 พ.ย. แชท /system ต่อจาก FINALE3 | รอบ 6 ส่วนที่ 3 ต่อ บอส 4 ตัวที่เหลือจากสเก็ตช์ THE NAMELESS MASTER THE STAFF THE DEVIL'S STRING THE BLIND CANTOR (`BETA1_DIRECTION.md` 32.18) | `Core/Figure.Tacet.cs` `Screens/BattleScreen.Boss.cs` `Screens/BattleScreen.Stage.cs` `Data/BattleRules.cs` (Figure Feel) `Core/DebugShots*.cs` เอกสาร |
 
 ---
 
