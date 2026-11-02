@@ -462,6 +462,21 @@
         public static float FigureMirrorDepth = 0.17f;    //   fading out this share of its height under its feet
         public static float FigureFloorLight = 0.1f;      // FLOOR LIGHT : the soft pool of light each figure gives the floor under it (a legend's in its own colour)
 
+        //Legend Art (Beta1 2 Nov, block C items 3 4 6, the user 13.106, Core/LegendArt.cs) : outside the fight the legends are
+        //the fight's figures in the pages' windows (PORTRAIT), the conductors are their themes (SIGIL). Looks only, not balance.
+        public static float LegendColumnTall = 0.8f;      // COLUMN : the whole legend stands this share of its tall window's height
+        public static float LegendColumnFoot = 0.07f;     //   its feet this share of the height over the window's bottom
+        public static float LegendFaceZoom = 2.35f;       // FACE : the legend is drawn this many times the square's height, so the head and shoulders fill it
+        public static float LegendFaceAnchor = 0.77f;     //   the point this share of its height over its feet sits in the middle of the square
+        public static float LegendGlow = 0.55f;           // the weapon's and the core's light round a portrait (the fight's glow feeds a bloom, a page has none)
+        public static float LegendWind = 0.45f;           // WIND : the pointer is the baton, this share of its speed blows through a portrait's hair and cloth
+        public static float LegendWindMax = 1800f;        //   at most this strong
+        public static float LegendWindReach = 260f;       //   a portrait feels it fully under the pointer, nothing this far away (pixels)
+        public static float LegendWindCalm = 6f;          //   and it calms this fast when the pointer stops (a share a second)
+        public static float SigilSpin = 0.25f;            // SIGIL : a conductor's ring turns this fast (turns a second, radians)
+        public static float SigilBoltEvery = 2.6f;        // STORM : a red bolt strikes through the ring about this often (seconds)
+        public static float SigilBoltTime = 0.32f;        //   and lights it this long
+
         //Attack Feel (Beta1 2 Nov, MATH ART round 6 part 5, docs/BETA1_DIRECTION.md 32.21) : how the code's fighters strike.
         //ONE NOTE ONE BLOW : every note is one blow, on both sides, landing the moment the game judges it. The rules do not
         //change and the damage lands when it always did, these only move the figures (they are looks, not balance, so
@@ -610,6 +625,11 @@
         public static float TitleHoleY = 300f;
         public static float TitleHoleRadius = 92f;
         public static float TitleOrbit = 860f;            //   the big thin ring round the hole that the menu sits on (pixels)
+        public static float TitleLogoRing = 0.747f;       // TITLE ART (block C item 2) : the team's logo (Content/Art/Ui/Title/logo.png) has its ring this share
+        public static float TitleLogoRingY = 0.467f;      //   of the picture's width wide, its middle this share of the height down (measured 2 Nov)
+        public static float TitleLogoHole = 2.2f;         //   with the logo the hole opens this many times wider, its rim on the logo's ring
+        public static float TitlePosterTime = 3.4f;       //   the team's poster (poster.png) opens the game this long the first time, a click skips it
+        public static float TitlePosterFade = 0.8f;       //   fading in, and out into the title, this long
         public static float TitleReveal = 1.6f;           //   the first opening of the game : the hole opens, the rings draw, the logo and menu come in
         public static float ResultBurstAt = 0.34f;        // RESULT : a win opens on the last blow's IMPACT FRAME, then TACET's hole bursts at this time
         public static float ResultDarkTime = 2.2f;        //   a loss : TACET's dark creeps in from the edges over this long

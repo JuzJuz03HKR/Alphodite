@@ -76,6 +76,17 @@ namespace Tacetno433.Core
             b.UseSkill(new NoteResult[] { good, good, good, good });
             report += Same("the pact", "20 4 True False 1", (before - b.Enemies[0].Hp) + " " + (lifeBefore - b.Party[0].Hp) + " " + b.Pacts(b.Party[0]) + " " + b.Pacts(b.Party[1]) + " " + CountGift(b, MotifId.ThePact));
 
+            //LIFE PRICE (block C item 7) : the command button and the skill card read one price. With THE PACT, PAGANINI's CAPRICE
+            //(2 BREATH) out of 10 BREATH : both diamonds paid in BREATH and 4 life. With no BREATH left, THE DEVIL'S BARGAIN pays
+            //both in life (2 x 6) and THE PACT adds its 4 : 16. QUANTZ pays no life even short of BREATH (and cannot write it).
+            b = GiftFight(new List<Musician> { paganini, quantz }, new List<Enemy> { hush }, MotifId.ThePact);
+            int paidFull, paidNone, paidQuantz;
+            int priceFull = b.LifePrice(b.Party[0], SkillList.First(paganini), out paidFull);
+            b.Breath = 0;
+            int priceNone = b.LifePrice(b.Party[0], SkillList.First(paganini), out paidNone);
+            int priceQuantz = b.LifePrice(b.Party[1], SkillList.First(quantz), out paidQuantz);
+            report += Same("command price", "4 2 16 0 0", priceFull + " " + paidFull + " " + priceNone + " " + paidNone + " " + priceQuantz);
+
             //SNAPPED STRINGS : HUSH at 7 DISSONANCE, CAPRICE's second cut brings it to 9 and it cracks : 27 more and back to 0, then
             //2 more cuts (4 x 4 + 27 = 43, DISSONANCE 2)
             b = GiftFight(Solo(0), new List<Enemy> { hush }, MotifId.SnappedStrings);

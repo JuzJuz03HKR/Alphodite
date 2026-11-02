@@ -34,6 +34,7 @@ namespace Tacetno433.Screens
         private Rectangle conductorRect;
         private Rectangle[] slotRects = new Rectangle[0];   // one place per member of the band, in the order
         private Musician[] owner = new Musician[0];         // who stands in each place
+        private readonly PortraitSet portraits = new PortraitSet(Portrait.Frame.Column);   // LEGEND ART (block C) : the band drawn by the code
         private float[] lit = new float[0];
         private float conductorLit;
         private int hover = -2;                             // the place under the mouse : -1 the conductor, -2 nothing
@@ -91,12 +92,14 @@ namespace Tacetno433.Screens
                 slotRects[p] = new Rectangle(bandX + p * (ColumnW + Gap), ColumnsTop, ColumnW, BandColumn.PictureH);
                 owner[p] = run.Order[p];
             }
+            portraits.Tell(run);                             // LEGEND ART : one portrait each, kept when the order changes (it walks there)
         }
 
         public override void Update(float dt)
         {
             time += dt;
             RunState run = Game.CurrentRun;
+            portraits.Update(dt);
 
             //Hover : the place under the mouse, its column and the words under it
             hover = -2;
@@ -206,20 +209,20 @@ namespace Tacetno433.Screens
             Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.StageDeep);
             Gfx.DrawGlowBox(sb, new Rectangle(-100, 40, 1400, 560), Palette.Paper * 0.05f);
 
-            //Conductor : the leader's column, cut from their painting
+            //Conductor : the leader's column, their mark drawn by the code (SIGIL, block C : the painting is only on the Maestro page)
             float ca = ColumnIn(0);
             Rectangle cr = conductorRect;
             cr.Y += (int)Math.Round((1f - ca) * 30f - BandColumn.Lift * UiMotion.EaseOut(conductorLit));
-            BandColumn.Picture(sb, cr, ArtBank.GalleryOf(run.Conductor), run.Conductor.Spot, UiMotion.EaseOut(conductorLit), ca);
+            BandColumn.Picture(sb, cr, run.Conductor, time, UiMotion.EaseOut(conductorLit), ca);
 
             //The Band : the dragged one last so it goes over the others, an empty window where it was
             for (int p = 0; p < slotRects.Length; p++)
             {
                 if (dragging && p == pressed) { BandColumn.Empty(sb, slotRects[p], ColumnIn(p + 1)); continue; }
-                BandColumn.Picture(sb, Shown(p), UiArt.BustOf(owner[p]), BandColumn.SpotOf(owner[p]), UiMotion.EaseOut(lit[p]), ColumnIn(p + 1));
+                BandColumn.Picture(sb, Shown(p), portraits.Get(owner[p]), BandColumn.SpotOf(owner[p]), UiMotion.EaseOut(lit[p]), ColumnIn(p + 1));
             }
             if (dragging && pressed >= 0)
-                BandColumn.Picture(sb, Shown(pressed), UiArt.BustOf(owner[pressed]), BandColumn.SpotOf(owner[pressed]), 1f, 1f);
+                BandColumn.Picture(sb, Shown(pressed), portraits.Get(owner[pressed]), BandColumn.SpotOf(owner[pressed]), 1f, 1f);
         }
 
         //Lights : a soft light on the column pointed at

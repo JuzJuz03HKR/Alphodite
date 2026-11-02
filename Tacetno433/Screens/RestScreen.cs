@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -72,6 +73,8 @@ namespace Tacetno433.Screens
         private string stageLine = "";
         private float phaseTimer;
         private float time;
+        private readonly PortraitSet restBand = new PortraitSet(Portrait.Frame.Whole);   // LEGEND ART (block C) : the band resting
+        private static readonly float[] RestSpots = { 0.2f, 0.36f, 0.68f };              //   where each stands, shares of the room's width
 
         //Motion (Beta1 round 1) : the cards and buttons point like the menus (Core/UiMotion.cs)
         private UiMotion[] optionMotion = { new UiMotion(), new UiMotion(), new UiMotion() };
@@ -84,6 +87,7 @@ namespace Tacetno433.Screens
         public override void Load()
         {
             RunState run = Game.CurrentRun;
+            restBand.Tell(run);                                                            // LEGEND ART : their life on the resting band
             stageLine = "REST   /   " + run.StageLabel;
             wings = run.InWings;
             if (wings)
@@ -183,6 +187,7 @@ namespace Tacetno433.Screens
         public override void Update(float dt)
         {
             time += dt;
+            restBand.Update(dt);
             phaseTimer += dt;
             RunState run = Game.CurrentRun;
             for (int i = 0; i < 3; i++) optionMotion[i].Update(dt, phase == Phase.Choose && Input.MouseOver(OptionRect(i)) && OptionAllowed(i));
@@ -331,7 +336,23 @@ namespace Tacetno433.Screens
             float e = UiMotion.Between(time, 0f, 0.8f);
             Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.Void);
             Gfx.DrawGlowBox(sb, new Rectangle(140, 200, 1000, 560), Palette.Paper * 0.05f);
-            ArtBank.DrawOrSlot(sb, ArtBank.Rest, new Rectangle(160, 186, 960, 236), Palette.Paper, e);
+            Rectangle room = new Rectangle(160, 186, 960, 236);
+            PlaceArt.Draw(sb, room, PlaceKind.Rest, time, e, false);                       // PLACE ART (block C) : the warm light drawn by the code
+            DrawRestingBand(sb, room, e);
+        }
+
+        //Resting Band (LEGEND ART, block C) : the band standing round the warm light, the two on the left facing it, the one on
+        //the right turned back to it
+        private void DrawRestingBand(SpriteBatch sb, Rectangle room, float alpha)
+        {
+            List<Musician> band = Game.CurrentRun.Lineup();
+            for (int i = 0; i < band.Count && i < RestSpots.Length; i++)
+            {
+                Portrait p = restBand.Get(band[i]);
+                p.Figure.Facing = RestSpots[i] > 0.5f ? -1f : 1f;
+                int x = room.X + (int)(room.Width * RestSpots[i]);
+                p.Draw(sb, new Rectangle(x - 70, room.Bottom - 170, 140, 160), 0.9f * alpha);
+            }
         }
 
         //Lights : LAMP, one wide soft light low in the middle that breathes, and the pointed card lifted into it

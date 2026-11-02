@@ -441,7 +441,7 @@ namespace Tacetno433.Screens
             float e = UiMotion.Between(time, 0f, 0.6f);
             Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.StageDeep);
             Gfx.DrawGlowBox(sb, new Rectangle(-120, 500, 960, 300), Palette.Paper * 0.05f);
-            ArtBank.DrawOrSlot(sb, ArtBank.Shop, new Rectangle(24, 80, 672, 470), Palette.Paper, e);
+            PlaceArt.Draw(sb, new Rectangle(24, 80, 672, 470), PlaceKind.Shop, time, e, false);   // PLACE ART (block C) : the shelves drawn by the code
         }
 
         //Lights : KEEPER, a stage light from above on the keeper that comes up as the page opens and breathes a little,

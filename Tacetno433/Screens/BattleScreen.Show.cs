@@ -133,10 +133,12 @@ namespace Tacetno433.Screens
                 Gfx.Rect(sb, lx, ly, 90 + (i % 3) * 70, 2, Palette.Paper * 0.18f);
             }
 
-            //Portrait : taller than the band, so it breaks out of it top and bottom (an empty frame until the art)
+            //Portrait : taller than the band, so it breaks out of it top and bottom. SIGIL (block C, the user 13.106 : the team's
+            //art is only on the Maestro page) : the conductor's mark drawn by the code, its light filling the window
             Rectangle portrait = new Rectangle(x + 100, 170, 360, 380);
             Gfx.Rect(sb, portrait, Palette.Void);
-            ArtBank.DrawOrSlot(sb, ArtBank.CutInOf(c), portrait, Palette.Paper, 1f);
+            LegendArt.Sigil(sb, c, portrait, time, 1f, 1f - t * 1.6f);                    // it strikes as the cut in lands
+            Gfx.RectOutline(sb, portrait, Palette.Paper * (0.7f * dim), 1);
 
             //Shards : sixteen streaks thrown out of the portrait, the same every time
             float cx = portrait.Center.X;

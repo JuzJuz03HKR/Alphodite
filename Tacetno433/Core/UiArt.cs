@@ -19,6 +19,8 @@ namespace Tacetno433.Core
         public static Texture2D[] Busts = new Texture2D[0];       // lined up with MusicianList.All
         public static Texture2D[] Faces = new Texture2D[0];
         public static Dictionary<string, Texture2D> Icons = new Dictionary<string, Texture2D>();
+        public static Texture2D Logo;                             // TITLE (block C item 2) : Title/logo.png, the team's logo, any size
+        public static Texture2D Poster;                           //   and Title/poster.png, the team's poster, shown as the game opens
         public static int Loaded;
 
         //Load : called once from LoadContent
@@ -28,6 +30,8 @@ namespace Tacetno433.Core
             int musicians = MusicianList.All.Length;
             Busts = new Texture2D[musicians];
             Faces = new Texture2D[musicians];
+            Logo = Picture(device, "Title", "logo");
+            Poster = Picture(device, "Title", "poster");
             for (int i = 0; i < musicians; i++)
             {
                 string key = ArtBank.Key(MusicianList.All[i].Name);

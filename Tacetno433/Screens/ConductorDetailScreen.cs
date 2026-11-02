@@ -323,11 +323,11 @@ namespace Tacetno433.Screens
         }
 
         //Painting : the conductor's painting at the size it was painted, or the empty slot that waits for it
-        private static void DrawPainting(SpriteBatch sb, Conductor who, Rectangle r, float alpha, float room)
+        private void DrawPainting(SpriteBatch sb, Conductor who, Rectangle r, float alpha, float room)
         {
             Texture2D art = ArtBank.GalleryOf(who);
             if (art != null) sb.Draw(art, new Vector2(r.X + (r.Width - art.Width) / 2, r.Y), Color.White * alpha);
-            else ArtSlot.Draw(sb, r, Palette.Paper, alpha * room);
+            else LegendArt.Sigil(sb, who, r, time, alpha * room);                       // SIGIL (block C) : their mark until the painting comes
         }
 
         //Scene : the space behind the painting, built in layers from far to near, all of it fading with the room
@@ -454,7 +454,9 @@ namespace Tacetno433.Screens
             face.Y += (int)Math.Round(drop);
             face.X -= (int)Math.Round((1f - Arrived(0.12f)) * slide);
             Gfx.Rect(sb, face, Palette.CanvasDark * d);
-            ArtBank.DrawOrSlot(sb, ArtBank.FaceOf(c), face, Palette.Paper, d);
+            Texture2D faceArt = ArtBank.FaceOf(c);
+            if (faceArt != null) ArtBank.DrawOrSlot(sb, faceArt, face, Palette.Paper, d);
+            else LegendArt.Sigil(sb, c, face, time, d);                                 // SIGIL (block C) : their mark until the close up comes
             Ornament.CornerBrackets(sb, new Rectangle(face.X - 4, face.Y - 4, face.Width + 8, face.Height + 8), 12, Palette.PaperDim * d, 1);
 
             //Record : beside the face, a label over each value like a record card

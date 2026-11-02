@@ -32,6 +32,11 @@ namespace Tacetno433.Core
         //Set it back to BlendState.AlphaBlend when done.
         public static BlendState Blending = BlendState.AlphaBlend;
 
+        //Clip (block C, 2 Nov) : true keeps the triangles inside the card's ScissorRectangle, a portrait cut by its window
+        //(Core/LegendArt.cs). The caller sets the rectangle and puts Clip back to false when done.
+        public static bool Clip;
+        private static readonly RasterizerState clipped = new RasterizerState { CullMode = CullMode.None, ScissorTestEnable = true };
+
         //Work : the points of one shape while it is cut up (no shape has more than MaxPoints)
         public const int MaxPoints = 256;
         private static readonly Vector2[] work = new Vector2[MaxPoints];
@@ -67,7 +72,7 @@ namespace Tacetno433.Core
             if (orderCount == 0 || device == null) return;
             device.BlendState = Blending;
             device.DepthStencilState = DepthStencilState.None;
-            device.RasterizerState = RasterizerState.CullNone;             // shapes come in both turning directions
+            device.RasterizerState = Clip ? clipped : RasterizerState.CullNone;   // shapes come in both turning directions
             effect.CurrentTechnique.Passes[0].Apply();
             device.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, corners, 0, cornerCount, order, 0, orderCount / 3);
             cornerCount = 0;

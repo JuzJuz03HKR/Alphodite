@@ -31,10 +31,10 @@ namespace Tacetno433.Screens
         private static readonly Rectangle foreBox = new Rectangle(40, 188, 320, 512);   // the musician in front, 160 x 256 at x2, feet at 700
         private const int ChipX = 24;                       // THE BAND : the row of cards under the bar strip
         private const int ChipY = 66;
-        private const int ChipW = 150;
+        private const int ChipW = 168;                      // BAND CARDS (block C item 6) : 150 until 2 Nov, now with a face (ends at 540, clear of a boss's bar)
         private const int ChipH = 68;                       // 50 until 31 Oct : the move written in the plan now has a line of its own
         private const int ChipMoveY = 48;                   //   this far down, under the life (a long one ran into "/ 54", 19.7)
-        private const int ChipStep = 156;
+        private const int ChipStep = 174;
 
         //Enemy Feet : where each enemy stands for 1 to 4 enemies, the front one first. The floor goes away up to the right.
         private static readonly Vector2[][] enemyFeet =
@@ -973,14 +973,13 @@ namespace Tacetno433.Screens
         {
             int left = (TacetGame.ScreenW - LayerW) / 2;
 
-            //Far : the movement's backdrop above the horizon (an empty frame until the art comes), then the middle layer
+            //Far : the movement's backdrop above the horizon, then the middle layer. No picture is coming (the team draws the
+            //conductors only, 13.106) : the plain stage colour under TACET's dark, no empty frame or label (block C item 1)
             sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, Layer(cam, 0));
             if (layerArt[0] != null) DrawLayerArt(sb, layerArt[0], left);
             else
             {
                 Gfx.Rect(sb, left, 0, LayerW, Horizon, Palette.Stage);
-                ArtSlot.Draw(sb, new Rectangle(left + 64, 40, LayerW - 128, Horizon - 60), Palette.Paper, 0.6f);
-                Gfx.TextSpaced(sb, Game.Font, layerName[0], left + 470, Horizon - 46, Palette.LineGrey * 0.7f, TextSize.Label, 2f);
             }
             sb.End();
             if (layerArt[1] != null)
@@ -1002,8 +1001,7 @@ namespace Tacetno433.Screens
             {
                 sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, null, null, null, Layer(cam, 2));
                 Gfx.Rect(sb, left, Horizon, LayerW, TacetGame.ScreenH - Horizon, Palette.Stage);
-                DrawFloorGuide(sb, left);
-                Gfx.TextSpaced(sb, Game.Font, layerName[1], left + 470, Horizon + 10, Palette.LineGrey * 0.6f, TextSize.Label, 2f);
+                DrawFloorGuide(sb, left);                                              // the floor's lines stay, its label is gone (block C item 1)
                 sb.End();
             }
 

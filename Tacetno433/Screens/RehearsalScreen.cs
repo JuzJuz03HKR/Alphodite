@@ -29,8 +29,8 @@ namespace Tacetno433.Screens
         public const float LineWidth = 340f;            // the legends' lines are wrapped to this (RehearsalList.PrepareText)
         private const int ColumnW = 376;
         private const int ColumnGap = 22;
-        private const int ColumnsTop = 180;
-        private const int FaceSize = 96;
+        private const int ColumnsTop = 172;
+        private const int FaceSize = 112;                 // block C item 4 : the face at its full size (math art since 2 Nov)
         private const int CardH = 106;
         private const int CardGap = 8;
         private const int CardsTop = ColumnsTop + FaceSize + 16;
@@ -41,6 +41,7 @@ namespace Tacetno433.Screens
         private readonly From from;
         private List<Musician> band = new List<Musician>();
         private Rectangle[] faces = new Rectangle[0];
+        private readonly PortraitSet faceArt = new PortraitSet(Portrait.Frame.Face);   // LEGEND ART (block C) : each face drawn by the code
         private string[] powerText = new string[0];
         private Rectangle[] cards = new Rectangle[0];
         private string[] names = new string[0];
@@ -86,6 +87,7 @@ namespace Tacetno433.Screens
             RunState run = Game.CurrentRun;
             if (from == From.Fight) run.RehearsalPending = false;                         // the win's star is picked here
             band = run.Lineup();
+            faceArt.Tell(run);                                                             // LEGEND ART : their life and stars on the faces
             over = from == From.Fight ? "AFTER THE CONCERT" : (from == From.Event ? "A LESSON ON THE ROAD" : "A QUIET ROOM");
 
             int count = band.Count;
@@ -155,6 +157,7 @@ namespace Tacetno433.Screens
         public override void Update(float dt)
         {
             time += dt;
+            faceArt.Update(dt);
             for (int i = 0; i < lift.Length; i++)
             {
                 bool up = picked < 0 ? i == selected && can[i] : i == picked;
@@ -392,7 +395,9 @@ namespace Tacetno433.Screens
             face.Y += (int)Math.Round((1f - a) * 30f);
             Color spot = BandColumn.SpotOf(m);
             Gfx.Rect(sb, face, Palette.CanvasDark * a);
-            ArtBank.DrawOrSlot(sb, UiArt.FaceOf(m), face, Palette.Paper, a);
+            Ui.ColourRise(sb, face, 0f, spot, 0.3f, a);                                   // LEGEND ART : their colour behind the face
+            faceArt.Get(m).Draw(sb, face, a);
+            Gfx.RectOutline(sb, face, spot * (0.6f * a), 1);
 
             float x = face.Right + 14;
             Gfx.TextSpaced(sb, Game.BigFont, m.Name, x, face.Y + 8, Palette.Highlight * a, TextSize.Small, 3f);

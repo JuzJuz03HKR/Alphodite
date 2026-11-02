@@ -152,7 +152,7 @@ namespace Tacetno433
             HandArt.Load(Content);
 
             //Still Art : stage backgrounds, portraits, faces, places, signature pictures
-            ArtBank.Load(Content);
+            ArtBank.Load(Content, GraphicsDevice);         // block C : the conductors' paintings straight from Content/Art/Conductors
             UiArt.Load(GraphicsDevice);                     // Beta1 screens : the pages' pixel art, straight from Content/Art/Ui
             MotifArt.Load();                                // GIFTS : the marks of the legends, from the icons UiArt found
 
@@ -249,6 +249,7 @@ namespace Tacetno433
 
             Input.Update();
             if (DebugShots.Active) DebugShots.FakeMouse(dt);
+            LegendArt.Update(dt);                        // LEGEND ART : the pointer's wind through the portraits (block C)
 
             //Window Focus : when the player alt tabs away the game stops where it is. The page
             //on screen is told once, the pause menu opens on pages that can pause, and then
@@ -342,7 +343,8 @@ namespace Tacetno433
                 string line = "FPS " + shownFps + "   MEM " + shownMemory.ToString("0.0") + " MB"
                             + "   SFX " + SoundBank.LoadedSfx + "   MUSIC " + SoundBank.LoadedMusic
                             + "   PHRASE " + SoundBank.LoadedPhrase + "   INSTR " + SoundBank.LoadedInstruments
-                            + "   HAND " + HandArt.LoadedPoses + "   ART " + ArtBank.Loaded + "   PIXEL " + CharacterArt.Loaded
+                            + "   HAND " + HandArt.LoadedPoses + "   ART " + ArtBank.Loaded + "   UI " + UiArt.Loaded + "   BATTLE " + FrameArt.Loaded   // block C item 5 : the art the game found, by folder
+                            + "   PIXEL " + CharacterArt.Loaded
                             + "   VIEW " + Sharp.Width + " x " + Sharp.Height;           // SHARP SCREEN : the real size the page is drawn at
                 //Optimize (Beta1) : the cost of a frame. DRAW = draw calls last frame, GC = collections so far (gen 0 / 1 / 2),
                 //FX = whether the shaders loaded. Watch these before and after adding an effect.

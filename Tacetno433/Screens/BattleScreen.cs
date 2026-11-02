@@ -356,6 +356,8 @@ namespace Tacetno433.Screens
         {
             time += dt;
             viewTime += dt;
+            friendFaces.Update(dt);                                                     // LEGEND ART : the friend cards' faces breathe
+            bandFaces.Update(dt);                                                       //   and the band cards'
             if (judgeLife > 0f) judgeLife -= dt;
             if (barPulse > 0f) barPulse = Math.Max(0f, barPulse - dt * 3f);
 
@@ -1990,9 +1992,21 @@ namespace Tacetno433.Screens
             Gfx.TextCentered(sb, Game.StoryFont, bondLine, TacetGame.ScreenW / 2f, 150, Palette.Paper * a, TextSize.Story);
         }
 
-        //THE BAND (Beta1) : everyone on the field as a card in a row under the bar strip, until the user's face GUI.
-        //The name, the life, the move written in the plan and its place in the bar (the statuses under the card are icons,
-        //BattleScreen.Marks.cs). The card of the musician in front has a bright frame.
+        //BAND CARDS (Beta1 2 Nov, block C item 6, docs/BETA1_DIRECTION.md 33, references docs/REFERENCE_GAMES.md) : everyone on
+        //the field as a card in the row under the bar strip. Taken from the references and changed for TACET :
+        //   FACE      each card shows who it is at a glance (the portraits of HSR, ZZZ and CZN), here the legend's own figure drawn by
+        //             the code in a small window, alive, in their colour (LEGEND ART), PAGANINI's life string glowing with her life
+        //   COLOUR    a band of their colour down the card's left edge, the same colour as their light in the fight (the colour
+        //             language of Worldless : one side's colour is that side)
+        //   ORDER     the place of their move in the bar, big in the top right (Limbus writes the speed over each portrait)
+        //   ACTIVE    the one being planned, or playing now, stands up out of the row with a rim of their colour
+        //   HURT      a blow shakes the card and flashes it, so the hit is felt where the life is written
+        //The name, the life (bar and numbers), the move written in the plan, the target and friend marks stay where they were
+        //(the statuses under the card are icons, BattleScreen.Marks.cs).
+        private const int ChipFace = 56;                    // the face's window, square
+        private const int ChipText = 7 + ChipFace + 8;      // the words start this far in, after the face
+        private readonly PortraitSet bandFaces = new PortraitSet(Portrait.Frame.Face);
+
         private void DrawBand(SpriteBatch sb, bool planning)
         {
             bool picking = view == View.Target && pending != null && pending.Target == SkillTarget.Ally;
@@ -2003,32 +2017,45 @@ namespace Tacetno433.Screens
                 Fighter f = battle.Party[i];
                 Rectangle r = ChipBox(i);
                 float a = f.Down ? 0.4f : 1f;
+                Color own = SpotOf(f).Tint;
+                bool active = !f.Down && ((planning && selected == f) || (!planning && battle.Current == f));
+                Look look;
+                float hit = looks.TryGetValue(f, out look) ? look.Flash : 0f;
+                if (hit > 0f) r.X += (int)Math.Round(Math.Sin(time * 70f) * 3f * hit * Flashing);     // HURT : the card shakes with the blow
+                if (active) r.Y -= 3;                                                                  // ACTIVE : it stands up out of the row
 
-                Gfx.Rect(sb, r, Palette.Panel * 0.9f);
-                Gfx.RectOutline(sb, r, (f == fore ? Palette.Paper : Palette.LineGrey * 0.45f) * a, 1);
-                if (planning && selected == f) Gfx.Rect(sb, r.X, r.Bottom - 3, r.Width, 3, Palette.Accent);
-                if (!planning && battle.Current == f) Gfx.Rect(sb, r.X, r.Bottom - 3, r.Width, 3, Palette.Highlight);
+                Gfx.Rect(sb, r, Palette.Panel * 0.92f);
+                Gfx.Rect(sb, r.X, r.Y, 3, r.Height, own * a);                                          // COLOUR
+                Rectangle face = new Rectangle(r.X + 7, r.Y + 6, ChipFace, ChipFace);
+                Gfx.Rect(sb, face, Palette.CanvasDark * a);
+                Ui.ColourRise(sb, face, 0f, own, active ? 0.45f : 0.28f, a);
+                Portrait portrait = bandFaces.Get(f.Musician);
+                portrait.Figure.Cues.Life = f.Down ? 0f : f.Hp / (float)Math.Max(1, f.MaxHp);
+                portrait.Draw(sb, face, a);
+                Gfx.RectOutline(sb, r, (active ? own : (f == fore ? Palette.Paper * 0.7f : Palette.LineGrey * 0.45f)) * a, active ? 2 : 1);
                 bool outline = hover == f && (picking || (view == View.Plan && battle.CanPlan(f)));
                 if (outline)
                     Gfx.RectOutline(sb, new Rectangle(r.X - 3, r.Y - 3, r.Width + 6, r.Height + 6), Palette.Accent, 2);
 
-                Gfx.TextSpaced(sb, Game.Font, f.Name, r.X + 8, r.Y + 6, Palette.Paper * a, TextSize.Label, 1f);
-                Rectangle bar = clear ? new Rectangle(r.X + 8, r.Y + 23, r.Width - 16, 4) : new Rectangle(r.X + 8, r.Y + 26, r.Width - 16, 5);
+                int tx = r.X + ChipText;
+                int room = r.Right - 8 - tx;
+                Gfx.TextSpaced(sb, Game.Font, f.Name, tx, r.Y + 6, Palette.Paper * a, TextSize.Label, 1f);
+                Rectangle bar = clear ? new Rectangle(tx, r.Y + 23, room, 4) : new Rectangle(tx, r.Y + 26, room, 5);
                 Gfx.Bar(sb, bar, f.Hp / (float)f.MaxHp, Palette.Stage * a, Palette.Paper * a);
                 DrawLifePreview(sb, bar, f, 0, GainOf(f), a);                              // MARKS AND AIM : the life a heal gives back
                 if (clear)
                 {
                     //CLEAR FIGHT : the life a size bigger, the bar a little higher to make room for it
                     string hp = NumberText.Get(f.Hp);
-                    Gfx.Text(sb, Game.Font, hp, r.X + 8, r.Y + 27, Palette.Highlight * a, TextSize.Body);
-                    Gfx.Text(sb, Game.Font, maxLabel[f], r.X + 12 + Gfx.TextWidth(Game.Font, hp, TextSize.Body), r.Y + 32, Palette.LineGrey * a, TextSize.Tiny);
+                    Gfx.Text(sb, Game.Font, hp, tx, r.Y + 27, Palette.Highlight * a, TextSize.Body);
+                    Gfx.Text(sb, Game.Font, maxLabel[f], tx + 4 + Gfx.TextWidth(Game.Font, hp, TextSize.Body), r.Y + 32, Palette.LineGrey * a, TextSize.Tiny);
                 }
                 else
                 {
                     //NO LIMIT : the most stays where it was, and moves right only for a life of 4 digits or more
                     string hp = NumberText.Get(f.Hp);
-                    Gfx.Text(sb, Game.Font, hp, r.X + 8, r.Y + 33, Palette.Highlight * a, TextSize.Label);
-                    Gfx.Text(sb, Game.Font, maxLabel[f], Math.Max(r.X + 40, r.X + 12 + Gfx.TextWidth(Game.Font, hp, TextSize.Label)), r.Y + 34, Palette.LineGrey * a, TextSize.Tiny);
+                    Gfx.Text(sb, Game.Font, hp, tx, r.Y + 33, Palette.Highlight * a, TextSize.Label);
+                    Gfx.Text(sb, Game.Font, maxLabel[f], Math.Max(tx + 32, tx + 4 + Gfx.TextWidth(Game.Font, hp, TextSize.Label)), r.Y + 34, Palette.LineGrey * a, TextSize.Tiny);
                 }
 
                 //FRIEND MARK : a skill for this musician (or one that could be picked) marks the card, where the move would show
@@ -2037,7 +2064,7 @@ namespace Tacetno433.Screens
                 if (marked) DrawFriendMark(sb, r.Right - 36, r.Y + 15, 8f, fullMark, false);   // top right, clear of the life bar
 
                 //The Move : in the plan, what this musician will play (on its own line under the life, so a long name such as
-                //THUNDER CALL or NAPOLEON'S DENT never runs into "/ 54") and where in the bar (the number at the top right)
+                //THUNDER CALL or NAPOLEON'S DENT never runs into "/ 54") and where in the bar (the number at the top right, ORDER)
                 if (planning && !f.Down && !marked)
                 {
                     BarMove move = battle.MoveOf(f);
@@ -2045,8 +2072,8 @@ namespace Tacetno433.Screens
                     if (move != null)
                     {
                         Gfx.TextRight(sb, Game.Font, move.Skill == null ? WordAttack : move.Skill.Name, r.Right - 8, r.Y + ChipMoveY, Palette.Highlight, TextSize.Tiny);
-                        if (at >= 0 && clear) Gfx.TextRight(sb, Game.Font, NumberText.Get(OrderNumber(at)), r.Right - 8, r.Y + 3, Palette.Highlight, TextSize.Body);
-                        else if (at >= 0) Gfx.TextRight(sb, Game.BigFont, NumberText.Get(OrderNumber(at)), r.Right - 8, r.Y + 2, Palette.Highlight, TextSize.Small);
+                        if (at >= 0 && clear) Gfx.TextRight(sb, Game.Font, NumberText.Get(OrderNumber(at)), r.Right - 8, r.Y + 3, own, TextSize.Body);
+                        else if (at >= 0) Gfx.TextRight(sb, Game.BigFont, NumberText.Get(OrderNumber(at)), r.Right - 8, r.Y + 2, own, TextSize.Small);
                     }
                     else if (battle.CanPlan(f))
                         Gfx.TextRight(sb, Game.Font, WordAttack, r.Right - 8, r.Y + ChipMoveY, Palette.LineGrey, TextSize.Tiny);   // nothing written : it ATTACKs
@@ -2063,8 +2090,7 @@ namespace Tacetno433.Screens
                     DrawTargetSign(sb, r.Center.X, r.Y - 1f, 6f, Palette.Accent * pulse);
                 }
 
-                Look look;
-                if (looks.TryGetValue(f, out look) && look.Flash > 0f) Gfx.Rect(sb, r, Palette.Paper * (0.45f * look.Flash));
+                if (hit > 0f) Gfx.Rect(sb, r, Palette.Paper * (0.45f * hit));
             }
         }
 
@@ -2446,6 +2472,22 @@ namespace Tacetno433.Screens
             return new Vector2(chip.Center.X, chip.Bottom + 2f);
         }
 
+        //LIFE PRICE (Beta1 2 Nov, block C item 7) : a command's price under its icon, the same one its skill card says.
+        //The BREATH it takes as white diamonds. What THE DEVIL'S BARGAIN pays in life for the BREATH the band is short of as
+        //blood red diamonds, and the whole life it takes (THE PACT too) as a red number after them.
+        private void DrawPrice(SpriteBatch sb, Skill s, float x, float cy, float a)
+        {
+            int paid;
+            int life = battle.LifePrice(selected, s, out paid);
+            Color blood = Palette.SpotFire;
+            for (int i = 0; i < s.Cost; i++)
+            {
+                if (i < paid) Gfx.Diamond(sb, x + i * 9f, cy, 3f, Palette.Paper * a);
+                else Gfx.Diamond(sb, x + i * 9f, cy, 3f, blood * a);
+            }
+            if (life > 0) Gfx.Text(sb, Game.Font, NumberText.Signed(-life), x + (s.Cost - 1) * 9f + 7f, cy - 7f, blood * a, TextSize.Tiny);
+        }
+
         //Bottom Bar : in the plan, the selected musician's commands, the BENCH and a line about what is under
         //the pointer. While the bar plays, who is playing what. Always BREATH and the SIGNATURE on the right.
         private void DrawBottom(SpriteBatch sb, bool planning)
@@ -2473,7 +2515,7 @@ namespace Tacetno433.Screens
                         Rectangle icon = new Rectangle(box.X + Ui.Slant + 8 + lean, box.Center.Y - 15, 24, 24);
                         Ui.Icon(sb, icon, commandArt[k], commandCode[k], lit ? Palette.Ink : kind, false, 0, a);
                         Gfx.TextSpaced(sb, Game.Font, commandFor[k], box.X + Ui.Slant + 2, box.Y - 13, Palette.LineGrey * a, TextSize.Tiny, 2f);
-                        if (k > 0) Ui.Pips(sb, icon.Center.X - (s.Cost - 1) * 4.5f, box.Bottom - 6, s.Cost, s.Cost, 3f, 9f, a);
+                        if (k > 0) DrawPrice(sb, s, icon.Center.X - (s.Cost - 1) * 4.5f, box.Bottom - 6, a);
                         Ui.Stars(sb, box.Right - Ui.Slant - 34, box.Y + 9, RehearsalList.StarsOf(selected.Musician, k), RehearsalList.Most, 4f, 11f, SpotOf(selected).Tint, a);   // REHEARSAL : its stars
                     }
                 }

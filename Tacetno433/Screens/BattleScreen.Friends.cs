@@ -37,6 +37,7 @@ namespace Tacetno433.Screens
         private static readonly string[] friendKey = { "1", "2", "3" };
 
         private readonly List<Fighter> friendPick = new List<Fighter>();   // the friends the waiting skill can go to
+        private readonly PortraitSet friendFaces = new PortraitSet(Portrait.Frame.Face);   // LEGEND ART (block C) : the faces drawn by the code
         private MovePreview[] friendAim = new MovePreview[0];               // what each would get
         private Rectangle[] friendBox = new Rectangle[0];
         private string[] friendGets = new string[0];                        // what they get, in the kind's colour
@@ -237,7 +238,10 @@ namespace Tacetno433.Screens
                 //of the card's height
                 Rectangle face = new Rectangle(r.X + 12, r.Y + (r.Height - FriendFace) / 2, FriendFace, FriendFace);
                 Gfx.Rect(sb, face, Palette.CanvasDark * a);
-                ArtBank.DrawOrSlot(sb, UiArt.FaceOf(f.Musician), face, Palette.Paper, a);
+                Ui.ColourRise(sb, face, 0f, SpotOf(f).Tint, 0.3f, a);                               // LEGEND ART : their colour behind the face
+                Portrait own = friendFaces.Get(f.Musician);
+                own.Figure.Cues.Life = f.Hp / (float)Math.Max(1, f.MaxHp);
+                own.Draw(sb, face, a);
 
                 //The Name, a stroke of their own colour under it, and the number to press
                 float x = r.X + FriendText;                                                        // just after the face

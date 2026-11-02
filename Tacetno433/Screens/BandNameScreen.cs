@@ -28,6 +28,7 @@ namespace Tacetno433.Screens
 
         private string name = "";
         private float time;
+        private readonly PortraitSet portraits = new PortraitSet(Portrait.Frame.Column);   // LEGEND ART (block C)
         private float typed = 99f;                     // seconds since the last letter, for its little drop
         private UiMotion confirmMotion = new UiMotion();
 
@@ -43,6 +44,7 @@ namespace Tacetno433.Screens
         //mean guessing at all three.
         public override void Load()
         {
+            portraits.Tell(Game.CurrentRun);                 // LEGEND ART : their life and stars on the portraits
             Game.Window.TextInput += HandleTyping;
             Game.CurrentRun.SyncOrder();
             name = Settings.LastBandName.Length <= MaxLength ? Settings.LastBandName : "";   // LAST NAME KEPT : last run's name, ENTER keeps it
@@ -93,6 +95,7 @@ namespace Tacetno433.Screens
         public override void Update(float dt)
         {
             time += dt;
+            portraits.Update(dt);
             typed += dt;
             confirmMotion.Update(dt, Input.MouseOver(confirmButton));
 
@@ -148,7 +151,7 @@ namespace Tacetno433.Screens
             {
                 float a = UiMotion.Between(time, 0.35f + i * 0.07f, 0.45f);
                 if (a <= 0f) continue;
-                BandColumn.Picture(sb, ColumnRect(i, band.Count), UiArt.BustOf(band[i]), BandColumn.SpotOf(band[i]), 0.35f, a);
+                BandColumn.Picture(sb, ColumnRect(i, band.Count), portraits.Get(band[i]), BandColumn.SpotOf(band[i]), 0.35f, a);
             }
             Gfx.Rect(sb, 300, LineupTop + ColumnH + 8, 680, 1, Palette.LineGrey * 0.6f);
         }

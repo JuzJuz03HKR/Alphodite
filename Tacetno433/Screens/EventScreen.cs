@@ -58,6 +58,7 @@ namespace Tacetno433.Screens
         private int[] previewLives;                 //   the lives it would leave, or null when it does not touch life for sure
         private int chosen = -1;
         private int hoverCard = -1;
+        private readonly PortraitSet cardFaces = new PortraitSet(Portrait.Frame.Face);   // LEGEND ART (block C) : the cards' faces drawn by the code
         private Musician checker;
         private int chance;
         private int roll;
@@ -149,6 +150,7 @@ namespace Tacetno433.Screens
         {
             time += dt;
             phaseTimer += dt;
+            cardFaces.Update(dt);
             RunState run = Game.CurrentRun;
             for (int i = 0; i < choiceMotion.Length; i++)
                 choiceMotion[i].Update(dt, phase == Phase.Read && i < ev.Choices.Length && Input.MouseOver(ChoiceRect(i)) && CanTake(ev.Choices[i]));
@@ -411,7 +413,7 @@ namespace Tacetno433.Screens
             Gfx.Rect(sb, artBox, Palette.CanvasDark * e);
             Rectangle picture = artBox;
             picture.Inflate(-10, -10);
-            ArtBank.DrawOrSlot(sb, ArtBank.EventOf(ev), picture, Palette.Paper, e);
+            PlaceArt.Draw(sb, picture, PlaceKind.Chance, time, e);                        // PLACE ART (block C) : no picture is coming
             Ornament.FadeUp(sb, new Rectangle(artBox.X, artBox.Bottom - 80, artBox.Width, 80), 0.9f * e);
             Ornament.DoubleFrame(sb, artBox, Palette.PaperDim * e);
         }
@@ -539,7 +541,7 @@ namespace Tacetno433.Screens
                 float k = UiMotion.Between(phaseTimer, i * 0.03f, 0.25f);
                 card.Y += (int)((1f - k) * 50f);
                 Musician m = run.Roster[i];
-                MusicianArt.Card(sb, card, m, run, i == hoverCard, false, "");
+                MusicianArt.Card(sb, card, m, run, i == hoverCard, false, "", cardFaces.Get(m));
 
                 //Chance Band : the percent in large type along the bottom of the card
                 Rectangle band = new Rectangle(card.X, card.Bottom + 4, card.Width, 26);

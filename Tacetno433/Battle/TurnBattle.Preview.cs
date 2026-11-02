@@ -35,6 +35,24 @@ namespace Tacetno433.Battle
     {
         private readonly List<Fighter> previewLine = new List<Fighter>();
 
+        //Life Price (Beta1 2 Nov, block C item 7) : what a skill would cost this musician if it were written now, in BREATH and in
+        //life. THE DEVIL'S BARGAIN (and BORROWED BREATH) pays in life for the BREATH the band is short of, THE PACT takes its life
+        //every time (never the last point). A skill already written for this musician gives its BREATH back first, the way
+        //CanPlanSkill counts it. The skill card says PAYS and the command button shows the same price, so the two always agree.
+        public int LifePrice(Fighter who, Skill s, out int breathPaid)
+        {
+            breathPaid = 0;
+            if (who == null || s == null) return 0;
+            BarMove old = MoveOf(who);
+            int free = Math.Max(0, BreathFree + (old != null && old.Skill != null ? old.Skill.Cost : 0));
+            breathPaid = Math.Min(s.Cost, free);
+            int life = 0;
+            if (PaysInLife(who) && free < s.Cost) life += (s.Cost - free) * BattleRules.TurnPaganiniLife;   // THE DEVIL'S BARGAIN
+            else breathPaid = s.Cost;                                                                       // short and no bargain : still BREATH
+            if (Pacts(who)) life += Math.Max(0, Math.Min(BattleRules.TurnPactLife, who.Hp - 1));            // THE PACT (GIFT)
+            return life;
+        }
+
         //Targets For : who a skill would reach, the way it is played (a CHAKRAM's line, DEVIL'S CANNON, every enemy ...)
         public void TargetsFor(Skill s, Fighter target, Fighter who, List<Fighter> into)
         {

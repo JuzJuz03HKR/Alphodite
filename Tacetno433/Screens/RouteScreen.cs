@@ -812,11 +812,7 @@ namespace Tacetno433.Screens
             Rectangle art = new Rectangle(card.Center.X - CardArtW / 2, card.Y + 16, CardArtW, CardArtH);
             Texture2D picture = ArtBank.RouteOf(cardNode.Type);
             if (picture != null) sb.Draw(picture, art, Color.White * a);
-            else
-            {
-                Gfx.Rect(sb, art, Palette.Stage * a);
-                ArtSlot.Draw(sb, art, Palette.Paper, 0.8f * a);
-            }
+            else PlaceArt.Draw(sb, art, PlaceArt.Of(cardNode.Type), time, a);         // PLACE ART (block C) : the place drawn by the code
 
             int tx = card.X + 14;
             Ui.Tag(sb, RouteNodeInfo.Tags[type], tx, art.Bottom + 12, Array.IndexOf(run.Options, cardNode) >= 0, a);

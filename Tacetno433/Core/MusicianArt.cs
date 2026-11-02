@@ -42,7 +42,7 @@ namespace Tacetno433.Core
         //seatWord is the band along the bottom (+1 TIER, TOP TIER, a chance like 65%), empty for none.
         //The number is the musician's own power with rehearsals and motifs added, the same number
         //every other page shows (RunState.PowerOf). Beside it, the section they sit in, in short.
-        public static void Card(SpriteBatch sb, Rectangle r, Musician m, RunState run, bool hover, bool dim, string seatWord)
+        public static void Card(SpriteBatch sb, Rectangle r, Musician m, RunState run, bool hover, bool dim, string seatWord, Portrait face = null)
         {
             float bright = dim ? 0.35f : 1f;
             if (hover) r.Y -= 4;
@@ -52,7 +52,12 @@ namespace Tacetno433.Core
             //Portrait : the top of the card, everything except the 62 pixels of details under it
             Rectangle art = new Rectangle(r.X + 1, r.Y + 1, r.Width - 2, r.Height - 62);
             Gfx.Rect(sb, art, Palette.CanvasDark * bright);
-            ArtBank.DrawOrSlot(sb, ArtBank.PortraitOf(m), art, Palette.Paper, bright);
+            if (face != null)                                                               // LEGEND ART (block C) : the legend drawn by the code
+            {
+                Ui.ColourRise(sb, art, 0f, Palette.SpotOf(m.Spot), 0.3f, bright);
+                face.Draw(sb, art, bright);
+            }
+            else ArtBank.DrawOrSlot(sb, ArtBank.PortraitOf(m), art, Palette.Paper, bright);
             Ornament.FadeUp(sb, new Rectangle(art.X, art.Bottom - 34, art.Width, 34), 0.9f);
 
             //Side : the arrow in the top corner, so every card says which way of the baton they answer.

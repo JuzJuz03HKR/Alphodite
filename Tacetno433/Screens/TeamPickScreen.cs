@@ -29,6 +29,7 @@ namespace Tacetno433.Screens
         //Audition State
         private Musician[] legends = new Musician[0];        // MusicianList.Shown, in its order
         private Rectangle[] columns = new Rectangle[0];
+        private Portrait[] portraits = new Portrait[0];       // LEGEND ART (block C) : each legend drawn by the code in their column
         private float[] lit = new float[0];                  // the pointed column's light, 0..1
         private float[] chosen = new float[0];               // a picked column's light, 0..1
         private float[] pickedAt = new float[0];             // when each was last picked, for its flash
@@ -59,8 +60,12 @@ namespace Tacetno433.Screens
             chosen = new float[legends.Length];
             pickedAt = new float[legends.Length];
             int total = legends.Length * ColumnW + (legends.Length - 1) * ColumnGap;
+            portraits = new Portrait[legends.Length];
             for (int i = 0; i < legends.Length; i++)
+            {
                 columns[i] = new Rectangle((TacetGame.ScreenW - total) / 2 + i * (ColumnW + ColumnGap), ColumnsTop, ColumnW, BandColumn.PictureH);
+                portraits[i] = Portrait.Of(legends[i], Portrait.Frame.Column, i + 1);
+            }
 
             //A run that already has some of its band (an old save) starts with them picked
             for (int i = 0; i < run.Roster.Count && picked.Count < BattleRules.BandSize; i++)
@@ -90,6 +95,7 @@ namespace Tacetno433.Screens
         {
             time += dt;
             if (messageTimer > 0f) messageTimer -= dt;
+            for (int i = 0; i < portraits.Length; i++) portraits[i].Update(dt);
 
             //Leaving : the band steps forward a moment, then the name page
             if (leaving >= 0f)
@@ -235,7 +241,7 @@ namespace Tacetno433.Screens
                 Rectangle r = Shown(i);
                 float glow = UiMotion.EaseOut(chosen[i]);
                 if (glow > 0f) Gfx.DrawGlowBox(sb, new Rectangle(r.X - 60, r.Bottom - 40, r.Width + 120, 90), BandColumn.SpotOf(m) * (0.18f * glow));
-                BandColumn.Picture(sb, r, UiArt.BustOf(m), BandColumn.SpotOf(m), Math.Max(UiMotion.EaseOut(lit[i]), 0.6f * glow), Bright(i));
+                BandColumn.Picture(sb, r, portraits[i], BandColumn.SpotOf(m), Math.Max(UiMotion.EaseOut(lit[i]), 0.6f * glow), Bright(i));
             }
         }
 

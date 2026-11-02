@@ -49,6 +49,7 @@ namespace Tacetno433.Screens
         private string encoreLine = "";                  //   which level the win opened, "" when it opened none (made in Load)
         private float encoreCallW;
         private float time;
+        private readonly PortraitSet portraits = new PortraitSet(Portrait.Frame.Column);   // LEGEND ART (block C)
         private UiMotion titleMotion = new UiMotion();
 
         public CurtainCallScreen(bool runWon)
@@ -58,6 +59,7 @@ namespace Tacetno433.Screens
 
         public override void Load()
         {
+            portraits.Tell(Game.CurrentRun);                 // LEGEND ART : their life and stars on the portraits
             run = Game.CurrentRun;
             SaveFile.DeleteRun();          // the run is over either way
 
@@ -99,6 +101,7 @@ namespace Tacetno433.Screens
         public override void Update(float dt)
         {
             time += dt;
+            portraits.Update(dt);
 
             //A Lost Run : TACET's hole grows behind the band, its dark creeping in from the edges
             if (Dark != null)
@@ -194,11 +197,11 @@ namespace Tacetno433.Screens
                 float a = BowIn(i);
                 if (a <= 0f) continue;
                 Rectangle r = BowRect(i, count);
-                if (i == 0) BandColumn.Picture(sb, r, ArtBank.GalleryOf(run.Conductor), run.Conductor.Spot, won ? 0.6f : 0.2f, a);
+                if (i == 0) BandColumn.Picture(sb, r, run.Conductor, time, won ? 0.6f : 0.2f, a);       // SIGIL (block C)
                 else
                 {
                     Musician m = run.Order[i - 1];
-                    BandColumn.Picture(sb, r, UiArt.BustOf(m), BandColumn.SpotOf(m), won ? 0.4f : 0f, a * (won ? 1f : 0.8f));
+                    BandColumn.Picture(sb, r, portraits.Get(m), BandColumn.SpotOf(m), won ? 0.4f : 0f, a * (won ? 1f : 0.8f));
                 }
             }
         }

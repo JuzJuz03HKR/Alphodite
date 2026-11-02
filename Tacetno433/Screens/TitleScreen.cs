@@ -146,6 +146,8 @@ namespace Tacetno433.Screens
         private float clock;                    // seconds into the opening
         private bool revealing;                 // the first opening is playing, a key or a click skips it
         private bool opened;                    // the hole has thrown its first shock wave
+        private bool posterShowing;             // TITLE ART (block C item 2) : the team's poster opens the game the first time
+        private float posterClock;
 
         //Logo : TACET letter by letter, each letter's place measured once (Load)
         private static string[] logoLetters = { "T", "A", "C", "E", "T" };
@@ -198,6 +200,8 @@ namespace Tacetno433.Screens
 
             //Opening : the whole of it the first time, only the menu coming in after that
             revealing = FirstOpen;
+            posterShowing = revealing && UiArt.Poster != null;
+            posterClock = 0f;
             clock = FirstOpen ? 0f : LaterStart;
             opened = !FirstOpen;
             FirstOpen = false;
@@ -205,6 +209,18 @@ namespace Tacetno433.Screens
             spot = itemAt[selected];
             lastMouse = Input.MousePos;
             SoundBank.PlayMusic(Music.Title);
+        }
+
+        //Poster Covers : the poster is up and the title not yet showing under it
+        private bool PosterCovers
+        {
+            get { return posterShowing && posterClock < BattleRules.TitlePosterTime - BattleRules.TitlePosterFade; }
+        }
+
+        //Hole Scale : TITLE ART, with the team's logo the hole opens wider so its rim lies on the logo's ring
+        private static float HoleScale
+        {
+            get { return UiArt.Logo != null ? BattleRules.TitleLogoHole : 1f; }
         }
 
         //Orbit X : where the big ring round the hole crosses the row y, on its left side
@@ -224,6 +240,23 @@ namespace Tacetno433.Screens
         public override void Update(float dt)
         {
             time += dt;
+
+            //POSTER (block C item 2) : the first time, the team's poster opens the game. The title's own opening waits, then
+            //starts under the poster as it fades, so the poster's ring gives way to the hole. A key or a click skips to the fade.
+            if (posterShowing)
+            {
+                posterClock += dt;
+                bool skip = posterClock > 0.25f && (Input.MouseClicked() || Input.KeyPressed(Keys.Enter) || Input.KeyPressed(Keys.Space) || Input.KeyPressed(Keys.Escape));
+                if (skip) posterClock = Math.Max(posterClock, BattleRules.TitlePosterTime - BattleRules.TitlePosterFade);
+                if (posterClock >= BattleRules.TitlePosterTime) posterShowing = false;
+                if (PosterCovers)
+                {
+                    Dark.Update(dt, 0.3f);
+                    Dark.PlaceOnPage(new Vector2(BattleRules.TitleHoleX, BattleRules.TitleHoleY), 0f, 0f, 0f, 0f);
+                    return;
+                }
+                if (skip) return;                                  // the click that skipped it is not a choice
+            }
             clock += dt;
             int before = selected;
 
@@ -236,7 +269,7 @@ namespace Tacetno433.Screens
             float open = UiMotion.EaseBack(MathHelper.Clamp(clock / 0.5f, 0f, 1f));
             float breath = 1f + 0.04f * (float)Math.Sin(time * 0.8f);
             Dark.Update(dt, 0.3f);
-            Dark.PlaceOnPage(hole, BattleRules.TitleHoleRadius * open * breath, 0f, 0f, 0f);
+            Dark.PlaceOnPage(hole, BattleRules.TitleHoleRadius * HoleScale * open * breath, 0f, 0f, 0f);   // TITLE ART : wider under the logo
             if (!opened && clock > 0.12f)
             {
                 opened = true;
@@ -371,6 +404,11 @@ namespace Tacetno433.Screens
         //Back : what TACET's hole bends. The dark stage, the margins of a printed programme, and the score.
         public override void DrawBack(SpriteBatch sb)
         {
+            if (PosterCovers)
+            {
+                Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Color.Black);
+                return;
+            }
             Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.StageDeep);
             Gfx.DrawGlowBox(sb, new Rectangle(-300, -200, 1300, 900), Palette.Paper * 0.06f);
             Gfx.DrawGlow(sb, 300, 250, 300, Palette.Paper * 0.05f);
@@ -385,6 +423,7 @@ namespace Tacetno433.Screens
         //World : the rings round the hole, the dark bits it pulls in, and the logo
         public override void DrawWorld(SpriteBatch sb)
         {
+            if (PosterCovers) return;
             Dark.DrawDebris(sb, false);
             DrawRings(sb);
             DrawLogo(sb);
@@ -393,6 +432,7 @@ namespace Tacetno433.Screens
         //Lights : a dark stage with a light on the logo and one following the chosen line (TACET adds its own)
         public override void DrawLights(SpriteBatch sb)
         {
+            if (PosterCovers) return;
             float up = UiMotion.Between(clock, 0f, 0.6f);
             Gfx.DrawGlowBox(sb, new Rectangle(-260, -120, 1060, 960), Color.White * (HouseLight * up));
             Gfx.DrawGlow(sb, 260, 190, 520, Color.White * (LogoLight * up));
@@ -402,6 +442,7 @@ namespace Tacetno433.Screens
         //Glow : a halo under the chosen line's circle, so it seems to light the ring it sits on
         public override void DrawGlow(SpriteBatch sb)
         {
+            if (PosterCovers) return;
             float e = motion[selected].Shown * ItemIn(selected);
             if (e > 0f) Gfx.DrawGlow(sb, itemAt[selected].X, itemAt[selected].Y, 30f, Color.White * (0.5f * e));
         }
@@ -454,7 +495,8 @@ namespace Tacetno433.Screens
 
             //Inner Ring : starts from the top and goes round
             float inner = UiMotion.Between(clock, 0.15f, 0.6f);
-            Ornament.TickRing(sb, hx, hy, BattleRules.TitleHoleRadius * InnerRing, 72, time * 0.03f, inner, Palette.Paper * 0.35f);
+            float ringScale = UiArt.Logo != null ? 1.3f : 1f;                                    // TITLE ART : outside the logo's ring
+            Ornament.TickRing(sb, hx, hy, BattleRules.TitleHoleRadius * InnerRing * ringScale, 72, time * 0.03f, inner, Palette.Paper * 0.35f);
 
             //Middle Ring : faint, so the eye joins the hole to the menu
             float orbit = UiMotion.Between(clock, 0.25f, 0.7f);
@@ -485,6 +527,7 @@ namespace Tacetno433.Screens
         //Logo : the game name letter by letter, then 4'33 between its two lines
         private void DrawLogo(SpriteBatch sb)
         {
+            if (UiArt.Logo != null) return;                                                      // TITLE ART : the team's logo takes its place (DrawLogoArt)
             for (int i = 0; i < logoLetters.Length; i++)
             {
                 float a = UiMotion.Between(clock, 0.35f + i * 0.07f, 0.35f);
@@ -510,12 +553,64 @@ namespace Tacetno433.Screens
 
         public override void Draw(SpriteBatch sb)
         {
+            if (PosterCovers)
+            {
+                DrawPoster(sb);
+                return;
+            }
+            DrawLogoArt(sb);
             DrawHeader(sb);
             DrawMenu(sb);
             DrawNotice(sb);
             DrawSide(sb);
             DrawFooter(sb);
             askBox.Draw(sb);
+            DrawPoster(sb);                                                                      // fading out over the title
+        }
+
+        //Logo Art (TITLE ART, block C item 2) : the team's logo laid on the hole, its ring on the hole's rim, its light added
+        //so its black is the page's black (no box round it). Until the file comes, the logo the code writes (DrawLogo).
+        private void DrawLogoArt(SpriteBatch sb)
+        {
+            Texture2D logo = UiArt.Logo;
+            if (logo == null) return;
+            float a = UiMotion.Between(clock, 0.35f, 0.7f);
+            if (a <= 0f) return;
+            float ring = BattleRules.TitleHoleRadius * BattleRules.TitleLogoHole * 1.08f;
+            float w = 2f * ring / BattleRules.TitleLogoRing;
+            float h = w * logo.Height / (float)logo.Width;
+            Rectangle r = new Rectangle((int)(BattleRules.TitleHoleX - w / 2f), (int)(BattleRules.TitleHoleY - h * BattleRules.TitleLogoRingY), (int)w, (int)h);
+            sb.End();
+            sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearClamp, null, null, null, Sharp.Transform);
+            sb.Draw(logo, r, Color.White * a);
+            sb.End();
+            Sharp.Begin(sb);
+        }
+
+        //Poster (TITLE ART) : the team's poster in the middle, as tall as the page allows, pushing in slowly, its light added
+        //over black. It fades out over the title's own opening.
+        private void DrawPoster(SpriteBatch sb)
+        {
+            Texture2D poster = UiArt.Poster;
+            if (!posterShowing || poster == null) return;
+            float fadeIn = MathHelper.Clamp(posterClock / BattleRules.TitlePosterFade, 0f, 1f);
+            float fadeOut = MathHelper.Clamp((BattleRules.TitlePosterTime - posterClock) / BattleRules.TitlePosterFade, 0f, 1f);
+            float a = UiMotion.EaseOut(fadeIn) * fadeOut;
+            float grow = 1f + 0.03f * (posterClock / BattleRules.TitlePosterTime);
+            float h = (TacetGame.ScreenH - 40f) * grow;
+            float w = h * poster.Width / (float)poster.Height;
+            if (w > TacetGame.ScreenW - 40f)
+            {
+                h *= (TacetGame.ScreenW - 40f) / w;
+                w = TacetGame.ScreenW - 40f;
+            }
+            Rectangle r = new Rectangle((int)(TacetGame.ScreenW / 2f - w / 2f), (int)(TacetGame.ScreenH / 2f - h / 2f), (int)w, (int)h);
+            if (PosterCovers) Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Color.Black);
+            sb.End();
+            sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearClamp, null, null, null, Sharp.Transform);
+            sb.Draw(poster, r, Color.White * a);
+            sb.End();
+            Sharp.Begin(sb);
         }
 
         //Header : the company at the top, and the hook line under the logo
@@ -527,8 +622,9 @@ namespace Tacetno433.Screens
             Ornament.Crosses(sb, 740, 44, 4, 1, 16, Palette.LineGrey * a);
 
             float hook = UiMotion.Between(clock, 0.85f, 0.4f);
-            Gfx.Text(sb, Game.StoryFont, "You do not play the notes.", 86, 296, Palette.Highlight * hook, TextSize.Story);
-            Gfx.Text(sb, Game.StoryFont, "You lead the band that does.", 86, 318, Palette.PaperDim * hook, TextSize.Story);
+            float hookY = UiArt.Logo != null ? 196f : 296f;                                       // TITLE ART : up where the written logo was
+            Gfx.Text(sb, Game.StoryFont, "You do not play the notes.", 86, hookY, Palette.Highlight * hook, TextSize.Story);
+            Gfx.Text(sb, Game.StoryFont, "You lead the band that does.", 86, hookY + 22f, Palette.PaperDim * hook, TextSize.Story);
         }
 
         //Menu : the lines on the big ring, sliding down it into place one after another

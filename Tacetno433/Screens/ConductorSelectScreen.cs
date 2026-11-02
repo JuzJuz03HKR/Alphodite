@@ -381,7 +381,7 @@ namespace Tacetno433.Screens
             Ui.SlantCut(sb, null, r, slant, Color.Lerp(Palette.Panel, Palette.Void, hand) * a);
             Texture2D art = ArtBank.GalleryOf(c);
             if (art != null) Ui.SlantCut(sb, art, r, slant, Color.White * (MathHelper.Lerp(0.72f, 1f, e) * a));
-            else Ui.SlantSlot(sb, r, slant, a * (1f - hand));
+            else LegendArt.Sigil(sb, c, r, time, MathHelper.Lerp(0.6f, 1f, e) * a * (1f - hand));   // SIGIL (block C) : their mark until the painting comes
 
             //Colour Rise : the conductor's own colour, up from the bottom (menu6)
             float rise = e * (1f - hand);

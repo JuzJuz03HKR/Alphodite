@@ -43,7 +43,7 @@ namespace Tacetno433.Screens
         private float bossCutLength;
         private float bossBarIn;               // BOSS BAR : 0 hidden .. 1 in place
         private float bossHalfBreak;           // THE TURN : the half mark breaking, 1 = just now
-        private Texture2D bossPicture;         // the cut in's picture, null for an empty frame
+        private Portrait bossFace;             // LEGEND ART (block C) : the boss drawn by the code in THE TELL and THE STRIKE
 
         //Boss Plate : where its marks go, on the screen under the BOSS BAR. Its next move is the row just above it (IntentRow :
         //22 over its top), its STUN, BURN and CUT IN icons the row under it, from the bar's left.
@@ -76,10 +76,23 @@ namespace Tacetno433.Screens
             bossBigLine = e.BigName.Length > 0 ? Words.BigAttack + "   " + e.BigName : "";
             bossPhaseLine = e.PhaseLine;
             bossMovement = run != null ? MovementList.Names[Math.Max(0, Math.Min(MovementList.Names.Length - 1, run.Movement))] : "";
-            bossPicture = FrameArt.Picture(Game.GraphicsDevice, "Bosses", ArtBank.Key(e.Name) + "_cutin");
+            bossFace = new Portrait(Figure.Sort.Boss, ArtBank.Key(e.Name), Color.White, Color.White, Portrait.Frame.Whole, 77);
             bossBarIn = 0f;
             StartBoss(BossMoment.Entrance, BattleRules.BossEntranceTime, false);
             actionCam.HoldFor(BossAt(), BattleRules.CamZoomMost * 0.5f, BattleRules.BossEntranceTime * 0.75f);
+        }
+
+        //Step Boss Face (LEGEND ART, block C) : the cut in's boss follows the one on the stage, its life (CRACKS) and its white
+        //shell (THE MONUMENT, broken at THE TURN), and breathes
+        private void StepBossFace(float dt)
+        {
+            if (bossFace == null) return;
+            Figure onStage = ArtOf(boss).Figure;
+            bossFace.Figure.Life = boss.Hp / (float)Math.Max(1, boss.MaxHp);
+            bool shell = onStage == null || onStage.ShellOn;
+            bossFace.Figure.TurnPending = shell;
+            if (!shell && bossFace.Figure.ShellOn) bossFace.Figure.BreakShell(false);
+            bossFace.Update(dt);
         }
 
         //Start Boss : a moment begins. then : NextStep was stopped for it and goes on afterwards.
@@ -95,6 +108,7 @@ namespace Tacetno433.Screens
         private bool UpdateBoss(float dt)
         {
             if (boss == null) return false;
+            StepBossFace(dt);
             if (bossHalfBreak > 0f) bossHalfBreak = Math.Max(0f, bossHalfBreak - dt * 0.8f);
             bool entering = bossMoment == BossMoment.Entrance && bossClock < bossLength - 0.7f;
             if (!entering) bossBarIn = Math.Min(1f, bossBarIn + dt * 2.5f);
@@ -292,8 +306,7 @@ namespace Tacetno433.Screens
             //Its picture on the right, taller than the band (an empty frame until the art)
             Rectangle portrait = new Rectangle((int)(offset + 930), 170, 230, 220);
             Gfx.Rect(sb, portrait, Palette.Void * a);
-            if (bossPicture != null) sb.Draw(bossPicture, portrait, Color.White * a);
-            else ArtSlot.Draw(sb, portrait, Palette.Paper, 0.8f * a);
+            bossFace.Draw(sb, portrait, a);
 
             int x = (int)offset + 150;
             Ui.Tag(sb, Words.BigAttack, x, 234, true, a);
@@ -358,8 +371,7 @@ namespace Tacetno433.Screens
             //Portrait : on the right, breaking out of the band top and bottom
             Rectangle portrait = new Rectangle(x + 820, 160, 360, 400);
             Gfx.Rect(sb, portrait, Palette.Void);
-            if (bossPicture != null) sb.Draw(bossPicture, portrait, Color.White * dim);
-            else ArtSlot.Draw(sb, portrait, Palette.Paper, dim);
+            bossFace.Draw(sb, portrait, dim);
 
             //Shards : streaks thrown out of the portrait
             float cx = portrait.Center.X;

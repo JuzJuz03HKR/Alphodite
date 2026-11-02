@@ -35,6 +35,25 @@ namespace Tacetno433.Core
             Ui.SlantEdge(sb, r, Slant, Color.Lerp(Palette.LineGrey * 0.55f, Palette.Paper, lit) * alpha);
         }
 
+        //Picture (LEGEND ART, Beta1 2 Nov, block C item 3) : the window with the legend the code draws standing in it, alive
+        //(Core/LegendArt.cs, the user 13.106 : only the Maestro page has the team's art). Their colour rises behind them.
+        public static void Picture(SpriteBatch sb, Rectangle r, Portrait who, Color spot, float lit, float alpha)
+        {
+            Ui.SlantCut(sb, null, r, Slant, Palette.Panel * alpha);
+            Ui.ColourRise(sb, r, Slant, spot, 0.2f + 0.34f * lit, alpha);
+            if (who != null) who.Draw(sb, r, MathHelper.Lerp(0.78f, 1f, lit) * alpha);
+            Ui.SlantEdge(sb, r, Slant, Color.Lerp(Palette.LineGrey * 0.55f, Palette.Paper, lit) * alpha);
+        }
+
+        //Picture (SIGIL, block C item 3) : a conductor's column, their mark drawn by the code (Core/LegendArt.cs)
+        public static void Picture(SpriteBatch sb, Rectangle r, Conductor c, float time, float lit, float alpha)
+        {
+            Ui.SlantCut(sb, null, r, Slant, Palette.Panel * alpha);
+            LegendArt.Sigil(sb, c, r, time, MathHelper.Lerp(0.8f, 1f, lit) * alpha);
+            if (lit > 0f) Ui.ColourRise(sb, r, Slant, c.Spot, 0.3f * lit, alpha);
+            Ui.SlantEdge(sb, r, Slant, Color.Lerp(Palette.LineGrey * 0.55f, Palette.Paper, lit) * alpha);
+        }
+
         //Draw : a musician's whole column, the picture and the words under it. dim : waiting on the bench.
         public static void Draw(SpriteBatch sb, Rectangle r, Musician m, float lit, float alpha, bool dim)
         {

@@ -35,6 +35,7 @@ namespace Tacetno433.Screens
         private float sharpenTime;                 // seconds since it went up
         private bool nothingToDo;                  // every weapon is at its top tier
         private float time;
+        private readonly PortraitSet portraits = new PortraitSet(Portrait.Frame.Column);   // LEGEND ART (block C)
         private string[] nowLabel = new string[0]; // "POWER 7" now and "TO 9" after, made when the page opens and after the upgrade
         private string[] nextLabel = new string[0];
         private string resultLine = "";
@@ -48,6 +49,7 @@ namespace Tacetno433.Screens
 
         public override void Load()
         {
+            portraits.Tell(Game.CurrentRun);                 // LEGEND ART : their life and stars on the portraits
             RunState run = Game.CurrentRun;
             int count = run.Roster.Count;
             columns = new Rectangle[count];
@@ -97,6 +99,7 @@ namespace Tacetno433.Screens
         public override void Update(float dt)
         {
             time += dt;
+            portraits.Update(dt);
             if (sharpened != null) sharpenTime += dt;
             RunState run = Game.CurrentRun;
 
@@ -193,7 +196,7 @@ namespace Tacetno433.Screens
             float e = UiMotion.Between(time, 0f, 0.6f);
             Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.StageDeep);
             Gfx.DrawGlowBox(sb, new Rectangle(-120, 520, 1520, 260), Palette.Paper * 0.05f);
-            ArtBank.DrawOrSlot(sb, ArtBank.Luthier, artBox, Palette.Paper, e);
+            PlaceArt.Draw(sb, artBox, PlaceKind.Workshop, time, e, false);                 // PLACE ART (block C) : the bench drawn by the code
 
             for (int i = 0; i < columns.Length; i++)
             {
@@ -201,7 +204,7 @@ namespace Tacetno433.Screens
                 Rectangle r = Shown(i);
                 float a = ColumnIn(i) * (Done && i != sharpenedAt ? 0.55f : 1f);
                 if (i == sharpenedAt) Gfx.DrawGlowBox(sb, new Rectangle(r.X - 60, r.Bottom - 40, r.Width + 120, 90), BandColumn.SpotOf(m) * 0.2f);
-                BandColumn.Picture(sb, r, UiArt.BustOf(m), BandColumn.SpotOf(m), Flood(i), a);
+                BandColumn.Picture(sb, r, portraits.Get(m), BandColumn.SpotOf(m), Flood(i), a);
                 if (!Done) Ui.NumberKey(sb, i, r.X + 14, r.Y + 20, a);                          // NUMBER KEYS
             }
         }

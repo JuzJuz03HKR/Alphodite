@@ -55,7 +55,7 @@ namespace Tacetno433.Core
         private static string[] routeFile = { "battle", "event", "shop", "elite", "rest", "boss", "crossing", "luthier", "treasure" };
 
         //Art Load : called once from LoadContent
-        public static void Load(ContentManager content)
+        public static void Load(ContentManager content, GraphicsDevice device)
         {
             Loaded = 0;
 
@@ -83,10 +83,12 @@ namespace Tacetno433.Core
             for (int i = 0; i < conductors; i++)
             {
                 string key = ConductorKey(ConductorList.All[i]);
-                CutIn[i] = Picture(content, "Art/Conductors/cutin_" + key);
-                ConductorPortrait[i] = Picture(content, "Art/Conductors/portrait_" + key);
-                ConductorFace[i] = Picture(content, "Art/Conductors/face_" + key);
-                ConductorGallery[i] = Picture(content, "Art/Conductors/gallery_" + key);
+                //CONDUCTOR FILES (block C item 5, 2 Nov) : read straight from Content/Art/Conductors/ like the pages' art
+                //(Core/UiArt.cs) : drop the file in, Rebuild, done. No Content.mgcb entry. Only the Maestro pages show them.
+                CutIn[i] = Direct(device, "Conductors", "cutin_" + key);
+                ConductorPortrait[i] = Direct(device, "Conductors", "portrait_" + key);
+                ConductorFace[i] = Direct(device, "Conductors", "face_" + key);
+                ConductorGallery[i] = Direct(device, "Conductors", "gallery_" + key);
             }
 
             Enemy = new Texture2D[EnemyList.All.Length];
@@ -105,6 +107,24 @@ namespace Tacetno433.Core
             Rest = Picture(content, "Art/Places/rest");
             Luthier = Picture(content, "Art/Places/luthier");
             Baton = Picture(content, "Art/Baton/baton");
+        }
+
+        //Direct : one optional PNG read straight from Content/Art/<folder>/<name>.png (the csproj copies the folder next to
+        //the game). Null when it is not there yet, or cannot be read.
+        public static Texture2D Direct(GraphicsDevice device, string folder, string name)
+        {
+            try
+            {
+                string path = Path.Combine(AppContext.BaseDirectory, "Content", "Art", folder, name + ".png");
+                if (!File.Exists(path)) return null;
+                Texture2D picture = Texture2D.FromFile(device, path, DefaultColorProcessors.PremultiplyAlpha);
+                Loaded++;
+                return picture;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
         //Picture : one optional file. Null when it is not there yet, or cannot be read.

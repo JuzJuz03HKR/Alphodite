@@ -354,11 +354,9 @@ namespace Tacetno433.Screens
                 if (s.Shield) line = Join(line, "THEIR HITS ON " + (who != null ? who.Name : "DUPORT") + " x" + Share(cardAim.Share));
                 if (s.Lesson) line = Join(line, Words.Focus + " : NEXT SKILL x" + Share(cardAim.Share));
 
-                //Paid in life : THE DEVIL'S BARGAIN short of BREATH (as it stands while the bar is written), THE PACT every time
-                int life = 0;
-                if (who != null && battle.PaysInLife(who) && battle.BreathFree < s.Cost)
-                    life += (s.Cost - Math.Max(0, battle.BreathFree)) * BattleRules.TurnPaganiniLife;
-                if (battle.Pacts(who)) life += Math.Max(0, Math.Min(BattleRules.TurnPactLife, who.Hp - 1));     // THE PACT (GIFT)
+                //Paid in life : THE DEVIL'S BARGAIN short of BREATH (as it stands while the bar is written), THE PACT every time.
+                //TurnBattle.LifePrice is what the command button under the card shows too (block C item 7)
+                int life = battle.LifePrice(who, s, out _);
                 if (life > 0) line = Join(line, "PAYS " + life + " LIFE");
             }
             cardLine = line;
