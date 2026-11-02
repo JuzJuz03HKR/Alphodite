@@ -80,8 +80,38 @@ namespace Tacetno433.Core
             if (cornerCount + cornersNeeded >= MaxCorners || orderCount + cornersNeeded * 6 >= order.Length) Flush();
         }
 
+        //SILHOUETTE (round 6 part 4) : every corner black, keeping only how much it is seen (its alpha). A figure drawn this
+        //way into the GLOW picture hides the light behind it (TACET's hole, its seam) whatever its own colours are.
+        public static bool Silhouette;
+
+        //MIRROR (round 6 part 4) : the shapes upside down under a floor line, fading out as they go down, like a figure seen
+        //in a glossy black floor (the lid of a piano). MirrorAt turns it on for one figure, MirrorOff turns it off.
+        private static bool mirror;
+        private static float mirrorFloor;
+        private static float mirrorDepth;
+
+        public static void MirrorAt(float floorY, float depth)
+        {
+            mirror = true;
+            mirrorFloor = floorY;
+            mirrorDepth = Math.Max(1f, depth);
+        }
+
+        public static void MirrorOff()
+        {
+            mirror = false;
+        }
+
+        //Corner : one corner of a triangle. SILHOUETTE and MIRROR change it here, so every shape gets them without knowing.
         private static short Corner(Vector2 at, Color color)
         {
+            if (Silhouette) color = Color.Black * (color.A / 255f);
+            if (mirror)
+            {
+                float up = mirrorFloor - at.Y;                                      // as high above the floor as it shows deep in it
+                at.Y = mirrorFloor + Math.Max(0f, up);                              // (what hangs below the floor does not show)
+                color *= up >= 0f ? Math.Max(0f, 1f - up / mirrorDepth) : 0f;
+            }
             corners[cornerCount].Position = new Vector3(at, 0f);
             corners[cornerCount].Color = color;
             return (short)cornerCount++;

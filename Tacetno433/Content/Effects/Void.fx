@@ -51,6 +51,7 @@ float Swirl;        // LENSING : how far the world turns around the hole at its 
 float Danger;       // 0..1 how close the band is to losing : wilder and brighter
 float Time;
 float4 Wave;        // SHOCK WAVE : x, y (pixels), its radius now (pixels), strength 0..1
+float Grain;        // STIPPLE : how strong the grains of light round the hole are (1 = full, a fight has them fainter)
 float Fine;         // 0 = the battle : the backdrop is pixel art drawn x2, read once per block of 2 x 2
                     // 1 = another page (Beta1 screens) : the backdrop has lines one pixel thin, so every screen pixel reads
                     //     its own spot, moved as far as its block bends (a block's middle falls between two pixels,
@@ -233,7 +234,7 @@ float4 VoidGlowPS(VertexShaderOutput input) : COLOR0
     //through made white specks all over the screen, round 4)
     float halo = saturate(1.0 - outside / (Radius * 0.6)) * step(0.0, outside);
     float grain = 1.0 - step(halo * halo * 0.2, Rand(floor(p * 0.5) + floor(Time * 10.0) * 0.731));
-    g += grain * 0.6;
+    g += grain * 0.6 * Grain;
 
     //SHOCK WAVE : the ring of a hit
     float wd = length(p - Wave.xy);

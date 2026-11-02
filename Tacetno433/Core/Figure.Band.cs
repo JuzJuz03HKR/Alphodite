@@ -549,10 +549,18 @@ namespace Tacetno433.Core
             return new Color((byte)(c.R * shade), (byte)(c.G * shade), (byte)(c.B * shade), c.A) * alpha;
         }
 
-        //Draw Silhouette : the band's shape in black (see SILHOUETTE)
+        //Draw Silhouette : the figure's shape in black (see SILHOUETTE). TACET's figures (round 6 part 4) go black through
+        //Shapes.Silhouette, so the light of the hole behind them stops at their edge.
         public void DrawSilhouette(float alpha)
         {
-            if (Of != Sort.Musician || alpha <= 0.005f) return;
+            if (alpha <= 0.005f) return;
+            if (Of != Sort.Musician)
+            {
+                Shapes.Silhouette = true;
+                DrawTacet(alpha, 0f, 1f, 0f);
+                Shapes.Silhouette = false;
+                return;
+            }
             silhouette = true;
             DrawBand(alpha, 0f);
             silhouette = false;
@@ -1478,6 +1486,7 @@ namespace Tacetno433.Core
         private void GlowBand(SpriteBatch sb, float alpha)
         {
             SetFrame();
+            GlowFloor(sb, 0.5f, Tint * (BattleRules.FigureFloorLight * alpha));          // FLOOR LIGHT : its own colour on the floor under it
             float power = BattleRules.FigureGlow * alpha;
             float strike = move == "attack" ? Math.Max(0f, Strike()) : 0f;
             float tier = 1f + 0.25f * Math.Min(Cues.Stars0, RehearsalList.Most);

@@ -764,6 +764,7 @@ namespace Tacetno433.Screens
             PostChain.BeginGlowTarget(device);
             dark.DrawGlow(device, sb, PostChain.Back);
             DrawFrontSilhouette(device, cam);                     // MATH ART : the musician in front hides the seam's light behind it
+            DrawTacetSilhouettes(device, cam);                    //   and TACET's figures hide the hole's light behind them
             sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearClamp, null, null, null, Layer(cam, 3));
             effects.DrawBlows(sb);
             effects.DrawSparks(sb);
@@ -882,6 +883,7 @@ namespace Tacetno433.Screens
             {
                 sb.End();
                 Shapes.Begin(sb.GraphicsDevice, Layer(cam, 3), Sharp.Dot);
+                DrawTacetReflections();
                 DrawTacetFigures();
                 Shapes.End();
                 sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, Layer(cam, 3));
@@ -1100,19 +1102,23 @@ namespace Tacetno433.Screens
             float sink = looks.TryGetValue(fore, out down) && down.Fall > 0f ? Smooth(down.Fall) : 1f;   // STAND IN MOVES : it fades as it sinks
             float a = SwapAlpha() * (fore.Down ? MathHelper.Lerp(1f, BattleRules.StageDownFade, sink) : 1f);
 
-            Gfx.DrawGlowBox(sb, new Rectangle(r.X - 20, r.Bottom - 30, r.Width + 40, 60), Color.Black * (0.7f * a));
             Art art = ArtOf(fore);
             if (art.Figure != null)                                                    // MATH ART : the legend drawn by the code, smooth (BAND LOOK)
             {
+                Figure figure = art.Figure;                                            // its shadow under its feet (WHOLE LEGEND : they stand over the box's bottom)
+                float wide = figure.Height * 0.6f, tall = figure.Height * 0.09f;
+                Gfx.DrawGlowBox(sb, new Rectangle((int)(figure.Feet.X - wide * 0.5f), (int)(figure.Feet.Y - tall * 0.5f), (int)wide, (int)tall), Color.Black * (0.7f * a));
                 Look lit;
                 float flash = looks.TryGetValue(fore, out lit) ? lit.Flash * Flashing : 0f;
                 sb.End();
                 Shapes.Begin(sb.GraphicsDevice, Layer(stageCam, 3), Sharp.Dot);
-                art.Figure.Draw(a, flash, 1f, 0f);
+                figure.DrawReflection(a, 1f);                                          // MIRROR : the legend in the glossy floor
+                figure.Draw(a, flash, 1f, 0f);
                 Shapes.End();
                 sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, Layer(stageCam, 3));
                 return;
             }
+            Gfx.DrawGlowBox(sb, new Rectangle(r.X - 20, r.Bottom - 30, r.Width + 40, 60), Color.Black * (0.7f * a));
             if (art.Set != null) art.Player.Draw(sb, art.Set, new Vector2(r.Center.X, r.Bottom), 2, Color.White * a);
             else
             {
@@ -1160,6 +1166,50 @@ namespace Tacetno433.Screens
                 figure.Shift = Vector2.Zero;
                 figure.Draw(alpha, flash, light, mark);
             }
+        }
+
+        //Draw Tacet Reflections (round 6 part 4, MIRROR) : every enemy the code draws, upside down and faint in the glossy floor
+        //under it, back to front, before the figures themselves (Figure.DrawReflection)
+        private void DrawTacetReflections()
+        {
+            for (int i = battle.Enemies.Count - 1; i >= 0; i--)
+            {
+                Fighter e = battle.Enemies[i];
+                Figure figure = ArtOf(e).Figure;
+                if (figure == null) continue;
+                float alpha, light, flash, mark;
+                FigureLookOf(e, out alpha, out light, out flash, out mark);
+                figure.Shift = Vector2.Zero;
+                figure.DrawReflection(alpha, light);
+            }
+        }
+
+        //Tacet Silhouettes (round 6 part 4) : every enemy the code draws, in black into the GLOW picture over the light of
+        //TACET's hole, so the rim, its rays and its grains pass behind the body instead of across it (it stands in front of the
+        //hole, the user 13.90 : less sparkle where the fighters are). Their own light is added after (DrawFigureGlows).
+        private void DrawTacetSilhouettes(GraphicsDevice device, Vector2 cam)
+        {
+            if (!DrawsTacet()) return;
+            Shapes.Begin(device, Layer(cam, 3), Sharp.Dot);
+            for (int i = battle.Enemies.Count - 1; i >= 0; i--)
+            {
+                Fighter e = battle.Enemies[i];
+                Figure figure = ArtOf(e).Figure;
+                if (figure == null) continue;
+                float alpha, light, flash, mark;
+                FigureLookOf(e, out alpha, out light, out flash, out mark);
+                figure.Shift = Vector2.Zero;
+                figure.DrawSilhouette(alpha);
+            }
+            Shapes.End();
+        }
+
+        //Fore Feet Y : where the musician in front stands on the floor. MATH ART : the legend stands over its box's bottom
+        //(WHOLE LEGEND), so its pool of light goes under its feet, not under the commands
+        private float ForeFeetY()
+        {
+            Figure figure = fore != null ? ArtOf(fore).Figure : null;
+            return figure != null ? figure.Feet.Y : foreBox.Bottom;
         }
 
         //Front Silhouette : the musician in front drawn in black into the GLOW picture, over the light of TACET's seam, so the
@@ -1255,7 +1305,7 @@ namespace Tacetno433.Screens
             Rectangle f = foreBox;
             float spot = BattleRules.StageSpot * (fore != null ? SwapAlpha() * 0.5f + 0.5f : 0.5f);
             Gfx.DrawGlowBox(sb, new Rectangle(f.X - 120 - (int)near.X, f.Y - 120 - (int)near.Y, f.Width + 240, f.Height + 160), Color.White * spot);
-            Gfx.DrawGlowBox(sb, new Rectangle(f.X - 160 - (int)floor.X, f.Bottom - 70 - (int)floor.Y, f.Width + 320, 140), Color.White * (spot * 0.8f));
+            Gfx.DrawGlowBox(sb, new Rectangle(f.X - 160 - (int)floor.X, (int)ForeFeetY() - 70 - (int)floor.Y, f.Width + 320, 140), Color.White * (spot * 0.8f));
 
             //House Lights : the floor near the band is lit, so TACET's dark can be seen eating the light as it comes
             Gfx.DrawGlowBox(sb, new Rectangle(-300 - (int)floor.X, Horizon + 60 - (int)floor.Y, TacetGame.ScreenW + 600, 760), Color.White * BattleRules.StageFloorLight);

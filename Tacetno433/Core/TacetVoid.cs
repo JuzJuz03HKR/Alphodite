@@ -61,7 +61,7 @@ namespace Tacetno433.Core
         private float crackClock;
 
         //Shader Settings : the shader's numbers, found once by name
-        private EffectParameter pNoise, pScreen, pHole, pRadius, pPoolBase, pPoolSize, pSpike, pSwirl, pDanger, pTime, pWave, pFine;
+        private EffectParameter pNoise, pScreen, pHole, pRadius, pPoolBase, pPoolSize, pSpike, pSwirl, pDanger, pTime, pWave, pFine, pGrain;
 
         public TacetVoid()
         {
@@ -310,6 +310,7 @@ namespace Tacetno433.Core
                 pTime = e.Parameters["Time"];
                 pWave = e.Parameters["Wave"];
                 pFine = e.Parameters["Fine"];
+                pGrain = e.Parameters["Grain"];
             }
             pNoise.SetValue(Fx.Noise);
             pScreen.SetValue(new Vector2(TacetGame.ScreenW, TacetGame.ScreenH));
@@ -323,6 +324,14 @@ namespace Tacetno433.Core
             pTime.SetValue(time);
             pWave.SetValue(new Vector4(waveAt.X, waveAt.Y, waveAge * BattleRules.StageVoidWaveSpeed, WaveStrength()));
             if (pFine != null) pFine.SetValue(onPage ? 1f : 0f);
+            if (pGrain != null) pGrain.SetValue(GrainNow);
+        }
+
+        //Grain Now : how strong the grains of light and the bright DEBRIS are (STIPPLE). Fainter in a fight (round 6 part 4),
+        //so TACET's cores in front stay the whitest thing on the stage. The other pages keep them full.
+        private float GrainNow
+        {
+            get { return onPage ? 1f : BattleRules.StageVoidGrain; }
         }
 
         //Wave Strength : the shock wave fades as it runs out
@@ -396,7 +405,7 @@ namespace Tacetno433.Core
 
                 float fade = Math.Min(1f, cycle * 6f) * Math.Min(1f, (1f - cycle) * 5f);
                 Vector2 at = Snap(Hole + local);
-                if (bright) Gfx.Rect(sb, at.X, at.Y, 2f, 2f, Color.White * (0.7f * fade));
+                if (bright) Gfx.Rect(sb, at.X, at.Y, 2f, 2f, Color.White * (0.7f * fade * GrainNow));
                 else
                 {
                     float size = 2f + 2f * (int)(c * 3f);

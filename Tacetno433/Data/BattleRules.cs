@@ -457,6 +457,10 @@
         public static float FigureShardHang = 0.35f;      // SILENCED : the shards fly and bounce this long before the hole pulls them in
         public static float FigureShardPull = 22f;        //   how hard the hole pulls
         public static float FigureShardBounce = 0.35f;    //   a shard hitting the floor keeps this share of its speed
+        //THE STAGE (round 6 part 4, 2 Nov, docs/BETA1_DIRECTION.md 32.20) : what the floor shows of the figures standing on it
+        public static float FigureMirrorAlpha = 0.2f;     // MIRROR : each figure shows upside down in the glossy black floor under it, this strong (as in the sketch)
+        public static float FigureMirrorDepth = 0.17f;    //   fading out this share of its height under its feet
+        public static float FigureFloorLight = 0.1f;      // FLOOR LIGHT : the soft pool of light each figure gives the floor under it (a legend's in its own colour)
 
         //Hit Feel (Beta1 round 4) : what a blow looks like where it lands (Core/HitFx.cs). Nothing flies : the musician
         //strikes and the light happens on the enemy. Strings SLASH, winds SHOT, percussion SMASH, the SIGNATURE CROSS.
@@ -525,6 +529,8 @@
         public static float StageVoidWaveTime = 0.55f;    //   how long it lasts (seconds)
         public static float StageVoidCracks = 2.5f;       // CRACKS a second when calm (up to twice as many in danger)
         public static int StageVoidDebris = 34;           // DEBRIS : bits of the stage turning around the hole
+        public static float StageVoidGrain = 0.7f;        // STIPPLE : the grains of light round the hole and the bright DEBRIS are this strong in a fight
+                                                          //   (round 6 part 4 : a little fainter, so no spot on the stage is as white as TACET's cores)
         public static float StageVoidEngulfFrom = 0.62f;  // ENGULF : past this SHARE the dark creeps in from the screen's edges
 
         //UI Feel (Beta1 screens, 28 Oct) : how every page other than the battle looks and moves (docs/SCREENS_LEVEL_UP.md 3.4

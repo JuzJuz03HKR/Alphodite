@@ -918,7 +918,8 @@ namespace Tacetno433.Core
         }
 
         //Glow Look : the four looks' lights into the GLOW picture (they feed the bloom) : the core strongest (and stronger on
-        //its blow), the slit, the light under THE WEIGHT, the choir's mouths when it sings, the light on the floor, the cracks
+        //its blow), the slit, the light under THE WEIGHT, the choir's mouths when it sings, the cracks (its light on the floor is
+        //GlowFloor, in GlowTacet)
         private void GlowLook(SpriteBatch sb, float power)
         {
             SetLook();
@@ -948,8 +949,6 @@ namespace Tacetno433.Core
                     Gfx.DrawGlow(sb, at.X, at.Y, 0.14f * h, Color.White * (power * 0.5f));
                     break;
             }
-            at = SF(120, 262);                                                     // the light it gives the floor
-            Gfx.DrawGlowBox(sb, new Rectangle((int)(at.X - 0.28f * h), (int)(at.Y - 0.02f * h), (int)(0.56f * h), (int)(0.04f * h)), Color.White * (power * 0.45f));
             for (int k = 0; k < crackSeen && k < 3; k++)
             {
                 at = CrackSpot(k);
@@ -1520,6 +1519,10 @@ namespace Tacetno433.Core
         //Glow : TACET
         //======================================================================================
 
+        //Boss Floor Wide : how wide the light each boss gives the floor is, a share of its height (the sketch's haze under each
+        //card : REQUIEM, THE NAMELESS MASTER, THE DEVIL'S STRING, THE DEAF CROWN, THE STAFF, THE BLIND CANTOR)
+        private static readonly float[] BossFloorWide = { 0.63f, 0.68f, 0.58f, 0.86f, 0.72f, 0.81f };
+
         private void GlowTacet(SpriteBatch sb, float alpha)
         {
             if (down && shardCount == 0) return;
@@ -1538,6 +1541,7 @@ namespace Tacetno433.Core
                 }
                 return;
             }
+            GlowFloor(sb, IsLook ? 0.56f : BossFloorWide[design - Requiem], Color.White * (BattleRules.FigureFloorLight * alpha));   // FLOOR LIGHT
             if (IsLook)
             {
                 GlowLook(sb, power);

@@ -461,5 +461,25 @@ namespace Tacetno433.Core
             if (Of == Sort.Musician) GlowBand(sb, alpha);
             else GlowTacet(sb, alpha);
         }
+
+        //Draw Reflection (round 6 part 4) : the figure upside down in the glossy floor under its feet, faint, fading out as it
+        //goes down (MIRROR in Core/Shapes.cs, as in the sketch). Drawn before the figure, so it stands on its reflection.
+        //No hit flash and no STAGGERED edge show in the floor.
+        public void DrawReflection(float alpha, float light)
+        {
+            if (alpha <= 0.005f) return;
+            Shapes.MirrorAt(Feet.Y + Shift.Y, Height * BattleRules.FigureMirrorDepth);
+            Draw(alpha * BattleRules.FigureMirrorAlpha, 0f, light, 0f);
+            Shapes.MirrorOff();
+        }
+
+        //Glow Floor (round 6 part 4) : the light a figure gives the floor it stands on, a flat soft pool under its feet, into
+        //the GLOW picture. wide is a share of its height.
+        private void GlowFloor(SpriteBatch sb, float wide, Color light)
+        {
+            Vector2 at = Feet + Shift;
+            float w = wide * Height, tall = 0.04f * Height;
+            Gfx.DrawGlowBox(sb, new Rectangle((int)(at.X - w * 0.5f), (int)(at.Y - tall * 0.5f), (int)w, (int)tall), light);
+        }
     }
 }
