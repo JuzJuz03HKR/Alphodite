@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 2 พ.ย. แชท /system Polish and Publish7 (ต่อจาก Polish and Publish4 ที่หยุดแล้ว) | ก้อน F3 ภาษาไทยให้จบ (เก็บประโยคที่ยังไม่แปล แคปตรวจ) → F2 เนื้อเรื่องสั้น → ก้อน G ที่เหลือ (เงิน ความโหดทวีคูณ) → รีวิว polish → H4 | `Content/Text/thai.txt` `docs/lang/` `Core/ThaiText.cs` `Data/Lang.cs` `Core/Gfx.cs` `Screens/*` ที่มีข้อความ `Data/BattleRules.cs` `Data/RunState.cs` |
+| (ว่าง) | | |
 
 ---
 
@@ -63,6 +63,12 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 ---
 
 ## สถานะล่าสุด (2 พ.ย.)
+
+**🔥 2 พ.ย. งานส่งด่วนที่สุด (ผู้ใช้ 13.143 13.144 แผนเต็ม `BETA1_DIRECTION.md` 54 ทำตามลำดับ 54.2) มีเวลา 1 ชั่วโมงครึ่ง ทุกข้อความสั้น**
+1. แก้เกม 3 จุด (ฉาก FANNY เศษกระจก / ภาพหน้าวาทยากรในหน้า BRAVO กับหน้าจัดวง `Core/BandColumn.cs` `Picture`) → 2. ไฟล์เกม .exe zip + `README.md` + tag v1.0.0 → 3. **teaser 15 ถึง 20 วินาที (ด่วนที่สุด)** → 4. Asset Content → 5. เอกสารสรุปกระบวนการทำงาน → 6. สไลด์ Canva
+เครื่องมือที่มีในแชทนี้ : ตัวเชื่อม Google Drive (อ่านโฟลเดอร์ของผู้ใช้ได้ : `รวมรวมข้อมูลเกมตลอดการพัฒนา` มีสไลด์ Concept 25 ภาพ / `Asset Content` ว่าง / `soundgame` เสียง TEAM FREE) / ตัวเชื่อม Canva (อ่านและแก้สไลด์ "Final Playtesting Alphodite" ได้ ต้องให้ผู้ใช้ตกลงก่อน commit) / ไม่มีเครื่องมือสร้าง GitHub Release (ผู้ใช้กดเอง)
+ลิงก์ Drive กับ Canva ไม่อยู่ใน repo ให้ผู้ใช้ส่งซ้ำ
+
 
 **2 พ.ย. แชท /system Polish and Publish7 (กำลังทำ ต่อจาก Polish and Publish4 ที่หยุด ผู้ใช้ "ทำต่อจากงานที่ค้างไว้")**
 ✅ git ตรงกับ GitHub (ดึงมา 21 commit) / skill 30 ตัว / Context7 เรียกได้ / build ใน cloud ได้ (Debug และ Release 0/0)
