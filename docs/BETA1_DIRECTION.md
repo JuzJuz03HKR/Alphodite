@@ -2542,3 +2542,4 @@ commit `db7bb75` / build 0/0 turncheck 204/204 savecheck 44/44 / ภาพ `titl
 - เม็ดแสงรอบหลุมจางลงนิดหน่อย แกนขาวในตัวศัตรูเด่นกว่าเดิม
 
 ถัดไป : ส่วน 5 ท่าโจมตีของทุกตัว (13.89 / `Core/Figure.cs` `Strike` กับเวลา `BattleRules.TurnStrikeTime` `TurnStrikeImpact` / นักดนตรี 5 คน TACET 4 แบบ บอส 6 ตัว) ทำแล้วหยุดรอ (13.92) / VFX ธาตุกับ VFX วาทยากรรอภาพจากผู้ใช้ (ก้อน D) / PLAYTEST FINALE ยัง 1 PERFECT
+**ผู้ใช้เทสส่วน 4 แล้ว ยังไม่ต้องปรับ (2 พ.ย. `USER_BRIEFS.md` 13.100)** แชทหน้าทำส่วน 5 ท่าโจมตี
