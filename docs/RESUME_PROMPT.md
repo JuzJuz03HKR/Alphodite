@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| (ว่าง) | | |
+| 2 พ.ย. แชท FINALE9 | ก้อน D ข้อ 7 ตัวที่ยืนทับหลุมดำมืดจนแทบมองไม่เห็น (`HANDOFF.md` 00.3 / ผู้ใช้ 13.112 "เริ่มเลย") : แคปเช็กก่อน หาสาเหตุ แล้วแก้ | `Screens/BattleScreen.Stage.cs` `Core/` (TacetVoid Shapes Figure* PostChain Fx DebugShots*) `Content/Effects/` (Void.fx Post.fx) `Data/BattleRules.cs` `docs/` (BETA1_DIRECTION HANDOFF RESUME_PROMPT USER_BRIEFS) |
 
 ---
 
