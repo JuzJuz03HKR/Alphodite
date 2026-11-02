@@ -1,1 +1,1 @@
-put .ogg or .mp3 music here, see ../README.txt
+put .ogg music here, see ../README.txt

@@ -1,44 +1,31 @@
-TACET AUDIO FOLDER  (Beta1, updated 1 Nov 2026)
-===============================================
+TACET AUDIO FOLDER  (Beta1, updated 2 Nov 2026, block E)
+=========================================================
 
-The full list of every sound the game needs is docs/ASSET_LIST.md (the sound part, S0 to S5),
-with a sheet to tick in docs/TACET_Asset_List.xlsx (tab Sound). It says which sounds the game
-already plays, which ones the battle still needs (they are not hooked in the code yet), and which
-old ones are not used any more.
+Every sound and every track is read straight from these folders when the game starts
+(Audio/SoundBank.cs). Nothing goes into Content.mgcb : the project copies the folders next
+to the game (Tacetno433.csproj). A missing file is skipped quietly, so each sound switches on by
+itself the moment its file is there. Press F3 in game : the overlay counts SFX, MUSIC,
+BORROWED and BAND files found.
 
-Until a file exists the game simply stays silent, so sounds can be added one at a time and each
-one switches on by itself. There are no stand-in sounds.
+FOLDERS
+  Sfx/       short sounds, WAV 44.1 kHz 16 bit. Free files only (ours, CC0, CC-BY).
+  Music/     looping tracks, OGG Vorbis only. Free files only.
+  Borrowed/  the closed playtest's borrowed sounds and music (from other games, or of unknown
+             origin). NEVER COMMITTED : git keeps only its README. Same names as Sfx and Music.
+             A file here wins over the free one with the same name.
+  Instruments/  the old duel's nine notes (Alpha6, not used by Beta1, kept as the user asked).
 
-HOW TO ADD ONE
-  1. Put the file in the right folder with EXACTLY the name in the list (lower case)
-       Sfx   ->  Content/Audio/Sfx/<name>.wav
-       Music ->  Content/Audio/Music/<name>.ogg   (mp3 also works)
-  2. Open Content.mgcb in the MGCB Editor, Add > Existing Item, pick the file.
-     Sound effects use the "Sound Effect" processor, music uses "Song".
-  3. Build. Press F3 in game : the overlay shows how many SFX and MUSIC files loaded.
+THE NAMES
+  The names the code plays are in Audio/SoundBank.cs (SfxFiles, MusicFiles) and each band
+  member's own note is band_<Sample>.wav (band_violin band_flute band_timpani band_cello
+  band_horn). The full list with what plays where is docs/ASSET_LIST.md (S1 to S3).
+  Many moments share one file on purpose (the user 13.133 : reuse what can be reused).
 
-The names the code plays today live in Audio/SoundBank.cs (SfxFiles and MusicFiles).
+HOW A BLOW SOUNDS (the user 13.131)
+  Two layers : the weapon (weapon_cut for strings, weapon_shot for winds, weapon_smash for
+  drums), then the striker's own instrument, light, the same note every time. Never a tune.
 
-FILES
-  Sound effects : WAV, 44.1 kHz, 16 bit, mono is fine. The sound starts right at the start of the
-  file. Hits and notes stay short, because the notes of a skill come close together.
-  Music : the game loops the whole file, so the end must run straight back into the start
-  (no fade out). It does not need to follow the notes : the fights are no longer tied to a song.
-
-THE BATTLE
-  The Beta1 battle plays almost no sound yet : the buttons and the fight music (combo_up only
-  in the practice fight, when a lesson is done). The hits, the notes, the parries, the enemies
-  and the bosses are listed in ASSET_LIST.md S3 and get hooked in during the sound work.
-  The user's direction : every weapon is an instrument, so a hit sounds like the instrument
-  mixed with the weapon.
-
-NOT USED BY BETA1
-  Instruments/ (nine notes from SoundLibrary/, the song system of Alpha6, SoundBank.InstrumentsOn
-  is false) and Phrase/ (answer_1 to answer_8, call_1 to call_8) belong to the old duel.
-  So do note_off, qte_boost, qte_ease, clash_win, clash_lose, clash_even, enemy_boost,
-  enemy_ease, stamina_empty and combo_break.
-
-BEFORE THE GAME IS SOLD
-  Every sound and every piece of music needs a licence for commercial use. Where the samples in
-  SoundLibrary/ came from, and under which licence, is not written down anywhere in the repo :
-  ask the team before shipping them.
+WHERE THE FILES COME FROM
+  docs/CREDITS.md names every file, who made it, its licence and its label : OURS, FREE or
+  BORROWED. The free files are made again with docs/audio/make_sounds.py.
+  SoundLibrary/ is VSCO 2 Community Edition by Versilian Studios, CC0 (checked 2 Nov).

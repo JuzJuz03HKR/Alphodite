@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# Block E (2 Nov) : borrowed sounds and music for the closed playtest (other games' or of unknown origin) never go into this
+# public repo. They live in the team's Google Drive and are copied here before a playtest build (docs/CREDITS.md).
+Tacetno433/Content/Audio/Borrowed/*
+!Tacetno433/Content/Audio/Borrowed/README.txt

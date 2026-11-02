@@ -272,6 +272,7 @@ namespace Tacetno433.Screens
             TestRoomScreen.TweakFight(battle);                                               // TEST ROOM : a boss test's BIG ATTACK or half life
             Arrange();
             SoundBank.PlayMusic(RunFlow.FightMusic(run));
+            SoundBank.Play(Sfx.FightStart);                                                  // BLOCK E : the fight begins (BattleScreen.Sound.cs)
         }
 
         //Practice Load : PRACTICE. The first three musicians at full life, all on the field, THE UNHEARING's SIGNATURE,
@@ -285,6 +286,7 @@ namespace Tacetno433.Screens
                 if (ConductorList.All[i].Turn == TurnKit.Beethoven) signatureName = ConductorList.All[i].TurnSignatureName;
             Arrange();
             SoundBank.PlayMusic(Music.Battle);
+            SoundBank.Play(Sfx.FightStart);
         }
 
         //Arrange : the words on everybody's plates, then a moment before the first bar
@@ -473,6 +475,7 @@ namespace Tacetno433.Screens
             Game.IsMouseVisible = true;
             if (!battle.CanPlan(selected) || battle.Bar.Count == 0) Select(NextUnwritten(null));     // a new bar starts at the front seat
             RefreshPreview();
+            SoundBandTurn();                                                             // BLOCK E : the baton taps the stand (BattleScreen.Sound.cs)
             BossTell();                                                                  // BOSS SHOW : its BIG ATTACK comes this turn
         }
 
@@ -821,6 +824,7 @@ namespace Tacetno433.Screens
             for (int i = 0; i < enemy.IntentNotes.Length; i++)                                     // BOSSES : TE DEUM ends in a SHAKE
                 AddNote(i < enemy.IntentKinds.Length ? enemy.IntentKinds[i] : NoteKind.Swipe, enemy.IntentWays[i], i < enemy.IntentLate.Length && enemy.IntentLate[i]);   // FALSE NOTES
             BeginSwipe(SwipeFor.Parry);
+            SoundEnemyTurn();                                                                        // BLOCK E : TACET's turn, once a turn
             BossCut(enemy);                                                                          // BOSS SHOW : THE STRIKE or PRE first
         }
 
@@ -856,6 +860,7 @@ namespace Tacetno433.Screens
 
             results = new NoteResult[notes.Count];
             next = 0;
+            cueNext = 0;                                                     // BLOCK E : PARRY CUE, no swing has sounded yet
             swipeFor = what;
             holding = false;
             rolling = false;
@@ -916,6 +921,7 @@ namespace Tacetno433.Screens
                 return;
             }
             TellBlows(n, now);                                         // ONE NOTE ONE BLOW : the wind up as the ring closes (BattleScreen.Stage.cs)
+            SoundCues(now);                                            // BLOCK E : PARRY CUE, TACET's notes swing in (BattleScreen.Sound.cs)
             if (n.Kind == NoteKind.Roll)
             {
                 UpdateRoll(n, now);
@@ -952,6 +958,8 @@ namespace Tacetno433.Screens
                     holdTick = 0f;
                     holdGrade = grade;
                     HoldBlow(grade);                                   // ONE NOTE ONE BLOW : the charge (a skill) or the guard held (TACET's turn)
+                    SoundLand(grade);                                  // BLOCK E : heard as it lands, then the held strings while it is held
+                    SoundBank.StartLoop(Sfx.HoldLoop, 0.6f);
                     return;
                 }
                 Land(grade, 1f);
@@ -986,6 +994,7 @@ namespace Tacetno433.Screens
             if (!down || holdTime >= BattleRules.TurnHoldTime)
             {
                 holding = false;
+                SoundBank.StopLoop();                                  // BLOCK E : the held strings stop with the hand
                 Land(holdGrade, holdDown / BattleRules.TurnHoldTime);
             }
         }
@@ -1005,6 +1014,7 @@ namespace Tacetno433.Screens
             if (stroke)
             {
                 shakes++;
+                SoundBank.Play(Sfx.RollTap, 0.7f, ((shakes % 3) - 1) * 0.06f);   // BLOCK E : each shake a tap
                 baton.Whip(gesture.Direction);
                 lastWay = gesture.Direction;
                 qteEffects.SpawnSparks(HitX, HitY, 2, 1f);
@@ -1028,6 +1038,7 @@ namespace Tacetno433.Screens
             grade = battle.Forgive(grade);                                               // SPARE STRINGS (GIFT) : the first MISS is a GOOD
             missKept = false;
             notesPlayed++;                                                               // RANK
+            if (notes[next].Kind != NoteKind.Hold || !(grade == Grade.Perfect || grade == Grade.Good) || hold <= 0f) SoundLand(grade);   // BLOCK E (a held note rang as it landed)
             results[next] = new NoteResult(grade, hold);
             qteEffects.SpawnHit(HitX, HitY, grade);
             judgeLife = 1f;
@@ -1125,6 +1136,7 @@ namespace Tacetno433.Screens
         //Several on one fighter stack upward so they never cover each other.
         private void ShowEvents()
         {
+            SoundEvents();                                                                 // BLOCK E : heard first (BattleScreen.Sound.cs)
             popStack.Clear();
             echoVoice = false;                                                             // FUGUE : the blows after an ECHO are its own
             starsShown = false;                                                            // STAR MARKS : once in these events

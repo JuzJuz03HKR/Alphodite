@@ -662,6 +662,27 @@
         public static float ClearFocusPool = 0.8f;        //   and the dark pool behind the ring is this deep (0.6 without CLEAR FIGHT)
         public static float ClearPlate = 0.9f;            //   the plates behind names, life and attacks are this solid (0.6 without)
 
+        //Sound Feel (block E, 2 Nov, docs/BETA1_DIRECTION.md 47, Audio/SoundBank.cs and Screens/BattleScreen.Sound.cs) : how loud
+        //each layer is and how the music moves. Screen numbers, not balance. Volumes are 0..1 before the settings' faders.
+        public static float SoundWeapon = 0.9f;            // a blow's first layer, the weapon
+        public static float SoundBandLayer = 0.38f;        // its second layer, the striker's instrument, light (the user 13.131)
+        public static float SoundWeaponPitch = 0.05f;      // each weapon blow up to this much higher or lower, so a run of blows is not one stamp
+        public static float SoundSpark = 0.55f;            // the bright ring over a PERFECT note
+        public static float SoundGood = 0.4f;              // the small tick of a GOOD note
+        public static float SoundMiss = 0.7f;              // the dull thud of a MISS (a note let pass is this x0.6)
+        public static float SoundSwing = 0.75f;            // EnemySwing, the parry cue of each of TACET's notes
+        public static float SoundSwingLead = 0.16f;        //   it starts this long before the note is due : its file is loudest this far in
+        public static float SoundRepeatGap = 0.035f;       // REPEAT GAP : the same sound again sooner than this (seconds) is not played
+        public static float SoundMusicFadeOut = 0.7f;      // seconds a track takes to fade out when the page asks for another
+        public static float SoundMusicFadeIn = 1.2f;       //   and the next one to fade in
+        public static float SoundFightMusic = 0.72f;       // a plain or ELITE fight's music this loud (Worldless : quiet fights, clear cues)
+        public static float SoundDuckFinale = 0.3f;        // DUCK : the music this loud while a FINALE's own sound plays
+        public static float SoundDuckFinaleTime = 2.4f;    //   for this long (seconds)
+        public static float SoundDuckBoss = 0.45f;         //   and while a boss's moment (ENTRANCE THE STRIKE THE TURN) speaks
+        public static float SoundDuckBossTime = 2.2f;
+        public static float SoundDuckDown = 10f;           //   how fast it goes down (per second, the share of the way)
+        public static float SoundDuckUp = 1.4f;            //   and comes back up
+
         //Camera Feel (Beta1, 29 Oct, docs/BETA1_DIRECTION.md 10) : the camera moves with the baton (Core/StageCamera.cs).
         //The user : "zoom in and the screen shakes, so the action we do really shows" (Muse Dash, Chaos Zero Nightmare).
         //Only the world's picture moves, the ring and the words stay still to be read. The user may find it zooms too

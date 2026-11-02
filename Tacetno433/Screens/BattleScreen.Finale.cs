@@ -1,6 +1,7 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Tacetno433.Audio;
 using Tacetno433.Battle;
 using Tacetno433.Core;
 using Tacetno433.Data;
@@ -85,6 +86,7 @@ namespace Tacetno433.Screens
         //Finale Begins : the FINALE's swipe starts (StartSignature). HOLY starts from an empty sky.
         private void FinaleBegins()
         {
+            SoundFinale();                                                                 // BLOCK E : the conductor's own sound (BattleScreen.Sound.cs)
             holyOn = battle.Kit == TurnKit.Bach;
             holySky = 0f;
             holyStruck = -1f;

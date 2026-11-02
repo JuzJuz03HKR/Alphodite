@@ -100,6 +100,7 @@ namespace Tacetno433.Screens
         public static Music FightMusic(RunState run)
         {
             if (run.Battle != null && run.Battle.Enemy.Kind == EnemyKind.Boss) return Music.Boss;
+            if (run.Battle != null && run.Battle.Enemy.Kind == EnemyKind.Elite) return Music.Elite;   // BLOCK E : an ELITE's own track
             return Music.Battle;
         }
     }

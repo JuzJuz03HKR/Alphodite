@@ -1,6 +1,7 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Tacetno433.Audio;
 using Tacetno433.Battle;
 using Tacetno433.Core;
 using Tacetno433.Data;
@@ -89,6 +90,7 @@ namespace Tacetno433.Screens
             bossBarIn = 0f;
             bossRose = false;
             StartBoss(BossMoment.Entrance, BattleRules.BossEntranceTime, false);
+            SoundBoss(Sfx.BossEntrance);                                                 // BLOCK E (BattleScreen.Sound.cs)
             actionCam.HoldFor(BossAt(), BattleRules.CamZoomMost * 0.5f, BattleRules.BossEntranceTime * 0.75f);
         }
 
@@ -149,6 +151,7 @@ namespace Tacetno433.Screens
             if (boss == null || boss.Down || !boss.IntentBig || bossToldAt == boss.Attacks) return;
             bossToldAt = boss.Attacks;
             StartBoss(BossMoment.Tell, BattleRules.BossTellTime, false);
+            SoundBoss(Sfx.BossTell);                                                     // BLOCK E
             actionCam.HoldFor(BossAt(), BattleRules.CamZoomMost * 0.35f, BattleRules.BossTellTime);
         }
 
@@ -159,6 +162,8 @@ namespace Tacetno433.Screens
             bossTurnWaiting = false;
             if (boss.Down || battle.Step == TurnStep.Won || battle.Step == TurnStep.Lost) return false;
             StartBoss(BossMoment.Turn, BattleRules.BossTurnTime, true);
+            SoundBoss(Sfx.BossTurn);                                                     // BLOCK E : THE TURN, and its second half's music
+            SoundBank.PlayMusic(Music.BossTurn);
             Figure monument = ArtOf(boss).Figure;                                        // THE MONUMENT : the white shell breaks (MATH ART)
             if (monument != null) monument.BreakShell(true);
             hits.ImpactFrame(BossAt());                                                  // the frame turns negative
@@ -181,6 +186,7 @@ namespace Tacetno433.Screens
             actionCam.HoldFor(BossAt(), BattleRules.CamZoomMost * (bossCutBig ? 0.6f : 0.3f), bossCutLength);
             if (bossCutBig)
             {
+                SoundBoss(Sfx.BossStrike);                                               // BLOCK E
                 hits.ImpactFrame(BossAt());
                 actionCam.Shake(BattleRules.CamShake * 2f);
                 bossTearWaiting = true;                                                  // HEAVY VFX : the stage tears as the cut in leaves (BossTear)
@@ -211,6 +217,7 @@ namespace Tacetno433.Screens
             actionCam.HoldFor(middle, BattleRules.CamZoomMost * 0.8f, 1.2f);
             actionCam.Shake(BattleRules.CamShake * 3f);
             hitStop = Math.Max(hitStop, BattleRules.BossKillStop);
+            SoundBank.StopMusic();                                                       // BLOCK E : its music fades with it (BossDown rings)
         }
 
         //Boss Blocked : every note of its BIG ATTACK blocked, its words over it (the rules threw it off the beat)

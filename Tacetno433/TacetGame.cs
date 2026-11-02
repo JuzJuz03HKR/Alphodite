@@ -276,6 +276,7 @@ namespace Tacetno433
                 else if (Input.KeyPressed(Keys.Escape) && CanOpenPause() && !Screens.Current.UsesEscape) Pause.Show();
                 else Screens.Update(dt);
             }
+            SoundBank.Update(dt);                        // BLOCK E : the music's fades and DUCK
             Ornament.UpdateGrain(dt);
             if (DebugShots.Active) Input.PretendPress = Keys.None;     // a pretend key lasts one update, even when a slow frame runs several
             if (showDebug) updateMsSum += updateWatch.Elapsed.TotalMilliseconds;
@@ -341,7 +342,7 @@ namespace Tacetno433
                 //Debug numbers are built here on purpose. They only exist while F3 is on,
                 //so the string work never happens during normal play.
                 string line = "FPS " + shownFps + "   MEM " + shownMemory.ToString("0.0") + " MB"
-                            + "   SFX " + SoundBank.LoadedSfx + "   MUSIC " + SoundBank.LoadedMusic
+                            + "   SFX " + SoundBank.LoadedSfx + "   MUSIC " + SoundBank.LoadedMusic + "   BORROWED " + SoundBank.LoadedBorrowed + "   BAND " + SoundBank.LoadedBand
                             + "   PHRASE " + SoundBank.LoadedPhrase + "   INSTR " + SoundBank.LoadedInstruments
                             + "   HAND " + HandArt.LoadedPoses + "   ART " + ArtBank.Loaded + "   UI " + UiArt.Loaded + "   BATTLE " + FrameArt.Loaded   // block C item 5 : the art the game found, by folder
                             + "   PIXEL " + CharacterArt.Loaded
