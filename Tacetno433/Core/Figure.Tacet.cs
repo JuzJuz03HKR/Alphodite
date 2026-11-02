@@ -169,14 +169,9 @@ namespace Tacetno433.Core
                     Set(HandA, 0.2f + lunge, -0.86f + bob * 1.2f);
                     Set(HandB, -0.2f, -0.85f + bob * 0.8f);
                     break;
-                case Requiem:
-                    Set(Head, 0f + lunge * 0.4f, -0.83f + bob);
-                    Set(Chest, 0f + lunge * 0.4f, -0.72f + bob);
-                    Set(Hip, 0f, -0.42f + bob);
-                    Set(HandA, 0.27f + lunge * 1.6f, -0.52f + bob * 1.4f - raise * 0.18f);
-                    Set(HandB, -0.22f, -0.5f + bob * 1.2f);
-                    Set(FootA, -0.08f, -0.08f);
-                    Set(FootB, 0.08f, -0.08f);
+                case Requiem:                                                            // REQUIEM : tall and still, the quill swings on its blow
+                    LookRest(lunge * 0.6f, bob, 0.4f);
+                    Set(HandA, -0.124f + Math.Max(0f, s) * 0.45f, -0.44f + bob - raise * 0.1f - Math.Max(0f, s) * 0.08f);
                     break;
                 case Nameless:
                     Set(Head, 0f + lunge, (body2 ? -0.86f : -0.76f) + bob);
@@ -350,9 +345,11 @@ namespace Tacetno433.Core
                 DrawChips(alpha);
                 return;
             }
-            if (design == Crown)                                                     // drawn from the round 6 sketch
+            if (design == Crown || design == Requiem)                                // drawn from the round 6 sketch
             {
-                DrawCrown(alpha, light, flash, mark);
+                SetBossInks(alpha, light, flash, mark);
+                if (design == Crown) DrawCrown(alpha);
+                else DrawRequiem(alpha);
                 DrawChips(alpha);
                 return;
             }
@@ -494,40 +491,11 @@ namespace Tacetno433.Core
         {
             switch (design)
             {
-                case Requiem: PartsRequiem(); break;
                 case Nameless: PartsNameless(); break;
                 case Devil: PartsDevil(); break;
                 case Staff: PartsStaff(); break;
                 case Cantor: PartsCantor(); break;
                 default: break;                                                          // the looks draw themselves (DrawLook)
-            }
-        }
-
-        //REQUIEM : a tall robe with points at the shoulders, a hood, a quill for a blade, staff lines that stop below it
-        private void PartsRequiem()
-        {
-            float h = Height;
-            Vector2 head = body[Head].At, chest = body[Chest].At, hip = body[Hip].At;
-            if (Level == 2)
-            {
-                TLine(P(chest, 0.1f, 0.02f), body[HandA].At, 0.045f * h, 0.025f * h);
-                TLine(P(chest, -0.1f, 0.02f), body[HandB].At, 0.045f * h, 0.025f * h);
-                TClaws(body[HandB].At, 0.08f * h);
-            }
-            TKite(body[HandA].At, P(body[HandA].At, 0.05f, -0.32f), 0.06f * h, 0.15f);    // the quill
-            line[0] = P(chest, -0.12f, 0f); line[1] = P(chest, 0.11f, 0f); line[2] = P(hip, 0.17f, 0.28f); line[3] = P(hip, -0.19f, 0.28f);
-            TPoly(4);
-            TKite(P(chest, -0.11f, 0f), P(chest, -0.2f, -0.09f), 0.05f * h, 0.3f);
-            TKite(P(chest, 0.1f, 0f), P(chest, 0.18f, -0.08f), 0.05f * h, 0.3f);
-            line[0] = P(head, -0.07f, -0.08f); line[1] = P(head, 0f, -0.13f); line[2] = P(head, 0.07f, -0.08f); line[3] = P(head, 0.06f, 0.07f); line[4] = P(head, -0.06f, 0.07f);
-            TPoly(5);
-            for (int k = 0; k < 5; k++)                                                // the piece never finished : lines that stop
-            {
-                float y = 0.31f + k * 0.045f;
-                float gap = (float)Math.Sin(clock * 0.7f + k * 1.3f) * 0.04f;
-                float wide = 0.3f - k * 0.04f;
-                TBox(P(hip, -wide * 0.25f + gap, y), wide * 0.42f * h, 0.02f * h, 0f);
-                TBox(P(hip, wide * 0.32f - gap, y), wide * 0.26f * h, 0.02f * h, 0f);
             }
         }
 
@@ -635,7 +603,9 @@ namespace Tacetno433.Core
             Vector2 head = body[Head].At, chest = body[Chest].At;
             switch (design)
             {
-                case Requiem: return P(chest, 0f, 0.05f);
+                case Requiem:
+                    SetLook();
+                    return S(32, 160) - Shift;                                           // where the unfinished lines stop
                 case Nameless: return P(chest, 0f, 0.11f);
                 case Devil: return chest;
                 case Crown:
@@ -675,23 +645,6 @@ namespace Tacetno433.Core
             float slant = -0.25f * Facing;
             switch (design)
             {
-                case Requiem:
-                    Shapes.Arc(P(head, 0f, -0.02f), 0.2f * h, -1.2f, 3.6f, 0.014f * h, 0.006f * h, white);   // the broken halo
-                    Shapes.Box(head, 0.06f * h, 0.01f * h, 0f, white);                                      // the face, a slit
-                    for (int k = 0; k < 5; k++)                                                             // a staff that stops
-                    {
-                        float wide = (0.13f - k * 0.02f) * h;
-                        Vector2 start = P(chest, -0.07f, 0.09f + k * 0.026f);
-                        Shapes.Box(start + new Vector2(wide * 0.5f * Facing, 0f), wide, SignLine, 0f, white);
-                    }
-                    for (int k = 0; k < 4; k++)                                                             // LACRIMOSA : the tears
-                    {
-                        float t = (clock * 0.45f + k * 0.25f) % 1f;
-                        Vector2 at = head + new Vector2((Hash(k, 61) - 0.5f) * 0.05f * h, (0.03f + t * 0.5f) * h);
-                        Shapes.Circle(at, 0.009f * h, white * (1f - t));
-                        Shapes.Kite(at, at - new Vector2(0f, 0.03f * h), 0.018f * h, 0.1f, white * (1f - t));
-                    }
-                    break;
                 case Nameless:
                     {
                         Vector2 frame = P(chest, 0f, 0.11f);                                       // the frame where its name was, empty
@@ -1318,16 +1271,29 @@ namespace Tacetno433.Core
         //front (it cannot hear), a stick held in its teeth (he heard through his jaw, a stick on the piano) whose tip holds the
         //core, a great hand raised to give orders. THE MONUMENT : white, lit from the band's side, cracking as it is hit. Broken
         //at THE TURN : the same shape in black, cracks of lightning across it (THE NINTH), the brows and the stick in white.
-        private void DrawCrown(float alpha, float light, float flash, float mark)
+        //Set Boss Inks : the colours of a boss drawn from the sketch. THE MONUMENT : lit white, its far side in grey shade,
+        //signs cut in black, a dark grey rim. The black form : black, darker on its far side, signs in pale white, the pale rim
+        //of TACET, and the white flash when it has just broken.
+        private Color bossLit;
+        private Color bossDark;
+        private Color bossInk;
+
+        private void SetBossInks(float alpha, float light, float flash, float mark)
         {
             SetLook();
             bool white = ShellOn;
             float lift = Math.Max(flash, breakFlash);
-            Color lit = white ? Dim(MonumentWhite, 0.6f + 0.4f * light) : Color.Lerp(BodyInk, Color.White, lift);
-            Color dark = white ? Dim(MonumentShade, 0.6f + 0.4f * light) : Color.Lerp(new Color(10, 10, 13), Color.White, lift);
-            Color ink = white ? MonumentInk : Dim(Palette.Paper, 0.85f);
+            bossLit = white ? Dim(MonumentWhite, 0.6f + 0.4f * light) : Color.Lerp(BodyInk, Color.White, lift);
+            bossDark = white ? Dim(MonumentShade, 0.6f + 0.4f * light) : Color.Lerp(new Color(10, 10, 13), Color.White, lift);
+            bossInk = white ? MonumentInk : Dim(Palette.Paper, 0.85f);
             lookEdge = BattleRules.FigureTacetEdge * (1f + 1.5f * mark);
             lookRim = (white ? Dim(MonumentShade, 0.45f) : Color.Lerp(Palette.Paper * (BattleRules.FigureTacetRim * light), Color.White, mark)) * alpha;
+        }
+
+        private void DrawCrown(float alpha)
+        {
+            bool white = ShellOn;
+            Color lit = bossLit, dark = bossDark, ink = bossInk;
             Vector2 hand = body[HandA].At - Local(-0.36f, -0.69f) - (body[Chest].At - Local(0f, -0.5f));   // the hand's own swing
 
             lookFill = lit * alpha;                                                // the robe of the bust, its far side in shade
@@ -1407,6 +1373,90 @@ namespace Tacetno433.Core
         {
             for (int i = 0; i < 5; i++) line[i] = S(CrownCracks[k * 10 + i * 2], CrownCracks[k * 10 + i * 2 + 1]);
             LightLine(5, width * lookK, c);
+        }
+
+        //======================================================================================
+        //REQUIEM (round 6 part 3, from the sketch) : the piece Mozart never finished
+        //======================================================================================
+
+        //Draw Requiem : a tall slim robe, a small head under a broken halo, a quill held as a blade, tears running down
+        //(LACRIMOSA), and from its other hand the five lines of a score that stop half way across : the core is where they
+        //stop. THE MONUMENT white, then the black form with the same lines and tears in white.
+        private void DrawRequiem(float alpha)
+        {
+            bool white = ShellOn;
+            Color lit = bossLit, dark = bossDark, ink = bossInk;
+            Color light = Dim(MonumentWhite, 1f) * (0.7f * alpha);
+            Vector2 hand = body[HandA].At - Local(-0.124f, -0.44f) - (body[Chest].At - Local(0f, -0.5f));   // the quill's own swing
+
+            for (int k = 0; k < 5; k++)                                            // the unfinished lines, their ends never still
+            {
+                float y = 150f + k * 5f;
+                float end = RequiemEnds[k] - (float)Math.Sin(clock * 1.3f + k * 1.7f) * 3f;
+                Shapes.Line(S(end, y), S(88, y), 0.9f * lookK, light);
+            }
+            lookFill = lit * alpha;                                                // the robe, its far side in shade
+            int n = Cubic(S(120, 98), S(138, 140), S(152, 208), SF(166, 262), 10, line, 0);
+            line[n++] = SF(74, 262);
+            n = CubicMore(SF(74, 262), S(88, 208), S(102, 140), S(120, 98), 10, line, n);
+            Shell(n - 1, 1f);
+            n = Cubic(S(120, 98), S(138, 140), S(152, 208), SF(166, 262), 10, line, 0);
+            line[n++] = SF(120, 262);
+            Shapes.Fill(line, n, dark * alpha);
+            ShellOval(S(120, 80), 13f, 16f);                                       // the head, its far half in shade
+            for (int i = 0; i <= 10; i++)
+            {
+                float t = -MathHelper.PiOver2 + i * MathHelper.Pi / 10f;
+                line[i] = S(120f + (float)Math.Cos(t) * 13f, 80f + (float)Math.Sin(t) * 16f);
+            }
+            Shapes.Fill(line, 11, dark * alpha);
+            for (int i = 0; i < 16; i++)                                           // the broken halo, open at the front
+            {
+                float t = MathHelper.ToRadians(190f + i * 12f);
+                line[i] = S(118f + (float)Math.Cos(t) * 24f, 60f + (float)Math.Sin(t) * 7f);
+            }
+            LightLine(16, 2.4f * lookK, (white ? MonumentWhite : Dim(Palette.Paper, 0.9f)) * alpha);
+            lookFill = lit * alpha;
+            line[0] = S(140, 72); line[1] = S(146, 75); line[2] = S(141, 78);      //   a piece of it, fallen
+            Shell(3, 1f);
+
+            n = Cubic(S(146, 162) + hand, S(172, 128) + hand, S(196, 96) + hand, S(218, 60) + hand, 10, line, 0);   // the quill, a blade
+            n = CubicMore(S(218, 60) + hand, S(206, 100) + hand, S(186, 134) + hand, S(152, 168) + hand, 10, line, n);
+            Shell(n, 1f);
+            Shapes.Line(S(150, 166) + hand, S(216, 62) + hand, 1f * lookK, dark * alpha);
+            Shapes.Polygon(S(147.5f, 164.5f) + hand, 6.4f * lookK, 4, lookLean, lit * alpha);   // the hand on it
+            Shapes.Polygon(S(90, 159), 5.7f * lookK, 4, lookLean, lit * alpha);                 // the hand the lines leave
+
+            for (int k = 0; k < 3; k++)                                            // LACRIMOSA : tears running down
+            {
+                float t = (clock * 0.3f + k / 3f) % 1f;
+                Vector2 at = S(114f - k * 1.5f, 98f + t * 52f);
+                float size = (3.6f - k * 0.5f) * lookK;
+                Color tear = Color.White * (alpha * (1f - t * t));
+                Shapes.Circle(at, size * 0.6f, tear);
+                Shapes.Kite(at, at - new Vector2(0f, size * 1.8f), size * 1.1f, 0.15f, tear);
+            }
+            Diamond(S(32, 160), white ? 6f : 7.5f, white ? 7f : 9f, Color.White * alpha);   // the core where the lines stop
+
+            if (white)                                                             // CRACKS in the white shell
+            {
+                if (crackSeen >= 1) RequiemCrack(0, ink * alpha, 1.4f);
+                if (crackSeen >= 2) RequiemCrack(1, ink * alpha, 1.4f);
+            }
+            else
+            {
+                RequiemCrack(0, Color.White * alpha, 1.6f);
+                RequiemCrack(1, Color.White * alpha, 1.6f);
+            }
+        }
+
+        private static readonly float[] RequiemEnds = { 34, 30, 38, 33, 40 };
+        private static readonly float[] RequiemCracks = { 104, 190, 110, 206, 106, 214, 114, 236, 140, 200, 134, 214, 139, 224, 139, 224 };
+
+        private void RequiemCrack(int k, Color c, float width)
+        {
+            for (int i = 0; i < 4; i++) line[i] = S(RequiemCracks[k * 8 + i * 2], RequiemCracks[k * 8 + i * 2 + 1]);
+            LightLine(4, width * lookK, c);
         }
 
         //======================================================================================
