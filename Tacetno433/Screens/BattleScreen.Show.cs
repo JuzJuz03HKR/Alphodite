@@ -113,6 +113,50 @@ namespace Tacetno433.Screens
             }
         }
 
+        //GIFT AT WORK (block D item 4, 2 Nov) : when a gift works, its badge (the diamond with its initials, framed in the colour of
+        //the legend it is for, MotifArt.Badge) pops up big over who it worked on, a ring of that colour opening from it, then it
+        //rises and fades. The gift's name still pops beside it. So the player sees which gift did it, the same badge as in the
+        //top bar and the shop.
+        private struct GiftPop
+        {
+            public bool On;
+            public Motif Gift;
+            public Vector2 At;
+            public float Age;
+            public bool OnScreen;      // over the ring (SPARE STRINGS), not on a fighter : drawn without the battle's camera
+        }
+        private readonly GiftPop[] giftPops = new GiftPop[6];
+        private const float GiftPopLife = 1.1f;
+
+        //Spawn Gift : a gift worked at at (on a fighter, or over the ring when onScreen)
+        private void SpawnGift(Motif gift, Vector2 at, bool onScreen)
+        {
+            int slot = 0;
+            for (int i = 0; i < giftPops.Length; i++)
+                if (!giftPops[i].On) { slot = i; break; }
+            giftPops[slot] = new GiftPop { On = true, Gift = gift, At = at, Age = 0f, OnScreen = onScreen };
+        }
+
+        //Draw Gift Pops : the ones on fighters (onScreen false) through the battle's camera, the others after. A soft glow of its
+        //colour, the ring opening, the badge popping in too big and settling, rising and fading at the end.
+        private void DrawGiftPops(SpriteBatch sb, bool onScreen)
+        {
+            for (int i = 0; i < giftPops.Length; i++)
+            {
+                if (!giftPops[i].On || giftPops[i].OnScreen != onScreen) continue;
+                GiftPop g = giftPops[i];
+                float t = g.Age / GiftPopLife;
+                float pop = g.Age < 0.12f ? 1f + 0.7f * (1f - g.Age / 0.12f) : 1f;
+                float fade = Math.Min(1f, Math.Min(g.Age / 0.06f, (GiftPopLife - g.Age) / 0.3f));
+                Vector2 at = g.At + new Vector2(0f, -18f * Smooth(t));
+                Color key = MotifArt.KeyColor(g.Gift.Key);
+                Gfx.DrawGlow(sb, at.X, at.Y, 46f * pop, key * (0.35f * fade));
+                float ring = 18f + 50f * Smooth(Math.Min(1f, t * 2.5f));
+                Gfx.CircleOutline(sb, at.X, at.Y, ring, key * (0.8f * fade * (1f - Math.Min(1f, t * 2.5f))), 2f);
+                MotifArt.Badge(sb, g.Gift, at.X, at.Y, BattleRules.GiftPopSize * pop, fade);
+            }
+        }
+
         private readonly DuelEffects qteEffects = new DuelEffects();   // QTE LIGHT : rings, sparks and slashes at the ring
         private readonly HitFx qteHits = new HitFx();                  //             a parry's clash
         private float cutIn;                                           // CUT-IN : counts down while the picture is up
@@ -127,6 +171,12 @@ namespace Tacetno433.Screens
                 if (!numbers[i].On) continue;
                 numbers[i].Age += dt;
                 if (numbers[i].Age > BattleRules.TurnNumberTime) numbers[i].On = false;
+            }
+            for (int i = 0; i < giftPops.Length; i++)                                     // GIFT AT WORK
+            {
+                if (!giftPops[i].On) continue;
+                giftPops[i].Age += dt;
+                if (giftPops[i].Age > GiftPopLife) giftPops[i].On = false;
             }
             for (int i = 0; i < starMarks.Length; i++)                                    // STAR MARKS
             {

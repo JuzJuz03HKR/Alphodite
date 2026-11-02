@@ -1154,6 +1154,7 @@ namespace Tacetno433.Screens
                 {
                     Motif gift = MotifList.All[e.Amount];
                     hudPops.SpawnPop(HitX, HitY - 80f, gift.Name, MotifArt.PopColor(gift.Key), 0.8f);
+                    SpawnGift(gift, new Vector2(HitX, HitY - 124f), true);                            // GIFT AT WORK : its badge over the ring
                     continue;
                 }
                 if (e.Who == null) continue;
@@ -1286,7 +1287,11 @@ namespace Tacetno433.Screens
                 //REHEARSAL (Beta1 31 Oct) : the legend's name when the rule of a third star works, in the musician's colour
                 else if (e.Kind == TurnEventKind.Legend && RehearsalList.RuleWords[e.Amount].Length > 0) effects.SpawnPop(x, y, RehearsalList.RuleWords[e.Amount], SpotOf(e.Who).Tint, 0.8f);
                 //GIFTS (Beta1 31 Oct) : a gift worked, its name over who it worked on, in the colour of its legend's mark (until its VFX)
-                else if (e.Kind == TurnEventKind.Gift) effects.SpawnPop(x, y, MotifList.All[e.Amount].Name, MotifArt.PopColor(MotifList.All[e.Amount].Key), 0.75f);
+                else if (e.Kind == TurnEventKind.Gift)
+                {
+                    effects.SpawnPop(x, y, MotifList.All[e.Amount].Name, MotifArt.PopColor(MotifList.All[e.Amount].Key), 0.75f);
+                    SpawnGift(MotifList.All[e.Amount], new Vector2(x, y - 34f), false);              // GIFT AT WORK : its badge over them (BattleScreen.Show.cs)
+                }
                 else if (e.Kind == TurnEventKind.Counter)
                 {
                     Figure answers = FigureOf(e.Who);                                          // ONE NOTE ONE BLOW : the musician strikes back at once
@@ -2014,8 +2019,10 @@ namespace Tacetno433.Screens
             BeginCameraBatch(sb);                                            // the words and numbers stay on the fighter they came off
             effects.DrawPops(sb, Game.Font);
             DrawStarMarks(sb);                                               // STAR MARKS : a move's stars over its blow
+            DrawGiftPops(sb, false);                                         // GIFT AT WORK : a gift's badge over who it worked on
             DrawNumbers(sb);
             EndCameraBatch(sb);
+            DrawGiftPops(sb, true);
             hudPops.DrawPops(sb, Game.Font);
 
             if (judgeLife > 0f)

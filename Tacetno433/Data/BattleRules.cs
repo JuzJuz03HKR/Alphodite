@@ -505,6 +505,7 @@
         public static float StarMarkSize = 8f;            // one star's size (page pixels)
         public static float StarMarkGap = 22f;            //   from one star to the next
         public static float StarMarkLift = 70f;           //   how far over the blow's middle the row stands
+        public static float GiftPopSize = 22f;            // GIFT AT WORK (block D item 4) : a working gift's badge over the fighter (page pixels)
 
         //Tell Feel (block D, 2 Nov, Screens/BattleScreen.Tells.cs) : what TACET's moves look like on their bodies and the band's
         //skills on the cards. Screen numbers, not balance.
