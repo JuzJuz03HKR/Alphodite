@@ -64,6 +64,13 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 
 ## สถานะล่าสุด (2 พ.ย.)
 
+**2 พ.ย. แชท /system FINALE8 : ✅ อาร์ตวาทยากร THE UNHEARING ภาพ 1 2 3 ลงช่องแล้ว ภาพ 2 อยู่กลางหน้าโปรไฟล์และตอน FINALE / ผู้ใช้ตอบ ก้อน D ทำทีละข้อถามทีละข้อ กล้องซูมยังไม่ต้องปรับ** (คำต่อคำ `USER_BRIEFS.md` 13.109 รายละเอียด `BETA1_DIRECTION.md` 34)
+✅ ภาพ 1 = แผงหน้าเลือก `gallery_<name>.png` 302×402 / ภาพ 2 = กลางหน้าโปรไฟล์ + cut in FINALE `cutin_<name>.png` 320×530 / ภาพ 3 = หน้าสี่เหลี่ยมซ้าย `face_<name>.png` 224×224 (ทุกไฟล์อยู่ `Tacetno433/Content/Art/Conductors/` อ่านตรง ไม่ต้องใส่ mgcb)
+✅ โค้ด : PROFILE PAINTING ใน `Screens/ConductorDetailScreen.cs` (ภาพ 1 ยกมาแล้วกลายเป็นภาพ 2 กรอบเปิดขึ้นลง `BattleRules.UiProfileOpen`) / `DrawCutIn` ใน `Screens/BattleScreen.Show.cs` ใช้ภาพ 2 / build 0/0 turncheck 205/205 savecheck 44/44 / ตาราง "แชทที่กำลังทำงาน" ว่าง
+⚠️ **อาร์ต FANNY 3 รูปที่ส่งระหว่างที่ไอริสทำงานไม่ถูกเก็บเป็นไฟล์** ขอให้ผู้ใช้ส่งใหม่ตอนไอริสไม่ได้ทำงาน แล้ววางเป็น `gallery_the_unsigned.png` `cutin_the_unsigned.png` `face_the_unsigned.png` แคปเช็ก (`--shots gallery1,detail1@90,battlecutin@1` ไฟต์ต้องเป็นรันของ FANNY ถ้าจะเห็น cut in ของเธอ) และดูว่าเงา FELIX ที่ AURA วาดซ้อนกับ Felix ในภาพไหม / ผู้ใช้ยังไม่ได้ลองบน Windows
+⚠️ PLAYTEST FINALE ยัง 1 PERFECT (`PlaytestSignatureNeed` ห้ามแก้จนผู้ใช้บอก ถามก่อนก้อน G) / ไอคอนเกมจากโลโก้ (E3) ถามก่อน
+**งานถัดไป** : วางอาร์ต FANNY เมื่อได้ไฟล์ / แล้วก้อน D VFX **ทีละข้อ ถามผู้ใช้ทีละข้อ ขอภาพอ้างอิงของข้อนั้นก่อนทำ** (ไอริสเสนอลำดับ D7 ไม่ต้องใช้ภาพอ้างอิง → D1 → D3 → D2 → D5 → D4 → D6 → D9 / D8 ตอบแล้ว ไม่ต้องปรับ)
+
 **2 พ.ย. แชท /system FINALE7 หลัง /update : ✅ เอาโลโก้กับโปสเตอร์ออกจากเกม หน้า Title เหมือนเดิม เปิดเกมเริ่มในหลุมดำแล้วซูมออก INTO THE HOLE** (คำต่อคำ `USER_BRIEFS.md` 13.108 รายละเอียด `BETA1_DIRECTION.md` 33.7)
 ✅ `Screens/TitleScreen.cs` `Core/UiArt.cs` คืนเป็นแบบก่อนแชทนี้แล้วเพิ่ม intro (ตัวเลข `BattleRules` TitleIntro*) / ไฟล์โลโก้กับโปสเตอร์อยู่ `docs/team_art/` (ไม่ติดไปกับเกม โปสเตอร์ต้องส่งงาน) / build 0/0 ภาพแคปทุกช่วงของ intro / ตาราง "แชทที่กำลังทำงาน" ว่าง
 ⚠️ ผู้ใช้ยังไม่ได้ลอง intro (ปิดเกมเปิดใหม่หลัง Rebuild) / ไอคอนเกมจากโลโก้ (ก้อน E ข้อ 3) ถามผู้ใช้ก่อนว่ายังใช้โลโก้ทำไอคอนไหม

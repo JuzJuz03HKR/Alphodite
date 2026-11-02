@@ -65,7 +65,7 @@
 6. ✅ แถบการ์ดของวง : ผู้ใช้ให้ไอริสคิดเองจากเกมตัวอย่าง (13.106) BAND CARDS หน้า math art แถบสี เลขลำดับ คนที่เล่นยกขึ้น
 7. ✅ ราคาเลือดของ THE DEVIL'S BARGAIN กับ THE PACT ใต้ปุ่ม ตรงกับการ์ดสกิล (`TurnBattle.LifePrice` `BattleScreen.DrawPrice`)
 
-⏭ **ก้อน D VFX ทั้งหมด ทำทีเดียว** (ผู้ใช้สั่ง 1 พ.ย. ให้รวม VFX ทุกงานไว้ก้อนนี้ / ขอภาพอ้างอิงจากผู้ใช้ก่อนทุกชนิด ห้ามเดา / ทำบนหน้าจอที่นิ่งแล้ว)
+⏭ **ก้อน D VFX ทั้งหมด** (ผู้ใช้สั่ง 1 พ.ย. ให้รวม VFX ทุกงานไว้ก้อนนี้ / ขอภาพอ้างอิงจากผู้ใช้ก่อนทุกชนิด ห้ามเดา / ทำบนหน้าจอที่นิ่งแล้ว) **2 พ.ย. ผู้ใช้ : ทำทีละข้อ ถามทีละข้อ ผู้ใช้หาภาพอ้างอิงมาให้ทีละข้อ (13.109)** ไอริสเสนอลำดับ D7 → D1 → D3 → D2 → D5 → D4 → D6 → D9
 1. VFX ของสกิลใหม่ (ก้อน 1 ข้อ 7 เดิม) ให้แต่ละสกิลมีหน้าตาตามชื่อ (ผู้ใช้ขอ 28 ต.ค.) ตอนนี้ตีตามตระกูลเครื่องดนตรี SLASH SHOT SMASH (`StyleOf`) / ที่ยังไม่มีตัวอย่าง : SHIELD CHAKRAM THE LESSON TURN OF THE HAND และท่า CHARGE GUARD ของศัตรู
 2. FINALE ของ Fanny กับ Bach ยังเป็นแสงกากบาท CROSS (`SignatureStyle` ใน `Screens/BattleScreen.Stage.cs`) ธีมที่ตกลงไว้ Fanny ผลึกคริสตัลสีรุ้ง Bach แสงศักดิ์สิทธิ์สีทอง / FINALE ขั้นที่โตหลังบอส (STORM THE ART OF FUGUE DAS JAHR) ยังใช้ภาพแบบเดิม (13.2)
 3. VFX ของดาวขั้นสูง ร่างในตำนานของ ATTACK กับสกิล (`HitFx` tier) ยังไม่ชัด (ผู้ใช้บอก 29 ต.ค.)
@@ -73,13 +73,13 @@
 5. บอส : ENTRANCE THE TELL THE STRIKE THE TURN ตอนนี้วาดด้วยโค้ด (`Screens/BattleScreen.Boss.cs` 21) VFX หนักรอทำในก้อนนี้
 6. COMBO (ก้อน 6 เดิม) กับช่วงมันส์ของ 16.4 : PERFECT ติดกันนับ COMBO สีของวงกลืนความมืด SOLO เกรดสด / ถ้า COMBO คูณดาเมจจะเป็นกติกาด้วย ต้องเสร็จก่อน balance รอบสุดท้าย (ก้อน G)
 7. ตัวละครที่ยืนซ้อนหลุมดำมืดจนแทบมองไม่เห็น (24.5) ไล่ว่ามาจากแสงหรือลำดับการวาด ดูพร้อมภาพศัตรูจริงถ้ามาแล้ว
-8. ❓ กล้องซูมอาจบ่อยไป (ผู้ใช้บอก 29 ต.ค.) ห้ามลดจนกว่าผู้ใช้รีวิว
+8. ✅ กล้องซูมอาจบ่อยไป (ผู้ใช้บอก 29 ต.ค.) : ผู้ใช้รีวิวแล้ว 2 พ.ย. "ไม่มากไม่น้อยเกินไป ตอนนี้ยังไม่ต้องปรับ" (13.109)
 9. ตั้งค่ากราฟิก ทำท้ายก้อน เพราะต้องรู้ก่อนว่ามี VFX อะไรให้เปิดปิด (มี LESS FLASHING อยู่แล้ว)
 
 **ก้อน E เสียงกับอาร์ตจริง** (ผู้ใช้ส่งไฟล์รวดเดียวทาง Google Drive ไอริสไม่มีตัวเชื่อม Drive ให้แนบในแชทหรือ push / ถ้าไฟล์มาก่อนถึงก้อนนี้ใส่ได้ทันที)
 1. จุดเล่นเสียงในไฟต์ตาม `ASSET_LIST.md` S3 (49 แถว) ทำได้ก่อนไฟล์มา เพราะตัวโหลดข้ามไฟล์ที่ไม่มีไปเงียบๆ (ไม่ใส่เสียงชั่วคราว) / เสียงตีเป็นเสียงเครื่องดนตรีผสมเสียงอาวุธ (16.14)
 2. ใส่ไฟล์เสียงจริง S1 ถึง S3 ลง `Content.mgcb`
-3. ใส่ภาพจริงแล้วเช็กทุกช่อง : ไอคอนเกม `Icon.ico` `Icon.bmp` จากโลโก้ (ข้อ 9 ข้อ 5) / จอ 1920×1080 ขยายภาพ 1.5 เท่า ให้ผู้ใช้เลือกแบบคมหรือแบบเนียน (ข้อ 9 ข้อ 11) / ท่า exit victory และท่าพิเศษของบอส (ข้อ 9 ข้อ 13)
+3. ใส่ภาพจริงแล้วเช็กทุกช่อง (2 พ.ย. ✅ THE UNHEARING ภาพ 1 2 3 ภาพ 2 ใช้กลางหน้าโปรไฟล์และ FINALE `BETA1_DIRECTION.md` 34 / FANNY รอไฟล์ / THE METRONOME ยังไม่มี) : ไอคอนเกม `Icon.ico` `Icon.bmp` จากโลโก้ (ข้อ 9 ข้อ 5) / จอ 1920×1080 ขยายภาพ 1.5 เท่า ให้ผู้ใช้เลือกแบบคมหรือแบบเนียน (ข้อ 9 ข้อ 11) / ท่า exit victory และท่าพิเศษของบอส (ข้อ 9 ข้อ 13)
 4. ผูกดาเมจกับเฟรมภาพ (รอภาพท่า attack จริง)
 
 **ก้อน F สอนเล่นกับเนื้อเรื่อง** (ทำเมื่อระบบ หน้าจอ VFX นิ่งแล้ว เพราะสอนและเล่าตามของจริง)
@@ -188,7 +188,8 @@
 | ก้อน C (2 พ.ย.) PLACE ART : สถานที่เป็นฉากเล็กแบบการ์ดสัตว์ของ Worldless (FIGHT ELITE BOSS CHANCE SHOP REST WORKSHOP TREASURE) | `Core/PlaceArt.cs` · ใช้ที่ `RouteScreen` (การ์ดห้อง) `EventScreen` `ShopScreen` `RestScreen` `LuthierScreen` |
 | ก้อน C (2 พ.ย.) BAND CARDS การ์ดของวงในไฟต์ / LIFE PRICE ใต้ปุ่ม / INTO THE HOLE ตอนเปิดเกม / ภาพวาทยากรอ่านตรงจากโฟลเดอร์ | `BattleScreen.DrawBand` (`ChipW` `ChipStep` ใน Stage) · `TurnBattle.LifePrice` `BattleScreen.DrawPrice` · INTO THE HOLE เปิดเกมเริ่มในหลุมดำแล้วซูมออก `TitleScreen` (`IntroOut` `IntroZoom` `IntroCamera` `DrawIntroName` `DrawRoom`) ตัวเลข `BattleRules` TitleIntro* · `ArtBank.Direct` |
 | รอบ 6 ส่วน 5 (2 พ.ย.) ท่าโจมตี ONE NOTE ONE BLOW : โน้ตหนึ่งตัว = ตีหนึ่งครั้งทั้งสองฝั่ง ท่าหลักต่อกัน READY WIND CUT HOLD BACK GUARD CHARGE มือกับอาวุธวางตรงท่า (PINNED) | กลไก `Core/Figure.cs` หัวข้อ ONE NOTE ONE BLOW (`Ready` `Brace` `Blow` `Tap` `Charge` `Guard` `Freeze` `PoseNow` `Blend` `Toward`) · ท่าของนักดนตรี `PaganiniKey` ถึง `PuntoKey` `ThrownAt` ใน `Core/Figure.Band.cs` · ท่า TACET กับบอส `TacetRest` `TacetKey` `Shadow` ใน `Core/Figure.Tacet.cs` · สั่งจากหน้าต่อสู้ `TellBlows` `NoteBlow` `HoldBlow` `EnemyBlow` `FreezeFigures` `AimOf` ใน `Screens/BattleScreen.Stage.cs` (เรียกใน `UpdateSwipe` `Land` ของ `Screens/BattleScreen.cs`) · ตัวเลข `BattleRules` หัวข้อ Attack Feel · วิธีแคปทีละเฟรม `BETA1_DIRECTION.md` 32.22 |
-| cut-in SIGNATURE, แสงของวง QTE (วาดทับหลังโลกถูกหรี่) | `Screens/BattleScreen.Show.cs` |
+| cut-in SIGNATURE, แสงของวง QTE (วาดทับหลังโลกถูกหรี่) / 2 พ.ย. cut in FINALE ใช้ภาพ 2 ของวาทยากร `cutin_<name>.png` 320×530 (ไม่มีภาพ = SIGIL) | `Screens/BattleScreen.Show.cs` (`DrawCutIn`) |
+| 2 พ.ย. PROFILE PAINTING : หน้าโปรไฟล์วาทยากรยกภาพ 1 มาแล้วกลายเป็นภาพ 2 กรอบเปิดขึ้นลง กด BACK ปิดกลับก่อนยกคืน | `Screens/ConductorDetailScreen.cs` (`DrawPainting` `BigFull` `BigWindow` `FrameOf` `Open` `BigTop` `MarkY`) · `BattleRules.UiProfileOpen` · ภาพ `Content/Art/Conductors/` |
 | อ่านภาพ animation ของทีมอาร์ต (PNG / Aseprite) | `Core/FrameArt.cs` · โฟลเดอร์ `Content/Art/Battle/` · แผนอาร์ต `BATTLE_ART_PLAN.md` |
 | LESS FLASHING | `Core/Settings.cs` `ReduceFlashing` · หน้า `Screens/SettingsScreen.cs` แถว 07 · `BattleRules.LessFlash` |
 | CLEAR FIGHT (หน้าต่อสู้อ่านง่าย 29 ต.ค.) | `Core/Settings.cs` `ClearFight` เซฟ `clearfight=` · หน้า `Screens/SettingsScreen.cs` แถว 08 · วาดใน `Screens/BattleScreen.cs` (ค้น `CLEAR FIGHT` : `DrawClearPlate` `DrawAimedAt` `DrawIntent` `DrawBand` `DrawBottom`) · ตัวเลข `BattleRules.ClearFocusDim` `ClearFocusPool` `ClearPlate` |

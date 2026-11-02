@@ -37,6 +37,8 @@ namespace Tacetno433.Screens
         private const int RightX = 842;
         private const int RightW = 380;
         private const int FaceSize = 224;              // the face as it was drawn (docs/UI_ART_PLAN.md 2.3)
+        private const int BigTop = 44;                 // PROFILE PAINTING : the top of the big painting once it is open, under the letterbox
+        private const int MarkY = 576;                 // the FINALE's marking under the painting (pushed down under a big painting)
         private static readonly Rectangle paintBox = new Rectangle(TacetGame.ScreenW / 2 - ConductorSelectScreen.PaintW / 2, 96,
                                                                    ConductorSelectScreen.PaintW, ConductorSelectScreen.PaintH);
         private Rectangle faceBox = new Rectangle(LeftX, 174, FaceSize, FaceSize);
@@ -135,13 +137,14 @@ namespace Tacetno433.Screens
             for (int i = 0; i < auras.Length; i++)
             {
                 float power = 0f;
-                Rectangle frame = PaintingAt();
+                Rectangle frame = FrameOf(c, PaintingAt(), Open());
                 if (i == index) power = Room() * (swapFrom >= 0 ? Math.Min(1f, swap / BattleRules.UiProfileSwap) : 1f);
                 else if (i == swapFrom && swap < BattleRules.UiProfileSwap)
                 {
                     float t = UiMotion.EaseOut(swap / BattleRules.UiProfileSwap);
                     frame = paintBox;
                     frame.X -= (int)Math.Round(t * 140f * swapWay);
+                    frame = FrameOf(ConductorList.Shown[i], frame, Open());
                     power = Room() * (1f - t);
                 }
                 auras[i].Update(dt, frame, power);
@@ -255,6 +258,16 @@ namespace Tacetno433.Screens
             return MathHelper.Clamp(leaveTime / BattleRules.UiProfileCarry, 0f, 1f);
         }
 
+        //Open : 0..1, how far the big painting has opened (PROFILE PAINTING). It opens once the carried painting has landed,
+        //and closes first when the page is left, so the gallery gets back the very same picture it handed over.
+        private float Open()
+        {
+            if (phase == Phase.Arrive) return 0f;
+            float open = UiMotion.EaseOut(MathHelper.Clamp((time - BattleRules.UiProfileCarry) / BattleRules.UiProfileOpen, 0f, 1f));
+            if (phase == Phase.Leave) open *= 1f - UiMotion.EaseInOut(MathHelper.Clamp(leaveTime / (BattleRules.UiProfileCarry * 0.4f), 0f, 1f));
+            return open;
+        }
+
         //Words : the page's words and buttons, one piece after another once the painting is on its way. They leave first,
         //and fade in again after the arrows (Arrived alone is how far they have slid in).
         private float Words(float start)
@@ -322,12 +335,59 @@ namespace Tacetno433.Screens
             for (int i = 0; i < auras.Length; i++) auras[i].DrawFront(sb);
         }
 
-        //Painting : the conductor's painting at the size it was painted, or the empty slot that waits for it
+        //Painting : the conductor's painting at the size it was painted, or the empty slot that waits for it.
+        //PROFILE PAINTING (2 Nov, the user 13.109) : the profile shows the big painting (their art number 2, the same picture as the
+        //FINALE's cut in, Content/Art/Conductors/cutin_<name>.png). The gallery painting is carried in from its panel as before; when
+        //it lands, it turns into the big painting inside its own frame, then the frame opens up and down to the whole of it.
+        //No big painting yet : the gallery painting stays, as before.
         private void DrawPainting(SpriteBatch sb, Conductor who, Rectangle r, float alpha, float room)
         {
-            Texture2D art = ArtBank.GalleryOf(who);
-            if (art != null) sb.Draw(art, new Vector2(r.X + (r.Width - art.Width) / 2, r.Y), Color.White * alpha);
-            else LegendArt.Sigil(sb, who, r, time, alpha * room);                       // SIGIL (block C) : their mark until the painting comes
+            Texture2D big = ArtBank.CutInOf(who);
+            float open = big != null ? Open() : 0f;
+            float turn = MathHelper.Clamp(open / 0.35f, 0f, 1f);                         // it turns into the big one in the first third
+
+            //Gallery Painting : fading out as the big one comes in
+            if (turn < 1f)
+            {
+                Texture2D art = ArtBank.GalleryOf(who);
+                if (art != null) sb.Draw(art, new Vector2(r.X + (r.Width - art.Width) / 2, r.Y), Color.White * (alpha * (1f - turn)));
+                else LegendArt.Sigil(sb, who, r, time, alpha * room * (1f - turn));      // SIGIL (block C) : their mark until the painting comes
+            }
+
+            //Big Painting : only the open part of it, at the size it was painted (whole pixels, so it stays sharp)
+            if (turn > 0f)
+            {
+                Rectangle full = BigFull(big, r);
+                Rectangle window = BigWindow(big, r, open);
+                Rectangle from = new Rectangle(window.X - full.X, window.Y - full.Y, window.Width, window.Height);
+                sb.Draw(big, window, from, Color.White * (alpha * turn));
+            }
+        }
+
+        //Big Full : where the whole big painting stands for a gallery frame r, on the same middle line, its top at BigTop
+        private static Rectangle BigFull(Texture2D big, Rectangle r)
+        {
+            return new Rectangle(r.Center.X - big.Width / 2, r.Y - (paintBox.Y - BigTop), big.Width, big.Height);
+        }
+
+        //Big Window : the part of the big painting on show. Closed it is the gallery frame r, open it is the whole painting.
+        //Kept inside the picture, so a big painting smaller than the frame still works.
+        private static Rectangle BigWindow(Texture2D big, Rectangle r, float open)
+        {
+            Rectangle full = BigFull(big, r);
+            int left = (int)Math.Round(MathHelper.Lerp(r.Left, full.Left, open));
+            int top = (int)Math.Round(MathHelper.Lerp(r.Top, full.Top, open));
+            int right = (int)Math.Round(MathHelper.Lerp(r.Right, full.Right, open));
+            int bottom = (int)Math.Round(MathHelper.Lerp(r.Bottom, full.Bottom, open));
+            return Rectangle.Intersect(new Rectangle(left, top, right - left, bottom - top), full);
+        }
+
+        //Frame Of : the painting's frame this frame for a gallery frame r (the open part of a big painting), for the AURA and the glow
+        private Rectangle FrameOf(Conductor who, Rectangle r, float open)
+        {
+            Texture2D big = ArtBank.CutInOf(who);
+            if (big == null || open <= 0f) return r;
+            return BigWindow(big, r, open);
         }
 
         //Scene : the space behind the painting, built in layers from far to near, all of it fading with the room
@@ -388,7 +448,7 @@ namespace Tacetno433.Screens
         {
             float e = Room() * Math.Min(1f, 0.25f + swap * 4f);
             if (e <= 0f) return;                      // no room yet, so no aura either (it rises with the room)
-            Rectangle r = PaintingAt();
+            Rectangle r = FrameOf(c, PaintingAt(), Open());
             Gfx.DrawGlowBox(sb, new Rectangle(r.X - 70, r.Bottom - 70, r.Width + 140, 130), c.SpotAt(time) * (0.45f * e));
             for (int i = 0; i < auras.Length; i++) auras[i].DrawGlow(sb);
         }
@@ -402,9 +462,10 @@ namespace Tacetno433.Screens
             DrawLeftColumn(sb);
             DrawRightColumn(sb);
 
-            //Under the painting : the signature's marking, as it would be written in a score
+            //Under the painting : the signature's marking, as it would be written in a score (under the big painting's foot when it is open)
             float mark = Words(0.2f);
-            Gfx.TextCentered(sb, Game.StoryFont, c.SignatureMark, TacetGame.ScreenW / 2f, 576, Palette.PaperDim * mark, TextSize.Story);
+            float markY = Math.Max(MarkY, FrameOf(c, PaintingAt(), Open()).Bottom + 18);
+            Gfx.TextCentered(sb, Game.StoryFont, c.SignatureMark, TacetGame.ScreenW / 2f, markY, Palette.PaperDim * mark, TextSize.Story);
 
             //Buttons
             float low = Words(0.3f);

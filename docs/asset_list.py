@@ -144,13 +144,14 @@ CONDUCTORS = [("the_unhearing", "THE UNHEARING (Beethoven)", "ฟ้าสาย
               ("the_metronome", "THE METRONOME (J. S. Bach)", "แสงศักดิ์สิทธิ์สีทอง ผ้าพันตา รอบตัวมืด")]
 for key, name, theme in CONDUCTORS:
     warn = ""
-    art("conductors", "Content/Art/Conductors/gallery_" + key, name + " ภาพเต็ม", (302, 402), "302×402", PIX1,
-        "หน้าเลือกวาทยากรกับหน้าโปรไฟล์เท่านั้น (13.106) ระหว่างรอ โค้ดวาดเครื่องหมายของวาทยากร (SIGIL)", 2, note=theme + warn)
-    art("conductors", "Content/Art/Conductors/face_" + key, name + " หน้า", (224, 224), "224×224", PIX1,
-        "หน้าโปรไฟล์วาทยากร ระหว่างรอ โค้ดวาดเครื่องหมายของวาทยากร", 1, note=warn.strip(" /"))
-    art("conductors", "Content/Art/Conductors/cutin_" + key, name + " ภาพ FINALE", (180, 190), "360×380", PIX2,
-        "ไม่ใช้แล้ว (2 พ.ย.) : cut in ของ FINALE วาดเครื่องหมายของวาทยากรด้วยโค้ด", 2, stable=False,
-        note="ผู้ใช้ 13.106 ภาพอาร์ตมีแค่หน้าเลือกวาทยากร" + warn)
+    art("conductors", "Content/Art/Conductors/gallery_" + key, name + " ภาพ 1 (แผงหน้าเลือก)", (302, 402), "302×402", PIX1,
+        "หน้าเลือกวาทยากร แผงสูงของแต่ละคน และเป็นภาพที่ถูกยกเข้าหน้าโปรไฟล์ ระหว่างรอ โค้ดวาดเครื่องหมายของวาทยากร (SIGIL)", 2,
+        note=theme + warn)
+    art("conductors", "Content/Art/Conductors/cutin_" + key, name + " ภาพ 2 (กลางหน้าโปรไฟล์ + FINALE)", (320, 530), "320×530", PIX1,
+        "หน้าโปรไฟล์วาทยากร ภาพใหญ่ตรงกลาง (เปิดออกจากภาพ 1 ตอนวางลง) และ cut in ตอนใช้ FINALE ในหน้าต่อสู้ ระหว่างรอ โค้ดวาดเครื่องหมาย", 2,
+        note="ผู้ใช้ 13.109 : ตอนใช้สกิล maestro ใช้ภาพหมายเลข 2" + warn)
+    art("conductors", "Content/Art/Conductors/face_" + key, name + " ภาพ 3 (หน้า)", (224, 224), "224×224", PIX1,
+        "หน้าโปรไฟล์วาทยากร ช่องสี่เหลี่ยมซ้าย ระหว่างรอ โค้ดวาดเครื่องหมายของวาทยากร", 1, note=warn.strip(" /"))
 
 # 3 the legends on the other pages (UiArt : Busts, Faces)
 for key, name, inst in LEGENDS:

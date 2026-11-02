@@ -133,11 +133,15 @@ namespace Tacetno433.Screens
                 Gfx.Rect(sb, lx, ly, 90 + (i % 3) * 70, 2, Palette.Paper * 0.18f);
             }
 
-            //Portrait : taller than the band, so it breaks out of it top and bottom. SIGIL (block C, the user 13.106 : the team's
-            //art is only on the Maestro page) : the conductor's mark drawn by the code, its light filling the window
-            Rectangle portrait = new Rectangle(x + 100, 170, 360, 380);
+            //Portrait : taller than the band, so it breaks out of it top and bottom. The conductor's big painting (the user 13.109 :
+            //their art number 2 is the FINALE's picture, Content/Art/Conductors/cutin_<name>.png) at the size it was painted, standing
+            //on the band's middle line. Until it comes, SIGIL (block C) : the conductor's mark drawn by the code, its light filling the window
+            Texture2D art = ArtBank.CutInOf(c);
+            Rectangle portrait = art != null ? new Rectangle(x + 120, band.Center.Y - art.Height / 2, art.Width, art.Height)
+                                             : new Rectangle(x + 100, 170, 360, 380);
             Gfx.Rect(sb, portrait, Palette.Void);
-            LegendArt.Sigil(sb, c, portrait, time, 1f, 1f - t * 1.6f);                    // it strikes as the cut in lands
+            if (art != null) sb.Draw(art, new Vector2(portrait.X, portrait.Y), Color.White);
+            else LegendArt.Sigil(sb, c, portrait, time, 1f, 1f - t * 1.6f);               // it strikes as the cut in lands
             Gfx.RectOutline(sb, portrait, Palette.Paper * (0.7f * dim), 1);
 
             //Shards : sixteen streaks thrown out of the portrait, the same every time
