@@ -26,6 +26,12 @@ namespace Tacetno433.Screens
     //three choices rise in one after another, and pointing at one lifts it into the lamp's light.
     public class RestScreen : GameScreen
     {
+        //THE STAGE TURNS (13.122) : the run's conductor's weather in this page's sky (Core/ConductorWeather.cs)
+        public override bool ShowsWeather
+        {
+            get { return true; }
+        }
+
         private enum Phase { Choose, Done }
 
         //Rest Options

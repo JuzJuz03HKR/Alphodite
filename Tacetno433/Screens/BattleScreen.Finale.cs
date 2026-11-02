@@ -23,6 +23,11 @@ namespace Tacetno433.Screens
     //FINALE GROWS (the user 13.119 : "light and stars over the whole field") : FUGUE lights a patch of sky round its 4/4,
     //THE ART OF FUGUE fills the whole field with stars and the room goes darker, THE ART OF FUGUE II adds shafts of holy
     //light falling across the stage and more stars still.
+    //THE STAGE TURNS (the user 13.120 and 13.122) : the stage has its conductor's weather from the first turn (Core/
+    //ConductorWeather.cs : STORM's rain and far lightning, PRISM's rainbow sky against her brother's shadows, HOLY's night of
+    //stars), half strength, and once a FINALE has struck it comes in to its full after the strike's own moment, a little
+    //stronger at each level. The sky's parts are drawn into the GLOW before the fighters' silhouettes (BattleScreen.Stage.cs
+    //PreDraw), so the fighters stand in front of them; the rain and the shadows are drawn over the finished world.
     //The sky hangs over the enemies, so its 4/4 is drawn through the battle's camera; the far stars stand still over the
     //world, under the band's cards; the falling stars land on the cards, so they are drawn with them. Nothing here is made
     //while the fight runs. Numbers : Data/BattleRules.cs, Finale Feel.
@@ -58,6 +63,15 @@ namespace Tacetno433.Screens
 
         //STORM II : the enemies struck by the great bolt (no list is made in a fight)
         private readonly Rectangle[] greatBoxes = new Rectangle[8];
+
+        //THE STAGE TURNS : whose weather the stage has, how far it has come in, where it is going, the wait after a FINALE
+        private AuraKind moodKind = AuraKind.None;
+        private float moodPower;
+        private float moodTarget;
+        private float moodWait = -1f;
+        private int moodLevel;
+        private const float MoodWaitTime = 0.9f;                       // the strike's own moment first
+        private const float MoodInTime = 1.8f;                         // then the weather comes in over this long
 
         //PRISM : where each of FANNY's strokes cuts, by its beat. The cracks cross near the enemies at four angles, so the
         //world breaks into pieces of many sizes (the small ones round the enemies).
@@ -113,6 +127,14 @@ namespace Tacetno433.Screens
         private void FinaleStrike()
         {
             int level = battle.SignatureLevel;
+            AuraKind weather = AuraOf(battle.Kit);                                         // THE STAGE TURNS : the conductor's weather stays
+            if (weather != AuraKind.None)
+            {
+                if (weather != moodKind) moodPower = 0f;
+                moodKind = weather;
+                moodLevel = level;
+                moodWait = MoodWaitTime;                                                     // full once the strike's moment is over
+            }
             if (battle.Kit == TurnKit.Fanny) hits.PrismBreak(EnemiesCenter(), level);
             else if (battle.Kit == TurnKit.Bach)
             {
@@ -165,6 +187,13 @@ namespace Tacetno433.Screens
 
         private void UpdateFinale(float dt)
         {
+            if (moodWait >= 0f)                                                                // THE STAGE TURNS
+            {
+                moodWait -= dt;
+                if (moodWait < 0f) moodTarget = 1f;                                            // waited : it comes in to its full
+            }
+            if (moodPower < moodTarget) moodPower = Math.Min(moodTarget, moodPower + dt / MoodInTime);
+
             if (stormAge >= 0f)
             {
                 stormAge += dt;
@@ -213,6 +242,7 @@ namespace Tacetno433.Screens
         //the 4/4 of stars hangs over the enemies. STORM : the rain.
         private void DrawFinaleSky(SpriteBatch sb)
         {
+            DrawMoodFront(sb);                                                           // THE STAGE TURNS : rain, her brother's shadows
             if (hits.HasOver)                                                            // PRISM : the glass and the months over the broken world
             {
                 float f = BattleRules.StageParallax[3];
@@ -419,6 +449,64 @@ namespace Tacetno433.Screens
                 if (x < 0f) x += TacetGame.ScreenW + 300f;
                 Gfx.Line(sb, new Vector2(x, y), new Vector2(x + 16f, y - 36f), Color.Lerp(Palette.LightningBlueHot, Color.White, 0.5f) * (0.5f * a), 1.5f);
             }
+        }
+
+        //Aura Of : a conductor's weather, by their FINALE (the hidden conductors have none)
+        private static AuraKind AuraOf(TurnKit kit)
+        {
+            if (kit == TurnKit.Beethoven) return AuraKind.Storm;
+            if (kit == TurnKit.Fanny) return AuraKind.Prism;
+            if (kit == TurnKit.Bach) return AuraKind.Holy;
+            return AuraKind.None;
+        }
+
+        //======================================================================================
+        //THE STAGE TURNS
+        //======================================================================================
+
+        //Mood Begins : the fight's first turn, the stage already has the conductor's weather at half strength (13.122)
+        private void MoodBegins()
+        {
+            moodKind = AuraOf(battle.Kit);
+            moodLevel = battle.SignatureLevel;
+            moodPower = BattleRules.WeatherFight;
+            moodTarget = BattleRules.WeatherFight;
+            moodWait = -1f;
+        }
+
+        //Mood Strength : how strong the weather is now (a little stronger at each level of the FINALE that brought it)
+        private float MoodStrength
+        {
+            get { return moodKind == AuraKind.None ? 0f : moodPower * (0.75f + 0.125f * moodLevel); }
+        }
+
+        //Mood Ambient : the stage's light under the weather (the light map, so the GLOW's stars and light stay bright) :
+        //darker in the STORM, a night for HOLY, a little for PRISM
+        private float MoodAmbient(float ambient)
+        {
+            float s = MoodStrength;
+            if (s <= 0f) return ambient;
+            float dim = moodKind == AuraKind.Storm ? 0.3f : moodKind == AuraKind.Holy ? 0.35f : 0.15f;
+            return ambient * (1f - dim * s);
+        }
+
+        //Draw Mood Back : the weather's sky, into the GLOW before the fighters' silhouettes (they stand in front of it). The
+        //far layer's camera, so it moves less than the fighters (it is far away).
+        private void DrawMoodBack(SpriteBatch sb, Vector2 cam)
+        {
+            float s = MoodStrength;
+            if (s <= 0.005f) return;
+            sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearClamp, null, null, null, Layer(cam, 1));
+            ConductorWeather.Sky(sb, moodKind, s, moodLevel, worldTime, Horizon, PanelTop, false);
+            sb.End();
+        }
+
+        //Draw Mood Front : over the finished world, under the panel : the STORM's rain, PRISM's shadows of her brother
+        private void DrawMoodFront(SpriteBatch sb)
+        {
+            float s = MoodStrength;
+            if (s <= 0.005f) return;
+            ConductorWeather.Front(sb, moodKind, s, moodLevel, worldTime, PanelTop);
         }
 
         //Hash : a steady random 0..1 from two whole numbers (the same trick as TacetField)

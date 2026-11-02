@@ -20,6 +20,12 @@ namespace Tacetno433.Screens
     //TAB, ENTER or the button goes back to the route. ESC opens the pause menu, like every page of a run.
     public class BandScreen : GameScreen
     {
+        //THE STAGE TURNS (13.122) : the run's conductor's weather in this page's sky (Core/ConductorWeather.cs)
+        public override bool ShowsWeather
+        {
+            get { return true; }
+        }
+
         //Band Layout : the conductor and the band, centred left of the sheet
         private const int ColumnsTop = 132;
         private const int SideLeft = 40;

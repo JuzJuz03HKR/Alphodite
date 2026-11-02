@@ -206,9 +206,21 @@ namespace Tacetno433.Core
             if (dark != null) dark.DrawGlow(device, sb, Back);
             sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearClamp, null, null, null, Sharp.Transform);
             page.DrawGlow(sb);
+            Weather(sb, page, time);
             sb.End();
 
             Finish(device, sb, time, look.Focus, look.Engulf, look.Impact, look.BloomThreshold, look.BloomStrength, look.Vignette, 0f);
+        }
+
+        //Weather : a run's page shows its conductor's weather in the glow (THE STAGE TURNS, the user 13.122), a little stronger
+        //as the run goes on (the FINALE's level : the floor reached). The rain falls as light, there is nothing over a page.
+        private static void Weather(SpriteBatch sb, GameScreen page, float time)
+        {
+            if (!page.ShowsWeather || page.Game == null) return;
+            RunState run = page.Game.CurrentRun;
+            if (run == null || run.Conductor == null || run.Conductor.Aura == AuraKind.None) return;
+            int level = System.Math.Max(0, System.Math.Min(2, run.Floor - 1));
+            ConductorWeather.Sky(sb, run.Conductor.Aura, BattleRules.WeatherPage, level, time, H * 0.6f, H, true);
         }
 
         //Spot Light : the plain stage light of a page, into the LIGHT MAP (GameScreen.DrawLights calls it).

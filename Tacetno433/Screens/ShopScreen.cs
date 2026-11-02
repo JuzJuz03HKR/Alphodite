@@ -31,6 +31,12 @@ namespace Tacetno433.Screens
     //are written out line by line. A new shelf comes in the same way.
     public class ShopScreen : GameScreen
     {
+        //THE STAGE TURNS (13.122) : the run's conductor's weather in this page's sky (Core/ConductorWeather.cs)
+        public override bool ShowsWeather
+        {
+            get { return true; }
+        }
+
         //Leave Box : "are you sure?" before walking out
         private ConfirmBox confirm = new ConfirmBox();
 

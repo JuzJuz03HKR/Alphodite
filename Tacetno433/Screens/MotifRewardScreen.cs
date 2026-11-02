@@ -24,6 +24,12 @@ namespace Tacetno433.Screens
     //(30 to 31 Oct the same cards showed the band's PATH steps too. REHEARSAL took their place, Screens/RehearsalScreen.cs.)
     public class MotifRewardScreen : GameScreen
     {
+        //THE STAGE TURNS (13.122) : the run's conductor's weather in this page's sky (Core/ConductorWeather.cs)
+        public override bool ShowsWeather
+        {
+            get { return true; }
+        }
+
         public enum Kind { Fight, Treasure }
 
         //Reward Layout

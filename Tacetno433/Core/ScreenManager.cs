@@ -97,6 +97,13 @@ namespace Tacetno433.Core
             get { return false; }
         }
 
+        //Shows Weather : true for the pages of a run, which show the run's conductor's weather in their sky (THE STAGE TURNS,
+        //the user 13.122, Core/ConductorWeather.cs, drawn by PostChain.DrawPage)
+        public virtual bool ShowsWeather
+        {
+            get { return false; }
+        }
+
         //Lens : how this page's picture is finished (its light, bloom, vignette ...). A page may change it while it runs.
         public PostChain.PageLook Lens = new PostChain.PageLook();
 

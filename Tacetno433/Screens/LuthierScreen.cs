@@ -18,6 +18,12 @@ namespace Tacetno433.Screens
     //A lamp hangs over the bench, the room around it dark (the user : white, black and grey, colour only on the characters).
     public class LuthierScreen : GameScreen
     {
+        //THE STAGE TURNS (13.122) : the run's conductor's weather in this page's sky (Core/ConductorWeather.cs)
+        public override bool ShowsWeather
+        {
+            get { return true; }
+        }
+
         //Workshop Layout
         private const int ColumnW = 176;
         private const int ColumnGap = 22;

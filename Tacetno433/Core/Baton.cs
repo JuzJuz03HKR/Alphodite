@@ -1,6 +1,7 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Tacetno433.Data;
 
 namespace Tacetno433.Core
 {
@@ -10,8 +11,19 @@ namespace Tacetno433.Core
     //
     //ARTWORK : Content/Art/Baton/baton.png, drawn standing up from its bottom middle and turned
     //to the stick's angle (see ArtBank). Until then it is a plain rectangle.
+    //CONDUCTOR'S BATON (block D, 2 Nov, the user 13.121 : "a lightning baton, a crystal baton and a gold baton sparkling with
+    //stars") : the page tells the stick whose it is (Look, the conductor's weather) and it is drawn as theirs :
+    //   STORM  THE UNHEARING : a bolt of lightning, jagged, flickering, small arcs crawling off its tip (blue, red once his
+    //          FINALE has grown into STORM : Level)
+    //   PRISM  FANNY : a long crystal, clear with white edges, the rainbow along one edge, a glint running up it
+    //   HOLY   THE METRONOME : a stick of gold with a star at its tip, twinkling, gold dust falling off its swing
+    //The swing's tail takes the same colour. None keeps the plain stick (the old duel, the tutorial).
     public class Baton
     {
+        public AuraKind Look = AuraKind.None;
+        public int Level;                       // the FINALE's level (STORM turns the lightning red)
+        private float clock;                    // the looks' flicker and glints run on it
+        private static readonly Vector2[] crystal = new Vector2[4];
         public const float Length = 118f;
         public const float Width = 10f;
         private const float Rest = -1.3f;       // radians : 0 points right, minus a half turn points up
@@ -48,6 +60,7 @@ namespace Tacetno433.Core
         public void Update(float dt, bool held)
         {
             if (dt <= 0f) return;
+            clock += dt;
             Glow = Math.Max(0f, Glow - dt * 2.5f);
 
             Vector2 now = Input.MousePos;
@@ -91,8 +104,16 @@ namespace Tacetno433.Core
                     float fresh = 1f - gesture.TrailAge(i);
                     if (fresh <= 0.06f) continue;
                     Gfx.Line(sb, a, b, Palette.Ink * (0.25f * fresh), 4f + fresh * 8f);
-                    Gfx.Line(sb, a, b, Palette.Highlight * (0.7f * fresh), 2f + fresh * 5f);
+                    Gfx.Line(sb, a, b, TailColor(i) * (0.7f * fresh), 2f + fresh * 5f);
+                    if (Look == AuraKind.Holy && fresh > 0.3f && Hash(i, (int)(clock * 12f)) > 0.6f)   // gold dust off the swing
+                        Gfx.Diamond(sb, b.X + (Hash(i, 3) - 0.5f) * 14f, b.Y + (Hash(i, 5) - 0.5f) * 14f + (1f - fresh) * 10f, 2f, Palette.SpotHolyHot * fresh);
                 }
+            }
+
+            if (Look != AuraKind.None && ArtBank.Baton == null)
+            {
+                DrawOwn(sb, grip, along, held);
+                return;
             }
 
             Texture2D art = ArtBank.Baton;
@@ -110,6 +131,100 @@ namespace Tacetno433.Core
             }
 
             if (Glow > 0f) Gfx.DrawGlow(sb, tip.X, tip.Y, 40f * Glow, Palette.Highlight * (0.6f * Glow));
+        }
+
+        //Tail Color : the swing's tail in the conductor's colour (the rainbow along it for the crystal)
+        private Color TailColor(int i)
+        {
+            if (Look == AuraKind.Storm) return Level >= 1 ? Palette.StormRedHot : Palette.LightningBlueHot;
+            if (Look == AuraKind.Prism) return Color.Lerp(Color.White, Palette.Prism(i * 0.07f + clock * 0.3f), 0.7f);
+            if (Look == AuraKind.Holy) return Palette.SpotHolyHot;
+            return Palette.Highlight;
+        }
+
+        //Draw Own : the conductor's own baton (CONDUCTOR'S BATON), held at the grip and pointing along. Let go it is dimmer.
+        private void DrawOwn(SpriteBatch sb, Vector2 grip, Vector2 along, bool held)
+        {
+            Vector2 side = new Vector2(-along.Y, along.X);
+            Vector2 tip = grip + along * Length;
+            float on = held ? 1f : 0.6f;
+
+            if (Look == AuraKind.Storm)
+            {
+                //A bolt : the stick's line broken into a zigzag that jumps to a new shape a few times a second
+                Color tint = Level >= 1 ? Palette.StormRed : Palette.LightningBlue;
+                Color hot = Level >= 1 ? Palette.StormRedHot : Palette.LightningBlueHot;
+                int shape = (int)(clock * 9f);
+                Vector2 last = grip;
+                for (int k = 1; k <= 6; k++)
+                {
+                    float t = k / 6f;
+                    float off = k < 6 ? (Hash(k, shape) - 0.5f) * 9f + (k % 2 == 0 ? 3f : -3f) : 0f;
+                    Vector2 p = grip + along * (Length * t) + side * off;
+                    Gfx.Line(sb, last, p, tint * (0.35f * on), 9f);
+                    Gfx.Line(sb, last, p, hot * on, 3f);
+                    Gfx.Line(sb, last, p, Color.White * on, 1f);
+                    last = p;
+                }
+                if (held)                                                                    // small arcs crawling off the tip
+                    for (int a = 0; a < 2; a++)
+                    {
+                        Vector2 p = tip;
+                        for (int k = 0; k < 3; k++)
+                        {
+                            float angle = Hash(a * 7 + k, (int)(clock * 20f)) * MathHelper.TwoPi;
+                            Vector2 q = p + new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)) * 8f;
+                            Gfx.Line(sb, p, q, hot * 0.8f, 1.5f);
+                            p = q;
+                        }
+                    }
+                Gfx.DrawGlow(sb, tip.X, tip.Y, 26f + 30f * Glow, tint * ((0.35f + 0.5f * Glow) * on));
+                return;
+            }
+
+            if (Look == AuraKind.Prism)
+            {
+                //A crystal : a long narrow diamond, widest a third of the way up, clear with white edges, the rainbow along one
+                Vector2 wide = grip + along * (Length * 0.3f);
+                crystal[0] = grip;
+                crystal[1] = wide + side * 6f;
+                crystal[2] = tip;
+                crystal[3] = wide - side * 6f;
+                Gfx.Quad(sb, crystal, Color.Lerp(Palette.SpotPrism, Palette.Prism(clock * 0.2f), 0.25f) * (0.35f * on));
+                for (int k = 0; k < 4; k++) Gfx.Line(sb, crystal[k], crystal[(k + 1) % 4], Color.White * (0.85f * on), 1.5f);
+                for (int c = 0; c < 3; c++)                                                  // the rainbow along the upper edge
+                {
+                    Vector2 off = side * (1.5f + c * 1.5f);
+                    Gfx.Line(sb, crystal[1] + off, crystal[2] + off * 0.3f, Palette.Prism(c / 3f + clock * 0.25f) * (0.8f * on), 1f);
+                }
+                Gfx.Line(sb, grip, tip, Color.White * (0.5f * on), 1f);                   // the crystal's ridge
+                float run = (clock * 0.8f) % 1.4f;                                           // a glint running up it now and then
+                if (run < 1f)
+                {
+                    Vector2 g = grip + along * (Length * run);
+                    Gfx.DrawGlow(sb, g.X, g.Y, 14f, Color.White * (0.6f * on));
+                    Gfx.Diamond(sb, g.X, g.Y, 2.5f, Color.White * on);
+                }
+                Gfx.DrawGlow(sb, tip.X, tip.Y, 22f + 30f * Glow, Palette.Prism(clock * 0.3f) * ((0.3f + 0.5f * Glow) * on));
+                return;
+            }
+
+            //Gold : a stick of gold with an ink edge, and a star at its tip that twinkles (and flares with a stroke)
+            Gfx.Line(sb, grip, tip, Palette.Ink * on, Width + 2f);
+            Gfx.Line(sb, grip, tip, Palette.SpotHoly * on, Width - 3f);
+            Gfx.Line(sb, grip + side * 1.5f, tip + side * 1.5f, Palette.SpotHolyHot * (0.8f * on), 1.5f);
+            float twinkle = 0.75f + 0.25f * (float)Math.Sin(clock * 6f);
+            float star = (7f + 5f * Glow) * twinkle;
+            Gfx.DrawGlow(sb, tip.X, tip.Y, 26f + 30f * Glow, Palette.SpotHoly * ((0.4f + 0.5f * Glow) * on));
+            Gfx.Star(sb, tip.X, tip.Y, star, Palette.SpotHolyHot * on);
+            Gfx.Rect(sb, tip.X - 1f, tip.Y - 1f, 2f, 2f, Color.White * on);
+        }
+
+        //Hash : a steady random 0..1 from two whole numbers (the same trick as TacetField)
+        private static float Hash(int a, int b)
+        {
+            float h = (float)Math.Sin(a * 12.9898f + b * 78.233f) * 43758.547f;
+            return h - (float)Math.Floor(h);
         }
 
         //Size Of : 0 small (p, the p players), 1 middle (mf, the mf players too), 2 big (f, the whole band)

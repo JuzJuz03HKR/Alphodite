@@ -19,6 +19,12 @@ namespace Tacetno433.Screens
     //No dust or specks : the user does not like white dots on a page with words.
     public class ChapterScreen : GameScreen
     {
+        //THE STAGE TURNS (13.122) : the run's conductor's weather in this page's sky (Core/ConductorWeather.cs)
+        public override bool ShowsWeather
+        {
+            get { return true; }
+        }
+
         private const float ShowTime = 3.6f;
 
         //Movement Text : one per floor. THE PLACE TO EDIT the words on the card (the names are in Data/Movement.cs).

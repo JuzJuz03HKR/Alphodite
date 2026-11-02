@@ -29,6 +29,12 @@ namespace Tacetno433.Screens
     //TAB (or the button) opens the band page. ESC opens the pause menu, like every page of a run. Arriving here saves the run.
     public class RouteScreen : GameScreen
     {
+        //THE STAGE TURNS (13.122) : the run's conductor's weather in this page's sky (Core/ConductorWeather.cs)
+        public override bool ShowsWeather
+        {
+            get { return true; }
+        }
+
         //Road Layout : where the floor falls on the screen (see PERSPECTIVE below)
         private const float Horizon = 150f;           // everything far away closes in on this line, TACET's hole sits on it
         private const float NearY = 572f;             // the row the band stands on lies this far down the screen ...

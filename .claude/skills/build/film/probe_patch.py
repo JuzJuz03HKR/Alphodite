@@ -47,6 +47,7 @@ patch('Tacetno433/Screens/BattleScreen.cs',
                 for (int i = 0; i < ConductorList.All.Length; i++)
                     if (ConductorList.All[i].Turn == battle.Kit) signatureName = ConductorList.All[i].SignatureNameAt(battle.SignatureLevel);
                 battle.Signature = battle.SignatureNeed;
+                MoodBegins();                                                           // THE STAGE TURNS : this conductor's weather
                 StartSignature();
                 return;
             }

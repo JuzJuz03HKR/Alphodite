@@ -296,6 +296,7 @@ namespace Tacetno433.Screens
             Game.IsMouseVisible = true;
             LoadStage();
             LoadMarks();
+            MoodBegins();                                                                   // THE STAGE TURNS : the conductor's weather from the first turn
 
             //The first bar starts after a moment, so the page can be seen first
             view = View.Pause;
@@ -394,6 +395,8 @@ namespace Tacetno433.Screens
             UpdateShow(dt);
             gesture.Update(dt, view == View.Swipe && Input.MouseDown());
             baton.Update(dt, gesture.Held);
+            baton.Look = AuraOf(battle.Kit);                                                // CONDUCTOR'S BATON : the stick is theirs (Core/Baton.cs)
+            baton.Level = battle.SignatureLevel;
 
             //FIGURE LEVEL (MATH ART, 1 Nov) : F4 swaps the code's fighters between the shapes (1) and a simple body (2), so the
             //user can see both (docs/BETA1_DIRECTION.md 31)
@@ -1881,6 +1884,7 @@ namespace Tacetno433.Screens
                 bool holy = name == "battleholy" || name.StartsWith("battlefugue");
                 battle.Kit = holy ? TurnKit.Bach : name.StartsWith("battlestorm") ? TurnKit.Beethoven : TurnKit.Fanny;
                 battle.Floor = name.EndsWith("1") ? 2 : (name == "battlejahr" || name == "battlefugue2" || name == "battlestorm" ? 3 : 1);
+                MoodBegins();                                                                 // THE STAGE TURNS : this conductor's weather
                 for (int i = 0; i < ConductorList.All.Length; i++)
                     if (ConductorList.All[i].Turn == battle.Kit) signatureName = ConductorList.All[i].SignatureNameAt(battle.SignatureLevel);
                 for (int i = 0; i < battle.Party.Count; i++) battle.Party[i].Hp = Math.Max(1, battle.Party[i].MaxHp / 2);

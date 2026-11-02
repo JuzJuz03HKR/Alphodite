@@ -492,6 +492,8 @@
         public static float FinaleHolyFall = 0.55f;       //   a guiding star takes this long to come down to a musician
         public static float FinaleHolyFade = 2.2f;        //   the sky fades away in this long after the strike
         public static float FinaleEchoDelay = 0.16f;      // ECHO : the second voice answers this long after the first blow
+        public static float WeatherFight = 0.6f;          // THE STAGE TURNS (13.120 13.122) : the conductor's weather on the stage from the first turn (1 after a FINALE)
+        public static float WeatherPage = 0.6f;           //   and on the pages of the run (Core/ConductorWeather.cs)
 
         //Tell Feel (block D, 2 Nov, Screens/BattleScreen.Tells.cs) : what TACET's moves look like on their bodies and the band's
         //skills on the cards. Screen numbers, not balance.

@@ -22,6 +22,12 @@ namespace Tacetno433.Screens
     //Its look is a first one : the VFX of a new star and of a legend wait for the user's references (16.14 point 5).
     public class RehearsalScreen : GameScreen
     {
+        //THE STAGE TURNS (13.122) : the run's conductor's weather in this page's sky (Core/ConductorWeather.cs)
+        public override bool ShowsWeather
+        {
+            get { return true; }
+        }
+
         public enum From { Fight, Rest, Wings, Event }           // Wings : THE WINGS (BOSSES), back to its room after the star
                                                                  // Event : RISKY WAYS, an event's stars, then the next stage
 

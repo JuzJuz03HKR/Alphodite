@@ -21,6 +21,12 @@ namespace Tacetno433.Screens
     //piece by piece, and the choices light up like the menus when pointed at.
     public class EventScreen : GameScreen
     {
+        //THE STAGE TURNS (13.122) : the run's conductor's weather in this page's sky (Core/ConductorWeather.cs)
+        public override bool ShowsWeather
+        {
+            get { return true; }
+        }
+
         private enum Phase { Read, Pick, Rolling, Result }
 
         //Event Layout

@@ -979,13 +979,14 @@ namespace Tacetno433.Screens
             dark.DrawScene(device, sb, PostChain.Back);
             DrawFighters(sb, cam);
 
-            PostChain.BeginLights(device, sb, BattleRules.StageAmbient);
+            PostChain.BeginLights(device, sb, MoodAmbient(BattleRules.StageAmbient));      // THE STAGE TURNS : darker under a STORM or a night
             DrawStageLights(sb, cam);
             PostChain.EndLights(sb);
 
             //GLOW : the light of the dark, then the effects of the blows
             PostChain.BeginGlowTarget(device);
             dark.DrawGlow(device, sb, PostChain.Back);
+            DrawMoodBack(sb, cam);                                // THE STAGE TURNS : the conductor's sky after a FINALE (BattleScreen.Finale.cs)
             DrawFrontSilhouette(device, cam);                     // MATH ART : the musician in front hides the seam's light behind it
             DrawTacetSilhouettes(device, cam);                    //   and TACET's figures hide the hole's light behind them
             sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearClamp, null, null, null, Layer(cam, 3));

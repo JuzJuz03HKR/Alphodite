@@ -19,6 +19,12 @@ namespace Tacetno433.Screens
     //Until 29 Oct new faces were rolled at every floor and the BENCH held the rest (RecruitScreen, CALL).
     public class TeamPickScreen : GameScreen
     {
+        //THE STAGE TURNS (13.122) : the run's conductor's weather in this page's sky (Core/ConductorWeather.cs)
+        public override bool ShowsWeather
+        {
+            get { return true; }
+        }
+
         //Audition Layout : five columns centred, the box under them, the button at the bottom
         private const int ColumnW = 176;
         private const int ColumnGap = 34;
