@@ -64,6 +64,17 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 
 ## สถานะล่าสุด (2 พ.ย.)
 
+**2 พ.ย. ปิดแชท FINALE11 (/update) : ผู้ใช้ตอบงานที่เหลือทุกก้อน E F G H และคำถามค้างทั้งหมด จะไปทำต่อกับ AI อีกตัวในแชทใหม่ "เราจะรีบทำให้เสร็จกันแล้ว"** (คำต่อคำ `USER_BRIEFS.md` 13.124 แผนเต็ม `BETA1_DIRECTION.md` 45)
+✅ ก้อน A B C D เสร็จ / งานทั้งหมดอยู่บน GitHub / build 0/0 turncheck 205/205 savecheck 44/44 / ตาราง "แชทที่กำลังทำงาน" ว่าง
+⚠️ ผู้ใช้ยังไม่ได้ Rebuild ลองงานของแชท FINALE11 (สิ่งที่ให้ลอง `BETA1_DIRECTION.md` 39.6 40.3 41.3 42 43 44) / FINALE ยัง 1 PERFECT จนกว่าแชทหน้าจะตั้งค่าใหม่ (ผู้ใช้อนุญาตแล้ว)
+❓ ถามผู้ใช้ก่อนทำ (45.1) : ไฟล์เสียงเก่าที่จะลบคือไฟล์ไหน (`Content/Audio/Instruments/` 9 ไฟล์ / `SoundLibrary/` เก็บไว้) / "มีไฟล์เสียงแล้ว" อยู่ที่ไหน / E4 ยังต้องทำไหม / **บอกผู้ใช้ตรงๆ เรื่องลิขสิทธิ์ : repo สาธารณะ อย่า commit เพลงหรือเสียงที่มีลิขสิทธิ์ ใช้ CC0 CC-BY ใส่เครดิต `docs/CREDITS.md`**
+**งานถัดไป (ผู้ใช้อยากรีบ ทำต่อเนื่อง บันทึก commit push ทุกก้อน 13.123)** :
+1. ก้อน G แกนเกมก่อน (ผลต่อความสนุกมากสุด) : FINALE ตั้งค่า PERFECT ใหม่ + ให้มีผลต่อเกม (`TurnBattle.UseSignature` `BattleRules.PlaytestSignatureNeed` เป็น 0 `TurnSignatureNeed`) / balance ยากขึ้น หลากหลายขึ้น : โน้ตมากขึ้นตามความคืบหน้า ตวัดรวด ชนิดโน้ตใหม่ได้ (`Data/Skill.cs` `NoteKind` `Core/NoteGlyph.cs` `TurnBattle.Judge`) / COMBO คูณดาเมจนิดหน่อย (`TurnBattle.PerfectRun` ใน `HitDamage`) / SOLO (ออกแบบเอง) / แก้ค่าที่คาดใน `Core/DebugShots.Turn.cs` / อัปเดต `docs/TACET_Balance.xlsx` (`python3 docs/turn_balance_tabs.py`)
+2. ก้อน E : เสียง (ถามก่อน) จุดเล่นเสียง 49 จุด (`Core/SoundBank.cs` + `Screens/BattleScreen*.cs`) / ป้าย EARLY ACCESS ของ THE METRONOME (`Screens/ConductorSelectScreen.cs` `ConductorDetailScreen.cs`)
+3. ก้อน F : Tutorial ใหม่ (`Screens/TutorialScreen*.cs`) / เนื้อเรื่องคร่าวๆ หรือไม่มี / ภาษาไทยหลังข้อความนิ่ง
+4. G6 ท่าโจมตีตาม Worldless (`Core/Figure*.cs`) / ก้อน H build (ปิด TEST ROOM ตอน build สุดท้าย)
+
+
 **2 พ.ย. แชท /system FINALE11 : ✅ ก้อน D ครบ** (D2 FINALE ของ FANNY กับ Bach + FINALE โตตามขั้น / บรรยากาศของวาทยากร / ไม้บาตองของวาทยากร / D3 STAR MARKS / D5 บอส VFX หนัก / D4 GIFT AT WORK / D6 COMBO LIVE RANK / D9 SCREEN SHAKE STAGE WEATHER) คำต่อคำ `USER_BRIEFS.md` 13.119 ถึง 13.123 รายละเอียดกับสิ่งที่ให้ลอง `BETA1_DIRECTION.md` 39 ถึง 44
 ✅ งานทั้งหมดอยู่บน GitHub / build 0/0 turncheck 205/205 savecheck 44/44 / ตาราง "แชทที่กำลังทำงาน" ว่าง / ผู้ใช้ยังไม่ได้ Rebuild ลองของแชทนี้
 ❓ ถามผู้ใช้ : COMBO คูณดาเมจไหม (เป็นกติกา เกมง่ายขึ้น) / SOLO 16.4 ข้อ 4 (ท่าโซโล่เป็นกติกาใหม่) / "ผ่าใหญ่เส้นเดียว" อ่านเป็นฟ้าผ่าเส้นเดียวของ Beethoven ถูกไหม (39.5)
