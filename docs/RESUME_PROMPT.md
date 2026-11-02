@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| (ว่าง) | | |
+| 2 พ.ย. แชท FINALE9 | ก้อน D ข้อ 1 VFX สกิลหน้าตาตามชื่อ : สำรวจแล้ว เสนอแบ่งรอบละคน เริ่ม PAGANINI รอผู้ใช้ตอบกับภาพอ้างอิง (`BETA1_DIRECTION.md` 36) | `Core/HitFx.cs` `Screens/BattleScreen.cs` `Screens/BattleScreen.Stage.cs` `Core/Figure*.cs` `Data/BattleRules.cs` `docs/` (BETA1_DIRECTION HANDOFF RESUME_PROMPT USER_BRIEFS) |
 
 ---
 
@@ -63,6 +63,11 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 ---
 
 ## สถานะล่าสุด (2 พ.ย.)
+
+**2 พ.ย. แชท /system FINALE9 ต่อ : ผู้ใช้ลอง D7 แล้วไม่ต้องแก้ / ⏳ D1 VFX สกิลหน้าตาตามชื่อ สำรวจแล้ว เสนอแล้ว รอผู้ใช้ตอบกับภาพอ้างอิง** (คำต่อคำ `USER_BRIEFS.md` 13.113 รายละเอียด `BETA1_DIRECTION.md` 36)
+✅ D7 ผู้ใช้ลองแล้ว "ยังไม่มีอะไรต้องแก้" (35.5)
+⏳ D1 ยังไม่เขียนโค้ด : ตอนนี้ท่าโจมตีของแต่ละคนหน้าตาเหมือนกันหมดตามตระกูลเครื่องดนตรี (`StyleOf`) สกิลฮีล กัน เสริม ความสามารถติดตัว และท่าศัตรู CHARGE ARMOR UP BREAK PIERCE มีแค่คำเด้ง (36.1) / รายการท่ากับไอเดียตั้งต้นต่อท่า 36.2 / เสนอแบ่งรอบละคน รอบ 1 PAGANINI (CAPRICE IL CANNONE THE DEVIL'S BARGAIN) กับ ARMOR UP และ PIERCE ของศัตรู (36.3)
+**งานถัดไป** : รอผู้ใช้ตอบว่าแบ่งแบบนี้ไหม แล้วส่งภาพอ้างอิงของรอบแรก (ส่งตอนไอริสตอบเสร็จ) / ได้ภาพแล้วบรรยายภาพลง `BETA1_DIRECTION.md` 36 (ห้าม commit ภาพหรือลิงก์ของผู้ใช้) เสนอหน้าตาต่อท่าให้ผู้ใช้ยืนยัน แล้วทำ / ไฟล์ : `HitStyle` `HitFx.Hit` ใน `Core/HitFx.cs` / `StyleOf` `SpotOf` ใน `Screens/BattleScreen.Stage.cs` / ส่วนแปลง TurnEvent เป็นภาพใน `Screens/BattleScreen.cs` (หา `TurnEventKind.Pierce` `Guard`) / ตัวเลข `BattleRules` หัวข้อ Hit Feel
 
 **2 พ.ย. แชท /system FINALE9 : ✅ ก้อน D ข้อ 7 HOLE LIGHT ตัวที่ยืนทับหลุมดำไม่หายไปในสีดำแล้ว / ผู้ใช้ลองรอบแก้ 34.5 แล้ว ไม่ต้องแก้** (คำต่อคำ `USER_BRIEFS.md` 13.112 รายละเอียด `BETA1_DIRECTION.md` 35)
 ✅ commit `db013ce` (โค้ด) และ commit เอกสารนี้ อยู่บน GitHub / build 0/0 turncheck 205/205 savecheck 44/44 / ตาราง "แชทที่กำลังทำงาน" ว่าง
