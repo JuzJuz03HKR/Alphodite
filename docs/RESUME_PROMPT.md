@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| (ว่าง) | | |
+| 2 พ.ย. แชท /system FINALE6 (รอบ 2) | ท่าโจมตีให้ลื่นและเหมือนท่าจริง (ทางโค้ง ตัวนำ อาวุธตามหลัง ตีตามจังหวะ ส่งแรงต่อ) ที่จับดาบ PAGANINI ใหม่ รอตีหรือรับดาเมจเสร็จก่อนสลับตัว (`USER_BRIEFS.md` 13.104) | `Core/Figure.cs` `Core/Figure.Band.cs` `Core/Figure.Tacet.cs` `Screens/BattleScreen.cs` `Screens/BattleScreen.Stage.cs` `Data/BattleRules.cs` และเอกสาร |
 
 ---
 
