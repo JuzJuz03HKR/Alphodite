@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| (ว่าง) | | |
+| 2 พ.ย. แชท /system Polish and Publish4 | ก้อน E ที่เหลือ (เครดิต หน้าเครดิตในเกม EARLY ACCESS ASSET_LIST) → ก้อน F (Tutorial ภาษาไทย) → เตรียมก้อน H | `docs/CREDITS.md` `docs/ASSET_LIST.md` `docs/asset_list.py` `Screens/TitleScreen.cs` `Screens/Conductor*Screen.cs` `Screens/Tutorial*.cs` ไฟล์ใหม่ `Screens/CreditsScreen.cs` ฟอนต์ไทย `Content/` ข้อความทั้งเกม (ภาษาไทย) |
 
 ---
 
