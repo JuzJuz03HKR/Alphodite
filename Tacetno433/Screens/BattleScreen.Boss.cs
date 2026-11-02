@@ -128,6 +128,8 @@ namespace Tacetno433.Screens
             bossTurnWaiting = false;
             if (boss.Down || battle.Step == TurnStep.Won || battle.Step == TurnStep.Lost) return false;
             StartBoss(BossMoment.Turn, BattleRules.BossTurnTime, true);
+            Figure monument = ArtOf(boss).Figure;                                        // THE MONUMENT : the white shell breaks (MATH ART)
+            if (monument != null) monument.BreakShell(true);
             hits.ImpactFrame(BossAt());                                                  // the frame turns negative
             actionCam.HoldFor(BossAt(), BattleRules.CamZoomMost * 0.7f, BattleRules.BossTurnTime * 0.6f);
             actionCam.Shake(BattleRules.CamShake * 3f);

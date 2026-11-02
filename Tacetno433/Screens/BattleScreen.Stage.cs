@@ -257,6 +257,7 @@ namespace Tacetno433.Screens
             }
             figure.Hole = hole;
             if (f.IsEnemy) figure.Life = f.MaxHp > 0 ? MathHelper.Clamp((float)f.Hp / f.MaxHp, 0f, 1f) : 0f;   // CRACKS
+            figure.TurnPending = bossTurnWaiting;                                     // THE MONUMENT breaks at THE TURN
             if (!f.Down && figure.IsDown) figure.Up();                    // back up (a heal from zero)
             if (!f.IsEnemy && f.Musician != null) TellLegend(f, figure);  // LEGEND CUES
             figure.Update(dt, wind);

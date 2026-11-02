@@ -58,6 +58,50 @@ namespace Tacetno433.Core
         private Vector2 releaseAt;        // RELEASE : where its light was when it broke
         private const float SignLine = 2f;   // the bosses' thin white lines, page pixels
 
+        //THE MONUMENT (round 6 part 3, docs/BETA1_DIRECTION.md 32.6) : a boss stands first as the white monument the world
+        //remembers of that legend. At half life (THE TURN, Screens/BattleScreen.Boss.cs) the white shell breaks off in a
+        //flash and the black form inside is left, the same shape but dark, its core brighter.
+        private bool shellOn = true;
+        private float breakFlash;            // 1 just broken, fades to 0
+        private float shellDue;              // seconds below half life with no THE TURN waiting (a fight begun below half)
+        public bool TurnPending;             // the stage : THE TURN is waiting to play, do not break quietly
+        private static readonly Color MonumentWhite = new Color(230, 229, 234);
+        private static readonly Color MonumentShade = new Color(164, 163, 172);
+        private static readonly Color MonumentInk = new Color(10, 10, 12);
+
+        //Shell On : a boss still in its white shell
+        public bool ShellOn
+        {
+            get { return Of == Sort.Boss && shellOn; }
+        }
+
+        //Break Shell : THE TURN breaks the white shell (loud : white pieces fall and the black form flashes)
+        public void BreakShell(bool loud)
+        {
+            if (!ShellOn) return;
+            shellOn = false;
+            if (!loud) return;
+            breakFlash = 1f;
+            int count = 18;
+            for (int i = 0; i < count && chipCount < chips.Length; i++)
+            {
+                int k = chipSerial++;
+                Vector2 at = body[i % 8].At + new Vector2(Hash(k, 95) - 0.5f, Hash(k, 97) - 0.5f) * (Height * 0.3f);
+                ChipAt(at, 1);
+                ChipBit c = chips[chipCount - 1];
+                c.White = true;
+                c.Size *= 2.2f;
+                c.Speed *= 1.6f;
+                chips[chipCount - 1] = c;
+            }
+        }
+
+        //Dim : a colour darker, still solid (a colour times a number would also make it see through)
+        private static Color Dim(Color c, float k)
+        {
+            return new Color((byte)(c.R * k), (byte)(c.G * k), (byte)(c.B * k), c.A);
+        }
+
         //Is Look : one of the four looks every enemy wears (not a boss)
         private bool IsLook
         {
@@ -153,14 +197,9 @@ namespace Tacetno433.Core
                     Set(FootA, -0.06f, 0f);
                     Set(FootB, 0.08f, 0f);
                     break;
-                case Crown:
-                    Set(Head, 0f + lunge * 0.4f, -0.86f + bob);
-                    Set(Chest, 0f + lunge * 0.3f, -0.7f + bob * 0.6f);
-                    Set(Hip, 0f, -0.4f + bob * 0.3f);
-                    Set(HandA, 0.33f + lunge * 2f, -0.56f + bob * 1.5f - raise * 0.2f);
-                    Set(HandB, -0.3f, -0.62f + bob * 1.3f);
-                    Set(FootA, -0.12f, 0f);
-                    Set(FootB, 0.12f, 0f);
+                case Crown:                                                              // THE DEAF CROWN : the bust stands still, the hand gives orders
+                    LookRest(lunge * 0.3f, bob * 0.5f, 0.6f);
+                    Set(HandA, -0.36f + Math.Max(0f, s) * 0.55f, -0.69f + bob * 1.5f - raise * 0.1f + Math.Max(0f, s) * 0.12f);
                     break;
                 case Staff:
                     float beat = StaffBeat();
@@ -311,6 +350,18 @@ namespace Tacetno433.Core
                 DrawChips(alpha);
                 return;
             }
+            if (design == Crown)                                                     // drawn from the round 6 sketch
+            {
+                DrawCrown(alpha, light, flash, mark);
+                DrawChips(alpha);
+                return;
+            }
+            if (ShellOn)                                                             // THE MONUMENT : white, a grey rim, signs cut in black
+            {
+                edge = Color.Lerp(Dim(MonumentShade, 0.5f + 0.5f * light), Color.White, mark) * alpha;
+                fill = Dim(MonumentWhite, 0.6f + 0.4f * light) * alpha;
+            }
+            else if (breakFlash > 0f) fill = Color.Lerp(fill, Color.White, breakFlash);    // just broken : the black form flashes
             tGrow = SignLine * (1f + mark);
             tColor = edge;
             DrawTacetParts();
@@ -446,7 +497,6 @@ namespace Tacetno433.Core
                 case Requiem: PartsRequiem(); break;
                 case Nameless: PartsNameless(); break;
                 case Devil: PartsDevil(); break;
-                case Crown: PartsCrown(); break;
                 case Staff: PartsStaff(); break;
                 case Cantor: PartsCantor(); break;
                 default: break;                                                          // the looks draw themselves (DrawLook)
@@ -530,32 +580,6 @@ namespace Tacetno433.Core
             TCrescent(P(top, -0.06f, 0f), 0.16f * h, Facing > 0f ? -0.2f : MathHelper.Pi - 1.2f, Facing > 0f ? 1.2f : MathHelper.Pi + 0.2f, 0.045f * h);
         }
 
-        //THE DEAF CROWN : a broad robe with spikes at the shoulders, a crown over a face that is not there, two great hands
-        private void PartsCrown()
-        {
-            float h = Height;
-            Vector2 head = body[Head].At, chest = body[Chest].At, hip = body[Hip].At;
-            if (Level == 2)
-            {
-                TLine(P(chest, 0.2f, 0f), body[HandA].At, 0.08f * h, 0.045f * h);
-                TLine(P(chest, -0.2f, 0f), body[HandB].At, 0.08f * h, 0.045f * h);
-            }
-            line[0] = P(chest, -0.24f, -0.02f); line[1] = P(chest, 0.24f, -0.02f); line[2] = P(hip, 0.26f, 0.36f); line[3] = P(hip, -0.28f, 0.36f);
-            TPoly(4);
-            TKite(P(chest, -0.2f, -0.02f), P(chest, -0.3f, -0.14f), 0.07f * h, 0.3f);
-            TKite(P(chest, 0.2f, -0.02f), P(chest, 0.3f, -0.14f), 0.07f * h, 0.3f);
-            TCircle(P(head, 0f, 0.09f), 0.085f * h);
-            for (int k = 0; k < 5; k++)                                                // the crown's points
-            {
-                float x = -0.1f + k * 0.05f;
-                float tall = (k == 2 ? 0.13f : (k == 1 || k == 3 ? 0.1f : 0.075f)) * h;
-                TKite(P(head, x, 0.03f), P(head, x, 0.03f) + new Vector2(0f, -tall), 0.045f * h, 0.15f);
-            }
-            TBox(P(head, 0f, 0.035f), 0.26f * h, 0.035f * h, 0f);
-            THand(body[HandA].At, 0.075f * h);
-            THand(body[HandB].At, 0.075f * h);
-        }
-
         //THE STAFF : the staff it beat time with, slamming the floor, its body a banner hanging from the top
         private void PartsStaff()
         {
@@ -614,7 +638,9 @@ namespace Tacetno433.Core
                 case Requiem: return P(chest, 0f, 0.05f);
                 case Nameless: return P(chest, 0f, 0.11f);
                 case Devil: return chest;
-                case Crown: return P(chest, 0f, 0.12f);
+                case Crown:
+                    SetLook();
+                    return S(176, 109) - Shift;                                          // the tip of the stick in its teeth
                 case Staff: return Local(0.13f, 0f) + new Vector2(0f, (-0.98f - StaffBeat() * 0.12f) * Height);
                 case Cantor: return P(chest, 0f, 0.08f);
                 default: return chest;                                                   // the looks have their own (LookCore)
@@ -624,7 +650,7 @@ namespace Tacetno433.Core
         //Core Size : the bosses' hearts are bigger
         private float CoreSize
         {
-            get { return (Of == Sort.Boss ? 0.024f : 0.034f) * Height; }
+            get { return (Of == Sort.Boss ? (shellOn ? 0.024f : 0.032f) : 0.034f) * Height; }   // the black form's core is brighter
         }
 
         //======================================================================================
@@ -643,8 +669,8 @@ namespace Tacetno433.Core
         private void DrawTacetSigns(float alpha)
         {
             float h = Height;
-            Color white = Color.White * alpha;
-            Color grey = Palette.PaperDim * alpha;
+            Color white = (ShellOn ? MonumentInk : Color.White) * alpha;          // THE MONUMENT : the signs cut in black
+            Color grey = (ShellOn ? MonumentShade : Palette.PaperDim) * alpha;
             Vector2 head = body[Head].At + Shift, chest = body[Chest].At + Shift, hip = body[Hip].At + Shift;
             float slant = -0.25f * Facing;
             switch (design)
@@ -691,26 +717,6 @@ namespace Tacetno433.Core
                         Shapes.Stroke(line, lineW, 16, white, white * 0.5f, false);
                         Shapes.Arc(head, 0.04f * h, clock * 2f, clock * 2f + 4.5f, 0.012f * h, 0.004f * h, white);   // the scroll's curl
                         Shapes.Box(P(head, 0.03f, 0.02f), 0.04f * h, 0.01f * h, slant, white);                       // an eye
-                    }
-                    break;
-                case Crown:
-                    {
-                        Vector2 face = P(head, 0f, 0.09f) + new Vector2(0f, 0f);                   // it cannot hear : the face is empty
-                        Shapes.Ring(face, 0.055f * h, 0.012f * h, white);
-                        if (Hash((int)(clock * 11f), 2) > 0.45f)                                   // lightning between the hands
-                        {
-                            Vector2 a = body[HandA].At + Shift, b = body[HandB].At + Shift;
-                            int seedStep = (int)(clock * 11f);
-                            for (int i = 0; i < 9; i++)
-                            {
-                                float t = i / 8f;
-                                Vector2 p = Vector2.Lerp(a, b, t) + new Vector2(0f, -(float)Math.Sin(t * MathHelper.Pi) * 0.2f * h);
-                                if (i > 0 && i < 8) p += new Vector2((Hash(seedStep, i) - 0.5f) * 0.06f * h, (Hash(seedStep, i + 9) - 0.5f) * 0.06f * h);
-                                line[i] = p;
-                                lineW[i] = 0.007f * h;
-                            }
-                            Shapes.Stroke(line, lineW, 9, white, white, false);
-                        }
                     }
                     break;
                 case Staff:
@@ -1155,6 +1161,7 @@ namespace Tacetno433.Core
             public float Spin;
             public float Size;
             public float Age;
+            public bool White;               // a piece of a boss's white shell (THE MONUMENT)
         }
         private readonly ChipBit[] chips = new ChipBit[24];
         private int chipCount;
@@ -1192,6 +1199,7 @@ namespace Tacetno433.Core
                 c.Spin = (Hash(k, 91) - 0.5f) * 16f;
                 c.Size = (0.012f + 0.014f * Hash(k, 93)) * Height;
                 c.Age = 0f;
+                c.White = false;
                 chips[chipCount++] = c;
             }
         }
@@ -1214,6 +1222,13 @@ namespace Tacetno433.Core
             }
             else if (stage < crackSeen) crackSeen = stage;                       // healed
             crackClock += dt;
+            if (breakFlash > 0f) breakFlash = Math.Max(0f, breakFlash - dt * 1.4f);
+            if (ShellOn && Life < 0.5f && !TurnPending && !down)                  // a fight begun below half : the shell goes quietly
+            {
+                shellDue += dt;
+                if (shellDue > 1f) BreakShell(false);
+            }
+            else shellDue = 0f;
 
             float scale = Height / 512f;
             int keep = 0;
@@ -1242,7 +1257,16 @@ namespace Tacetno433.Core
             {
                 ChipBit c = chips[i];
                 float fade = 1f - MathHelper.Clamp((c.Age / BattleRules.FigureChipLife - 0.6f) / 0.4f, 0f, 1f);
-                Crumb(c.At + Shift, c.Size, c.Turn, fade * alpha);
+                if (c.White)
+                {
+                    Color rim = lookRim, fill = lookFill;
+                    lookRim = MonumentShade * alpha;
+                    lookFill = MonumentWhite * alpha;
+                    Crumb(c.At + Shift, c.Size, c.Turn, fade);
+                    lookRim = rim;
+                    lookFill = fill;
+                }
+                else Crumb(c.At + Shift, c.Size, c.Turn, fade * alpha);
             }
         }
 
@@ -1287,6 +1311,105 @@ namespace Tacetno433.Core
         }
 
         //======================================================================================
+        //THE DEAF CROWN (round 6 part 3, from the sketch docs/art_refs/concept_v6.html, docs/BETA1_DIRECTION.md 32.6)
+        //======================================================================================
+
+        //Draw Crown : the bust everyone knows of Beethoven. A V of a frown, a crown of black thorns over both ears and none in
+        //front (it cannot hear), a stick held in its teeth (he heard through his jaw, a stick on the piano) whose tip holds the
+        //core, a great hand raised to give orders. THE MONUMENT : white, lit from the band's side, cracking as it is hit. Broken
+        //at THE TURN : the same shape in black, cracks of lightning across it (THE NINTH), the brows and the stick in white.
+        private void DrawCrown(float alpha, float light, float flash, float mark)
+        {
+            SetLook();
+            bool white = ShellOn;
+            float lift = Math.Max(flash, breakFlash);
+            Color lit = white ? Dim(MonumentWhite, 0.6f + 0.4f * light) : Color.Lerp(BodyInk, Color.White, lift);
+            Color dark = white ? Dim(MonumentShade, 0.6f + 0.4f * light) : Color.Lerp(new Color(10, 10, 13), Color.White, lift);
+            Color ink = white ? MonumentInk : Dim(Palette.Paper, 0.85f);
+            lookEdge = BattleRules.FigureTacetEdge * (1f + 1.5f * mark);
+            lookRim = (white ? Dim(MonumentShade, 0.45f) : Color.Lerp(Palette.Paper * (BattleRules.FigureTacetRim * light), Color.White, mark)) * alpha;
+            Vector2 hand = body[HandA].At - Local(-0.36f, -0.69f) - (body[Chest].At - Local(0f, -0.5f));   // the hand's own swing
+
+            lookFill = lit * alpha;                                                // the robe of the bust, its far side in shade
+            line[0] = S(64, 140); line[1] = S(176, 140); line[2] = SF(206, 262); line[3] = SF(34, 262);
+            Shell(4, 1f);
+            line[0] = S(120, 140); line[1] = S(176, 140); line[2] = SF(206, 262); line[3] = SF(120, 262);
+            Shapes.Fill(line, 4, dark * alpha);
+            int n = Cubic(S(89, 138), S(104, 154), S(136, 154), S(151, 138), 10, line, 0);   // the collar
+            for (int i = 0; i < n; i++) lineW[i] = 15f * lookK;
+            Shapes.Stroke(line, lineW, n, Color.Lerp(lit, dark, 0.35f) * alpha, Color.Lerp(lit, dark, 0.35f) * alpha, false);
+
+            lookFill = ink * alpha;                                                // the thorns over the ears, none in front
+            CrownThorn(100, 86, 70, 64, 96, 95); CrownThorn(97, 99, 58, 95, 97, 107); CrownThorn(100, 112, 70, 128, 101, 116);
+            CrownThorn(140, 86, 170, 64, 144, 95); CrownThorn(143, 99, 182, 95, 143, 107); CrownThorn(140, 112, 170, 128, 139, 116);
+            lookFill = lit * alpha;                                                // the head, its far half in shade
+            ShellOval(S(120, 98), 23f, 29f);
+            for (int i = 0; i <= 12; i++)
+            {
+                float t = -MathHelper.PiOver2 + i * MathHelper.Pi / 12f;
+                line[i] = S(120f + (float)Math.Cos(t) * 23f, 98f + (float)Math.Sin(t) * 29f);
+            }
+            Shapes.Fill(line, 13, dark * alpha);
+            line[0] = S(104, 92); line[1] = S(119, 99); line[2] = S(136, 90);      // the frown
+            LightLine(3, 3.6f * lookK, ink * alpha);
+            Shapes.Box(S(138.9f, 111.6f), 70f * lookK, 4f * lookK, -0.07f + lookLean, ink * alpha);   // the stick in its teeth
+
+            lookFill = lit * alpha;                                                // the raised hand
+            line[0] = S(182, 120) + hand; line[1] = S(214, 112) + hand; line[2] = S(218, 140) + hand; line[3] = S(190, 148) + hand;
+            Shell(4, 1f);
+            CrownFinger(hand, 184, 120, 180, 64, 190, 118); CrownFinger(hand, 192, 118, 195, 54, 200, 116);
+            CrownFinger(hand, 201, 116, 211, 60, 208, 116); CrownFinger(hand, 209, 114, 225, 72, 215, 119);
+            CrownFinger(hand, 186, 133, 162, 110, 190, 127);
+
+            Color core = Color.White * alpha;                                      // the core at the stick's tip
+            Diamond(S(176, 109), white ? 6f : 7.5f, white ? 7f : 9f, core);
+
+            if (white)                                                             // CRACKS in the white shell, light leaking out
+            {
+                if (crackSeen >= 1) CrownCrack(0, MonumentInk * alpha, 1.6f);
+                if (crackSeen >= 2) CrownCrack(2, MonumentInk * alpha, 1.6f);
+                if (crackSeen >= 1)
+                {
+                    line[0] = S(97, 222); line[1] = S(91, 197);
+                    LightLine(2, 1.1f * lookK, Color.White * alpha);
+                }
+            }
+            else                                                                   // THE NINTH : the black form cracked by lightning
+            {
+                Color bolt = Color.White * alpha;
+                CrownCrack(0, bolt, 1.8f);
+                CrownCrack(1, bolt, 1.8f);
+                if (crackSeen >= 3) CrownCrack(2, bolt, 1.6f);
+            }
+        }
+
+        private void CrownThorn(float ax, float ay, float bx, float by, float cx, float cy)
+        {
+            line[0] = S(ax, ay); line[1] = S(bx, by); line[2] = S(cx, cy);
+            Shell(3, 1f);
+        }
+
+        private void CrownFinger(Vector2 hand, float ax, float ay, float bx, float by, float cx, float cy)
+        {
+            line[0] = S(ax, ay) + hand; line[1] = S(bx, by) + hand; line[2] = S(cx, cy) + hand;
+            Shell(3, 1f);
+        }
+
+        //Crown Crack : the cracks of the sketch (down its left side, down its right, over its brow)
+        private static readonly float[] CrownCracks =
+        {
+            84, 168, 96, 186, 90, 196, 102, 222, 96, 240,
+            156, 162, 146, 182, 154, 194, 142, 224, 142, 224,
+            108, 72, 114, 84, 110, 92, 110, 92, 110, 92,
+        };
+
+        private void CrownCrack(int k, Color c, float width)
+        {
+            for (int i = 0; i < 5; i++) line[i] = S(CrownCracks[k * 10 + i * 2], CrownCracks[k * 10 + i * 2 + 1]);
+            LightLine(5, width * lookK, c);
+        }
+
+        //======================================================================================
         //Glow : TACET
         //======================================================================================
 
@@ -1313,14 +1436,22 @@ namespace Tacetno433.Core
                 GlowLook(sb, power);
                 return;
             }
-            Gfx.DrawGlow(sb, at.X, at.Y, 0.18f * h, Color.White * (power * 0.6f));
+            Gfx.DrawGlow(sb, at.X, at.Y, 0.18f * h, Color.White * (power * (ShellOn ? 0.9f : 0.6f)));
             Vector2 core = CorePoint() + Shift;                                      // the heart glows (it feeds the bloom)
-            Gfx.DrawGlow(sb, core.X, core.Y, CoreSize * 5f, Color.White * (power * 1.6f));
-            Gfx.DrawGlow(sb, core.X, core.Y, CoreSize * 2f, Color.White * (power * 1.4f));
-            if (design == Crown)
+            float bright = ShellOn ? 1f : 1.5f;                                      // brighter once the shell is gone
+            Gfx.DrawGlow(sb, core.X, core.Y, CoreSize * 5f, Color.White * (power * 1.6f * bright));
+            Gfx.DrawGlow(sb, core.X, core.Y, CoreSize * 2f, Color.White * (power * 1.4f * bright));
+            if (breakFlash > 0f)                                                     // THE MONUMENT breaking : a white blast
             {
-                Gfx.DrawGlow(sb, body[HandA].At.X, body[HandA].At.Y, 0.12f * h, Color.White * (power * 0.6f));
-                Gfx.DrawGlow(sb, body[HandB].At.X, body[HandB].At.Y, 0.12f * h, Color.White * (power * 0.6f));
+                Vector2 middle = body[Chest].At + Shift;
+                Gfx.DrawGlow(sb, middle.X, middle.Y, 0.75f * h, Color.White * (power * 4f * breakFlash));
+            }
+            if (design == Crown && !ShellOn)                                         // THE NINTH : the lightning cracks glow
+            {
+                SetLook();
+                Vector2 c1 = S(96, 200), c2 = S(150, 190);
+                Gfx.DrawGlow(sb, c1.X, c1.Y, 0.12f * h, Color.White * (power * 0.9f));
+                Gfx.DrawGlow(sb, c2.X, c2.Y, 0.1f * h, Color.White * (power * 0.9f));
             }
         }
     }
