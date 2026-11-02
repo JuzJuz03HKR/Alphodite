@@ -450,6 +450,11 @@
         public static float FigureGlowTacet = 0.22f;      // TACET's white light inside
         public static float FigureTacetEdge = 1.5f;       // TACET LOOK (round 6) : the pale rim round each black body, page pixels (more on a STUNNED one)
         public static float FigureTacetRim = 0.6f;        //   how bright that rim is, a share of the paper white (never as white as the core)
+        public static float FigureHoleRim = 0.95f;        // HOLE LIGHT (D7, 2 Nov) : over the hole's black or deep in its pool, the hole's light catches the
+                                                          //   rim of TACET's figures, up to this share of the paper white (still under the core) ...
+        public static float FigureHoleEdge = 1.5f;        //   ... and makes it this much wider, page pixels
+        public static float FigureHoleHalo = 0.26f;       //   HALO : a wide soft haze behind each figure there, so the black body stands out of the black
+        public static float FigureHoleHaloSize = 1.05f;   //   the haze's size, a share of the figure's height
         public static int FigureChips = 4;                // CHIPS : a hit knocks this many small bits off TACET's shell (THE NOISE twice as many)
         public static float FigureChipLife = 0.9f;        //   a chip falls and fades in this long
         public static float FigureCrackTime = 0.3f;       // CRACKS : at 75 50 25 of its life a new crack runs across the body in this long

@@ -325,19 +325,36 @@ namespace Tacetno433.Screens
         }
 
         //Figure Look Of : how an enemy's figure is drawn this frame, worked out the way DrawEnemy works out a picture :
-        //fainter as it dissolves (SILENCED) or blinks (FLICKER), darker further back and deeper in the dark, the hit's
-        //white, the STAGGERED edge beating
+        //fainter as it dissolves (SILENCED) or blinks (FLICKER), darker further back, the hit's white, the STAGGERED edge
+        //beating. HOLE LIGHT (D7) : a figure is not darkened deeper in the dark like a picture is. Its shell is black
+        //already, so the dark would swallow it whole; the hole's light catches its rim there instead (Figure.Behind).
         private void FigureLookOf(Fighter f, out float alpha, out float light, out float flash, out float mark)
         {
-            Rectangle r = DrawBox(f);
             float depth = 1f - BattleRules.StageDepthDim * f.Slot;
-            float deep = dark.InDark(new Vector2(r.Center.X, r.Bottom) - stageCam * BattleRules.StageParallax[3]);
-            light = MathHelper.Clamp(depth * MathHelper.Lerp(1f, 0.55f, deep), 0.2f, 1f);
+            light = MathHelper.Clamp(depth, 0.2f, 1f);
             if (ArtOf(f).Shared && f.Enemy != null) light *= f.Enemy.LookShade;
+            Figure figure = ArtOf(f).Figure;
+            if (figure != null) figure.Behind = BehindOf(f);
             alpha = (1f - GoneOf(f)) * FlickerOf(f);
             Look look;
             flash = looks.TryGetValue(f, out look) ? look.Flash * Flashing : 0f;
             mark = f.Staggered ? 0.5f + 0.5f * (float)Math.Sin(time * 8f) : 0f;
+        }
+
+        //Behind Of : HOLE LIGHT (D7, 2 Nov). How dark it is behind an enemy, 0..1 : the middle of its body over the black of
+        //TACET's hole (full inside most of the hole, none past its rim), or its feet deep in the pool on the floor.
+        //Both are measured on the screen, the way InDark always was (the fighters' layer moves with the camera).
+        private float BehindOf(Fighter f)
+        {
+            Rectangle r = DrawBox(f);
+            Figure figure = ArtOf(f).Figure;
+            float tall = figure != null ? figure.Height : r.Height;
+            Vector2 onScreen = stageCam * BattleRules.StageParallax[3];
+            Vector2 middle = new Vector2(r.Center.X, r.Bottom - tall * 0.5f) - onScreen;
+            float past = (Vector2.Distance(middle, dark.Hole) - dark.Radius * 0.8f) / (dark.Radius * 0.6f + 1f);
+            float overHole = 1f - MathHelper.Clamp(past, 0f, 1f);
+            float deep = dark.InDark(new Vector2(r.Center.X, r.Bottom) - onScreen);
+            return Math.Max(overHole, deep);
         }
 
         //======================================================================================
@@ -1141,9 +1158,14 @@ namespace Tacetno433.Screens
             if (art.Figure != null)                                                    // MATH ART : the figure is drawn after every enemy (TACET LOOK),
             {                                                                          //   only its BACKLIGHT, HUM and HALO go behind it here
                 float tall = art.Figure.Height;                                        // BACKLIGHT : round and soft, brightest behind the middle
-                Gfx.DrawGlow(sb, r.Center.X, r.Bottom - tall * 0.5f, tall * 0.62f, Color.White * (BattleRules.FigureBacklight * shade * a));
+                float lit = MathHelper.Clamp(depth, 0.2f, 1f);                         // HOLE LIGHT (D7) : not darker in the dark (FigureLookOf)
+                float behind = BehindOf(f);
+                Gfx.DrawGlow(sb, r.Center.X, r.Bottom - tall * 0.5f, tall * 0.62f, Color.White * (BattleRules.FigureBacklight * lit * a));
+                if (behind > 0f)                                                       //   HALO : over the black a wide soft haze, the black body
+                    Gfx.DrawGlow(sb, r.Center.X, r.Bottom - tall * 0.5f, tall * BattleRules.FigureHoleHaloSize,   //   stands out of it
+                                 Color.White * (BattleRules.FigureHoleHalo * behind * lit * a));
                 LookMark glowMark = MarkOf(f);
-                if (gone <= 0f && (glowMark == LookMark.Hum || glowMark == LookMark.Halo)) DrawMark(sb, f, art, r, shade * f.Enemy.LookShade, a * FlickerOf(f));
+                if (gone <= 0f && (glowMark == LookMark.Hum || glowMark == LookMark.Halo)) DrawMark(sb, f, art, r, lit * f.Enemy.LookShade, a * FlickerOf(f));
                 return;
             }
             if (art.Set != null)

@@ -55,6 +55,11 @@ namespace Tacetno433.Core
         //Shift : where an extra copy is drawn (ECHO, the stage draws it more than once), page pixels
         public Vector2 Shift;
 
+        //Behind : HOLE LIGHT (D7, 2 Nov). How dark it is behind this figure, 0..1, set by the battle stage each frame (0 on
+        //every other page). A black shell over the hole's black would vanish, so there the hole's light catches its rim : the
+        //rim grows brighter and wider instead of sinking into the dark (FigureHoleRim, FigureHoleEdge in Data/BattleRules.cs).
+        public float Behind;
+
         private readonly Shard[] shards = new Shard[40];
         private int shardCount;
 
@@ -482,12 +487,25 @@ namespace Tacetno433.Core
 
         private static readonly Color BodyInk = new Color(20, 20, 24);       // a little above the hole's black, so a body reads in front of it
 
+        //Rim Share : how bright the pale rim of a black shell is, a share of the paper white. HOLE LIGHT : the darker it is
+        //behind (Behind), the more the hole's light catches the rim, so a black body still reads over the black of the hole.
+        private float RimShare(float light)
+        {
+            return MathHelper.Lerp(BattleRules.FigureTacetRim, BattleRules.FigureHoleRim, Behind) * light;
+        }
+
+        //Rim Edge : the rim's width, page pixels, wider where the hole's light catches it
+        private float RimEdge()
+        {
+            return BattleRules.FigureTacetEdge + BattleRules.FigureHoleEdge * Behind;
+        }
+
         //Draw Tacet : a look draws itself shape by shape (DrawLook), a boss from its card of the sketch (Draw<Name>, white as
         //THE MONUMENT until THE TURN). A beaten one is only its shards and the light it lets go.
         private void DrawTacet(float alpha, float flash, float light, float mark)
         {
             Color fill = Color.Lerp(BodyInk, Color.White, flash) * alpha;
-            Color rim = Color.Lerp(Palette.Paper * (BattleRules.FigureTacetRim * light), Color.White, mark) * alpha;
+            Color rim = Color.Lerp(Palette.Paper * RimShare(light), Color.White, mark) * alpha;
             Color edge = Color.Lerp(Palette.Paper * light, Color.White, mark) * alpha;
             if (shardCount > 0)
             {
@@ -498,7 +516,7 @@ namespace Tacetno433.Core
             if (down) return;
             if (IsLook)
             {
-                lookEdge = BattleRules.FigureTacetEdge * (1f + 1.5f * mark);
+                lookEdge = RimEdge() * (1f + 1.5f * mark);
                 lookRim = rim;
                 lookFill = fill;
                 DrawLook(alpha, light);
@@ -1180,8 +1198,8 @@ namespace Tacetno433.Core
             bossLit = white ? Dim(MonumentWhite, 0.6f + 0.4f * light) : Color.Lerp(BodyInk, Color.White, lift);
             bossDark = white ? Dim(MonumentShade, 0.6f + 0.4f * light) : Color.Lerp(new Color(10, 10, 13), Color.White, lift);
             bossInk = white ? MonumentInk : Dim(Palette.Paper, 0.85f);
-            lookEdge = BattleRules.FigureTacetEdge * (1f + 1.5f * mark);
-            lookRim = (white ? Dim(MonumentShade, 0.45f) : Color.Lerp(Palette.Paper * (BattleRules.FigureTacetRim * light), Color.White, mark)) * alpha;
+            lookEdge = (white ? BattleRules.FigureTacetEdge : RimEdge()) * (1f + 1.5f * mark);   // HOLE LIGHT : only the black form needs it
+            lookRim = (white ? Dim(MonumentShade, 0.45f) : Color.Lerp(Palette.Paper * RimShare(light), Color.White, mark)) * alpha;
         }
 
         //Boss Swing : how far its hand (the HandA spring) has swung from where it rests, page pixels, the body's own move taken

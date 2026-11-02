@@ -1139,7 +1139,8 @@ namespace Tacetno433.Core
         //======================================================================================
 
         //Draw : the figure into the shapes being drawn (Core/Shapes.cs begun by the stage). alpha 0..1, flash 0..1 a hit's
-        //white, light 0..1 how much light falls on it (TACET deeper in the dark is darker), mark 0..1 the STAGGERED edge.
+        //white, light 0..1 how much light falls on it (TACET further back is darker), mark 0..1 the STAGGERED edge.
+        //HOLE LIGHT (D7) : Behind says how dark it is behind it; the stage sets it before drawing a TACET figure.
         public void Draw(float alpha, float flash, float light, float mark)
         {
             if (alpha <= 0.005f) return;
