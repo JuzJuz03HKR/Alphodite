@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| (ว่าง) | | |
+| 2 พ.ย. แชท FINALE3 | รอบ 6 ส่วนที่ 2 TACET 4 แบบ (`BETA1_DIRECTION.md` 32.14 ข้อ 2) ผู้ใช้ให้ใช้ token ราว 25 ถึง 28% แล้วบันทึกให้แชทอื่นทำต่อ | `Core/Figure.Tacet.cs` `Core/Figure.cs` `Screens/BattleScreen.Stage.cs` `Data/BattleRules.cs` (Figure Feel) `Core/DebugShots*.cs` เอกสาร |
 
 ---
 
