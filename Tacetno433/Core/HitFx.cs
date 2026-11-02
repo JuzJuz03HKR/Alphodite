@@ -5,8 +5,9 @@ using Tacetno433.Data;
 
 namespace Tacetno433.Core
 {
-    //Hit Style : how a blow looks where it lands (HitFx)
-    public enum HitStyle { Slash, Shot, Smash, Cross, Ink, Lightning }
+    //Hit Style : how a blow looks where it lands (HitFx). The last five are the five legends' own skills (Beta1 block D,
+    //2 Nov, Core/HitFx.Skills.cs) : CAPRICE and IL CANNONE (PAGANINI), LANCE (DUPORT), CHAKRAM (PUNTO), TIMPANI ROLL (PFUNDT).
+    public enum HitStyle { Slash, Shot, Smash, Cross, Ink, Lightning, Caprice, Cannon, Lance, Chakram, Roll }
 
     //Hit Flair : what a musician's own colour adds to every blow (round 4, the user asked) :
     //SPARKLE = golden twinkles and glitter, FLAME = tongues of fire and embers
@@ -48,7 +49,7 @@ namespace Tacetno433.Core
     //golden SPARKLES or FLAMES. Everything is lines, squares and the soft Glow texture, drawn into the GLOW layer so it
     //shines and blooms (the INK drops go into the SCENE). Every piece sits on the art's 2 x 2 grid (PIXEL x2) and the
     //pieces live in fixed pools, so a long fight makes no garbage. Sizes and times are in Data/BattleRules.cs, Hit Feel.
-    public class HitFx
+    public partial class HitFx
     {
         //Stroke : one cut of light, curved (a crescent) or straight. It draws on fast from its head, holds, then is
         //wiped off from its tail, the way a blade's trail looks.
@@ -254,6 +255,7 @@ namespace Tacetno433.Core
         //way, so the mark on the enemy follows the player's hand (Flick.None : the blow's own slant, as before).
         public void Hit(HitStyle style, Rectangle box, float power, HitColors c, int tier = 0, Flick swing = Flick.None)
         {
+            if (SkillHit(style, box, power, c, tier, swing)) return;                // a legend's own skill (HitFx.Skills.cs)
             Vector2 at = new Vector2(box.Center.X, box.Y + box.Height * 0.45f);
             float size = (0.75f + 0.35f * power) * BattleRules.HitSize * (1f + BattleRules.HitTierSize * tier);
             float lean = (float)(random.NextDouble() - 0.5) * 0.6f;
@@ -625,6 +627,7 @@ namespace Tacetno433.Core
         {
             impactAge += dt;
             focusAge += dt;
+            UpdateSkills(dt, frozen);                                                 // the skills' own pieces (HitFx.Skills.cs)
 
             //Pending blows land when their wait is over (the clock runs through the hit stop, they are part of it)
             for (int i = 0; i < pending.Length; i++)
@@ -733,6 +736,7 @@ namespace Tacetno433.Core
             for (int i = 0; i < pending.Length; i++) pending[i].On = false;
             focusAge = 99f;
             impactAge = 99f;
+            ClearSkills();
         }
 
         //======================================================================================
@@ -744,6 +748,7 @@ namespace Tacetno433.Core
         {
             DrawFocus(sb);
             for (int i = 0; i < flames.Length; i++) if (flames[i].On && flames[i].Age >= 0f) DrawFlame(sb, flames[i]);
+            DrawSkills(sb);                                                           // the skills' own pieces under the cuts
             for (int i = 0; i < rings.Length; i++) if (rings[i].On) DrawRing(sb, rings[i]);
             for (int i = 0; i < bursts.Length; i++) if (bursts[i].On) DrawBurst(sb, bursts[i]);
             for (int i = 0; i < strokes.Length; i++) if (strokes[i].On && strokes[i].Age > 0f) DrawStroke(sb, strokes[i]);

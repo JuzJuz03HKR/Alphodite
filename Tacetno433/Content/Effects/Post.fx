@@ -7,7 +7,7 @@
 // darkened by the light map). Then these passes mix them:
 //   Down     : SCENE x LIGHT + GLOW, shrunk to a quarter of the screen (cheap to blur)
 //   Blur     : a soft smear along one direction, run twice (across, then down)
-//   Composite: SCENE x LIGHT + GLOW, plus the soft glow (BLOOM) taken from the blurred copy, then the QTE FOCUS,
+//   Composite: SCENE x LIGHT + GLOW (read through the SPACE CUTS, see CutUV), plus the soft glow (BLOOM) taken from the blurred copy, then the QTE FOCUS,
 //              TACET's dark creeping in from the edges (ENGULF), the dark corners (VIGNETTE), the IMPACT FRAME of a
 //              big blow and the film grain
 //
@@ -79,6 +79,11 @@ float Blur;             //             IMPACT FRAME : the world smeared towards 
 float2 Center;          //             IMPACT FRAME : where the blow landed (0..1 of the screen)
 float Lod;              // Down : which copy of SCENE and GLOW is the page's own size (0 in the 1280 x 720 window)
 
+// SPACE CUT (Beta1 block D, 2 Nov) : up to four cuts that split the picture of the world for a moment (Core/HitFx.Skills.cs)
+float4 Cuts[4];         //             xy where it is (0..1 of the screen), z its angle, w how open (0 = closed, 1 = wide)
+float4 CutTints[4];     //             rgb the colour of its edges, a its half length (in screen heights)
+float4 CutShapes[4];    //             x how far the two halves slide along it, y how wide the black gap is (screen heights)
+
 struct VertexShaderOutput
 {
     float4 Position : SV_POSITION;
@@ -95,6 +100,42 @@ float Luma(float3 c)
 float Hash(float2 p)
 {
     return frac(sin(dot(p, float2(12.9898, 78.233))) * 43758.5453);
+}
+
+//SPACE CUT : where this pixel reads the world from while the cuts are open, how deep it is in a cut's black gap (dark),
+//and the light of the cut's edges on it (edge).
+//ADVANCED PART : a cut is a line through Cuts[i].xy at angle z. For each pixel, side is how far it is from the line
+//(plus on one side, minus on the other) and along is how far down the line. Every pixel on one side reads the picture
+//from a little further along the line and away from it, the other side the other way, so the two halves of the world
+//slide apart like the two halves of something cut (DMC's Judgement Cut, ZZZ's Miyabi). span fades the slide out
+//towards the cut's ends, so it is a tear in the picture, not a line across the whole screen. What shows in the gap is
+//black : the silence behind the world.
+float2 CutUV(float2 uv, out float dark, out float3 edge)
+{
+    const float aspect = 1280.0 / 720.0;
+    float2 square = float2(aspect, 1.0);
+    float2 moved = uv;
+    dark = 0.0;
+    edge = float3(0.0, 0.0, 0.0);
+    [unroll] for (int i = 0; i < 4; i++)
+    {
+        float2 dir = float2(cos(Cuts[i].z), sin(Cuts[i].z));
+        float2 across = float2(-dir.y, dir.x);
+        float2 d = (uv - Cuts[i].xy) * square;
+        float along = dot(d, dir);
+        float side = dot(d, across);
+        float span = saturate(1.0 - abs(along) / max(CutTints[i].a, 0.001));
+        span = span * span * (3.0 - 2.0 * span);
+        float k = Cuts[i].w * span;
+        float s = side >= 0.0 ? 1.0 : -1.0;
+        float gap = CutShapes[i].y * k;
+        moved -= (dir * (s * CutShapes[i].x * k) + across * (s * gap)) / square;
+        dark = max(dark, (1.0 - smoothstep(gap * 0.55, gap + 0.0005, abs(side))) * step(0.0001, k));
+        float rim = saturate(1.0 - abs(abs(side) - gap) / 0.0035) * k;
+        float haze = saturate(1.0 - abs(side) / 0.045) * k;
+        edge += CutTints[i].rgb * (rim * 1.4 + haze * 0.3) + float3(1.0, 1.0, 1.0) * (rim * rim * 0.9);
+    }
+    return moved;
 }
 
 //Down : the lit world, a quarter of the size. SCENE and GLOW are read from their copy the page's size (Lod), so on every
@@ -125,10 +166,13 @@ float4 BlurPS(VertexShaderOutput input) : COLOR0
 //Composite : the finished picture of the world
 float4 CompositePS(VertexShaderOutput input) : COLOR0
 {
-    float3 scene = tex2Dlod(SceneSampler, float4(input.UV, 0.0, 0.0)).rgb;      // the full size copy, pixel for pixel
-    float3 light = tex2D(LightSampler, input.UV).rgb * 2.0;
-    float3 soft = tex2D(SoftSampler, input.UV).rgb;
-    float3 glow = tex2Dlod(GlowSampler, float4(input.UV, 0.0, 0.0)).rgb;
+    float cutDark;
+    float3 cutEdge;
+    float2 uv = CutUV(input.UV, cutDark, cutEdge);                                // SPACE CUT : the halves of the world apart
+    float3 scene = tex2Dlod(SceneSampler, float4(uv, 0.0, 0.0)).rgb;             // the full size copy, pixel for pixel
+    float3 light = tex2D(LightSampler, uv).rgb * 2.0;
+    float3 soft = tex2D(SoftSampler, uv).rgb;
+    float3 glow = tex2Dlod(GlowSampler, float4(uv, 0.0, 0.0)).rgb;
 
     float3 lit = scene * light + glow;
 
@@ -162,6 +206,10 @@ float4 CompositePS(VertexShaderOutput input) : COLOR0
             smear += tex2Dlod(SoftSampler, float4(input.UV + toward * (i / 6.0), 0.0, 0.0)).rgb;
         c = lerp(c, smear / 6.0 * 1.35, Blur * 0.65);
     }
+
+    //SPACE CUT : black where the world is cut open, the cut's edges burning in its colour
+    c = lerp(c, float3(0.0, 0.0, 0.0), cutDark);
+    c += cutEdge;
 
     //VIGNETTE : darker towards the corners, more so in FOCUS
     float2 d = (input.UV - 0.5) * float2(1.25, 1.0);

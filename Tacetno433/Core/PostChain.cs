@@ -37,6 +37,19 @@ namespace Tacetno433.Core
         public static RenderTarget2D Light;
         public static RenderTarget2D Glow;
         public static RenderTarget2D Final;
+
+        //SPACE CUT (Beta1 block D, 2 Nov) : the cuts that split the world this frame (Core/HitFx.Skills.cs fills them through
+        //SetCuts). Finish hands them to Post.fx and empties them, so a page that sets none has none.
+        public const int MostCuts = 4;
+        private static readonly Vector4[] cutWhere = new Vector4[MostCuts];
+        private static readonly Vector4[] cutTint = new Vector4[MostCuts];
+        private static readonly Vector4[] cutShape = new Vector4[MostCuts];
+
+        //Set Cuts : this frame's cuts, from a battle's HitFx (shift : how far the fighters' layer has moved with the camera)
+        public static void SetCuts(HitFx hits, Vector2 shift)
+        {
+            hits.CutsNow(shift, cutWhere, cutTint, cutShape);
+        }
         private static RenderTarget2D softA;
         private static RenderTarget2D softB;
 
@@ -294,6 +307,16 @@ namespace Tacetno433.Core
             post.Parameters["Blur"].SetValue(MathHelper.Clamp(impact.Blur, 0f, 1f));
             post.Parameters["Center"].SetValue(impact.Center);
             post.Parameters["NoiseTexture"].SetValue(Fx.Noise);
+            EffectParameter cuts = post.Parameters["Cuts"];                         // SPACE CUT (an older Post.fx has none)
+            if (cuts != null)
+            {
+                cuts.SetValue(cutWhere);
+                post.Parameters["CutTints"].SetValue(cutTint);
+                post.Parameters["CutShapes"].SetValue(cutShape);
+            }
+            System.Array.Clear(cutWhere, 0, MostCuts);                                   //   used once : the next frame sets its own
+            System.Array.Clear(cutTint, 0, MostCuts);
+            System.Array.Clear(cutShape, 0, MostCuts);
             sb.Begin(SpriteSortMode.Immediate, BlendState.Opaque, SamplerState.LinearClamp, null, null, post);
             device.SamplerStates[1] = SamplerState.LinearClamp;
             device.SamplerStates[2] = SamplerState.LinearClamp;

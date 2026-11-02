@@ -455,6 +455,23 @@
         public static float FigureHoleEdge = 1.5f;        //   ... and makes it this much wider, page pixels
         public static float FigureHoleHalo = 0.26f;       //   HALO : a wide soft haze behind each figure there, so the black body stands out of the black
         public static float FigureHoleHaloSize = 1.05f;   //   the haze's size, a share of the figure's height
+
+        //Skill Feel (Beta1 block D, 2 Nov, Core/HitFx.Skills.cs) : the five legends' own skills. Screen numbers, not balance.
+        public static float SkillCapriceReach = 0.75f;    // CAPRICE : each cut's half length, a share of the enemy's bigger side
+        public static float SkillCutSlide = 9f;           // SPACE CUT : how far the two halves of the stage slide along a cut (page pixels)
+        public static float SkillCutGap = 4f;             //   how wide the black gap opens between them (page pixels)
+        public static float SkillSeamTime = 1.5f;         // CAPRICE : a burning SEAM stays this long
+        public static float SkillCannonWidth = 14f;       // IL CANNONE : the blast's thickness (page pixels)
+        public static float SkillCannonLead = 90f;        //   how far before the enemy's front it starts
+        public static float SkillGatherReach = 110f;      //   GATHER : how far round the f hole the sparks start
+        public static float SkillGatherGlow = 90f;        //   the ball of fire's size when full
+        public static float SkillLanceTail = 1.3f;        // LANCE : the spike starts this many enemy widths before its middle ...
+        public static float SkillLanceTip = 0.95f;        //   ... and its tip ends this many after
+        public static float SkillLanceWidth = 12f;        //   its width at the tail (page pixels)
+        public static float SkillSawSize = 0.95f;         // CHAKRAM : the spinning saw's size, a share of a blow's size
+        public static float SkillSawTime = 0.4f;          //   how long it grinds
+        public static float SkillSawSpin = 26f;           //   how fast it spins (radians a second)
+        public static float SkillRollStep = 0.07f;        // TIMPANI ROLL : the wait between its rings on the floor
         public static int FigureChips = 4;                // CHIPS : a hit knocks this many small bits off TACET's shell (THE NOISE twice as many)
         public static float FigureChipLife = 0.9f;        //   a chip falls and fades in this long
         public static float FigureCrackTime = 0.3f;       // CRACKS : at 75 50 25 of its life a new crack runs across the body in this long
