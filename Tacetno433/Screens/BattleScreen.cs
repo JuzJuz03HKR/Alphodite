@@ -2027,6 +2027,11 @@ namespace Tacetno433.Screens
                 StageHit(box.Center.ToVector2(), style != HitStyle.Ink, 1f, colors.Tint);
                 if (style != HitStyle.Ink) SpawnNumber(new Vector2(box.Center.X, box.Y - 34), 24, false, true, name == "battlegold" || name == "battlefire" ? colors.Tint : Palette.Highlight);
             }
+            else if (name == "battlefanny")
+            {
+                battle.Kit = TurnKit.Fanny;                                                   // FANNY's stage on the first turn (13.143)
+                MoodBegins();
+            }
             else if (name == "battlecracks" || name == "battleprism" || name == "battleholy" || name == "battlestorm" || name == "battlestorm1"
                      || name == "battlejahr" || name == "battlejahr1" || name == "battlefugue1" || name == "battlefugue2")
             {

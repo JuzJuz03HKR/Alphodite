@@ -45,11 +45,15 @@ namespace Tacetno433.Core
             Ui.SlantEdge(sb, r, Slant, Color.Lerp(Palette.LineGrey * 0.55f, Palette.Paper, lit) * alpha);
         }
 
-        //Picture (SIGIL, block C item 3) : a conductor's column, their mark drawn by the code (Core/LegendArt.cs)
+        //Picture (FACE, 2 Nov, the user 13.143) : a conductor's column shows the team's face picture (face_<name> 224x224),
+        //made as tall as the column and its middle kept (Ui.SlantCover). No picture yet (THE METRONOME) : their mark drawn
+        //by the code (SIGIL, Core/LegendArt.cs). LINKED : THE BAND page and CURTAIN CALL both draw this.
         public static void Picture(SpriteBatch sb, Rectangle r, Conductor c, float time, float lit, float alpha)
         {
             Ui.SlantCut(sb, null, r, Slant, Palette.Panel * alpha);
-            LegendArt.Sigil(sb, c, r, time, MathHelper.Lerp(0.8f, 1f, lit) * alpha);
+            Texture2D face = ArtBank.FaceOf(c);
+            if (face != null) Ui.SlantCover(sb, face, r, Slant, Color.White * (MathHelper.Lerp(0.8f, 1f, lit) * alpha));
+            else LegendArt.Sigil(sb, c, r, time, MathHelper.Lerp(0.8f, 1f, lit) * alpha);
             if (lit > 0f) Ui.ColourRise(sb, r, Slant, c.Spot, 0.3f * lit, alpha);
             Ui.SlantEdge(sb, r, Slant, Color.Lerp(Palette.LineGrey * 0.55f, Palette.Paper, lit) * alpha);
         }

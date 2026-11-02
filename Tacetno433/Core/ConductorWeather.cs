@@ -104,44 +104,35 @@ namespace Tacetno433.Core
         //PRISM
         //======================================================================================
 
-        //Prism Sky : three wide bands of rainbow light lying across the sky (six colours side by side, the way a prism spreads
-        //white light), drifting slowly, and pieces of prism glass turning as they float across
+        //Prism Sky (2 Nov, the user 13.143 : the rainbow bands looked odd, glass from the start) : no bands of rainbow any more.
+        //Shards of clear glass float across the sky from the first turn, turning as they go. Mostly white glass, one edge
+        //catching a thin prism colour, and a white glint across the face when a shard turns flat to us. More of them with
+        //the FINALE's level.
         private static void PrismSky(SpriteBatch sb, float s, int level, float time, float horizon)
         {
-            for (int band = 0; band < 3; band++)
-            {
-                float angle = -0.42f + band * 0.18f;
-                Vector2 way = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
-                Vector2 across = new Vector2(-way.Y, way.X);
-                Vector2 middle = new Vector2(240f + band * 420f + (float)Math.Sin(time * 0.13f + band * 2f) * 90f, horizon * 0.43f + band * 40f);
-                float shimmer = 0.75f + 0.25f * (float)Math.Sin(time * 0.8f + band * 1.9f);
-                for (int c = 0; c < 6; c++)
-                {
-                    Vector2 off = across * ((c - 2.5f) * 9f);
-                    Gfx.Line(sb, middle - way * 900f + off, middle + way * 900f + off, Palette.Prism(c / 6f + band * 0.1f) * (0.45f * s * shimmer), 9f);
-                }
-            }
-            int pieces = 7 + 3 * level;
+            int pieces = 16 + 6 * level;
             for (int i = 0; i < pieces; i++)
             {
                 float x = (Hash(i, 51) * (TacetGame.ScreenW + 200f) + time * (6f + 10f * Hash(i, 52))) % (TacetGame.ScreenW + 200f) - 100f;
-                float y = 40f + Hash(i, 53) * (horizon + 60f) + (float)Math.Sin(time * 0.7f + i) * 10f;
-                float size = 10f + 16f * Hash(i, 54);
+                float y = 30f + Hash(i, 53) * (horizon + 80f) + (float)Math.Sin(time * 0.7f + i) * 10f;
+                float size = 12f + 22f * Hash(i, 54);
                 float spin = time * (0.3f + 0.5f * Hash(i, 55)) + i;
                 float squeeze = 0.25f + 0.75f * Math.Abs((float)Math.Sin(time * (0.5f + Hash(i, 56)) + i * 2f));
                 float cs = (float)Math.Cos(spin);
                 float sn = (float)Math.Sin(spin);
                 for (int k = 0; k < 4; k++)
                 {
-                    float a = k * MathHelper.PiOver2 + (Hash(i * 4 + k, 57) - 0.5f) * 0.8f;
-                    float r = size * (0.6f + 0.4f * Hash(i * 4 + k, 58));
+                    float a = k * MathHelper.PiOver2 + (Hash(i * 4 + k, 57) - 0.5f) * 1.1f;            // uneven corners : a broken piece
+                    float r = size * (0.35f + 0.65f * Hash(i * 4 + k, 58));
                     Vector2 local = new Vector2((float)Math.Cos(a) * r * squeeze, (float)Math.Sin(a) * r);
                     corners[k] = new Vector2(x, y) + new Vector2(local.X * cs - local.Y * sn, local.X * sn + local.Y * cs);
                 }
-                float hue = Hash(i, 59) + time * 0.05f;
-                Gfx.Quad(sb, corners, Color.Lerp(Color.White, Palette.Prism(hue), 0.5f) * (0.25f * s));
+                Color edge = Color.Lerp(Color.White, Palette.Prism(Hash(i, 59) + time * 0.03f), 0.55f);
+                Gfx.Quad(sb, corners, Color.White * (0.1f * s));
                 for (int k = 0; k < 4; k++)
-                    Gfx.Line(sb, corners[k], corners[(k + 1) % 4], (k == 1 ? Palette.Prism(hue) : Color.White) * (0.75f * s), 1.5f);
+                    Gfx.Line(sb, corners[k], corners[(k + 1) % 4], (k == 1 ? edge : Color.White) * (0.7f * s), 1.5f);
+                float glint = (squeeze - 0.85f) / 0.15f;                                               // GLINT : flat to us
+                if (glint > 0f) Gfx.Line(sb, corners[0], corners[2], Color.White * (0.8f * s * glint), 2f);
             }
         }
 

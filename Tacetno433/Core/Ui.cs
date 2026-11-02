@@ -338,6 +338,28 @@ namespace Tacetno433.Core
             }
         }
 
+        //Slant Cover (2 Nov) : like SlantCut, but the picture is scaled to cover the whole window (never stretched, the middle
+        //kept). Each line of the window takes the nearest line of the picture.
+        public static void SlantCover(SpriteBatch sb, Texture2D art, Rectangle r, float slant, Color color)
+        {
+            float scale = Math.Max((float)r.Height / art.Height, (float)r.Width / art.Width);
+            float artW = art.Width * scale;
+            float artX = r.Center.X - artW / 2f;
+            float top = (art.Height * scale - r.Height) / 2f;                // window lines cut off above the window
+            for (int j = 0; j < r.Height; j++)
+            {
+                int row = Math.Min(art.Height - 1, (int)((j + top) / scale));
+                float lean = slant * (1f - (j + 0.5f) / r.Height);
+                float from = Math.Max(artX, (float)Math.Round(r.X + lean));
+                float to = Math.Min(artX + artW, (float)Math.Round(r.X + lean + r.Width - slant));
+                if (to <= from) continue;
+                int srcX = (int)((from - artX) / scale);
+                int srcW = Math.Max(1, Math.Min(art.Width - srcX, (int)Math.Round((to - from) / scale)));
+                sb.Draw(art, new Vector2(from, r.Y + j), new Rectangle(srcX, row, srcW, 1), color, 0f, Vector2.Zero,
+                        new Vector2((to - from) / srcW, 1f), SpriteEffects.None, 0f);
+            }
+        }
+
         //Colour Rise : a character's own colour rising from the foot of a slanted window (menu6), strongest at the foot.
         //Rows two pixels tall like the ink bars (PIXEL x2). reach 0..1 is how far up the window it has come.
         public static void ColourRise(SpriteBatch sb, Rectangle r, float slant, Color color, float reach, float alpha)
