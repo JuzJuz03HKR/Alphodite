@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| (ว่าง) | | |
+| 2 พ.ย. แชท FINALE7 | ก้อน C GUI ทั้ง 7 ข้อรวดเดียว (`HANDOFF.md` 00.3 / ผู้ใช้ 13.106 : นอกหน้าเลือกวาทยากรเป็น math art ทั้งหมด / ช่องโปสเตอร์กับโลโก้ / แถบการ์ดของวง) + ศึกษาเกมอ้างอิง ZZZ HSR CZN Limbus Worldless | `Screens/` (Title Battle* Rehearsal Event Band BandName CurtainCall Luthier TeamPick Shop Rest Route ConductorDetail) `Core/` (UiArt ArtBank ArtSlot CharacterArt PortraitBox BandColumn Figure* DebugShots*) `Data/BattleRules.cs` `docs/` (REFERENCE_GAMES BETA1_DIRECTION ASSET_LIST HANDOFF) |
 
 ---
 
