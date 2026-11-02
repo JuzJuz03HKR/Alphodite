@@ -96,10 +96,10 @@
 6. ท่าโจมตีของตัวละคร MATH ART (รอบ 6 ส่วน 5) : ผู้ใช้ลองสองรอบแล้วยังไม่โอเค ปรับช่วงท้ายพร้อมงานที่ค้างทั้งเกม (13.104 13.105) / ถามผู้ใช้ก่อนว่าไม่โอเคตรงไหน ขอคลิปอ้างอิงถ้ามี แคปทีละเฟรมก่อนแก้ (วิธี `BETA1_DIRECTION.md` 32.22) / ทำอะไรไปแล้ว 32.22 32.23 / กลไก `Core/Figure.cs` หัวข้อ ONE NOTE ONE BLOW กับ JOIN / ท่า `PaganiniKey` ถึง `PuntoKey` ใน `Core/Figure.Band.cs` `TacetKey` ใน `Core/Figure.Tacet.cs` / ตัวเลข `BattleRules` หัวข้อ Attack Feel
 
 **ก้อน H build สำหรับขาย**
-1. เอาไฟล์ที่ไม่ใช้ออกจาก `Content.mgcb` (chibi เก่า 9 ไฟล์ เสียงเครื่องดนตรีเก่า 9 ไฟล์) แต่เก็บไฟล์ไว้ใน repo (ข้อ 9 ข้อ 14) / เสียงจาก `SoundLibrary/` ไม่มีบันทึกที่มาและสิทธิ์ ห้ามติดไปกับเกม (23.5 ข้อ 9)
-2. ห่อ `DebugShots` ด้วย `#if DEBUG` (ตอนนี้ยังไม่มีเลย) และลบแพ็กเกจที่ไม่ใช้
-3. ปิด TEST ROOM ตอน build ตัวสุดท้าย (ผู้ใช้ 13.124 `TestRoomScreen.On` = false)
-4. ทำไฟล์เกมสำหรับแจก
+1. ✅ 2 พ.ย. แชท Polish and Publish4 (`BETA1_DIRECTION.md` 51) เอา chibi เก่า 9 กับเสียงเครื่องดนตรีเก่า 9 ออกจาก `Content.mgcb` แล้ว ไฟล์ยังอยู่ใน repo (ตัวโหลดข้ามไฟล์ที่ไม่มีเอง) / `SoundLibrary/` = VSCO 2 CE CC0 ใช้ได้ (47.1)
+2. ✅ 2 พ.ย. `DebugShots` ทุกไฟล์อยู่ใน `#if DEBUG` / build Release ใช้ตัวแทนเล็ก `Core/DebugShots.Release.cs` (ปิดทุกอย่าง ไม่รับ --shots) / แพ็กเกจมีแค่ MonoGame 2 ตัวที่ต้องใช้ ไม่มีให้ลบ
+3. ✅ 2 พ.ย. TEST ROOM เปิดเฉพาะ build Debug (F5 ใน Visual Studio) ปิดเองใน build Release (`TestRoomScreen.On` ใช้ `#if DEBUG`)
+4. ทำไฟล์เกมสำหรับแจก : **เลือก Release** ใน Visual Studio แล้ว Build (หรือ `dotnet publish -c Release -r win-x64 --self-contained` ได้โฟลเดอร์ที่เครื่องไม่มี .NET ก็เปิดได้) / แตกชุดเสียงของทีมลง `Content/Audio/Borrowed/` ก่อน build / ยังไม่ได้ทำไฟล์แจก (ทำหลังรีวิวรอบสุดท้าย)
 
 **ก้อน 1 ถึง 7 แบบเดิมไปอยู่ไหน** (ก้อน 1 ถึง 6 มาจาก `BETA1_DIRECTION.md` 11.7 กับ 12 13 / ข้อ 7 คือ "งานอื่นที่ค้าง" ของหัวข้อนี้ฉบับก่อน)
 - ก้อน 1 สกิลกับหน้าต่อสู้ : ✅ ข้อ 1 ถึง 6 (ชนิดสกิล ชุดสกิลใหม่ 5 คน ศัตรู CHARGE GUARD หน้าต่อสู้แบบ HSR/CZN ข้อความ ทดสอบ) / ข้อ 7 VFX สกิลใหม่ ไป D1

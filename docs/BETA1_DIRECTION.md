@@ -3204,3 +3204,11 @@ D3 ดาวขั้นสูงกับร่างในตำนาน → 
 - หน้า HOW TO PLAY หน้า 02 : แถวบนขวามีโน้ต 4 แบบ HOLD SHAKE AGAIN RUSH
 - หน้า THE ARCHIVE SETTINGS HOW TO PLAY CREDITS : หน้าตาเหมือนเดิม (ตอนนี้มาจากชิ้นเดียว)
 
+## 51. เตรียมก้อน H build สำหรับแจก (2 พ.ย. แชท /system Polish and Publish4)
+
+- **H1** : เอา `Art/Musicians/*_idle_0.png` 9 ไฟล์ (chibi ของดวลเดิม) กับ `Audio/Instruments/*.wav` 9 ไฟล์ออกจาก `Content.mgcb` ไฟล์ยังอยู่ใน repo / ปลอดภัยเพราะ `CharacterArt.Load` ข้ามไฟล์ที่ไม่มี และ `SoundBank` โหลดเครื่องดนตรีเก่าเฉพาะเมื่อ `InstrumentsOn` (ปิด) / ดวลเดิม (`TurnBattleOn` = false) จะไม่มี chibi กับเสียงเครื่องดนตรีถ้าเปิดกลับมา
+- **H2** : ไฟล์ `Core/DebugShots*.cs` 16 ไฟล์ห่อด้วย `#if DEBUG` / build Release ใช้ `Core/DebugShots.Release.cs` (Active Steady Target Parse Begin FakeMouse AfterDraw ปิดหมด) / แพ็กเกจมีแค่ `MonoGame.Framework.DesktopGL` กับ `MonoGame.Content.Builder.Task` ใช้ทั้งคู่
+- **H3** : `TestRoomScreen.On` = true ใน Debug false ใน Release (ผู้ใช้ 13.124 ปิด TEST ROOM ตอน build สุดท้าย) / **build ตัวแจกต้องเลือก Release** / เล่นทดสอบใน Visual Studio ตามปกติ (Debug) ยังมี TEST ROOM กับ --shots
+- ตรวจ : build Debug 0/0 และ Release 0/0 / Release เปิดเกมได้ไม่ crash และไม่รับ --shots / Debug turncheck 220/220 savecheck 45/45 ภาพ `titletest` `battle` ยังแคปได้ / โฟลเดอร์ Content ของ Release ไม่มี Instruments แล้ว (48 MB)
+- H4 ไฟล์แจกยังไม่ได้ทำ ทำหลังรีวิวรอบสุดท้าย (วิธีอยู่ `HANDOFF.md` ก้อน H ข้อ 4)
+

@@ -22,7 +22,13 @@ namespace Tacetno433.Screens
     public class TestRoomScreen : GameScreen
     {
         //TEST ROOM ON : the one switch. false takes F2 and this page out of the game (before it is sold).
+        //BLOCK H (2 Nov, H3, the user 13.124 "close the TEST ROOM in the last build") : on in a Debug build (Visual Studio's F5),
+        //off by itself in a Release build, the build that is handed out. Set it here only to test the page in Release.
+#if DEBUG
         public static readonly bool On = true;
+#else
+        public static readonly bool On = false;
+#endif
 
         //Test Mode : true from the moment this page opens until the title page opens again (TitleScreen.Load calls StopTests)
         public static bool Running;

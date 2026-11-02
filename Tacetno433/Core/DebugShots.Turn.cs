@@ -1,3 +1,6 @@
+#if DEBUG
+// BLOCK H (2 Nov, H2) : the capture and test tool is the team's, it builds only in Debug. A Release build (the game that
+// ships) gets the small stand in of Core/DebugShots.Release.cs instead, everything off.
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -600,3 +603,4 @@ namespace Tacetno433.Core
         }
     }
 }
+#endif

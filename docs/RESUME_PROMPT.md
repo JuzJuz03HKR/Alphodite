@@ -68,7 +68,8 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 ✅ หน้า CREDITS (หน้า Title มุมซ้ายล่างหรือกด C `Screens/CreditsScreen.cs` `Data/Credits.cs`) / ป้าย EARLY ACCESS ของ THE METRONOME / ไฟล์ใน Drive = TEAM FREE / Worldless มีขายเท่านั้น / ASSET_LIST ฝ่ายเสียงใหม่ / build 0/0 turncheck 220/220 savecheck 44/44
 ✅ ก้อน F1 THE FIRST REHEARSAL (`BETA1_DIRECTION.md` 49) : TUTORIAL = ไฟต์ฝึก 5 บท (HOLD ใหม่) กล่องโค้ชไม่ทับการ์ด NEW RUN ครั้งแรกถามฝึกก่อน / savecheck 45/45
 ✅ LINKED (ผู้ใช้ 13.139 `BETA1_DIRECTION.md` 50) : ของที่ขึ้นหลายหน้ามาจากชิ้นเดียว ตาราง `HANDOFF.md` 00.7 กติกา `CLAUDE.md` ข้อ 3 / `Core/StillRoom.cs` ห้องมืด 4 หน้าเมนู (เทียบ --steady เหมือนเดิมทุกพิกเซล) / การ์ดบอสบนแผนที่เป็นตัวบอสจริง / HOW TO PLAY มี RUSH
-**งานถัดไปในแชทนี้** : เตรียมก้อน H (TEST ROOM กับ DebugShots เฉพาะ Debug) → ก้อน F3 ภาษาไทย (ชั้นตัวอักษรรองรับแค่ ASCII ต้องแก้ `Core/SharpText.cs` `Gfx.TextSpaced` `LetterOf` + ฟอนต์ไทย + วางสระวรรณยุกต์เอง)
+✅ เตรียมก้อน H (`BETA1_DIRECTION.md` 51) : DebugShots กับ TEST ROOM เฉพาะ Debug / Release 0/0 เปิดได้ / mgcb ไม่มีของเก่าแล้ว
+**งานถัดไปในแชทนี้** : ก้อน F3 ภาษาไทย (ชั้นตัวอักษรรองรับแค่ ASCII ต้องแก้ `Core/SharpText.cs` `Gfx.TextSpaced` `LetterOf` + ฟอนต์ไทย + วางสระวรรณยุกต์เอง)
 
 **2 พ.ย. ปิดแชท /system Polish and Publish3 (token ผู้ใช้เหลือน้อย 13.137) : ✅ ก้อน E เสียง ระบบ + ชุดแรก** (คำต่อคำ `USER_BRIEFS.md` 13.131 ถึง 13.137 รายละเอียด `BETA1_DIRECTION.md` 47)
 ✅ เสียงตี = อาวุธ + เครื่องดนตรีบางๆ (ผู้ใช้เลือก 13.131) / สกิล = ธาตุของคนนั้น / PARRY CUE / เพลงจาง DUCK เปลี่ยนเพลงที่ THE TURN / **ของสำเร็จรูปเป็นหลัก (13.134)** ไฟล์ฟรี 61 + 13 เพลงใน repo ชุดยืม 15 ไฟล์ส่งผู้ใช้เป็น zip (ไม่อยู่ใน repo) / `SoundLibrary/` = VSCO 2 CE CC0 / build 0/0 / `--shots soundcheck` ผ่าน (turncheck savecheck ไม่ได้รันซ้ำ กติกาไม่เปลี่ยน) / งานอยู่บน GitHub / ตาราง "แชทที่กำลังทำงาน" ว่าง
