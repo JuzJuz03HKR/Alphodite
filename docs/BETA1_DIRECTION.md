@@ -3269,3 +3269,11 @@ solution กับ content ของ Visual Studio (zip) / เปิด repo pub
 ### 54.3 ผู้ใช้ช่วยได้ (งานสั้น)
 ส่งลิงก์ Drive กับ Canva ซ้ำในแชทใหม่ / แคปภาพเครื่องมือที่ทีมใช้วางแผนและคุยกัน (ถ้ามี) ใส่ Drive / สร้าง Release บน GitHub จาก tag v1.0.0 แล้วแนบ zip / ดับเบิลคลิกลองไฟล์ .exe บน Windows / ตอบตกลงตอนไอริสขอ commit สไลด์ Canva
 
+### 54.4 ผล (2 พ.ย. ดึก แชท /system Final)
+- **แก้เกม 3 จุด** : ฉาก FANNY ไม่มีแถบรุ้งแล้ว เศษกระจกลอยตั้งแต่ตาแรก (`PrismSky` ชิ้นกระจกใส ขอบเดียวสีปริซึม แวบขาวตอนหันหน้าตรง ชื่อแคป `battlefanny`) / เสาวาทยากรในหน้า THE BAND กับ CURTAIN CALL ใช้ภาพ `face_<name>` ขยายเต็มเสาไม่บิด crop กลาง (`Ui.SlantCover` ไม่มีภาพใช้ SIGIL) / build 0 error
+- **ไฟล์เกม** : publish Release win-x64 self-contained จากสำเนา net8.0 (Release ไม่มี TEST ROOM กับเครื่องมือแคป) ใส่ README ใน zip / **ไม่มีเสียง TEAM FREE ในไฟล์นี้** (โหลดจาก Drive ผ่านตัวเชื่อมแล้วเปลือง token มาก) ผู้ใช้วางไฟล์ลง `Content/Audio/Borrowed/` เองได้ / ยังไม่ได้เปิดบน Windows
+- **README.md** ที่ราก repo / **tag v1.0.0** สร้างในเครื่องแต่ push ไม่ได้ (proxy ของแชท cloud ตอบ 403 กับ tag) → ผู้ใช้กด Releases → Draft new release → พิมพ์ tag `v1.0.0` (target `Beta1`) → แนบ zip
+- **teaser** 20 วินาที 1920x1080 30fps : ผู้ใช้ไม่โอเครอบ 1 (ภาพนิ่ง) รอบ 2 (ครอปฉากสู้ดูไม่รู้เรื่อง) → **v4 : อาร์ต CG ของทีม (export จากสไลด์ Canva หน้า 6) เลื่อนแบบ Ken Burns + VFX วาดด้วยโค้ดแบบในเกม (หลุมดำหมุน ฟ้าผ่าฟ้าแล้วแดง เศษกระจกปริซึมกับแสงรุ้ง ดาว แสงจ้าจากหลุม ประกายที่ตา ขอบมืด แถบดำ cinematic) ไม่มีฉากสู้** เสียงจากเกม (title.ogg boss_turn.ogg finale_storm prism holy boss_entrance boss_strike ทั้งหมด FREE ใน repo) / ไฟล์ `docs/submission/TACET433_Teaser.mp4`
+- **Asset Content** zip : ไอคอน / screenshot 1920x1080 (Splash Gameplay Highlight) / ตัวละคร (นักดนตรี วาทยากร บอส) / ฉาก / เสียง + CREDITS / โปสเตอร์ + teaser
+- **เอกสารสรุปกระบวนการ** PDF 3 หน้า ภาษาไทย (gantt จากวันที่ commit จริง kanban ก้อน A ถึง I / ออกแบบ / Drive GitHub Canva / commit ต่อวัน 360 commit และลำดับ branch) ภาพจากเครื่องมือจริงของทีม (หน้า Drive GitHub แชททีม) ผู้ใช้แปะเพิ่มได้
+- **สไลด์ Canva** : หน้า 1 ชื่อเกม / หน้า 4 Genre แก้เป็น roguelike ผลัดตา + QTE กับแนวคิด 6 บรรทัด + ภาพหลุม / หน้า 7 นักดนตรี 5 คน + ธาตุ + ศัตรูกับบอส / หน้า 8 ฉาก 3 ภาพ / หน้า 9 วิธีเล่น 7 ข้อ + ภาพ / หน้า teaser / ข้อความส่วนตัวที่เคยหลุดไม่เจอแล้ว / **บันทึกเมื่อผู้ใช้ตอบตกลง**
