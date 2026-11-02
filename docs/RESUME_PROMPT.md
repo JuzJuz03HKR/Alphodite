@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 2 พ.ย. แชท /system FINALE6 | รอบ 6 ส่วนที่ 5 ท่าโจมตี ทำทั้งหมดรวดเดียวตาม `BETA1_DIRECTION.md` 32.21.7 ข้อ 1 ถึง 9 (หลัก ONE NOTE ONE BLOW นักดนตรี 5 TACET 4 บอส 6 กติกาไม่เปลี่ยน `USER_BRIEFS.md` 13.102 13.103) | `Data/BattleRules.cs` (Attack Feel) `Core/Figure.cs` `Core/Figure.Band.cs` `Core/Figure.Tacet.cs` `Screens/BattleScreen.cs` `Screens/BattleScreen.Stage.cs` อาจแตะ `Screens/BattleScreen.Boss.cs` `Core/DebugShots*.cs` และเอกสาร |
+| (ว่าง) | | |
 
 ---
 
@@ -63,6 +63,12 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 ---
 
 ## สถานะล่าสุด (2 พ.ย.)
+
+**2 พ.ย. แชท /system FINALE6 : ✅ รอบ 6 ส่วนที่ 5 ท่าโจมตี ทำรวดเดียวตาม 32.21.7 เสร็จ หยุดรอผู้ใช้ Rebuild ลอง** (คำต่อคำ `USER_BRIEFS.md` 13.103 ผลกับสิ่งที่ให้ลอง `BETA1_DIRECTION.md` 32.22)
+✅ commit `e738486` `ad803d2` และ commit บันทึกนี้ อยู่บน GitHub / build 0/0 turncheck 204/204 savecheck 44/44 / ตาราง "แชทที่กำลังทำงาน" ว่าง
+✅ ONE NOTE ONE BLOW : `Core/Figure.cs` (กลไก) `Core/Figure.Band.cs` (ท่า 5 คน) `Core/Figure.Tacet.cs` (ท่า TACET 4 แบบ บอส 6 ตัว) `Screens/BattleScreen.Stage.cs` (สั่งท่า) `Screens/BattleScreen.cs` (`UpdateSwipe` `Land` COUNTER) `Data/BattleRules.cs` (Attack Feel)
+⚠️ ดูภาพใน cloud แล้ว (แคปทีละเฟรมด้วย PROBE ให้เกมเล่นเอง วิธีอยู่ 32.22) แต่ตาศัตรูภาพมืดมากเพราะ QTE FOCUS หรี่โลก ต้องดูบนเครื่องจริงว่าท่าศัตรูอ่านออกไหม / PLAYTEST FINALE ยัง 1 PERFECT (`PlaytestSignatureNeed` ห้ามแก้จนผู้ใช้บอก)
+**งานถัดไป** : ผู้ใช้ Rebuild ลองตาม 32.22 แล้วบอกจุดที่อยากปรับ (ตัวเลข Attack Feel / ท่าใน `*Key`) / VFX รอยแสงตามคม ธาตุ วาทยากร (ก้อน D) / ก้อน C GUI กับงานอื่นใน `HANDOFF.md` 00.3
 
 **2 พ.ย. แชท /system FINALE5 : /update ปิดแชท ผู้ใช้เอาตามข้อเสนอท่าโจมตีทุกข้อ สั่งทำทั้งหมดรวดเดียวในแชทหน้า** (คำต่อคำ `USER_BRIEFS.md` 13.102 คำตอบกับแผนโค้ด `BETA1_DIRECTION.md` 32.21.6 32.21.7)
 ✅ แชทนี้ไม่ได้แตะโค้ดเกม มีแต่เอกสาร (`6e3cca2` `ed99978` และ commit ปิดแชทนี้) / ตาราง "แชทที่กำลังทำงาน" ว่าง
