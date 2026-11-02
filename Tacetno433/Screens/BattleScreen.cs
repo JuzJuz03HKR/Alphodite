@@ -139,6 +139,7 @@ namespace Tacetno433.Screens
         private float holdDown;        // how long the button was kept down
         private Grade holdGrade;
         private float holdTick;        // ACTION : the next small blow while it is held
+        private bool lastSkillNote;    // the note whose events are being shown is a skill's last (block D : CAPRICE's finish)
 
         //ROLL : shakes counted while a roll note lasts
         private bool rolling;
@@ -1040,7 +1041,9 @@ namespace Tacetno433.Screens
                 {
                     battle.SkillNote(next, results[next]);                               // NOTE BY NOTE : the blow lands now
                     NoteBlow(grade, last);                                               // ONE NOTE ONE BLOW : the musician's blow, on this frame
+                    lastSkillNote = last;                                                // the skill's own look knows its last note (CAPRICE)
                     ShowEvents();
+                    lastSkillNote = false;
                 }
                 SwipeAction(grade, last);
             }
@@ -1170,7 +1173,8 @@ namespace Tacetno433.Screens
 
                     //The blow's light : the striker's style on an enemy, TACET's INK on a musician (Core/HitFx.cs).
                     //LIGHTNING strikes the enemies one after another, the first lights the whole stage.
-                    HitStyle style = !e.Who.IsEnemy ? HitStyle.Ink : (hitSignature ? SignatureStyle() : StyleOf(hitBy));
+                    //A legend's own skill lands its own way (block D : CAPRICE cuts the stage open, LANCE runs through...)
+                    HitStyle style = !e.Who.IsEnemy ? HitStyle.Ink : (hitSignature ? SignatureStyle() : (PlayingSkill != null ? SkillStyle(hitBy, PlayingSkill) : StyleOf(hitBy)));
                     float power = 0.4f + Math.Min(0.8f, e.Amount / 25f);
                     if (style == HitStyle.Lightning)
                     {
@@ -1183,6 +1187,7 @@ namespace Tacetno433.Screens
                         int tier = !hitSignature && hitBy != null && !hitBy.IsEnemy ? hitBy.Musician.Rehearsed : 0;   // WEAPON TIERS
                         Flick swing = view == View.Swipe && swipeFor == SwipeFor.Skill ? lastWay : Flick.None;     // ACTION : cut the way the baton swung
                         hits.Hit(style, DrawBox(e.Who), power, colors, tier, swing);
+                        if (style == HitStyle.Caprice && lastSkillNote) hits.CapriceFinish(DrawBox(e.Who), colors);   // CAPRICE : the last cut sets every seam alight
                     }
 
                     //IMPACT FRAME : the world holds still through the turns and the flash

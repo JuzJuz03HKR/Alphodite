@@ -457,9 +457,9 @@
         public static float FigureHoleHaloSize = 1.05f;   //   the haze's size, a share of the figure's height
 
         //Skill Feel (Beta1 block D, 2 Nov, Core/HitFx.Skills.cs) : the five legends' own skills. Screen numbers, not balance.
-        public static float SkillCapriceReach = 0.75f;    // CAPRICE : each cut's half length, a share of the enemy's bigger side
-        public static float SkillCutSlide = 9f;           // SPACE CUT : how far the two halves of the stage slide along a cut (page pixels)
-        public static float SkillCutGap = 4f;             //   how wide the black gap opens between them (page pixels)
+        public static float SkillCapriceReach = 1.25f;    // CAPRICE : each cut's half length, a share of the enemy's bigger side (long, the way Miyabi's cuts cross the screen)
+        public static float SkillCutSlide = 22f;          // SPACE CUT : how far the two halves of the stage slide along a cut (page pixels)
+        public static float SkillCutGap = 7f;             //   how wide the black gap opens between them (page pixels)
         public static float SkillSeamTime = 1.5f;         // CAPRICE : a burning SEAM stays this long
         public static float SkillCannonWidth = 14f;       // IL CANNONE : the blast's thickness (page pixels)
         public static float SkillCannonLead = 90f;        //   how far before the enemy's front it starts

@@ -78,6 +78,7 @@ namespace Tacetno433.Core
         private Vector2 gatherAt;
         private float gatherPower;          // 0..1, how much has gathered
         private float gatherFresh;          // seconds since the hold last fed it (it fades once nobody does)
+        private float gatherClock;          // seconds the gather has been drawn (its pull lines run on it)
         private HitColors gatherColors = HitColors.Plain;
 
         //======================================================================================
@@ -118,8 +119,10 @@ namespace Tacetno433.Core
             AddBurst(at, size * 0.55f, angle, 2.4f, 10, 3f, 0.18f, c);
             Throw(at, way, 10 + (int)(8 * power), 560f, Streak, c);
             Throw(at, -way, 6, 360f, Streak, c);
-            if (c.Flair == HitFlair.Flame) Burn(at, size * 0.55f, power * 0.5f, way, true, c);
-            else if (c.Flair == HitFlair.Sparkle) Sparkle(at, size * 0.6f, power * 0.5f, c);
+            //Each cut stays clean (one thin line and its seam, the way Miyabi's cuts read at once); the flames wait for the last
+            //note, when every seam bursts at once (Caprice Finish). Embers drift up off the seam meanwhile.
+            Throw(at, new Vector2(0f, -1f), 4 + (int)(4 * power), 160f, Ember, c);
+            if (c.Flair == HitFlair.Sparkle) Sparkle(at, size * 0.6f, power * 0.5f, c);
         }
 
         //Caprice Finish : the last note of CAPRICE. Every seam still on the stage flares white and burns out in a burst of
@@ -207,8 +210,8 @@ namespace Tacetno433.Core
         {
             Vector2 feet = new Vector2(box.Center.X, box.Bottom - 6f);
             int rings = power > 0.5f ? 4 : 1;
-            for (int k = 0; k < rings; k++)
-                AddPulse(feet, size * (1.2f + 0.45f * k), 0.24f, 3f, 0.34f, k * BattleRules.SkillRollStep, k % 2 == 0 ? c.Tint : c.Hot);
+            for (int k = 0; k < rings; k++)                                              // a shake's ring is wide and thick enough to be seen on the floor
+                AddPulse(feet, size * (1.7f + 0.5f * k), 0.24f, 5f, 0.36f, k * BattleRules.SkillRollStep, k % 2 == 0 ? c.Tint : c.Hot);
             float x = box.X + box.Width * (0.3f + 0.4f * (float)random.NextDouble());
             Vector2 jolt = new Vector2(x, box.Bottom - box.Height * (0.15f + 0.25f * (float)random.NextDouble()));
             AddBurst(jolt, size * (0.5f + 0.5f * power), -MathHelper.PiOver2, 2.2f, 8 + (int)(8 * power), 4f, 0.2f, c);
@@ -233,7 +236,7 @@ namespace Tacetno433.Core
             gatherPower = Math.Max(gatherPower, MathHelper.Clamp(build, 0f, 1f));
             gatherFresh = 0f;
             gatherColors = c;
-            int count = 4 + (int)(5 * build);
+            int count = 6 + (int)(8 * build);
             for (int i = 0; i < count; i++)
             {
                 int slot = Free(bits);
@@ -316,6 +319,7 @@ namespace Tacetno433.Core
                 if (thrusts[i].Age > ThrustOut + ThrustHold + ThrustFade) thrusts[i].On = false;
             }
             gatherFresh += dt;
+            gatherClock += dt;
             if (gatherFresh > 0.2f) gatherPower = Math.Max(0f, gatherPower - dt * 3f);
             if (frozen) return;
 
@@ -461,9 +465,10 @@ namespace Tacetno433.Core
                 float t = k / (float)steps;
                 Vector2 p = Vector2.Lerp(tail, tip, t);
                 float w = width * (float)Math.Pow(1f - (t - 0.5f / steps), 0.55);          // wide at the tail, sharp at the tip
-                Gfx.Line(sb, Snap(last), Snap(p), s.Tint * (0.35f * (1f - fade)), Math.Max(2f, w * 2.4f));
-                Gfx.Line(sb, Snap(last), Snap(p), s.Hot * (1f - 0.5f * fade), Math.Max(2f, w));
-                Gfx.Line(sb, Snap(last), Snap(p), Color.White * (1f - fade), Math.Max(1f, w * 0.35f));
+                //the legend's colour must show on the spike (37.2 : colour on the edge, white only in the core)
+                Gfx.Line(sb, Snap(last), Snap(p), s.Tint * (0.6f * (1f - fade)), Math.Max(2f, w * 2.4f));
+                Gfx.Line(sb, Snap(last), Snap(p), Color.Lerp(s.Tint, s.Hot, 0.45f) * (1f - 0.5f * fade), Math.Max(2f, w));
+                Gfx.Line(sb, Snap(last), Snap(p), Color.White * (1f - fade), Math.Max(1f, w * 0.3f));
                 last = p;
             }
             if (fade < 0.5f) Gfx.DrawGlow(sb, tip.X, tip.Y, s.Width * 2.2f, s.Hot * (0.7f * (1f - 2f * fade)));   // the point, brightest
@@ -487,22 +492,36 @@ namespace Tacetno433.Core
                     float angle = from + 1.5f * k / steps;
                     Vector2 p = s.At + new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)) * r;
                     float thin = (float)Math.Sin(Math.PI * k / (steps + 1));
-                    Gfx.Line(sb, Snap(last), Snap(p), s.Tint * (0.5f * a), 6f * thin + 2f);
-                    Gfx.Line(sb, Snap(last), Snap(p), s.Hot * a, 2f);
+                    Gfx.Line(sb, Snap(last), Snap(p), s.Tint * (0.6f * a), 9f * thin + 3f);
+                    Gfx.Line(sb, Snap(last), Snap(p), s.Hot * a, 3f);
                     last = p;
                 }
             }
         }
 
-        //Draw Gather : the ball of fire growing at the f hole, a ring tightening round it as the hold goes on
+        //Draw Gather : the ball of fire growing at the f hole, a ring tightening round it as the hold goes on. The white core
+        //is the one focus while it is held (37.2), so it is the brightest thing on the stage until the blast takes over.
+        //Four short lines run in towards it (the pull Miyabi's draw has before the cut), faster as it fills.
         private void DrawGather(SpriteBatch sb)
         {
             float p = gatherPower;
             float breathe = 0.85f + 0.15f * (float)Math.Sin(gatherFresh * 30f + p * 20f);
-            Gfx.DrawGlow(sb, gatherAt.X, gatherAt.Y, BattleRules.SkillGatherGlow * (0.4f + 0.8f * p), gatherColors.Tint * (0.55f * p * breathe));
-            Gfx.DrawGlow(sb, gatherAt.X, gatherAt.Y, BattleRules.SkillGatherGlow * (0.15f + 0.25f * p), gatherColors.Hot * (0.9f * p));
+            Gfx.DrawGlow(sb, gatherAt.X, gatherAt.Y, BattleRules.SkillGatherGlow * (0.5f + 0.9f * p), gatherColors.Tint * (0.8f * p * breathe));
+            Gfx.DrawGlow(sb, gatherAt.X, gatherAt.Y, BattleRules.SkillGatherGlow * (0.2f + 0.3f * p), gatherColors.Hot * (1.2f * p));
+            Gfx.DrawGlow(sb, gatherAt.X, gatherAt.Y, BattleRules.SkillGatherGlow * (0.08f + 0.12f * p), Color.White * (p * p));
             float ring = BattleRules.SkillGatherReach * (1f - 0.7f * p);
-            Gfx.EllipseOutline(sb, gatherAt.X, gatherAt.Y, ring, ring, gatherColors.Hot * (0.6f * p), 2f);
+            Gfx.EllipseOutline(sb, gatherAt.X, gatherAt.Y, ring, ring, gatherColors.Hot * (0.8f * p), 3f);
+            Gfx.EllipseOutline(sb, gatherAt.X, gatherAt.Y, ring * 1.35f, ring * 1.35f, gatherColors.Tint * (0.35f * p), 2f);
+            float run = (gatherClock * (2f + 3f * p)) % 1f;                                   // how far in the pull lines are
+            for (int i = 0; i < 4; i++)
+            {
+                float angle = i * MathHelper.PiOver2 + 0.4f + gatherClock * 0.7f;
+                Vector2 way = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
+                float far = BattleRules.SkillGatherReach * (1.3f - run);
+                Vector2 a = gatherAt + way * far;
+                Vector2 b = gatherAt + way * Math.Max(6f, far - 22f - 30f * p);
+                Gfx.Line(sb, Snap(a), Snap(b), gatherColors.Hot * (0.7f * p * (1f - run * 0.6f)), 2f);
+            }
         }
     }
 }

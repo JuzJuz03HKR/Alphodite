@@ -507,6 +507,35 @@ namespace Tacetno433.Screens
             return HitStyle.Shot;
         }
 
+        //Skill Style (block D, 2 Nov, docs/BETA1_DIRECTION.md 37.3) : how a legend's own skill lands, so each looks like its
+        //name (Core/HitFx.Skills.cs). The skill is found by its button, not by the name on it : a legend form renames the
+        //button (CAPRICE No. 24) and stars rewrite it (Musician.Kit), but underneath it is still CAPRICE. A skill with no look
+        //of its own yet lands like the musician's ATTACK (StyleOf).
+        private static HitStyle SkillStyle(Fighter f, Skill s)
+        {
+            if (f == null || f.IsEnemy || f.Musician == null || s == null) return StyleOf(f);
+            int k = s == SkillList.First(f.Musician) ? 0 : (s == SkillList.Second(f.Musician) ? 1 : -1);
+            if (k < 0) return StyleOf(f);
+            string plain = SkillList.Plain(f.Musician, k).Name;
+            if (plain == "CAPRICE") return HitStyle.Caprice;
+            if (plain == "IL CANNONE") return HitStyle.Cannon;
+            if (plain == "LANCE") return HitStyle.Lance;
+            if (plain == "CHAKRAM") return HitStyle.Chakram;
+            if (plain == "TIMPANI ROLL") return HitStyle.Roll;
+            return StyleOf(f);
+        }
+
+        //Playing Skill : the skill whose notes are being swiped now, null when none is
+        private Skill PlayingSkill
+        {
+            get
+            {
+                if (view != View.Swipe || swipeFor != SwipeFor.Skill) return null;
+                BarMove move = battle.CurrentMove;
+                return move != null ? move.Skill : null;
+            }
+        }
+
         //Flashing : how strong flashes and shaking are, turned down by LESS FLASHING on the settings page
         private static float Flashing
         {
@@ -719,13 +748,25 @@ namespace Tacetno433.Screens
                 return;
             }
 
+            //IL CANNONE (block D, 37.3) : the hold gathers fire into the violin's f hole (GATHER), nothing lands on the enemy
+            //until it is let go. TIMPANI ROLL : each shake is one small ring on the floor under the enemy.
+            HitStyle style = SkillStyle(user, move.Skill);
+            if (style == HitStyle.Cannon)
+            {
+                Vector2 hole = figure != null ? figure.SoundPoint : ActionPoint();
+                hits.Gather(hole, build, colors);
+                AddStageLight(hole, 160f + 140f * build, 0.25f + 0.4f * build, 0.15f, colors.Tint);
+                return;
+            }
+            if (style != HitStyle.Roll) style = StyleOf(user);
+
             for (int i = 0; i < battle.Enemies.Count; i++)
             {
                 Fighter e = battle.Enemies[i];
                 if (e.Down) continue;
                 if (move.Skill.Target == SkillTarget.Enemy && e != move.Target) continue;
                 Rectangle box = DrawBox(e);
-                hits.Hit(StyleOf(user), box, 0.15f + 0.3f * build, colors, 0, lastWay);
+                hits.Hit(style, box, 0.15f + 0.3f * build, colors, 0, lastWay);
                 StageHit(CenterOf(box), true, 0.2f + 0.25f * build, colors.Tint);
                 Look look;
                 if (looks.TryGetValue(e, out look)) look.Knock = Math.Max(look.Knock, 0.5f);
@@ -950,6 +991,7 @@ namespace Tacetno433.Screens
             DrawMood(sb);
             sb.End();
 
+            PostChain.SetCuts(hits, cam * BattleRules.StageParallax[3]);      // SPACE CUT : the skills' cuts split the world's picture (Post.fx)
             PostChain.ImpactLook impact;
             impact.Turn = hits.Impact;
             impact.Flash = hits.ImpactFlash;

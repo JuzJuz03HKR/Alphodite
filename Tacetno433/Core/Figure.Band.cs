@@ -852,6 +852,27 @@ namespace Tacetno433.Core
             return body[Head].At + new Vector2(dx * headCos - dy * headSin, dx * headSin + dy * headCos);
         }
 
+        //Sound Point (block D, 2 Nov, docs/BETA1_DIRECTION.md 37.4) : where this legend's sound comes out, the same points GlowBand
+        //lights : the violin's f hole (PAGANINI), the flute's blow hole (QUANTZ), the drum's skin (PFUNDT), the cello's f holes
+        //(DUPORT), the horn's bell (PUNTO). A skill's light gathers or starts here (IL CANNONE's GATHER, Core/HitFx.Skills.cs).
+        //Page pixels in the fighters' layer, like Feet. A figure that is not a legend gives its chest.
+        public Vector2 SoundPoint
+        {
+            get
+            {
+                if (Of != Sort.Musician) return body[Chest].At;
+                SetFrame();
+                switch (legend.Weapon)
+                {
+                    case Rapier: return T(112, 99);
+                    case Hammers: return T(112, 112);
+                    case Shield: return T(112, 125);
+                    case Chakram: return Hd(100, 64);
+                    default: return T(112, 131);
+                }
+            }
+        }
+
         //TA : an angle of the sketch (0 forward, a quarter turn down) turned with the body. TW : its way.
         private float TA(float angle)
         {
