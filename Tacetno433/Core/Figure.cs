@@ -317,6 +317,13 @@ namespace Tacetno433.Core
 
             TickBlow(dt);                                                 // ONE NOTE ONE BLOW : the blow's phases move on
             Pose();
+            if (float.IsNaN(want[Chest].X) || float.IsNaN(body[Chest].At.X))   // a broken number must never lose the figure for good
+            {
+                phase = Phase.None;
+                pose = default(KeyPose);
+                Pose();
+                PlaceAll();
+            }
             TickBand(dt);                                                 // LEGEND CUES : the band's own timers (Figure.Band.cs)
             float scale = Height / 512f;
             float stiff = BattleRules.FigureSpring * (phase != Phase.None ? BattleRules.AttackBodyStiff : 1f);   // the body carries the blow
@@ -505,7 +512,7 @@ namespace Tacetno433.Core
         private float readyDue;               // seconds until the note being readied
         private float readyStart;             //   how many there were when READY began
         private float windDelay = -1f;        // the plain ATTACK : seconds before its wind up begins (-1 : none waiting)
-        private float windLength, cutLength, holdLength, backLength;
+        private float windLength = 0.14f, cutLength = 0.06f, holdLength = 0.08f, backLength = 0.3f;   // set by each blow (never 0 : a phase's share divides by them)
         private bool guardClean;              // GUARD : a PERFECT block (else GOOD, pushed back)
         private float hitAge = -1f;           // seconds since the last blow landed (-1 : none yet), for what follows a blow (THE BLIND CANTOR's voice)
 
@@ -729,6 +736,7 @@ namespace Tacetno433.Core
             Snap();
             phase = Phase.Back;
             phaseTime = 0f;
+            if (backLength < 0.05f) backLength = BattleRules.AttackBack[Weight];
         }
 
         //Snap : a phase starts from the pose shown now. Parts that were on their springs start from where the springs have
@@ -830,10 +838,14 @@ namespace Tacetno433.Core
                         }
                         else
                         {
+                            //A phrase's first wind up starts from rest (a STANCE kept), the next from the blow before as it
+                            //drifts home, so a chain of blows flows from one into the next
                             float near = 1f - MathHelper.Clamp(readyDue / WindTime, 0f, 1f);
                             float amount = Steps(Ease(near));
+                            KeyPose start = rest;
                             if (stance) amount = Math.Max(BattleRules.AttackStance, amount);    // STANCE
-                            target = Blend(rest, KeyFor(KeyOf.Wound, rest), amount);
+                            else start = Blend(from, rest, Ease(phaseTime / BattleRules.AttackBack[Weight]));
+                            target = Blend(start, KeyFor(KeyOf.Wound, rest), amount);
                         }
                         float settle = phaseTime / Math.Min(BattleRules.AttackSettle, readyStart);
                         return Blend(from, target, Ease(settle));

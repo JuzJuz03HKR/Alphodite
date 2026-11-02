@@ -1237,6 +1237,8 @@ namespace Tacetno433.Screens
                 else if (e.Kind == TurnEventKind.Gift) effects.SpawnPop(x, y, MotifList.All[e.Amount].Name, MotifArt.PopColor(MotifList.All[e.Amount].Key), 0.75f);
                 else if (e.Kind == TurnEventKind.Counter)
                 {
+                    Figure answers = FigureOf(e.Who);                                          // ONE NOTE ONE BLOW : the musician strikes back at once
+                    if (answers != null) answers.Blow(Flick.Right, true, true);                //   (DUPORT's THE SCAR is his SHIELD BASH)
                     effects.SpawnPop(x, y, "COUNTER", Palette.Highlight, 0.9f);
                     effects.SpawnFlare(x, box.Center.Y, 1f);
                     //ACTION : every note blocked, the musician answers. The camera snaps to the enemy and punches in.
