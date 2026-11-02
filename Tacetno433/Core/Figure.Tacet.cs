@@ -21,16 +21,23 @@ namespace Tacetno433.Core
     //   so it reads as a shape anywhere on the dark stage, and a white CORE, the brightest thing on the stage (the user 13.87 :
     //   smooth, brighter than the stage, breakable, light first). CRACKS at 75 50 25 of its life, CHIPS off its shell on every
     //   hit, and when it is beaten the shell breaks (SHARDS) and the light it held rises as a ring (RELEASE).
-    //The bosses, still the round 5 shapes (round 6 part 3 draws them again) : black with a white edge, now smooth, built from
-    //the signs of silence and their own stories :
-    //   requiem          the piece never finished : a broken halo, staff lines that stop, a quill for a blade, tears (LACRIMOSA)
-    //   the_nameless_master  a blank mask, an empty frame where the name was, a shadow that copies it a moment late (ITALIEN)
-    //   the_devil_s_string   one string through its heart, a violin's scroll for a head with horns, the bow as a scythe
-    //   the_deaf_crown   a crown over an empty face (it cannot hear), two great hands that give orders, lightning (THE NINTH)
-    //   the_staff        the conductor's staff it beat time with on its own foot : it slams the floor, its body is a banner of
-    //                    the five staff lines (TE DEUM)
-    //   the_blind_cantor a blindfold, organ pipes for wings, voices going out one after another in rings (IN THE DARK)
-    //LEVEL 2 gives each one thin limbs under the same shapes.
+    //The bosses (round 6 part 3, 2 Nov, docs/BETA1_DIRECTION.md 32.6) : each one drawn from its card in the sketch the same way
+    //(Draw<Name> with S and SF, its colours from SetBossInks). THE MONUMENT first, the white statue the world remembers of that
+    //legend, then at THE TURN the black form inside. Each core sits where its story is :
+    //   requiem          REQUIEM (Mozart) : a broken halo, a quill for a blade, tears (LACRIMOSA), the lines of a score that
+    //                    stop half way (the core where they stop)
+    //   the_nameless_master  THE NAMELESS MASTER (Fanny) : a blank mask, an empty frame where her name should be (the core in
+    //                    it), her brother's black shadow standing behind her a moment late (ITALIEN)
+    //   the_devil_s_string   THE DEVIL'S STRING (Paganini) : a violin's scroll grown into horns, one string through it from above
+    //                    its head to the floor (the core on it, it shivers when it plays), needles for fingers, the bow a
+    //                    scythe (ON ONE STRING)
+    //   the_deaf_crown   THE DEAF CROWN (Beethoven) : the famous bust, black thorns over the ears, a stick in its teeth (the
+    //                    core at its tip), a raised hand giving orders, cracks of lightning once broken (THE NINTH)
+    //   the_staff        THE STAFF (Lully) : a collar of the Sun King's rays, a great staff slammed down on its own rotting
+    //                    foot (the core where it lands, TE DEUM)
+    //   the_blind_cantor THE BLIND CANTOR (Bach) : a blindfold leaking light, organ pipes for wings, voices going out of its
+    //                    chest in rings (the core in the middle, IN THE DARK)
+    //LEVEL 2 gives the four looks thin limbs under the same shapes. The bosses are statues and stay as they are.
     public partial class Figure
     {
         private const int Hush = 0;
@@ -56,7 +63,6 @@ namespace Tacetno433.Core
         private int crackSeen;            // CRACKS : how many cracks it shows (one more at 75 50 25 of its life)
         private float crackClock;         //   seconds since the newest one began to run
         private Vector2 releaseAt;        // RELEASE : where its light was when it broke
-        private const float SignLine = 2f;   // the bosses' thin white lines, page pixels
 
         //THE MONUMENT (round 6 part 3, docs/BETA1_DIRECTION.md 32.6) : a boss stands first as the white monument the world
         //remembers of that legend. At half life (THE TURN, Screens/BattleScreen.Boss.cs) the white shell breaks off in a
@@ -149,7 +155,6 @@ namespace Tacetno433.Core
             float s = move == "attack" ? Strike() : 0f;
             float lunge = Math.Max(0f, s) * 0.08f - Math.Max(0f, -s) * 0.03f;      // forward is toward the band
             float raise = Math.Max(0f, -s);                                        // drawn back before the blow
-            bool body2 = Level == 2;
             float orbit = clock * 0.9f + seed;
             want[Extra] = Local((float)Math.Cos(orbit) * 0.3f, -0.6f + (float)Math.Sin(orbit) * 0.12f);
 
@@ -173,47 +178,27 @@ namespace Tacetno433.Core
                     LookRest(lunge * 0.6f, bob, 0.4f);
                     Set(HandA, -0.124f + Math.Max(0f, s) * 0.45f, -0.44f + bob - raise * 0.1f - Math.Max(0f, s) * 0.08f);
                     break;
-                case Nameless:
-                    Set(Head, 0f + lunge, (body2 ? -0.86f : -0.76f) + bob);
-                    Set(Chest, 0f + lunge * 0.6f, -0.7f + bob);
-                    Set(Hip, 0f, -0.45f + bob * 0.5f);
-                    Set(HandA, 0.22f + lunge * 1.6f, -0.56f + bob - raise * 0.12f);
-                    Set(HandB, -0.18f, -0.5f + bob);
-                    Set(FootA, -0.07f, 0f);
-                    Set(FootB, 0.07f, 0f);
-                    want[Extra] = body[Head].At + new Vector2(-0.11f * Facing, 0.03f) * Height;   // the shadow, late
+                case Nameless:                                                           // THE NAMELESS MASTER : it bows into its blow
+                    LookRest(lunge * 0.7f, bob, 0.4f);
+                    want[Extra] = body[Chest].At;                                        //   its shadow rides the loose Extra spring, so it comes a moment late
                     break;
-                case Devil:
-                    Set(Head, 0.03f + lunge * 0.6f, -0.82f + bob);
-                    Set(Chest, 0.03f + lunge * 0.4f, -0.66f + bob);
-                    Set(Hip, 0.03f, -0.44f + bob * 0.6f);
-                    Set(HandA, 0.22f + lunge * 1.5f, -0.6f + bob - raise * 0.15f);
-                    Set(HandB, -0.16f, -0.5f + bob);
-                    Set(FootA, -0.06f, 0f);
-                    Set(FootB, 0.08f, 0f);
+                case Devil:                                                              // THE DEVIL'S STRING : its blow draws the scythe across its own string
+                    LookRest(lunge * 0.5f, bob, 0.3f);
+                    Set(HandA, 0.22f + Math.Max(0f, s) * 0.42f - raise * 0.04f, -0.5f + bob - raise * 0.08f + Math.Max(0f, s) * 0.06f);
                     break;
                 case Crown:                                                              // THE DEAF CROWN : the bust stands still, the hand gives orders
                     LookRest(lunge * 0.3f, bob * 0.5f, 0.6f);
                     Set(HandA, -0.36f + Math.Max(0f, s) * 0.55f, -0.69f + bob * 1.5f - raise * 0.1f + Math.Max(0f, s) * 0.12f);
                     break;
-                case Staff:
-                    float beat = StaffBeat();
-                    Set(Head, 0.01f, -0.88f + bob - beat * 0.04f);
-                    Set(Chest, 0f, -0.8f + bob - beat * 0.04f);
-                    Set(Hip, -0.01f, -0.5f + bob * 0.6f - beat * 0.03f);
-                    Set(HandA, 0.12f + lunge, -0.62f - beat * 0.05f);
-                    Set(HandB, -0.16f, -0.52f + bob);
-                    Set(FootA, -0.06f, -0.03f);
-                    Set(FootB, 0.05f, 0f);
+                case Staff:                                                              // THE STAFF : it rises a little as it lifts the staff, the staff swings on its blow
+                    {
+                        float y = bob * 0.5f - StaffBeat() * 0.012f;
+                        LookRest(lunge * 0.5f, y, 0.5f);
+                        Set(HandA, 0.22f + Math.Max(0f, s) * 0.3f, -0.5f + y - raise * 0.06f);
+                    }
                     break;
-                case Cantor:
-                    Set(Head, 0f + lunge * 0.5f, -0.82f + bob);
-                    Set(Chest, 0f + lunge * 0.4f, -0.66f + bob);
-                    Set(Hip, 0f, -0.36f + bob * 0.4f);
-                    Set(HandA, 0.3f + lunge * 1.6f, -0.55f + bob * 1.3f + (float)Math.Sin(clock * 2.1f) * 0.02f);
-                    Set(HandB, 0.22f + lunge, -0.44f + bob + (float)Math.Sin(clock * 1.7f + 1f) * 0.02f);
-                    Set(FootA, -0.08f, 0f);
-                    Set(FootB, 0.08f, 0f);
+                case Cantor:                                                             // THE BLIND CANTOR : it sways a little, as if listening
+                    LookRest(lunge * 0.5f + (float)Math.Sin(clock * 0.7f + seed) * 0.008f, bob, 0.5f);
                     break;
                 default:                                                                 // THE MUTE : it leans into its blow
                     LookRest(lunge, bob, 0.2f);
@@ -246,7 +231,8 @@ namespace Tacetno433.Core
             Set(FootB, 0.08f, 0f);
         }
 
-        //Staff Beat : THE STAFF slams the floor every few seconds, 1 at the slam (it has no feet left to walk on)
+        //Staff Beat : THE STAFF beats time on its own foot every 1.7 seconds. 1 = the staff lifted highest, then it comes down
+        //fast to 0 : the slam, at 0.45 of each beat (TE DEUM)
         private float StaffBeat()
         {
             float t = (clock + seed) % 1.7f;
@@ -317,13 +303,10 @@ namespace Tacetno433.Core
         //Draw : TACET
         //======================================================================================
 
-        private float tGrow;          // the part being drawn is this much bigger all round (the white edge pass)
-        private Color tColor;
         private static readonly Color BodyInk = new Color(20, 20, 24);       // a little above the hole's black, so a body reads in front of it
 
-        //Draw Tacet : a look draws itself shape by shape (DrawLook). A boss in three passes : the edge (every part a little
-        //bigger, in white), the body (every part in black over it, so only the outline of the whole stays white), then the white
-        //cut through it (eyes, signs). A beaten one is only its shards and the light it lets go.
+        //Draw Tacet : a look draws itself shape by shape (DrawLook), a boss from its card of the sketch (Draw<Name>, white as
+        //THE MONUMENT until THE TURN). A beaten one is only its shards and the light it lets go.
         private void DrawTacet(float alpha, float flash, float light, float mark)
         {
             Color fill = Color.Lerp(BodyInk, Color.White, flash) * alpha;
@@ -345,30 +328,17 @@ namespace Tacetno433.Core
                 DrawChips(alpha);
                 return;
             }
-            if (design == Crown || design == Requiem)                                // drawn from the round 6 sketch
+            SetBossInks(alpha, light, flash, mark);                                  // every boss is drawn from the round 6 sketch
+            switch (design)
             {
-                SetBossInks(alpha, light, flash, mark);
-                if (design == Crown) DrawCrown(alpha);
-                else DrawRequiem(alpha);
-                DrawChips(alpha);
-                return;
+                case Requiem: DrawRequiem(alpha); break;
+                case Nameless: DrawNameless(alpha); break;
+                case Devil: DrawDevil(alpha); break;
+                case Crown: DrawCrown(alpha); break;
+                case Staff: DrawStaff(alpha); break;
+                default: DrawCantor(alpha); break;
             }
-            if (ShellOn)                                                             // THE MONUMENT : white, a grey rim, signs cut in black
-            {
-                edge = Color.Lerp(Dim(MonumentShade, 0.5f + 0.5f * light), Color.White, mark) * alpha;
-                fill = Dim(MonumentWhite, 0.6f + 0.4f * light) * alpha;
-            }
-            else if (breakFlash > 0f) fill = Color.Lerp(fill, Color.White, breakFlash);    // just broken : the black form flashes
-            tGrow = SignLine * (1f + mark);
-            tColor = edge;
-            DrawTacetParts();
-            tGrow = 0f;
-            tColor = fill;
-            DrawTacetParts();
-            DrawTacetLights(alpha * (0.6f + 0.4f * light));
-            lookEdge = BattleRules.FigureTacetEdge;
-            lookRim = rim;
-            lookFill = fill;
+            lookFill = bossLit * alpha;                                              // CHIPS : bits of its shell, white or black
             DrawChips(alpha);
         }
 
@@ -403,217 +373,25 @@ namespace Tacetno433.Core
         }
 
         //======================================================================================
-        //TACET helpers : every part through these, so the edge pass makes it bigger by tGrow
+        //The core : TACET's heart
         //======================================================================================
 
-        //P : a point near a part, x toward the band, y down, in shares of the height
-        private Vector2 P(Vector2 from, float x, float y)
-        {
-            return from + new Vector2(x * Facing, y) * Height;
-        }
-
-        private void TCircle(Vector2 at, float r)
-        {
-            Shapes.Circle(at + Shift, r + tGrow, tColor);
-        }
-
-        private void TEllipse(Vector2 at, float rx, float ry, float rot)
-        {
-            Shapes.Ellipse(at + Shift, rx + tGrow, ry + tGrow, rot, tColor, tColor);
-        }
-
-        private void TBox(Vector2 at, float w, float h, float rot)
-        {
-            Shapes.Box(at + Shift, w + tGrow * 2f, h + tGrow * 2f, rot, tColor);
-        }
-
-        private void TKite(Vector2 root, Vector2 tip, float width, float widest)
-        {
-            Vector2 d = tip - root;
-            if (d.LengthSquared() < 0.01f) return;
-            d.Normalize();
-            Shapes.Kite(root - d * tGrow + Shift, tip + d * tGrow + Shift, width + tGrow * 2f, widest, tColor);
-        }
-
-        private void TLine(Vector2 a, Vector2 b, float w0, float w1)
-        {
-            Shapes.Taper(a + Shift, b + Shift, w0 + tGrow * 2f, w1 + tGrow * 2f, tColor);
-        }
-
-        //T Poly : the points in line, made bigger round their middle
-        private void TPoly(int n)
-        {
-            Vector2 middle = Vector2.Zero;
-            for (int i = 0; i < n; i++) middle += line[i];
-            middle /= n;
-            for (int i = 0; i < n; i++)
-            {
-                Vector2 out1 = line[i] - middle;
-                if (out1.LengthSquared() > 0.01f) out1.Normalize();
-                line[i] += out1 * tGrow + Shift;
-            }
-            Shapes.Fill(line, n, tColor);
-        }
-
-        private void TCrescent(Vector2 at, float r, float from, float to, float thick)
-        {
-            Shapes.Crescent(at + Shift, r, from, to, thick + tGrow * 2f, tColor);
-        }
-
-        //T Hand : a hand of TACET, a diamond (THE DEAF CROWN's great hands that give orders, THE BLIND CANTOR's that feel the way)
-        private void THand(Vector2 at, float size)
-        {
-            Shapes.Polygon(at + Shift, size + tGrow * 1.4f, 4, 0f, tColor);
-        }
-
-        //T Claws : three thin spikes from a hand
-        private void TClaws(Vector2 at, float length)
-        {
-            for (int k = 0; k < 3; k++)
-            {
-                float a = 1.1f + k * 0.35f;
-                Vector2 d = new Vector2((float)Math.Cos(a) * Facing, (float)Math.Sin(a));
-                TLine(at, at + d * length, 0.022f * Height, 0.004f * Height);
-            }
-        }
-
-        //Note Head : a tilted oval, the sign of a note (STATIC's false notes, the choir's hollow heads)
-        private float NoteTilt
-        {
-            get { return -0.42f * Facing; }
-        }
-
-        //======================================================================================
-        //The designs : black bodies (drawn twice, see DrawTacet)
-        //======================================================================================
-
-        private void DrawTacetParts()
-        {
-            switch (design)
-            {
-                case Nameless: PartsNameless(); break;
-                case Devil: PartsDevil(); break;
-                case Staff: PartsStaff(); break;
-                case Cantor: PartsCantor(); break;
-                default: break;                                                          // the looks draw themselves (DrawLook)
-            }
-        }
-
-        //THE NAMELESS MASTER : a tailcoat, a blank diamond mask, and its shadow a moment behind (drawn first)
-        private void PartsNameless()
-        {
-            float h = Height;
-            Vector2 head = body[Head].At, chest = body[Chest].At, hip = body[Hip].At;
-            for (int twin = 0; twin < 2; twin++)
-            {
-                Vector2 m = twin == 0 ? body[Extra].At - head : Vector2.Zero;
-                if (Level == 2)
-                {
-                    TLine(P(hip, -0.04f, 0f) + m, body[FootA].At + m, 0.04f * h, 0.012f * h);
-                    TLine(P(hip, 0.04f, 0f) + m, body[FootB].At + m, 0.04f * h, 0.012f * h);
-                    TLine(P(chest, 0.1f, 0.01f) + m, body[HandA].At + m, 0.035f * h, 0.018f * h);
-                    TLine(P(chest, -0.1f, 0.01f) + m, body[HandB].At + m, 0.035f * h, 0.018f * h);
-                    TLine(body[HandA].At + m, P(body[HandA].At, 0.14f, -0.2f) + m, 0.014f * h, 0.006f * h);   // its pen, its baton
-                }
-                TKite(P(hip, -0.03f, 0f) + m, P(hip, -0.16f, 0.36f) + m, 0.08f * h, 0.15f);
-                TKite(P(hip, 0.03f, 0f) + m, P(hip, -0.04f, 0.34f) + m, 0.06f * h, 0.15f);
-                line[0] = P(chest, -0.12f, 0f) + m; line[1] = P(chest, 0.11f, 0f) + m; line[2] = P(hip, 0.05f, 0f) + m; line[3] = P(hip, -0.06f, 0f) + m;
-                TPoly(4);
-                line[0] = P(head, 0f, -0.12f) + m; line[1] = P(head, 0.08f, 0f) + m; line[2] = P(head, 0f, 0.14f) + m; line[3] = P(head, -0.08f, 0f) + m;
-                TPoly(4);
-            }
-        }
-
-        //THE DEVIL'S STRING : a thin twisted body, a violin's scroll for a head with two horns, the bow as a scythe
-        private void PartsDevil()
-        {
-            float h = Height;
-            Vector2 head = body[Head].At, chest = body[Chest].At, hip = body[Hip].At;
-            if (Level == 2)
-            {
-                TLine(hip, body[FootA].At, 0.04f * h, 0.01f * h);
-                TLine(hip, body[FootB].At, 0.04f * h, 0.01f * h);
-                TLine(P(chest, -0.06f, 0.01f), body[HandB].At, 0.03f * h, 0.015f * h);
-                TClaws(body[HandB].At, 0.07f * h);
-                TLine(P(chest, 0.06f, 0.01f), body[HandA].At, 0.03f * h, 0.015f * h);
-            }
-            line[0] = P(chest, -0.07f, 0f); line[1] = P(chest, 0.08f, 0.02f); line[2] = P(hip, 0.02f, 0.05f); line[3] = P(hip, -0.05f, 0.04f);
-            TPoly(4);
-            TKite(P(hip, -0.01f, 0.02f), P(hip, -0.06f, 0.38f), 0.1f * h, 0.12f);
-            TCircle(head, 0.065f * h);
-            TCrescent(P(head, -0.04f, -0.03f), 0.09f * h, -2.6f, -1.5f, 0.03f * h);   // horns
-            TCrescent(P(head, 0.04f, -0.03f), 0.09f * h, -1.6f, -0.5f, 0.03f * h);
-            Vector2 top = P(body[HandA].At, 0.02f, -0.38f);
-            TLine(P(body[HandA].At, 0f, 0.05f), top, 0.018f * h, 0.012f * h);          // the bow's stick
-            TCrescent(P(top, -0.06f, 0f), 0.16f * h, Facing > 0f ? -0.2f : MathHelper.Pi - 1.2f, Facing > 0f ? 1.2f : MathHelper.Pi + 0.2f, 0.045f * h);
-        }
-
-        //THE STAFF : the staff it beat time with, slamming the floor, its body a banner hanging from the top
-        private void PartsStaff()
-        {
-            float h = Height;
-            Vector2 head = body[Head].At, chest = body[Chest].At, hip = body[Hip].At;
-            float beat = StaffBeat();
-            Vector2 foot = Local(0.13f, 0f) + new Vector2(0f, -beat * 0.12f * h);
-            TLine(foot, foot + new Vector2(0f, -0.96f * h), 0.03f * h, 0.025f * h);
-            TBox(foot + new Vector2(0f, -0.98f * h), 0.06f * h, 0.06f * h, MathHelper.PiOver4);
-            TCircle(foot + new Vector2(0f, -0.9f * h), 0.03f * h);
-            if (Level == 2)
-            {
-                TLine(P(chest, 0.08f, 0f), new Vector2(foot.X, body[HandA].At.Y), 0.05f * h, 0.035f * h);
-                TLine(P(chest, -0.1f, 0f), body[HandB].At, 0.05f * h, 0.035f * h);
-                TLine(P(hip, 0.04f, 0f), body[FootB].At, 0.06f * h, 0.03f * h);
-                TLine(P(hip, -0.05f, 0f), P(hip, -0.12f, 0.3f), 0.05f * h, 0.03f * h);   // the leg it hurt, hanging
-            }
-            line[0] = P(chest, -0.17f, 0f); line[1] = P(chest, 0.1f, 0f); line[2] = P(hip, 0.09f, 0.22f); line[3] = P(hip, -0.02f, 0.14f); line[4] = P(hip, -0.15f, 0.24f);
-            TPoly(5);                                                                  // the banner, a swallowtail
-            TCircle(head, 0.06f * h);
-            TBox(P(head, 0f, -0.05f), 0.15f * h, 0.03f * h, 0f);
-        }
-
-        //THE BLIND CANTOR : a robe, organ pipes for wings, two hands feeling the way
-        private void PartsCantor()
-        {
-            float h = Height;
-            Vector2 head = body[Head].At, chest = body[Chest].At, hip = body[Hip].At;
-            for (int k = 0; k < 6; k++)                                                // organ pipes for wings
-            {
-                float tall = (0.3f + 0.22f * (float)Math.Sin(k * 0.9f + 0.4f)) * h;
-                float x = 0.16f + k * 0.055f;
-                TBox(P(chest, x, 0f) + new Vector2(0f, -tall * 0.35f), 0.04f * h, tall, 0f);
-                TBox(P(chest, -x, 0f) + new Vector2(0f, -tall * 0.35f), 0.04f * h, tall, 0f);
-            }
-            if (Level == 2)
-            {
-                TLine(P(chest, 0.1f, 0f), body[HandA].At, 0.05f * h, 0.03f * h);
-                TLine(P(chest, 0.06f, 0.04f), body[HandB].At, 0.045f * h, 0.03f * h);
-            }
-            line[0] = P(chest, -0.14f, -0.04f); line[1] = P(chest, 0.14f, -0.04f); line[2] = P(hip, 0.17f, 0.3f); line[3] = P(hip, -0.19f, 0.3f);
-            TPoly(4);
-            TCircle(head, 0.085f * h);
-            THand(body[HandA].At, 0.05f * h);
-            THand(body[HandB].At, 0.05f * h);
-        }
-
-        //Core Point : TACET's heart, a small white diamond of light (the Worldless way : every creature has one small glowing
-        //core, 13.86). Where it sits says something about the enemy : on HUSH's lips, in THE DAMPER's block, on THE DEVIL'S
-        //STRING's string, in the frame where THE NAMELESS MASTER's name was, at the head of THE STAFF.
+        //Core Point : a boss's heart, a small white diamond of light (the Worldless way : every creature has one small glowing
+        //core, 13.86). Where it sits says something about the boss : where REQUIEM's unfinished lines stop, in the frame where
+        //THE NAMELESS MASTER's name should be, on THE DEVIL'S STRING's string, at the tip of THE DEAF CROWN's stick, where THE
+        //STAFF's staff comes down, in the middle of THE BLIND CANTOR's chest. The looks have their own (LookCore).
         private Vector2 CorePoint()
         {
-            Vector2 head = body[Head].At, chest = body[Chest].At;
+            SetLook();
             switch (design)
             {
-                case Requiem:
-                    SetLook();
-                    return S(32, 160) - Shift;                                           // where the unfinished lines stop
-                case Nameless: return P(chest, 0f, 0.11f);
-                case Devil: return chest;
-                case Crown:
-                    SetLook();
-                    return S(176, 109) - Shift;                                          // the tip of the stick in its teeth
-                case Staff: return Local(0.13f, 0f) + new Vector2(0f, (-0.98f - StaffBeat() * 0.12f) * Height);
-                case Cantor: return P(chest, 0f, 0.08f);
-                default: return chest;                                                   // the looks have their own (LookCore)
+                case Requiem: return S(32, 160) - Shift;
+                case Nameless: return S(120, 161) - Shift;
+                case Devil: return DevilCore() - Shift;
+                case Crown: return S(176, 109) - Shift;
+                case Staff: return StaffFoot() - Shift;
+                case Cantor: return S(120, 146) - Shift;
+                default: return body[Chest].At;
             }
         }
 
@@ -621,90 +399,6 @@ namespace Tacetno433.Core
         private float CoreSize
         {
             get { return (Of == Sort.Boss ? (shellOn ? 0.024f : 0.032f) : 0.034f) * Height; }   // the black form's core is brighter
-        }
-
-        //======================================================================================
-        //The designs : the white cut through them (eyes and the signs of silence), never the band's colours
-        //======================================================================================
-
-        private void DrawTacetLights(float alpha)
-        {
-            DrawTacetSigns(alpha);
-            Vector2 core = CorePoint() + Shift;                                      // the heart, over everything
-            Shapes.Polygon(core, CoreSize, 4, 0f, Color.White * alpha);
-            Shapes.Polygon(core, CoreSize * 0.45f, 4, 0f, new Color(40, 40, 46) * alpha);
-            Shapes.Polygon(core, CoreSize * 0.22f, 4, 0f, Color.White * alpha);
-        }
-
-        private void DrawTacetSigns(float alpha)
-        {
-            float h = Height;
-            Color white = (ShellOn ? MonumentInk : Color.White) * alpha;          // THE MONUMENT : the signs cut in black
-            Color grey = (ShellOn ? MonumentShade : Palette.PaperDim) * alpha;
-            Vector2 head = body[Head].At + Shift, chest = body[Chest].At + Shift, hip = body[Hip].At + Shift;
-            float slant = -0.25f * Facing;
-            switch (design)
-            {
-                case Nameless:
-                    {
-                        Vector2 frame = P(chest, 0f, 0.11f);                                       // the frame where its name was, empty
-                        float w = 0.13f * h, hh = 0.06f * h, t = SignLine;
-                        Shapes.Box(frame - new Vector2(0f, hh * 0.5f), w, t, 0f, white);
-                        Shapes.Box(frame + new Vector2(0f, hh * 0.5f), w, t, 0f, white);
-                        Shapes.Box(frame - new Vector2(w * 0.5f, 0f), t, hh, 0f, white);
-                        Shapes.Box(frame + new Vector2(w * 0.5f, 0f), t, hh, 0f, white);
-                        Shapes.Box(head + new Vector2(0f, 0.01f * h), t, 0.18f * h, 0f, grey);     // a crack down the blank mask
-                    }
-                    break;
-                case Devil:
-                    {
-                        float top = -0.2f * h;                                                     // ON ONE STRING : it shivers
-                        for (int i = 0; i < 16; i++)
-                        {
-                            float t = i / 15f;
-                            float y = MathHelper.Lerp(top, Feet.Y + Shift.Y, t);
-                            float wobble = (float)Math.Sin(t * MathHelper.Pi) * (float)Math.Sin(clock * 31f) * 0.012f * h * (move == "attack" ? 3f : 1f);
-                            line[i] = new Vector2(chest.X + wobble, y);
-                            lineW[i] = 0.006f * h;
-                        }
-                        Shapes.Stroke(line, lineW, 16, white, white * 0.5f, false);
-                        Shapes.Arc(head, 0.04f * h, clock * 2f, clock * 2f + 4.5f, 0.012f * h, 0.004f * h, white);   // the scroll's curl
-                        Shapes.Box(P(head, 0.03f, 0.02f), 0.04f * h, 0.01f * h, slant, white);                       // an eye
-                    }
-                    break;
-                case Staff:
-                    {
-                        for (int k = 0; k < 5; k++)                                                // its banner is a staff : five lines
-                        {
-                            Vector2 a = P(chest, -0.15f, 0.05f + k * 0.035f);
-                            Vector2 b = P(chest, 0.08f, 0.05f + k * 0.035f);
-                            Shapes.Line(a, b, SignLine, white);
-                        }
-                        Shapes.Box(head, 0.05f * h, 0.01f * h, 0f, white);
-                        float t = ((clock + seed) % 1.7f - 0.45f) / 0.8f;                         // TE DEUM : the beat on the floor
-                        if (t > 0f && t < 1f)
-                        {
-                            Vector2 foot = Local(0.13f, 0f) + Shift;
-                            Shapes.Arc(foot, 0.1f * h + t * 0.4f * h, MathHelper.Pi, MathHelper.TwoPi, 0.01f * h * (1f - t), 0.01f * h * (1f - t), white * (1f - t));
-                        }
-                    }
-                    break;
-                case Cantor:
-                    Shapes.Box(P(head, 0f, -0.005f), 0.19f * h, 0.035f * h, 0f, white);           // the blindfold
-                    for (int k = 0; k < 6; k++)                                                    // each pipe's mouth
-                    {
-                        float tall = (0.3f + 0.22f * (float)Math.Sin(k * 0.9f + 0.4f)) * h;
-                        float x = 0.16f + k * 0.055f;
-                        Shapes.Box(P(chest, x, 0f) + new Vector2(0f, tall * 0.05f), 0.022f * h, 0.012f * h, 0f, grey);
-                        Shapes.Box(P(chest, -x, 0f) + new Vector2(0f, tall * 0.05f), 0.022f * h, 0.012f * h, 0f, grey);
-                    }
-                    for (int k = 0; k < 3; k++)                                                    // voices, one after another
-                    {
-                        float t = (clock * 0.5f + k / 3f) % 1f;
-                        Shapes.Ring(head, (0.1f + t * 0.4f) * h, 0.006f * h * (1f - t), white * (0.8f * (1f - t)));
-                    }
-                    break;
-            }
         }
 
         //======================================================================================
@@ -1264,13 +958,9 @@ namespace Tacetno433.Core
         }
 
         //======================================================================================
-        //THE DEAF CROWN (round 6 part 3, from the sketch docs/art_refs/concept_v6.html, docs/BETA1_DIRECTION.md 32.6)
+        //THE MONUMENT pieces : what every boss from the round 6 sketch is made of (round 6 part 3)
         //======================================================================================
 
-        //Draw Crown : the bust everyone knows of Beethoven. A V of a frown, a crown of black thorns over both ears and none in
-        //front (it cannot hear), a stick held in its teeth (he heard through his jaw, a stick on the piano) whose tip holds the
-        //core, a great hand raised to give orders. THE MONUMENT : white, lit from the band's side, cracking as it is hit. Broken
-        //at THE TURN : the same shape in black, cracks of lightning across it (THE NINTH), the brows and the stick in white.
         //Set Boss Inks : the colours of a boss drawn from the sketch. THE MONUMENT : lit white, its far side in grey shade,
         //signs cut in black, a dark grey rim. The black form : black, darker on its far side, signs in pale white, the pale rim
         //of TACET, and the white flash when it has just broken.
@@ -1290,11 +980,113 @@ namespace Tacetno433.Core
             lookRim = (white ? Dim(MonumentShade, 0.45f) : Color.Lerp(Palette.Paper * (BattleRules.FigureTacetRim * light), Color.White, mark)) * alpha;
         }
 
+        //Boss Swing : how far its hand (the HandA spring) has swung from where it rests, page pixels, the body's own move taken
+        //out (PoseTacet moves the hand on its blow, the spring adds the follow through)
+        private Vector2 BossSwing(float restX, float restY)
+        {
+            return body[HandA].At - Local(restX, restY) - (body[Chest].At - Local(0f, -0.5f));
+        }
+
+        //Since Blow : 0 to 1 over the half second after its blow lands, -1 the rest of the time
+        private float SinceBlow()
+        {
+            if (move != "attack") return -1f;
+            float t = (moveTime - BattleRules.TurnStrikeImpact) / 0.5f;
+            return t >= 0f && t < 1f ? t : -1f;
+        }
+
+        //Robe : a body of the sketch, four corners from its shoulders (top) to its hem (foot). Lit on the band's side, its far
+        //half in shade (the sketch's two greys, split at its middle line). A hem on the floor stays on the floor.
+        private void Robe(float top, float topLeft, float topRight, float foot, float footLeft, float footRight, float alpha)
+        {
+            bool floor = foot >= LookFloor;
+            lookFill = bossLit * alpha;
+            line[0] = S(topLeft, top);
+            line[1] = S(topRight, top);
+            line[2] = floor ? SF(footRight, foot) : S(footRight, foot);
+            line[3] = floor ? SF(footLeft, foot) : S(footLeft, foot);
+            Shell(4, 1f);
+            line[0] = S(LookMiddle, top);
+            line[3] = floor ? SF(LookMiddle, foot) : S(LookMiddle, foot);
+            Shapes.Fill(line, 4, bossDark * alpha);
+        }
+
+        //Boss Head : an oval of the sketch, its far half in shade
+        private void BossHead(float x, float y, float rx, float ry, float alpha)
+        {
+            lookFill = bossLit * alpha;
+            ShellOval(S(x, y), rx, ry);
+            for (int i = 0; i <= 10; i++)
+            {
+                float t = -MathHelper.PiOver2 + i * MathHelper.Pi / 10f;
+                line[i] = S(x + (float)Math.Cos(t) * rx, y + (float)Math.Sin(t) * ry);
+            }
+            Shapes.Fill(line, 11, bossDark * alpha);
+        }
+
+        //Boss Core : the white diamond (w and h half its size in sketch units), bigger once the white shell is gone
+        private void BossCore(Vector2 at, float w, float h, float alpha)
+        {
+            float grow = ShellOn ? 1f : 1.25f;
+            Diamond(at, w * grow, h * grow, Color.White * alpha);
+        }
+
+        //Boss Cracks : the cracks of its card (x y pairs). In the white shell they come one by one as it is hit (CRACKS at 75 and
+        //50 of its life) in black. On the black form the first two are always there in white, a third at 25.
+        private void BossCracks(float[][] cracks, float alpha)
+        {
+            bool white = ShellOn;
+            Color c = (white ? bossInk : Color.White) * alpha;
+            for (int k = 0; k < cracks.Length; k++)
+            {
+                if (white ? k >= crackSeen : (k >= 2 && k >= crackSeen)) break;
+                int n = cracks[k].Length / 2;
+                for (int i = 0; i < n; i++) line[i] = S(cracks[k][i * 2], cracks[k][i * 2 + 1]);
+                LightLine(n, (white ? 1.4f : 1.6f) * lookK, c);
+            }
+        }
+
+        //Blade : a curved piece of the sketch between two cubic curves (a scythe, a tail, the ends of a blindfold). The first runs
+        //from root to tip, the second back from tip to root. Drawn as one stroke along the middle as wide as the gap, because
+        //the fan of Shapes.Fill would spill out of its hollow side. rim : a shell's pale rim first (cloth has none).
+        private void Blade(Vector2 a0, Vector2 a1, Vector2 a2, Vector2 a3, Vector2 b0, Vector2 b1, Vector2 b2, Vector2 b3, Color fill, bool rim)
+        {
+            const int count = 12;
+            for (int i = 0; i < count; i++)
+            {
+                float t = i / (count - 1f);
+                Vector2 p = Bez(a0, a1, a2, a3, t), q = Bez(b0, b1, b2, b3, 1f - t);
+                line[i] = (p + q) * 0.5f;
+                lineW[i] = Vector2.Distance(p, q) + (rim ? lookEdge * 2f : 0f);
+            }
+            if (rim)
+            {
+                Shapes.Stroke(line, lineW, count, lookRim, lookRim, false);
+                for (int i = 0; i < count; i++) lineW[i] -= lookEdge * 2f;
+            }
+            Shapes.Stroke(line, lineW, count, fill, fill, false);
+        }
+
+        //Bez : one point of a cubic BEZIER from a to d pulled by b and c (t 0 to 1)
+        private static Vector2 Bez(Vector2 a, Vector2 b, Vector2 c, Vector2 d, float t)
+        {
+            float u = 1f - t;
+            return a * (u * u * u) + b * (3f * u * u * t) + c * (3f * u * t * t) + d * (t * t * t);
+        }
+
+        //======================================================================================
+        //THE DEAF CROWN (round 6 part 3, from the sketch docs/art_refs/concept_v6.html, docs/BETA1_DIRECTION.md 32.6)
+        //======================================================================================
+
+        //Draw Crown : the bust everyone knows of Beethoven. A V of a frown, a crown of black thorns over both ears and none in
+        //front (it cannot hear), a stick held in its teeth (he heard through his jaw, a stick on the piano) whose tip holds the
+        //core, a great hand raised to give orders. THE MONUMENT : white, lit from the band's side, cracking as it is hit. Broken
+        //at THE TURN : the same shape in black, cracks of lightning across it (THE NINTH), the brows and the stick in white.
         private void DrawCrown(float alpha)
         {
             bool white = ShellOn;
             Color lit = bossLit, dark = bossDark, ink = bossInk;
-            Vector2 hand = body[HandA].At - Local(-0.36f, -0.69f) - (body[Chest].At - Local(0f, -0.5f));   // the hand's own swing
+            Vector2 hand = BossSwing(-0.36f, -0.69f);                              // the hand's own swing
 
             lookFill = lit * alpha;                                                // the robe of the bust, its far side in shade
             line[0] = S(64, 140); line[1] = S(176, 140); line[2] = SF(206, 262); line[3] = SF(34, 262);
@@ -1323,9 +1115,9 @@ namespace Tacetno433.Core
             lookFill = lit * alpha;                                                // the raised hand
             line[0] = S(182, 120) + hand; line[1] = S(214, 112) + hand; line[2] = S(218, 140) + hand; line[3] = S(190, 148) + hand;
             Shell(4, 1f);
-            CrownFinger(hand, 184, 120, 180, 64, 190, 118); CrownFinger(hand, 192, 118, 195, 54, 200, 116);
-            CrownFinger(hand, 201, 116, 211, 60, 208, 116); CrownFinger(hand, 209, 114, 225, 72, 215, 119);
-            CrownFinger(hand, 186, 133, 162, 110, 190, 127);
+            Finger(hand, 184, 120, 180, 64, 190, 118); Finger(hand, 192, 118, 195, 54, 200, 116);
+            Finger(hand, 201, 116, 211, 60, 208, 116); Finger(hand, 209, 114, 225, 72, 215, 119);
+            Finger(hand, 186, 133, 162, 110, 190, 127);
 
             Color core = Color.White * alpha;                                      // the core at the stick's tip
             Diamond(S(176, 109), white ? 6f : 7.5f, white ? 7f : 9f, core);
@@ -1355,7 +1147,8 @@ namespace Tacetno433.Core
             Shell(3, 1f);
         }
 
-        private void CrownFinger(Vector2 hand, float ax, float ay, float bx, float by, float cx, float cy)
+        //Finger : three corners of the sketch moved by a hand's swing (THE DEAF CROWN's fingers, THE DEVIL'S STRING's needles)
+        private void Finger(Vector2 hand, float ax, float ay, float bx, float by, float cx, float cy)
         {
             line[0] = S(ax, ay) + hand; line[1] = S(bx, by) + hand; line[2] = S(cx, cy) + hand;
             Shell(3, 1f);
@@ -1387,7 +1180,7 @@ namespace Tacetno433.Core
             bool white = ShellOn;
             Color lit = bossLit, dark = bossDark, ink = bossInk;
             Color light = Dim(MonumentWhite, 1f) * (0.7f * alpha);
-            Vector2 hand = body[HandA].At - Local(-0.124f, -0.44f) - (body[Chest].At - Local(0f, -0.5f));   // the quill's own swing
+            Vector2 hand = BossSwing(-0.124f, -0.44f);                             // the quill's own swing
 
             for (int k = 0; k < 5; k++)                                            // the unfinished lines, their ends never still
             {
@@ -1460,6 +1253,270 @@ namespace Tacetno433.Core
         }
 
         //======================================================================================
+        //THE NAMELESS MASTER (round 6 part 3, from the sketch) : Fanny Mendelssohn, whose songs came out under her brother's name
+        //======================================================================================
+
+        //Draw Nameless : a blank mask with no face, an empty frame floating on her chest where a name should be (the core is
+        //in it), and behind her the black shadow of her brother, a moment late in every move (PoseTacet), only its eyes and a
+        //tear showing. THE MONUMENT white with the frame cut in black, then the black form with the frame in white.
+        private void DrawNameless(float alpha)
+        {
+            bool white = ShellOn;
+            Vector2 late = body[Extra].At - body[Chest].At;                       // the shadow, a moment behind
+            Vector2 lateFloor = new Vector2(late.X, 0f);                          //   its hem stays on the floor
+            Color rim = lookRim;
+            float edge = lookEdge;
+            lookRim = ShadowRim * alpha;                                          //   black, a pale edge so it reads on the dark
+            lookFill = ShadowInk * alpha;
+            lookEdge = edge * 1.4f;
+            line[0] = S(126, 102) + late; line[1] = S(154, 102) + late; line[2] = SF(182, 262) + lateFloor; line[3] = SF(98, 262) + lateFloor;
+            Shell(4, 1f);
+            ShellOval(S(140, 82) + late, 14f, 18f);
+            lookRim = rim;
+            lookEdge = edge;
+            Shapes.Circle(S(134, 80) + late, 2f * lookK, Color.White * alpha);    //   its eyes
+            Shapes.Circle(S(147, 80) + late, 2f * lookK, Color.White * alpha);
+            float drop = (clock * 0.3f + seed) % 1f;                              //   a tear from the eye her mask does not hide
+            Vector2 tear = S(147f, 85f + drop * 26f) + late;
+            float size = 2.4f * lookK;
+            Color wet = Color.White * (alpha * (1f - drop * drop));
+            Shapes.Circle(tear, size * 0.6f, wet);
+            Shapes.Kite(tear, tear - new Vector2(0f, size * 1.8f), size * 1.1f, 0.15f, wet);
+
+            Robe(110, 104, 136, 262, 80, 160, alpha);                             // the master
+            lookFill = (white ? Color.Lerp(bossLit, Color.White, 0.3f) : bossLit) * alpha;   // the blank mask
+            ShellOval(S(120, 90), 15f, 19f);
+            if (white) OvalLine(S(120, 90), 15f, 19f, 1f, bossDark * alpha);
+            Color frame = (white ? bossInk : Color.White) * alpha;                // the empty frame where her name should be
+            line[0] = S(98, 146); line[1] = S(142, 146); line[2] = S(142, 176); line[3] = S(98, 176);
+            for (int i = 0; i < 4; i++) lineW[i] = 1.6f * lookK;
+            Shapes.Stroke(line, lineW, 4, frame, frame, true);
+            BossCore(S(120, 161), 6f, 7f, alpha);
+            BossCracks(NamelessCracks, alpha);
+        }
+
+        private static readonly Color ShadowInk = new Color(6, 6, 8);
+        private static readonly Color ShadowRim = new Color(214, 214, 220) * 0.7f;
+        private static readonly float[][] NamelessCracks =
+        {
+            new float[] { 92, 196, 100, 212, 95, 220, 102, 240 },
+            new float[] { 146, 206, 140, 218, 145, 228 },
+        };
+
+        //======================================================================================
+        //THE STAFF (round 6 part 3, from the sketch) : Lully, who beat time with a great staff and struck his own foot
+        //======================================================================================
+
+        //Draw Staff : a man of the Sun King's court, its collar a ring of the sun's rays, beating time with a great staff on
+        //its own foot. That foot is rotting and falls away in bits (Lully died of the wound he struck himself conducting a
+        //TE DEUM). Every 1.7 seconds it lifts the staff and slams it down (StaffBeat) : a ring goes out along the floor and
+        //bits of the foot fall off. The core is the staff's tip, where it lands. On its blow the staff swings at the band.
+        private void DrawStaff(float alpha)
+        {
+            bool white = ShellOn;
+            Color lit = bossLit * alpha, dark = bossDark * alpha;
+            lookFill = Dim(bossDark, 0.94f) * alpha;                              // the sun's rays round its head, turning slowly
+            float turn = clock * 0.06f;
+            for (int j = 0; j < 16; j++)
+            {
+                float b = j / 16f * MathHelper.TwoPi + turn, r = j % 2 == 1 ? 38f : 48f;
+                line[0] = S(120f + (float)Math.Cos(b - 0.08f) * 22f, 94f + (float)Math.Sin(b - 0.08f) * 22f);
+                line[1] = S(120f + (float)Math.Cos(b) * r, 94f + (float)Math.Sin(b) * r);
+                line[2] = S(120f + (float)Math.Cos(b + 0.08f) * 22f, 94f + (float)Math.Sin(b + 0.08f) * 22f);
+                Shell(3, 1f);
+            }
+            Robe(118, 90, 150, 250, 62, 178, alpha);
+            BossHead(120, 94, 15f, 19f, alpha);
+
+            lookFill = lit;                                                       // the foot it stands on
+            int n = Cubic(SF(96, 262), SF(92, 256), SF(88, 248), SF(91, 243), 6, line, 0);
+            n = CubicMore(SF(91, 243), SF(93, 239), SF(99, 239), SF(101, 243), 6, line, n);
+            n = CubicMore(SF(101, 243), SF(104, 248), SF(100, 256), SF(96, 262), 6, line, n);
+            Shell(n - 1, 1f);
+            lookFill = dark;                                                      // the foot it strikes, rotting, a bite out of it
+            n = Cubic(SF(146, 262), SF(142, 257), SF(139, 250), SF(141, 246), 6, line, 0);
+            line[n++] = SF(148, 249);
+            line[n++] = SF(151, 244);
+            n = CubicMore(SF(151, 244), SF(153, 249), SF(151, 256), SF(146, 262), 6, line, n);
+            Shell(n - 1, 1f);
+            line[0] = SF(144, 250); line[1] = SF(148, 256);                       //   cracked through
+            LightLine(2, 1.3f * lookK, (white ? bossInk : Color.White) * alpha);
+            float since = (clock + seed) % 1.7f - 0.45f;                          //   after each slam bits of it fall
+            for (int k = 0; k < 3; k++)
+            {
+                float t = (since - k * 0.07f) / 0.6f;
+                if (t < 0f || t > 1f) continue;
+                Vector2 from = SF(149f + k * 3f, 246f + k), to = SF(157f + k * 5f, 261f);
+                Vector2 at = new Vector2(MathHelper.Lerp(from.X, to.X, t), MathHelper.Lerp(from.Y, to.Y, t * t));
+                Crumb(at, (2.6f - k * 0.4f) * lookK, t * 5f + k, 1f - t * t * t);
+            }
+            Crumb(SF(160, 260), 1.6f * lookK, 0.7f, 1f);                          //   one already on the floor
+            BossCracks(StaffCracks, alpha);
+
+            float ring = since / 0.8f;                                            // TE DEUM : the beat goes out along the floor
+            if (ring > 0f && ring < 1f)
+            {
+                float wide = 1.6f * lookK * (1f - ring);
+                Shapes.Arc(SF(150, 262), (14f + ring * 70f) * lookK, MathHelper.Pi, MathHelper.TwoPi, wide, wide, Color.White * (0.55f * alpha * (1f - ring)));
+            }
+            Vector2 top = S(162, 48) + StaffLift() + BossSwing(0.22f, -0.5f), tip = StaffFoot();   // the staff, lifted between beats, swung on its blow
+            Shapes.Line(top, tip, 4f * lookK + lookEdge * 2f, lookRim);
+            Shapes.Line(top, tip, 4f * lookK, lit);
+            Vector2 knob = top + (S(162.5f, 44f) - S(162f, 48f));
+            Shapes.Circle(knob, 8f * lookK + lookEdge, lookRim);
+            Shapes.Circle(knob, 8f * lookK, lit);
+            Vector2 grip = Vector2.Lerp(top, tip, (125f - 48f) / (252f - 48f));    //   the hand on it
+            Shapes.Polygon(grip, 7.1f * lookK + lookEdge, 4, lookLean, lookRim);
+            Shapes.Polygon(grip, 7.1f * lookK, 4, lookLean, lit);
+            BossCore(tip, 5f, 6f, alpha);
+        }
+
+        //Staff Lift : how high the staff is lifted between beats, page pixels
+        private Vector2 StaffLift()
+        {
+            return new Vector2(0f, -StaffBeat() * 16f * lookK);
+        }
+
+        //Staff Foot : the staff's tip, where it comes down on the rotting foot (its core). It swings less than the top.
+        private Vector2 StaffFoot()
+        {
+            return S(150, 252) + StaffLift() + BossSwing(0.22f, -0.5f) * 0.25f;
+        }
+
+        private static readonly float[][] StaffCracks =
+        {
+            new float[] { 160, 214, 156, 228, 162, 236, 158, 250 },
+            new float[] { 170, 226, 166, 240 },
+        };
+
+        //======================================================================================
+        //THE DEVIL'S STRING (round 6 part 3, from the sketch) : Paganini, the violinist people said had sold his soul
+        //======================================================================================
+
+        //Draw Devil : tall, thin and bent, the scroll of a violin grown into two great horns, one string pulled from above its
+        //head to the floor straight through it (he played whole pieces on one string, ON ONE STRING), long needles for
+        //fingers, the bow a scythe, a tail. The core sits on the string at its chest and the string shivers, wide while it
+        //plays : its blow draws the scythe across the string. The big form of the small horns on PAGANINI's head in the band.
+        private void DrawDevil(float alpha)
+        {
+            Color lit = bossLit * alpha, dark = bossDark * alpha;
+            Vector2 swing = BossSwing(0.22f, -0.5f);                              // the bow hand's own swing
+            float flick = (float)Math.Sin(clock * 1.3f + seed) * 3f;              // its tail
+            Blade(S(110, 248), S(90, 256), S(76, 250 + flick * 0.5f), S(70, 238 + flick),
+                  S(70, 238 + flick), S(80, 246 + flick * 0.5f), S(94, 248), S(108, 242), dark, true);
+            Robe(96, 114, 126, 250, 106, 134, alpha);
+            lookFill = lit;                                                       // the shoulders, a bar
+            ShellQuad(S(92, 104), S(148, 104), S(144, 110), S(96, 110));
+            BossHead(120, 80, 10f, 14f, alpha);
+            Horn(DevilHornLit, lit);                                              // the scroll grown into horns
+            Horn(DevilHornShade, dark);
+            lookFill = lit;                                                       // the bow hand's needles, then the bow : a scythe
+            Finger(swing, 150, 138, 196, 124, 152, 142);
+            Finger(swing, 151, 141, 198, 140, 152, 145);
+            Finger(swing, 151, 144, 194, 156, 151, 147);
+            lookFill = dark;                                                      // the other hand's needles
+            Finger(Vector2.Zero, 90, 146, 52, 136, 89, 150);
+            Finger(Vector2.Zero, 90, 150, 50, 152, 90, 153);
+            Blade(S(188, 126) + swing, S(230, 140) + swing, S(236, 196) + swing, S(206, 228) + swing,
+                  S(206, 228) + swing, S(220, 192) + swing, S(214, 152) + swing, S(188, 132) + swing, lit, true);
+            for (int i = 0; i < 16; i++)                                          // ON ONE STRING : from above its head to the floor
+            {
+                float t = i / 15f;
+                line[i] = Bez(S(120, 30), S(121.5f, 100), S(118.5f, 180), SF(120, 262), t) + new Vector2(StringShake(t) * lookK, 0f);
+                lineW[i] = 1.4f * lookK;
+            }
+            Shapes.Stroke(line, lineW, 16, Color.White * alpha, Color.White * alpha, false);
+            BossCore(DevilCore(), 6f, 7f, alpha);
+            BossCracks(DevilCracks, alpha);
+        }
+
+        //Horn : one of THE DEVIL'S STRING's horns, the curl of a violin's scroll (three curves of the sketch), thick at the root
+        //and thin at the curl, its rim first
+        private void Horn(float[] p, Color fill)
+        {
+            int n = Cubic(S(p[0], p[1]), S(p[2], p[3]), S(p[4], p[5]), S(p[6], p[7]), 8, line, 0);
+            n = CubicMore(S(p[6], p[7]), S(p[8], p[9]), S(p[10], p[11]), S(p[12], p[13]), 6, line, n);
+            n = CubicMore(S(p[12], p[13]), S(p[14], p[15]), S(p[16], p[17]), S(p[18], p[19]), 5, line, n);
+            for (int i = 0; i < n; i++) lineW[i] = MathHelper.Lerp(6f, 2.5f, i / (n - 1f)) * lookK + lookEdge * 2f;
+            Shapes.Stroke(line, lineW, n, lookRim, lookRim, false);
+            for (int i = 0; i < n; i++) lineW[i] -= lookEdge * 2f;
+            Shapes.Stroke(line, lineW, n, fill, fill, false);
+        }
+
+        //String Shake : how far the string is off its line, sketch units (t 0 at its top, 1 on the floor). A fine shiver all
+        //the time, five times wider at its blow
+        private float StringShake(float t)
+        {
+            return (float)Math.Sin(t * MathHelper.Pi) * (float)Math.Sin(clock * 31f) * (0.8f + 3.2f * lookStrike);
+        }
+
+        //Devil Core : the core on the string at its chest, shaking with it
+        private Vector2 DevilCore()
+        {
+            return S(120, 150) + new Vector2(StringShake(0.52f) * lookK, 0f);
+        }
+
+        private static readonly float[] DevilHornLit = { 112, 70, 96, 60, 84, 40, 96, 30, 104, 24, 112, 32, 106, 38, 102, 42, 98, 38, 100, 35 };
+        private static readonly float[] DevilHornShade = { 128, 70, 144, 60, 156, 40, 144, 30, 136, 24, 128, 32, 134, 38, 138, 42, 142, 38, 140, 35 };
+        private static readonly float[][] DevilCracks =
+        {
+            new float[] { 112, 176, 117, 190, 113, 198 },
+            new float[] { 128, 206, 124, 220 },
+        };
+
+        //======================================================================================
+        //THE BLIND CANTOR (round 6 part 3, from the sketch) : Bach, who went blind at the end of his life
+        //======================================================================================
+
+        //Draw Cantor : a blindfold with light leaking at its edges, wings of organ pipes rising one higher than the next, and
+        //voices going out of its chest in rings, one after another (a fugue). The core is the middle of its chest, the heart
+        //of the organ. On its blow the pipes sound (their mouths light) and a voice is thrown at the band (IN THE DARK).
+        private void DrawCantor(float alpha)
+        {
+            Color lit = bossLit * alpha, dark = bossDark * alpha, ink = bossInk * alpha;
+            float after = SinceBlow();
+            Color mouth = Color.Lerp(bossInk, Color.White, after >= 0f ? (1f - after) * (1f - after) : 0f) * alpha;
+            for (int k = 0; k < 5; k++)                                           // the organ pipes behind it, the outer ones taller
+            {
+                float top = 120f - k * 15f - Math.Max(0f, (float)Math.Sin(clock * 1.1f - k * 0.7f)) * 2.5f;   // rising one by one
+                for (int side = 0; side < 2; side++)
+                {
+                    float x = side == 0 ? 90f - k * 10f : 143f + k * 10f;
+                    lookFill = side == 0 ? lit : dark;
+                    ShellQuad(S(x, top), S(x + 7f, top), S(x + 7f, 206f), S(x, 206f));
+                    Shapes.Box(S(x + 3.5f, 192.5f), 4f * lookK, 5f * lookK, lookLean, mouth);
+                }
+            }
+            Robe(112, 104, 136, 262, 74, 166, alpha);
+            BossHead(120, 88, 16f, 20f, alpha);
+            float flap = (float)Math.Sin(clock * 2.2f + seed) * 2.5f;            // the blindfold's two ends in the air
+            Blade(S(102, 82), S(86, 86), S(76, 96 + flap * 0.5f), S(66, 112 + flap),
+                  S(71, 114 + flap), S(80, 100 + flap * 0.5f), S(90, 92), S(102, 89), ink, false);
+            Blade(S(102, 86), S(90, 94), S(84, 104 + flap * 0.5f), S(80, 118 + flap * 0.8f),
+                  S(85, 119 + flap * 0.8f), S(88, 106 + flap * 0.5f), S(94, 98), S(103, 91), ink, false);
+            Shapes.Box(S(120, 84.5f), 36f * lookK, 9f * lookK, lookLean, ink);   // the blindfold
+            Shapes.Line(S(104, 79), S(136, 79), 1.2f * lookK, Color.White * alpha);   //   light leaking at its edges
+            Shapes.Line(S(104, 90.5f), S(136, 90.5f), 1f * lookK, Color.White * alpha);
+            Vector2 heart = S(120, 146);
+            for (int k = 0; k < 3; k++)                                           // voices going out, one after another
+            {
+                float t = (clock * 0.4f + k / 3f) % 1f;
+                Shapes.Ring(heart, (11f + t * 30f) * lookK, 1.1f * lookK, Color.White * (alpha * 0.6f * (1f - t)));
+            }
+            if (after >= 0f)                                                      // IN THE DARK : a voice thrown at the band
+                Shapes.Ring(heart, (13f + after * 100f) * lookK, (0.6f + 2f * (1f - after)) * lookK, Color.White * (alpha * (1f - after)));
+            BossCore(heart, 6f, 7f, alpha);
+            BossCracks(CantorCracks, alpha);
+        }
+
+        //The sketch draws no cracks on THE BLIND CANTOR : these are like the others', down the robe on both sides
+        private static readonly float[][] CantorCracks =
+        {
+            new float[] { 96, 198, 104, 214, 99, 224, 106, 246 },
+            new float[] { 146, 206, 139, 220, 144, 232 },
+        };
+
+        //======================================================================================
         //Glow : TACET
         //======================================================================================
 
@@ -1496,12 +1553,49 @@ namespace Tacetno433.Core
                 Vector2 middle = body[Chest].At + Shift;
                 Gfx.DrawGlow(sb, middle.X, middle.Y, 0.75f * h, Color.White * (power * 4f * breakFlash));
             }
-            if (design == Crown && !ShellOn)                                         // THE NINTH : the lightning cracks glow
+            SetLook();                                                               // each boss's own lights (S already holds Shift)
+            switch (design)
             {
-                SetLook();
-                Vector2 c1 = S(96, 200), c2 = S(150, 190);
-                Gfx.DrawGlow(sb, c1.X, c1.Y, 0.12f * h, Color.White * (power * 0.9f));
-                Gfx.DrawGlow(sb, c2.X, c2.Y, 0.1f * h, Color.White * (power * 0.9f));
+                case Crown:                                                          // THE NINTH : the lightning cracks glow
+                    if (!ShellOn)
+                    {
+                        Vector2 c1 = S(96, 200), c2 = S(150, 190);
+                        Gfx.DrawGlow(sb, c1.X, c1.Y, 0.12f * h, Color.White * (power * 0.9f));
+                        Gfx.DrawGlow(sb, c2.X, c2.Y, 0.1f * h, Color.White * (power * 0.9f));
+                    }
+                    break;
+                case Nameless:                                                       // the empty frame, and the shadow's eyes
+                    {
+                        Vector2 frame = S(120, 161);
+                        Gfx.DrawGlow(sb, frame.X, frame.Y, 0.09f * h, Color.White * (power * (ShellOn ? 0.5f : 0.9f)));
+                        Vector2 eyes = S(140.5f, 80f) + body[Extra].At - body[Chest].At;
+                        Gfx.DrawGlow(sb, eyes.X, eyes.Y, 0.03f * h, Color.White * (power * 0.8f));
+                    }
+                    break;
+                case Devil:                                                          // the string glows, more while it plays
+                    for (int i = 1; i < 6; i++)
+                    {
+                        Vector2 p = Bez(S(120, 30), S(121.5f, 100), S(118.5f, 180), SF(120, 262), i / 6f);
+                        Gfx.DrawGlow(sb, p.X, p.Y, 0.05f * h, Color.White * (power * (0.3f + 0.9f * lookStrike)));
+                    }
+                    break;
+                case Staff:                                                          // TE DEUM : the slam lights the floor
+                    {
+                        float t = ((clock + seed) % 1.7f - 0.45f) / 0.4f;
+                        if (t > 0f && t < 1f)
+                        {
+                            Vector2 floor = SF(150, 262);
+                            Gfx.DrawGlow(sb, floor.X, floor.Y, 0.14f * h, Color.White * (power * 1.6f * (1f - t)));
+                        }
+                    }
+                    break;
+                case Cantor:                                                         // the light leaking round the blindfold
+                    {
+                        Vector2 band = S(120, 84.5f);
+                        int w = (int)(44f * lookK), tall = (int)(16f * lookK);
+                        Gfx.DrawGlowBox(sb, new Rectangle((int)band.X - w / 2, (int)band.Y - tall / 2, w, tall), Color.White * (power * 0.7f));
+                    }
+                    break;
             }
         }
     }
