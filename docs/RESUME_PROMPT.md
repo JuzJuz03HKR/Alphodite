@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 2 พ.ย. แชท /system FINALE5 | รอบ 6 ส่วนที่ 5 ท่าโจมตี ขั้นแรก : ค้นท่าโจมตีจาก CZN ZZZ Worldless แคปท่าตีตอนนี้ทีละเฟรม แล้วเสนอท่าตีของแต่ละตัวให้ผู้ใช้เลือก ยังไม่เขียนโค้ด (`BETA1_DIRECTION.md` 32.14 ข้อ 5 `USER_BRIEFS.md` 13.101) | เอกสาร (`BETA1_DIRECTION.md` `USER_BRIEFS.md` `RESUME_PROMPT.md`) ขั้นถัดไป `Core/Figure*.cs` `Screens/BattleScreen.Stage.cs` `Screens/BattleScreen.Boss.cs` `Data/BattleRules.cs` (Figure Feel) `Core/DebugShots*.cs` |
+| 2 พ.ย. แชท /system FINALE5 | รอบ 6 ส่วนที่ 5 ท่าโจมตี : ขั้นแรก (ค้น แคป เสนอ) เสร็จ รอผู้ใช้ตอบ `BETA1_DIRECTION.md` 32.21.5 แล้วเขียนโค้ดท่าตี (`USER_BRIEFS.md` 13.101) | เอกสาร (`BETA1_DIRECTION.md` `USER_BRIEFS.md` `RESUME_PROMPT.md`) ขั้นถัดไป `Core/Figure*.cs` `Screens/BattleScreen.Stage.cs` `Screens/BattleScreen.Boss.cs` `Data/BattleRules.cs` (Figure Feel) `Core/DebugShots*.cs` |
 
 ---
 
@@ -63,6 +63,11 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 ---
 
 ## สถานะล่าสุด (2 พ.ย.)
+
+**2 พ.ย. แชท /system FINALE5 : รอบ 6 ส่วน 5 ท่าโจมตี ขั้นแรกเสร็จ (แคปท่าตอนนี้ ค้นเกมอ้างอิง เสนอท่า) หยุดรอผู้ใช้เลือก ยังไม่เขียนโค้ด** (คำต่อคำ `USER_BRIEFS.md` 13.101 ทั้งหมด `BETA1_DIRECTION.md` 32.21)
+✅ ปัญหา 8 ข้อของท่าตอนนี้ (32.21.1 เช่น ทุกคนสับท่าเดียวกัน อาวุธตามสปริงมาช้ากว่าตัวเลข โน้ตสกิลเริ่มท่าใหม่ทุกโน้ต ศัตรูตีครั้งเดียวแต่โน้ตมาหลายตัว จักรไม่ถึงศัตรู) / ข้อมูลอ้างอิง ZZZ 7 ตัว CZN Worldless (32.21.2 network บล็อกเว็บส่วนใหญ่ อ่านได้แค่ผลสรุปจากการค้น) / ข้อเสนอหลักร่วม 5 ข้อ ONE NOTE ONE BLOW (32.21.3) ท่าต่อตัว 15 ตัว (32.21.4) / คำถาม 4 ข้อ (32.21.5) / ภาพแคปส่งให้ผู้ใช้ในแชทแล้ว ไม่ได้ commit / แถวในตาราง "แชทที่กำลังทำงาน" ยังจอง
+✅ วิธีแคปท่าตีใน cloud ที่เร็วขึ้น (แก้เฉพาะสำเนาใน scratchpad) : PROBE ใน `Core/Figure.cs` ต่อจากบรรทัด `if (move == "enter" && moveTime > BattleRules.StageSwapTime) move = "idle";` ให้ชนิดที่ตั้งใน env `TACET_PROBE` (Musician Enemy Boss) ตีวนตั้งแต่วินาที `TACET_START` (ค่าเริ่ม 2 บอสใช้ 3.6 เพราะ ENTRANCE บัง) ทิศ `TACET_WAY` ปุ่ม `TACET_BUTTON` / ใน `Core/DebugShots.cs` หลัง `index++;` ถ้าหน้าถัดไปชื่อเดียวกันและเฟรมมากกว่าให้ return เลย (ไม่เปิดหน้าใหม่) แคป 13 เฟรมใช้ 12 วินาที (เดิมราว 2 นาที) / หน้า `battleboss1` ถึง `6` คือ REQUIEM THE DEAF CROWN THE NAMELESS MASTER THE STAFF THE DEVIL'S STRING THE BLIND CANTOR
+**งานถัดไป** : ผู้ใช้ตอบ 32.21.5 แล้วทำตามที่เลือก (ไอริสแนะนำนักดนตรี 5 คนก่อน แคปให้ดู หยุดรอ แล้ว TACET แล้วบอส) / กติกาไม่เปลี่ยน ดาเมจลงเวลาเดิม / PLAYTEST FINALE ยัง 1 PERFECT (`PlaytestSignatureNeed` ห้ามแก้จนผู้ใช้บอก) / VFX ธาตุกับ VFX วาทยากรรอภาพจากผู้ใช้ (ก้อน D)
 
 **2 พ.ย. แชท /system (ต่อจาก FINALE3) : /update ปิดแชท ผู้ใช้เทสส่วน 4 เวทีแล้ว ยังไม่ต้องปรับ แชทหน้าทำส่วน 5 ท่าโจมตี** (คำต่อคำ `USER_BRIEFS.md` 13.100)
 ✅ แชทนี้ทำรอบ 6 ส่วน 3 ที่เหลือ (บอส 4 ตัว `3ab8950` `BETA1_DIRECTION.md` 32.19) กับส่วน 4 เวที (`db7bb75` 32.20) ผู้ใช้เทสทั้งสองแล้ว ยังไม่ต้องปรับ (13.99 13.100) / งานอยู่บน GitHub ครบ / ตาราง "แชทที่กำลังทำงาน" ว่าง / ตัวเลขที่เพิ่มใน `BattleRules` เป็นตัวเลขภาพ (Figure Feel กับ Stage Void) `docs/TACET_Balance.xlsx` ไม่ต้องอัปเดต
