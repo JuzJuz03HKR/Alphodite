@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| (ว่าง) | | |
+| 2 พ.ย. แชท /system FINALE5 | รอบ 6 ส่วนที่ 5 ท่าโจมตี ขั้นแรก : ค้นท่าโจมตีจาก CZN ZZZ Worldless แคปท่าตีตอนนี้ทีละเฟรม แล้วเสนอท่าตีของแต่ละตัวให้ผู้ใช้เลือก ยังไม่เขียนโค้ด (`BETA1_DIRECTION.md` 32.14 ข้อ 5 `USER_BRIEFS.md` 13.101) | เอกสาร (`BETA1_DIRECTION.md` `USER_BRIEFS.md` `RESUME_PROMPT.md`) ขั้นถัดไป `Core/Figure*.cs` `Screens/BattleScreen.Stage.cs` `Screens/BattleScreen.Boss.cs` `Data/BattleRules.cs` (Figure Feel) `Core/DebugShots*.cs` |
 
 ---
 
