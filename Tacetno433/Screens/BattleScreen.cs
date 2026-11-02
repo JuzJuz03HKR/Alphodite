@@ -153,6 +153,8 @@ namespace Tacetno433.Screens
         //ONE NOTE ONE BLOW (MATH ART round 6 part 5, 2 Nov) : the code's figures strike note by note (BattleScreen.Stage.cs)
         private int struckNote = -1;   // the note of TACET's attack whose blow has landed (on its beat, or when parried early)
         private Fighter throwAt;       // the enemy the last note of a skill reached (PUNTO's ring flies there)
+        private bool strikeWaiting;    // STAGE FIRST : an ATTACK waiting for its striker to be in front
+        private float stageWait;       //   how long the fight has waited for the stage (never longer than AttackWaitMost)
 
         //Prepared Text : every word on this page is made in Load or Update, never in Draw
         private Dictionary<Fighter, string> shortName = new Dictionary<Fighter, string>();
@@ -416,7 +418,7 @@ namespace Tacetno433.Screens
             else if (view == View.Target) UpdateTarget();
             else if (view == View.Strike) UpdateStrike(dt);
             else if (view == View.Swipe) UpdateSwipe(dt);
-            else if (view == View.Pause && viewTime >= BattleRules.TurnPause) NextStep();
+            else if (view == View.Pause && viewTime >= BattleRules.TurnPause && !WaitForStage(dt)) NextStep();   // STAGE FIRST : blows and hurts finish first
             else if (view == View.Over && viewTime >= BattleRules.TurnEndTime) Finish();
             UpdateMarks(dt);                                                             // MARKS AND AIM (BattleScreen.Marks.cs)
         }
@@ -703,7 +705,8 @@ namespace Tacetno433.Screens
             striker = battle.Current;
             hitBy = striker;
             hitSignature = false;
-            PlayArt(striker, "attack");
+            strikeWaiting = true;                                                    // ONE NOTE ONE BLOW : it starts once the striker is in front (UpdateStrike)
+            stageWait = 0f;
             strikeMove = move;
             strikeTarget = battle.CanTarget(move.Target) ? move.Target : battle.FocusTarget();
             strikeTime = 0f;
@@ -713,9 +716,20 @@ namespace Tacetno433.Screens
             Game.IsMouseVisible = true;
         }
 
-        //Update Strike : the lunge's clock stops during the hit stop, so the hit really freezes
+        //Update Strike : the lunge's clock stops during the hit stop, so the hit really freezes.
+        //STAGE FIRST (13.104) : the ATTACK starts only once the striker has walked in front (the hit came at 0.24 seconds, the
+        //walk in takes StageSwapTime, so the blow used to land before they were there), and the next move waits for the blow
+        //to finish (WaitForStage).
         private void UpdateStrike(float dt)
         {
+            if (strikeWaiting)
+            {
+                stageWait += dt;
+                if ((fore != striker || swap > 0f) && stageWait < BattleRules.AttackWaitMost) return;
+                strikeWaiting = false;
+                stageWait = 0f;
+                PlayArt(striker, "attack");
+            }
             if (hitStop <= 0f) strikeTime += dt;
 
             if (!struck && strikeTime >= BattleRules.TurnStrikeImpact)
@@ -733,7 +747,7 @@ namespace Tacetno433.Screens
                 ShowEvents();
             }
 
-            if (struck && strikeTime >= BattleRules.TurnStrikeTime) FinishMove();
+            if (struck && strikeTime >= BattleRules.TurnStrikeTime && !WaitForStage(dt)) FinishMove();
         }
 
         //Finish Move : after an ATTACK. The run ends at once when the fight is lost (see Finish Swipe).
@@ -1526,6 +1540,10 @@ namespace Tacetno433.Screens
                     for (int i = 0; i < battle.Enemies.Count; i++) battle.Enemies[i].Hp = 1;
                 battle.PlayBar();
                 NextStep();
+                fore = striker;                                                         // STAGE FIRST : the picture starts in front
+                swap = 0f;
+                strikeWaiting = false;
+                PlayArt(striker, "attack");
                 strikeTime = BattleRules.TurnStrikeImpact * 0.9f;
             }
             else if (name == "battleskill")

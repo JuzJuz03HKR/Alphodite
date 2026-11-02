@@ -362,8 +362,10 @@ namespace Tacetno433.Screens
 
             //SWAP : the musician pointed at walks in. A change in the middle of a swap just changes who comes in.
             Fighter pointed = Pointed();
+            Figure leaving = FigureOf(fore);
+            bool hold = view != View.Plan && view != View.Target && leaving != null && leaving.Busy;   // STAGE FIRST : a blow or a hurt ends first
             if (fore == null) fore = pointed;
-            else if (pointed != null && pointed != fore && swap <= 0f)
+            else if (pointed != null && pointed != fore && swap <= 0f && !hold)
             {
                 foreNext = pointed;
                 swap = 0.0001f;
@@ -734,7 +736,7 @@ namespace Tacetno433.Screens
             if (swipeFor == SwipeFor.Skill)
             {
                 Figure f = FigureOf(battle.Current);
-                if (f != null && !rolling) f.Ready(n.Way, dueIn, last);
+                if (f != null && !rolling) f.Ready(n.Way, dueIn, last, n.Kind == NoteKind.Swipe || n.Kind == NoteKind.Spark);   // PRE CUT for one stroke notes
                 return;
             }
             if (swipeFor != SwipeFor.Parry || battle.Current == null || !battle.Current.IsEnemy) return;
@@ -742,8 +744,8 @@ namespace Tacetno433.Screens
             if (guard != null) guard.Brace(dueIn);
             Figure enemy = FigureOf(battle.Current);
             if (enemy == null || struckNote == next) return;
-            if (dueIn > 0f) enemy.Ready(n.Way, dueIn, last);
-            else EnemyBlow(n);
+            if (dueIn > 0f) enemy.Ready(n.Way, dueIn, last, true);                    // its blow starts before the beat (PRE CUT)
+            else EnemyBlow(n);                                                         //   and lands on it
         }
 
         //Enemy Blow : TACET's blow for the note being answered, once
@@ -800,6 +802,31 @@ namespace Tacetno433.Screens
                 if (e.Kind == TurnEventKind.Damage && e.Who != null && e.Who.IsEnemy) return e.Who;
             }
             return null;
+        }
+
+        //Wait For Stage : STAGE FIRST (the user 13.104 : let a blow, or taking a hit, finish before the next musician comes in).
+        //True while the one in front or an enemy is still in a blow, a guard or a hurt, at most AttackWaitMost seconds.
+        private bool WaitForStage(float dt)
+        {
+            if (!StageBusy() || stageWait >= BattleRules.AttackWaitMost)
+            {
+                stageWait = 0f;
+                return false;
+            }
+            stageWait += dt;
+            return true;
+        }
+
+        private bool StageBusy()
+        {
+            Figure f = FigureOf(fore);
+            if (f != null && f.Busy) return true;
+            for (int i = 0; i < battle.Enemies.Count; i++)
+            {
+                f = FigureOf(battle.Enemies[i]);
+                if (f != null && f.Busy) return true;
+            }
+            return false;
         }
 
         //Freeze Figures : while the hit stop holds the world, a cut just begun still reaches its hit (Figure.Freeze)

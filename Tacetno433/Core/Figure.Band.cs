@@ -416,6 +416,7 @@ namespace Tacetno433.Core
             k.Chest += new Vector2(dx, dy);
             k.Hip += new Vector2(dx * 0.6f, dy * 0.6f);
             k.Light = light;
+            k.Arc = 1f;                                                      // ARCS : a swing goes round the shoulder (a thrust sets 0)
             return k;
         }
 
@@ -476,11 +477,13 @@ namespace Tacetno433.Core
                     k = wound ? Body(rest, -0.45f, -6f, 0f, 0f) : Body(rest, 0.8f, 10f, 2f, 1f);
                     if (wound) { Weapon(ref k, 86f, 104f, -2.75f, 1); k.HandB = new Vector2(140f, 136f); }
                     else { Weapon(ref k, 200f, 116f, 0.2f, 1); k.HandB = new Vector2(60f, 112f); k.FootB = rest.FootB + new Vector2(10f, 0f); }
+                    k.Arc = 0.3f;
                     break;
                 case Flick.Left:                                                      // back : reached out, then drawn back down past her
                     k = wound ? Body(rest, 0.25f, 4f, 0f, 0f) : Body(rest, -0.55f, -6f, 2f, 1f);
                     if (wound) { Weapon(ref k, 184f, 92f, -0.6f, -1); k.HandB = new Vector2(66f, 120f); }
                     else { Weapon(ref k, 94f, 150f, 2.4f, 1); k.HandB = new Vector2(150f, 110f); }
+                    k.Arc = 0.6f;
                     break;
                 default:                                                              // DOWN-BOW : high behind the head, then hard down in front
                     k = wound ? Body(rest, -0.7f, -6f, -2f, 0f) : Body(rest, 0.9f, 8f, 6f, 1f);
@@ -494,6 +497,7 @@ namespace Tacetno433.Core
                     }
                     break;
             }
+            if (Cues.Button == 1 && !blowLast) k = Scale(rest, k, BattleRules.AttackCaprice);   // CAPRICE : quick cuts from the wrist
             return k;
         }
 
@@ -543,6 +547,7 @@ namespace Tacetno433.Core
                             k = Body(rest, -0.15f, -4f, 0f, 0f);                     // drawn back, the front foot lifting to step
                             Weapon(ref k, 124f, 110f, -0.14f, 0);
                             k.FootB = rest.FootB + new Vector2(4f, -5f);
+                            k.Arc = 0f;                                              //   a thrust goes straight
                             return k;
                         }
                         float step = BattleRules.AttackStep * 1.3f;                  // the LUNGE : a long low step and a straight thrust
@@ -554,6 +559,7 @@ namespace Tacetno433.Core
                         k.FootB = new Vector2(legend.FootB.X + step * 2.3f, SketchFloor);   // the front foot far forward
                         k.FootA = new Vector2(legend.FootA.X - 5f, SketchFloor);
                         k.HandB = LeanRound(legend.HandB + new Vector2(step * 0.8f, low), pivot, k.Lean * 0.6f);   // the hand stays behind her back
+                        k.Arc = 0f;                                                  //   the arm goes out first, the foot lands after (FEET)
                         return k;
                     }
             }
@@ -647,6 +653,7 @@ namespace Tacetno433.Core
                 k = wound ? Body(rest, -0.5f, -6f, -4f, 0f) : Body(rest, -0.3f, -4f, -6f, 1f);
                 if (wound) { Weapon(ref k, 140f, 124f, -0.25f, 0); k.FootA = new Vector2(100f, 256f); }
                 else { Weapon(ref k, 200f, 118f, -0.08f, 0); k.FootA = new Vector2(214f, 236f); }
+                k.Arc = 0f;
                 return k;
             }
             switch (blowWay)
@@ -678,6 +685,7 @@ namespace Tacetno433.Core
                     break;
             }
             k.FootA = wound ? new Vector2(legend.FootA.X - 2f, SketchFloor) : k.FootA;   // the spike stays set in the floor
+            if (blowWay != Flick.Left) k.Arc = 0.25f;                          // a push, nearly straight (the back sweep goes round)
             return k;
         }
 
@@ -1013,6 +1021,7 @@ namespace Tacetno433.Core
             float turn = arm.LengthSquared() > 1f ? MathHelper.WrapAngle((float)(Math.Atan2(arm.Y, arm.X) - Math.Atan2(armRest.Y, armRest.X))) : 0f;
             Vector2 needle = Way(turn);
             Shapes.Kite(grip - needle * (27f * k), grip, 8f * k, 0.38f, white);
+            DrawSmear(smearGrip, smearAngle, grip, weapon.At, 96f, 4.6f);
             DrawCannone(grip, weapon.At);
         }
 
@@ -1066,7 +1075,9 @@ namespace Tacetno433.Core
             return Hd(p.X, p.Y);
         }
 
-        //IL CANNONE : the violin as a sword. Its two bouts are the guard, the bow its long blade, a string glowing down it.
+        //IL CANNONE : the violin as a sword. The bow is its long blade with a string glowing down it, the violin's waist (its
+        //two C bouts, thin crescents with sharp ends, as on her body) is the guard across it, the violin's scroll curls at the
+        //end of the grip. (13.104 : the guard was two round bouts and read as something rude, nothing round is left there.)
         //LEGEND FORM (DIABOLUS IN MUSICA) : small flames run along the blade.
         private void DrawCannone(Vector2 grip, float angle)
         {
@@ -1074,11 +1085,18 @@ namespace Tacetno433.Core
             Vector2 side = new Vector2(-d.Y, d.X);
             float rot = (float)Math.Atan2(d.Y, d.X);
             Color line1 = WeaponLine();
-            Shapes.Taper(grip + d * (2f * k), grip + d * (88f * k), 5.2f * k, 4f * k, white);
+            Shapes.Taper(grip + d * (4f * k), grip + d * (88f * k), 5.2f * k, 4f * k, white);
             Shapes.Kite(grip + d * (87f * k), grip + d * (98f * k), 4f * k, 0.02f, white);
-            Shapes.Line(grip + d * (6f * k), grip + d * (86f * k), 1.4f * k, line1);
-            Shapes.Ellipse(grip - side * (5f * k) - d * (1f * k), 4.2f * k, 5.2f * k, rot, white, white);   // the guard : two bouts
-            Shapes.Ellipse(grip + side * (5.5f * k) - d * (1f * k), 5f * k, 6f * k, rot, white, white);
+            Shapes.Line(grip + d * (8f * k), grip + d * (86f * k), 1.4f * k, line1);
+            Shapes.Line(grip - d * (8f * k), grip + d * (4f * k), 2.2f * k, white);                    // the grip
+            for (int s = -1; s <= 1; s += 2)                                                            // the guard : the two C bouts
+            {
+                Vector2 o = side * s;
+                Sickle(grip + o * (1.5f * k) + d * (3f * k), grip + o * (8f * k) + d * (1f * k), grip + o * (10.5f * k) + d * (8f * k), 2.6f * k, white);
+            }
+            Vector2 scroll = grip - d * (10f * k);                                                     // the scroll : a curl
+            Shapes.Arc(scroll, 3.6f * k, rot + 0.4f, rot + 4.2f, 1.7f * k, 0.9f * k, white);
+            Shapes.Arc(scroll + side * (0.8f * k), 1.6f * k, rot + 4.2f, rot + 7.4f, 0.9f * k, 0.4f * k, white);
             if (Legendary(Cues.Stars0) && !silhouette)
             {
                 for (int f = 0; f < 5; f++)
@@ -1176,6 +1194,7 @@ namespace Tacetno433.Core
 
             //Front hand : a ring, the cup and the rapier
             Vector2 grip = body[HandA].At;
+            DrawSmear(smearGrip, smearAngle, grip, weapon.At, 90f, 4f);
             DrawRapier(grip, weapon.At);
             Shapes.Ring(grip, 3.8f * k, 1.7f * k, white);
         }
@@ -1278,6 +1297,7 @@ namespace Tacetno433.Core
             DrawWindingKey(Legendary(Cues.Stars1));
 
             //Back fist and its stick
+            DrawSmear(smearGrip2, smearAngle2, body[HandB].At, weapon2.At, 40f, 3.4f);
             DrawStick(body[HandB].At, weapon2.At, 36f, 7f, grey, false);
             Shapes.Circle(body[HandB].At, 9f * k, grey);
 
@@ -1324,6 +1344,7 @@ namespace Tacetno433.Core
             EllipseLine(Hd(112, 78), 18f * k, 11.5f * k, TA(0f), 0f, MathHelper.TwoPi, 1.7f * k, edge);
 
             //Front fist and its stick
+            DrawSmear(smearGrip, smearAngle, body[HandA].At, weapon.At, 50f, 3.6f);
             DrawStick(body[HandA].At, weapon.At, 45f, 7.5f, white, true);
             Shapes.Circle(body[HandA].At, 9.5f * k, white);
         }
@@ -1457,6 +1478,7 @@ namespace Tacetno433.Core
 
             //Front hand and the lance (the bow)
             Vector2 grip = body[HandA].At;
+            DrawSmear(smearGrip, smearAngle, grip, weapon.At, 80f, 4f);
             DrawLance(grip, weapon.At);
             Shapes.Box(grip, 10f * k, 10f * k, TA(0.14f), white);
         }
@@ -1690,6 +1712,23 @@ namespace Tacetno433.Core
         //======================================================================================
         //Shapes the designs share
         //======================================================================================
+
+        //SMEAR (13.104 : smoother) : a weapon that turned fast this frame leaves two faint copies of its blade between where it
+        //was last frame and where it is now, the animator's smear frames (the blade's own grey, not a light : the VFX trails
+        //of the elements are a later step)
+        private void DrawSmear(Vector2 grip0, float angle0, Vector2 grip1, float angle1, float length, float width)
+        {
+            if (silhouette || BattleRules.AttackSmear <= 0f) return;
+            float turn = MathHelper.WrapAngle(angle1 - angle0);
+            if (Math.Abs(turn) < BattleRules.AttackSmearTurn && Vector2.DistanceSquared(grip0, grip1) < 144f * k * k) return;
+            for (int g = 1; g <= 2; g++)
+            {
+                float t = g / 3f;
+                Vector2 grip = Vector2.Lerp(grip0, grip1, t);
+                Vector2 d = Way(angle0 + turn * t);
+                Shapes.Taper(grip + d * (4f * k), grip + d * (length * k), width * k, width * 0.35f * k, C(BodyTop, drawAlpha * BattleRules.AttackSmear * (0.5f + 0.5f * t)));
+            }
+        }
 
         //Weapon Line : the line of the legend's colour down a weapon, brighter with each star of the ATTACK (WEAPON TIERS)
         private Color WeaponLine()

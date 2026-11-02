@@ -355,6 +355,7 @@ namespace Tacetno433.Core
                 weapon2.Follow(weapon2Want, BattleRules.FigureSpring * 1.1f, BattleRules.FigureBounce, dt);
             }
             for (int b = 0; b < bits.Length; b++) bits[b].Follow(bitWant[b], BattleRules.FigureSpring * 0.45f, BattleRules.FigureBounce * 0.8f, dt);
+            KeepSmear();
 
             //AIR : gravity, the baton's wind, and a slow breeze so nothing ever hangs dead still. The wind also pushes the loose
             //parts a little (they float on springs, so they lean with the swing and come back)
@@ -448,14 +449,6 @@ namespace Tacetno433.Core
             return t * t * (3f - 2f * t);
         }
 
-        //Cut Ease : a blow starts at once and slows into the hit (the swipe is answered on the same frame)
-        private static float CutEase(float t)
-        {
-            t = MathHelper.Clamp(t, 0f, 1f);
-            float u = 1f - t;
-            return 1f - u * u * u;
-        }
-
         //======================================================================================
         //ONE NOTE ONE BLOW (round 6 part 5, 2 Nov, docs/BETA1_DIRECTION.md 32.21, numbers in BattleRules Attack Feel)
         //======================================================================================
@@ -493,6 +486,7 @@ namespace Tacetno433.Core
             public float Throw;                // a thrown weapon on its way : 0 in the hand, 1 at the target (PUNTO)
             public float Aim;                  // a design's own part, 0 to 1 (PAGANINI aiming, THE MUTE's finger, the choir's fists, REQUIEM's quill)
             public float Show;                 // parts only shown in a blow (THE EMPTY CHOIR's floating hands)
+            public float Arc;                  // ARCS : how much the hands swing round their shoulders on the way to this pose (0 straight, a thrust)
         }
 
         private Phase phase = Phase.None;
@@ -515,6 +509,14 @@ namespace Tacetno433.Core
         private float windLength = 0.14f, cutLength = 0.06f, holdLength = 0.08f, backLength = 0.3f;   // set by each blow (never 0 : a phase's share divides by them)
         private bool guardClean;              // GUARD : a PERFECT block (else GOOD, pushed back)
         private float hitAge = -1f;           // seconds since the last blow landed (-1 : none yet), for what follows a blow (THE BLIND CANTOR's voice)
+        private bool preCut;                  // PRE CUT : this cut began before its note was judged (Blow finishes it)
+        private bool awaiting;                //   a legend's : it waits on the hit for the swipe to say how it went
+        private KeyPose cutFrom;              // where the last cut began (FOLLOW THROUGH goes on the way it went)
+        private KeyPose after;                // FOLLOW THROUGH (or REBOUND) : where a blow goes on to before it comes home
+
+        //SMEAR : where the weapons were last frame and this one (the band draws two faint copies between them when fast)
+        private Vector2 smearGrip, smearGrip2, lastGrip, lastGrip2;
+        private float smearAngle, smearAngle2, lastAngle, lastAngle2;
 
         //Weight : 0 light, 1 medium, 2 heavy (Attack Feel), by design
         private int Weight
@@ -525,6 +527,14 @@ namespace Tacetno433.Core
                 if (Of == Sort.Boss) return 2;
                 return design == Static ? 0 : (design == Damper ? 2 : 1);
             }
+        }
+
+        //Hold Of : how long a blow stays on its hit (the FINISHER longer). REBOUND : PFUNDT's sticks bounce off the skin at once.
+        private float HoldOf(bool last)
+        {
+            float hold = BattleRules.AttackHold[Weight] * (last ? BattleRules.AttackFinisherHold : 1f);
+            if (Of == Sort.Musician && legend.Weapon == Hammers) hold *= BattleRules.AttackDrumHold;
+            return hold;
         }
 
         //Wind Time : how long its wind up takes before a note (THE WEIGHT and THE STAFF longest, every boss long)
@@ -564,14 +574,31 @@ namespace Tacetno433.Core
 
         //Ready : a note of this fighter's phrase is coming, its way, how long until it is due (seconds of the screen's clock)
         //and whether it is the last. Called every frame while its ring closes. A legend takes its STANCE from the start of the
-        //phrase, TACET only winds up near the note.
-        public void Ready(Flick way, float dueIn, bool last)
+        //phrase, TACET only winds up near the note. cut : a note answered by one stroke, so its blow may start a moment before
+        //it is due (PRE CUT) and land on the beat (a HOLD charges and a ROLL taps instead).
+        public void Ready(Flick way, float dueIn, bool last, bool cut)
         {
             if (down) return;
             readySeen = true;
             readyDue = dueIn;
             if (phase == Phase.Cut || phase == Phase.Hold || phase == Phase.Guard || phase == Phase.Charge || windDelay >= 0f) return;   // the blow before ends first
-            if (phase == Phase.Ready && !readyGuard && blowWay == way) return;
+            if (phase == Phase.Ready && !readyGuard && blowWay == way)
+            {
+                //PRE CUT : a cut has in-betweens to show its way, so it starts this much before the note and lands on its beat
+                int w = Weight;
+                if (cut && dueIn <= BattleRules.AttackCut[w] * BattleRules.AttackPreCut)
+                {
+                    int side = nextSide;
+                    nextSide = side == 0 ? 1 : 0;
+                    StartCut(way, side, blowSize, blowLast);
+                    cutLength = BattleRules.AttackCut[w];
+                    holdLength = HoldOf(blowLast);
+                    backLength = BattleRules.AttackBack[w];
+                    preCut = true;
+                    awaiting = Of == Sort.Musician;                       // the band waits on the hit for the swipe, TACET always lands
+                }
+                return;
+            }
             if (Of != Sort.Musician && dueIn > WindTime) return;
             bool fresh = phase == Phase.None;
             Snap();
@@ -608,9 +635,26 @@ namespace Tacetno433.Core
         }
 
         //Blow : the note was judged, the blow lands now. A MISS cuts the air, the last note of a skill is the FINISHER.
+        //A PRE CUT on its way is finished at once instead (or, already on its hit, held from now).
         public void Blow(Flick way, bool landed, bool last)
         {
             if (down) return;
+            if (preCut && (phase == Phase.Cut || phase == Phase.Hold))
+            {
+                preCut = false;
+                awaiting = false;
+                bool finisher = last && landed;
+                if (finisher && !blowLast)                                    // the last note grows into the FINISHER
+                {
+                    blowSize = BattleRules.AttackFinisher;
+                    if (Of == Sort.Musician && legend.Weapon == Hammers) blowSide = 2;
+                }
+                blowLast = finisher;
+                holdLength = HoldOf(blowLast);
+                if (phase == Phase.Cut) cutLength = Math.Min(cutLength, phaseTime + BattleRules.AttackCatchUp);
+                else phaseTime = 0f;                                          // the hold counts from the hit
+                return;
+            }
             if (way == Flick.None) way = blowWay;
             int side = nextSide;
             nextSide = side == 0 ? 1 : 0;                                     // CHAINS : the next blow takes the other hand
@@ -619,7 +663,7 @@ namespace Tacetno433.Core
             StartCut(way, side, size, last && landed);
             int w = Weight;
             cutLength = BattleRules.AttackCut[w];
-            holdLength = BattleRules.AttackHold[w] * (blowLast ? BattleRules.AttackFinisherHold : 1f);
+            holdLength = HoldOf(blowLast);
             backLength = BattleRules.AttackBack[w];
         }
 
@@ -663,7 +707,11 @@ namespace Tacetno433.Core
         //hit and not before it (the screen calls this instead of Update while it is frozen)
         public void Freeze(float dt)
         {
-            if (phase != Phase.Cut || dt <= 0f) return;
+            if (phase != Phase.Cut || dt <= 0f)
+            {
+                KeepSmear();
+                return;
+            }
             dt = Math.Min(dt, 1f / 30f);
             phaseTime += dt;
             if (phaseTime >= cutLength) EndCut();
@@ -676,6 +724,34 @@ namespace Tacetno433.Core
             }
             weapon.At = weaponWant;
             weapon2.At = weapon2Want;
+            KeepSmear();
+        }
+
+        //Keep Smear : remember where the weapons were last frame (SMEAR, drawn by the band)
+        private void KeepSmear()
+        {
+            smearGrip = lastGrip;
+            smearAngle = lastAngle;
+            smearGrip2 = lastGrip2;
+            smearAngle2 = lastAngle2;
+            lastGrip = body[HandA].At;
+            lastAngle = weapon.At;
+            lastGrip2 = body[HandB].At;
+            lastAngle2 = weapon2.At;
+        }
+
+        //Busy : still in a blow, a guard, a hurt or walking in. The stage waits for it before the next musician comes in (the
+        //user 13.104 : let a blow, or taking a hit, finish first). The last part of the way home does not count.
+        public bool Busy
+        {
+            get
+            {
+                if (down) return false;
+                if (move == "hurt" || move == "enter" || windDelay >= 0f) return true;
+                if (phase == Phase.None || (phase == Phase.Ready && readyGuard)) return false;
+                if (phase == Phase.Back) return phaseTime < backLength * BattleRules.AttackBusyBack;
+                return true;
+            }
         }
 
         //--------------------------------------------------------------------------------------
@@ -690,7 +766,7 @@ namespace Tacetno433.Core
             int w = Weight;
             cutLength = BattleRules.AttackCut[w];
             windLength = Math.Min(BattleRules.AttackWind[w], BattleRules.TurnStrikeImpact - cutLength);
-            holdLength = BattleRules.AttackHold[w];
+            holdLength = HoldOf(false);
             backLength = BattleRules.AttackBack[w];
             blowWay = swing == Flick.None ? Flick.Down : swing;
             blowSide = 0;
@@ -715,6 +791,7 @@ namespace Tacetno433.Core
         private void StartCut(Flick way, int side, float size, bool last)
         {
             Snap();
+            cutFrom = from;
             phase = Phase.Cut;
             phaseTime = 0f;
             blowWay = way;
@@ -722,6 +799,8 @@ namespace Tacetno433.Core
             blowSize = size;
             blowLast = last;
             windDelay = -1f;
+            preCut = false;
+            awaiting = false;
         }
 
         private void EndCut()
@@ -731,12 +810,19 @@ namespace Tacetno433.Core
             hitAge = 0f;
         }
 
+        //Start Back : home again. After a blow's hit it first goes on a little the way it went (FOLLOW THROUGH), a drum stick
+        //bounces back up instead (REBOUND), then it settles home.
         private void StartBack()
         {
+            bool afterHit = phase == Phase.Hold;
             Snap();
             phase = Phase.Back;
             phaseTime = 0f;
             if (backLength < 0.05f) backLength = BattleRules.AttackBack[Weight];
+            after = from;
+            if (!afterHit) return;
+            if (Of == Sort.Musician && legend.Weapon == Hammers) after = Blend(from, cutFrom, BattleRules.AttackRebound);   // REBOUND
+            else after = FollowKey(cutFrom, from, Of == Sort.Musician ? BattleRules.AttackFollow : BattleRules.AttackFollow * 0.5f);
         }
 
         //Snap : a phase starts from the pose shown now. Parts that were on their springs start from where the springs have
@@ -799,12 +885,19 @@ namespace Tacetno433.Core
                     if (phaseTime >= cutLength) EndCut();
                     break;
                 case Phase.Hold:
+                    if (awaiting && readySeen) break;                         // PRE CUT : on its hit until the swipe says how it went
+                    if (awaiting)                                              //   (the notes stopped coming : nothing will)
+                    {
+                        awaiting = false;
+                        preCut = false;
+                        phaseTime = 0f;
+                    }
                     if (phaseTime < holdLength) break;
                     if (secondBeat)                                            // TWO BEATS : the other hand comes down
                     {
                         secondBeat = false;
                         StartCut(blowWay, 1, 1f, false);
-                        holdLength = BattleRules.AttackHold[Weight];
+                        holdLength = HoldOf(false);
                         backLength = BattleRules.AttackBack[Weight] * 0.75f;
                     }
                     else StartBack();
@@ -841,25 +934,31 @@ namespace Tacetno433.Core
                             //A phrase's first wind up starts from rest (a STANCE kept), the next from the blow before as it
                             //drifts home, so a chain of blows flows from one into the next
                             float near = 1f - MathHelper.Clamp(readyDue / WindTime, 0f, 1f);
-                            float amount = Steps(Ease(near));
+                            float amount = Steps(WindEase(near));
                             KeyPose start = rest;
                             if (stance) amount = Math.Max(BattleRules.AttackStance, amount);    // STANCE
-                            else start = Blend(from, rest, Ease(phaseTime / BattleRules.AttackBack[Weight]));
-                            target = Blend(start, KeyFor(KeyOf.Wound, rest), amount);
+                            else start = Join(from, rest, Steps(phaseTime / BattleRules.AttackBack[Weight]));
+                            target = Join(start, KeyFor(KeyOf.Wound, rest), amount);
                         }
                         float settle = phaseTime / Math.Min(BattleRules.AttackSettle, readyStart);
                         return Blend(from, target, Ease(settle));
                     }
                 case Phase.Wind:
-                    return Blend(from, KeyFor(KeyOf.Wound, rest), Steps(Ease(phaseTime / windLength)));
+                    return Join(from, KeyFor(KeyOf.Wound, rest), Steps(WindEase(phaseTime / windLength)));
                 case Phase.Cut:
-                    return Blend(from, KeyFor(KeyOf.Struck, rest), CutEase(phaseTime / cutLength));
+                    return Join(from, KeyFor(KeyOf.Struck, rest), phaseTime / cutLength);
                 case Phase.Hold:
                     return KeyFor(KeyOf.Struck, rest);
                 case Phase.Back:
-                    return Blend(from, rest, Steps(Ease(phaseTime / backLength)));
+                    {
+                        //FOLLOW THROUGH (or REBOUND) first, quick then slowing, then home, slow at both ends
+                        float p = phaseTime / backLength;
+                        float f = BattleRules.AttackFollowTime;
+                        if (p < f) return Join(from, after, Steps(1f - (1f - p / f) * (1f - p / f)));
+                        return Join(after, rest, Steps((p - f) / (1f - f)));
+                    }
                 case Phase.Guard:
-                    return Blend(from, KeyFor(KeyOf.Guard, rest), Ease(phaseTime / BattleRules.AttackGuardTime));
+                    return Join(from, KeyFor(KeyOf.Guard, rest), phaseTime / BattleRules.AttackGuardTime);
                 case Phase.Charge:
                     {
                         KeyPose charged = Blend(from, KeyFor(KeyOf.Charge, rest), Ease(phaseTime / BattleRules.AttackChargeTime));
@@ -894,6 +993,92 @@ namespace Tacetno433.Core
             return step / 3f;
         }
 
+        //Wind Ease : a wind up starts quickly and slows into its top, where it hangs a moment before the blow (ANTICIPATION)
+        private static float WindEase(float t)
+        {
+            t = MathHelper.Clamp(t, 0f, 1f);
+            return 1f - (1f - t) * (1f - t);
+        }
+
+        //JOIN : the way from one key to the next the way a body moves, not every part in a straight line at once (the user
+        //13.104 : like real blows; these are the animator's ARCS and OVERLAPPING ACTION) :
+        //   OVERLAP  the body starts the move and gets there first (AttackLead), the hand follows
+        //   DRAG     the weapon starts late and whips through at the end (AttackDrag), so the blade is fastest on the hit
+        //   FEET     land after the hand (AttackFootLate) : a fencer's arm goes before her foot, a step comes under the blow
+        //   ARCS     a hand swings round its shoulder (its angle and its distance are joined, not its place), as much as the
+        //            key's Arc says : a slash or a throw goes round, a thrust goes straight
+        //p is the share of the move done, 0 to 1. Every part is at a at 0 and at b at 1, so nothing jumps between phases.
+        private KeyPose Join(KeyPose a, KeyPose b, float p)
+        {
+            p = MathHelper.Clamp(p, 0f, 1f);
+            float body = Ease(Math.Min(1f, p * BattleRules.AttackLead));
+            float hand = Ease(p);
+            float tip = Ease((p - BattleRules.AttackDrag) / (1f - BattleRules.AttackDrag));
+            float feet = Ease((p - BattleRules.AttackFootLate) / (1f - BattleRules.AttackFootLate));
+            KeyPose k = Blend(a, b, hand);
+            k.Head = Vector2.Lerp(a.Head, b.Head, body);
+            k.Chest = Vector2.Lerp(a.Chest, b.Chest, body);
+            k.Hip = Vector2.Lerp(a.Hip, b.Hip, body);
+            k.Lean = MathHelper.Lerp(a.Lean, b.Lean, body);
+            k.FootA = Vector2.Lerp(a.FootA, b.FootA, feet);
+            k.FootB = Vector2.Lerp(a.FootB, b.FootB, feet);
+            k.Angle = a.Angle + Toward(a.Angle, b.Angle, b.Turn) * tip;
+            k.Angle2 = a.Angle2 + Toward(a.Angle2, b.Angle2, b.Turn2) * tip;
+            if (b.Arc > 0f)
+            {
+                k.HandA = Vector2.Lerp(k.HandA, ArcHand(a.HandA, b.HandA, ShoulderOf(a, false), ShoulderOf(b, false), body, hand), b.Arc);
+                if (Of == Sort.Musician)
+                    k.HandB = Vector2.Lerp(k.HandB, ArcHand(a.HandB, b.HandB, ShoulderOf(a, true), ShoulderOf(b, true), body, hand), b.Arc);
+            }
+            return k;
+        }
+
+        //Arc Hand : a hand on its way from a to b round its shoulder (sa to sb, the shoulder moves with the body). Its angle
+        //round the shoulder turns the short way (an arm lifts in front to go behind the head, while the blade it holds swings
+        //down and back on its own way, Toward), its distance from the shoulder changes evenly.
+        //ADVANCED PART : POLAR JOINING. A straight line between two places of a hand cuts through the body when the hand
+        //goes from behind the head to the front. Joined as an angle and a length round the shoulder instead, the hand draws
+        //the circle an arm really draws.
+        private static Vector2 ArcHand(Vector2 a, Vector2 b, Vector2 sa, Vector2 sb, float body, float t)
+        {
+            Vector2 da = a - sa, db = b - sb;
+            float la = da.Length(), lb = db.Length();
+            if (la < 0.001f || lb < 0.001f) return Vector2.Lerp(a, b, t);
+            float aa = (float)Math.Atan2(da.Y, da.X), ab = (float)Math.Atan2(db.Y, db.X);
+            float angle = aa + MathHelper.WrapAngle(ab - aa) * t;
+            float length = MathHelper.Lerp(la, lb, t);
+            return Vector2.Lerp(sa, sb, body) + new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)) * length;
+        }
+
+        //Shoulder Of : where a key's shoulder is (off : the other one), in the key's own units. The band's turns with its
+        //lean, TACET's hands go round its middle.
+        private Vector2 ShoulderOf(KeyPose k, bool off)
+        {
+            if (Of != Sort.Musician) return k.Chest;
+            Vector2 s = legend.Shoulder;
+            if (off) s.X = legend.Chest.X * 2f - s.X;
+            return LeanRound(s + (k.Chest - legend.Chest), new Vector2(SketchMiddle, SketchFloor), k.Lean * (off ? 0.6f : 1f));
+        }
+
+        //Follow Key : FOLLOW THROUGH, a blow going on a little past its hit the way it went (from start through hit), its
+        //feet staying where they landed
+        private KeyPose FollowKey(KeyPose start, KeyPose hit, float amount)
+        {
+            KeyPose k = Blend(start, hit, 1f + amount);
+            k.Angle = hit.Angle + Toward(start.Angle, hit.Angle, hit.Turn) * amount;
+            k.Angle2 = hit.Angle2 + Toward(start.Angle2, hit.Angle2, hit.Turn2) * amount;
+            if (hit.Arc > 0f)
+                k.HandA = Vector2.Lerp(k.HandA, ArcHand(start.HandA, hit.HandA, ShoulderOf(start, false), ShoulderOf(hit, false), 1f, 1f + amount), hit.Arc);
+            k.FootA = hit.FootA;
+            k.FootB = hit.FootB;
+            k.Light = hit.Light;
+            k.Squash = hit.Squash;
+            k.Throw = hit.Throw;
+            k.Aim = hit.Aim;
+            k.Show = hit.Show;
+            return k;
+        }
+
         //Key For : the design's key of this kind for the blow being played, made bigger or smaller by its size (FINISHER,
         //MISS, a ROLL's shake)
         private KeyPose KeyFor(KeyOf kind, KeyPose rest)
@@ -924,6 +1109,7 @@ namespace Tacetno433.Core
             k.Throw = MathHelper.Lerp(a.Throw, b.Throw, t);
             k.Aim = MathHelper.Lerp(a.Aim, b.Aim, t);
             k.Show = MathHelper.Lerp(a.Show, b.Show, t);
+            k.Arc = b.Arc;
             return k;
         }
 

@@ -290,6 +290,7 @@ namespace Tacetno433.Core
             bool wound = kind == KeyOf.Wound || kind == KeyOf.Charge;
             float r = BattleRules.AttackRush;
             k.Light = wound ? 0f : 1f;
+            k.Arc = 1f;                                                                  // ARCS : a hand (a boss's hand, the choir's) swings round its middle
             switch (design)
             {
                 case Static:                                                             // THE NOISE : closer in jumps, then the cloud bursts

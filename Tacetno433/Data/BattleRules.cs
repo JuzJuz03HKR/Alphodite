@@ -469,7 +469,7 @@
         //(the wind up), CUT (fast, it ends on the hit), HOLD (kept a moment), BACK (home again).
         //Seconds, in three weights : light (PAGANINI QUANTZ THE NOISE), medium (DUPORT PUNTO THE MUTE THE EMPTY CHOIR), heavy (PFUNDT).
         public static float[] AttackWind = { 0.10f, 0.14f, 0.24f };      // the wind up (ZZZ : a heavy blow winds up long, a light one is quick)
-        public static float[] AttackCut = { 0.05f, 0.06f, 0.07f };       //   the blow itself, ending on the hit
+        public static float[] AttackCut = { 0.08f, 0.09f, 0.11f };       //   the blow itself, ending on the hit (13.104 : long enough to show its way, it starts before the note, PRE CUT)
         public static float[] AttackHold = { 0.06f, 0.08f, 0.12f };      //   the pose kept on the hit (with a PERFECT's hit stop, more)
         public static float[] AttackBack = { 0.25f, 0.30f, 0.35f };      //   home again, eased
         public static float AttackWindBoss = 0.3f;                       // every boss winds up this long before a note
@@ -494,6 +494,21 @@
         public static float AttackGuardPush = 0.45f;                     // GOOD : the guard holds but is pushed back, a knock this share of FigureKnock
         public static float AttackSecondBeat = 0.09f;                    // TWO BEATS : PFUNDT's other hand comes down this long after the first
         public static float AttackShadowLate = 0.22f;                    // THE NAMELESS MASTER : the shadow behind it strikes again this late
+        //HOW A BODY MOVES (the user 13.104 : smoother, the way real blows go, the 12 principles of animation)
+        public static float AttackPreCut = 0.65f;                        // PRE CUT : a note's blow starts this share of its cut before the note is due, so it lands on the beat
+        public static float AttackCatchUp = 0.03f;                       //   a swipe that comes during that cut finishes it in at most this long
+        public static float AttackLead = 1.35f;                          // OVERLAP : the body gets this much ahead of the hand (it starts the move)
+        public static float AttackDrag = 0.15f;                          // DRAG : the weapon starts this share of a move late, then whips through to the hit
+        public static float AttackFootLate = 0.3f;                       //   the feet land this share of a move after the hand (a fencer's arm goes before her foot)
+        public static float AttackFollow = 0.14f;                        // FOLLOW THROUGH : after the hit a blade goes on this share of its cut before it comes home
+        public static float AttackRebound = 0.35f;                       // REBOUND : a drum stick bounces back up this share of the way it came (PFUNDT)
+        public static float AttackDrumHold = 0.4f;                       //   and stays on the skin only this share of a heavy blow's hold
+        public static float AttackCaprice = 0.8f;                        // CAPRICE : PAGANINI's quick cuts are this big (the wrist, not the whole arm), its last one full
+        public static float AttackFollowTime = 0.3f;                     //   the follow through (or the rebound) takes this share of the way home
+        public static float AttackSmear = 0.3f;                          // SMEAR : two faint copies of a fast weapon between this frame and the last (0 = none)
+        public static float AttackSmearTurn = 0.14f;                     //   only when it turned more than this in a frame (radians)
+        public static float AttackBusyBack = 0.6f;                       // the stage waits for a blow to be this far home (or a hurt to end) before the next musician comes in
+        public static float AttackWaitMost = 1.2f;                       //   but never longer than this (seconds)
 
         //Hit Feel (Beta1 round 4) : what a blow looks like where it lands (Core/HitFx.cs). Nothing flies : the musician
         //strikes and the light happens on the enemy. Strings SLASH, winds SHOT, percussion SMASH, the SIGNATURE CROSS.
