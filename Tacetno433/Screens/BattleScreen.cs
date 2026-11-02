@@ -886,7 +886,11 @@ namespace Tacetno433.Screens
             if (cutIn > 0f)
             {
                 cutIn -= dt;
-                if (cutIn <= 0f) gesture.Clear();
+                if (cutIn <= 0f)
+                {
+                    gesture.Clear();
+                    BossTear();                                                     // HEAVY VFX : THE STRIKE tears the stage (BattleScreen.Boss.cs)
+                }
                 return;
             }
 
@@ -1239,6 +1243,7 @@ namespace Tacetno433.Screens
                         StageHit(new Vector2(box.Center.X, box.Center.Y), true, 1.2f);
                         shake = 0.9f;
                         hitStop = Math.Max(hitStop, BattleRules.TurnKillStop);
+                        if (e.Who == boss) BossSilenced(DrawBox(e.Who));                        // HEAVY VFX : the boss's last blow breaks the world
                     }
                     else effects.SpawnPop(x, box.Y - 90, "DOWN", Palette.PaperDim, 1f);
                 }
@@ -1542,9 +1547,9 @@ namespace Tacetno433.Screens
                         if (show == "battlebossparry") { cutIn = 0f; clock = RingTime * 0.8f; }
                     }
                 }
-                if (show == "battlebossturn")
+                if (show == "battlebossturn" || show == "battlebosskill")                    // battlebosskill : its last blow (HEAVY VFX)
                 {
-                    boss.Hp = boss.MaxHp / 2 + 1;
+                    boss.Hp = show == "battlebosskill" ? 1 : boss.MaxHp / 2 + 1;
                     battle.PlanAttack(battle.Party[0], boss);
                     battle.PlayBar();
                     if (battle.Step == TurnStep.PlayerTurn) battle.Attack();

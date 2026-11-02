@@ -21,6 +21,13 @@ namespace Tacetno433.Screens
     //   PRE         before each plain attack : the boss rises and leans in, the dark flares, the camera turns to it
     //   THE TURN    its life falls to half : the frame turns negative, the half mark breaks, its second line, PHASE 2
     //   BOSS BAR    its life, long, at the top right, with the half mark, instead of the small plate over it
+    //HEAVY VFX (block D item 5, 2 Nov, docs/BETA1_DIRECTION.md 41) : TACET breaks the world its own way, white and grey (Core/
+    //HitFx.Finale.cs THE SILENCE BREAKS), the rainbow and the gold stay the band's :
+    //   ENTRANCE    as it rises a white pillar of light stands up out of the hole, rings open on the floor, shards fly, the dark cracks
+    //   THE TELL    while its BIG ATTACK is coming it gathers the silence : black shards drawn into its heart (the CHARGE's look)
+    //   THE STRIKE  a long white cut tears the stage open from it to the band before the notes come
+    //   THE TURN    the world cracks with its shell : three cracks through it, the pieces jolt and drop, white glass flies
+    //   SILENCED    its last blow breaks the world into pieces that fall, white glass everywhere, the stage white, a long stop
     //What each is made from (inspiration only, never copied, 21.2) : the band answering every hit of an attack it can read
     //(Expedition 33), a sign before a special attack (Sekiro, Zenless Zone Zero : here the ring and the name, not a colour,
     //the world is black and white), a stop between the two halves (Honkai: Star Rail), the boss known early (Slay the Spire).
@@ -44,6 +51,8 @@ namespace Tacetno433.Screens
         private float bossBarIn;               // BOSS BAR : 0 hidden .. 1 in place
         private float bossHalfBreak;           // THE TURN : the half mark breaking, 1 = just now
         private Portrait bossFace;             // LEGEND ART (block C) : the boss drawn by the code in THE TELL and THE STRIKE
+        private bool bossRose;                 // ENTRANCE : its pillar of light has stood up (HEAVY VFX)
+        private bool bossTearWaiting;          // THE STRIKE : its white cut tears the stage as the cut in ends (HEAVY VFX)
 
         //Boss Plate : where its marks go, on the screen under the BOSS BAR. Its next move is the row just above it (IntentRow :
         //22 over its top), its STUN, BURN and CUT IN icons the row under it, from the bar's left.
@@ -78,6 +87,7 @@ namespace Tacetno433.Screens
             bossMovement = run != null ? MovementList.Names[Math.Max(0, Math.Min(MovementList.Names.Length - 1, run.Movement))] : "";
             bossFace = new Portrait(Figure.Sort.Boss, ArtBank.Key(e.Name), Color.White, Color.White, Portrait.Frame.Whole, 77);
             bossBarIn = 0f;
+            bossRose = false;
             StartBoss(BossMoment.Entrance, BattleRules.BossEntranceTime, false);
             actionCam.HoldFor(BossAt(), BattleRules.CamZoomMost * 0.5f, BattleRules.BossEntranceTime * 0.75f);
         }
@@ -115,6 +125,13 @@ namespace Tacetno433.Screens
             if (bossMoment == BossMoment.None) return false;
 
             bossClock += dt;
+            if (bossMoment == BossMoment.Entrance && !bossRose && bossClock >= BattleRules.BossRiseAt)   // HEAVY VFX : it rises
+            {
+                bossRose = true;
+                hits.BossRise(BoxOf(boss));
+                dark.CrackAll(4, 0.7f);
+                actionCam.Shake(BattleRules.CamShake * 2f * Flashing);
+            }
             if (bossMoment == BossMoment.Entrance && bossClock > BattleRules.BossEntranceSkip && Input.MouseClicked())
                 bossClock = Math.Max(bossClock, bossLength - 0.5f);                    // a click : on to its end
             if (bossClock < bossLength) return true;
@@ -145,6 +162,7 @@ namespace Tacetno433.Screens
             Figure monument = ArtOf(boss).Figure;                                        // THE MONUMENT : the white shell breaks (MATH ART)
             if (monument != null) monument.BreakShell(true);
             hits.ImpactFrame(BossAt());                                                  // the frame turns negative
+            hits.SilenceBreak(BossAt(), 3, BattleRules.BossTurnFall, BattleRules.BossTurnGlass);   // HEAVY VFX : the world cracks with the shell
             actionCam.HoldFor(BossAt(), BattleRules.CamZoomMost * 0.7f, BattleRules.BossTurnTime * 0.6f);
             actionCam.Shake(BattleRules.CamShake * 3f);
             dark.CrackAll(6, 1f);
@@ -165,7 +183,34 @@ namespace Tacetno433.Screens
             {
                 hits.ImpactFrame(BossAt());
                 actionCam.Shake(BattleRules.CamShake * 2f);
+                bossTearWaiting = true;                                                  // HEAVY VFX : the stage tears as the cut in leaves (BossTear)
             }
+        }
+
+        //Boss Tear : HEAVY VFX, THE STRIKE's cut in is over and the notes are coming : a long white cut tears the stage open from
+        //the boss to the one it aims at (the cut in would have hidden it)
+        private void BossTear()
+        {
+            if (!bossTearWaiting || boss == null) return;
+            bossTearWaiting = false;
+            Fighter aimed = battle.HitTarget(boss);
+            Vector2 to = aimed != null ? CenterOf(BoxOf(aimed)) : CenterOf(foreBox);
+            Vector2 from = BossAt();
+            hits.SilenceCut((from + to) * 0.5f, (float)Math.Atan2(to.Y - from.Y, to.X - from.X));
+            actionCam.Shake(BattleRules.CamShake * 1.5f);
+        }
+
+        //Boss Silenced : HEAVY VFX, the boss's last blow. The world breaks into pieces that fall, white glass everywhere, the
+        //stage lit white, the camera punched in and a long stop (on top of the SILENCED every enemy gets)
+        private void BossSilenced(Rectangle box)
+        {
+            Vector2 middle = new Vector2(box.Center.X, box.Center.Y);
+            hits.SilenceBreak(middle, 4, BattleRules.BossKillFall, BattleRules.BossKillGlass);
+            hits.ImpactFrame(middle);
+            AddStageLight(middle, 1300f, BattleRules.HitBoltFlash * 1.5f, 0.8f, Color.White);
+            actionCam.HoldFor(middle, BattleRules.CamZoomMost * 0.8f, 1.2f);
+            actionCam.Shake(BattleRules.CamShake * 3f);
+            hitStop = Math.Max(hitStop, BattleRules.BossKillStop);
         }
 
         //Boss Blocked : every note of its BIG ATTACK blocked, its words over it (the rules threw it off the beat)

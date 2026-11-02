@@ -350,6 +350,12 @@
         public static float BossStrikeTime = 1.4f;        // THE STRIKE : the cut in before the BIG ATTACK's notes
         public static float BossPreTime = 0.55f;          // PRE ANIMATION : before each plain attack of a boss, it rises and leans in
         public static float BossTurnTime = 2.4f;          // THE TURN : half life, the frame stops, its second line
+        public static float BossRiseAt = 0.95f;           // HEAVY VFX (block D item 5) : ENTRANCE, the pillar of light stands up this far in
+        public static float BossTurnFall = 0.03f;         //   THE TURN : how far the cracked world's pieces drop (screen heights)
+        public static int BossTurnGlass = 24;             //   and the white glass thrown off its cracks
+        public static float BossKillFall = 0.07f;         //   SILENCED : the last blow's pieces drop this far
+        public static int BossKillGlass = 44;             //   and its glass
+        public static float BossKillStop = 0.4f;          //   and the stop (seconds)
         public static float BossDarkRise = 0.25f;         // the stage's dark (TACET's share) grows this much at the top of a moment
         public static float BossRise = 140f;              // ENTRANCE : the boss rises this far out of the hole
         public static float TurnKillStop = 0.18f;         //           the freeze when an enemy falls silent

@@ -139,7 +139,7 @@ namespace Tacetno433.Core
                 spaceCuts[i].Mode = CutBroken;
                 spaceCuts[i].Age = 0f;
                 if (level >= 2) spaceCuts[i].Gap *= 1.3f;
-                ThrowGlass(spaceCuts[i].At, spaceCuts[i].Angle, pieces / cracks, spaceCuts[i].Prism < 0.5f);
+                ThrowGlass(spaceCuts[i].At, spaceCuts[i].Angle, pieces / cracks, spaceCuts[i].Prism < 0.5f ? BrotherGlass : -0.5f);
             }
 
             HitColors white = new HitColors(Palette.SpotPrism, Color.White, HitFlair.None);
@@ -156,8 +156,9 @@ namespace Tacetno433.Core
             }
         }
 
-        //Throw Glass : count pieces of glass off the part of a crack that is on the stage, each flung to one side and up
-        private void ThrowGlass(Vector2 at, float angle, int count, bool brother)
+        //Throw Glass : count pieces of glass off the part of a crack that is on the stage, each flung to one side and up.
+        //hue : BrotherGlass, WhiteGlass, or below 0 otherwise for a random colour of the rainbow each
+        private void ThrowGlass(Vector2 at, float angle, int count, float hue)
         {
             Vector2 way = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
             Vector2 across = new Vector2(-way.Y, way.X);
@@ -180,7 +181,7 @@ namespace Tacetno433.Core
                     FlipSpeed = 3f + 9f * (float)random.NextDouble(),
                     Age = -0.1f * (float)random.NextDouble(),
                     Life = 0.9f + 0.8f * (float)random.NextDouble(),
-                    Hue = brother ? -1f : (float)random.NextDouble(),
+                    Hue = hue == BrotherGlass || hue == WhiteGlass ? hue : (float)random.NextDouble(),
                     Seed = random.Next(1000),
                 };
             }
@@ -258,6 +259,84 @@ namespace Tacetno433.Core
             float k = 1f - (t - 0.62f) / (GreatLife - 0.62f);
             return k > 0f ? 0.8f * k * k : 0f;
         }
+
+        //======================================================================================
+        //THE SILENCE BREAKS (block D item 5, the bosses) : TACET's own way of breaking the world, white and grey, no rainbow
+        //(the world is TACET's colours, the rainbow is the band's). Used by Screens/BattleScreen.Boss.cs.
+        //======================================================================================
+
+        //Silence Break : count cracks through at, spread round it, opening at once (THE BREAK's look), the pieces dropping by
+        //fall (screen heights, 0 = they only slide apart), white glass thrown off them. THE TURN and a boss SILENCED.
+        public void SilenceBreak(Vector2 at, int count, float fall, int glassCount)
+        {
+            count = Math.Max(1, Math.Min(count, spaceCuts.Length));
+            for (int i = 0; i < count; i++)
+            {
+                float angle = -1.25f + i * (2.5f / count) + ((float)random.NextDouble() - 0.5f) * 0.25f;
+                Vector2 off = new Vector2(((float)random.NextDouble() - 0.5f) * 60f, ((float)random.NextDouble() - 0.5f) * 40f);
+                int slot = CutSlot();
+                spaceCuts[slot] = new SpaceCut
+                {
+                    On = true,
+                    Mode = CutBroken,
+                    At = at + off,
+                    Angle = angle,
+                    Age = 0f,
+                    Reach = CrackReach,
+                    Slide = BattleRules.FinaleBreakSlide * 0.8f,
+                    Gap = BattleRules.FinaleBreakGap,
+                    Prism = 0f,
+                    Tint = Color.White,
+                };
+                ThrowGlass(at + off, angle, glassCount / count, WhiteGlass);                // TACET's glass is white
+            }
+            breakAge = 0f;
+            breakFall = fall;
+        }
+
+        //Silence Cut : one long white cut torn across the stage through at (a boss's BIG ATTACK coming), held open as THE
+        //BREAK is, without falling
+        public void SilenceCut(Vector2 at, float angle)
+        {
+            int slot = CutSlot();
+            spaceCuts[slot] = new SpaceCut
+            {
+                On = true,
+                Mode = CutBroken,
+                At = at,
+                Angle = angle,
+                Age = 0f,
+                Reach = CrackReach,
+                Slide = BattleRules.FinaleBreakSlide,
+                Gap = BattleRules.FinaleBreakGap * 1.4f,
+                Prism = 0f,
+                Tint = Color.White,
+            };
+            breakAge = 0f;
+            breakFall = 0f;
+            Vector2 way = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
+            AddCut(at - way * 800f, at + way * 800f, 4f, 0f, HitColors.Plain);
+            Throw(at, way, 14, 700f, Streak, HitColors.Plain);
+            Throw(at, -way, 14, 700f, Streak, HitColors.Plain);
+        }
+
+        //Boss Rise : ENTRANCE, the monument rising out of the hole : a white pillar of light up from where it stands, rings on
+        //the floor opening one after another, shards thrown up, lines rushing in
+        public void BossRise(Rectangle box)
+        {
+            Vector2 feet = new Vector2(box.Center.X, box.Bottom - 6f);
+            Vector2 middle = new Vector2(box.Center.X, box.Center.Y);
+            float size = BattleRules.HitSize;
+            AddCut(feet + new Vector2(0f, 20f), new Vector2(feet.X, -60f), 30f, 0f, HitColors.Plain);
+            AddCut(feet + new Vector2(0f, 20f), new Vector2(feet.X, -60f), 10f, -0.04f, HitColors.Plain);
+            for (int k = 0; k < 3; k++) AddPulse(feet, size * (2.4f + 1.4f * k), 0.24f, 5f - k, 0.6f, k * 0.12f, Color.White);
+            Throw(feet, new Vector2(0f, -1f), 30, 620f, Shard, HitColors.Plain);
+            Throw(middle, new Vector2(0f, -1f), 16, 420f, Spark, HitColors.Plain);
+            Focus(middle);
+        }
+
+        private const float BrotherGlass = -1f;                    // Glass.Hue for her brother's purple glass
+        private const float WhiteGlass = -2f;                      //   and for TACET's white glass
 
         //Finale Hit : a FINALE's blow on one enemy (called by Hit). PRISM : a white star, spikes in every colour of the
         //rainbow round it, splinters of glass in those colours, a ring, and the IMPACT FRAME.
@@ -446,11 +525,17 @@ namespace Tacetno433.Core
                 Vector2 local = new Vector2((float)Math.Cos(angle) * r * squeeze, (float)Math.Sin(angle) * r);
                 glassCorners[k] = g.At + new Vector2(local.X * cs - local.Y * sn, local.X * sn + local.Y * cs);
             }
-            bool brother = g.Hue < 0f;
-            Color face = brother ? Palette.SpotBrother : Color.Lerp(Color.White, Palette.Prism(g.Hue), 0.45f);
+            bool white = g.Hue <= WhiteGlass + 0.5f;                                          // TACET's glass : white and grey, no rainbow
+            bool brother = !white && g.Hue < 0f;
+            Color face = white ? Palette.PaperDim : brother ? Palette.SpotBrother : Color.Lerp(Color.White, Palette.Prism(g.Hue), 0.45f);
             Gfx.Quad(sb, glassCorners, face * (0.12f * a));
             for (int k = 0; k < 4; k++)
                 Gfx.Line(sb, glassCorners[k], glassCorners[(k + 1) % 4], (brother ? Palette.SpotBrother : Color.White) * (0.6f * a), 1.5f);
+            if (white)
+            {
+                if (facing > 0.9f) Gfx.DrawGlow(sb, g.At.X, g.At.Y, g.Size * 1.6f, Color.White * ((facing - 0.9f) * 7f * a));
+                return;
+            }
 
             //The rainbow along one edge : light breaking into its colours, three thin lines side by side
             Vector2 e0 = glassCorners[1];

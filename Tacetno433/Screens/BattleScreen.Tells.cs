@@ -206,7 +206,8 @@ namespace Tacetno433.Screens
                 }
                 t.Chip = Math.Max(0f, t.Chip - dt * 4f);
                 t.Turn = Math.Max(0f, t.Turn - dt / BattleRules.TellTurnTime);
-                float charged = !f.Down && f.Charge >= 2 ? 1f : 0f;
+                bool gathers = f == boss && f.IntentBig && view != View.Swipe;                 // HEAVY VFX : a boss gathers the silence before its BIG ATTACK
+                float charged = !f.Down && (f.Charge >= 2 || gathers) ? 1f : 0f;
                 t.Charge = MathHelper.Clamp(t.Charge + Math.Sign(charged - t.Charge) * dt * 3f, 0f, 1f);
                 float stunned = !f.Down && f.Staggered ? 1f : 0f;
                 t.Stun = MathHelper.Clamp(t.Stun + Math.Sign(stunned - t.Stun) * dt * 4f, 0f, 1f);

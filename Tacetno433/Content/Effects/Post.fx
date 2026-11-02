@@ -177,14 +177,17 @@ float2 CutUV(float2 uv, out float dark, out float3 edge)
         float apart = step(0.5, abs(there - piece));
         dark = max(dark, apart);
         float near = 1.0;
+        float prism = 0.0;
         [unroll] for (int j = 0; j < 4; j++)
         {
             float2 d2 = (moved - Cuts[j].xy) * square;
             float whole = step(1.5, CutTints[j].a) * step(0.0001, CutShapes[j].z);
             near = min(near, lerp(1.0, abs(dot(d2, float2(-Cuts[j].w, Cuts[j].z))), whole));
+            prism = max(prism, CutShapes[j].w * whole);
         }
         float glint = saturate(1.0 - near / 0.004) * (1.0 - apart) * saturate(CutFall * 60.0);
-        edge += Hue(moved.x * 1.7 + moved.y * 0.8 + Time * 0.4) * (glint * 1.3) + float3(1.0, 1.0, 1.0) * (glint * glint * 0.7);
+        float3 glass = lerp(float3(0.85, 0.85, 0.9), Hue(moved.x * 1.7 + moved.y * 0.8 + Time * 0.4), prism);   // TACET's glass is white
+        edge += glass * (glint * 1.3) + float3(1.0, 1.0, 1.0) * (glint * glint * 0.7);
     }
     return moved;
 }
