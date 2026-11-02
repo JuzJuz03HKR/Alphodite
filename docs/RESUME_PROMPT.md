@@ -64,6 +64,11 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 
 ## สถานะล่าสุด (2 พ.ย.)
 
+**2 พ.ย. แชท /system (FINALE3) : ผู้ใช้ให้ทำต่ออีกราว 5% ✅ REQUIEM จากสเก็ตช์ หยุดและบันทึกแล้ว** (คำต่อคำ `USER_BRIEFS.md` 13.97 ผล `BETA1_DIRECTION.md` 32.18)
+✅ `128aa55` : REQUIEM (`DrawRequiem`) สีของบอสจากสเก็ตช์รวมที่ `SetBossInks` / build 0/0 turncheck 204/204 savecheck 44/44 / ภาพ `battleboss1` `battlebossturn1` ดูแล้ว / งานอยู่บน GitHub / ตาราง "แชทที่กำลังทำงาน" ว่าง
+⚠️ ผู้ใช้ยังไม่ได้ Rebuild ลอง 32.16 32.17 32.18 / แก้ข้อมูลเดิม : หน้าแคปบอสรายตัวมีแล้ว (`battleboss1` ถึง `6` `battlebossturn1` ถึง `6` ใช้ `@200`)
+**งานถัดไป** : ผู้ใช้ Rebuild ลอง (ถ้าเจออะไรแก้ก่อน) / แล้วบอสอีก 4 ตัว THE NAMELESS MASTER THE STAFF THE DEVIL'S STRING THE BLIND CANTOR ทำแบบ `DrawRequiem` (ขั้นตอนท้าย 32.18) / แล้วส่วน 4 เวที ส่วน 5 ท่าโจมตี / ทำทีละส่วน จบแล้วหยุดรอ (13.92) / PLAYTEST FINALE ยัง 1 PERFECT (`PlaytestSignatureNeed` ห้ามแก้จนผู้ใช้บอก)
+
 **2 พ.ย. แชท /system (FINALE3) : ผู้ใช้ให้ทำต่ออีกราว 10% ✅ เริ่มส่วน 3 บอส (THE MONUMENT บอสทุกตัว + THE DEAF CROWN) หยุดและบันทึกแล้ว** (คำต่อคำ `USER_BRIEFS.md` 13.96 ผลและสิ่งที่ให้ลอง `BETA1_DIRECTION.md` 32.17)
 ✅ `0717e56` : บอสทุกตัวเป็นอนุสาวรีย์ขาวจนครึ่งเลือด THE TURN เปลือกแตกเป็นชิ้นขาว วาบ แล้วเหลือร่างดำแกนสว่างขึ้น (`ShellOn` `BreakShell` `TurnPending` ใน `Core/Figure.Tacet.cs` เรียกจาก `BossTurnFirst` ใน `Screens/BattleScreen.Boss.cs`) / THE DEAF CROWN วาดใหม่จากสเก็ตช์ (`DrawCrown`) / build 0/0 turncheck 204/204 savecheck 44/44 / ภาพ `battleboss` `battlebossturn` ดูแล้ว / งานอยู่บน GitHub / ตาราง "แชทที่กำลังทำงาน" ว่าง
 ⚠️ ผู้ใช้ยังไม่ได้ Rebuild ลองทั้งส่วน 2 (32.16) และส่วน 3 ที่เริ่มแล้ว (32.17) / บอสอีก 5 ตัวยังรูปทรงรอบ 5 (แต่ขาวแล้วแตกได้)

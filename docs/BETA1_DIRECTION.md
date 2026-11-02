@@ -2492,3 +2492,13 @@ commit `0717e56` / build 0/0 turncheck 204/204 savecheck 44/44 / ภาพ `batt
 
 ถัดไป (ส่วน 3 ที่เหลือ) : บอสอีก 5 ตัวจากสเก็ตช์ (`docs/art_refs/concept_v6.html` บรรทัดราว 588 ถึง 725 ทีละการ์ด) ทำแบบเดียวกับ `DrawCrown` : เพิ่ม `case` ใน `PoseTacet` ด้วย `LookRest` / ฟังก์ชันวาดของตัวเองที่ใช้ `S` `SF` `Shell` สองโทน (`lit` `dark` `ink` สลับตาม `ShellOn`) / `CorePoint` คืน `S(แกนของสเก็ตช์) - Shift` หลัง `SetLook()` / ลบ `Parts...` กับ `case` ใน `DrawTacetSigns` ของตัวนั้น / เรียกใน `DrawTacet` ก่อนทางเดิม (ดูที่ `design == Crown`) / แคป `battleboss` ได้แค่บอสตัวเดียว ต้องเพิ่มหน้าแคป `battleboss1` ถึง `6` ใน `Core/DebugShots.cs` หรือให้ผู้ใช้ดูผ่านหน้าเทส F2
 
+### 32.18 ส่วนที่ 3 ต่อ : REQUIEM จากสเก็ตช์ (2 พ.ย. แชท /system FINALE3 ผู้ใช้ "ยังเหลืออีก 10% ทำอีก 5%" `USER_BRIEFS.md` 13.97)
+commit `128aa55` / build 0/0 turncheck 204/204 savecheck 44/44 / ภาพ `battleboss1` (เฟส 1) `battlebossturn1` (เฟส 2) ดูแล้ว
+- **REQUIEM** (`DrawRequiem` `RequiemCrack`) : ร่างสูงเพรียวสองโทน หัวเล็ก รัศมีขาดเปิดด้านหน้ามีชิ้นที่ร่วง ปากกาขนนกเป็นดาบ (ตอนตีฟาดมาข้างหน้า) น้ำตาไหลลง (LACRIMOSA) เส้นบรรทัด 5 เส้นออกจากมืออีกข้างแล้วหยุดกลางทาง ปลายเส้นสั่นไม่นิ่ง **แกนอยู่ตรงที่เส้นหยุด** / เฟส 1 ร้าวที่ 75 50 / เฟส 2 ร่างดำ รอยร้าวขาว
+- สีของบอสที่วาดจากสเก็ตช์อยู่ที่เดียว `SetBossInks` (`bossLit` `bossDark` `bossInk` สลับตาม `ShellOn`) บอสตัวถัดไปใช้ต่อได้เลย
+- **แก้ข้อมูลใน 32.17** : หน้าแคปบอสรายตัวมีอยู่แล้ว ใส่เลขท้ายชื่อหน้า `battleboss1` ถึง `battleboss6` และ `battlebossturn1` ถึง `6` (1 REQUIEM 2 THE DEAF CROWN 3 THE NAMELESS MASTER 4 THE STAFF 5 THE DEVIL'S STRING 6 THE BLIND CANTOR) ใช้ `@200` ให้พ้นป้ายเปิดตัวบอส ไม่ต้องเพิ่มใน `Core/DebugShots.cs`
+
+สิ่งที่ให้ลอง : หน้าเทส (Title กด F2) เลือกบอส REQUIEM แล้ว START กับ HALF LIFE / บอสอยู่ฝั่งขวากลางจอ เส้นบรรทัดยื่นไปทางซ้ายหาวง แกนขาวอยู่ปลายเส้น
+
+ถัดไป : อีก 4 ตัว THE NAMELESS MASTER THE STAFF THE DEVIL'S STRING THE BLIND CANTOR จากสเก็ตช์ (`docs/art_refs/concept_v6.html` การ์ดที่ 3 ถึง 6 ของหัวข้อ "บอส 6 ตัว") ทำแบบ `DrawRequiem` : `case` ใน `PoseTacet` / ฟังก์ชันวาด + `SetBossInks` / `CorePoint` / ลบ `Parts...` กับ `case` ใน `DrawTacetSigns` / เพิ่มชื่อในเงื่อนไข `design == Crown || design == Requiem` ใน `DrawTacet`
+
