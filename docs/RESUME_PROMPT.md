@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| (ว่าง) | | |
+| 2 พ.ย. 22:30 (แชท /system FINALE11) | ก้อน D รอบยาวต่อ `BETA1_DIRECTION.md` 38.6 : D2 FINALE ของ FANNY กับ Bach (+ ขั้นที่โตหลังบอส) แล้ว D3 D5 D4 D6 D9 | `Screens/BattleScreen.Stage.cs` `BattleScreen.Show.cs` `BattleScreen.Boss.cs` `BattleScreen.cs` `Core/HitFx*.cs` `Core/PostChain.cs` `Content/Effects/Post.fx` `Data/BattleRules.cs` `Data/Settings.cs` `Screens/SettingsScreen.cs` (D6 ถ้าแตะกติกา `Battle/TurnBattle*.cs`) เอกสาร |
 
 ---
 
