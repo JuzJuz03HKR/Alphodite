@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 2 พ.ย. 22:30 (แชท /system FINALE11) | ก้อน D รอบยาวต่อ `BETA1_DIRECTION.md` 38.6 : D2 FINALE ของ FANNY กับ Bach (+ ขั้นที่โตหลังบอส) แล้ว D3 D5 D4 D6 D9 | `Screens/BattleScreen.Stage.cs` `BattleScreen.Show.cs` `BattleScreen.Boss.cs` `BattleScreen.cs` `Core/HitFx*.cs` `Core/PostChain.cs` `Content/Effects/Post.fx` `Data/BattleRules.cs` `Data/Settings.cs` `Screens/SettingsScreen.cs` (D6 ถ้าแตะกติกา `Battle/TurnBattle*.cs`) เอกสาร |
+| (ว่าง) | | |
 
 ---
 
@@ -64,11 +64,11 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 
 ## สถานะล่าสุด (2 พ.ย.)
 
-**2 พ.ย. แชท /system FINALE11 (กำลังทำ) : ✅ D2 FINALE ของ FANNY กับ Bach ✅ FINALE โตตามขั้น ✅ บรรยากาศของวาทยากร ✅ ไม้บาตองของวาทยากร ✅ D3 STAR MARKS ✅ D5 บอส VFX หนัก ✅ D4 GIFT AT WORK ✅ D6 COMBO LIVE RANK** (คำต่อคำ `USER_BRIEFS.md` 13.119 ถึง 13.123 รายละเอียดกับสิ่งที่ให้ลอง `BETA1_DIRECTION.md` 39 ถึง 43 / ผู้ใช้ 13.123 : บันทึกเรื่อยๆ ทุกก้อน)
-✅ งานอยู่บน GitHub / build 0/0 turncheck 205/205 savecheck 44/44 / ตาราง "แชทที่กำลังทำงาน" จองโดย FINALE11
+**2 พ.ย. แชท /system FINALE11 : ✅ ก้อน D ครบ** (D2 FINALE ของ FANNY กับ Bach + FINALE โตตามขั้น / บรรยากาศของวาทยากร / ไม้บาตองของวาทยากร / D3 STAR MARKS / D5 บอส VFX หนัก / D4 GIFT AT WORK / D6 COMBO LIVE RANK / D9 SCREEN SHAKE STAGE WEATHER) คำต่อคำ `USER_BRIEFS.md` 13.119 ถึง 13.123 รายละเอียดกับสิ่งที่ให้ลอง `BETA1_DIRECTION.md` 39 ถึง 44
+✅ งานทั้งหมดอยู่บน GitHub / build 0/0 turncheck 205/205 savecheck 44/44 / ตาราง "แชทที่กำลังทำงาน" ว่าง / ผู้ใช้ยังไม่ได้ Rebuild ลองของแชทนี้
+❓ ถามผู้ใช้ : COMBO คูณดาเมจไหม (เป็นกติกา เกมง่ายขึ้น) / SOLO 16.4 ข้อ 4 (ท่าโซโล่เป็นกติกาใหม่) / "ผ่าใหญ่เส้นเดียว" อ่านเป็นฟ้าผ่าเส้นเดียวของ Beethoven ถูกไหม (39.5)
 ⚠️ PLAYTEST FINALE คง 1 PERFECT (13.117 ห้ามแก้ ถามก่อนก้อน G) / THE METRONOME ยังไม่มีอาร์ต
-**ถัดไป (แชทนี้ทำต่อ)** : D9 ตั้งค่ากราฟิก แล้วก้อน E F G H (`HANDOFF.md` 00.3) / ❓ ถามผู้ใช้ : COMBO คูณดาเมจไหม กับ SOLO (43)
-
+**งานถัดไป** : ก้อน E (E1 จุดเล่นเสียงในไฟต์ตาม `ASSET_LIST.md` S3 ทำได้ก่อนไฟล์มา) → F → G → H (`HANDOFF.md` 00.3) / วิธีแคป FINALE ใน cloud : probe `TACET_PROBE=finale TACET_KIT=fanny|bach|beethoven TACET_LEVEL=0..2` (`.claude/skills/build/film/`)
 
 **2 พ.ย. แชท /system FINALE10 ปิดแชท (โทเคนผู้ใช้ใกล้หมด 13.118) : ✅ ไอคอนเกม ✅ รูปเรฟ VFX ✅ สกิล 5 ท่าหน้าตาตามชื่อ + SPACE CUT ✅ TELLS เกราะ ชาร์จ ดาวมึน การ์ดของวง** (คำต่อคำ `USER_BRIEFS.md` 13.117 13.118 รายละเอียด `BETA1_DIRECTION.md` 38)
 ✅ งานทั้งหมดอยู่บน GitHub / build 0/0 turncheck 205/205 (กติกาไม่เปลี่ยน savecheck ไม่ได้รันซ้ำ) / ตาราง "แชทที่กำลังทำงาน" ว่าง / ผู้ใช้ยังไม่ได้ Rebuild ลอง (สิ่งที่ให้ลอง 38.4)
