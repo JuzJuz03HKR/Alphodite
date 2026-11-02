@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| (ว่าง) | | |
+| 2 พ.ย. แชท /system FINALE10 | ก้อน D รอบยาว `BETA1_DIRECTION.md` 37.4 (รูปเรฟ VFX ต่อสายสกิล SPACE CUT ส่วนที่เหลือของ 37.3 แล้ว D2 D3 D5 D4 D6 D9) + E3 ไอคอนเกมจากโลโก้ | `Core/HitFx*.cs` `Core/Figure*.cs` `Core/PostChain.cs` `Content/Effects/Post.fx` `Screens/BattleScreen*.cs` `Data/BattleRules.cs` `Core/ConductorAura.cs` `Icon.ico` `Icon.bmp` `docs/art_refs/vfx/` `docs/research/` |
 
 ---
 
