@@ -27,9 +27,11 @@ namespace Tacetno433.Battle
                                 DissonanceTick, CrescendoLost, GuardUp,    // WORDS (31 Oct) : the moments the rule words work, so the screen
                                                              // pops the word right then : BURN as it hurts (Amount = the damage), VOLUME as a
                                                              // MISS takes it (Amount = what is left), GUARD as THUNDER CALL lands
-                                BossTurn, BigParried, OwnFoot }   // BOSSES (Beta1 31 Oct) : THE TURN, a boss's life fell to half /
+                                BossTurn, BigParried, OwnFoot,    // BOSSES (Beta1 31 Oct) : THE TURN, a boss's life fell to half /
                                                              // every note of its BIG ATTACK blocked PERFECT (Amount = its BossMove) /
                                                              // TE DEUM, the staff struck its own foot (Amount = the life it will lose)
+                                Solo, Forte }                // BLOCK G (2 Nov) : SOLO earned by Who (Amount 0) or played (Amount 1) /
+                                                             // FORTE began after a FINALE (Amount = its turns)
 
     //DecreeKind : DECREE (THE DEAF CROWN, step 14), what the band may not do this bar
     public enum DecreeKind { None, NoSkills, NoAttacks }
@@ -152,6 +154,10 @@ namespace Tacetno433.Battle
         //Band only, REHEARSAL (Beta1 30 Oct)
         public float LessonScale;      // THE LESSON : how much harder their next skill plays (its first star makes it more), 0 : TurnLessonScale
 
+        //Band only, BLOCK G (2 Nov, docs/BETA1_DIRECTION.md 46) : SOLO
+        public int SoloRun;            // SOLO : their own PERFECTs in a row (the notes of their skills and the notes they parry)
+        public bool Solo;              //        TurnSoloNeed of them : their next move is a SOLO, spent when it is played
+
         public bool Down { get { return Hp <= 0; } }
     }
 
@@ -205,6 +211,7 @@ namespace Tacetno433.Battle
         public bool FelixVoice;        // TWO VOICES (FANNY MENDELSSOHN AND ???) : false while FANNY's voice leads, true for FELIX's
         public int CapriceTurns;       // CAPRICE (THE HEARTLESS) : turns left in which no swipe is a MISS
         public int Feather;            // FEATHER (THE SHADOWLESS) : free ATTACKs at the end of the band's part of this bar
+        public int Forte;              // FORTE (BLOCK G) : turns left, this one counted, in which the band hits harder after a FINALE (0 for none)
 
         //Motifs (step 6) : what the band carries, see GiveMotifs and Data/Motif.cs (TurnText)
         private bool[] motif = new bool[64];
@@ -331,6 +338,7 @@ namespace Tacetno433.Battle
             ClearGiftShown();
             if (Round > 0) GreenRoom();
             Round++;
+            if (Forte > 0) Forte--;                                                      // FORTE : one of its turns is over
             Order.Clear();
             OrderMoves.Clear();
             OrderIndex = 0;
@@ -763,11 +771,46 @@ namespace Tacetno433.Battle
             enemy.MissedWays.Clear();
             count += back;
 
+            GrowNotes(enemy, count, hit);                                                // THE SILENCE GROWS (BLOCK G)
             Unfinished(enemy);
 
             //FALSE NOTES (STATIC) : one note keeps its arrow hidden behind a ? until its ring is half closed
             //(Beta1 29 Oct : it used to show a wrong size, and the sizes are gone)
             if (trait && e.Trait == EnemyTrait.FalseNotes) enemy.IntentLate[random.Next(count)] = true;
+        }
+
+        //THE SILENCE GROWS (BLOCK G, 2 Nov, docs/BETA1_DIRECTION.md 46) : deeper down TACET's attacks ask for more kinds of swipes.
+        //RUSH notes come on the heels of a plain note (every second note at most, BattleRules.TurnEnemyRush by floor), an ELITE's
+        //or a BOSS's long attack ends in a heavy HOLD (held back to the end, TurnEnemyHoldPower x one of its notes) and on floor 3
+        //opens with a ROLL. Floor 1 plays as it always did. The BIG ATTACKs and the CHARGE's blow keep their own notes.
+        private void GrowNotes(Fighter enemy, int count, int hit)
+        {
+            if (count <= 0 || enemy.Enemy == null) return;
+            bool small = enemy.Enemy.Kind == EnemyKind.Normal;
+            int f = Math.Max(0, Math.Min(BattleRules.TurnEnemyRush.Length - 1, Floor - 1));
+            NoteKind[] kinds = new NoteKind[count];
+            bool grown = false;
+            if (!small && Floor >= BattleRules.TurnEnemyRollFloor && count >= BattleRules.TurnEnemyRollFrom)
+            {
+                kinds[0] = NoteKind.Roll;
+                grown = true;
+            }
+            if (!small && Floor >= BattleRules.TurnEnemyHoldFloor && count >= BattleRules.TurnEnemyHoldFrom)
+            {
+                kinds[count - 1] = NoteKind.Hold;
+                enemy.IntentNotes[count - 1] = Math.Max(1, (int)Math.Round(hit * BattleRules.TurnEnemyHoldPower));
+                grown = true;
+            }
+            int rushes = small ? BattleRules.TurnEnemyRushSmall[f] : BattleRules.TurnEnemyRush[f];
+            for (int i = 1; i < count && rushes > 0; i++)
+            {
+                if (kinds[i] != NoteKind.Swipe || kinds[i - 1] != NoteKind.Swipe) continue;   // a RUSH follows a plain swipe
+                kinds[i] = NoteKind.Rush;
+                rushes--;
+                grown = true;
+                i++;                                                                       //   and the note after it is not one again
+            }
+            if (grown) enemy.IntentKinds = kinds;
         }
 
         //No Notes : the turn planned plays nothing (LULLABY, GUARD, the wind up of a CHARGE, a broken CHARGE)
@@ -1239,6 +1282,11 @@ namespace Tacetno433.Battle
             MusicianTrait trait = attacker.Musician.Trait;
             float scale = BattleRules.TurnAttackScale;
             scale *= MoveScale(attacker, CurrentMove) * CueScale(attacker);                         // DOWNBEAT, ENTRANCE, UNISON, THE HUNTING CALL
+            if (attacker.Solo)                                                                       // SOLO (BLOCK G) : the ATTACK is the solo
+            {
+                scale *= BattleRules.TurnSoloAttack;
+                PlaySolo(attacker);
+            }
             int damage = HitDamage(attacker, target, scale);
             Strike(target, damage);
             AddBreath(AttackBreath + (trait == MusicianTrait.BreathControl ? BattleRules.TurnBreathControl : 0));   // BREATH CONTROL (QUANTZ)
@@ -1355,10 +1403,129 @@ namespace Tacetno433.Battle
         public bool UseSkill(Skill s, Fighter target, NoteResult[] results)
         {
             if (!BeginSkill(s, target)) return false;
-            for (int n = 0; n < s.Notes.Length; n++)
+            int count = playingList.Length;                                                 // RUSH TAIL and SOLO notes too (BLOCK G)
+            for (int n = 0; n < count; n++)
                 SkillNote(n, (results != null && n < results.Length) ? results[n] : new NoteResult(Grade.Hesitate, 1f));
             EndSkill();
             return true;
+        }
+
+        //======================================================================================
+        //BLOCK G (2 Nov, docs/BETA1_DIRECTION.md 46) : the notes a skill asks for as the run goes on
+        //======================================================================================
+
+        //RUSH TAIL : deeper in the run every ATTACK skill of the band ends in quick RUSH notes (BattleRules.TurnRushTail by floor),
+        //the user : "the further you play, the more notes to swipe, swipes in a rush" (USER_BRIEFS 13.124)
+        public int TailOf(Fighter user, Skill s)
+        {
+            if (user == null || user.IsEnemy || s == null || s.Kind != SkillKind.Attack) return 0;
+            return BattleRules.TurnRushTail[Math.Max(0, Math.Min(BattleRules.TurnRushTail.Length - 1, Floor - 1))];
+        }
+
+        //Solo Notes : a musician with a SOLO waiting plays TurnSoloRush more RUSH notes on their next skill
+        public int SoloNotesOf(Fighter user)
+        {
+            return user != null && !user.IsEnemy && user.Solo ? BattleRules.TurnSoloRush : 0;
+        }
+
+        //Note Count : how many notes the skill asks for when this musician plays it now
+        public int NoteCount(Fighter user, Skill s)
+        {
+            return s.Notes.Length + TailOf(user, s) + SoloNotesOf(user);
+        }
+
+        //Note At : note n of the skill as this musician plays it now. The skill's own notes first, then the RUSH notes, which go
+        //back and forth from the way of the skill's last arrow (left, right, left : the hand flicking to and fro)
+        public SkillNote NoteAt(Fighter user, Skill s, int n)
+        {
+            if (n < s.Notes.Length) return s.Notes[n];
+            Flick last = Flick.Right;                                                      // a skill with no arrow (a ROLL) : the right hand
+            for (int i = s.Notes.Length - 1; i >= 0; i--)
+                if (s.Notes[i].Way != Flick.None) { last = s.Notes[i].Way; break; }
+            int k = n - s.Notes.Length;
+            return new SkillNote(NoteKind.Rush, k % 2 == 0 ? Opposite(last) : last);
+        }
+
+        //Note Weight : how much of the skill note n does, a RUSH note TurnRushScale of a note, the skill's own notes all of it
+        public static float NoteWeight(SkillNote note)
+        {
+            return note.Kind == NoteKind.Rush ? BattleRules.TurnRushScale : 1f;
+        }
+
+        //Notes For : the whole phrase, made once when the skill begins (not in Draw)
+        public SkillNote[] NotesFor(Fighter user, Skill s)
+        {
+            SkillNote[] all = new SkillNote[NoteCount(user, s)];
+            for (int n = 0; n < all.Length; n++) all[n] = NoteAt(user, s, n);
+            return all;
+        }
+
+        //Opposite : the other way along the same line
+        public static Flick Opposite(Flick way)
+        {
+            if (way == Flick.Left) return Flick.Right;
+            if (way == Flick.Right) return Flick.Left;
+            if (way == Flick.Up) return Flick.Down;
+            if (way == Flick.Down) return Flick.Up;
+            return way;
+        }
+
+        //Playing Notes : the phrase of the skill being played now (its own notes, RUSH TAIL, SOLO), for the screen
+        public SkillNote[] PlayingNotes { get { return playingList; } }
+
+        //Play Solo : the SOLO is played now, the spotlight goes out and the count starts again
+        private void PlaySolo(Fighter f)
+        {
+            f.Solo = false;
+            f.SoloRun = 0;
+            Events.Add(new TurnEvent(TurnEventKind.Solo, f, 1));
+        }
+
+        //Count Solo : SOLO, one musician's own PERFECTs in a row. Anything less starts the count again (a SOLO already
+        //earned stays). The notes of a SOLO being played do not count toward the next one, so a SOLO is never a loop.
+        private void CountSolo(bool perfect, Fighter who)
+        {
+            if (who == null || who.IsEnemy) return;
+            if (!perfect)
+            {
+                who.SoloRun = 0;
+                return;
+            }
+            if (playingSolo && who == Current && Step == TurnStep.PlayerTurn) return;
+            who.SoloRun++;
+            if (!who.Solo && who.SoloRun >= BattleRules.TurnSoloNeed)
+            {
+                who.Solo = true;
+                Events.Add(new TurnEvent(TurnEventKind.Solo, who, 0));
+            }
+        }
+
+        //Combo Scale : COMBO, the band hits a little harder from TurnComboEvery PERFECTs in a row (only the best players get there)
+        public float ComboScale
+        {
+            get { return ComboScaleAt(perfectRun); }
+        }
+
+        public static float ComboScaleAt(int run)
+        {
+            int steps = Math.Min(BattleRules.TurnComboSteps, Math.Max(0, run) / Math.Max(1, BattleRules.TurnComboEvery));
+            return 1f + steps * BattleRules.TurnComboStep;
+        }
+
+        //Forte Scale : FORTE, the band after a FINALE
+        public float ForteScale
+        {
+            get { return Forte > 0 ? BattleRules.TurnForteScale : 1f; }
+        }
+
+        //Held Grade : a HOLD note parried (THE SILENCE GROWS). The share of its hold the button was kept down decides how much it
+        //blocks : TurnParryHoldPerfect for all of it, TurnParryHoldGood for half, less lets the whole blow through.
+        public Grade HeldGrade(Grade g, float held)
+        {
+            if (g != Grade.Perfect && g != Grade.Good) return g;
+            if (held >= BattleRules.TurnParryHoldPerfect) return g;
+            if (held >= BattleRules.TurnParryHoldGood) return Grade.Good;
+            return Grade.Miss;
         }
 
         //NOTE BY NOTE (Beta1, 29 Oct) : every swipe hits the moment it lands (the user : "like we gave the order and
@@ -1369,6 +1536,9 @@ namespace Tacetno433.Battle
         private float playingScale;                                 // DOWNBEAT, ENTRANCE, THE HUNTING CALL, THE LESSON, LANCE
         private bool playingLanded;                                 // a note has landed (FUGUE, GUARD, TAUNT, SHIELD, THE LESSON)
         private NoteResult[] playingNotes = new NoteResult[0];      // how each note went, for the FUGUE echo
+        private SkillNote[] playingList = new SkillNote[0];        // BLOCK G : the phrase played, the skill's notes then RUSH TAIL and SOLO
+        private int playingBase;                                    //           the skill's own notes in it (the last of them is its last note)
+        private bool playingSolo;                                   //           this skill is a SOLO
         private List<Fighter> bounced = new List<Fighter>();        // CHAKRAM : the enemies this throw has hit
         private List<Fighter> noteTargets = new List<Fighter>();    // CHAKRAM : the one enemy a note flies to (kept, so a note makes no new list)
         private List<Fighter> handStruck = new List<Fighter>();     // TURN OF THE HAND : the enemies PFUNDT's skill has hit
@@ -1390,7 +1560,15 @@ namespace Tacetno433.Battle
 
             playing = s;
             playingTargets = targets;
+            playingList = NotesFor(user, s);                                                       // BLOCK G : RUSH TAIL and SOLO notes after its own
+            playingBase = s.Notes.Length;
             playingScale = MoveScale(user, CurrentMove) * CueScale(user);                          // DOWNBEAT, ENTRANCE, THE HUNTING CALL
+            playingSolo = user.Solo;
+            if (playingSolo)                                                                       // SOLO : the spotlight's skill plays harder
+            {
+                playingScale *= BattleRules.TurnSoloScale;
+                PlaySolo(user);
+            }
             if (user.Lesson) playingScale *= user.LessonScale > 0f ? user.LessonScale : BattleRules.TurnLessonScale;   // THE LESSON (used up in EndSkill)
             if (s.Revenge > 0f && (user.Wounded || user.Musician.Has(StarRule.LanceAlways)))      // LANCE : the blow that just landed is paid back (THE LAST LANCE : always)
             {
@@ -1400,7 +1578,7 @@ namespace Tacetno433.Battle
             playingLanded = false;
             bounced.Clear();                                                                       // CHAKRAM : a new throw
             handStruck.Clear();
-            playingNotes = new NoteResult[s.Notes.Length];
+            playingNotes = new NoteResult[playingList.Length];
             for (int n = 0; n < playingNotes.Length; n++) playingNotes[n] = new NoteResult(Grade.Hesitate, 1f);
 
             int lifeCost = LifeCost(s);                                                            // BORROWED BREATH, THE DEVIL'S BARGAIN
@@ -1427,12 +1605,14 @@ namespace Tacetno433.Battle
         //Skill Note : note n of the skill being played, swiped this well. A note that lands does the skill once, now.
         public void SkillNote(int n, NoteResult r)
         {
-            if (playing == null || n < 0 || n >= playing.Notes.Length) return;
+            if (playing == null || n < 0 || n >= playingList.Length) return;
             Fighter user = Current;
-            bool last = n == playing.Notes.Length - 1;
+            bool last = n == playingBase - 1;                                               // the skill's own last note (BLOCK G : RUSH notes come after it)
+            SkillNote note = playingList[n];
+            float weight = NoteWeight(note);                                                // RUSH : a share of a note
             r.Grade = Forgive(r.Grade);                                                     // SPARE STRINGS
             playingNotes[n] = r;
-            CountNote(r.Grade == Grade.Perfect);
+            CountNote(r.Grade == Grade.Perfect, user);
             if (!r.Lands)
             {
                 LoseCrescendo(user);                                                        // CRESCENDO is lost on a MISS (HAND STOPPING : half)
@@ -1441,7 +1621,7 @@ namespace Tacetno433.Battle
                 {
                     float again;
                     List<Fighter> missed = NoteTargets(playing, n, out again);
-                    PlayNote(playing, playing.Notes[n], new NoteResult(Grade.Good, r.Hold), missed, user, BattleRules.TurnRubatoMiss * playingScale * again, false, last);
+                    PlayNote(playing, note, new NoteResult(Grade.Good, r.Hold), missed, user, BattleRules.TurnRubatoMiss * playingScale * again * weight, false, last);
                 }
                 return;
             }
@@ -1454,7 +1634,7 @@ namespace Tacetno433.Battle
                 lucky = BattleRules.TurnLuckyBowScale;
                 GiftWorks(MotifId.LuckyBow, user);
             }
-            PlayNote(playing, playing.Notes[n], r, reached, user, playingScale * repeat * lucky, true, last);
+            PlayNote(playing, note, r, reached, user, playingScale * repeat * lucky * weight, true, last);
         }
 
         //Note Targets : who note n of a skill reaches. A plain skill reaches all of its targets with every note.
@@ -1506,6 +1686,7 @@ namespace Tacetno433.Battle
             Skill s = playing;
             Fighter user = Current;
             playing = null;
+            playingSolo = false;                                                            // SOLO : over with its last note
 
             //FUGUE (THE METRONOME) : an echo waiting on this musician plays the notes that landed once more
             if (user.Echo > 0f && playingLanded && Echoes(s))
@@ -1514,12 +1695,12 @@ namespace Tacetno433.Battle
                 UseEcho(user);
                 Events.Add(new TurnEvent(TurnEventKind.Echo, user, 0));
                 bounced.Clear();                                                            // CHAKRAM : the echo is a second throw
-                for (int n = 0; n < s.Notes.Length; n++)
+                for (int n = 0; n < playingNotes.Length && n < playingList.Length; n++)       // BLOCK G : the RUSH notes echo too, at their share
                 {
                     if (!playingNotes[n].Lands) continue;
                     float repeat;
                     List<Fighter> reached = NoteTargets(s, n, out repeat);
-                    PlayNote(s, s.Notes[n], playingNotes[n], reached, user, echo * repeat, false, n == s.Notes.Length - 1);
+                    PlayNote(s, playingList[n], playingNotes[n], reached, user, echo * repeat * NoteWeight(playingList[n]), false, n == playingBase - 1);
                 }
             }
 
@@ -1853,6 +2034,7 @@ namespace Tacetno433.Battle
             if (!attacker.IsEnemy) damage *= TraitScale(attacker, target);                     // the musician's own trait
             if (!attacker.IsEnemy && target.IsEnemy && BondList.Against(attacker.Musician, target.Enemy) != null) damage *= BattleRules.TurnBondScale;   // BONDS : THE DEVIL
             if (!attacker.IsEnemy && Kit == TurnKit.Fanny && !FelixVoice) damage *= 1f + BattleRules.TurnFannyScale;   // TWO VOICES : FANNY hits
+            if (!attacker.IsEnemy) damage *= ComboScale * ForteScale;                          // COMBO, FORTE (BLOCK G, both 1 most of the time)
             if (target.Staggered) damage *= BattleRules.TurnOffBeatScale;                     // OFF-BEAT
             return Math.Max(1, (int)Math.Round(damage));
         }
@@ -1900,7 +2082,7 @@ namespace Tacetno433.Battle
             g = Forgive(g);                                                                  // SPARE STRINGS
 
             //PARRY : a PERFECT swipe blocks the note, gives breath back and shakes the enemy (OFF-BEAT)
-            CountNote(g == Grade.Perfect);
+            CountNote(g == Grade.Perfect, HitTarget(enemy));                                 // SOLO : the one who parries it (SHIELD : the one in front)
             if (g == Grade.Perfect)
             {
                 parried++;
@@ -2159,8 +2341,10 @@ namespace Tacetno433.Battle
         //Count Note : every PERFECT fills the SIGNATURE gauge (a conductor with no kit has none).
         //PRODIGY (THE SHADOWLESS) : TurnMozartRun PERFECTs in a row give 1 breath back.
         //(30 to 31 Oct it also counted each musician's own PERFECTs for INSPIRED, gone with the PATH cards.)
-        private void CountNote(bool perfect)
+        //SOLO (BLOCK G) : who is the musician who played or parried the note, their own count goes on too
+        private void CountNote(bool perfect, Fighter who)
         {
+            CountSolo(perfect, who);
             if (!perfect)
             {
                 perfectRun = 0;
@@ -2304,6 +2488,12 @@ namespace Tacetno433.Battle
                     if (SignatureLevel >= 1) AddCrescendo(Party[i], BattleRules.TurnJahrCrescendo);
                 }
             }
+
+            //BLOCK G (2 Nov, the user : "FINALE should matter") : every FINALE breaks every CHARGE, so it can be kept for the big blow
+            //that is coming, and the band plays FORTE, this turn and the next (BattleRules.TurnForteTurns)
+            for (int i = 0; i < Enemies.Count; i++) BreakCharge(Enemies[i]);
+            Forte = BattleRules.TurnForteTurns;
+            Events.Add(new TurnEvent(TurnEventKind.Forte, null, Forte));
 
             CheckEnd();
             return true;

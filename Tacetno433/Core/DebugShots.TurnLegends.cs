@@ -165,6 +165,7 @@ namespace Tacetno433.Core
             report += TurnCheckBigs();                                                 // BOSSES (Beta1 31 Oct, the named BIG ATTACKs)
             report += TurnCheckEncore();                                               // ENCORE (Beta1 1 Nov, in place of MAESTRO MODE)
             report += TurnCheckEvents();                                               // RISKY WAYS (Beta1 1 Nov, the events)
+            report += TurnCheckBlockG(band, hush);                                     // BLOCK G (Beta1 2 Nov : FINALE, RUSH, COMBO, SOLO)
             return report;
         }
 

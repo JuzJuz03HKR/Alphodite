@@ -49,6 +49,11 @@ namespace Tacetno433.Data
         public const string Turn = "TURN";            // BAR in the code : one round, the band's moves then TACET's
         public const string Turns = "TURNS";
         public const string Play = "PLAY";            // PLAY THE BAR until 31 Oct : the button that plays the turn
+        //BLOCK G (2 Nov, docs/BETA1_DIRECTION.md 46)
+        public const string Rush = "RUSH";            // the note kind : a quick swipe right after the one before, the way of its arrow
+        public const string Solo = "SOLO";            // one musician's PERFECTs in a row : their next move is bigger
+        public const string Forte = "FORTE";          // after a FINALE : the band hits harder for a few turns
+        public const string Combo = "COMBO";          // PERFECTs in a row, from TurnComboEvery they make every hit a little harder
 
         //The run
         public const string Workshop = "WORKSHOP";    // LUTHIER in the code : a place where one ATTACK gets a star, free
@@ -83,7 +88,14 @@ namespace Tacetno433.Data
         public static readonly string HealLine = "this turn it heals instead of attacking";
         public static readonly string EveryoneLine = "its notes hit every musician standing";
         public static readonly string BigAttackLine = "the boss's own big move. Block every note and it is " + Stunned;
-        public static readonly string FinaleLine = "the conductor's big move. PERFECTs fill the diamonds, SPACE plays it";
+        public static readonly string FinaleLine = "the conductor's big move. PERFECTs fill the diamonds, SPACE plays it. It breaks every "
+                                                   + Charge + " and gives " + Forte;
+        public static readonly string RushLine = "comes right after the note before it. Swipe its arrow, fast";
+        public static readonly string SoloLine = BattleRules.TurnSoloNeed + " PERFECTs in a row by one musician. Their next move is bigger";
+        public static readonly string ForteLine = "after a " + Finale + " the band hits " + Percent(BattleRules.TurnForteScale) + " percent harder for "
+                                                  + BattleRules.TurnForteTurns + " " + Turns;
+        public static readonly string ComboLine = "PERFECTs in a row. Every " + BattleRules.TurnComboEvery + " make the band hit "
+                                                  + Percent(1f + BattleRules.TurnComboStep) + " percent harder";
 
         //Keywords : the words a skill's line can use, with their lines, for the skill card (KeywordsIn). STUNNED before STUN.
         private static readonly string[] keys = { Burn, Volume, Stunned, Stun, Muted, Guard, Armor, Focus, Shield, Echo, Charge };

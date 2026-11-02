@@ -134,7 +134,7 @@
         public static int[] TurnNotesMin = { 1, 2, 3 };        // ELITE and BOSS
         public static int[] TurnNotesMax = { 2, 3, 4 };
         public static int[] TurnSmallNotesMin = { 1, 1, 2 };   // ordinary enemies
-        public static int[] TurnSmallNotesMax = { 2, 2, 2 };
+        public static int[] TurnSmallNotesMax = { 2, 2, 3 };   // BLOCK G (2 Nov) : floor 3 was 2, THE SILENCE GROWS
         public static float TurnNoteDamage = 2f;             // step 12 : was 1.5, the user found NORMAL far too easy (turnsim STRONG 81 -> 57 percent).
                                                              // Step 15 : was 2.2, longer fights give TACET more turns, so each note is softer and the run is as hard as before.
                                                              // Notes are rounded to whole numbers, so a small change can jump (1.9 made power 4 notes 8 instead of 7)
@@ -189,10 +189,12 @@
         //Conductors (ALPHA7_DESIGN 5.9, step 5). The SIGNATURE gauge fills one per PERFECT (an attack,
         //a skill note or a parry). Full, SPACE plays the 4/4 shape : down, left, right, up, any size.
         //How well the four strokes land sets how strong it is (the average of their swipe scale).
-        public static int TurnSignatureNeed = 6;
+        public static int TurnSignatureNeed = 8;     // BLOCK G (2 Nov, docs/BETA1_DIRECTION.md 46) : was 6. FINALE breaks every CHARGE and brings FORTE now,
+                                                     // and the deeper floors play more notes (RUSH), so it costs more PERFECTs
         //PLAYTEST (Beta1, the user asked 28 Oct, to try the SIGNATURE and its CUT-IN often) : above 0, the SIGNATURE needs
         //only this many PERFECTs, CON BRIO or not. Set it back to 0 for the real cost. turncheck and turnsim always use the real one.
-        public static int PlaytestSignatureNeed = 1;
+        //BLOCK G (2 Nov) : the user let it go (USER_BRIEFS 13.124, "set what fits"), 0 = the real cost.
+        public static int PlaytestSignatureNeed = 0;
         public static float TurnBeethovenMost = 0.5f;  // THE UNHEARING's PASSIVE : up to this much harder as the band's life runs out
         public static int TurnBoltDamage = 14;         // LIGHTNING : damage to every enemy at full strength (x1)
         public static int TurnMozartRun = 3;           // THE SHADOWLESS's PASSIVE : this many PERFECTs in a row give 1 breath
@@ -225,6 +227,38 @@
         //76 percent, a gauge 1 or 2 fuller at the start to 69 and 73 : with STORM the SIGNATURE is the strongest thing there is.)
         public static float TurnBondScale = 1.5f;
         public static float TurnBondLineTime = 4f;     // seconds a tied legend's line shows as the fight starts
+
+        //BLOCK G (2 Nov, docs/BETA1_DIRECTION.md 46, the user 13.124 : "too easy, not exciting or varied enough. The further you
+        //play, the more notes to swipe, swipes in a rush, varied swipes, more ways to attack, more combos, notes of different
+        //kinds", and "FINALE should matter"). First numbers, tuned when the whole game is reviewed (14.6 : never by turnsim).
+        //FORTE : the band after a FINALE, the conductor's music fills the stage
+        public static int TurnForteTurns = 2;          // FORTE : the turns it lasts, the one the FINALE was played in counted (so : this one and the next)
+        public static float TurnForteScale = 1.25f;    //         every hit of the band x this
+        //RUSH : the new kind of note, a quick swipe right on the heels of the note before it, the way of its arrow
+        public static float TurnRushGap = 0.25f;       // seconds after the note before it (a SPARK is 0.3 and takes any way)
+        public static float TurnRushScale = 0.5f;      // a RUSH note of the band does its skill this much of a note
+        public static int[] TurnRushTail = { 0, 1, 2 };// RUSH TAIL : RUSH notes at the end of every ATTACK skill of the band, floor 1 / 2 / 3
+        //THE SILENCE GROWS : TACET's attacks on floor 1 / 2 / 3. RUSH notes in each attack (every second note at most),
+        //an ELITE's or a BOSS's long attack ends in a HOLD (a heavy blow, held back to the end) and on floor 3 opens with a ROLL
+        public static int[] TurnEnemyRush = { 0, 1, 2 };       // ELITE and BOSS
+        public static int[] TurnEnemyRushSmall = { 0, 1, 1 };  // ordinary enemies
+        public static int TurnEnemyHoldFloor = 2;      // the HOLD from this floor
+        public static int TurnEnemyHoldFrom = 3;       //          in an attack of this many notes or more
+        public static float TurnEnemyHoldPower = 1.5f; //          the held blow x one of its notes
+        public static int TurnEnemyRollFloor = 3;      // the ROLL from this floor
+        public static int TurnEnemyRollFrom = 4;       //          in an attack of this many notes or more
+        public static float TurnParryHoldPerfect = 0.85f;  // a HOLD parried : PERFECT needs the button kept down this share of the hold,
+        public static float TurnParryHoldGood = 0.4f;      //                  GOOD this much, less lets the whole blow through
+        //COMBO : PERFECTs in a row make the band hit a little harder, only the best players reach it (the user : "not much")
+        public static int TurnComboEvery = 10;         // a step every this many PERFECTs in a row
+        public static float TurnComboStep = 0.05f;     // each step x this more
+        public static int TurnComboSteps = 3;          // at most this many steps (x1.15 from 30)
+        //SOLO : one musician's own PERFECTs in a row (their skill notes and the notes they parry) put the spotlight on them,
+        //their next move is a SOLO
+        public static int TurnSoloNeed = 5;
+        public static float TurnSoloScale = 1.3f;      // a skill played as a SOLO x this
+        public static int TurnSoloRush = 2;            //   and RUSH notes added to it
+        public static float TurnSoloAttack = 2f;       // an ATTACK played as a SOLO x this
 
         //Musician Traits in the turn battle (step 10, the TurnTraitText of each musician in Data/Musician.cs)
         //THE FIVE KITS (Beta1 29 Oct) : the five legends' traits and the new moves of their skills (Data/Skill.cs).
@@ -302,7 +336,7 @@
         public static int TurnAccelerandoShakes = 2;      // ACCELERANDO : each shake of a roll counts this many
         public static int TurnGraceTimes = 2;             // GRACE NOTE : a spark that lands does its skill this many times
         public static int TurnMarcatoOffBeat = 2;         // MARCATO : a PERFECT attack's OFF-BEAT, times this
-        public static int TurnConBrioNeed = 4;            // CON BRIO : PERFECTs the SIGNATURE needs instead
+        public static int TurnConBrioNeed = 6;            // CON BRIO : PERFECTs the SIGNATURE needs instead (BLOCK G 2 Nov : was 4, the real cost went 6 -> 8)
         public static float TurnCodaBelow = 0.25f;        // CODA : an enemy under this share of its life
         public static float TurnCodaScale = 1.5f;         //        takes this much more
         //ONE BAR motifs (step 13). SEGUE and LAST WORD need no number.
@@ -371,6 +405,8 @@
         public static float StageAmbient = 0.34f;         // LIGHT MAP everywhere (0.5 = lit normally) : the stage is dark, lights do the rest
         public static float StageSpot = 0.42f;            //   the stage light on the musician in front
         public static float StageFootLight = 0.2f;        //   the pool of light each enemy stands in (like Chaos Zero Nightmare)
+        public static float StageSoloSpot = 0.6f;         // SOLO (BLOCK G) : the stage light on a musician with a SOLO waiting, this much more
+        public static float StageSoloShaft = 2.5f;        //                  and the shaft from above this much more, in their colour
         public static float StageShaft = 0.1f;            //   the shaft of light from above on the musician in front (GLOW, round 4)
         public static int StageDust = 0;                  //   specks of dust turning in it (round 4 : none, the user found white specks cluttered)
         public static float StageFloorLight = 0.16f;      //   the house lights on the floor near the band, so TACET's dark can be seen eating it

@@ -176,9 +176,11 @@ namespace Tacetno433.Screens
         private const string HintParry = "SWIPE THE ARROW'S WAY TO BLOCK EACH NOTE";
         private const string HintHold = "KEEP HOLDING";
         private const string HintRoll = "SHAKE!";
+        private const string HintRush = Words.Rush + " : THE NEXT ARROW COMES RIGHT AWAY, SWIPE IT FAST";   // BLOCK G
         private const string WordHold = "HOLD";                     // ONE RULE : the word under a note that is not a plain swipe
         private const string WordRoll = "SHAKE";
         private const string WordSpark = "AGAIN";
+        private const string WordRush = Words.Rush;                 // BLOCK G : RUSH, a quick swipe right after the one before
         private const string HintMute = Words.Muted + " : NO SKILLS THIS TURN, ATTACK STILL WORKS";
         private const string HintNoSkills = "DECREE : A SKILL THIS TURN HURTS WHOEVER PLAYS IT";
         private const string HintNoAttacks = "DECREE : AN ATTACK THIS TURN HURTS WHOEVER PLAYS IT (NO MOVE = ATTACK)";
@@ -777,7 +779,6 @@ namespace Tacetno433.Screens
         private void StartSkill(Skill s)
         {
             notes.Clear();
-            for (int i = 0; i < s.Notes.Length; i++) AddNote(s.Notes[i].Kind, s.Notes[i].Way, false);
             hitBy = battle.Current;
             hitSignature = false;
             if (!battle.BeginSkill())                                                  // the rules turn a skill that cannot be played into
@@ -785,6 +786,8 @@ namespace Tacetno433.Screens
                 StartStrike(battle.CurrentMove);
                 return;
             }
+            SkillNote[] phrase = battle.PlayingNotes;                                  // BLOCK G : its own notes, then RUSH TAIL and SOLO
+            for (int i = 0; i < phrase.Length; i++) AddNote(phrase[i].Kind, phrase[i].Way, false);
             ShowEvents();                                                              // BORROWED BREATH may cost life
             BeginSwipe(SwipeFor.Skill);
             throwAt = null;
@@ -842,7 +845,9 @@ namespace Tacetno433.Screens
                 if (i > 0)
                 {
                     NoteKind before = notes[i - 1].Kind;
-                    due += notes[i].Kind == NoteKind.Spark ? BattleRules.TurnSparkGap : gap * GapAt(what, i);   // THE NINTH : uneven
+                    if (notes[i].Kind == NoteKind.Spark) due += BattleRules.TurnSparkGap;
+                    else if (notes[i].Kind == NoteKind.Rush) due += BattleRules.TurnRushGap;               // RUSH (BLOCK G) : right on its heels
+                    else due += gap * GapAt(what, i);                                                       // THE NINTH : uneven
                     if (before == NoteKind.Hold) due += BattleRules.TurnHoldTime;
                     if (before == NoteKind.Roll) due += BattleRules.TurnRollTime;
                 }
@@ -1018,6 +1023,8 @@ namespace Tacetno433.Screens
         //hits now (NOTE BY NOTE), the SIGNATURE's strokes gather and strike together at the end.
         private void Land(Grade grade, float hold)
         {
+            if (swipeFor == SwipeFor.Parry && notes[next].Kind == NoteKind.Hold)
+                grade = battle.HeldGrade(grade, hold);                                   // THE SILENCE GROWS (BLOCK G) : a heavy blow is held back to the end
             grade = battle.Forgive(grade);                                               // SPARE STRINGS (GIFT) : the first MISS is a GOOD
             missKept = false;
             notesPlayed++;                                                               // RANK
@@ -1144,6 +1151,11 @@ namespace Tacetno433.Screens
                 if (e.Kind == TurnEventKind.Ready)
                 {
                     hudPops.SpawnPop(1120f, signatureBox.Y - 14f, Words.FinaleReady, Palette.Highlight, 0.7f);
+                    continue;
+                }
+                if (e.Kind == TurnEventKind.Forte)                                                  // FORTE (BLOCK G) : after the FINALE's name
+                {
+                    hudPops.SpawnPop(HitX, HitY - 170f, Words.Forte, Palette.Highlight, 1.1f);
                     continue;
                 }
                 if (e.Kind == TurnEventKind.Extra)
@@ -1273,6 +1285,8 @@ namespace Tacetno433.Screens
                 else if (e.Kind == TurnEventKind.BossTurn) { bossTurnWaiting = true; bossHalfBreak = 1f; }
                 else if (e.Kind == TurnEventKind.BigParried) BossBlocked(x, box);
                 else if (e.Kind == TurnEventKind.OwnFoot) effects.SpawnPop(x, box.Y - 90, WordOwnFoot, Palette.Highlight, 1.1f);
+                //SOLO (BLOCK G) : the spotlight finds them (Amount 0), or their SOLO is played (1), in their own colour
+                else if (e.Kind == TurnEventKind.Solo) effects.SpawnPop(x, box.Y - 80, Words.Solo, SpotOf(e.Who).Tint, e.Amount == 0 ? 1f : 1.25f);
                 //THE FIVE KITS (Beta1 29 Oct) : a word for each new move, in the colour of its SKILL KIND (until their VFX)
                 else if (e.Kind == TurnEventKind.Cut) effects.SpawnPop(x, box.Y - 70, "-" + NumberText.Get(e.Amount) + " NOTE", Palette.Paper, 0.8f);   // TURN OF THE HAND
                 else if (e.Kind == TurnEventKind.Shield) effects.SpawnPop(x, y, Words.Shield, Palette.KindDefend, 0.8f);     // SHIELD
@@ -2129,6 +2143,14 @@ namespace Tacetno433.Screens
                 portrait.Figure.Cues.Life = f.Down ? 0f : f.Hp / (float)Math.Max(1, f.MaxHp);
                 portrait.Draw(sb, face, a);
                 Gfx.RectOutline(sb, r, (active ? own : (f == fore ? Palette.Paper * 0.7f : Palette.LineGrey * 0.45f)) * a, active ? 2 : 1);
+                if (f.Solo && !f.Down)                                                                 // SOLO (BLOCK G) : the spotlight is on them,
+                {                                                                                      //   their next move is the solo
+                    float pulse = 0.65f + 0.35f * (float)Math.Sin(time * 6f);
+                    Gfx.DrawGlowBox(sb, new Rectangle(r.X - 10, r.Y - 10, r.Width + 20, r.Height + 20), own * (0.3f * pulse));
+                    Gfx.RectOutline(sb, new Rectangle(r.X - 2, r.Y - 2, r.Width + 4, r.Height + 4), own * pulse, 2);
+                    Gfx.Rect(sb, face.X, face.Bottom - 15, face.Width, 15, Palette.Void * 0.75f);
+                    Gfx.TextSpacedCentered(sb, Game.Font, Words.Solo, face.Center.X, face.Bottom - 14, own, TextSize.Tiny, 2f);
+                }
                 bool outline = hover == f && (picking || (view == View.Plan && battle.CanPlan(f)));
                 if (outline)
                     Gfx.RectOutline(sb, new Rectangle(r.X - 3, r.Y - 3, r.Width + 6, r.Height + 6), Palette.Accent, 2);
@@ -2372,8 +2394,8 @@ namespace Tacetno433.Screens
                 for (int n = 0; n < f.IntentNotes.Length; n++)
                 {
                     float nx = x + room + IntentNoteStep * (n + 0.5f);
-                    if (n < f.IntentKinds.Length && f.IntentKinds[n] == NoteKind.Roll) NoteGlyph.RollNote(sb, nx, cy, 0.46f, ia);   // TE DEUM : a SHAKE
-                    else NoteGlyph.Note(sb, Game.BigFont, nx, cy, f.IntentWays[n], 0.46f, ia, n < f.IntentLate.Length && f.IntentLate[n]);
+                    NoteKind kind = n < f.IntentKinds.Length ? f.IntentKinds[n] : NoteKind.Swipe;   // TE DEUM's SHAKE, THE SILENCE GROWS (BLOCK G)
+                    DrawKind(sb, kind, f.IntentWays[n], nx, cy, 0.46f, ia, n < f.IntentLate.Length && f.IntentLate[n]);
                 }
                 string tag = f.IntentBig ? f.Enemy.BigName : (f.IntentAll ? Words.Everyone : (f.IntentHeavy ? Words.Charged : Words.BigAttack));   // BOSSES : its name
                 Color tagColor = Palette.Highlight * (ia * (0.7f + 0.3f * (float)Math.Sin(time * 6f)));
@@ -2492,7 +2514,7 @@ namespace Tacetno433.Screens
             float a = MathHelper.Clamp(progress * 3f, 0f, 1f);
 
             DrawGlyph(sb, n, HitX, HitY, NoteGrow, a);
-            string word = n.Kind == NoteKind.Hold ? WordHold : (n.Kind == NoteKind.Roll ? WordRoll : (n.Kind == NoteKind.Spark ? WordSpark : null));
+            string word = WordOf(n.Kind);
             if (word != null && !holding && !rolling)
                 Gfx.TextSpacedCentered(sb, Game.Font, word, HitX, HitY + RingMark + 22f, Palette.Highlight * a, TextSize.Label, 4f);
             if (holding)
@@ -2522,15 +2544,33 @@ namespace Tacetno433.Screens
             }
         }
 
+        //Word Of : the one word under a note that is not a plain swipe (HOLD, SHAKE, AGAIN, RUSH), null for a plain one
+        private static string WordOf(NoteKind kind)
+        {
+            if (kind == NoteKind.Hold) return WordHold;
+            if (kind == NoteKind.Roll) return WordRoll;
+            if (kind == NoteKind.Spark) return WordSpark;
+            if (kind == NoteKind.Rush) return WordRush;
+            return null;
+        }
+
         //Glyph : one note of any kind, see NoteGlyph. A SIGNATURE stroke is a plain note too (ONE RULE).
         private void DrawGlyph(SpriteBatch sb, QteNote n, float x, float y, float grow, float a)
         {
-            if (n.Kind == NoteKind.Spark) NoteGlyph.Spark(sb, x, y, 14f * grow, Palette.Highlight * a);
-            else if (n.Kind == NoteKind.Roll) NoteGlyph.RollNote(sb, x, y, grow, a);
+            DrawKind(sb, n.Kind, n.Way, x, y, grow, a, false);
+        }
+
+        //Draw Kind : a note of this kind at (x, y), the same look for the band's skills, TACET's notes and the plan's intents
+        //(BLOCK G : TACET's attacks have HOLD, ROLL and RUSH notes too, THE SILENCE GROWS)
+        private void DrawKind(SpriteBatch sb, NoteKind kind, Flick way, float x, float y, float grow, float a, bool hidden)
+        {
+            if (kind == NoteKind.Spark) NoteGlyph.Spark(sb, x, y, 14f * grow, Palette.Highlight * a);
+            else if (kind == NoteKind.Roll) NoteGlyph.RollNote(sb, x, y, grow, a);
+            else if (kind == NoteKind.Rush) NoteGlyph.RushNote(sb, Game.BigFont, x, y, way, grow, a, hidden);
             else
             {
-                NoteGlyph.Note(sb, Game.BigFont, x, y, n.Way, grow, a, false);
-                if (n.Kind == NoteKind.Hold) NoteGlyph.FermataSign(sb, x, y - (NoteGlyph.NoteRadius + 18f) * grow, 10f * grow, Palette.Highlight * a);
+                NoteGlyph.Note(sb, Game.BigFont, x, y, way, grow, a, hidden);
+                if (kind == NoteKind.Hold) NoteGlyph.FermataSign(sb, x, y - (NoteGlyph.NoteRadius + 18f) * grow, 10f * grow, Palette.Highlight * a);
             }
         }
 
@@ -2553,9 +2593,14 @@ namespace Tacetno433.Screens
                 float y = MathHelper.Lerp(from.Center.Y, HitY, p);
                 float a = i == next ? 1f : 0.55f;
                 bool hidden = notes[i].Late && progress < BattleRules.TurnLateReveal;                // FALSE NOTES
-                if (notes[i].Kind == NoteKind.Roll) NoteGlyph.RollNote(sb, x, y, MathHelper.Lerp(1f, NoteGrow, p), a);   // TE DEUM : shake
-                else NoteGlyph.Note(sb, Game.BigFont, x, y, notes[i].Way, MathHelper.Lerp(1f, NoteGrow, p), a, hidden);
-                if (i == next) NoteGlyph.TimingRing(sb, HitX, HitY, progress, RingMark, RingStart, 0f, Math.Min(1f, progress * 3f));
+                DrawKind(sb, notes[i].Kind, notes[i].Way, x, y, MathHelper.Lerp(1f, NoteGrow, p), a, hidden);   // TE DEUM's SHAKE, THE SILENCE GROWS
+                if (i == next)
+                {
+                    NoteGlyph.TimingRing(sb, HitX, HitY, progress, RingMark, RingStart, 0f, Math.Min(1f, progress * 3f));
+                    string word = WordOf(notes[i].Kind);                                                // BLOCK G : what to do with it
+                    if (word != null && !holding && !rolling && progress > 0.35f)
+                        Gfx.TextSpacedCentered(sb, Game.Font, word, HitX, HitY + RingMark + 22f, Palette.Highlight * Math.Min(1f, progress), TextSize.Label, 4f);
+                }
             }
         }
 
@@ -2658,6 +2703,7 @@ namespace Tacetno433.Screens
                     string line = swipeFor == SwipeFor.Parry ? HintParry : HintSwing;
                     if (holding) line = HintHold;
                     else if (rolling) line = HintRoll;
+                    else if (next + 1 < notes.Count && notes[next + 1].Kind == NoteKind.Rush) line = HintRush;   // BLOCK G : a RUSH comes next
                     Gfx.TextSpaced(sb, Game.Font, line, 40, 680, Palette.PaperDim, TextSize.Label, 2f);
                 }
             }

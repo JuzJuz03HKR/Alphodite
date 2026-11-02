@@ -89,6 +89,7 @@ namespace Tacetno433.Battle
             {
                 //ATTACK : one hit at its enemy, OFF-BEAT and BREATH back (BREATH CONTROL : QUANTZ more)
                 Fighter enemy = into.Targets[0];
+                if (who.Solo) first *= BattleRules.TurnSoloAttack;                                   // SOLO (BLOCK G) : the ATTACK is the solo
                 into.PerNote = HitFor(who, enemy, BattleRules.TurnAttackScale * first, false);
                 PreviewStrike(into, enemy, into.PerNote, false);
                 into.OffBeat = BattleRules.TurnAttackOffBeat * (Has(MotifId.Marcato) ? BattleRules.TurnMarcatoOffBeat : 1);   // MARCATO
@@ -111,6 +112,7 @@ namespace Tacetno433.Battle
             if (who.Lesson) scale *= who.LessonScale > 0f ? who.LessonScale : BattleRules.TurnLessonScale;
             if (s.Revenge > 0f && (who.Wounded || who.Musician.Has(StarRule.LanceAlways))) scale *= s.Revenge;
             if (Pacts(who)) scale *= BattleRules.TurnBloodScale;                                                // THE PACT (GIFT)
+            if (who.Solo) scale *= BattleRules.TurnSoloScale;                                                   // SOLO (BLOCK G)
             bool everyone = s.Target == SkillTarget.AllEnemies || s.Target == SkillTarget.AllAllies;
             float tutti = everyone && Has(MotifId.Tutti) ? BattleRules.TurnTuttiScale : 1f;                  // TUTTI
             bool felix = Kit == TurnKit.Fanny && FelixVoice;                                                   // TWO VOICES
@@ -118,12 +120,13 @@ namespace Tacetno433.Battle
             int offBeat = s.OffBeat;
             if (who.Musician.Family == Family.Percussion && Has(MotifId.SpareSticks)) offBeat = (int)Math.Round(offBeat * BattleRules.TurnSpareSticksOffBeat);   // WOODEN STICKS (GIFT)
 
-            into.Notes = s.Notes.Length;
-            for (int n = 0; n < s.Notes.Length; n++)
+            into.Notes = NoteCount(who, s);                                                                     // BLOCK G : RUSH TAIL and SOLO notes too
+            for (int n = 0; n < into.Notes; n++)
             {
-                float hold = s.Notes[n].Kind == NoteKind.Hold ? HoldScale(1f) : 1f;
+                SkillNote note = NoteAt(who, s, n);
+                float hold = note.Kind == NoteKind.Hold ? HoldScale(1f) : 1f;
                 float lucky = n == 0 && Has(MotifId.LuckyBow) ? BattleRules.TurnLuckyBowScale : 1f;            // LUCKY BOW (GIFT) : the first note
-                float noteScale = SwipeScale(Grade.Good) * hold * scale * lucky;
+                float noteScale = SwipeScale(Grade.Good) * hold * scale * lucky * NoteWeight(note);             // RUSH : a share of a note
                 bool last = n == s.Notes.Length - 1;
                 if (lastCut && last) noteScale *= BattleRules.TurnLastCutScale;
                 float repeat;
@@ -148,7 +151,7 @@ namespace Tacetno433.Battle
                         }
                         continue;
                     }
-                    float heal = s.Heal * hold * tutti * repeat * lucky;
+                    float heal = s.Heal * hold * tutti * repeat * lucky * NoteWeight(note);                  // RUSH (SOLO) : a share
                     if (who.Musician.Family == Family.Wind && Has(MotifId.ReedCase)) heal *= BattleRules.TurnReedCaseHeal;   // ON PLAYING THE FLUTE (GIFT, was REED CASE)
                     if (felix) heal *= BattleRules.TurnFelixHeal;
                     int gain = Math.Min((int)Math.Round(heal), f.MaxHp - f.Hp - into.Gain[f.Slot]);

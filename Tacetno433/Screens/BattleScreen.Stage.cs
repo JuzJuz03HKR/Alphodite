@@ -1512,10 +1512,12 @@ namespace Tacetno433.Screens
         {
             Rectangle f = foreBox;
             float a = BattleRules.StageShaft * (fore != null ? SwapAlpha() * 0.5f + 0.5f : 0.5f);
+            a *= 1f + BattleRules.StageSoloShaft * soloGlow;                                       // SOLO (BLOCK G) : the spotlight, in their colour
+            Color light = fore != null ? Color.Lerp(Color.White, SpotOf(fore).Tint, 0.6f * soloGlow) : Color.White;
 
             //Shaft : a wide dim light stretched tall, and a narrow brighter core inside it
-            Gfx.DrawGlowBox(sb, new Rectangle(f.X - 10, -260, f.Width + 20, f.Y + 520), Color.White * (a * 0.6f));
-            Gfx.DrawGlowBox(sb, new Rectangle(f.X + 70, -200, f.Width - 140, f.Y + 420), Color.White * a);
+            Gfx.DrawGlowBox(sb, new Rectangle(f.X - 10, -260, f.Width + 20, f.Y + 520), light * (a * 0.6f));
+            Gfx.DrawGlowBox(sb, new Rectangle(f.X + 70, -200, f.Width - 140, f.Y + 420), light * a);
 
             //Dust : specks drifting slowly down and sideways through the shaft, twinkling
             float span = f.Y + 300f;
@@ -1547,8 +1549,10 @@ namespace Tacetno433.Screens
             //Stage Light : from above onto the musician in front, and its pool on the boards
             Rectangle f = foreBox;
             float spot = BattleRules.StageSpot * (fore != null ? SwapAlpha() * 0.5f + 0.5f : 0.5f);
-            Gfx.DrawGlowBox(sb, new Rectangle(f.X - 120 - (int)near.X, f.Y - 120 - (int)near.Y, f.Width + 240, f.Height + 160), Color.White * spot);
-            Gfx.DrawGlowBox(sb, new Rectangle(f.X - 160 - (int)floor.X, (int)ForeFeetY() - 70 - (int)floor.Y, f.Width + 320, 140), Color.White * (spot * 0.8f));
+            spot *= 1f + BattleRules.StageSoloSpot * soloGlow;                                     // SOLO (BLOCK G) : the spotlight
+            Color lamp = fore != null ? Color.Lerp(Color.White, SpotOf(fore).Tint, 0.5f * soloGlow) : Color.White;
+            Gfx.DrawGlowBox(sb, new Rectangle(f.X - 120 - (int)near.X, f.Y - 120 - (int)near.Y, f.Width + 240, f.Height + 160), lamp * spot);
+            Gfx.DrawGlowBox(sb, new Rectangle(f.X - 160 - (int)floor.X, (int)ForeFeetY() - 70 - (int)floor.Y, f.Width + 320, 140), lamp * (spot * 0.8f));
 
             //House Lights : the floor near the band is lit, so TACET's dark can be seen eating the light as it comes
             Gfx.DrawGlowBox(sb, new Rectangle(-300 - (int)floor.X, Horizon + 60 - (int)floor.Y, TacetGame.ScreenW + 600, 760), Color.White * BattleRules.StageFloorLight);

@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Tacetno433.Battle;
@@ -7,9 +8,9 @@ using Tacetno433.Data;
 
 namespace Tacetno433.Screens
 {
-    //BattleScreen Combo (Beta1 block D item 6, 2 Nov, docs/BETA1_DIRECTION.md 43) : the fun moments 3 and 6 of 16.4, shown, not
-    //ruled. Nothing here changes a number of the fight (a COMBO that multiplies damage would be a rule, the user decides that
-    //with the last balance, block G).
+    //BattleScreen Combo (Beta1 block D item 6, 2 Nov, docs/BETA1_DIRECTION.md 43) : the fun moments 3 and 6 of 16.4, shown.
+    //BLOCK G (2 Nov, 46) : the COMBO is a rule now (TurnBattle.ComboScale, a little harder from TurnComboEvery PERFECTs), its
+    //x shows under the number, and FORTE (after a FINALE) shows over it with the turns it has left.
     //   COMBO         the PERFECTs in a row (TurnBattle.PerfectRun), big on the right over the panel from 2, popping at each
     //                 one. A miss breaks it : the number cracks and falls away grey.
     //   THE MUSIC     the longer the COMBO, the louder the band : the conductor's weather grows (THE STAGE TURNS) and TACET's dark
@@ -23,11 +24,23 @@ namespace Tacetno433.Screens
         private int comboBroken;           // the COMBO that just broke, falling away
         private float comboBreak;          // 1 when it just broke, fades
         private float comboGlow;           // 0..1 eased : how loud the band is (THE MUSIC SWELLS)
+        private float soloGlow;            // 0..1 eased : SOLO (BLOCK G), the musician in front has the spotlight
         private int rankShown = -1;        // LIVE RANK : the letter shown (0 S .. 3 C)
         private float rankPop;
         private static readonly string[] RankWords = { "S", "A", "B", "C" };
-        private const string WordCombo = "COMBO";
+        private const string WordCombo = Words.Combo;
         private const string WordRank = "RANK";
+        //BLOCK G : the COMBO's x by its step ("x1.05" ...) and FORTE's, made once from BattleRules
+        private static readonly string[] ComboScaleWords = MakeComboWords();
+        private static readonly string ForteScaleWord = "x" + BattleRules.TurnForteScale.ToString("0.00", CultureInfo.InvariantCulture);
+
+        private static string[] MakeComboWords()
+        {
+            string[] words = new string[BattleRules.TurnComboSteps + 1];
+            for (int k = 0; k < words.Length; k++)
+                words[k] = "x" + (1f + k * BattleRules.TurnComboStep).ToString("0.00", CultureInfo.InvariantCulture);
+            return words;
+        }
 
         //Update Combo : follow the rules' run of PERFECTs, the swell and the rank
         private void UpdateCombo(float dt)
@@ -44,6 +57,8 @@ namespace Tacetno433.Screens
             comboBreak = Math.Max(0f, comboBreak - dt * 1.4f);
             float swell = Math.Min(1f, run / (float)BattleRules.ComboFull);
             comboGlow += (swell - comboGlow) * Math.Min(1f, dt * (swell > comboGlow ? 3f : 1.2f));   // up quickly, back slowly
+            float soloWant = fore != null && !fore.IsEnemy && fore.Solo && !fore.Down ? 1f : 0f;      // SOLO : the spotlight finds them
+            soloGlow += (soloWant - soloGlow) * Math.Min(1f, dt * 3f);
 
             int rank = BattleState.RankIndexOf(BattleState.RankScoreOf(perfects, notesPlayed, LifeShareNow()));
             if (rank != rankShown)
@@ -82,6 +97,18 @@ namespace Tacetno433.Screens
                 Gfx.DrawGlow(sb, cx, cy, 70f * big, ink * (0.25f * a * (0.4f + 0.6f * comboGlow)));
                 PixelDigits.Draw(sb, comboShown, false, cx, cy, BattleRules.ComboCell * big, ink * a, Color.Black * (0.85f * a));
                 Gfx.TextSpacedCentered(sb, Game.Font, WordCombo, cx, cy + 22f, Palette.PaperDim * a, TextSize.Label, 4f);
+                int steps = Math.Min(BattleRules.TurnComboSteps, comboShown / Math.Max(1, BattleRules.TurnComboEvery));   // COMBO (BLOCK G) : its x
+                if (steps > 0) Gfx.TextSpacedCentered(sb, Game.Font, ComboScaleWords[steps], cx, cy + 40f, ink * a, TextSize.Label, 3f);
+            }
+            if (battle.Forte > 0)                                                                // FORTE (BLOCK G) : after a FINALE
+            {
+                float beat = 0.75f + 0.25f * (float)Math.Sin(worldTime * 5f);
+                float fy = cy - 58f;
+                Gfx.DrawGlow(sb, cx, fy, 60f, Palette.Highlight * (0.18f * beat));
+                Gfx.TextSpacedCentered(sb, Game.BigFont, Words.Forte, cx, fy - 12f, Palette.Highlight * beat, TextSize.Small, 4f);
+                Gfx.TextSpacedCentered(sb, Game.Font, ForteScaleWord, cx - 22f, fy + 14f, Palette.Highlight, TextSize.Label, 2f);
+                Gfx.TextSpacedCentered(sb, Game.Font, NumberText.Get(battle.Forte), cx + 18f, fy + 14f, Palette.PaperDim, TextSize.Label, 2f);
+                Gfx.TextSpacedCentered(sb, Game.Font, Words.Turn, cx + 44f, fy + 14f, Palette.PaperDim, TextSize.Label, 2f);
             }
             if (comboBreak > 0f)
             {

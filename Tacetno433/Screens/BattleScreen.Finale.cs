@@ -192,7 +192,11 @@ namespace Tacetno433.Screens
                 moodWait -= dt;
                 if (moodWait < 0f) moodTarget = 1f;                                            // waited : it comes in to its full
             }
+            //FORTE (BLOCK G, 2 Nov) : the weather is full while the band plays FORTE, then it settles back to the fight's own
+            //strength, so a full sky always means the band is hitting harder
+            if (moodWait < 0f && battle.Forte <= 0 && moodTarget > BattleRules.WeatherFight) moodTarget = BattleRules.WeatherFight;
             if (moodPower < moodTarget) moodPower = Math.Min(moodTarget, moodPower + dt / MoodInTime);
+            else if (moodPower > moodTarget) moodPower = Math.Max(moodTarget, moodPower - dt / (MoodInTime * 2f));
 
             if (stormAge >= 0f)
             {

@@ -521,7 +521,10 @@ namespace Tacetno433.Core
                         float hard = 1f;
                         if (i < enemy.IntentLate.Length && enemy.IntentLate[i]) hard *= SimLateSpread;
                         if (enemy.IntentGaps.Length > 0) hard *= SimGapSpread;
+                        NoteKind kind = i < enemy.IntentKinds.Length ? enemy.IntentKinds[i] : NoteKind.Swipe;   // THE SILENCE GROWS (BLOCK G)
+                        if (kind == NoteKind.Rush) hard *= SimRushSpread;
                         parries[i] = SimSwipe(b, player, rng, hard).Grade;
+                        if (kind == NoteKind.Hold) parries[i] = b.HeldGrade(parries[i], 1f);                       //   a HOLD kept down to the end
                     }
                     b.TakeEnemyAttack(parries);
                 }
@@ -694,11 +697,12 @@ namespace Tacetno433.Core
 
         private static NoteResult[] SimNotes(TurnBattle b, Skill s, SimPlayer player, Random rng)
         {
-            NoteResult[] results = new NoteResult[s.Notes.Length];
+            NoteResult[] results = new NoteResult[b.NoteCount(b.Current, s)];                 // BLOCK G : RUSH TAIL and SOLO notes too
             for (int i = 0; i < results.Length; i++)
             {
-                NoteResult r = SimSwipe(b, player, rng);
-                if (s.Notes[i].Kind == NoteKind.Hold) r.Hold = r.Grade == Grade.Perfect ? 1f : 0.6f;
+                SkillNote note = b.NoteAt(b.Current, s, i);
+                NoteResult r = SimSwipe(b, player, rng, note.Kind == NoteKind.Rush ? SimRushSpread : 1f);
+                if (note.Kind == NoteKind.Hold) r.Hold = r.Grade == Grade.Perfect ? 1f : 0.6f;
                 results[i] = r;
             }
             return results;
@@ -710,6 +714,7 @@ namespace Tacetno433.Core
         //uneven notes of THE NINTH (a guess for the simulator only, not a rule of the game)
         private const float SimLateSpread = 1.3f;
         private const float SimGapSpread = 1.2f;
+        private const float SimRushSpread = 1.25f;    // BLOCK G : a RUSH comes right on the heels of the note before, read a little worse
 
         private static NoteResult SimSwipe(TurnBattle b, SimPlayer player, Random rng, float hard = 1f)
         {

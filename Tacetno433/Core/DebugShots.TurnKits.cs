@@ -185,7 +185,8 @@ namespace Tacetno433.Core
             b.UseSignature(fourPerfect);
             b.PlayBar();
             b.Attack();
-            report += Same("fugue attack", "60 0", b.Enemies[0].Hp + " " + b.Party[0].Echo);
+            //BLOCK G (2 Nov) : a FINALE brings FORTE now, the ATTACK and its echo x1.25 (6.9 -> 7, then 7 x 2.34 = 16 more), HUSH 80 -> 57
+            report += Same("fugue attack", "57 0", b.Enemies[0].Hp + " " + b.Party[0].Echo);
 
             //FUGUE : THE LESSON has nothing to repeat, so QUANTZ's echo waits for her next move (it was LONG BREATH)
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));

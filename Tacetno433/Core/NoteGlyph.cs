@@ -116,6 +116,25 @@ namespace Tacetno433.Core
             Arrow(sb, way, cx, cy, length, head, Palette.Highlight * alpha, thick);
         }
 
+        //Rush Note : BLOCK G (2 Nov, docs/BETA1_DIRECTION.md 46), a swipe that comes right on the heels of the one before.
+        //The same ring and arrow with three speed lines trailing behind it, the way a fast thing is drawn in a comic, so it
+        //reads "quick" before the word under it does.
+        public static void RushNote(SpriteBatch sb, SpriteFont font, float cx, float cy, Flick way, float grow, float alpha, bool hidden)
+        {
+            Note(sb, font, cx, cy, way, grow, alpha, hidden);
+            Vector2 dir = Way(way);
+            if (hidden || dir == Vector2.Zero) return;
+            Vector2 side = new Vector2(-dir.Y, dir.X);
+            float radius = NoteRadius * grow;
+            for (int i = -1; i <= 1; i++)
+            {
+                Vector2 from = new Vector2(cx, cy) - dir * (radius + 6f * grow) + side * (i * radius * 0.45f);
+                Vector2 to = from - dir * (radius * (i == 0 ? 0.9f : 0.6f));
+                Gfx.Line(sb, from, to, Palette.Ink * alpha, 2.5f * grow + 3f);
+                Gfx.Line(sb, from, to, Palette.Highlight * alpha, 2.5f * grow);
+            }
+        }
+
         //Roll Note : the roll of a skill (TREMOLO). A ring with a zigzag in it, the shape of the hand shaking
         //(it was "tr" as music writes a trill, which only a musician reads)
         public static void RollNote(SpriteBatch sb, float cx, float cy, float grow, float alpha)

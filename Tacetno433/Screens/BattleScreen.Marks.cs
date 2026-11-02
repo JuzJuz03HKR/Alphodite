@@ -330,6 +330,7 @@ namespace Tacetno433.Screens
             {
                 line = Join(line, cardAim.PerNote + " DAMAGE");
                 line = Join(line, "+" + cardAim.Breath + " BREATH");
+                if (who != null && who.Solo) line = Join(line, Words.Solo);                    // SOLO (BLOCK G) : this ATTACK is the solo
             }
             else
             {
@@ -346,6 +347,9 @@ namespace Tacetno433.Screens
                 if (cardAim.Dissonance > 0) line = Join(line, "+" + cardAim.Dissonance + " " + Words.Burn);
                 if (cardAim.OffBeat > 0) line = Join(line, "+" + cardAim.OffBeat + " " + Words.Stun);
                 if (cardAim.Breath > 0) line = Join(line, "+" + cardAim.Breath + " BREATH");
+                int rush = cardAim.Notes - s.Notes.Length;                                       // BLOCK G : RUSH TAIL and SOLO notes after its own
+                if (rush > 0) line = Join(line, "+" + rush + " " + Words.Rush);
+                if (who != null && who.Solo) line = Join(line, Words.Solo);
                 if (s.Pierce) line = Join(line, "THROUGH " + Words.Armor);
                 if (s.Breaks) line = Join(line, "BREAKS " + Words.Charge);
                 if (s.Revenge > 0f) line = Join(line, (who != null && who.Wounded ? "x" : "AFTER A HIT x") + Share(s.Revenge) + (who != null && who.Wounded ? " NOW" : ""));

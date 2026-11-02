@@ -21,7 +21,9 @@ namespace Tacetno433.Data
     //   Spark  a second quick swipe right after the note before it, any way
     //   Hold   a swipe, then keep the button down while the ring fills (the baton may move)
     //   Roll   shake the baton as many times as you can while it lasts
-    public enum NoteKind { Swipe, Spark, Hold, Roll }
+    //   Rush   BLOCK G (2 Nov, the user unlocked new kinds) : a quick swipe right on the heels of the note before it,
+    //          the way of its arrow (BattleRules.TurnRushGap). The band's RUSH TAIL and SOLO, TACET's deeper attacks
+    public enum NoteKind { Swipe, Spark, Hold, Roll, Rush }
 
     //SkillNote : one note a skill asks for, its kind and the way of its arrow
     public struct SkillNote
