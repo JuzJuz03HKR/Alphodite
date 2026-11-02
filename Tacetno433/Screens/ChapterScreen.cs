@@ -36,6 +36,16 @@ namespace Tacetno433.Screens
             "Four minutes and thirty-three seconds. Then nothing."
         };
 
+        //THE PREMISE (Beta1 2 Nov, block F2, the user 13.124 : a rough story or none, the game comes first) : one more line under
+        //each movement's, so a run tells its whole story in three lines : why the band goes down, what grows on the way, and
+        //who waits at the bottom (the last boss is the conductor's own hollow, RunState.PickBosses)
+        private static string[] premises =
+        {
+            "TACET took the music. Lead your band down into the silence and bring it back.",
+            "The deeper you go, the louder the silence plays.",
+            "At the bottom waits what the silence made of you."
+        };
+
         //Card Layout : TACET's hole, bigger with every movement
         private static readonly Vector2 Hole = new Vector2(640f, 236f);
         private static readonly float[] holeSizes = { 74f, 88f, 104f };
@@ -43,6 +53,7 @@ namespace Tacetno433.Screens
         private string movementLabel = "";
         private string nameLabel = "";
         private string lineLabel = "";
+        private string premiseLabel = "";
         private string floorLabel = "";
         private string[] nameLetters = new string[0];      // the name one letter at a time, made in Load
         private float[] letterX = new float[0];
@@ -66,6 +77,7 @@ namespace Tacetno433.Screens
             movementLabel = "MOVEMENT  " + numerals[floor - 1];
             nameLabel = MovementList.Names[MovementList.Of(floor)];
             lineLabel = lines[floor - 1];
+            premiseLabel = premises[floor - 1];
             floorLabel = Game.CurrentRun.FloorShort;
             holeSize = holeSizes[floor - 1];
 
@@ -193,6 +205,8 @@ namespace Tacetno433.Screens
 
             float l = UiMotion.Between(time, 1.1f, 0.5f);
             Gfx.TextCentered(sb, Game.StoryFont, lineLabel, cx, 566, Palette.PaperDim * l, TextSize.Story);
+            float q = UiMotion.Between(time, 1.4f, 0.5f);                                 // THE PREMISE, a breath after the line
+            Gfx.TextCentered(sb, Game.StoryFont, premiseLabel, cx, 602, Palette.LineGrey * q, TextSize.StorySmall);
 
             //Corners : where we are, and how to move on
             Gfx.TextSpaced(sb, Game.Font, "TACET 4'33", 40, 680, Palette.LineGrey * l, TextSize.Tiny, 3f);

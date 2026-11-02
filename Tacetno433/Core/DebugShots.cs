@@ -1142,6 +1142,7 @@ namespace Tacetno433.Core
 
         //Page Open : build a sample run that suits the page, then show it.
         //Names: title titlecontinue titlequit guide guide3 guide4 guide5 settings calibrate gallery detail chapter
+        //       chapter2 chapter3 (THE PREMISE 2 Nov : the cards of movements II and III)
         //       credits credits2 credits3 credits4 titlecredits (block E 2 Nov : the CREDITS page, C on the title page)
         //       titlepractice practicehold (THE FIRST REHEARSAL 2 Nov : the first NEW RUN's question, the practice's HOLD lesson)
         //       recruit bandname route pause band (or view) duelbargain dueltrait duelmute duelmirror
@@ -1219,7 +1220,7 @@ namespace Tacetno433.Core
                 screen = new ConductorDetailScreen(ShotConductor(name));
             if (name == "detailcarry") screen = new ConductorDetailScreen(0);             //   the painting on its way to the middle (detailcarry@12)
             if (name == "detailswap") screen = new ConductorDetailScreen(0);              //   the arrows sliding to the next profile (detailswap@40)
-            if (name == "chapter") screen = new ChapterScreen();
+            if (name == "chapter" || name == "chapter2" || name == "chapter3") screen = new ChapterScreen();   // THE PREMISE (F2) : each movement's card
             if (name == "teampick" || name == "teampickfull") screen = new TeamPickScreen();   // THE AUDITION (29 Oct)
             if (name == "luthier" || name == "luthierdone") screen = new LuthierScreen();   // 29 Oct : the luthier, the chest, the boss's great upgrade
             if (name == "treasure") screen = new MotifRewardScreen(MotifRewardScreen.Kind.Treasure);
@@ -1392,6 +1393,8 @@ namespace Tacetno433.Core
                 run.Floor = 3;
             }
             if (name == "rewardboss") run.Chosen.Type = NodeType.Boss;                  // REFORGE in the middle of two treasured motifs
+            if (name == "chapter2") run.Floor = 2;                                    // THE PREMISE (F2, 2 Nov) : the cards of movements II and III
+            if (name == "chapter3") run.Floor = 3;
             run.PlaceSeed = 4331;                                                     // the shop's and the chest's dice
             if (name == "dueldouble") run.Floor = 3;                                  // pairs from floor two, more on the last
             if (name == "duelfermata") run.Floor = 2;                                 // held notes from floor two

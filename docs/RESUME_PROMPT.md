@@ -68,7 +68,9 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 ✅ git ตรงกับ GitHub (ดึงมา 21 commit) / skill 30 ตัว / Context7 เรียกได้ / build ใน cloud ได้ (Debug และ Release 0/0)
 ✅ ก้อน F3 ภาษาไทยรอบเก็บ (`BETA1_DIRECTION.md` 52.3) : ทัวร์โหมดไทย 67 หน้า ที่ยังเป็นอังกฤษเหลือแต่ที่ตั้งใจไม่แปล / HOW TO PLAY บท THE FIGHT บรรทัดละเรื่อง (ONE IDEA A LINE ทั้งสองภาษา `Gfx.WrapWords` รองรับ "\n") / เอาคำทดสอบสระท้ายไฟต์ฝึกออก / turncheck 220/220 savecheck 45/45
 ❓ ถามผู้ใช้ : เลขในชื่อหรือประโยคตัว Cormorant (300 CONCERTOS FLOOR 1 / STAGE 5) ยังเป็นเลขหัวต่ำของฟอนต์นั้น ให้เป็น Saira ด้วยไหม (52.3)
-**งานถัดไปในแชทนี้** : F2 เนื้อเรื่องสั้น (หรือไม่มี) → ก้อน G ที่เหลือ (เงินเฟ้อ ดอกเบี้ย ความโหดทวีคูณ) → G6 ท่าโจมตีตาม Worldless → รีวิวทั้งเกม polish → H4
+✅ ก้อน F2 THE PREMISE (`BETA1_DIRECTION.md` 53) : การ์ดท่อนเพลงใบละบรรทัดเรื่องย่อ
+⏸ ผู้ใช้สั่งหยุดรอ จะให้ทำงานด่วน (ยังไม่ได้บอกงาน)
+**งานถัดไปในแชทนี้** : งานด่วนของผู้ใช้ → ก้อน G ที่เหลือ (เงินเฟ้อ ดอกเบี้ย ความโหดทวีคูณ) → G6 ท่าโจมตีตาม Worldless → รีวิวทั้งเกม polish → H4
 
 **2 พ.ย. แชท /system Polish and Publish4 (กำลังทำ ผู้ใช้สั่ง "ทำงานต่อยาวๆได้เลย" 13.138) : ✅ ก้อน E ที่เหลือ** (`BETA1_DIRECTION.md` 48)
 ✅ หน้า CREDITS (หน้า Title มุมซ้ายล่างหรือกด C `Screens/CreditsScreen.cs` `Data/Credits.cs`) / ป้าย EARLY ACCESS ของ THE METRONOME / ไฟล์ใน Drive = TEAM FREE / Worldless มีขายเท่านั้น / ASSET_LIST ฝ่ายเสียงใหม่ / build 0/0 turncheck 220/220 savecheck 44/44

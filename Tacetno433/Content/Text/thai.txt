@@ -490,3 +490,6 @@ A short practice fight shows how every fight works. It is also on the title page
 String players hit 1 harder.	นักดนตรีเครื่องสายตีแรงขึ้น 1
 Their ATTACK gives 1 BREATH more.	ATTACK ของเขาได้ BREATH เพิ่ม 1
 While its court stands it takes half.	ระหว่างที่ข้าราชบริพารยังยืนอยู่ มันรับความเสียหายแค่ครึ่งเดียว
+TACET took the music. Lead your band down into the silence and bring it back.	TACET กลืนดนตรีไปหมดแล้ว พาวงลงไปในความเงียบ แล้วนำดนตรีกลับมา
+The deeper you go, the louder the silence plays.	ยิ่งลงลึก ความเงียบยิ่งบรรเลงดังขึ้น
+At the bottom waits what the silence made of you.	ที่ก้นหลุม สิ่งที่ความเงียบสร้างขึ้นจากตัวคุณกำลังรออยู่
