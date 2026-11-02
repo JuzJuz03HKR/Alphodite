@@ -9,10 +9,12 @@ namespace Tacetno433.Core
     //the gallery points at it and on their profile page. The user gave the three themes, the character design's pictures
     //showed the pieces.
     //   STORM   THE UNHEARING : rain blown sideways under dark clouds, and now and then lightning in his blue striking down
-    //           behind the painting, the room flashing with it (no flash with LESS FLASHING)
+    //           over the edge of the painting, the room flashing with it (no flash with LESS FLASHING)
     //   PRISM   FANNY MENDELSSOHN AND ??? : big shards of prism glass floating round her, every one turned to throw its light
     //           at her brother (BROTHER, a spot in the painting), the rainbow breaking along their edges, and a spotlight that
     //           always finds him
+    //   IN FRONT (2 Nov, the user 13.110) : the lightning and the glass are over the painting, see-through, so the art is
+    //           still seen through them (the big painting on the profile hid everything behind it)
     //   HOLY    THE METRONOME : the room goes dark round him (he cannot see it) and a shaft of holy gold falls on him alone,
     //           dust turning in it
     //Nothing here draws a person : the brother is in the painting, the light only finds him (the art rule, CLAUDE.md 3).
@@ -49,28 +51,30 @@ namespace Tacetno433.Core
             if (Kind == AuraKind.Holy) UpdateHoly(dt);
         }
 
-        //Draw Back : behind every painting (the storm's clouds and far rain, the shards behind her)
+        //Draw Back : behind every painting (the storm's clouds and far rain)
         public void DrawBack(SpriteBatch sb)
         {
             if (power <= 0f) return;
             if (Kind == AuraKind.Storm) DrawStormBack(sb);
-            if (Kind == AuraKind.Prism) DrawShards(sb, false);
         }
 
-        //Draw Middle : over the room and the other paintings, under this one (the lightning, the dark round THE METRONOME)
+        //Draw Middle : over the room and the other paintings, under this one (the dark round THE METRONOME)
         public void DrawMiddle(SpriteBatch sb)
         {
             if (power <= 0f) return;
-            if (Kind == AuraKind.Storm) DrawBolt(sb);
             if (Kind == AuraKind.Holy) Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Color.Black * (BattleRules.UiAuraHolyDark * power));
         }
 
-        //Draw Front : over the painting (the nearest rain, the shards in front of her, the dust in the gold)
+        //Draw Front : over the painting (the nearest rain and the lightning, every shard of glass, the dust in the gold). IN FRONT
         public void DrawFront(SpriteBatch sb)
         {
             if (power <= 0f) return;
-            if (Kind == AuraKind.Storm) DrawRain(sb, true);
-            if (Kind == AuraKind.Prism) DrawShards(sb, true);
+            if (Kind == AuraKind.Storm)
+            {
+                DrawRain(sb, true);
+                DrawBolt(sb);
+            }
+            if (Kind == AuraKind.Prism) DrawShards(sb);
             if (Kind == AuraKind.Holy) DrawMotes(sb);
         }
 
@@ -149,11 +153,12 @@ namespace Tacetno433.Core
             if (nextBolt <= 0f && power > 0.5f) Strike();
         }
 
-        //Strike : a new bolt from the top of the screen down to the floor just beside the painting, and two forks off it
+        //Strike : a new bolt from the top of the screen down over the painting's edge (IN FRONT : from a little inside it to a
+        //little outside), and two forks off it
         private void Strike()
         {
             float side = dice.NextDouble() < 0.5 ? -1f : 1f;
-            float x = frame.Center.X + side * frame.Width * (0.56f + 0.3f * (float)dice.NextDouble());
+            float x = frame.Center.X + side * frame.Width * (0.3f + 0.3f * (float)dice.NextDouble());
             bolt[0] = new Vector2(x - side * 90f * (float)dice.NextDouble(), -20f);
             bolt[BoltPoints - 1] = new Vector2(x, frame.Bottom - frame.Height * 0.2f * (float)dice.NextDouble());
             Jag(bolt, 0, BoltPoints - 1, 100f);
@@ -223,10 +228,10 @@ namespace Tacetno433.Core
             DrawRain(sb, false);
         }
 
-        //Bolt : the strike itself, a blue edge round a white hot core, over the other paintings but behind his
+        //Bolt : the strike itself, a blue edge round a white hot core. IN FRONT of the painting, see-through (UiAuraSeeThrough)
         private void DrawBolt(SpriteBatch sb)
         {
-            float seen = BoltSeen() * power;
+            float seen = BoltSeen() * power * BattleRules.UiAuraSeeThrough;
             if (seen <= 0f) return;
             Polyline(sb, bolt, Palette.LightningBlue * (0.6f * seen), 7f);
             Polyline(sb, bolt, Palette.LightningBlueHot * seen, 3f);
@@ -279,8 +284,8 @@ namespace Tacetno433.Core
         private const float BrotherX = 0.74f;
         private const float BrotherY = 0.42f;
 
-        //Shard Places : where each shard floats, as a share of the painting's width (X) and height (Y), and its length in
-        //pixels (Z). The last two cross the painting's edge and float in front of it.
+        //Shard Places : where each shard floats, as a share of the painting's width (X) and height (Y, of a band no taller than
+        //the gallery painting, ShardSpan), and its length in pixels (Z). IN FRONT : every one floats over the painting, see-through.
         private static readonly Vector3[] ShardPlaces =
         {
             new Vector3(-0.06f, 0.2f, 116f),
@@ -291,7 +296,7 @@ namespace Tacetno433.Core
             new Vector3(0.12f, -0.02f, 72f),
             new Vector3(0.4f, 0.97f, 84f)
         };
-        private const int FrontShards = 2;
+        private const float ShardSpan = 402f;          // the gallery painting's height : round the taller profile painting they stay off the words
 
         private Vector2[][] shardShape = new Vector2[0][];    // each shard's four corners round its middle, made once
         private float[] shardHue = new float[0];               // where in the rainbow its edge starts
@@ -324,22 +329,22 @@ namespace Tacetno433.Core
             return new Vector2(frame.X + frame.Width * BrotherX, frame.Y + frame.Height * BrotherY);
         }
 
-        //Shard At : where shard i floats now, bobbing slowly
+        //Shard At : where shard i floats now, bobbing slowly, in a band as tall as the gallery painting round the middle
         private Vector2 ShardAt(int i)
         {
             Vector3 place = ShardPlaces[i];
-            return new Vector2(frame.X + frame.Width * place.X, frame.Y + frame.Height * place.Y + 6f * (float)Math.Sin(time * 0.7f + i * 1.3f));
+            float span = Math.Min(frame.Height, ShardSpan);
+            float top = frame.Y + (frame.Height - span) * 0.5f;
+            return new Vector2(frame.X + frame.Width * place.X, top + span * place.Y + 6f * (float)Math.Sin(time * 0.7f + i * 1.3f));
         }
 
         //Shards : glass you can see through, white edges, one edge breaking into the rainbow, and a glint now and then.
-        //Each lies across the line to the brother, like a mirror turned to him.
-        private void DrawShards(SpriteBatch sb, bool front)
+        //Each lies across the line to the brother, like a mirror turned to him. IN FRONT of the painting, see-through.
+        private void DrawShards(SpriteBatch sb)
         {
             Vector2 brother = BrotherAt();
             for (int i = 0; i < shardShape.Length; i++)
             {
-                bool before = i >= shardShape.Length - FrontShards;
-                if (before != front) continue;
                 Vector2 at = ShardAt(i);
                 Vector2 to = brother - at;
                 float face = (float)Math.Atan2(to.Y, to.X) + MathHelper.PiOver2 + 0.2f * (float)Math.Sin(time * 0.45f + i);
@@ -351,7 +356,7 @@ namespace Tacetno433.Core
                     corners[k] = at + new Vector2(p.X * cos - p.Y * sin, p.X * sin + p.Y * cos);
                 }
 
-                float a = power * (front ? 0.75f : 1f);
+                float a = power * BattleRules.UiAuraSeeThrough;
                 float hue = shardHue[i] + time * 0.12f;
                 FillQuad(sb, corners, Color.Lerp(Palette.Paper, Palette.Prism(hue), 0.35f) * (0.14f * a));
                 for (int k = 0; k < 4; k++)

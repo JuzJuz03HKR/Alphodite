@@ -661,7 +661,8 @@
         public static float UiGalleryWalk = 0.34f;        //   STEP INSIDE : the other panels fall away this long before the profile takes the painting
         public static float UiProfileCarry = 0.5f;        // PROFILE : the painting is carried from its gallery panel to the middle of the shot this long (and back)
         public static float UiProfileSwap = 0.32f;        //   the arrows slide one painting out and the next one in this long
-        public static float UiProfileOpen = 0.55f;        //   PROFILE PAINTING : once it lands, the frame opens up and down to the big painting this long (2 Nov)
+        public static float UiProfileFade = 0.6f;         //   PROFILE PAINTING : once it lands, the gallery painting dissolves into the big one this long (2 Nov)
+        public static float UiProfileFadeBack = 0.3f;     //   and back again this long when the page is left, before it is carried back
         public static float UiRouteDive = 0.3f;           // ROUTE (the floor's map, 29 Oct) : choosing a place, the camera dives along the way into it this long
         public static float UiRouteDiveZoom = 0.16f;      //   and this far (0.16 = 16% closer) before the page changes
         public static float UiRouteDiveWalk = 0.5f;       //   while it dives the camera also walks this many rows toward the place
@@ -674,6 +675,7 @@
         public static float UiAuraBoltEvery = 1.3f;       //   a bolt of lightning about this often (seconds, give or take half)
         public static float UiAuraBoltFlash = 0.45f;      //   how bright the room flashes with it (none with LESS FLASHING)
         public static int UiAuraShards = 7;               //   PRISM : big shards of prism glass round FANNY MENDELSSOHN AND ??? (7 at most)
+        public static float UiAuraSeeThrough = 0.7f;      //   IN FRONT : the lightning and the glass are over the painting this see-through (1 = solid, 2 Nov)
         public static int UiAuraMotes = 40;               //   HOLY : specks of dust turning in THE METRONOME's light
         public static float UiAuraHolyDark = 0.55f;       //   and how dark the room goes round him (0 = no darker, 1 = black)
 
