@@ -95,7 +95,7 @@ namespace Tacetno433.Screens
                 float a = Math.Min(1f, 0.6f + 0.1f * comboShown);
                 Color ink = comboGlow >= 1f ? Palette.SpotHolyHot : Palette.Highlight;      // at its fullest the number turns gold
                 Gfx.DrawGlow(sb, cx, cy, 70f * big, ink * (0.25f * a * (0.4f + 0.6f * comboGlow)));
-                PixelDigits.Draw(sb, comboShown, false, cx, cy, BattleRules.ComboCell * big, ink * a, Color.Black * (0.85f * a));
+                Digits.Draw(sb, comboShown, false, cx, cy, BattleRules.ComboCell * big, ink * a, Color.Black * (0.85f * a));
                 Gfx.TextSpacedCentered(sb, Game.Font, WordCombo, cx, cy + 22f, Palette.PaperDim * a, TextSize.Label, 4f);
                 int steps = Math.Min(BattleRules.TurnComboSteps, comboShown / Math.Max(1, BattleRules.TurnComboEvery));   // COMBO (BLOCK G) : its x
                 if (steps > 0) Gfx.TextSpacedCentered(sb, Game.Font, ComboScaleWords[steps], cx, cy + 40f, ink * a, TextSize.Label, 3f);
@@ -113,7 +113,7 @@ namespace Tacetno433.Screens
             {
                 float fall = (1f - comboBreak) * 40f;
                 float a = comboBreak * comboBreak;
-                PixelDigits.Draw(sb, comboBroken, false, cx + 6f * (1f - comboBreak), cy + fall, BattleRules.ComboCell, Palette.LineGrey * a, Color.Black * (0.6f * a));
+                Digits.Draw(sb, comboBroken, false, cx + 6f * (1f - comboBreak), cy + fall, BattleRules.ComboCell, Palette.LineGrey * a, Color.Black * (0.6f * a));
                 Gfx.Line(sb, new Vector2(cx - 30f, cy - 14f + fall), new Vector2(cx + 26f, cy + 12f + fall), Palette.Void * a, 3f);   // the crack
             }
         }

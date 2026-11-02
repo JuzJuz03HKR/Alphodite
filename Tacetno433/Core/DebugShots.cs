@@ -1112,8 +1112,8 @@ namespace Tacetno433.Core
         private static void WriteSeen()
         {
             List<string> lines = new List<string>();
-            foreach (string s in Gfx.Seen)
-                if (!Gfx.WrapOut.Contains(s)) lines.Add(s.Replace("\r", "").Replace("\n", "\\n"));
+            foreach (string s in Gfx.Seen)                                           // a wrap's own output has a new line in it
+                if (!(Gfx.WrapOut.Contains(s) && s.Contains('\n'))) lines.Add(s.Replace("\r", "").Replace("\n", "\\n"));
             lines.Sort(StringComparer.Ordinal);
             File.WriteAllLines(Path.Combine(outDir, "seen.txt"), lines);
         }

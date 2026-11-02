@@ -184,7 +184,7 @@
 | แถบบนของรัน (ชีวิต เงิน ของ) | `Core/RunHud.cs` | แผนที่ หน้าวง ร้าน ที่พัก เหตุการณ์ WORKSHOP รางวัล หน้าซ้อม |
 | ความมืด TACET | `Core/TacetVoid.cs` | เกือบทุกหน้า |
 | เปลี่ยนหน้า | `Core/SlantWipe.cs` `Core/Curtain.cs` `Core/RingSweep.cs` | ทุกหน้า |
-| ตัวเลขใหญ่ / ตัวเลขเป็นคำ | `Core/PixelDigits.cs` / `Core/NumberText.cs` | ไฟต์ ตัวเลขในปุ่ม ทุกหน้า |
+| ตัวเลขทุกตัว (ฟอนต์เดียว Saira ผู้ใช้ 13.141) | ตัวเลขล้วนผ่าน `Gfx` วาดฟอนต์ตัวเลขเองทุกหน้า (NUMBERS ใน `Core/Gfx.cs`) / ตัวเลขใหญ่มีขอบ `Core/Digits.cs` (แทน PixelDigits ที่ลบแล้ว 2 พ.ย.) / ข้อความตัวเลข `Core/NumberText.cs` | ไฟต์ ตัวเลขในปุ่ม ทุกหน้า |
 | สี / ขนาดตัวอักษร / คำกติกา | `Core/Palette.cs` / `Core/TextSize.cs` / `Data/Words.cs` | ทุกหน้า |
 
 ## 0.0 แผนที่โค้ด Beta1 (ฉากต่อสู้ใหม่ + VFX, 28 ต.ค. รอบ 1–6)
@@ -197,7 +197,7 @@
 | โหลด shader, noise ที่ทำบน CPU | `Core/Fx.cs` (Post, Sprite, Void, `Fx.Noise`) |
 | ความมืดของ TACET : หลุมดำหลังศัตรู ความมืดบนพื้น ขอบคลื่นเสียง เงาสะท้อน รอยแตก เศษ คลื่นกระแทก | `Core/TacetVoid.cs` + `Content/Effects/Void.fx` (ไม่มี shader ใช้คลื่นเอียงเดิม `TacetField.DrawSlanted`) |
 | VFX ตอนตี : SLASH SHOT SMASH CROSS INK LIGHTNING, สีของตัวละคร (ทอง ประกาย / แดง ไฟ), ปัด CLASH, ศัตรูตาย PULL, focus lines | `Core/HitFx.cs` (สไตล์ต่อกลุ่มเครื่องดนตรี `BattleScreen.StyleOf`, สีต่อคน `Musician.Spot` + `Palette.Spot*`, SIGNATURE `SignatureStyle` / `SignatureColors`) |
-| ตัวเลขดาเมจแบบ pixel | `Core/PixelDigits.cs` · ป๊อปอัป `Screens/BattleScreen.Show.cs` (`SpawnNumber`) |
+| ตัวเลขดาเมจ (ฟอนต์ตัวเลขเดียวกับทั้งเกม ตั้งแต่ 2 พ.ย. เดิมแบบ pixel) | `Core/Digits.cs` · ป๊อปอัป `Screens/BattleScreen.Show.cs` (`SpawnNumber`) |
 | ฉาก กล้อง parallax ไฟ นักดนตรีตัวหน้า สลับคน ศัตรูยืน ลำแสง | `Screens/BattleScreen.Stage.cs` |
 | MATH ART (1 พ.ย.) ตัวละครที่โค้ดวาดแทนภาพทีม : ตัววาดรูปทรง (FEATHER ขอบเนียน) | `Core/Shapes.cs` |
 | MATH ART : ฟิสิกส์ของตัวละคร (SPRINGS CHAINS SHARDS IK) ท่า ATTACK PARRY HURT KO DEATH, F4 สลับระดับ `Figure.Level` | `Core/Figure.cs` · นักดนตรี `Core/Figure.Band.cs` · TACET กับบอส `Core/Figure.Tacet.cs` · ตัวเลข `BattleRules` หัวข้อ Figure Feel |

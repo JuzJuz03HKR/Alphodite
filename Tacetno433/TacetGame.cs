@@ -155,6 +155,10 @@ namespace Tacetno433
             Lang.Load(Path.Combine(AppContext.BaseDirectory, Content.RootDirectory, "Text", "thai.txt"));
             Lang.Apply();
 
+            //DIGITS (the user 13.141) : the one number font's biggest copy, for big numbers (Core/Digits.cs, Gfx NUMBERS)
+            Digits.Font = Content.Load<SpriteFont>("MainFont_3x");
+            Digits.Font.DefaultCharacter = '?';
+
             //Shared UI Pieces : hand the fonts over once
             Ui.Font = Font;
             Ui.BigFont = BigFont;

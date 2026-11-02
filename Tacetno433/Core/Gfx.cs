@@ -540,9 +540,96 @@ namespace Tacetno433.Core
             return Sharp.Scale == 1f ? (int)v : Sharp.Snap(v);
         }
 
+        //======================================================================================
+        //NUMBERS (Beta1 2 Nov, the user 13.141 : "the same number font in the whole game") : a line that is only a number ("8",
+        //"45 / 45", "+12", "x1.5", "01") is drawn in the game's one number font, Saira, whatever font the page asked for : as
+        //tall as that font's capitals and standing on its baseline, so nothing on a page moves. Small numbers use MainFont,
+        //big ones its biggest copy (Digits.Font, MainFont_3x) so they stay sharp. Words keep their own font (the title's 4'33
+        //and No.433 are a name, and roman numerals I II III are letters).
+        //======================================================================================
+        private class Face
+        {
+            public SpriteFont Font;
+            public char Letter;
+            public float Tall;                       // how tall the letter stands, in the font's own pixels
+            public float Foot;                       // how far below the line's top it stands on the baseline
+        }
+
+        private static readonly Face[] faces = new Face[12];
+        private static int faceCount;
+
+        private static Face FaceOf(SpriteFont font, char letter)
+        {
+            for (int i = 0; i < faceCount; i++)
+                if (faces[i].Font == font && faces[i].Letter == letter) return faces[i];
+            Face f = new Face();
+            f.Font = font;
+            f.Letter = letter;
+            int place = font.Characters.IndexOf(letter);
+            SpriteFont.Glyph g = font.Glyphs[Math.Max(0, place)];
+            f.Tall = Math.Max(1f, g.BoundsInTexture.Height);
+            f.Foot = g.Cropping.Y + g.BoundsInTexture.Height;
+            if (faceCount < faces.Length) faces[faceCount++] = f;
+            return f;
+        }
+
+        //Is Number : only digits and the signs that go with them, and at least one digit
+        public static bool IsNumber(string s)
+        {
+            if (s == null || s.Length == 0 || s.Length > 16) return false;
+            bool digit = false;
+            for (int i = 0; i < s.Length; i++)
+            {
+                char c = s[i];
+                if (c >= '0' && c <= '9') { digit = true; continue; }
+                if (c == ' ' || c == '+' || c == '-' || c == '/' || c == '%' || c == '.' || c == ',' || c == 'x') continue;
+                return false;
+            }
+            return digit;
+        }
+
+        //Number Needed : a number asked for in this font and size is drawn in the number font (not MainFont at its own size)
+        private static bool NumberNeeded(SpriteFont font, string s, float scale)
+        {
+            return Ui.Font != null && (font != Ui.Font || scale > 1.05f) && IsNumber(s);
+        }
+
+        //Number In : the number font and size that stand in for font at scale, and how far down to move so the digits stand
+        //on font's baseline (page pixels)
+        private static SpriteFont NumberIn(SpriteFont font, float scale, out float size, out float down)
+        {
+            Face asked = FaceOf(font, 'H');
+            float tall = asked.Tall * scale;
+            SpriteFont use = Ui.Font;
+            Face digit = FaceOf(use, '0');
+            size = tall / digit.Tall;
+            if (size > 1.05f && Digits.Font != null)
+            {
+                use = Digits.Font;
+                digit = FaceOf(use, '0');
+                size = tall / digit.Tall;
+            }
+            down = asked.Foot * scale - digit.Foot * size;
+            return use;
+        }
+
         //Put : a line already in the player's language, top left at (x, y). A Thai line goes to its partner font, moved down
-        //onto the baseline the English font would have used (THAI TEXT).
+        //onto the baseline the English font would have used (THAI TEXT). A number goes to the number font (NUMBERS).
         private static void Put(SpriteBatch sb, SpriteFont font, string s, float x, float y, Color color, float rotation, Vector2 origin, float scale)
+        {
+            if (rotation == 0f && NumberNeeded(font, s, scale))
+            {
+                float size;
+                float down;
+                SpriteFont number = NumberIn(font, scale, out size, out down);
+                SharpText.Draw(sb, number, s, new Vector2(Whole(x), Whole(y + down)), color, 0f, Vector2.Zero, size);
+                return;
+            }
+            PutLetters(sb, font, s, x, y, color, rotation, origin, scale);
+        }
+
+        //Put Letters : Put without NUMBERS (a spaced line's single letters, so the 4 of 4'33 keeps the title's font)
+        private static void PutLetters(SpriteBatch sb, SpriteFont font, string s, float x, float y, Color color, float rotation, Vector2 origin, float scale)
         {
             if (ThaiText.Has(s))
             {
@@ -564,6 +651,13 @@ namespace Tacetno433.Core
         {
             s = Lang.Of(s);
             if (ThaiText.Has(s)) return ThaiText.SizeOf(font, s);
+            if (font != Ui.Font && NumberNeeded(font, s, 1f))                                    // NUMBERS : as wide as Put draws it
+            {
+                float size;
+                float down;
+                SpriteFont number = NumberIn(font, 1f, out size, out down);
+                return new Vector2(number.MeasureString(s).X * size, font.LineSpacing);
+            }
             return font.MeasureString(s);
         }
 
@@ -618,6 +712,7 @@ namespace Tacetno433.Core
         {
             s = Lang.Of(s);
             if (ThaiText.Has(s)) return ThaiText.SizeOf(font, s).X * scale;
+            if (font != Ui.Font && NumberNeeded(font, s, scale)) return Measure(font, s).X * scale;   // NUMBERS : never spaced
             float width = 0f;
             for (int i = 0; i < s.Length; i++)
             {
@@ -637,7 +732,7 @@ namespace Tacetno433.Core
             See(s);
 #endif
             s = Lang.Of(s);
-            if (ThaiText.Has(s))
+            if (ThaiText.Has(s) || (font != Ui.Font && NumberNeeded(font, s, scale)))       // THAI TEXT, NUMBERS : drawn whole
             {
                 Put(sb, font, s, x, y, color, 0f, Vector2.Zero, scale);
                 return;
@@ -645,7 +740,7 @@ namespace Tacetno433.Core
             for (int i = 0; i < s.Length; i++)
             {
                 string letter = LetterOf(s[i]);
-                Put(sb, font, letter, x, y, color, 0f, Vector2.Zero, scale);
+                PutLetters(sb, font, letter, x, y, color, 0f, Vector2.Zero, scale);
                 x += font.MeasureString(letter).X * scale + tracking;
             }
         }

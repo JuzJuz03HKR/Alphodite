@@ -203,14 +203,15 @@ namespace Tacetno433.Core
         }
 
         //Number : a number that matters (menu7). A small spaced label on the left, the number big and blocky on the
-        //right (PixelDigits), and a thin line under them that fills as the number counts up, a small circle riding its end.
+        //right (Digits, the game's one number font since 2 Nov), and a thin line under them that fills as the number counts up,
+        //a small circle riding its end.
         //shown is the number this frame (UiMotion.Count), fill 0..1 how far the count has gone. Row height about 44.
         public static void Number(SpriteBatch sb, string label, int shown, bool sign, float x, float y, float width, float fill, Color ink, Color soft, float alpha)
         {
             Gfx.TextSpaced(sb, Font, label, x, y + 8f, soft * alpha, TextSize.Label, 3f);
             const float cell = 4f;
-            float numberW = PixelDigits.Width(shown, sign, cell);
-            PixelDigits.Draw(sb, shown, sign, x + width - numberW / 2f, y + 14f, cell, ink * alpha, Color.Transparent);
+            float numberW = Digits.Width(shown, sign, cell);
+            Digits.Draw(sb, shown, sign, x + width - numberW / 2f, y + 14f, cell, ink * alpha, Color.Transparent);
 
             float lineY = y + 36f;
             float to = width * MathHelper.Clamp(fill, 0f, 1f);
