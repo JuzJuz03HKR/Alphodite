@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 1 พ.ย. ค่ำ (FINALE1) | MATH ART รอบ 6 : ผู้ใช้ตอบแล้ว (13.90) แผนงานคู่ขนาน 2 ทาง `docs/PARALLEL_WORK.md` รอผู้ใช้สั่งข้อ 0 แล้วแชทนี้เป็นทาง A (ฝั่งวง) | `docs/BETA1_DIRECTION.md` 32 `docs/art_refs/concept_v6.html` / ถัดไป `Core/Figure.Band.cs` `Core/Figure.Tacet.cs` `Core/Figure.cs` `Screens/BattleScreen.Stage.cs` `Data/Musician.cs` `Core/Palette.cs` |
+| 1 พ.ย. ค่ำ (FINALE1) | MATH ART รอบ 6 : ผู้ใช้ตอบแล้ว (13.90 13.91) แผนหน้าบ้านหลังบ้าน `docs/PARALLEL_WORK.md` รอผู้ใช้สั่งข้อ 0 แล้วแชทนี้เป็นหน้าบ้าน (อาร์ตกับการแสดงผล) | `docs/BETA1_DIRECTION.md` 32 `docs/art_refs/concept_v6.html` / ถัดไป `Core/Figure.Band.cs` `Core/Figure.Tacet.cs` `Core/Figure.cs` `Screens/BattleScreen.Stage.cs` `Data/Musician.cs` `Core/Palette.cs` |
 
 ---
 
@@ -67,8 +67,9 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 **2 พ.ย. แชท /system (FINALE1) : ผู้ใช้ตอบ 7 ข้อของรอบ 6 และขอแผนให้ AI สองตัวทำพร้อมกัน แผนเสร็จ รอผู้ใช้สั่งข้อ 0** (คำต่อคำ `USER_BRIEFS.md` 13.90 ผล `BETA1_DIRECTION.md` 32.11 32.12 แผน `docs/PARALLEL_WORK.md`)
 ✅ ผู้ใช้ตอบ (32.11) : ระดับ 2 กับ F4 เก็บไว้ / รูปทรงอ่านได้เป็นชาย 2 หญิง 2 ไม่ระบุ 1 โอเคมาก (ถามแล้วว่าใครไม่ระบุ) ให้เช็กกิมมิคเพิ่ม / ธาตุสีโอเค / ศัตรูของที่ทำให้เงียบ ดี / บอสอนุสาวรีย์ ดี / สายฟ้าฟ้าก่อนแล้วค่อยแดง / **คงฉากหลังหลอกตา 3D** ลดประกายแค่พอ เพิ่มแสงพื้นกับเงาสะท้อน (ยกเลิกพื้นเส้นเดียว)
 ✅ เช็กดีไซน์นักดนตรีอีกรอบ (32.12) : กิมมิคบนตัวคือตัวบอกเกมเพลย์ (สายชีวิต PAGANINI คีย์บทเรียน QUANTZ กุญแจไขลาน PFUNDT รอยแผลนับสแต็ก DUPORT ปากแตรหันหาคนถัดไป PUNTO) / ร่างในตำนานเห็นบนตัวเมื่อปุ่มได้ดาว 3
-✅ แผนงานคู่ขนาน `docs/PARALLEL_WORK.md` : ทาง A ฝั่งวง (แชท FINALE1 ทำต่อ) / ทาง B ฝั่ง TACET กับเวที (แชทใหม่) แต่ละทางเป็นเจ้าของไฟล์ของตัวเอง / ข้อ 0 แยกจุดที่ชน 3 จุด (สีใน Stage.cs ช่อง FeedBand FeedTacet บล็อก Figure Feel) และเตรียมหัวข้อเอกสารของแต่ละทาง
-**งานถัดไป** : ผู้ใช้สั่งข้อ 0 แล้วแชทนี้ทำข้อ 0 (build 0/0 turncheck savecheck) commit push / แล้วผู้ใช้เปิดแชททาง B ด้วยพรอมต์ท้าย `PARALLEL_WORK.md` / แชทนี้ทำทาง A ข้อ 1 นักดนตรี 5 คน / PLAYTEST FINALE ยัง 1 PERFECT (`PlaytestSignatureNeed` ห้ามแก้จนผู้ใช้บอก)
+✅ ผู้ใช้ตอบเพิ่ม (13.91) : PUNTO ไม่ระบุเพศ (PAGANINI QUANTZ หญิง PFUNDT DUPORT ชาย `BETA1_DIRECTION.md` 32.13 `CHARACTER_DESIGN.md`) / **แยกงานแบบหน้าบ้านหลังบ้าน** แผนแรก (ฝั่งวงกับฝั่ง TACET) ยกเลิก
+✅ แผนใหม่ `docs/PARALLEL_WORK.md` : หน้าบ้าน = อาร์ตกับการแสดงผล (แชท FINALE1 ทำต่อ : ตัวละครรอบ 6 ท่าโจมตี VFX GUI แตะ `Screens/` กับไฟล์วาดใน `Core/`) / หลังบ้าน = ระบบ (แชทใหม่ : ระบบเสียงทั้งเกม ระบบโหลดภาพ build สำหรับขาย ❓ COMBO กับระบบเงิน แตะ `Battle/` `Data/` `Audio/` ไฟล์ระบบ) / จุดต่อกันจุดเดียวคือเหตุการณ์ในไฟต์ ข้อ 0 ทำช่อง `Audio/SoundCues.cs`
+**งานถัดไป** : ผู้ใช้สั่งข้อ 0 แล้วแชทนี้ทำข้อ 0 (build 0/0 turncheck savecheck) commit push / แล้วผู้ใช้เปิดแชทหลังบ้านด้วยพรอมต์ท้าย `PARALLEL_WORK.md` / แชทนี้ทำหน้าบ้านข้อ 1 นักดนตรี 5 คน / PLAYTEST FINALE ยัง 1 PERFECT (`PlaytestSignatureNeed` ห้ามแก้จนผู้ใช้บอก)
 
 **1 พ.ย. แชท /system (FINALE1) : MATH ART รอบ 6 ข้อเสนอเสร็จ รอผู้ใช้ตอบ 7 ข้อ ยังไม่แตะโค้ด** (ทำตาม `BETA1_DIRECTION.md` 31.9 ข้อเสนอเต็ม 32 คำต่อคำ `USER_BRIEFS.md` 13.89)
 ✅ เช็กตอนเปิดแชท : Beta1 ตรงกับ GitHub ไม่มีไฟล์ค้าง / skill 30 ตัว / Context7 เรียก `resolve-library-id` ได้จริง / อ่าน 13.78 ถึง 13.88 กับภาพ `docs/art_refs/` ครบ 13 ภาพ รีวิวรอบ 5 ตามจริง (32.1) และหลักของ Worldless (32.2)
