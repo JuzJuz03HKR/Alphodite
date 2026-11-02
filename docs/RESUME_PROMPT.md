@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| (ว่าง) | | |
+| 2 พ.ย. แชท FINALE2 | รอบ 6 ส่วนที่ 1 นักดนตรี 5 คน (`BETA1_DIRECTION.md` 32.14) | `Core/Figure.Band.cs` `Core/Figure.cs` `Data/Musician.cs` `Core/Palette.cs` `Screens/BattleScreen.Stage.cs` `Core/BandColumn.cs` `Core/DebugShots*.cs` เอกสาร |
 
 ---
 
