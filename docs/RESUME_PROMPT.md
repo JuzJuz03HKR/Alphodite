@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 2 พ.ย. แชท /system Polish and Publish4 | ก้อน E ที่เหลือ (เครดิต หน้าเครดิตในเกม EARLY ACCESS ASSET_LIST) → ก้อน F (Tutorial ภาษาไทย) → เตรียมก้อน H | `docs/CREDITS.md` `docs/ASSET_LIST.md` `docs/asset_list.py` `Screens/TitleScreen.cs` `Screens/Conductor*Screen.cs` `Screens/Tutorial*.cs` ไฟล์ใหม่ `Screens/CreditsScreen.cs` ฟอนต์ไทย `Content/` ข้อความทั้งเกม (ภาษาไทย) |
+| 2 พ.ย. แชท /system Polish and Publish7 (ต่อจาก Polish and Publish4 ที่หยุดแล้ว) | ก้อน F3 ภาษาไทยให้จบ (เก็บประโยคที่ยังไม่แปล แคปตรวจ) → F2 เนื้อเรื่องสั้น → ก้อน G ที่เหลือ (เงิน ความโหดทวีคูณ) → รีวิว polish → H4 | `Content/Text/thai.txt` `docs/lang/` `Core/ThaiText.cs` `Data/Lang.cs` `Core/Gfx.cs` `Screens/*` ที่มีข้อความ `Data/BattleRules.cs` `Data/RunState.cs` |
 
 ---
 
