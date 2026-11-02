@@ -472,6 +472,24 @@
         public static float SkillSawTime = 0.4f;          //   how long it grinds
         public static float SkillSawSpin = 26f;           //   how fast it spins (radians a second)
         public static float SkillRollStep = 0.07f;        // TIMPANI ROLL : the wait between its rings on the floor
+
+        //Tell Feel (block D, 2 Nov, Screens/BattleScreen.Tells.cs) : what TACET's moves look like on their bodies and the band's
+        //skills on the cards. Screen numbers, not balance.
+        public static float TellPlateReach = 0.62f;       // ARMOR : the ring the plates float on, a share of the enemy's bigger side
+        public static float TellPlateWidth = 0.72f;       //   how much of its sixth of the ring a plate covers (the rest is the gap)
+        public static float TellPlateThick = 13f;         //   a plate's thickness (page pixels)
+        public static float TellPlateSpin = 0.25f;        //   how fast they float round (radians a second)
+        public static float TellPlateRise = 0.28f;        //   the time they take to come in after ARMOR UP
+        public static float TellPlateFall = 0.6f;         //   the time the falling or blown plates take to go
+        public static float TellPlateBlow = 260f;         //   how far PIERCE blows them out of the back
+        public static float TellChargeReach = 1.35f;      // CHARGE : how far round the body the shards start, a share of half its bigger side
+        public static float TellChargePull = 0.9f;        //   how fast they are drawn in (rounds a second)
+        public static float TellChargeBeat = 14f;         //   how fast the heart flickers while it is wound up
+        public static float TellBreakSize = 1.3f;         // BREAK : the burst's size, a share of a blow's
+        public static float TellStunSpin = 3.2f;          // STUNNED : how fast the stars turn round the head
+        public static float TellStunSize = 9f;            //   a star's size (page pixels)
+        public static float TellTurnTime = 0.9f;          // THE TURN OF THE HAND : how long the key and the falling note show
+        public static float TellCardTime = 0.95f;         // CARDS : how long a skill shows on a band card
         public static int FigureChips = 4;                // CHIPS : a hit knocks this many small bits off TACET's shell (THE NOISE twice as many)
         public static float FigureChipLife = 0.9f;        //   a chip falls and fades in this long
         public static float FigureCrackTime = 0.3f;       // CRACKS : at 75 50 25 of its life a new crack runs across the body in this long

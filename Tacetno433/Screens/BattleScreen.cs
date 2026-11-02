@@ -389,6 +389,7 @@ namespace Tacetno433.Screens
 
             UpdateStage(dt, hitStop > 0f);
             hits.Update(dt, hitStop > 0f);
+            UpdateTells(dt);                                                                // TELLS : armor plates, charge, stars, the cards (BattleScreen.Tells.cs)
             UpdateShow(dt);
             gesture.Update(dt, view == View.Swipe && Input.MouseDown());
             baton.Update(dt, gesture.Held);
@@ -1143,6 +1144,7 @@ namespace Tacetno433.Screens
                     continue;
                 }
                 if (e.Who == null) continue;
+                TellEvent(e);                                                                   // TELLS : the move's look on the body or the card (BattleScreen.Tells.cs)
 
                 Rectangle box = BoxOf(e.Who);
                 Look look;
@@ -1918,6 +1920,7 @@ namespace Tacetno433.Screens
             EndCameraBatch(sb);
 
             DrawBand(sb, planning);
+            DrawCardTells(sb);                                                    // TELLS : the band's skills on their cards
             DrawIcons(sb, false);                                                 // MARKS AND AIM : THE BAND's statuses
             DrawForeMarks(sb);
             DrawBarStrip(sb, planning);

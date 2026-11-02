@@ -260,6 +260,43 @@ namespace Tacetno433.Core
         }
 
         //======================================================================================
+        //TACET's moves and the band's calls (block D, 37.3, Screens/BattleScreen.Tells.cs says when)
+        //======================================================================================
+
+        //Shatter : TACET's CHARGE broken (BREAK). The power it had gathered bursts out of its heart as white splinters all
+        //round, a spiked star and two rings : the crystal burst Acheron's ultimate ends on (docs/art_refs/vfx/
+        //hsr_acheron_shatter.jpg), white because that power is nobody's now.
+        public void Shatter(Vector2 at, float size)
+        {
+            HitColors white = HitColors.Plain;
+            AddBurst(at, size * 1.4f, 0f, 1f, 16, 3f, 0.32f, white);
+            AddRing(at, size * 1.6f, 1f, 3f, 0.42f, Color.White);
+            AddRing(at, size * 0.9f, 1f, 2f, 0.3f, Color.White);
+            for (int i = 0; i < 8; i++)
+            {
+                float angle = i * MathHelper.TwoPi / 8f + (float)random.NextDouble() * 0.6f;
+                Throw(at, new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)), 3, 560f, Shard, white);
+            }
+            Star(at, size * 1.3f, white);
+            Focus(at);
+        }
+
+        //Splinter : a plate of TACET's ARMOR took a blow (Blocked) : pale chips and sparks off it, away from the band
+        public void Splinter(Vector2 at, HitColors c)
+        {
+            Throw(at, new Vector2(0.8f, -0.6f), 6, 380f, Shard, HitColors.Plain);
+            Throw(at, new Vector2(1f, -0.2f), 5, 520f, Spark, c);
+            AddRing(at, BattleRules.HitSize * 0.35f, 1f, 2f, 0.2f, Color.White);
+        }
+
+        //Rumble : a ring on the floor that opens after a wait (THUNDER CALL's call rolling out to every enemy, nearest first)
+        public void Rumble(Vector2 at, float size, float wait, Color tint)
+        {
+            AddPulse(at, size, 0.24f, 4f, 0.42f, wait, tint);
+            AddPulse(at, size * 0.6f, 0.24f, 3f, 0.3f, wait + 0.06f, tint);
+        }
+
+        //======================================================================================
         //Spawning
         //======================================================================================
 

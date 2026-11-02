@@ -988,6 +988,7 @@ namespace Tacetno433.Screens
             effects.DrawFlares(sb);
             hits.DrawGlow(sb);
             DrawFigureGlows(sb);
+            DrawTellGlows(sb);                                    // TELLS : the CHARGE's heart and ring, STUNNED stars, the winding key
             DrawMood(sb);
             sb.End();
 
@@ -1098,6 +1099,8 @@ namespace Tacetno433.Screens
                 Shapes.Begin(sb.GraphicsDevice, Layer(cam, 3), Sharp.Dot);
                 DrawTacetReflections();
                 DrawTacetFigures();
+                DrawTellPlates();                                     // TELLS : ARMOR plates round them, CHARGE drawing shards in
+                DrawTellShards();
                 Shapes.End();
                 sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, Layer(cam, 3));
             }

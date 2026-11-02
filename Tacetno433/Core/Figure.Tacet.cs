@@ -571,6 +571,18 @@ namespace Tacetno433.Core
         //The core : TACET's heart
         //======================================================================================
 
+        //Heart (block D, 2 Nov) : where this TACET figure's white core is now, page pixels in the fighters' layer. The moves'
+        //tells use it (Screens/BattleScreen.Tells.cs : CHARGE draws its shards into it, BREAK bursts out of it).
+        public Vector2 Heart
+        {
+            get
+            {
+                if (Of == Sort.Musician) return body[Chest].At;
+                SetLook();
+                return Of == Sort.Boss ? CorePoint() + Shift : LookCore();
+            }
+        }
+
         //Core Point : a boss's heart, a small white diamond of light (the Worldless way : every creature has one small glowing
         //core, 13.86). Where it sits says something about the boss : where REQUIEM's unfinished lines stop, in the frame where
         //THE NAMELESS MASTER's name should be, on THE DEVIL'S STRING's string, at the tip of THE DEAF CROWN's stick, where THE
