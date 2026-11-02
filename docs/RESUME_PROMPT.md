@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 2 พ.ย. แชท /system FINALE6 (รอบ 2) | ท่าโจมตีให้ลื่นและเหมือนท่าจริง (ทางโค้ง ตัวนำ อาวุธตามหลัง ตีตามจังหวะ ส่งแรงต่อ) ที่จับดาบ PAGANINI ใหม่ รอตีหรือรับดาเมจเสร็จก่อนสลับตัว (`USER_BRIEFS.md` 13.104) | `Core/Figure.cs` `Core/Figure.Band.cs` `Core/Figure.Tacet.cs` `Screens/BattleScreen.cs` `Screens/BattleScreen.Stage.cs` `Data/BattleRules.cs` และเอกสาร |
+| (ว่าง) | | |
 
 ---
 
@@ -63,6 +63,11 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 ---
 
 ## สถานะล่าสุด (2 พ.ย.)
+
+**2 พ.ย. แชท /system FINALE6 รอบแก้ : ✅ ท่าโจมตีลื่นเหมือนร่างกายจริง ที่จับดาบ PAGANINI ใหม่ รอตีเสร็จก่อนสลับ หยุดรอผู้ใช้ Rebuild ลอง** (คำต่อคำ `USER_BRIEFS.md` 13.104 ทำอะไรกับสิ่งที่ให้ลอง `BETA1_DIRECTION.md` 32.23)
+✅ commit `2ca4836` (โค้ด) และ commit บันทึกนี้ อยู่บน GitHub / build 0/0 turncheck 204/204 savecheck 44/44 / ตาราง "แชทที่กำลังทำงาน" ว่าง / ผู้ใช้บอก context ใกล้เต็ม (บันทึกเรื่อยๆ)
+⚠️ ยังไม่ได้แคปดูด้วยตา : CAPRICE รอบใหม่ TACET บอส ท่ากันทีละโน้ต (โค้ดผ่านการทดสอบแล้ว) / วิธีแคปทีละเฟรมใน cloud อยู่ 32.22 / PLAYTEST FINALE ยัง 1 PERFECT
+**งานถัดไป** : ผู้ใช้ Rebuild ลองตาม 32.23 แล้วบอกจุดที่อยากปรับ (ตัวเลข Attack Feel ส่วน HOW A BODY MOVES / ท่าใน `*Key`) / VFX ก้อน D / ก้อน C GUI
 
 **2 พ.ย. แชท /system FINALE6 : ✅ รอบ 6 ส่วนที่ 5 ท่าโจมตี ทำรวดเดียวตาม 32.21.7 เสร็จ หยุดรอผู้ใช้ Rebuild ลอง** (คำต่อคำ `USER_BRIEFS.md` 13.103 ผลกับสิ่งที่ให้ลอง `BETA1_DIRECTION.md` 32.22)
 ✅ commit `e738486` `ad803d2` และ commit บันทึกนี้ อยู่บน GitHub / build 0/0 turncheck 204/204 savecheck 44/44 / ตาราง "แชทที่กำลังทำงาน" ว่าง
