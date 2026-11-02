@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| (ว่าง) | | |
+| 2 พ.ย. แชท /system ต่อจาก FINALE11 | ก้อน G แกนเกม (FINALE ตั้งค่าใหม่ + มีผล / โน้ตเยอะขึ้นตามความคืบหน้า ชนิดโน้ตใหม่ / COMBO คูณดาเมจ / SOLO) | `Battle/TurnBattle*.cs` `Data/Skill.cs` `Data/BattleRules.cs` `Data/Words.cs` `Core/NoteGlyph.cs` `Screens/BattleScreen*.cs` `Core/DebugShots.Turn*.cs` `docs/TACET_Balance.xlsx` |
 
 ---
 
@@ -64,13 +64,13 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 
 ## สถานะล่าสุด (2 พ.ย.)
 
-**2 พ.ย. แชท /system ต่อจาก FINALE11 : ผู้ใช้ตอบเรื่องเสียงแล้ว (คำต่อคำ `USER_BRIEFS.md` 13.125 แผน `BETA1_DIRECTION.md` 45.6)** ไฟล์ที่ยืมเก็บใน Google Drive โฟลเดอร์ `soundgame` ได้ (ห้ามจดลิงก์ลง repo) ยืมอะไรติดป้ายในเครดิต อยากใช้ของคนอื่นให้น้อยที่สุดแต่เสียงต้องเข้ากับเกมจริง / ใน Drive มีแค่ `Hit_3.wav` / ไม่มีไฟล์เก่าต้องลบ / ยังไม่ได้แตะโค้ด รอผู้ใช้สั่งเริ่มก้อน G
-✅ git ตรงกับ GitHub / skill 30 ตัว / Context7 เรียกได้ / ตาราง "แชทที่กำลังทำงาน" ว่าง
+**2 พ.ย. แชท /system ต่อจาก FINALE11 : ผู้ใช้ตอบเรื่องเสียงแล้ว (คำต่อคำ `USER_BRIEFS.md` 13.125 แผน `BETA1_DIRECTION.md` 45.6)** ไฟล์ที่ยืมเก็บใน Google Drive โฟลเดอร์ `soundgame` ได้ (ห้ามจดลิงก์ลง repo) ยืมอะไรติดป้ายในเครดิต / **13.126 : ใน Drive มีครบ (เสียงตี 3 GUI 4 เพลง 13 รายการ 45.6) ที่เหลือเอาตามที่ไอริสแนะนำ E4 ตัด เป้า : เพลงดีเข้าธีม ยืมได้เต็มที่ ให้เครดิต** / ไม่มีไฟล์เก่าต้องลบ / **กำลังทำก้อน G** (แถวในตาราง "แชทที่กำลังทำงาน" จองแล้ว)
+✅ git ตรงกับ GitHub / skill 30 ตัว / Context7 เรียกได้
 
 **2 พ.ย. ปิดแชท FINALE11 (/update) : ผู้ใช้ตอบงานที่เหลือทุกก้อน E F G H และคำถามค้างทั้งหมด จะไปทำต่อกับ AI อีกตัวในแชทใหม่ "เราจะรีบทำให้เสร็จกันแล้ว"** (คำต่อคำ `USER_BRIEFS.md` 13.124 แผนเต็ม `BETA1_DIRECTION.md` 45)
 ✅ ก้อน A B C D เสร็จ / งานทั้งหมดอยู่บน GitHub / build 0/0 turncheck 205/205 savecheck 44/44 / ตาราง "แชทที่กำลังทำงาน" ว่าง
 ⚠️ ผู้ใช้ยังไม่ได้ Rebuild ลองงานของแชท FINALE11 (สิ่งที่ให้ลอง `BETA1_DIRECTION.md` 39.6 40.3 41.3 42 43 44) / FINALE ยัง 1 PERFECT จนกว่าแชทหน้าจะตั้งค่าใหม่ (ผู้ใช้อนุญาตแล้ว)
-✅ ตอบแล้ว (45.6) : ไม่มีไฟล์เสียงเก่าต้องลบ / ไฟล์ที่ผู้ใช้มีอยู่ Drive `soundgame` (มีแค่ `Hit_3.wav`) / ของที่ยืมเก็บใน Drive ไม่เข้า repo ติดป้ายเครดิตทุกไฟล์ / ❓ ยังเหลือ E4 ยังต้องทำไหม (ไอริสมองว่าไม่ต้อง)
+✅ ตอบแล้ว (45.6) : ไม่มีไฟล์เสียงเก่าต้องลบ / ไฟล์ที่ผู้ใช้มีอยู่ Drive `soundgame` (มีแค่ `Hit_3.wav`) / ของที่ยืมเก็บใน Drive ไม่เข้า repo ติดป้ายเครดิตทุกไฟล์ / E4 ตัดออก (13.126)
 **งานถัดไป (ผู้ใช้อยากรีบ ทำต่อเนื่อง บันทึก commit push ทุกก้อน 13.123)** :
 1. ก้อน G แกนเกมก่อน (ผลต่อความสนุกมากสุด) : FINALE ตั้งค่า PERFECT ใหม่ + ให้มีผลต่อเกม (`TurnBattle.UseSignature` `BattleRules.PlaytestSignatureNeed` เป็น 0 `TurnSignatureNeed`) / balance ยากขึ้น หลากหลายขึ้น : โน้ตมากขึ้นตามความคืบหน้า ตวัดรวด ชนิดโน้ตใหม่ได้ (`Data/Skill.cs` `NoteKind` `Core/NoteGlyph.cs` `TurnBattle.Judge`) / COMBO คูณดาเมจนิดหน่อย (`TurnBattle.PerfectRun` ใน `HitDamage`) / SOLO (ออกแบบเอง) / แก้ค่าที่คาดใน `Core/DebugShots.Turn.cs` / อัปเดต `docs/TACET_Balance.xlsx` (`python3 docs/turn_balance_tabs.py`)
 2. ก้อน E : เสียงตามแผน `BETA1_DIRECTION.md` 45.6 (ของเรา / ฟรี / ยืม ไฟล์ยืมอยู่ Drive อ่านตอนรัน) จุดเล่นเสียง 49 จุด (`Core/SoundBank.cs` + `Screens/BattleScreen*.cs`) / ป้าย EARLY ACCESS ของ THE METRONOME (`Screens/ConductorSelectScreen.cs` `ConductorDetailScreen.cs`)
