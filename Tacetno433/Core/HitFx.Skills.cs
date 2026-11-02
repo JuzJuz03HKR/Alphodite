@@ -103,9 +103,14 @@ namespace Tacetno433.Core
             else if (style == HitStyle.Chakram) Chakram(at, size, power, c);
             else Roll(at, box, size, power, c);
 
-            //WEAPON TIERS : a sharper weapon still shows (the same marks as the plain blows)
+            //WEAPON TIERS : a sharper weapon still shows (the same marks as the plain blows), at three stars the element's
+            //flourish (STAR MARKS, HitFx.Stars.cs)
             if (tier >= 2) AddRing(at, size * 1.35f, 1f, 2f, 0.36f, c.Tint);
-            if (tier >= 3) Star(at, size * 1.25f, c);
+            if (tier >= 3)
+            {
+                Star(at, size * 1.25f, c);
+                Flourish(at, box, size, c);
+            }
             return true;
         }
 

@@ -495,6 +495,11 @@
         public static float WeatherFight = 0.6f;          // THE STAGE TURNS (13.120 13.122) : the conductor's weather on the stage from the first turn (1 after a FINALE)
         public static float WeatherPage = 0.6f;           //   and on the pages of the run (Core/ConductorWeather.cs)
 
+        //Star Feel (block D item 3, 2 Nov, Core/HitFx.Stars.cs) : STAR MARKS, a move's stars seen where it lands. Screen numbers.
+        public static float StarMarkSize = 8f;            // one star's size (page pixels)
+        public static float StarMarkGap = 22f;            //   from one star to the next
+        public static float StarMarkLift = 70f;           //   how far over the blow's middle the row stands
+
         //Tell Feel (block D, 2 Nov, Screens/BattleScreen.Tells.cs) : what TACET's moves look like on their bodies and the band's
         //skills on the cards. Screen numbers, not balance.
         public static float TellPlateReach = 0.62f;       // ARMOR : the ring the plates float on, a share of the enemy's bigger side

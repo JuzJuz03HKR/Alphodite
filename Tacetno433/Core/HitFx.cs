@@ -14,18 +14,21 @@ namespace Tacetno433.Core
     //SPARKLE = golden twinkles and glitter, FLAME = tongues of fire and embers
     public enum HitFlair { None, Sparkle, Flame }
 
-    //Hit Colors : a striker's colours. Tint for the glow, Hot for the bright core, and the flair.
+    //Hit Colors : a striker's colours. Tint for the glow, Hot for the bright core, and the flair. Element : the legend's
+    //element (round 6), for the flourish of a move with three stars (STAR MARKS, Core/HitFx.Stars.cs).
     public struct HitColors
     {
         public Color Tint;
         public Color Hot;
         public HitFlair Flair;
+        public SpotLook Element;
 
-        public HitColors(Color tint, Color hot, HitFlair flair)
+        public HitColors(Color tint, Color hot, HitFlair flair, SpotLook element = SpotLook.Gold)
         {
             Tint = tint;
             Hot = hot;
             Flair = flair;
+            Element = element;
         }
 
         public static readonly HitColors Plain = new HitColors(Color.White, Color.White, HitFlair.None);
@@ -340,13 +343,15 @@ namespace Tacetno433.Core
                 return;
             }
 
-            //WEAPON TIERS : a sharper weapon's blow shows it (SLASH, SHOT and SMASH, the musicians' own blows)
+            //WEAPON TIERS : a sharper weapon's blow shows it (SLASH, SHOT and SMASH, the musicians' own blows). STAR MARKS (block D
+            //item 3) : at three stars, the legend form, the blow ends in its element's flourish (HitFx.Stars.cs)
             if (tier >= 1) Throw(at, way, 6 * tier, 480f, Streak, c);
             if (tier >= 2) AddRing(at, size * 1.35f, 1f, 2f, 0.36f, c.Tint);
             if (tier >= 3)
             {
                 Star(at, size * 1.25f, c);
                 AddRing(at, size * 1.9f, 1f, 1f, 0.46f, c.Hot);
+                Flourish(at, box, size, c);
             }
 
             //FLAIR : the striker's own touch on top of the blow

@@ -558,7 +558,19 @@ namespace Tacetno433.Screens
             if (f == null || f.IsEnemy || f.Musician == null) return HitColors.Plain;
             SpotLook look = f.Musician.Spot;
             HitFlair flair = look == SpotLook.Red || look == SpotLook.Fire ? HitFlair.Flame : HitFlair.Sparkle;
-            return new HitColors(Palette.SpotOf(look), Palette.SpotHotOf(look), flair);
+            return new HitColors(Palette.SpotOf(look), Palette.SpotHotOf(look), flair, look);
+        }
+
+        //Move Stars : STAR MARKS (block D item 3), the stars of the move a musician is striking with : the ATTACK's are the
+        //weapon's tier, a skill's are its button's (REHEARSAL, Data/Rehearsal.cs). A skill is found by its button, the way
+        //SkillStyle finds it (a legend form renames it).
+        private int MoveStars(Fighter f)
+        {
+            if (f == null || f.IsEnemy || f.Musician == null) return 0;
+            Skill s = PlayingSkill;
+            if (s == null) return f.Musician.Rehearsed;
+            int button = s == SkillList.First(f.Musician) ? 1 : (s == SkillList.Second(f.Musician) ? 2 : 0);
+            return button > 0 ? RehearsalList.StarsOf(f.Musician, button) : 0;
         }
 
         //Stage Hit : a hit lands at a point (where the fighters stand). The dark is thrown (back when the band hits),

@@ -139,7 +139,8 @@ namespace Tacetno433.Screens
         private float holdDown;        // how long the button was kept down
         private Grade holdGrade;
         private float holdTick;        // ACTION : the next small blow while it is held
-        private bool lastSkillNote;    // the note whose events are being shown is a skill's last (block D : CAPRICE's finish)
+        private bool lastSkillNote;
+        private bool starsShown;                                                           // STAR MARKS : the move's stars are up already    // the note whose events are being shown is a skill's last (block D : CAPRICE's finish)
 
         //ROLL : shakes counted while a roll note lasts
         private bool rolling;
@@ -1114,6 +1115,7 @@ namespace Tacetno433.Screens
         {
             popStack.Clear();
             echoVoice = false;                                                             // FUGUE : the blows after an ECHO are its own
+            starsShown = false;                                                            // STAR MARKS : once in these events
             int bolts = 0;                                                                 // LIGHTNING : strikes so far
             for (int i = 0; i < battle.Events.Count; i++)
             {
@@ -1195,10 +1197,15 @@ namespace Tacetno433.Screens
                     }
                     else
                     {
-                        int tier = !hitSignature && hitBy != null && !hitBy.IsEnemy ? hitBy.Musician.Rehearsed : 0;   // WEAPON TIERS
+                        int tier = !hitSignature ? MoveStars(hitBy) : 0;                                       // WEAPON TIERS : the move's stars (STAR MARKS)
                         Flick swing = view == View.Swipe && swipeFor == SwipeFor.Skill ? lastWay : Flick.None;     // ACTION : cut the way the baton swung
                         if (voice) hits.HitLater(style, DrawBox(e.Who), power, colors, BattleRules.FinaleEchoDelay);   // the answer comes a moment after
                         else hits.Hit(style, DrawBox(e.Who), power, colors, tier, swing);
+                        if (tier > 0 && !voice && !starsShown && (PlayingSkill == null || lastSkillNote))       // STAR MARKS : once a move, over its blow
+                        {
+                            SpawnStars(DrawBox(e.Who), tier, colors.Tint);
+                            starsShown = true;
+                        }
                         if (style == HitStyle.Caprice && lastSkillNote) hits.CapriceFinish(DrawBox(e.Who), colors);   // CAPRICE : the last cut sets every seam alight
                     }
 
@@ -1869,6 +1876,7 @@ namespace Tacetno433.Screens
                 if (style == HitStyle.Ink) fore = at;
                 Rectangle box = BoxOf(at);
                 hits.Hit(style, box, 1f, colors, tierPicture);
+                if (tierPicture > 0) SpawnStars(box, tierPicture, colors.Tint);                // STAR MARKS (block D item 3)
                 StageHit(box.Center.ToVector2(), style != HitStyle.Ink, 1f, colors.Tint);
                 if (style != HitStyle.Ink) SpawnNumber(new Vector2(box.Center.X, box.Y - 34), 24, false, true, name == "battlegold" || name == "battlefire" ? colors.Tint : Palette.Highlight);
             }
@@ -2000,6 +2008,7 @@ namespace Tacetno433.Screens
 
             BeginCameraBatch(sb);                                            // the words and numbers stay on the fighter they came off
             effects.DrawPops(sb, Game.Font);
+            DrawStarMarks(sb);                                               // STAR MARKS : a move's stars over its blow
             DrawNumbers(sb);
             EndCameraBatch(sb);
             hudPops.DrawPops(sb, Game.Font);

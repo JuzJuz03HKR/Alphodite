@@ -57,6 +57,62 @@ namespace Tacetno433.Screens
             }
         }
 
+        //STAR MARKS (block D item 3, 2 Nov) : a move's stars over its blow, the same row as on its button (Ui.Stars) : the ones
+        //it has in the legend's colour, lighting one after another, the rest dim, on a dark pill so they read over any light
+        private struct Mark
+        {
+            public bool On;
+            public Vector2 At;
+            public int Count;
+            public float Age;
+            public Color Tint;
+        }
+        private readonly Mark[] starMarks = new Mark[6];
+        private const float MarkLife = 0.95f;
+        private const float MarkStep = 0.07f;                          // a star lights this long after the one before
+
+        //Spawn Stars : count stars (1 to 3) of the move that struck, over its blow on box
+        private void SpawnStars(Rectangle box, int count, Color tint)
+        {
+            int slot = 0;
+            for (int i = 0; i < starMarks.Length; i++)
+                if (!starMarks[i].On) { slot = i; break; }
+            Vector2 at = new Vector2(box.Center.X, box.Y + box.Height * 0.45f - BattleRules.StarMarkLift);
+            starMarks[slot] = new Mark { On = true, At = at, Count = Math.Min(count, BattleRules.RehearseMax), Age = 0f, Tint = tint };
+        }
+
+        //Draw Star Marks : through the battle's camera with the numbers. Each pops in big and settles, the row rises a little
+        //and fades at the end.
+        private void DrawStarMarks(SpriteBatch sb)
+        {
+            float gap = BattleRules.StarMarkGap;
+            int total = BattleRules.RehearseMax;
+            for (int i = 0; i < starMarks.Length; i++)
+            {
+                if (!starMarks[i].On) continue;
+                Mark m = starMarks[i];
+                float rise = 12f * Math.Min(1f, m.Age / MarkLife);
+                float fade = Math.Min(1f, Math.Min(m.Age / 0.08f, (MarkLife - m.Age) / 0.25f));
+                float left = m.At.X - gap * (total - 1) / 2f;
+                float y = m.At.Y - rise;
+                Gfx.Pill(sb, new Rectangle((int)(left - 14f), (int)(y - 12f), (int)(gap * (total - 1) + 28f), 24), Palette.Void * (0.6f * fade));
+                for (int k = 0; k < total; k++)
+                {
+                    float x = left + k * gap;
+                    if (k >= m.Count)
+                    {
+                        Gfx.Star(sb, x, y, BattleRules.StarMarkSize * 0.55f, Palette.LineGrey * (0.6f * fade));
+                        continue;
+                    }
+                    float lit = m.Age - k * MarkStep;
+                    if (lit < 0f) continue;
+                    float pop = lit < 0.1f ? 1f + 0.9f * (1f - lit / 0.1f) : 1f;
+                    Gfx.DrawGlow(sb, x, y, BattleRules.StarMarkSize * 3f * pop, m.Tint * (0.5f * fade));
+                    Gfx.Star(sb, x, y, BattleRules.StarMarkSize * pop, Color.Lerp(m.Tint, Color.White, 0.35f) * fade);
+                }
+            }
+        }
+
         private readonly DuelEffects qteEffects = new DuelEffects();   // QTE LIGHT : rings, sparks and slashes at the ring
         private readonly HitFx qteHits = new HitFx();                  //             a parry's clash
         private float cutIn;                                           // CUT-IN : counts down while the picture is up
@@ -71,6 +127,12 @@ namespace Tacetno433.Screens
                 if (!numbers[i].On) continue;
                 numbers[i].Age += dt;
                 if (numbers[i].Age > BattleRules.TurnNumberTime) numbers[i].On = false;
+            }
+            for (int i = 0; i < starMarks.Length; i++)                                    // STAR MARKS
+            {
+                if (!starMarks[i].On) continue;
+                starMarks[i].Age += dt;
+                if (starMarks[i].Age > MarkLife) starMarks[i].On = false;
             }
         }
 
