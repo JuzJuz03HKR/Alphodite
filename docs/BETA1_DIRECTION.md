@@ -3165,3 +3165,22 @@ D3 ดาวขั้นสูงกับร่างในตำนาน → 
 - หน้าเลือกวาทยากร : แผงที่ 3 THE METRONOME มีป้าย EARLY ACCESS มุมซ้ายบน / คลิกเข้าโปรไฟล์ ป้ายอยู่มุมซ้ายบนของกรอบหน้า
 - ป้ายเล็กทุกที่ (NOTE ใต้เมนูหน้า Title ป้ายรางวัลบนแผนที่ ป้ายในร้าน) ตัวอักษรอยู่กลางกล่องไม่โดนตัด
 
+## 49. ก้อน F1 Tutorial ใหม่ : THE FIRST REHEARSAL (2 พ.ย. แชท /system Polish and Publish4 ผู้ใช้ "ทำงานต่อยาวๆได้เลย" 13.138)
+
+### 49.1 ปัญหาที่เจอ
+- หน้า Tutorial เดิม (`Screens/TutorialScreen.cs` `TutorialScreen.Practice.cs`) ยังเป็น**เลนของเกมดวลเดิม** โน้ตวิ่งตามเลนเข้าวงตัดสินทางซ้าย แต่ไฟต์จริงของ Beta1 โน้ตขึ้น**กลางวงแหวนกลางจอ** วงแหวนหดเข้า ลูกศรใหญ่ คนเล่นครั้งแรกจึงเรียนภาพหนึ่งแล้วไปเจออีกภาพ (ขัดเป้าหมาย 13.35 เล่นครั้งแรกเข้าใจทันที)
+- ไฟต์ฝึก (`new BattleScreen(true)`) สอนในหน้าต่อสู้จริงอยู่แล้ว แต่**กล่อง PRACTICE วางทับการ์ดนักดนตรี 2 ใบ** ใบที่ประโยคบอกให้คลิก
+- ไม่ได้สอน HOLD (กดค้าง) ซึ่งเป็นการกดคนละแบบ พลาดง่ายถ้าไม่รู้ / คนที่กด NEW RUN เลยโดยไม่เปิด TUTORIAL ไม่เจออะไรสอนเลย
+
+### 49.2 ทำแล้ว
+- **TUTORIAL บนหน้า Title = ไฟต์ฝึกในหน้าต่อสู้จริงทันที** (ภาพที่เรียนคือภาพที่จะเล่น) / บทเรียนแบบเลนยังอยู่ในโค้ดสำหรับดวลเดิม (`BattleRules.TurnBattleOn` = false) ไม่ได้ลบ
+- **5 บท ทีละประโยค เกมรอจนทำได้** (เพชร 5 เม็ดในกล่อง) : 1 PLAY "Your turn. Press ENTER (PLAY) : the whole band attacks." / 2 BLOCK "Its turn. Hold the left button and swipe the arrow's way as the ring closes." / 3 SKILL "Click a musician, then 2 or 3 : a skill. Skills cost BREATH." แล้ว "A skill is a few notes. Swipe each arrow as its ring closes." / 4 **HOLD (ใหม่)** ตาวางแผนบอกล่วงหน้า "Its next attack ends in a HOLD. Press ENTER and get ready." ตอนโน้ตมา "HOLD : swipe it, then keep the button down until it ends." (โน้ตตัวสุดท้ายของศัตรูฝึกกลายเป็น HOLD ทุกตาจนกว่าจะค้างได้เกิน 3 ใน 4 ของเวลา `PracticeHold`) / 5 FINALE "The diamonds are full. Press SPACE for the FINALE." แล้ว "4 swipes : DOWN, LEFT, RIGHT, UP." / จบ "That is the whole fight. Now win it."
+- **กล่อง PRACTICE ย้ายลงใต้การ์ดของวง** (y 140 สูง 56) ไม่บังการ์ดแล้ว ตัวหนังสือกลางกล่อง
+- **THE FIRST REHEARSAL** : กด NEW RUN ครั้งแรกของเครื่อง (ยังไม่มีรันเซฟ) ขึ้นกล่อง "FIRST TIME HERE?" ปุ่ม PRACTICE (เลือกไว้ก่อน) กับ SKIP / PRACTICE = ไฟต์ฝึก ชนะแล้วไปหน้าเลือกวาทยากรต่อเลย / SKIP = เริ่มรัน / ถามครั้งเดียว (`Settings.PracticeOffered` เซฟใน settings `practice=` เปิด TUTORIAL เองก็นับว่าถามแล้ว)
+- ตรวจ : build 0/0 turncheck 220/220 **savecheck 45/45** (ข้อใหม่ practice asked) / ภาพใหม่ `practicehold` `titlepractice` (`TitleScreen.NewRunForPicture`)
+
+### 49.3 สิ่งที่ให้ลอง (Rebuild ใน Visual Studio ก่อน)
+- หน้า Title เมนู 03 TUTORIAL : เข้าไฟต์ฝึกทันที กล่อง PRACTICE อยู่ใต้การ์ดนักดนตรี 3 ใบ (ไม่ทับ) ทำตามประโยคทีละบทจนเพชรครบ 5
+- บท HOLD : ตาที่สองหลังบล็อกได้ ประโยคบอกว่าการตีถัดไปจบด้วย HOLD / ตอนโน้ตมา ตวัดแล้วกดค้างจนจบ / ปล่อยเร็ว ตาถัดไปได้ลองใหม่
+- ลบไฟล์ settings ของเกมหรือใช้เครื่องที่ไม่เคยเล่น แล้วกด NEW RUN : ขึ้นกล่อง FIRST TIME HERE? / PRACTICE แล้วชนะ ไปหน้าเลือกวาทยากรต่อ / กด NEW RUN ครั้งต่อไปไม่ถามแล้ว
+

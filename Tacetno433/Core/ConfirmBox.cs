@@ -40,6 +40,13 @@ namespace Tacetno433.Core
         //Box Show : the text is wrapped here, once, never while drawing
         public void Show(string title, string line, string yes, string no)
         {
+            Show(title, line, yes, no, false);
+        }
+
+        //Box Show, yes first : the yes is chosen when the box opens, for a question whose usual answer is yes
+        //(THE FIRST REHEARSAL : the practice fight before a first run)
+        public void Show(string title, string line, string yes, string no, bool yesFirst)
+        {
             this.title = title;
             lineWrapped = Gfx.WrapText(Ui.StoryFont, line, LineWrap, TextSize.Story);
             yesText = yes;
@@ -47,7 +54,9 @@ namespace Tacetno433.Core
             yesChosen = false;
             yesMotion = new UiMotion();
             noMotion = new UiMotion();
-            noMotion.Snap(true);
+            yesChosen = yesFirst;
+            if (yesFirst) yesMotion.Snap(true);
+            else noMotion.Snap(true);
             appear = 0f;
             lastMouse = Input.MousePos;
             Open = true;

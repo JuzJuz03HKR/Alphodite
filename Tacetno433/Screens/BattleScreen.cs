@@ -32,7 +32,7 @@ namespace Tacetno433.Screens
     {
         private enum View { Plan, Target, Strike, Swipe, Pause, Over }
         private enum SwipeFor { Skill, Parry, Signature }
-        private enum Lesson { Play, Parry, Skill, Signature }        // CALL was a lesson until it went away (29 Oct)
+        private enum Lesson { Play, Parry, Skill, Hold, Signature }  // CALL was a lesson until it went away (29 Oct), HOLD came with THE FIRST REHEARSAL (2 Nov)
 
         //Layout
         private const float HitX = 640f;
@@ -186,23 +186,36 @@ namespace Tacetno433.Screens
         private const string HintNoAttacks = "DECREE : AN ATTACK THIS TURN HURTS WHOEVER PLAYS IT (NO MOVE = ATTACK)";
         private const string WordAttack = Words.Attack;
 
-        //PRACTICE : what the card at the top says, and which of the four lessons are done
-        private const string CoachPlay = "Your turn. Press ENTER (" + Words.Play + ") and the whole band attacks.";
-        private const string CoachParry = "Its turn. Swipe back at each note to block it. PERFECT blocks it all.";
-        private const string CoachSkill = "Click a musician, then 2 or 3 for a skill. Skills cost BREATH.";
-        private const string CoachSkillSwipe = "A skill is a few notes. Swing the way the arrow points as the ring meets it.";
+        //PRACTICE : what the card says, and which of the five lessons are done. THE FIRST REHEARSAL (Beta1 2 Nov, block F,
+        //docs/BETA1_DIRECTION.md 49) : TUTORIAL on the title page opens this fight straight away, so everything is learned on the
+        //real fight's own page. One line at a time, plain words, the key to press in it.
+        private const string CoachPlay = "Your turn. Press ENTER (" + Words.Play + ") : the whole band attacks.";
+        private const string CoachParry = "Its turn. Hold the left button and swipe the arrow's way as the ring closes.";
+        private const string CoachSkill = "Click a musician, then 2 or 3 : a skill. Skills cost BREATH.";
+        private const string CoachSkillSwipe = "A skill is a few notes. Swipe each arrow as its ring closes.";
+        private const string CoachHoldNext = "Its next attack ends in a HOLD. Press ENTER and get ready.";
+        private const string CoachHold = "HOLD : swipe it, then keep the button down until it ends.";
         private const string CoachSignature = "The diamonds are full. Press SPACE for the " + Words.Finale + ".";
-        private const string CoachSignatureSwipe = "Draw the 4/4 shape : DOWN, LEFT, RIGHT, UP.";
-        private const string CoachWin = "That is all of it. Now win the fight.";
-        private static readonly Rectangle coachBox = new Rectangle(240, 64, 800, 74);   // 60 until 31 Oct : as tall as THE BAND's cards now
-        private const int CoachDown = 7;                   //   its words this much lower, to stay in the middle
-        private bool[] learned = new bool[4];              // one per Lesson
+        private const string CoachSignatureSwipe = "4 swipes : DOWN, LEFT, RIGHT, UP.";
+        private const string CoachWin = "That is the whole fight. Now win it.";
+        private static readonly Rectangle coachBox = new Rectangle(240, 140, 800, 56);  // under THE BAND's cards (until 2 Nov it lay over them, the ones it told you to click)
+        private bool[] learned = new bool[5];              // one per Lesson
         private int learnedCount;
         private string coachLine = CoachPlay;
 
         public BattleScreen(bool practice = false)
         {
             this.practice = practice;
+        }
+
+        //Practice Then Run (THE FIRST REHEARSAL, 2 Nov) : the practice asked for on the first NEW RUN. Won, it goes on to the
+        //conductors' gallery instead of back to the title.
+        private bool thenRun;
+
+        public BattleScreen(bool practice, bool thenRun)
+        {
+            this.practice = practice;
+            this.thenRun = thenRun;
         }
 
         //Can Pause : not in PRACTICE, where ESC leaves like on every tutorial page
@@ -279,6 +292,11 @@ namespace Tacetno433.Screens
         //floor 1 and the soft PRACTICE enemy (EnemyList.Practice). No motifs and no ARCHIVE.
         private void PracticeLoad()
         {
+            if (!Settings.PracticeOffered)                                              // THE FIRST REHEARSAL : played once, the first NEW RUN
+            {                                                                            //   no longer asks for it
+                Settings.PracticeOffered = true;
+                SaveFile.SaveSettings();
+            }
             List<Musician> band = new List<Musician> { MusicianList.All[0], MusicianList.All[1], MusicianList.All[2] };
             battle = new TurnBattle(band, new List<Enemy> { EnemyList.Practice }, 1, new Random());
             battle.Kit = TurnKit.Beethoven;
@@ -995,6 +1013,7 @@ namespace Tacetno433.Screens
             {
                 holding = false;
                 SoundBank.StopLoop();                                  // BLOCK E : the held strings stop with the hand
+                if (practice && holdDown >= BattleRules.TurnHoldTime * 0.75f) Learn(Lesson.Hold);   // THE FIRST REHEARSAL : held most of the way
                 Land(holdGrade, holdDown / BattleRules.TurnHoldTime);
             }
         }
@@ -1417,11 +1436,12 @@ namespace Tacetno433.Screens
         //kept go with it (BattleState.Rank, and the shards are multiplied by the rank).
         private void Finish()
         {
-            //PRACTICE : a win goes back to the title, a loss tries again
+            //PRACTICE : a win goes back to the title (or on to the gallery, THE FIRST REHEARSAL), a loss tries again
             if (practice)
             {
-                if (battle.Step == TurnStep.Won) Game.Screens.Change(new TitleScreen());
-                else Game.Screens.Change(new BattleScreen(true));
+                if (battle.Step == TurnStep.Won && thenRun) Game.Screens.Change(new ConductorSelectScreen());
+                else if (battle.Step == TurnStep.Won) Game.Screens.Change(new TitleScreen());
+                else Game.Screens.Change(new BattleScreen(true, thenRun));
                 view = View.Pause;
                 viewTime = -999f;
                 return;
@@ -1470,12 +1490,30 @@ namespace Tacetno433.Screens
             SoundBank.Play(Sfx.ComboUp, 1f, 0.5f);
         }
 
-        //Practice Help : enough BREATH for the skill lesson, then a full gauge for the SIGNATURE lesson
+        //Practice Help : enough BREATH for the skill lesson, a HOLD at the end of TACET's next attack once a block is learned,
+        //then a full gauge for the FINALE lesson
         private void PracticeHelp()
         {
             if (!learned[(int)Lesson.Play]) return;
+            if (learned[(int)Lesson.Parry] && !learned[(int)Lesson.Hold]) PracticeHold();
             if (!learned[(int)Lesson.Skill]) battle.Breath = Math.Max(battle.Breath, 4);
-            else if (!learned[(int)Lesson.Signature]) battle.Signature = battle.SignatureNeed;
+            else if (learned[(int)Lesson.Hold] && !learned[(int)Lesson.Signature]) battle.Signature = battle.SignatureNeed;
+        }
+
+        //Practice Hold : the practice enemy's attack this turn ends in a HOLD (the same blow, only held). Done again every turn
+        //until a HOLD is held to the end, so a missed one comes back.
+        private void PracticeHold()
+        {
+            for (int i = 0; i < battle.Enemies.Count; i++)
+            {
+                Fighter e = battle.Enemies[i];
+                int count = e.IntentNotes.Length;
+                if (e.Hp <= 0 || count == 0) continue;
+                NoteKind[] kinds = new NoteKind[count];
+                for (int k = 0; k < count; k++) kinds[k] = k < e.IntentKinds.Length ? e.IntentKinds[k] : NoteKind.Swipe;
+                kinds[count - 1] = NoteKind.Hold;
+                e.IntentKinds = kinds;
+            }
         }
 
         //Update Coach : the card says what to do next. While a swipe runs it explains that swipe,
@@ -1484,7 +1522,9 @@ namespace Tacetno433.Screens
         {
             if (view == View.Swipe)
             {
-                if (swipeFor == SwipeFor.Parry && !learned[(int)Lesson.Parry]) coachLine = CoachParry;
+                bool holdNow = next < notes.Count && notes[next].Kind == NoteKind.Hold;
+                if (holdNow && !learned[(int)Lesson.Hold]) coachLine = CoachHold;
+                else if (swipeFor == SwipeFor.Parry && !learned[(int)Lesson.Parry]) coachLine = CoachParry;
                 else if (swipeFor == SwipeFor.Skill && !learned[(int)Lesson.Skill]) coachLine = CoachSkillSwipe;
                 else if (swipeFor == SwipeFor.Signature && !learned[(int)Lesson.Signature]) coachLine = CoachSignatureSwipe;
             }
@@ -1492,6 +1532,7 @@ namespace Tacetno433.Screens
             {
                 if (!learned[(int)Lesson.Play]) coachLine = CoachPlay;
                 else if (!learned[(int)Lesson.Skill]) coachLine = CoachSkill;
+                else if (!learned[(int)Lesson.Hold]) coachLine = CoachHoldNext;
                 else if (!learned[(int)Lesson.Signature]) coachLine = CoachSignature;
                 else coachLine = CoachWin;
             }
@@ -1501,10 +1542,10 @@ namespace Tacetno433.Screens
         private void DrawCoach(SpriteBatch sb)
         {
             Ui.Panel(sb, coachBox, 1f);
-            Ui.Tag(sb, "PRACTICE", coachBox.X + 18, coachBox.Y + CoachDown + 10, true, 1f);
-            Ui.Pips(sb, coachBox.X + 26, coachBox.Y + CoachDown + 44, learnedCount, learned.Length, 5f, 15f, 1f);
-            Gfx.Text(sb, Game.StoryFont, coachLine, coachBox.X + 130, coachBox.Y + CoachDown + 16, Palette.Paper, TextSize.StorySmall);
-            Ui.KeyChipRight(sb, "ESC", coachBox.Right - 14, coachBox.Y + CoachDown + 30, Palette.PaperDim);
+            Ui.Tag(sb, "PRACTICE", coachBox.X + 18, coachBox.Y + 9, true, 1f);
+            Ui.Pips(sb, coachBox.X + 26, coachBox.Y + 40, learnedCount, learned.Length, 5f, 15f, 1f);
+            Gfx.Text(sb, Game.StoryFont, coachLine, coachBox.X + 130, coachBox.Y + coachBox.Height / 2f - Game.StoryFont.LineSpacing * TextSize.StorySmall / 2f, Palette.Paper, TextSize.StorySmall);
+            Ui.KeyChipRight(sb, "ESC", coachBox.Right - 14, coachBox.Y + coachBox.Height / 2f, Palette.PaperDim);
         }
 
         //Ally For : the first musician this skill can be played at (SHIELD and THE LESSON never at the one who plays it)
@@ -2049,11 +2090,12 @@ namespace Tacetno433.Screens
                 for (int i = 0; i < low.Count; i++) low[i].Hp = Math.Max(1, low[i].MaxHp / 8);
                 battle.Events.Clear();
             }
-            else if (name == "practiceskill" || name == "practicesig")
+            else if (name == "practiceskill" || name == "practicesig" || name == "practicehold")
             {
                 Learn(Lesson.Play);                                                     // PRACTICE
                 Learn(Lesson.Parry);
                 if (name != "practiceskill") Learn(Lesson.Skill);
+                if (name == "practicesig") Learn(Lesson.Hold);
                 EnterPlan();
             }
         }

@@ -114,6 +114,7 @@ namespace Tacetno433.Data
             lines.Add("shake=" + (Settings.ScreenShake ? 1 : 0));                     // block D item 9 (2 Nov), an older file without them reads ON
             lines.Add("weather=" + (Settings.StageWeather ? 1 : 0));
             lines.Add("lastband=" + Settings.LastBandName);                  // LAST NAME KEPT (1 Nov), an older file without it reads ""
+            lines.Add("practice=" + (Settings.PracticeOffered ? 1 : 0));     // THE FIRST REHEARSAL (2 Nov), an older file without it asks once
             Write(SettingsPath, lines);
         }
 
@@ -165,6 +166,7 @@ namespace Tacetno433.Data
             Settings.ScreenShake = GetInt(v, "shake", 1) == 1;
             Settings.StageWeather = GetInt(v, "weather", 1) == 1;
             Settings.LastBandName = GetText(v, "lastband");
+            Settings.PracticeOffered = GetInt(v, "practice", 0) == 1;
         }
 
         //Run Save : everything RunState needs to carry on. A fight in progress is not written,

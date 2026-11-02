@@ -68,6 +68,7 @@ namespace Tacetno433.Screens
         private string continueNote = "";   // where the saved run was left
         private ConfirmBox askBox = new ConfirmBox();
         private int confirmFor = -1;        // the item waiting for a yes
+        private const int AskPractice = 100;   // THE FIRST REHEARSAL : the box before a first NEW RUN, its no is a yes to the run
 
         //Title Tips : the notice strip at the bottom, one every few seconds.
         //The turn battle (Alpha 7) has its own list, the old duel's is kept below it.
@@ -335,7 +336,18 @@ namespace Tacetno433.Screens
             if (askBox.Open)
             {
                 int answer = askBox.Update(dt);
-                if (answer == 1) Act(confirmFor);
+                if (confirmFor == AskPractice && answer != 0)
+                {
+                    Settings.PracticeOffered = true;                       // asked once, never again
+                    SaveFile.SaveSettings();
+                    if (answer == 1)
+                    {
+                        SoundBank.Play(Sfx.UiConfirm);
+                        Game.Screens.Change(new BattleScreen(true, true));  // the practice, then on to the gallery
+                    }
+                    else Act(ItemNewRun);
+                }
+                else if (answer == 1) Act(confirmFor);
                 return;
             }
 
@@ -392,6 +404,12 @@ namespace Tacetno433.Screens
             if (Input.KeyPressed(Keys.Escape)) Choose(ItemQuit);
         }
 
+        //New Run For Picture : --shots titlepractice, NEW RUN chosen however the pretend mouse lies (THE FIRST REHEARSAL)
+        public void NewRunForPicture()
+        {
+            Choose(ItemNewRun);
+        }
+
         //Menu Choose : the two lines that cannot be undone ask first
         private void Choose(int item)
         {
@@ -403,6 +421,14 @@ namespace Tacetno433.Screens
             if (item == ItemNewRun && SaveFile.HasRun)
             {
                 Ask(item, "START A NEW RUN?", "The saved run will be thrown away. There is only room for one.", "NEW RUN", "KEEP IT");
+                return;
+            }
+
+            //THE FIRST REHEARSAL (Beta1 2 Nov, block F) : the very first NEW RUN offers the practice fight first, once
+            if (item == ItemNewRun && !Settings.PracticeOffered && BattleRules.TurnBattleOn)
+            {
+                confirmFor = AskPractice;
+                askBox.Show("FIRST TIME HERE?", "A short practice fight shows how every fight works. It is also on the title page : TUTORIAL.", "PRACTICE", "SKIP", true);
                 return;
             }
             Act(item);
@@ -436,8 +462,8 @@ namespace Tacetno433.Screens
                 SaveFile.DeleteRun();
                 Game.Screens.Change(new ConductorSelectScreen());
             }
-            else if (item == ItemTutorial)
-                Game.Screens.Change(new TutorialScreen());
+            else if (item == ItemTutorial)                                 // THE FIRST REHEARSAL : the practice fight on the fight's own page
+                Game.Screens.Change(BattleRules.TurnBattleOn ? (GameScreen)new BattleScreen(true) : new TutorialScreen());
             else if (item == ItemGuide)
                 Game.Screens.Change(new GuideScreen());
             else if (item == ItemSettings)

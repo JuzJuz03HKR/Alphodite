@@ -47,6 +47,10 @@ namespace Tacetno433.Core
         //given, so the next run's name page starts with it (ENTER keeps it). "" when the band went unnamed.
         public static string LastBandName = "";
 
+        //Practice Offered (Beta1 2 Nov, block F, THE FIRST REHEARSAL) : the first NEW RUN asks once whether to play the practice
+        //fight first. True once asked, or once the practice fight has been opened (TUTORIAL on the title page).
+        public static bool PracticeOffered;
+
         //Stroke Timing : seconds taken off every stroke before it is judged in a duel.
         //Every hand, mouse and screen is a little late in its own way. A player whose strokes
         //are always judged late moves this up, and the duel meets them where they are.

@@ -477,6 +477,17 @@ namespace Tacetno433.Core
             Settings.LastBandName = "";
             report += Same("last band name", "THE LOUD ONES", kept);
 
+            //THE FIRST REHEARSAL (2 Nov) : the first NEW RUN's question is asked once, the answer comes back with the settings
+            bool offered = Settings.PracticeOffered;
+            Settings.PracticeOffered = true;
+            SaveFile.SaveSettings();
+            Settings.PracticeOffered = false;
+            SaveFile.LoadSettings();
+            bool offeredBack = Settings.PracticeOffered;
+            Settings.PracticeOffered = offered;
+            SaveFile.SaveSettings();
+            report += Same("practice asked", "True", offeredBack.ToString());
+
             //KEEPSAKE (Alpha 7) : CONTINUE keeps exactly the saved motifs, it does not roll the keepsake again
             int keptKeepsake = Archive.All[Archive.Keepsake].Level;
             Archive.All[Archive.Keepsake].Level = 1;
@@ -1012,6 +1023,7 @@ namespace Tacetno433.Core
             if (names[index] == "credits3" && (frames == 10 || frames == 20)) Input.PretendPress = Keys.Right;
             if (names[index] == "credits4" && (frames == 10 || frames == 20 || frames == 30)) Input.PretendPress = Keys.Right;
             if (names[index] == "titlecredits" && frames == 30) Input.PretendPress = Keys.C;                       //   C on the title page opens it
+            if (names[index] == "titlepractice" && frames == 30 && game.Screens.Current is TitleScreen) { Settings.PracticeOffered = false; ((TitleScreen)game.Screens.Current).NewRunForPicture(); }   // THE FIRST REHEARSAL : the first NEW RUN asks
 
             //Page Changes (Beta1 screens) : a change starts a few frames in, so the picture shows the cover on its way
             if (frames == 6 && (names[index].StartsWith("wipe") || names[index].StartsWith("sweep")))
@@ -1072,6 +1084,7 @@ namespace Tacetno433.Core
         //Page Open : build a sample run that suits the page, then show it.
         //Names: title titlecontinue titlequit guide guide3 guide4 guide5 settings calibrate gallery detail chapter
         //       credits credits2 credits3 credits4 titlecredits (block E 2 Nov : the CREDITS page, C on the title page)
+        //       titlepractice practicehold (THE FIRST REHEARSAL 2 Nov : the first NEW RUN's question, the practice's HOLD lesson)
         //       recruit bandname route pause band (or view) duelbargain dueltrait duelmute duelmirror
         //       duel duelcombo duelboss duelcutin duelpause dueldouble dueltremolo duelfermata duelfire duelrepeat finale
         //       result defeat reward shop shopleave event eventchair rest curtain curtainwin
