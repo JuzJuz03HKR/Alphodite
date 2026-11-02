@@ -100,15 +100,14 @@ namespace Tacetno433.Screens
                 int steps = Math.Min(BattleRules.TurnComboSteps, comboShown / Math.Max(1, BattleRules.TurnComboEvery));   // COMBO (BLOCK G) : its x
                 if (steps > 0) Gfx.TextSpacedCentered(sb, Game.Font, ComboScaleWords[steps], cx, cy + 40f, ink * a, TextSize.Label, 3f);
             }
-            if (battle.Forte > 0)                                                                // FORTE (BLOCK G) : after a FINALE
+            if (battle.Forte > 0)                                                                // FORTE (BLOCK G) : after a FINALE, this turn
             {
                 float beat = 0.75f + 0.25f * (float)Math.Sin(worldTime * 5f);
-                float fy = cy - 58f;
-                Gfx.DrawGlow(sb, cx, fy, 60f, Palette.Highlight * (0.18f * beat));
-                Gfx.TextSpacedCentered(sb, Game.BigFont, Words.Forte, cx, fy - 12f, Palette.Highlight * beat, TextSize.Small, 4f);
-                Gfx.TextSpacedCentered(sb, Game.Font, ForteScaleWord, cx - 22f, fy + 14f, Palette.Highlight, TextSize.Label, 2f);
-                Gfx.TextSpacedCentered(sb, Game.Font, NumberText.Get(battle.Forte), cx + 18f, fy + 14f, Palette.PaperDim, TextSize.Label, 2f);
-                Gfx.TextSpacedCentered(sb, Game.Font, Words.Turn, cx + 44f, fy + 14f, Palette.PaperDim, TextSize.Label, 2f);
+                float fy = cy - 70f;
+                Gfx.DrawGlow(sb, cx, fy, 70f, Palette.Void * 0.8f);                               // a dark bed : the stage's edge never runs through it
+                Gfx.DrawGlow(sb, cx, fy, 60f, Palette.Highlight * (0.16f * beat));
+                Gfx.TextSpacedCentered(sb, Game.BigFont, Words.Forte, cx, fy - 16f, Palette.Highlight * beat, TextSize.Small, 4f);
+                Gfx.TextSpacedCentered(sb, Game.Font, ForteScaleWord, cx, fy + 12f, Palette.Highlight, TextSize.Label, 2f);
             }
             if (comboBreak > 0f)
             {

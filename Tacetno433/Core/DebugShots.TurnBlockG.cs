@@ -21,9 +21,9 @@ namespace Tacetno433.Core
 
             //FINALE : the real cost, the playtest one is off (the user 13.124 : "set what fits")
             TurnBattle b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
-            report += Same("finale need", "8 0 8", BattleRules.TurnSignatureNeed + " " + BattleRules.PlaytestSignatureNeed + " " + b.SignatureNeed);
+            report += Same("finale need", "10 0 10", BattleRules.TurnSignatureNeed + " " + BattleRules.PlaytestSignatureNeed + " " + b.SignatureNeed);
 
-            //FINALE : it breaks every CHARGE (FUGUE does no damage, so the FINALE itself breaks it) and FORTE begins
+            //FINALE : it breaks every CHARGE (FUGUE does no damage, so the FINALE itself breaks it) and FORTE begins for this turn
             Enemy deadAir = EnemyNamed("DEAD AIR");
             b = new TurnBattle(band, new List<Enemy> { deadAir, hush }, 1, new Random(433));
             Tough(b);
@@ -32,15 +32,12 @@ namespace Tacetno433.Core
             b.Kit = TurnKit.Bach;
             b.Signature = b.SignatureNeed;
             b.UseSignature(fourPerfect);
-            report += Same("finale breaks", "True False 2", b.Enemies[0].ChargeBroken + " " + b.Enemies[0].IntentCharge + " " + b.Forte);
+            report += Same("finale breaks", "True False 1", b.Enemies[0].ChargeBroken + " " + b.Enemies[0].IntentCharge + " " + b.Forte);
 
-            //FORTE : this turn and the next, then it is over
+            //FORTE : the band's moves of this turn, the next turn plays as usual
             int round = b.Round;
             for (int i = 0; i < 60 && b.Round == round && b.Step != TurnStep.Won && b.Step != TurnStep.Lost; i++) Step(b, Grade.Good);
-            string after = b.Forte.ToString();
-            round = b.Round;
-            for (int i = 0; i < 60 && b.Round == round && b.Step != TurnStep.Won && b.Step != TurnStep.Lost; i++) Step(b, Grade.Good);
-            report += Same("forte turns", "1 0", after + " " + b.Forte);
+            report += Same("forte turns", "0 " + (round + 1), b.Forte + " " + b.Round);
 
             //FORTE : every hit of the band x1.25 (PAGANINI 5 x 2 x 4 = 40 -> 50), TACET's hits as they were
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
@@ -56,19 +53,20 @@ namespace Tacetno433.Core
                 + F2(TurnBattle.ComboScaleAt(25)) + " " + F2(TurnBattle.ComboScaleAt(30)) + " " + F2(TurnBattle.ComboScaleAt(99)));
 
             //RUSH TAIL : CAPRICE (L R L R) has 4 notes on floor 1, 5 on floor 2, 6 on floor 3, the RUSH notes going back and forth
-            //from its last arrow (Right) : Left, then Right. SOFT AIR (a HEAL) never gets one.
+            //from its last arrow (Right) : Left, then Right. SOFT AIR (a HEAL) never gets one, nor IL CANNONE (one big shot).
             Skill caprice = SkillList.First(MusicianList.All[0]);
             Skill softAir = SkillList.First(MusicianList.All[1]);
             TurnBattle f1 = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             TurnBattle f2 = new TurnBattle(band, new List<Enemy> { hush }, 2, new Random(433));
             TurnBattle f3 = new TurnBattle(band, new List<Enemy> { hush }, 3, new Random(433));
-            report += Same("rush tail", "4 5 6 Rush Left Right 2",
+            Skill cannone = SkillList.Second(MusicianList.All[0]);
+            report += Same("rush tail", "4 5 6 Rush Left Right 2 1",
                 f1.NoteCount(f1.Party[0], caprice) + " " + f2.NoteCount(f2.Party[0], caprice) + " " + f3.NoteCount(f3.Party[0], caprice) + " "
                 + f3.NoteAt(f3.Party[0], caprice, 4).Kind + " " + f3.NoteAt(f3.Party[0], caprice, 4).Way + " " + f3.NoteAt(f3.Party[0], caprice, 5).Way + " "
-                + f3.NoteCount(f3.Party[1], softAir));
+                + f3.NoteCount(f3.Party[1], softAir) + " " + f3.NoteCount(f3.Party[0], cannone));
 
-            //RUSH TAIL : on floor 2 CAPRICE's fifth note (a RUSH) does half of a note (5.2 -> 5, 2.6 -> 3). PAGANINI alone, every note PERFECT.
-            report += Same("rush share", "5 5 5 5 3", SkillHits(2, caprice, 5));
+            //RUSH TAIL : on floor 2 CAPRICE's fifth note (a RUSH) does 40 percent of a note (5.2 -> 5, 2.1 -> 2). PAGANINI alone, every note PERFECT.
+            report += Same("rush share", "5 5 5 5 2", SkillHits(2, caprice, 5));
 
             //THE SILENCE GROWS : on floor 1 TACET's attacks are plain swipes, deeper down they bring RUSH, HOLD (x1.5) and ROLL
             //(THE ROUND opens with D D D : 2 notes on floor 1, 3 deeper. WHITE NOISE's L R L R and one more, NO REST : 5 on floor 3)
@@ -84,7 +82,7 @@ namespace Tacetno433.Core
                 + f1.HeldGrade(Grade.Perfect, 0.2f) + " " + f1.HeldGrade(Grade.Good, 1f) + " " + f1.HeldGrade(Grade.Miss, 1f));
 
             //SOLO : PAGANINI alone with 4 of their own PERFECTs in a row, one more is the SOLO. Their next CAPRICE is the solo : two
-            //RUSH notes more (6), x1.3 (4 x 7 and 2 x 3 = 34), and it is spent (the solo's own notes do not count toward the next one)
+            //RUSH notes more (6), x1.3 (4 x 6.8 -> 7 and 2 x 2.7 -> 3 = 34), and it is spent (the solo's own notes do not count toward the next one)
             b = new TurnBattle(Solo(0), new List<Enemy> { hush }, 1, new Random(433));
             Tough(b);
             b.Breath = 10;

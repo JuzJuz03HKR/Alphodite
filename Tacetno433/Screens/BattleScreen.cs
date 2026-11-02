@@ -1506,12 +1506,18 @@ namespace Tacetno433.Screens
         //Picture Step : for --shots, the fight goes on one step (the band ATTACKs, TACET's notes are blocked GOOD)
         private void PictureStep()
         {
+            PictureStep(Grade.Good);
+        }
+
+        //Picture Step : the parries this well (BLOCK G : PERFECT for a COMBO)
+        private void PictureStep(Grade parry)
+        {
             if (battle.Step == TurnStep.Plan) battle.PlayBar();
             else if (battle.Step == TurnStep.PlayerTurn) battle.Attack();
             else if (battle.Step == TurnStep.EnemyTurn)
             {
                 Grade[] goods = new Grade[battle.Current.IntentNotes.Length];
-                for (int i = 0; i < goods.Length; i++) goods[i] = Grade.Good;
+                for (int i = 0; i < goods.Length; i++) goods[i] = parry;
                 battle.TakeEnemyAttack(goods);
             }
             for (int i = 0; i < battle.Party.Count; i++) battle.Party[i].Hp = battle.Party[i].MaxHp;   // the band stays up for the picture
@@ -1541,6 +1547,69 @@ namespace Tacetno433.Screens
                 else if (who == '2') friend.Lesson = true;
                 else if (who == '3') front.Hp = Math.Max(1, front.MaxHp / 5);
                 else if (who == '4') front.Crescendo = 5;
+                return;
+            }
+
+            //BLOCK G (2 Nov, docs/BETA1_DIRECTION.md 46), on floor 3 against an ELITE (Core/DebugShots.cs) : battlesolo = the plan with
+            //a COMBO of 12 or more (x1.05), FORTE and a SOLO waiting on the one in front / battlerush = PAGANINI's CAPRICE at its
+            //first RUSH note (its RUSH TAIL) / battlerushparry = TACET's attack on the way, its ROLL, RUSH and HOLD
+            if (pic == "battlesolo")
+            {
+                for (int i = 0; i < 400 && (battle.PerfectRun < 12 || battle.Step != TurnStep.Plan) && battle.Step != TurnStep.Won && battle.Step != TurnStep.Lost; i++)
+                {
+                    PictureStep(Grade.Perfect);
+                    for (int k = 0; k < battle.Enemies.Count; k++) battle.Enemies[k].Hp = battle.Enemies[k].MaxHp;   // they stay up for the picture
+                }
+                battle.Party[0].Solo = true;
+                battle.Forte = 1;
+                selected = battle.Party[0];
+                battle.Events.Clear();
+                EnterPlan();
+                return;
+            }
+            if (pic == "battlerush")
+            {
+                Fighter paganini = battle.Party[0];
+                battle.Breath = 10;
+                battle.PlanSkill(paganini, SkillList.First(paganini.Musician), FirstStanding());
+                battle.PlayBar();
+                battle.Events.Clear();
+                NextStep();
+                if (view != View.Swipe) return;
+                int first = SkillList.First(paganini.Musician).Notes.Length;     // its own notes land, the RUSH comes next
+                clock = notes[first - 1].Due;
+                for (int i = 0; i < first && i < notes.Count; i++)
+                {
+                    lastWay = notes[i].Way;
+                    Land(Grade.Perfect, 1f);
+                }
+                clock += BattleRules.TurnRushGap * 0.6f;
+                ShowEvents();
+                return;
+            }
+            if (pic == "battlerushparry")
+            {
+                for (int i = 0; i < 40 && battle.Step != TurnStep.Won && battle.Step != TurnStep.Lost; i++)
+                {
+                    if (battle.Step == TurnStep.Plan)                                     // until an ELITE plans a ROLL (its long phrase)
+                    {
+                        Fighter elite = null;
+                        for (int k = 0; k < battle.Enemies.Count; k++)
+                            if (!battle.Enemies[k].Down && battle.Enemies[k].IntentKinds.Length > 0 && battle.Enemies[k].IntentKinds[0] == NoteKind.Roll) elite = battle.Enemies[k];
+                        if (elite != null) break;
+                    }
+                    PictureStep();
+                    for (int k = 0; k < battle.Enemies.Count; k++) battle.Enemies[k].Hp = battle.Enemies[k].MaxHp;
+                }
+                battle.PlayBar();
+                while (battle.Step == TurnStep.PlayerTurn) battle.Attack();
+                for (int i = 0; i < 6 && battle.Step == TurnStep.EnemyTurn && !(battle.Current.IntentKinds.Length > 0 && battle.Current.IntentKinds[0] == NoteKind.Roll); i++)
+                    battle.TakeEnemyAttack(null);
+                for (int k = 0; k < battle.Party.Count; k++) battle.Party[k].Hp = battle.Party[k].MaxHp;
+                battle.Events.Clear();
+                if (battle.Step != TurnStep.EnemyTurn) return;
+                StartParry();
+                clock = notes.Count > 1 ? notes[1].Due - RingTime * 0.35f : RingTime * 0.75f;   // the ROLL just past, the RUSH and the HOLD on the way
                 return;
             }
 

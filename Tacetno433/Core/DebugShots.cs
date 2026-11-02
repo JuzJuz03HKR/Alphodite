@@ -1299,6 +1299,11 @@ namespace Tacetno433.Core
                 run.Floor = 2;
             }
             if (name == "reward" || name == "dueltremolo" || name.EndsWith("repeat")) run.Chosen.Type = NodeType.Elite;
+            if (name == "battlesolo" || name.StartsWith("battlerush"))               // BLOCK G : floor 3, an ELITE and its pack
+            {
+                run.Chosen.Type = NodeType.Elite;
+                run.Floor = 3;
+            }
             if (name == "rewardboss") run.Chosen.Type = NodeType.Boss;                  // REFORGE in the middle of two treasured motifs
             run.PlaceSeed = 4331;                                                     // the shop's and the chest's dice
             if (name == "dueldouble") run.Floor = 3;                                  // pairs from floor two, more on the last

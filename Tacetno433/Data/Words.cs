@@ -92,8 +92,8 @@ namespace Tacetno433.Data
                                                    + Charge + " and gives " + Forte;
         public static readonly string RushLine = "comes right after the note before it. Swipe its arrow, fast";
         public static readonly string SoloLine = BattleRules.TurnSoloNeed + " PERFECTs in a row by one musician. Their next move is bigger";
-        public static readonly string ForteLine = "after a " + Finale + " the band hits " + Percent(BattleRules.TurnForteScale) + " percent harder for "
-                                                  + BattleRules.TurnForteTurns + " " + Turns;
+        public static readonly string ForteLine = "after a " + Finale + " the band hits " + Percent(BattleRules.TurnForteScale) + " percent harder "
+                                                  + (BattleRules.TurnForteTurns == 1 ? "this " + Turn : "for " + BattleRules.TurnForteTurns + " " + Turns);
         public static readonly string ComboLine = "PERFECTs in a row. Every " + BattleRules.TurnComboEvery + " make the band hit "
                                                   + Percent(1f + BattleRules.TurnComboStep) + " percent harder";
 

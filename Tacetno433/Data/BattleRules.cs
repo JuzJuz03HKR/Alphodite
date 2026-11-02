@@ -189,8 +189,10 @@
         //Conductors (ALPHA7_DESIGN 5.9, step 5). The SIGNATURE gauge fills one per PERFECT (an attack,
         //a skill note or a parry). Full, SPACE plays the 4/4 shape : down, left, right, up, any size.
         //How well the four strokes land sets how strong it is (the average of their swipe scale).
-        public static int TurnSignatureNeed = 8;     // BLOCK G (2 Nov, docs/BETA1_DIRECTION.md 46) : was 6. FINALE breaks every CHARGE and brings FORTE now,
-                                                     // and the deeper floors play more notes (RUSH), so it costs more PERFECTs
+        public static int TurnSignatureNeed = 10;    // BLOCK G (2 Nov, docs/BETA1_DIRECTION.md 46) : was 6. FINALE breaks every CHARGE and brings FORTE now,
+                                                     // and the deeper floors play more notes (RUSH), so it costs more PERFECTs. A good player filled 6 or 8
+                                                     // nearly every turn, and a big moment every turn is no big moment. turnsim before and after BLOCK G,
+                                                     // NORMAL STRONG runs : 39 percent before, 16 with 10, 8 with 12 (the real balance comes from playing, 14.6)
         //PLAYTEST (Beta1, the user asked 28 Oct, to try the SIGNATURE and its CUT-IN often) : above 0, the SIGNATURE needs
         //only this many PERFECTs, CON BRIO or not. Set it back to 0 for the real cost. turncheck and turnsim always use the real one.
         //BLOCK G (2 Nov) : the user let it go (USER_BRIEFS 13.124, "set what fits"), 0 = the real cost.
@@ -232,12 +234,14 @@
         //play, the more notes to swipe, swipes in a rush, varied swipes, more ways to attack, more combos, notes of different
         //kinds", and "FINALE should matter"). First numbers, tuned when the whole game is reviewed (14.6 : never by turnsim).
         //FORTE : the band after a FINALE, the conductor's music fills the stage
-        public static int TurnForteTurns = 2;          // FORTE : the turns it lasts, the one the FINALE was played in counted (so : this one and the next)
+        public static int TurnForteTurns = 1;          // FORTE : the turns it lasts, the one the FINALE was played in counted (1 : the band's moves of this turn)
         public static float TurnForteScale = 1.25f;    //         every hit of the band x this
         //RUSH : the new kind of note, a quick swipe right on the heels of the note before it, the way of its arrow
         public static float TurnRushGap = 0.25f;       // seconds after the note before it (a SPARK is 0.3 and takes any way)
-        public static float TurnRushScale = 0.5f;      // a RUSH note of the band does its skill this much of a note
-        public static int[] TurnRushTail = { 0, 1, 2 };// RUSH TAIL : RUSH notes at the end of every ATTACK skill of the band, floor 1 / 2 / 3
+        public static float TurnRushScale = 0.4f;      // a RUSH note of the band does its skill this much of a note
+        public static int[] TurnRushTail = { 0, 1, 2 };// RUSH TAIL : RUSH notes at the end of the band's ATTACK skills, floor 1 / 2 / 3
+        public static int TurnRushTailFrom = 2;        //   only skills of this many notes or more : a run of cuts gets a flourish, one big shot
+                                                       //   (IL CANNONE, TIMPANI ROLL) stays one shot (at 1, turnsim's PFUNDT bands won 54 percent, without 29)
         //THE SILENCE GROWS : TACET's attacks on floor 1 / 2 / 3. RUSH notes in each attack (every second note at most),
         //an ELITE's or a BOSS's long attack ends in a HOLD (a heavy blow, held back to the end) and on floor 3 opens with a ROLL
         public static int[] TurnEnemyRush = { 0, 1, 2 };       // ELITE and BOSS
@@ -336,7 +340,7 @@
         public static int TurnAccelerandoShakes = 2;      // ACCELERANDO : each shake of a roll counts this many
         public static int TurnGraceTimes = 2;             // GRACE NOTE : a spark that lands does its skill this many times
         public static int TurnMarcatoOffBeat = 2;         // MARCATO : a PERFECT attack's OFF-BEAT, times this
-        public static int TurnConBrioNeed = 6;            // CON BRIO : PERFECTs the SIGNATURE needs instead (BLOCK G 2 Nov : was 4, the real cost went 6 -> 8)
+        public static int TurnConBrioNeed = 8;            // CON BRIO : PERFECTs the SIGNATURE needs instead (BLOCK G 2 Nov : was 4, the real cost went 6 -> 10)
         public static float TurnCodaBelow = 0.25f;        // CODA : an enemy under this share of its life
         public static float TurnCodaScale = 1.5f;         //        takes this much more
         //ONE BAR motifs (step 13). SEGUE and LAST WORD need no number.

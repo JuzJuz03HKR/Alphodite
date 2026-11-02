@@ -1418,7 +1418,7 @@ namespace Tacetno433.Battle
         //the user : "the further you play, the more notes to swipe, swipes in a rush" (USER_BRIEFS 13.124)
         public int TailOf(Fighter user, Skill s)
         {
-            if (user == null || user.IsEnemy || s == null || s.Kind != SkillKind.Attack) return 0;
+            if (user == null || user.IsEnemy || s == null || s.Kind != SkillKind.Attack || s.Notes.Length < BattleRules.TurnRushTailFrom) return 0;
             return BattleRules.TurnRushTail[Math.Max(0, Math.Min(BattleRules.TurnRushTail.Length - 1, Floor - 1))];
         }
 

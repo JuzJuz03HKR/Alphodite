@@ -334,7 +334,7 @@ namespace Tacetno433.Core
             List<Motif> carried = new List<Motif> { MotifList.All[(int)MotifId.BreathMark], MotifList.All[(int)MotifId.Crescendo], MotifList.All[(int)MotifId.ConBrio] };
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             b.GiveMotifs(carried);
-            report += Same("motif start", "5 1 6", b.Breath + " " + b.Party[0].Crescendo + " " + b.SignatureNeed);   // CON BRIO 6 since BLOCK G (was 4)
+            report += Same("motif start", "5 1 8", b.Breath + " " + b.Party[0].Crescendo + " " + b.SignatureNeed);   // CON BRIO 8 since BLOCK G (was 4)
 
             //OVERTURE doubles the first hit only (PAGANINI 5 x 2 x 0.55 x 2 = 11, QUANTZ 4)
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
