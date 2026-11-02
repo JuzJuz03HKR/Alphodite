@@ -111,6 +111,8 @@ namespace Tacetno433.Data
             lines.Add("timing=" + Number(Settings.TimingOffset));
             lines.Add("lessflash=" + (Settings.ReduceFlashing ? 1 : 0));
             lines.Add("clearfight=" + (Settings.ClearFight ? 1 : 0));
+            lines.Add("shake=" + (Settings.ScreenShake ? 1 : 0));                     // block D item 9 (2 Nov), an older file without them reads ON
+            lines.Add("weather=" + (Settings.StageWeather ? 1 : 0));
             lines.Add("lastband=" + Settings.LastBandName);                  // LAST NAME KEPT (1 Nov), an older file without it reads ""
             Write(SettingsPath, lines);
         }
@@ -160,6 +162,8 @@ namespace Tacetno433.Data
             Settings.SetTiming(GetFloat(v, "timing", 0f));
             Settings.ReduceFlashing = GetInt(v, "lessflash", 0) == 1;
             Settings.ClearFight = GetInt(v, "clearfight", 0) == 1;
+            Settings.ScreenShake = GetInt(v, "shake", 1) == 1;
+            Settings.StageWeather = GetInt(v, "weather", 1) == 1;
             Settings.LastBandName = GetText(v, "lastband");
         }
 

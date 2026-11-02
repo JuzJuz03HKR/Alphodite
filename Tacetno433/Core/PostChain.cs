@@ -216,7 +216,7 @@ namespace Tacetno433.Core
         //as the run goes on (the FINALE's level : the floor reached). The rain falls as light, there is nothing over a page.
         private static void Weather(SpriteBatch sb, GameScreen page, float time)
         {
-            if (!page.ShowsWeather || page.Game == null) return;
+            if (!page.ShowsWeather || page.Game == null || !Settings.StageWeather) return;   // STAGE WEATHER (settings)
             RunState run = page.Game.CurrentRun;
             if (run == null || run.Conductor == null || run.Conductor.Aura == AuraKind.None) return;
             int level = System.Math.Max(0, System.Math.Min(2, run.Floor - 1));

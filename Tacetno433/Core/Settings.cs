@@ -34,6 +34,15 @@ namespace Tacetno433.Core
         //default, so it can be turned on and off to compare (CLEAR FIGHT on the settings page).
         public static bool ClearFight;
 
+        //Screen Shake (block D item 9, 2 Nov : the graphics settings once block D's effects were all in) : the fight's camera
+        //shakes with the blows. Off keeps every other move of the camera (the zoom, the kick, the lean) and only stops the
+        //shaking. On by default.
+        public static bool ScreenShake = true;
+
+        //Stage Weather (block D item 9) : the run's conductor's weather on the stage and the run's pages (THE STAGE TURNS,
+        //Core/ConductorWeather.cs : rain, rainbow light, stars). Off leaves the stage as it was. On by default.
+        public static bool StageWeather = true;
+
         //Last Band Name : LAST NAME KEPT (Beta1 1 Nov, docs/BETA1_DIRECTION.md 29 item 10), the name the last run's band was
         //given, so the next run's name page starts with it (ENTER keeps it). "" when the band went unnamed.
         public static string LastBandName = "";

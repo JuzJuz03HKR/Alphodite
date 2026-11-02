@@ -1032,7 +1032,7 @@ namespace Tacetno433.Screens
             cam += kick;
             if (shake > 0f)
             {
-                float amount = shake * shake * 10f * Flashing;
+                float amount = shake * shake * 10f * Flashing * (Settings.ScreenShake ? 1f : 0f);   // SCREEN SHAKE (settings)
                 cam += new Vector2((float)Math.Sin(time * 91f) * amount, (float)Math.Cos(time * 73f) * amount);
             }
             return cam;

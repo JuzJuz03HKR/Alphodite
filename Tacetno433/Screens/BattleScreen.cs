@@ -1975,7 +1975,7 @@ namespace Tacetno433.Screens
             //The World : finished before the frame (BattleScreen.Stage.cs PreDraw, Core/PostChain.cs). The IMPACT FRAME
             //punches the camera in round the blow for a moment. ACTION (Beta1, 29 Oct) : the camera that moves with the
             //baton frames it (Core/StageCamera.cs), worked out once here for all that is drawn through it this frame.
-            actionCam.Shown(Flashing, 1f + hits.ImpactZoom * BattleRules.HitImpactZoom, out camAt, out camZoom, out camTurn, out camShift);
+            actionCam.Shown(Flashing * (Settings.ScreenShake ? 1f : 0f), 1f + hits.ImpactZoom * BattleRules.HitImpactZoom, out camAt, out camZoom, out camTurn, out camShift);   // SCREEN SHAKE
             if (PostChain.Final != null) PostChain.ShowFinal(sb, camAt, camZoom, camTurn, camShift, Color.White);
             else Gfx.Rect(sb, 0, 0, TacetGame.ScreenW, TacetGame.ScreenH, Palette.StageDeep);
             DrawFinaleSky(sb);                                                    // FINALE : HOLY's stars and STORM's rain over the world
