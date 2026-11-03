@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| 3 พ.ย. แชท /system LAPTOP | เกมแลคบนโน้ตบุ๊คจอใหญ่ / NORMAL ง่ายลงช้าลง / บั๊กภาษาไทยอังกฤษ / คำอธิบายง่ายขึ้นมีสีคำ | `Core/PostChain.cs` `Core/Sharp.cs` `TacetGame.cs` `Core/Settings.cs` `Data/BattleRules.cs` `Data/Lang.cs` `Core/Gfx.cs` `Data/Words.cs` `Content/Text/thai.txt` `Screens/SettingsScreen.cs` `Core/DebugShots.Turn.cs` |
+| (ว่าง) | | |
 
 ---
 
@@ -63,6 +63,8 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 ---
 
 ## สถานะล่าสุด (2 พ.ย.)
+
+**✅ 3 พ.ย. แชท /system LAPTOP (`BETA1_DIRECTION.md` 57 คำต่อคำ `USER_BRIEFS.md` 13.150 ถึง 13.153)** : เต็มจอลื่นขึ้นเกือบ 2 เท่าภาพเหมือนเดิม (ART PIXELS DOWN WIDE STRAIGHT ON) / F3 FPS นับภาพจริง / SETTINGS GRAPHICS AUTO HIGH MEDIUM LOW / โหมด NEWBIE | NORMAL | HARD (`TurnBattle.Ease` `BattleRules` MODES) NORMAL ช้าลงง่ายลงนิดหน่อย / THE GUIDE ในไฟต์และทุกหน้าของรัน NEWBIE ชั้น 1 2 (`Screens/BattleScreen.Guide.cs` `Core/PageGuide.cs`) / Tutorial มี FIRST LOOK กรอบชี้ WHY / คำกติกาเป็นสี (`Core/MarkWords.cs`) / ภาษาไม่ปน + ANY NUMBERS (`Data/Lang.cs`) / ป้ายเป้าในปุ่มท่า / turncheck 221/221 savecheck 46/46 / .exe ใหม่ `Build/TACET4'33.zip` / ⚠️ ยังไม่ได้เปิดบน Windows / **ถัดไป** : ถามผลลองบนโน้ตบุ๊ค (FPS ใน F3 ระดับ GRAPHICS ที่ AUTO เลือก) / ผู้ใช้ชี้หน้าที่ข้อความยังรก (13.153) / ปรับความยาก NEWBIE NORMAL ตามที่เล่นจริง
 
 **✅ 3 พ.ย. (แชท /system token เหลือ 5%) WORLDLESS PASS + .exe ใหม่ (`BETA1_DIRECTION.md` 55 คำต่อคำ `USER_BRIEFS.md` 13.145 ถึง 13.149)** : ✅ ป้าย HARD แถบบน (`Core/RunHud.cs`) / ✅ FLOOR GLARE แสงพาดพื้นตอนโดน (`Core/HitFx.Floor.cs`) / ✅ STRIKE ท่าฟันเร่งเข้าจุดโดน + ตัวเลข Attack Feel (`Core/Figure.cs` `StrikeEase`) / ✅ BOSS RIM ขอบแสงบอส / ✅ SHATTER รอยแตกเป็นเศษหยัก (`Figure.Shatter`) / ✅ THE WRAP ผ้าพันตา THE BLIND CANTOR ไม่มีชายผ้า / ✅ STAND OUT สีธาตุสด ขอบแสงสีธาตุนักดนตรี ขอบขาว TACET (`Figure.DrawRim` `Figure.CT`) / ✅ FLOWING HAIR PAGANINI QUANTZ (`Figure.FlowHair`) / ✅ `probe_patch.py` ใช้ได้ / ✅ Context7 ใช้ได้ / turncheck 220/220 savecheck 45/45 build 0/0 / **.exe ล่าสุด `Build/TACET4'33.zip` บน Beta1 (Release self-contained ไม่มีเสียง TEAM FREE)** / ตัวเลขที่เพิ่มใน `BattleRules` เป็นตัวเลขภาพทั้งหมด ไม่ต้องแก้ `TACET_Balance.xlsx` / ⚠️ ยังไม่มีอะไรได้เปิดบน Windows ผู้ใช้ยังไม่ได้ฟังเสียง MAESTRO SOUNDS กับ DARK PASS / **ถัดไป** : ถามผลลอง .exe แล้วแก้ตามที่บอก (ตัวเลข `BattleRules` : `FigureTintShade` `FigureBandRim*` `FigureTacetGlowRim` `BossRim*` `Shatter*` `HairWave*` `FloorGlare*` `AttackSnap` Attack Feel) / เสียงที่ยังใส แก้ใน `docs/audio/darken_sounds.py` / รีวิว polish ทั้งเกมก่อน publish (ก้อน G H)
 

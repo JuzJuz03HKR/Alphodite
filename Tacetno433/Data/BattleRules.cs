@@ -1267,5 +1267,6 @@
         public static float ThaiLineMain = 1.2f;       // MainFont's partner, Chakra Petch
         public static float ThaiLineBig = 1.15f;       // BigFont's partner, Trirong
         public static float ThaiLineStory = 1.3f;      // StoryFont's partner, Trirong
+        public static float ThaiUnderTitle = 5f;     // LAID OUT (3 Nov, the user 13.153) : a Thai line right under a big title moves down this much, its marks above the letters touched the title
     }
 }

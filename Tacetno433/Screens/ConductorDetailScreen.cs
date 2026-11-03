@@ -558,7 +558,7 @@ namespace Tacetno433.Screens
             Gfx.Text(sb, Game.BigFont, nameTop, LeftX - (1f - Arrived(0f)) * slide, 54, Palette.Highlight * a, nameScale);
             if (nameLow.Length > 0)
                 Gfx.Text(sb, Game.BigFont, nameLow, LeftX - (1f - Arrived(0.03f)) * slide, 54 + drop, Palette.Highlight * a, nameScale);
-            Gfx.Text(sb, Game.StoryFont, epithetWrapped, LeftX + 2 - (1f - Arrived(0.06f)) * slide, 108 + drop, Palette.PaperDim * b, TextSize.Story);
+            Gfx.Text(sb, Game.StoryFont, epithetWrapped, LeftX + 2 - (1f - Arrived(0.06f)) * slide, 108 + drop + (Lang.Thai ? BattleRules.ThaiUnderTitle : 0f), Palette.PaperDim * b, TextSize.Story);   // LAID OUT : Thai marks clear of the name
             Gfx.Rect(sb, LeftX, 160 + drop, LeftW * Arrived(0.06f), 1, Palette.LineGrey * b);
             Gfx.Circle(sb, LeftX, 160 + drop, 3f, c.SpotAt(time) * b);
 

@@ -2800,7 +2800,9 @@ namespace Tacetno433.Screens
                         int lean = usable && Input.MouseOver(box) ? 4 : 0;
                         Rectangle icon = new Rectangle(box.X + Ui.Slant + 8 + lean, box.Center.Y - 15, 24, 24);
                         Ui.Icon(sb, icon, commandArt[k], commandCode[k], lit ? Palette.Ink : kind, false, 0, a);
-                        Gfx.TextSpaced(sb, Game.Font, commandFor[k], box.X + Ui.Slant + 2, box.Y - 13, Palette.LineGrey * a, TextSize.Tiny, 2f);
+                        //LAID OUT (3 Nov, the user 13.153) : who it is for sits inside the button, bottom right, beside its BREATH.
+                        //It used to stand on the button's top edge, the line running through the letters.
+                        Gfx.TextSpacedRight(sb, Game.Font, commandFor[k], box.Right - Ui.Slant - 12, box.Bottom - 14, Palette.LineGrey * a, TextSize.Tiny, 1.5f);
                         if (k > 0) DrawPrice(sb, s, icon.Center.X - (s.Cost - 1) * 4.5f, box.Bottom - 6, a);
                         Ui.Stars(sb, box.Right - Ui.Slant - 34, box.Y + 9, RehearsalList.StarsOf(selected.Musician, k), RehearsalList.Most, 4f, 11f, SpotOf(selected).Tint, a);   // REHEARSAL : its stars
                     }

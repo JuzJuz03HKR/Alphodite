@@ -245,7 +245,7 @@ namespace Tacetno433.Screens
             //Headline
             Gfx.TextSpaced(sb, Game.Font, "CURTAIN CALL", 90, 44, Palette.PaperDim * a, TextSize.Label, 6f);
             Gfx.Text(sb, Game.LogoFont, headline, 84 - (1f - a) * slide, 64, Palette.Highlight * a, TextSize.Logo * 0.85f);
-            Gfx.Text(sb, Game.StoryFont, subline, 92, 160, Palette.Paper * b, TextSize.Story);
+            Gfx.Text(sb, Game.StoryFont, subline, 92, 160 + (Lang.Thai ? BattleRules.ThaiUnderTitle : 0f), Palette.Paper * b, TextSize.Story);   // LAID OUT : Thai marks clear of BRAVO
 
             //ENCORE : the call under the subline in the conductor's colour, and the level it opened
             if (encoreLine.Length > 0)
