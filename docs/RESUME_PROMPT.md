@@ -64,6 +64,8 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 
 ## สถานะล่าสุด (2 พ.ย.)
 
+**✅ 3 พ.ย. BALANCE + HARD MODE + ตัวเกม v1.1.0 (`BETA1_DIRECTION.md` 56)** : วาทยากร 28/38/32 นักดนตรี เงิน โหมด NORMAL/HARD หน้าโปรไฟล์วาทยากร (M) turncheck 220/220 savecheck 45/45 / ⚠️ ผู้ใช้ยังไม่ได้ลอง v1.1.0 บน Windows / ถัดไป : ป้าย HARD บนแถบบนระหว่างรัน, ท่าทางนักดนตรีแบบ Worldless (`Core/Figure.cs` Attack Feel), แสงบนพื้นตอนโดน (`Core/HitFx.cs`), รูปร่างบอสรายตัว (`Core/Figure.Tacet.cs`), ซ่อม `probe_patch.py` ข้อ TellBlows / ผู้ใช้ปิดแชทตอน token เหลือ 2%
+
 **⏳ 3 พ.ย. polish หลังส่ง (`BETA1_DIRECTION.md` 55)** : เสียงโทนมืด เสียง FINALE ฟ้าผ่า กระจก แสง ริบบิ้นแสงตามอาวุธ ปีกเสี้ยวกับวงแหวนของบอส เสร็จแล้ว / ที่เหลือ : ซ่อมเครื่องมือถ่ายท่า แล้วดูริบบิ้นตอนฟันจริง ท่าทางนักดนตรีแบบ Worldless แสงบนพื้นตอนโดน
 
 **✅ 2 พ.ย. ดึก แชท /system Final (งานส่งด่วน 54 ทำครบ ผล `BETA1_DIRECTION.md` 54.4)** : แก้เกม 3 จุด push แล้ว (`bf93940`) / README.md ที่ราก repo / **tag v1.0.0 push ไม่ได้ (proxy 403 ให้ push แค่ branch) ผู้ใช้สร้าง tag ตอนกด Release บนเว็บ** / ไฟล์ส่งอยู่ที่ผู้ใช้แล้ว (ส่งทางแชท) : `TACET433_v1.0.0_Windows.zip` `TACET433_Asset_Content.zip` `TACET433_Teaser.mp4` `TACET433_Process.pdf` / teaser แก้ 4 รอบตามผู้ใช้ (v4 = อาร์ต CG ของทีมจาก Canva + VFX วาดด้วยโค้ด หลุมหมุน ฟ้าผ่า ปริซึม ดาว แสงจ้า ไม่มีฉากสู้ สคริปต์ไม่อยู่ใน repo) / สไลด์ Canva ใส่ข้อมูลหน้า 1 4 7 8 9 + หน้า teaser ผู้ใช้ตอบตกลง บันทึกแล้ว / ภาพที่สไลด์ใช้ `docs/submission/`
