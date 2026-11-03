@@ -612,13 +612,13 @@
         //docs/TACET_Balance.xlsx does not show them). A blow is KEY POSES joined in time (Core/Figure.cs) : READY or WIND
         //(the wind up), CUT (fast, it ends on the hit), HOLD (kept a moment), BACK (home again).
         //Seconds, in three weights : light (PAGANINI QUANTZ THE NOISE), medium (DUPORT PUNTO THE MUTE THE EMPTY CHOIR), heavy (PFUNDT).
-        public static float[] AttackWind = { 0.10f, 0.14f, 0.24f };      // the wind up (ZZZ : a heavy blow winds up long, a light one is quick)
+        public static float[] AttackWind = { 0.13f, 0.17f, 0.28f };      // the wind up (ZZZ : a heavy blow winds up long, a light one is quick)
         public static float[] AttackCut = { 0.08f, 0.09f, 0.11f };       //   the blow itself, ending on the hit (13.104 : long enough to show its way, it starts before the note, PRE CUT)
-        public static float[] AttackHold = { 0.06f, 0.08f, 0.12f };      //   the pose kept on the hit (with a PERFECT's hit stop, more)
-        public static float[] AttackBack = { 0.25f, 0.30f, 0.35f };      //   home again, eased
+        public static float[] AttackHold = { 0.09f, 0.12f, 0.16f };      //   the pose kept on the hit (with a PERFECT's hit stop, more)
+        public static float[] AttackBack = { 0.30f, 0.36f, 0.42f };      //   home again, eased
         public static float AttackWindBoss = 0.3f;                       // every boss winds up this long before a note
         public static float AttackWindHeaviest = 0.35f;                  //   THE WEIGHT and THE STAFF this long
-        public static float AttackLean = 0.18f;                          // the whole body leans into a blow about this far (radians, each design takes a share)
+        public static float AttackLean = 0.22f;                          // the whole body leans into a blow about this far (radians, each design takes a share)
         public static float AttackStep = 26f;                            //   and steps about this far (units of the legends' sketch, 237 to their height)
         public static float AttackRush = 0.2f;                           // TACET lunges about this share of its height at the band
         public static float AttackStance = 0.22f;                        // READY : while its phrase plays a legend keeps this share of the first wind up (a fighting stance)
@@ -644,7 +644,8 @@
         public static float AttackLead = 1.35f;                          // OVERLAP : the body gets this much ahead of the hand (it starts the move)
         public static float AttackDrag = 0.15f;                          // DRAG : the weapon starts this share of a move late, then whips through to the hit
         public static float AttackFootLate = 0.3f;                       //   the feet land this share of a move after the hand (a fencer's arm goes before her foot)
-        public static float AttackFollow = 0.14f;                        // FOLLOW THROUGH : after the hit a blade goes on this share of its cut before it comes home
+        public static float AttackFollow = 0.2f;                         // FOLLOW THROUGH : after the hit a blade goes on this share of its cut before it comes home
+        public static float AttackSnap = 2.2f;                           // STRIKE (3 Nov, from Worldless) : a cut gets faster all the way, on the hit this many times an even move's speed
         public static float AttackRebound = 0.35f;                       // REBOUND : a drum stick bounces back up this share of the way it came (PFUNDT)
         public static float AttackDrumHold = 0.4f;                       //   and stays on the skin only this share of a heavy blow's hold
         public static float AttackCaprice = 0.8f;                        // CAPRICE : PAGANINI's quick cuts are this big (the wrist, not the whole arm), its last one full

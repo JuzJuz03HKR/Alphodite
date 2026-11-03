@@ -962,7 +962,7 @@ namespace Tacetno433.Core
                 case Phase.Wind:
                     return Join(from, KeyFor(KeyOf.Wound, rest), Steps(WindEase(phaseTime / windLength)));
                 case Phase.Cut:
-                    return Join(from, KeyFor(KeyOf.Struck, rest), phaseTime / cutLength);
+                    return Join(from, KeyFor(KeyOf.Struck, rest), phaseTime / cutLength, true);     // STRIKE : fastest on the hit
                 case Phase.Hold:
                     return KeyFor(KeyOf.Struck, rest);
                 case Phase.Back:
@@ -1009,6 +1009,14 @@ namespace Tacetno433.Core
             return step / 3f;
         }
 
+        //Strike Ease : STRIKE, slow out of the wind up and faster all the way to the hit (its speed at the end is BattleRules.AttackSnap
+        //times an even move's)
+        private static float StrikeEase(float t)
+        {
+            t = MathHelper.Clamp(t, 0f, 1f);
+            return (float)Math.Pow(t, BattleRules.AttackSnap);
+        }
+
         //Wind Ease : a wind up starts quickly and slows into its top, where it hangs a moment before the blow (ANTICIPATION)
         private static float WindEase(float t)
         {
@@ -1023,13 +1031,17 @@ namespace Tacetno433.Core
         //   FEET     land after the hand (AttackFootLate) : a fencer's arm goes before her foot, a step comes under the blow
         //   ARCS     a hand swings round its shoulder (its angle and its distance are joined, not its place), as much as the
         //            key's Arc says : a slash or a throw goes round, a thrust goes straight
+        //   STRIKE   (the user 3 Nov, from Worldless) on a blow's cut the hand and the weapon do not slow into the hit : they
+        //            leave the top of the wind up slowly and get faster all the way, fastest on the hit, where the HOLD
+        //            stops them dead. Eased at both ends a blade drifted onto its target and the blow looked soft.
         //p is the share of the move done, 0 to 1. Every part is at a at 0 and at b at 1, so nothing jumps between phases.
-        private KeyPose Join(KeyPose a, KeyPose b, float p)
+        private KeyPose Join(KeyPose a, KeyPose b, float p, bool strike = false)
         {
             p = MathHelper.Clamp(p, 0f, 1f);
             float body = Ease(Math.Min(1f, p * BattleRules.AttackLead));
-            float hand = Ease(p);
-            float tip = Ease((p - BattleRules.AttackDrag) / (1f - BattleRules.AttackDrag));
+            float hand = strike ? StrikeEase(p) : Ease(p);
+            float late = (p - BattleRules.AttackDrag) / (1f - BattleRules.AttackDrag);
+            float tip = strike ? StrikeEase(late) : Ease(late);
             float feet = Ease((p - BattleRules.AttackFootLate) / (1f - BattleRules.AttackFootLate));
             KeyPose k = Blend(a, b, hand);
             k.Head = Vector2.Lerp(a.Head, b.Head, body);
