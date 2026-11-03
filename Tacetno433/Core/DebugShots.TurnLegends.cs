@@ -45,7 +45,7 @@ namespace Tacetno433.Core
             b.PlayBar();
             bargain += " " + b.LifeCost(caprice);
             b.UseSkill(fourGood);
-            report += Same("devil's bargain", "True False 12 33", bargain + " " + b.Party[0].Hp);
+            report += Same("devil's bargain", "True False 8 37", bargain + " " + b.Party[0].Hp);
 
             //BREATH CONTROL (QUANTZ) : an ATTACK gives 2 + 1 BREATH (3 -> 6), PAGANINI's the plain 2 (3 -> 5)
             b = new TurnBattle(Solo(1), new List<Enemy> { hush }, 1, new Random(433));
@@ -83,7 +83,7 @@ namespace Tacetno433.Core
             b = new TurnBattle(new List<Musician> { punto, paganini }, new List<Enemy> { hush }, 1, new Random(433));
             b.PlayBar();
             string call = b.Attack() + " " + b.Attack();
-            report += Same("hunting call", "6 7 1", call + " " + CountEvents(b, TurnEventKind.Cue));
+            report += Same("hunting call", "6 9 1", call + " " + CountEvents(b, TurnEventKind.Cue));
 
             //THE LESSON (QUANTZ) : played first at PAGANINI, whose CAPRICE then has a wider PERFECT window (0.13 s off is GOOD for
             //QUANTZ, PERFECT for PAGANINI) and plays x1.3 (each GOOD note 5 x 2 x 0.4 x 1.3 = 5.2 -> 5, HUSH 80 -> 60).
@@ -98,7 +98,7 @@ namespace Tacetno433.Core
             b.UseSkill(twoGood);
             taught += " " + b.Party[1].Lesson + " " + b.Judge(0.13f, true);
             b.UseSkill(fourGood);
-            report += Same("the lesson", "Good True Perfect 60 False False", taught + " " + b.Enemies[0].Hp + " " + b.Party[1].Lesson
+            report += Same("the lesson", "Good True Perfect 56 False False", taught + " " + b.Enemies[0].Hp + " " + b.Party[1].Lesson
                                                                              + " " + b.CanAim(b.Party[0], lesson, b.Party[0]));
 
             //SHIELD (DUPORT) : never at himself. Held up in front of PAGANINI, HUSH's notes aimed at her land on DUPORT at half
@@ -116,7 +116,7 @@ namespace Tacetno433.Core
             int notes = b.Current.IntentNotes.Length;
             covered += " " + b.TakeEnemyAttack(null) + " " + b.Party[1].Hp + " " + b.Party[0].Hp + " " + b.Party[0].Crescendo;
             b.PlayBar();                                                               // bar 2 : DUPORT is up first
-            report += Same("shield", "False DUPORT " + (4 * notes) + " 45 " + (45 - 4 * notes) + " 1 False", covered + " " + (b.Party[1].CoveredBy != null));
+            report += Same("shield", "False DUPORT " + (3 * notes) + " 45 " + (45 - 3 * notes) + " 1 False", covered + " " + (b.Party[1].CoveredBy != null));
 
             //LANCE (DUPORT, THE SCAR off so CRESCENDO stays out) : hit since his last move, 2 x (6 x 2 x 0.7 x 2 = 16.8 -> 17) = 34,
             //one x2 written down. Every note of the next attack parried PERFECT, so the next LANCE is plain, 2 x 8.4 -> 16.
@@ -139,7 +139,7 @@ namespace Tacetno433.Core
             before = b.Enemies[0].Hp;
             b.UseSkill(twoGood);
             duport.Trait = scar;
-            report += Same("lance", "34 16 1", lanced + " " + (before - b.Enemies[0].Hp) + " " + CountEvents(b, TurnEventKind.Revenge));
+            report += Same("lance", "22 12 1", lanced + " " + (before - b.Enemies[0].Hp) + " " + CountEvents(b, TurnEventKind.Revenge));
 
             //CHAKRAM (PUNTO) : picked at HUSH, it flies down the line, one enemy a throw (5 x 2 x 1 = 10 each). Against HUSH alone it
             //comes back for half on the second and third throws, 10 + 5 + 5 = 20.

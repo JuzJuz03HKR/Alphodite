@@ -1551,6 +1551,7 @@ namespace Tacetno433.Battle
         {
             int reward = ShardsBeforeRank();
             if (BattleRules.TurnBattleOn) reward = (int)Math.Round(reward * RankScale());       // RANK
+            if (BattleRules.TurnBattleOn && Run.Hard) reward = (int)Math.Round(reward * BattleRules.HardShards);   // HARD MODE
             return reward;
         }
 

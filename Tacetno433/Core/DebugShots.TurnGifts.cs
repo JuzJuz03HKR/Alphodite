@@ -77,7 +77,7 @@ namespace Tacetno433.Core
             int before = b.Enemies[0].Hp;
             int lifeBefore = b.Party[0].Hp;
             b.UseSkill(new NoteResult[] { good, good, good, good });
-            report += Same("the pact", "20 4 True False 1", (before - b.Enemies[0].Hp) + " " + (lifeBefore - b.Party[0].Hp) + " " + b.Pacts(b.Party[0]) + " " + b.Pacts(b.Party[1]) + " " + CountGift(b, MotifId.ThePact));
+            report += Same("the pact", "24 4 True False 1", (before - b.Enemies[0].Hp) + " " + (lifeBefore - b.Party[0].Hp) + " " + b.Pacts(b.Party[0]) + " " + b.Pacts(b.Party[1]) + " " + CountGift(b, MotifId.ThePact));
 
             //LIFE PRICE (block C item 7) : the command button and the skill card read one price. With THE PACT, PAGANINI's CAPRICE
             //(2 BREATH) out of 10 BREATH : both diamonds paid in BREATH and 4 life. With no BREATH left, THE DEVIL'S BARGAIN pays
@@ -88,7 +88,7 @@ namespace Tacetno433.Core
             b.Breath = 0;
             int priceNone = b.LifePrice(b.Party[0], SkillList.First(paganini), out paidNone);
             int priceQuantz = b.LifePrice(b.Party[1], SkillList.First(quantz), out paidQuantz);
-            report += Same("command price", "4 2 16 0 0", priceFull + " " + paidFull + " " + priceNone + " " + paidNone + " " + priceQuantz);
+            report += Same("command price", "4 2 12 0 0", priceFull + " " + paidFull + " " + priceNone + " " + paidNone + " " + priceQuantz);
 
             //SNAPPED STRINGS : HUSH at 7 DISSONANCE, CAPRICE's second cut brings it to 9 and it cracks : 27 more and back to 0, then
             //2 more cuts (4 x 4 + 27 = 43, DISSONANCE 2)
@@ -98,7 +98,7 @@ namespace Tacetno433.Core
             b.Enemies[0].Dissonance = 7;
             before = b.Enemies[0].Hp;
             b.UseSkill(new NoteResult[] { good, good, good, good });
-            report += Same("snapped strings", "43 2 1", (before - b.Enemies[0].Hp) + " " + b.Enemies[0].Dissonance + " " + CountGift(b, MotifId.SnappedStrings));
+            report += Same("snapped strings", "47 2 1", (before - b.Enemies[0].Hp) + " " + b.Enemies[0].Dissonance + " " + CountGift(b, MotifId.SnappedStrings));
 
             //ON PLAYING THE FLUTE : SOFT AIR heals 3 x 1.5 = 4.5 -> 4 a note (rounded to even, as every heal), 2 notes, PAGANINI 500 -> 508
             b = GiftFight(new List<Musician> { quantz, paganini }, new List<Enemy> { hush }, MotifId.ReedCase);
@@ -183,7 +183,7 @@ namespace Tacetno433.Core
             int hushBefore = b.Enemies[0].Hp;
             int airBefore = b.Enemies[1].Hp;
             b.UseSkill(new NoteResult[] { good, good });
-            report += Same("tourte bow", "16 16 1", (hushBefore - b.Enemies[0].Hp) + " " + (airBefore - b.Enemies[1].Hp) + " " + CountGift(b, MotifId.TourteBow));
+            report += Same("tourte bow", "12 12 1", (hushBefore - b.Enemies[0].Hp) + " " + (airBefore - b.Enemies[1].Hp) + " " + CountGift(b, MotifId.TourteBow));
 
             //THE EMPEROR'S SPUR : one note through to DUPORT, THE SCAR gives them 1 CRESCENDO and the whole band 1 as well
             b = GiftFight(new List<Musician> { duport, paganini, quantz }, new List<Enemy> { hush }, MotifId.EmperorsSpur);
@@ -224,7 +224,7 @@ namespace Tacetno433.Core
             ToTurnOf(b, b.Party[0]);
             b.Party[0].Crescendo = 5;
             int burst = b.Attack();
-            report += Same("hallali", "19 0 1", burst + " " + b.Party[0].Crescendo + " " + CountGift(b, MotifId.Hallali));
+            report += Same("hallali", "23 0 1", burst + " " + b.Party[0].Crescendo + " " + CountGift(b, MotifId.Hallali));
 
             //SPARE STRINGS : CAPRICE all MISSed, the first counts as GOOD (4 and 1 DISSONANCE), the rest are MISSes (a MISS of a skill
             //does nothing). The next MISS of the fight is a MISS.
@@ -234,7 +234,7 @@ namespace Tacetno433.Core
             before = b.Enemies[0].Hp;
             b.UseSkill(new NoteResult[] { miss, miss, miss, miss });
             string spare = (before - b.Enemies[0].Hp) + " " + b.Enemies[0].Dissonance + " " + b.Forgive(Grade.Miss);
-            report += Same("spare strings", "4 1 Miss 1", spare + " " + CountGift(b, MotifId.SpareStrings));
+            report += Same("spare strings", "5 1 Miss 1", spare + " " + CountGift(b, MotifId.SpareStrings));
 
             //LUCKY BOW : CAPRICE's first cut is twice as strong (8, then 4 4 4 : 20)
             b = GiftFight(Solo(0), new List<Enemy> { hush }, MotifId.LuckyBow);
@@ -242,12 +242,12 @@ namespace Tacetno433.Core
             ToTurnOf(b, b.Party[0]);
             before = b.Enemies[0].Hp;
             b.UseSkill(new NoteResult[] { good, good, good, good });
-            report += Same("lucky bow", "20 1", (before - b.Enemies[0].Hp) + " " + CountGift(b, MotifId.LuckyBow));
+            report += Same("lucky bow", "25 1", (before - b.Enemies[0].Hp) + " " + CountGift(b, MotifId.LuckyBow));
 
             //OPENING NIGHT : the band's first hit of the fight is x2 and its name pops once
             b = GiftFight(Solo(0), new List<Enemy> { hush }, MotifId.Overture);
             ToTurnOf(b, b.Party[0]);
-            report += Same("opening night", "11 1", b.Attack() + " " + CountGift(b, MotifId.Overture));
+            report += Same("opening night", "13 1", b.Attack() + " " + CountGift(b, MotifId.Overture));
 
             MusicianList.ResetRehearsals();
             return report;

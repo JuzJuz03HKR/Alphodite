@@ -39,13 +39,14 @@ namespace Tacetno433.Data
         public int Stage = 1;
         public int StagesThisFloor = 8;      // the boss sits on this stage number
         public bool RunComplete;             // true once the last boss is beaten
+        public bool Hard;                    // HARD MODE (3 Nov, the user : NORMAL and HARD back) : Settings.Hard when the run began
         public int Encore;                   // ENCORE (1 Nov, in place of MAESTRO MODE) : 0 a first concert, 1 to 5 each adds one rule (BattleRules ENCORE)
         public int EncoreOpened;             // ENCORE : the level this run's win opened (Encore.Win), for the curtain call. Not saved
 
         //Maestro : the old duel's MAESTRO MODE (29 Sep), the same as ENCORE's timing rule (ENCORE 2 and up)
         public bool Maestro
         {
-            get { return Encore >= BattleRules.EncoreTiming; }
+            get { return Hard || Encore >= BattleRules.EncoreTiming; }
         }
 
         //Encore At : this rule of ENCORE is on for the run (the run's level is this one or higher)

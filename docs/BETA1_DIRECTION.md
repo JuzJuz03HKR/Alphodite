@@ -3290,3 +3290,18 @@ solution กับ content ของ Visual Studio (zip) / เปิด repo pub
 - ✅ **RIBBON** (`Core/Figure.cs` `Core/Figure.Band.cs` `DrawRibbon`) : ริบบิ้นแสงตามปลายอาวุธหลักของนักดนตรีทุกคน ขึ้นเฉพาะตอนปลายอาวุธวิ่งเร็ว หัวขาวร้อน เรียวลงเป็นสีธาตุ (ตัวเลข `BattleRules` AttackRibbon*) **ยังไม่ได้ดูตอนฟันจริงในแชท เพราะเครื่องมือถ่ายท่า (`.claude/skills/build/film/probe_patch.py`) ไม่ตรงกับโค้ดไฟต์ตอนนี้ (แก้ไปข้อ 1 แล้ว ข้อ TellBlows ยังพัง)**
 - ✅ **WINGS + HALO ของบอส** (`Core/Figure.Tacet.cs` `BossWings` `BossHead`) : ปีกเสี้ยว 3 คู่หลังบอสทุกตัว หายใจช้า ขาวเทาบนอนุสาวรีย์ ดำขอบขาวหลังแตก / วงแหวนบางรอบหัวมีขีด 4 ขีดหมุนช้า (ตัวเลข `BossWingsLight`)
 - ⏳ **ที่เหลือของข้อนี้ (แชทหน้า)** : ซ่อม probe_patch.py แล้วถ่ายท่าฟันจริงดูริบบิ้น / ท่าทางนักดนตรีให้ลื่นแบบ Worldless (ง้างหนักขึ้น ค้างจังหวะตอนคมลง ตัวไหลตามอาวุธ = ก้อน G ข้อ 6) / แสงพาดยาวบนพื้นตอนฟันโดน / รูปร่างบอสเพิ่มเติมรายตัว
+
+## 56. BALANCE ละเอียด + โหมด NORMAL / HARD กลับมา (3 พ.ย. ผู้ใช้ "ทำเรื่อง balance แบบละเอียดเลยตอนนี้ ปรับให้เกมสมดุลที่สุด เอาโหมดธรรมดา กับโหมดยากกลับมาด้วย")
+
+ตามกติกาเดิม : ตัวจำลองใช้เทียบของกับของเท่านั้น ไม่ตัดสินว่าเกมยากหรือง่าย (ตัวจำลองไม่มีของ ไม่มีดาว จึงแพ้บอสชั้น 3 เกือบหมด) / รันผู้เล่น STRONG 3 seed เทียบก่อนหลัง
+- **วาทยากร** (ชนะทั้งรัน) : ก่อน THE UNHEARING 19 FANNY 46 THE METRONOME 33 / หลัง 28 38 32 (ห่างกัน 27 เหลือ 10)
+  - THE UNHEARING : `TurnBoltDamage` 14 เป็น 24 / `TurnBeethovenMost` 0.5 เป็น 0.8
+  - FANNY : `TurnDuetDamage` 12 เป็น 10 / `TurnFannyScale` 0.25 เป็น 0.2 / `TurnDuetHeal` 8 เป็น 6 / `TurnFelixHeal` 1.5 เป็น 1.3 (ที่แรงเกินคือฮีล เพราะเลือดติดข้ามไฟต์)
+- **นักดนตรี** (ชนะ เมื่อมีในวง / ไม่มี) : ก่อน PAGANINI 12/29 DUPORT 25/9 / หลัง PAGANINI 26/37 DUPORT 35/24 คนอื่นห่างไม่เกิน 5
+  - PAGANINI : Power 5 เป็น 6 / `TurnPaganiniLife` 6 เป็น 4 / `TurnCapricePrice` 0.2 เป็น 0.08
+  - DUPORT : Power 6 เป็น 4 / `TurnShieldKeep` 0.5 เป็น 0.35
+  - ยังห่างอยู่บ้าง ดูต่อตอนเพลย์เทสจริง (ดาวกับของเปลี่ยนภาพมาก)
+- **ศัตรู** : THE NAMELESS MASTER บอสที่อ่อนสุด `TurnHp` 230 เป็น 255 (บอสอื่น 250) / WHITE NOISE กลุ่มที่แรงสุด `TurnHp` 110 เป็น 95
+- **เงินเฟ้อ** (ผู้ใช้บอกไว้ 1 พ.ย.) : `RankShards` S A B C จาก x2 1.5 1.25 1 เป็น x1.6 1.35 1.15 1
+- **HARD MODE** (`BattleRules` HardTurnDamage 1.3 HardEnemyLife 1.25 HardShards 0.8 + วงแหวนเร็วกับช่วงตีแคบแบบ ENCORE 2) : หน้าโปรไฟล์วาทยากร เหนือ ENCORE มุมขวาล่าง ปุ่ม NORMAL | HARD คลิกหรือกด M จำไว้ใน settings (`Settings.Hard`) ติดไปกับรัน (`RunState.Hard` เซฟ `hard=`) ซ้อนกับ ENCORE ได้ / ตัวจำลองช่องที่สองเปลี่ยนจาก MAESTRO เป็น HARD (STRONG ชนะ 0 ใน 3 seed, EXPERT ราว 25)
+- turncheck 220/220 (ค่าที่คาดไว้ 49 ข้อเปลี่ยนตามตัวเลขใหม่ ไม่มีค่าจริงเท็จข้อไหนเปลี่ยน) savecheck 45/45 / `docs/TACET_Balance.xlsx` แท็บ Turn สร้างใหม่

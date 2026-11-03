@@ -273,7 +273,8 @@ namespace Tacetno433.Screens
             List<Enemy> enemies = new List<Enemy>(run.Battle.Pack);
             battle = new TurnBattle(band, enemies, run.Floor, run.Rng, life, Archive.Level(Archive.Life) * BattleRules.ArchiveLifePerLevel);
             battle.GiveMotifs(run.Motifs);                                                   // the motifs the band carries
-            battle.Encore = run.Encore;                                                      // ENCORE (1 Nov, MAESTRO MODE until then)
+            battle.Encore = run.Encore;
+            battle.Hard = run.Hard;                                                          // HARD MODE (3 Nov)                                                      // ENCORE (1 Nov, MAESTRO MODE until then)
             battle.Kit = run.Conductor.Turn;                                                 // the conductor's PASSIVE and SIGNATURE
 
             //ARCHIVE : DEEP BREATH and WARM UP, bought between runs (step 7)

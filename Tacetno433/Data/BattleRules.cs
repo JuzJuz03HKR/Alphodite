@@ -197,8 +197,8 @@
         //only this many PERFECTs, CON BRIO or not. Set it back to 0 for the real cost. turncheck and turnsim always use the real one.
         //BLOCK G (2 Nov) : the user let it go (USER_BRIEFS 13.124, "set what fits"), 0 = the real cost.
         public static int PlaytestSignatureNeed = 0;
-        public static float TurnBeethovenMost = 0.5f;  // THE UNHEARING's PASSIVE : up to this much harder as the band's life runs out
-        public static int TurnBoltDamage = 14;         // LIGHTNING : damage to every enemy at full strength (x1)
+        public static float TurnBeethovenMost = 0.8f;  // THE UNHEARING's PASSIVE : up to this much harder as the band's life runs out
+        public static int TurnBoltDamage = 24;         // LIGHTNING : damage to every enemy at full strength (x1)
         public static int TurnMozartRun = 3;           // THE SHADOWLESS's PASSIVE : this many PERFECTs in a row give 1 breath
         public static int TurnFeatherPerStroke = 2;    // FEATHER : free ATTACKs per stroke that lands (step 12, was 1 extra turn : 25 percent of STRONG runs won)
 
@@ -207,18 +207,18 @@
         public static float TurnLockedTempoWindow = 0.05f;   // LOCKED TEMPO : seconds added to the PERFECT window of skills and the SIGNATURE, never
                                                              // past GOOD (Beta1 29 Oct : was "any size is right", and the sizes are gone)
         public static float TurnFugueScale = 1.8f;     // FUGUE : the echo plays at the SIGNATURE's strength x this (step 13 : was 1, THE METRONOME was the weakest at 44 percent)
-        public static int TurnPaganiniLife = 6;        // THE HEARTLESS's PASSIVE : life paid for each BREATH a skill is short of (step 15 : was 3, skills carry the fight now).
+        public static int TurnPaganiniLife = 4;        // THE HEARTLESS's PASSIVE : life paid for each BREATH a skill is short of (step 15 : was 3, skills carry the fight now).
                                                        // THE DEVIL'S BARGAIN (the musician PAGANINI, Beta1 29 Oct) pays the same for their own skills
-        public static float TurnCapricePrice = 0.2f;   // CAPRICE : when it ends, every musician pays this share of their life (never below 1, step 13 : was 0.1)
+        public static float TurnCapricePrice = 0.08f;   // CAPRICE : when it ends, every musician pays this share of their life (never below 1, step 13 : was 0.1)
         public static int TurnCapricePerStroke = 2;    // CAPRICE : turns per stroke that lands (step 12, a bar has more turns now)
         public static float TurnLullyWindow = 0.01f;   // THE KING'S BATON's PASSIVE : seconds added to both parry windows (0.05 won 99 percent of STRONG runs, the others 83 to 90;
                                                        // step 12 : 0.03 won 92 percent and 0.02 84 when parrying became most of the fight)
         public static int TurnSunHeal = 6;             // THE SUN : life back for every musician at full strength (step 13 : was 12, THE KING'S BATON was the strongest at 71 percent. Step 15 : 8 -> 6)
-        public static float TurnFannyScale = 0.25f;    // FANNY MENDELSSOHN AND ???'s PASSIVE : FANNY's voice hits this much harder
-        public static float TurnFelixHeal = 1.5f;      //                          FELIX's voice heals this much more
+        public static float TurnFannyScale = 0.2f;    // FANNY MENDELSSOHN AND ???'s PASSIVE : FANNY's voice hits this much harder
+        public static float TurnFelixHeal = 1.3f;      //                          FELIX's voice heals this much more
         public static int TurnFelixCrescendo = 1;      //                          and gives this much more CRESCENDO
-        public static int TurnDuetDamage = 12;         // TWO VOICES : damage to every enemy at full strength (step 13 : was 9 and 6, FANNY 46 percent)
-        public static int TurnDuetHeal = 8;             //              and life back for every musician
+        public static int TurnDuetDamage = 10;         // TWO VOICES : damage to every enemy at full strength (step 13 : was 9 and 6, FANNY 46 percent)
+        public static int TurnDuetHeal = 6;             //              and life back for every musician
         //SIGNATURE GROWS (Beta1 30 Oct, BETA1_DIRECTION 11.7 point 7) : after each boss (the floor reached) the SIGNATURE gets
         //a level : LIGHTNING becomes STORM (a bolt more each level), FUGUE THE ART OF FUGUE (the echo plays on a move more each
         //level), DUET DAS JAHR (every musician gets TurnJahrCrescendo, and at level 2 the strike and the heal x TurnJahrScale)
@@ -277,7 +277,7 @@
         public static float TurnLessonWindow = 0.05f;  // THE LESSON (QUANTZ's skill) : seconds added to the PERFECT window of the friend's next skill, never past GOOD
         public static int TurnLessonShakes = 1;        //                               a ROLL in it needs this many shakes fewer for PERFECT
         public static float TurnLessonScale = 1.3f;    //                               and the skill plays this much harder
-        public static float TurnShieldKeep = 0.5f;     // SHIELD (DUPORT's skill) : the share of a hit on the friend that DUPORT takes instead
+        public static float TurnShieldKeep = 0.35f;     // SHIELD (DUPORT's skill) : the share of a hit on the friend that DUPORT takes instead
         public static float TurnChakramRepeat = 0.5f;  // CHAKRAM (PUNTO's skill) : an enemy the same throw already hit takes this share
         //REHEARSAL (Beta1 31 Oct, Data/Rehearsal.cs, was PATH) : the numbers of the stars that need one (the others rewrite a skill
         //in Rehearsal.cs). INSPIRED (30 Oct, a step at once after 4 PERFECTs of one's own) went with the PATH cards on 31 Oct.
@@ -315,6 +315,16 @@
         //opens the next ENCORE of its conductor, up to EncoreTop. Each level adds ONE rule on top of the ones under it, and the
         //level each rule starts at is written below. ENCORE 1 and 2 together are the old MAESTRO MODE (its Maestro numbers are
         //kept and used here), so a player who played MAESTRO finds nothing easier.
+        //BALANCE (3 Nov, BETA1_DIRECTION 56) : turnsim set against itself, the strong player, many seeds. Was THE UNHEARING 16,
+        //FANNY 47, THE METRONOME 35 percent; PAGANINI 11 with her and 22 without, DUPORT 22 and 7; THE NAMELESS MASTER the soft
+        //boss, WHITE NOISE the hard pack. Changed : TurnBoltDamage TurnBeethovenMost TurnDuetDamage TurnFannyScale
+        //TurnFelixHeal TurnDuetHeal TurnPaganiniLife TurnCapricePrice TurnShieldKeep PAGANINI's and DUPORT's Power, the two enemies' TurnHp, RankShards.
+        //HARD MODE (3 Nov, the user : NORMAL and HARD back) : picked on the conductor's page (Settings.Hard, kept with the run as
+        //RunState.Hard), on top of any ENCORE. HARD has the tight timing of ENCORE 2 (TurnBattle.TightTiming) and these :
+        public static float HardTurnDamage = 1.3f;     // TACET's notes hit this much harder
+        public static float HardEnemyLife = 1.25f;     // every enemy has this much more life
+        public static float HardShards = 0.8f;         // shards after a fight, this share
+
         public const int EncoreTop = 5;
         public const int EncoreHits = 1;               // TACET's notes hit MaestroTurnDamage harder
         public const int EncoreTiming = 2;             // the ring closes in MaestroTurnRingTime, with the Maestro windows and shakes
@@ -1102,7 +1112,7 @@
         //score is half its PERFECT share and half the band's life kept (BattleState.RankScore), and its shards are multiplied
         //by the rank. S A B C, in this order.
         public static float[] RankAt = { 0.85f, 0.7f, 0.5f };          // the score S, A and B start from (below B is C)
-        public static float[] RankShards = { 2f, 1.5f, 1.25f, 1f };     // the shards multiplied by this at S, A, B, C
+        public static float[] RankShards = { 1.6f, 1.35f, 1.15f, 1f };   // BALANCE 3 Nov (was 2 1.5 1.25 1 : too many shards)     // the shards multiplied by this at S, A, B, C
 
         //Run Length : beating the boss of the last floor wins the whole run
         public static int FloorsPerRun = 3;

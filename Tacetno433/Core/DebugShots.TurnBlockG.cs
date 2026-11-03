@@ -48,7 +48,7 @@ namespace Tacetno433.Core
             int plain = b.HitDamage(b.Party[0], b.Enemies[0], 4f);
             int theirs = b.HitDamage(b.Enemies[0], b.Party[0], 4f);
             b.Forte = 2;
-            report += Same("forte hits", "40 50 " + theirs, plain + " " + b.HitDamage(b.Party[0], b.Enemies[0], 4f) + " " + b.HitDamage(b.Enemies[0], b.Party[0], 4f));
+            report += Same("forte hits", "48 60 " + theirs, plain + " " + b.HitDamage(b.Party[0], b.Enemies[0], 4f) + " " + b.HitDamage(b.Enemies[0], b.Party[0], 4f));
 
             //COMBO : x1.05 a step of 10 PERFECTs in a row, 3 steps at most
             report += Same("combo scale", "1 1 1.05 1.1 1.15 1.15",
@@ -69,7 +69,7 @@ namespace Tacetno433.Core
                 + f3.NoteCount(f3.Party[1], softAir) + " " + f3.NoteCount(f3.Party[0], cannone));
 
             //RUSH TAIL : on floor 2 CAPRICE's fifth note (a RUSH) does 40 percent of a note (5.2 -> 5, 2.1 -> 2). PAGANINI alone, every note PERFECT.
-            report += Same("rush share", "5 5 5 5 2", SkillHits(2, caprice, 5));
+            report += Same("rush share", "6 6 6 6 2", SkillHits(2, caprice, 5));
 
             //THE SILENCE GROWS : on floor 1 TACET's attacks are plain swipes, deeper down they bring RUSH, HOLD (x1.5) and ROLL
             //(THE ROUND opens with D D D : 2 notes on floor 1, 3 deeper. WHITE NOISE's L R L R and one more, NO REST : 5 on floor 3)
@@ -101,7 +101,7 @@ namespace Tacetno433.Core
             b.PlanSkill(p, caprice, b.Enemies[0]);
             b.PlayBar();
             b.UseSkill(AllNotes(b.NoteCount(p, caprice), Grade.Perfect));
-            report += Same("solo", "True 6 / 34 False 0", earned + " / " + (before - b.Enemies[0].Hp) + " " + p.Solo + " " + p.SoloRun);
+            report += Same("solo", "True 6 / 38 False 0", earned + " / " + (before - b.Enemies[0].Hp) + " " + p.Solo + " " + p.SoloRun);
 
             //SOLO : an ATTACK played as the solo hits twice as hard (PAGANINI's ATTACK 6 -> 11)
             b = new TurnBattle(Solo(0), new List<Enemy> { hush }, 1, new Random(433));
@@ -109,7 +109,7 @@ namespace Tacetno433.Core
             b.Party[0].Solo = true;
             b.PlayBar();
             int solo = b.Attack();
-            report += Same("solo attack", "11 False", solo + " " + b.Party[0].Solo);
+            report += Same("solo attack", "13 False", solo + " " + b.Party[0].Solo);
             return report;
         }
 

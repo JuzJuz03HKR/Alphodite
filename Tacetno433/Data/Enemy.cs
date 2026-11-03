@@ -232,7 +232,7 @@ namespace Tacetno433.Data
             //now it is a reading test : a note on every beat, any mark, and no rest at all.
             new Enemy { Name = "WHITE NOISE",
                         Looks = new[] { "the_mute_choir" }, Mark = LookMark.Halo,   // SHARED LOOKS
-                        TurnHp = 110, TurnSpeed = 6, Phrases = new[] { "L R L R", "U D U D" }, TurnTraitText = "One note more in every attack, and parrying it gives no BREATH.",    Title = "Every beat, all the time, forever.",
+                        TurnHp = 95, TurnSpeed = 6, Phrases = new[] { "L R L R", "U D U D" }, TurnTraitText = "One note more in every attack, and parrying it gives no BREATH.",    Title = "Every beat, all the time, forever.",
                         Trait = EnemyTrait.NoRest, TraitName = "NO REST", TraitFloor = 1,
                         TraitText = "It never stops, so silent beats give back only half the breath.",
                         Kind = EnemyKind.Elite, Song = SongList.PreludeInC, Pattern = new int[] { 5, 5, 5, 5, 5, 5, 5, 5 }, Tone = Palette.ToneA, Temper = 0 },
@@ -246,7 +246,7 @@ namespace Tacetno433.Data
                         BigWin = "THE PIECE BREAKS OFF", PhaseLine = "It plays on, faster, the wrong way round.", HollowOf = TurnKit.Mozart,
                         Kind = EnemyKind.Boss, Movement = 0, Song = SongList.RondoAllaTurca, Pattern = new int[] { 6, 0, 4, 0, 8, 0, 4, 9 }, Hidden = new int[] { 2, 6 }, Tone = Palette.ToneA },
             new Enemy { Name = "THE NAMELESS MASTER",
-                        TurnHp = 230, TurnSpeed = 4, Phrases = new[] { "D U L", "R L D U" }, TurnTraitText = "It answers with the notes of the last skill your band played.", Title = "He plays a phrase. You must answer better.",
+                        TurnHp = 255, TurnSpeed = 4, Phrases = new[] { "D U L", "R L D U" }, TurnTraitText = "It answers with the notes of the last skill your band played.", Title = "He plays a phrase. You must answer better.",
                         Trait = EnemyTrait.Mirror, TraitName = "ANSWER BETTER", TraitFloor = 1,
                         TraitText = "From round two it plays your last round back at you.",
                         Big = BossMove.Italien, BigName = "ITALIEN", BigText = "It plays back every note of your last skills, under its own name.",

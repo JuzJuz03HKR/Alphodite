@@ -66,7 +66,7 @@ namespace Tacetno433.Core
             b.PlayBar();
             b.UseSkill(new NoteResult[] { good, good, good, good, good, good });
             string ways = capriceNow.Notes.Length + " " + capriceNow.Notes[0].Way + " " + capriceNow.Notes[5].Way;
-            report += Same("caprice no. 24", "6 Left Left 32 1 " + BattleRules.TurnDissonanceMost, ways + " " + (999 - b.Enemies[0].Hp) + " " + CountLegend(b, StarRule.LastCut) + " " + b.Enemies[0].Dissonance);
+            report += Same("caprice no. 24", "6 Left Left 39 1 " + BattleRules.TurnDissonanceMost, ways + " " + (999 - b.Enemies[0].Hp) + " " + CountLegend(b, StarRule.LastCut) + " " + b.Enemies[0].Dissonance);
             MusicianList.ResetRehearsals();
 
             //IL CANNONE's three stars : DEVIL'S CANNON at HUSH also hits STATIC (2 DISSONANCE), not DEAD AIR (none), x2.6 held to
@@ -79,7 +79,7 @@ namespace Tacetno433.Core
             b.PlanSkill(b.Party[0], SkillList.Second(paganini), b.Enemies[0]);
             b.PlayBar();
             b.UseSkill(new NoteResult[] { good });
-            report += Same("devil's cannon", "36 36 0", (999 - b.Enemies[0].Hp) + " " + (999 - b.Enemies[1].Hp) + " " + (999 - b.Enemies[2].Hp));
+            report += Same("devil's cannon", "44 44 0", (999 - b.Enemies[0].Hp) + " " + (999 - b.Enemies[1].Hp) + " " + (999 - b.Enemies[2].Hp));
             MusicianList.ResetRehearsals();
 
             //THE LESSON's three stars : it reaches both friends at once for 3 BREATH, each x1.6 and an ECHO of half waits on each
@@ -181,7 +181,7 @@ namespace Tacetno433.Core
             b.PlanSkill(b.Party[0], SkillList.Second(duport), b.Enemies[0]);
             b.PlayBar();
             b.UseSkill(new NoteResult[] { good, good, good });
-            report += Same("the last lance", "75 3 24", lance + " " + (999 - b.Enemies[0].Hp));
+            report += Same("the last lance", "51 3 18", lance + " " + (999 - b.Enemies[0].Hp));
             MusicianList.ResetRehearsals();
 
             //FANFARE's three stars : PUNTO first, 2 CRESCENDO a note (4 each), then the two after PUNTO both get THE HUNTING CALL at x1.5
@@ -194,7 +194,7 @@ namespace Tacetno433.Core
             b.PlayBar();
             b.UseSkill(new NoteResult[] { good, good });
             string hunt = b.Party[1].Crescendo + " " + b.Attack() + " " + b.Attack();
-            report += Same("the whole hunt", "4 13 11 2", hunt + " " + CountEvents(b, TurnEventKind.Cue));
+            report += Same("the whole hunt", "4 16 11 2", hunt + " " + CountEvents(b, TurnEventKind.Cue));
             MusicianList.ResetRehearsals();
 
             //CHAKRAM's three stars : 4 throws at HUSH alone, the second to fourth whole (10 each), the last one at every enemy
@@ -219,7 +219,7 @@ namespace Tacetno433.Core
             //The ATTACK's Legends : three stars on the weapon (power + 6). PAGANINI 11 x 2 x 0.55 = 12.1 -> 12 and 1 DISSONANCE /
             //QUANTZ's ATTACK heals PAGANINI (20 -> 24) / PFUNDT 13.2 -> 13 twice / DUPORT stands GUARD (8 -> 4 a note) / PUNTO 12.1 -> 12
             //on HUSH and on DEAD AIR
-            report += Same("diabolus in musica", "12 1 1", WeaponCheck(0, hush, null));
+            report += Same("diabolus in musica", "13 1 1", WeaponCheck(0, hush, null));
             Walk(quantz, 0, 3);
             b = new TurnBattle(new List<Musician> { quantz, paganini }, new List<Enemy> { hush }, 1, new Random(433));
             Tough(b);
@@ -296,7 +296,7 @@ namespace Tacetno433.Core
             b.Signature = b.SignatureNeed;
             b.UseSignature(strokes);
             grows += " " + (999 - b.Enemies[0].Hp);
-            report += Same("signature grows", "14 28 42 True 2 18", grows);
+            report += Same("signature grows", "24 48 72 True 2 15", grows);
 
             //BONDS : with Bach, QUANTZ's first move of the fight is x1.5 (4 x 2 x 0.55 x 1.5 = 6.6 -> 7, the second 4.4 -> 4), with
             //Beethoven plain (4). PAGANINI's ATTACK on THE DEVIL'S STRING (floor 1, x1.5) : 5 x 2 x 0.55 x 1.5 = 8.25 -> 8
@@ -317,7 +317,7 @@ namespace Tacetno433.Core
             b = new TurnBattle(Solo(0), new List<Enemy> { devil }, 1, new Random(433));
             b.PlayBar();
             bonds += " " + b.Attack();
-            report += Same("bonds", "7 4 4 8", bonds);
+            report += Same("bonds", "7 4 4 10", bonds);
 
             MusicianList.ResetRehearsals();
             return report;

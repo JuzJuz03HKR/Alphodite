@@ -47,6 +47,8 @@ namespace Tacetno433.Screens
         private Rectangle lastButton = new Rectangle(400, 614, 50, 50);    // the arrows either side of TAKE THE BATON
         private Rectangle nextButton = new Rectangle(830, 614, 50, 50);
         private Rectangle modeBox = new Rectangle(976, 612, 234, 38);      // ENCORE (1 Nov, MAESTRO MODE's switch until then)
+        private Rectangle hardBox = new Rectangle(976, 556, 234, 30);      // HARD MODE (3 Nov) : NORMAL or HARD
+        private static readonly string[] ModeNames = { "NORMAL", "HARD" };
 
         //Detail Data
         private int index;
@@ -153,7 +155,7 @@ namespace Tacetno433.Screens
             //Motion : TAKE THE BATON is the page's main action, so it stands pointed at (white) unless another button is
             bool look = phase == Phase.Look;
             bool elsewhere = Input.MouseOver(backButton) || Input.MouseOver(lastButton) || Input.MouseOver(nextButton)
-                          || (Encore.Open(c) > 0 && Input.MouseOver(modeBox));
+                          || (Encore.Open(c) > 0 && Input.MouseOver(modeBox)) || Input.MouseOver(hardBox);
             chooseMotion.Update(dt, look && !elsewhere);
             backMotion.Update(dt, look && Input.MouseOver(backButton));
             lastMotion.Update(dt, look && index > 0 && Input.MouseOver(lastButton));
@@ -199,6 +201,15 @@ namespace Tacetno433.Screens
             //Detail ENCORE : this conductor's level for the run, the same picker as the gallery (once they have won a run)
             ConductorSelectScreen.EncoreInput(c, modeBox);
 
+            //Detail HARD MODE : click a half, or M to swap
+            if (Input.KeyPressed(Keys.M) || Input.ClickedOn(hardBox))
+            {
+                bool hardHalf = Input.MousePos.X >= hardBox.Center.X;
+                Settings.Hard = Input.KeyPressed(Keys.M) ? !Settings.Hard : hardHalf;
+                SaveFile.SaveSettings();
+                SoundBank.Play(Sfx.UiMove);
+            }
+
             //Detail Confirm
             if (Input.KeyPressed(Keys.Enter) || Input.KeyPressed(Keys.Space) || Input.ClickedOn(chooseButton))
                 Confirm();
@@ -233,7 +244,8 @@ namespace Tacetno433.Screens
             //Run Begin : build a fresh run. The band is picked first (THE BAND OF THREE), then named, then the first movement's card
             Game.CurrentRun = new RunState();
             Game.CurrentRun.Start(c, Game.StoryFont, RouteNodeInfo.CaptionWrapWidth);
-            Game.CurrentRun.Encore = Encore.Picked(c);                                   // ENCORE, 0 until this conductor has won a run
+            Game.CurrentRun.Encore = Encore.Picked(c);
+            Game.CurrentRun.Hard = Settings.Hard;                                        // HARD MODE (3 Nov)                                   // ENCORE, 0 until this conductor has won a run
             SoundBank.Play(Sfx.UiConfirm);
             Game.Screens.SweepNext(chooseButton.Center.ToVector2(), RingSweep.Kind.Light);     // RING SWEEP : the run begins
             Game.Screens.Change(new TeamPickScreen());
@@ -472,11 +484,29 @@ namespace Tacetno433.Screens
             DrawArrow(sb, lastButton, false, index > 0, lastMotion, low);
             DrawArrow(sb, nextButton, true, index < ConductorList.Shown.Length - 1, nextMotion, low);
             Ui.EncorePicker(sb, modeBox, Encore.Open(c), Encore.Picked(c), low);
+            DrawMode(sb, low);
 
             DrawLetterbox(sb);
         }
 
         //Letterbox : two black bars, the cheapest way to make a screen feel like a film shot
+        //Draw Mode (HARD MODE, 3 Nov) : NORMAL | HARD over the ENCORE picker, the picked half filled, M on the right
+        private void DrawMode(SpriteBatch sb, float alpha)
+        {
+            if (alpha <= 0f) return;
+            for (int i = 0; i < 2; i++)
+            {
+                int w = hardBox.Width / 2;
+                Rectangle cell = new Rectangle(hardBox.X + i * w, hardBox.Y, i == 1 ? hardBox.Right - hardBox.X - w : w, hardBox.Height);
+                bool picked = (i == 1) == Settings.Hard;
+                if (picked) Gfx.Rect(sb, cell, (i == 1 ? Palette.Accent : Palette.Paper) * alpha);
+                Color ink = picked ? Palette.Ink : (Input.MouseOver(cell) ? Palette.Paper : Palette.PaperDim);
+                Gfx.TextCentered(sb, Ui.Font, ModeNames[i], cell.Center.X, cell.Center.Y, ink * alpha, TextSize.Label);
+            }
+            Gfx.RectOutline(sb, hardBox, (Input.MouseOver(hardBox) ? Palette.Highlight : Palette.LineGrey) * alpha, 1);
+            Ui.KeyChipRight(sb, "M", hardBox.Right, hardBox.Y - 13, Palette.PaperDim * alpha);
+        }
+
         private void DrawLetterbox(SpriteBatch sb)
         {
             float a = Words(0f);

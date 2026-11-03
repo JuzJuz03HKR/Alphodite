@@ -64,7 +64,7 @@ namespace Tacetno433.Core
             int h1 = b.Attack();
             int h2 = b.Attack();
             int h3 = b.Attack();
-            report += Same("attack", "7 6 4 63 9", h1 + " " + h2 + " " + h3 + " " + enemy.Hp + " " + b.Breath);
+            report += Same("attack", "7 7 4 62 9", h1 + " " + h2 + " " + h3 + " " + enemy.Hp + " " + b.Breath);
 
             //Enemy turn : an ordinary enemy plays 1 or 2 notes on floor 1, HUSH's first phrase has 2 of 8 (TurnNoteDamage 2, THE FIVE KITS 29 Oct)
             report += Same("enemy turn", "EnemyTurn HUSH", b.Step + " " + b.Current.Name);
@@ -80,7 +80,7 @@ namespace Tacetno433.Core
             //the target's power x 2, and the next bar is written
             int counter = enemy.IntentTarget.Musician.Power * 2;
             int taken = b.TakeEnemyAttack(AllGrades(notes, Grade.Perfect));
-            report += Same("parry perfect", "0 10 " + (63 - counter) + " Plan 2", taken + " " + b.Breath + " " + enemy.Hp + " " + b.Step + " " + b.Round);
+            report += Same("parry perfect", "0 10 " + (62 - counter) + " Plan 2", taken + " " + b.Breath + " " + enemy.Hp + " " + b.Step + " " + b.Round);
 
             //Swipe table (ONE RULE, Beta1 29 Oct : no wrong size any more)
             report += Same("swipe table", "1.3 1 0.4 0.4",
@@ -182,13 +182,13 @@ namespace Tacetno433.Core
             b.PlanSkill(b.Party[0], caprice, b.Enemies[0]);
             b.PlayBar();
             bool used = b.UseSkill(new NoteResult[] { perfect, good, miss, good });
-            report += Same("caprice skill", "True 67 3 1", used + " " + b.Enemies[0].Hp + " " + b.Enemies[0].Dissonance + " " + b.Breath);
+            report += Same("caprice skill", "True 64 3 1", used + " " + b.Enemies[0].Hp + " " + b.Enemies[0].Dissonance + " " + b.Breath);
 
             //DISSONANCE : QUANTZ 4 and PFUNDT 7 bring HUSH to 56, at the end of its turn it loses 3, then 2 stacks are left
             b.Attack();
             b.Attack();
             b.TakeEnemyAttack(null);
-            report += Same("dissonance", "53 2", b.Enemies[0].Hp + " " + b.Enemies[0].Dissonance);
+            report += Same("dissonance", "50 2", b.Enemies[0].Hp + " " + b.Enemies[0].Dissonance);
 
             //OFF-BEAT : PAGANINI's ATTACK (6) fills the gauge (90 + 10), QUANTZ then hits x1.5 (4 x 2 x 0.55 x 1.5 = 6.6 -> 7),
             //PFUNDT 9.9 -> 10 (80 - 23 = 57), and HUSH loses its turn, so the next bar is written at once
@@ -199,14 +199,14 @@ namespace Tacetno433.Core
             bool broke = b.Enemies[0].Staggered;
             b.Attack();
             b.Attack();
-            report += Same("off-beat", "True 57 Plan 2 False", broke + " " + b.Enemies[0].Hp + " " + b.Step + " " + b.Round + " " + b.Enemies[0].Staggered);
+            report += Same("off-beat", "True 56 Plan 2 False", broke + " " + b.Enemies[0].Hp + " " + b.Step + " " + b.Round + " " + b.Enemies[0].Staggered);
 
             //COUNTER : every note parried PERFECT, the target hits back for its attack (power x 2)
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             PlayToEnemy(b);                                                            // HUSH 80 - 17 = 63
             Fighter struck = b.Current.IntentTarget;
             b.TakeEnemyAttack(AllGrades(b.Current.IntentNotes.Length, Grade.Perfect));
-            report += Same("counter", (63 - struck.Musician.Power * 2).ToString(), b.Enemies[0].Hp.ToString());
+            report += Same("counter", (62 - struck.Musician.Power * 2).ToString(), b.Enemies[0].Hp.ToString());
 
             //THUNDER CALL (PFUNDT, was STAND FIRM) : GUARD and TAUNT, HUSH turns to him and each note does half (8 -> 4)
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
@@ -228,7 +228,7 @@ namespace Tacetno433.Core
             b.PlayBar();
             b.UseSkill(new NoteResult[] { miss, miss });                               // QUANTZ misses both notes
             int loud = b.Attack();                                                     // PAGANINI
-            report += Same("crescendo", "0 7 2", b.Party[1].Crescendo + " " + loud + " " + b.Party[0].Crescendo);
+            report += Same("crescendo", "0 9 2", b.Party[1].Crescendo + " " + loud + " " + b.Party[0].Crescendo);
 
             //MUTE : no skill can be written, and it wears off at the end of the musician's move
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
@@ -294,7 +294,7 @@ namespace Tacetno433.Core
             b.Kit = TurnKit.Beethoven;
             b.PlanAttack(b.Party[1], b.Enemies[0]);
             b.PlayBar();
-            report += Same("beethoven", "6", b.Attack().ToString());
+            report += Same("beethoven", "7", b.Attack().ToString());
 
             //LIGHTNING : played while the bar is written. All four PERFECT, strength 1.3 : 14 x 1.3 = 18.2 -> 18 to HUSH (80 -> 62),
             //thrown OFF-BEAT, and the bar is still being written
@@ -303,7 +303,7 @@ namespace Tacetno433.Core
             b.Signature = BattleRules.TurnSignatureNeed;
             NoteResult[] four = { perfect, perfect, perfect, perfect };
             bool played = b.UseSignature(four);
-            report += Same("lightning", "True 62 True Plan 0", played + " " + b.Enemies[0].Hp + " " + b.Enemies[0].Staggered + " " + b.Step + " " + b.Signature);
+            report += Same("lightning", "True 49 True Plan 0", played + " " + b.Enemies[0].Hp + " " + b.Enemies[0].Staggered + " " + b.Step + " " + b.Signature);
 
             //FEATHER : 3 strokes land, so 6 free ATTACKs at the end of the band's part, PAGANINI QUANTZ PFUNDT and round again
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
@@ -345,7 +345,7 @@ namespace Tacetno433.Core
             b.PlayBar();
             int first = b.Attack();
             int second = b.Attack();
-            report += Same("overture", "11 4", first + " " + second);
+            report += Same("overture", "13 4", first + " " + second);
 
             //RUBATO : CAPRICE's four notes all MISSed still play at 0.6 (5 x 2 x 0.4 x 0.6 = 2.4 -> 2 each, 80 -> 72)
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
@@ -353,7 +353,7 @@ namespace Tacetno433.Core
             b.PlanSkill(b.Party[0], caprice, b.Enemies[0]);
             b.PlayBar();
             b.UseSkill(new NoteResult[] { miss, miss, miss, miss });
-            report += Same("rubato", "72", b.Enemies[0].Hp.ToString());
+            report += Same("rubato", "68", b.Enemies[0].Hp.ToString());
 
             //SECOND WIND : QUANTZ at 1 life is hit by one note and stays up with 1 (only once a fight)
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433), new int[] { 30, 1, 36 });
@@ -502,7 +502,7 @@ namespace Tacetno433.Core
             int tierPower = picked.PowerOf(MusicianList.All[0]);
             picked.Rehearse(MusicianList.All[0]);
             bool more = picked.CanRehearse(MusicianList.All[0]);
-            report += Same("weapon tiers", "9 3 False DUPORT IL CANNONE  III", tierPower + " " + MusicianList.All[0].Rehearsed + " " + more + " " + picked.LeastTrained().Name + " " + MusicianList.All[0].WeaponNow);
+            report += Same("weapon tiers", "10 3 False DUPORT IL CANNONE  III", tierPower + " " + MusicianList.All[0].Rehearsed + " " + more + " " + picked.LeastTrained().Name + " " + MusicianList.All[0].WeaponNow);
             MusicianList.ResetRehearsals();
 
             //RANK (29 Oct) : half the PERFECT share, half the life kept. 6 of 10 PERFECT and 80 percent kept = 0.7 = A (shards x1.5),

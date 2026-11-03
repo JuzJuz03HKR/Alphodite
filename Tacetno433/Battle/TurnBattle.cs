@@ -257,6 +257,27 @@ namespace Tacetno433.Battle
         //ENCORE (1 Nov, in place of MAESTRO MODE) : the run's level, 0 for a first concert (BattleRules ENCORE, Data/Encore.cs).
         //In the fight ENCORE 1 makes TACET's notes harder, ENCORE 2 is the old MAESTRO timing (TightTiming) and ENCORE 5 brings
         //PHASE 2 sooner (BigPhase). Set after the fight is made, so the attacks already shown are planned again with the harder notes.
+        //HARD MODE (3 Nov) : more life for every enemy (once, when it is set), harder notes and the tight timing
+        private bool hard;
+        public bool Hard
+        {
+            get { return hard; }
+            set
+            {
+                if (value && !hard)
+                    for (int i = 0; i < Enemies.Count; i++)
+                    {
+                        Fighter e = Enemies[i];
+                        bool full = e.Hp >= e.MaxHp;
+                        e.MaxHp = (int)Math.Round(e.MaxHp * BattleRules.HardEnemyLife);
+                        if (full) e.Hp = e.MaxHp;
+                    }
+                hard = value;
+                for (int i = 0; i < Enemies.Count; i++)
+                    if (!Enemies[i].Down && Enemies[i].Planned) PlanIntent(Enemies[i]);
+            }
+        }
+
         private int encore;
         public int Encore
         {
@@ -272,7 +293,7 @@ namespace Tacetno433.Battle
         //Tight Timing : ENCORE 2, the old MAESTRO MODE's narrower windows and more shakes for a roll (and a faster ring, BattleScreen)
         public bool TightTiming
         {
-            get { return encore >= BattleRules.EncoreTiming; }
+            get { return encore >= BattleRules.EncoreTiming || hard; }                       // HARD MODE too
         }
 
         //Big Phase : the share of a boss's life where PHASE 2 starts (THE TURN), sooner on ENCORE 5
@@ -711,6 +732,7 @@ namespace Tacetno433.Battle
             if (trait && e.Trait == EnemyTrait.TwiceABar) count = 1;         // TWICE A BAR (STUTTER) : one note each time
             int power = e.TurnPower > 0 ? e.TurnPower : e.SongNotePower();                  // SongNotePower = the average of its Pattern notes
             float encoreHit = encore >= BattleRules.EncoreHits ? BattleRules.MaestroTurnDamage : 1f;    // ENCORE 1 (the old MAESTRO number)
+            if (hard) encoreHit *= BattleRules.HardTurnDamage;                                          // HARD MODE
             int hit = Math.Max(1, (int)Math.Round(power * BattleRules.TurnNoteDamage * BattleRules.TurnFloorDamage[Floor - 1] * encoreHit));
 
             //CHARGE : the wind up plays nothing and shows the blow to come. The blow is ONE note of its phrase, TurnChargePower

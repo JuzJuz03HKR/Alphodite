@@ -80,7 +80,7 @@ namespace Tacetno433.Core
             b.Attack();
             b.Attack();
             b.TakeEnemyAttack(AllGrades(b.Current.IntentNotes.Length, Grade.Perfect));
-            report += Same("caprice", "4 Good Perfect Good 0 36 31 43", caprice + " " + b.CapriceTurns + " " + b.Party[0].Hp + " " + b.Party[1].Hp + " " + b.Party[2].Hp);
+            report += Same("caprice", "4 Good Perfect Good 0 41 36 50", caprice + " " + b.CapriceTurns + " " + b.Party[0].Hp + " " + b.Party[1].Hp + " " + b.Party[2].Hp);
 
             //BORROWED BREATH (THE HEARTLESS) : no BREATH, QUANTZ's THE LESSON (2) for PAGANINI costs 2 x 6 = 12 life (THE FIVE KITS,
             //it was LONG BREATH). Without the kit it cannot be written, and with 12 life or less it cannot be paid (she has 6).
@@ -98,7 +98,7 @@ namespace Tacetno433.Core
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433), new int[] { 30, 6, 36 });
             b.Kit = TurnKit.Paganini;
             b.Breath = 0;
-            report += Same("borrowed breath", "False 12 27 0 False", paid + " " + b.CanPlanSkill(b.Party[1], lesson));
+            report += Same("borrowed breath", "False 8 31 0 False", paid + " " + b.CanPlanSkill(b.Party[1], lesson));
 
             //STEADY HAND (THE KING'S BATON) : on HUSH's turn 0.225 s late is still GOOD (0.22 + 0.01), not without it
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
@@ -127,14 +127,14 @@ namespace Tacetno433.Core
             int fanny = b.Attack();
             bool felixNext = b.FelixVoice;
             int felix = b.Attack();
-            report += Same("two voices", "6 True 6 False", fanny + " " + felixNext + " " + felix + " " + b.FelixVoice);
+            report += Same("two voices", "5 True 7 False", fanny + " " + felixNext + " " + felix + " " + b.FelixVoice);
 
             //DUET : all four PERFECT, 12 x 1.3 = 15.6 -> 16 to DEAD AIR (80 -> 64), 8 x 1.3 = 10.4 -> 10 back for everybody (step 13)
             b = new TurnBattle(band, new List<Enemy> { deadAir }, 1, new Random(433), new int[] { 10, 10, 10 });
             b.Kit = TurnKit.Fanny;
             b.Signature = b.SignatureNeed;
             b.UseSignature(fourPerfect);
-            report += Same("duet", "64 20 20 20", b.Enemies[0].Hp + " " + b.Party[0].Hp + " " + b.Party[1].Hp + " " + b.Party[2].Hp);
+            report += Same("duet", "67 18 18 18", b.Enemies[0].Hp + " " + b.Party[0].Hp + " " + b.Party[1].Hp + " " + b.Party[2].Hp);
 
             //Musician Traits (each musician on their own, the bar is played so their move is up).
             //The five legends' traits are in TurnCheckKits, these are the hidden musicians' (old saves).
@@ -189,7 +189,7 @@ namespace Tacetno433.Core
             b.PlayBar();
             b.Attack();
             //BLOCK G (2 Nov) : a FINALE brings FORTE now, the ATTACK and its echo x1.25 (6.9 -> 7, then 7 x 2.34 = 16 more), HUSH 80 -> 57
-            report += Same("fugue attack", "57 0", b.Enemies[0].Hp + " " + b.Party[0].Echo);
+            report += Same("fugue attack", "53 0", b.Enemies[0].Hp + " " + b.Party[0].Echo);
 
             //FUGUE : THE LESSON has nothing to repeat, so QUANTZ's echo waits for her next move (it was LONG BREATH)
             b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));

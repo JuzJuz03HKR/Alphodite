@@ -34,7 +34,7 @@ namespace Tacetno433.Core
             b.PlayBar();
             int down1 = b.Attack();
             int down2 = b.Attack();
-            report += Same("downbeat", "8 4", down1 + " " + down2);
+            report += Same("downbeat", "10 4", down1 + " " + down2);
 
             //ENTRANCE (29 Oct) : each musician's first move of the fight is x2 (PAGANINI 5.5 x 2 = 11, QUANTZ 4.4 x 2 = 8.8 -> 9,
             //PFUNDT 6.6 x 2 = 13.2 -> 13), the next bar plainly (PAGANINI 6). Until CALL went away : a called musician's first bar.
@@ -45,7 +45,7 @@ namespace Tacetno433.Core
             string entrance = b.Attack() + " " + b.Attack() + " " + b.Attack();
             PlayWholeBar(b);
             b.PlayBar();
-            report += Same("entrance", "11 9 13 6", entrance + " " + b.Attack());
+            report += Same("entrance", "13 9 13 7", entrance + " " + b.Attack());
 
             //300 CONCERTOS (GIFT 31 Oct, the place of GREEN ROOM) : after a bar with every note of TACET parried PERFECT, every hurt
             //musician gets 3 back while QUANTZ stands (PAGANINI and PFUNDT 500 -> 503, QUANTZ at full nothing). Without QUANTZ nobody.
@@ -76,7 +76,7 @@ namespace Tacetno433.Core
             b.PlanAttack(b.Party[1], b.Enemies[1]);
             b.PlayBar();
             b.Attack();
-            report += Same("unison", "6 9 4", uni1 + " " + uni2 + " " + b.Attack());
+            report += Same("unison", "7 9 4", uni1 + " " + uni2 + " " + b.Attack());
 
             //SEGUE : HUSH has 5 life, PAGANINI's 6 silences it and the 1 left over goes on to DEAD AIR (80 -> 79). Without it 80.
             b = new TurnBattle(Duo(), new List<Enemy> { hush, deadAir }, 1, new Random(433));
@@ -91,7 +91,7 @@ namespace Tacetno433.Core
             b.PlanAttack(b.Party[0], b.Enemies[0]);
             b.PlayBar();
             b.Attack();
-            report += Same("segue", "0 79 80", segue + " " + b.Enemies[1].Hp);
+            report += Same("segue", "0 78 80", segue + " " + b.Enemies[1].Hp);
 
             //LAST WORD : QUANTZ plays the bar's last move, so she stands GUARD and PAGANINI does not
             b = new TurnBattle(Duo(), new List<Enemy> { hush }, 1, new Random(433));
@@ -115,7 +115,7 @@ namespace Tacetno433.Core
             b.PlanAttack(b.Party[0], b.Enemies[0]);
             b.PlayBar();
             b.Attack();
-            report += Same("holds the room", "188 4 74", room + " " + b.Enemies[0].Hp);
+            report += Same("holds the room", "187 4 73", room + " " + b.Enemies[0].Hp);
 
             //ON CUE (THE CUE, floor 2, 29 Oct) : it turns to the musician who plays a skill, the moment they play it
             Enemy cue = EnemyNamed("THE CUE");
@@ -213,7 +213,7 @@ namespace Tacetno433.Core
             int anna = b.Party[0].Hp;
             int klara = b.Party[1].Hp;
             b.TakeEnemyAttack(null);
-            report += Same("court te deum", "397 True 2 Down 35 49 49", court + " " + (anna - b.Party[0].Hp) + " " + (klara - b.Party[1].Hp));
+            report += Same("court te deum", "396 True 2 Down 35 49 49", court + " " + (anna - b.Party[0].Hp) + " " + (klara - b.Party[1].Hp));
 
             //DECREE (THE DEAF CROWN) : bar 1 forbids skills, PAGANINI's CAPRICE costs her 5 (45 -> 40). It CUTS IN after
             //QUANTZ, every note is parried PERFECT and still no COUNTER. Bar 2 forbids attacks, PAGANINI's ATTACK costs 5 more.

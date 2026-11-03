@@ -43,6 +43,9 @@ namespace Tacetno433.Core
         //Core/ConductorWeather.cs : rain, rainbow light, stars). Off leaves the stage as it was. On by default.
         public static bool StageWeather = true;
 
+        //Hard : HARD MODE for the next run (3 Nov, the user : NORMAL and HARD back), picked on the conductor's page
+        public static bool Hard;
+
         //Last Band Name : LAST NAME KEPT (Beta1 1 Nov, docs/BETA1_DIRECTION.md 29 item 10), the name the last run's band was
         //given, so the next run's name page starts with it (ENTER keeps it). "" when the band went unnamed.
         public static string LastBandName = "";

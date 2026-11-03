@@ -153,7 +153,7 @@ namespace Tacetno433.Data
             //sword and the bow its blade, and it hits like a cannon.
             new Musician { Name = "PAGANINI", Instrument = "VIOLIN",    Culture = "EUROPEAN", Family = Family.String,     Cue = 0, Spot = SpotLook.Fire,
                            Epithet = "THE DEVIL'S VIOLINIST", Weapon = "IL CANNONE",
-                           Power = 5, Sample = "violin", SampleNote = 60, ThemeColor = Palette.ToneB,
+                           Power = 6 /* BALANCE 3 Nov : was 5 */, Sample = "violin", SampleNote = 60, ThemeColor = Palette.ToneB,
                            Key = GiftKey.Dissonance, Trait = MusicianTrait.DevilsBargain, TraitName = "THE DEVIL'S BARGAIN",
                            TurnTraitText = "Short of BREATH, their skills take " + BattleRules.TurnPaganiniLife + " life for each BREATH missing.",
                            Line = "They say the devil taught those hands. Nobody asks twice." },
@@ -201,7 +201,7 @@ namespace Tacetno433.Data
             //THE SCARRED SHIELD : the cello is a great shield with the emperor's dent in it, the bow a lance.
             new Musician { Name = "DUPORT",   Instrument = "CELLO",     Culture = "EUROPEAN", Family = Family.String,     Cue = 2, Spot = SpotLook.Water,
                            Epithet = "SCARRED BY AN EMPEROR", Weapon = "THE SCARRED SHIELD",
-                           Power = 6, Sample = "cello", SampleNote = 48, ThemeColor = Palette.ToneC,
+                           Power = 4,                                                                       // BALANCE 3 Nov : was 6 Sample = "cello", SampleNote = 48, ThemeColor = Palette.ToneC,
                            Key = GiftKey.Shield, Trait = MusicianTrait.TheScar, TraitName = "THE SCAR",
                            TurnTraitText = "Every attack that hurts them gives " + BattleRules.TurnScarCrescendo + " " + Words.Volume + ".",
                            Line = "An emperor once tried this cello and left a scar. It plays louder for it." },
