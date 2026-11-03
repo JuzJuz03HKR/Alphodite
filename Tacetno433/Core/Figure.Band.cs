@@ -1761,11 +1761,35 @@ namespace Tacetno433.Core
             for (int i = 1; i < ribbonCount; i++) run += Vector2.Distance(ribbon[i - 1], ribbon[i]);
             float a = MathHelper.Clamp((run - BattleRules.AttackRibbonFrom * k) / ((BattleRules.AttackRibbonFull - BattleRules.AttackRibbonFrom) * k), 0f, 1f) * BattleRules.AttackRibbon;
             if (a <= 0.01f) return;
+            int n = SmoothRibbon();
+            for (int i = 0; i < n; i++) ribbonWide[i] = width * k * 2.6f * (float)Math.Pow(1f - i / (float)(n - 1), 1.2f);
+            Shapes.Stroke(ribbonSmooth, ribbonWide, n, edge * (0.45f * a), edge * 0f, false);
+            for (int i = 0; i < n; i++) ribbonWide[i] *= 0.35f;
+            Shapes.Stroke(ribbonSmooth, ribbonWide, n, pale * a, edge * 0f, false);
+        }
+
+        //Smooth Ribbon (CHAIKIN) : the tip jumps far between frames in a fast cut, so the trail is rounded off twice : each
+        //step between two points becomes two points a quarter and three quarters along it. Returns how many points there are.
+        //ADVANCED PART : corner cutting. Cutting every corner this way twice gives a curve close to a smooth spline through
+        //the same points, with the two ends kept where they were.
+        private int SmoothRibbon()
+        {
             int n = ribbonCount;
-            for (int i = 0; i < n; i++) ribbonWide[i] = width * k * 3.2f * (float)Math.Pow(1f - i / (float)(n - 1), 0.8f);
-            Shapes.Stroke(ribbon, ribbonWide, n, edge * (0.5f * a), edge * 0f, false);
-            for (int i = 0; i < n; i++) ribbonWide[i] *= 0.38f;
-            Shapes.Stroke(ribbon, ribbonWide, n, pale * a, edge * 0f, false);
+            for (int i = 0; i < n; i++) ribbonSmooth[i] = ribbon[i];
+            for (int pass = 0; pass < 2; pass++)
+            {
+                int m = 0;
+                ribbonStep[m++] = ribbonSmooth[0];
+                for (int i = 0; i + 1 < n; i++)
+                {
+                    ribbonStep[m++] = Vector2.Lerp(ribbonSmooth[i], ribbonSmooth[i + 1], 0.25f);
+                    ribbonStep[m++] = Vector2.Lerp(ribbonSmooth[i], ribbonSmooth[i + 1], 0.75f);
+                }
+                ribbonStep[m++] = ribbonSmooth[n - 1];
+                for (int i = 0; i < m; i++) ribbonSmooth[i] = ribbonStep[i];
+                n = m;
+            }
+            return n;
         }
 
         //Weapon Line : the line of the legend's colour down a weapon, brighter with each star of the ATTACK (WEAPON TIERS)

@@ -729,9 +729,11 @@ namespace Tacetno433.Core
 
         //RIBBON (Worldless, the user 3 Nov) : the last places of the main weapon's tip, newest first. The band draws a tapered
         //trail of light along them (white at the tip, the legend's colour fading to nothing at its tail) when the tip moves fast.
-        private const int RibbonPoints = 14;
+        private const int RibbonPoints = 9;
         private readonly Vector2[] ribbon = new Vector2[RibbonPoints];
-        private readonly float[] ribbonWide = new float[RibbonPoints];
+        private readonly Vector2[] ribbonSmooth = new Vector2[RibbonPoints * 4];      // CHAIKIN : the trail rounded off
+        private readonly Vector2[] ribbonStep = new Vector2[RibbonPoints * 4];
+        private readonly float[] ribbonWide = new float[RibbonPoints * 4];
         private int ribbonCount;
         private float ribbonReach;                // how far the tip is from the hand (the band sets it when it draws the weapon)
 
