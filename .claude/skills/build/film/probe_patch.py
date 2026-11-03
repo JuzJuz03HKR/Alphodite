@@ -14,6 +14,7 @@ def patch(rel, old, new, count=1):
 patch('Tacetno433/Core/DebugShots.cs',
 '''            index++;
             frames = 0;
+            if (Gfx.Seen != null) WriteSeen();                                      // SEEN (block F3) : every line so far, after each page
             if (index >= names.Length)
             {
                 game.Exit();
@@ -22,6 +23,7 @@ patch('Tacetno433/Core/DebugShots.cs',
             Open(game, names[index]);''',
 '''            index++;
             frames = 0;
+            if (Gfx.Seen != null) WriteSeen();                                      // SEEN (block F3) : every line so far, after each page
             if (index >= names.Length)
             {
                 game.Exit();

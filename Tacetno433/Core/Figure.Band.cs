@@ -1318,7 +1318,7 @@ namespace Tacetno433.Core
             DrawWindingKey(Legendary(Cues.Stars1));
 
             //Back fist and its stick
-            DrawSmear(smearGrip2, smearAngle2, body[HandB].At, weapon2.At, 40f, 3.4f);
+            DrawSmear(smearGrip2, smearAngle2, body[HandB].At, weapon2.At, 40f, 3.4f, false);
             DrawStick(body[HandB].At, weapon2.At, 36f, 7f, grey, false);
             Shapes.Circle(body[HandB].At, 9f * k, grey);
 
@@ -1737,8 +1737,9 @@ namespace Tacetno433.Core
         //SMEAR (13.104 : smoother) : a weapon that turned fast this frame leaves two faint copies of its blade between where it
         //was last frame and where it is now, the animator's smear frames (the blade's own grey, not a light : the VFX trails
         //of the elements are a later step)
-        private void DrawSmear(Vector2 grip0, float angle0, Vector2 grip1, float angle1, float length, float width)
+        private void DrawSmear(Vector2 grip0, float angle0, Vector2 grip1, float angle1, float length, float width, bool main = true)
         {
+            if (main) { ribbonReach = length * k; DrawRibbon(width); }
             if (silhouette || BattleRules.AttackSmear <= 0f) return;
             float turn = MathHelper.WrapAngle(angle1 - angle0);
             if (Math.Abs(turn) < BattleRules.AttackSmearTurn && Vector2.DistanceSquared(grip0, grip1) < 144f * k * k) return;
@@ -1749,6 +1750,22 @@ namespace Tacetno433.Core
                 Vector2 d = Way(angle0 + turn * t);
                 Shapes.Taper(grip + d * (4f * k), grip + d * (length * k), width * k, width * 0.35f * k, C(BodyTop, drawAlpha * BattleRules.AttackSmear * (0.5f + 0.5f * t)));
             }
+        }
+
+        //Draw Ribbon (RIBBON, Worldless) : a tapered trail of light along the tip's last places, only while the tip runs fast.
+        //Two layers : a wide soft one in the legend's colour, and a thin hot core, white at the tip, gone at the tail.
+        private void DrawRibbon(float width)
+        {
+            if (silhouette || BattleRules.AttackRibbon <= 0f || ribbonCount < 3) return;
+            float run = 0f;
+            for (int i = 1; i < ribbonCount; i++) run += Vector2.Distance(ribbon[i - 1], ribbon[i]);
+            float a = MathHelper.Clamp((run - BattleRules.AttackRibbonFrom * k) / ((BattleRules.AttackRibbonFull - BattleRules.AttackRibbonFrom) * k), 0f, 1f) * BattleRules.AttackRibbon;
+            if (a <= 0.01f) return;
+            int n = ribbonCount;
+            for (int i = 0; i < n; i++) ribbonWide[i] = width * k * 3.2f * (float)Math.Pow(1f - i / (float)(n - 1), 0.8f);
+            Shapes.Stroke(ribbon, ribbonWide, n, edge * (0.5f * a), edge * 0f, false);
+            for (int i = 0; i < n; i++) ribbonWide[i] *= 0.38f;
+            Shapes.Stroke(ribbon, ribbonWide, n, pale * a, edge * 0f, false);
         }
 
         //Weapon Line : the line of the legend's colour down a weapon, brighter with each star of the ATTACK (WEAPON TIERS)

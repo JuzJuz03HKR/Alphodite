@@ -524,6 +524,7 @@ namespace Tacetno433.Core
                 return;
             }
             SetBossInks(alpha, light, flash, mark);                                  // every boss is drawn from the round 6 sketch
+            BossWings(alpha);                                                        // WINGS (Worldless) : behind every boss
             switch (design)
             {
                 case Requiem: DrawRequiem(alpha); break;
@@ -1244,9 +1245,39 @@ namespace Tacetno433.Core
             Shapes.Fill(line, 4, bossDark * alpha);
         }
 
-        //Boss Head : an oval of the sketch, its far half in shade
+        //Boss Wings (WINGS, Worldless, the user 3 Nov) : three crescent blades a side fanning up from behind the shoulders,
+        //breathing slowly. White and grey on the monument, black with a thin white edge once it has broken.
+        private void BossWings(float alpha)
+        {
+            float a = alpha * BattleRules.BossWingsLight;
+            if (a <= 0f) return;
+            float breathe = (float)Math.Sin(clock * 0.9f) * 4f;
+            for (int side = -1; side <= 1; side += 2)
+                for (int b = 2; b >= 0; b--)
+                {
+                    Vector2 root = S(120f + side * 12f, 118f + b * 5f);
+                    Vector2 tip = S(120f + side * (74f + b * 16f + breathe * 0.5f), 34f + b * 30f - breathe);
+                    Vector2 bend = S(120f + side * (40f + b * 10f), 70f + b * 22f);
+                    Color body = (b == 0 ? bossLit : Color.Lerp(bossLit, bossDark, 0.45f)) * a;
+                    Shapes.Kite(root, Vector2.Lerp(bend, tip, 0.15f), (9f - b * 1.5f) * lookK, 0.45f, body);
+                    Shapes.Kite(Vector2.Lerp(root, bend, 0.85f), tip, (7f - b * 1.5f) * lookK, 0.3f, body);
+                    Shapes.Taper(Vector2.Lerp(root, bend, 0.6f), tip, 1.4f * lookK, 0.2f * lookK, Color.White * ((ShellOn ? 0.45f : 0.6f) * a));
+                }
+        }
+
+        //Boss Head : an oval of the sketch, its far half in shade. HALO (Worldless) : a thin ring round it and four ticks.
         private void BossHead(float x, float y, float rx, float ry, float alpha)
         {
+            Vector2 halo = S(x, y - ry * 0.1f);
+            float r = (rx + ry) * 1.45f * lookK;
+            Color ring = (ShellOn ? Color.Lerp(bossLit, Color.White, 0.35f) : Palette.Paper) * (0.75f * alpha);
+            Shapes.Ring(halo, r, 1.6f * lookK, ring);
+            for (int t = 0; t < 4; t++)
+            {
+                float an = clock * 0.35f + t * MathHelper.PiOver2;
+                Vector2 d = new Vector2((float)Math.Cos(an), (float)Math.Sin(an));
+                Shapes.Line(halo + d * (r - 3f * lookK), halo + d * (r + 5f * lookK), 1.4f * lookK, ring);
+            }
             lookFill = bossLit * alpha;
             ShellOval(S(x, y), rx, ry);
             for (int i = 0; i <= 10; i++)

@@ -641,6 +641,10 @@
         public static float AttackFollowTime = 0.3f;                     //   the follow through (or the rebound) takes this share of the way home
         public static float AttackSmear = 0.3f;                          // SMEAR : two faint copies of a fast weapon between this frame and the last (0 = none)
         public static float AttackSmearTurn = 0.14f;                     //   only when it turned more than this in a frame (radians)
+        public static float AttackRibbon = 1f;                           // RIBBON (Worldless, 3 Nov) : the light trail behind a weapon's tip (0 = none)
+        public static float AttackRibbonFrom = 120f;                      //   seen once the tip ran more than this far over its trail (page pixels)
+        public static float AttackRibbonFull = 240f;                     //   full once it ran this far
+        public static float BossWingsLight = 0.85f;                      // WINGS (Worldless, 3 Nov) : the crescent blades behind a boss, how strong
         public static float AttackBusyBack = 0.6f;                       // the stage waits for a blow to be this far home (or a hurt to end) before the next musician comes in
         public static float AttackWaitMost = 1.2f;                       //   but never longer than this (seconds)
 

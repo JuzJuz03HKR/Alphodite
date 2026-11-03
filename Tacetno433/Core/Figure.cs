@@ -727,9 +727,23 @@ namespace Tacetno433.Core
             KeepSmear();
         }
 
-        //Keep Smear : remember where the weapons were last frame (SMEAR, drawn by the band)
+        //RIBBON (Worldless, the user 3 Nov) : the last places of the main weapon's tip, newest first. The band draws a tapered
+        //trail of light along them (white at the tip, the legend's colour fading to nothing at its tail) when the tip moves fast.
+        private const int RibbonPoints = 14;
+        private readonly Vector2[] ribbon = new Vector2[RibbonPoints];
+        private readonly float[] ribbonWide = new float[RibbonPoints];
+        private int ribbonCount;
+        private float ribbonReach;                // how far the tip is from the hand (the band sets it when it draws the weapon)
+
+        //Keep Smear : remember where the weapons were last frame (SMEAR, drawn by the band), and the tip's trail (RIBBON)
         private void KeepSmear()
         {
+            if (ribbonReach > 0f)
+            {
+                for (int i = RibbonPoints - 1; i > 0; i--) ribbon[i] = ribbon[i - 1];
+                ribbon[0] = body[HandA].At + Way(weapon.At) * ribbonReach;
+                ribbonCount = Math.Min(RibbonPoints, ribbonCount + 1);
+            }
             smearGrip = lastGrip;
             smearAngle = lastAngle;
             smearGrip2 = lastGrip2;
