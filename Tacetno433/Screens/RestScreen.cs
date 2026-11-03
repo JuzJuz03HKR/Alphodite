@@ -52,7 +52,6 @@ namespace Tacetno433.Screens
         private static string[] restNames = { BattleRules.TurnBattleOn ? "RECOVER" : "BREATHE", "REHEARSE", "DEEP REST" };   // step 15 : BREATH is the fight's skill points, rest gives LIFE
         private static string[] wingsNames = { "REHEARSE", "ONE MORE", "DEEP REST" };                                      // THE WINGS
         private string[] optionNames = restNames;
-        private static string[] optionNumerals = { "I", "II", "III" };
 
         //THE WINGS : the cards' places in the room before the boss
         private const int WingsFree = 0;
@@ -450,10 +449,11 @@ namespace Tacetno433.Screens
                 if (e > 0f)
                 {
                     Ui.InkBar(sb, r.X + 12 + BattleRules.UiShadow, r.Y + 10 + BattleRules.UiShadow, (nameW + 70f) * e, 32f, 10f, Palette.LineGrey * (0.5f * a), i * 9 + 4, 1f);
-                    Ui.InkBar(sb, r.X + 12, r.Y + 10, (nameW + 70f) * e, 32f, 10f, Palette.Paper * a, i * 9, 1f);
+                    Ui.InkBar(sb, r.X + 12, r.Y + 10, (nameW + 30f) * e, 32f, 10f, Palette.Paper * a, i * 9, 1f);
                 }
-                Gfx.Text(sb, Game.BigFont, optionNumerals[i], r.X + 20, r.Y + 12, Color.Lerp(Palette.PaperDim, Palette.InkSoft, e) * a, TextSize.Small);
-                Gfx.TextSpaced(sb, Game.BigFont, optionNames[i], r.X + 60, r.Y + 12, Color.Lerp(Palette.Highlight, Palette.Ink, e) * a, TextSize.Small, 2f);
+                //NOT CLUTTERED (3 Nov, the user 13.158 13.159) : the key at the top right numbers the card, so the roman numeral
+                //before the name is gone and the name lines up with the words under it
+                Gfx.TextSpaced(sb, Game.BigFont, optionNames[i], r.X + 20, r.Y + 12, Color.Lerp(Palette.Highlight, Palette.Ink, e) * a, TextSize.Small, 2f);
                 Gfx.Rect(sb, r.X + 20, r.Y + 50, r.Width - 40, 1, Palette.LineGrey * a);
                 Gfx.Text(sb, Game.StoryFont, optionTexts[i], r.X + 20, r.Y + 62, Palette.Paper * a, TextSize.StorySmall);
 

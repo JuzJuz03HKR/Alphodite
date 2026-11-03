@@ -185,6 +185,7 @@ namespace Tacetno433.Screens
         private const string HintNoSkills = "DECREE : A SKILL THIS TURN HURTS WHOEVER PLAYS IT";
         private const string HintNoAttacks = "DECREE : AN ATTACK THIS TURN HURTS WHOEVER PLAYS IT (NO MOVE = ATTACK)";
         private const string WordAttack = Words.Attack;
+        private const string WordOneEnemy = "ONE ENEMY";                       // the usual aim, not written on the buttons (NOT CLUTTERED)
 
         //PRACTICE : what the card says, and which of the five lessons are done. THE FIRST REHEARSAL (Beta1 2 Nov, block F,
         //docs/BETA1_DIRECTION.md 49) : TUTORIAL on the title page opens this fight straight away, so everything is learned on the
@@ -2338,8 +2339,8 @@ namespace Tacetno433.Screens
                         if (at >= 0 && clear) Gfx.TextRight(sb, Game.Font, NumberText.Get(OrderNumber(at)), r.Right - 8, r.Y + 3, own, TextSize.Body);
                         else if (at >= 0) Gfx.TextRight(sb, Game.BigFont, NumberText.Get(OrderNumber(at)), r.Right - 8, r.Y + 2, own, TextSize.Small);
                     }
-                    else if (battle.CanPlan(f))
-                        Gfx.TextRight(sb, Game.Font, WordAttack, r.Right - 8, r.Y + ChipMoveY, Palette.LineGrey, TextSize.Tiny);   // nothing written : it ATTACKs
+                    //NOT CLUTTERED (3 Nov, the user 13.158) : nothing written means it ATTACKs, which the order row over the cards
+                    //already says, so the card no longer repeats it in grey. A move the player wrote still shows, white.
                 }
 
                 //Target Mark : the musician an enemy's next attack lands on (SHIELD : the one standing in front), a frame and a
@@ -2802,7 +2803,9 @@ namespace Tacetno433.Screens
                         Ui.Icon(sb, icon, commandArt[k], commandCode[k], lit ? Palette.Ink : kind, false, 0, a);
                         //LAID OUT (3 Nov, the user 13.153) : who it is for sits inside the button, bottom right, beside its BREATH.
                         //It used to stand on the button's top edge, the line running through the letters.
-                        Gfx.TextSpacedRight(sb, Game.Font, commandFor[k], box.Right - Ui.Slant - 12, box.Bottom - 14, Palette.LineGrey * a, TextSize.Tiny, 1.5f);
+                        //NOT CLUTTERED (the user 13.158) : ONE ENEMY is what almost every move is for, so only the others are written
+                        if (commandFor[k] != WordOneEnemy)
+                            Gfx.TextSpacedRight(sb, Game.Font, commandFor[k], box.Right - Ui.Slant - 12, box.Bottom - 14, Palette.LineGrey * a, TextSize.Tiny, 1.5f);
                         if (k > 0) DrawPrice(sb, s, icon.Center.X - (s.Cost - 1) * 4.5f, box.Bottom - 6, a);
                         Ui.Stars(sb, box.Right - Ui.Slant - 34, box.Y + 9, RehearsalList.StarsOf(selected.Musician, k), RehearsalList.Most, 4f, 11f, SpotOf(selected).Tint, a);   // REHEARSAL : its stars
                     }

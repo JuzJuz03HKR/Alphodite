@@ -681,9 +681,9 @@ namespace Tacetno433.Screens
         private void DrawHeader(SpriteBatch sb)
         {
             float a = UiMotion.Between(clock, 1.2f, 0.4f);
+            //NOT CLUTTERED (3 Nov, the user 13.158 13.159) : the company alone at the top. A BAND AGAINST SILENCE said what the
+            //hook under the logo says, and the crosses beside it were only decoration
             Gfx.TextSpaced(sb, Game.Font, "ALPHODITE", 80, 38, Palette.LineGrey * a, TextSize.Tiny, 4f);
-            Gfx.TextSpaced(sb, Game.Font, BattleRules.TurnBattleOn ? "A BAND AGAINST SILENCE" : "A DUEL AGAINST SILENCE", 470, 38, Palette.LineGrey * a, TextSize.Tiny, 4f);
-            Ornament.Crosses(sb, 740, 44, 4, 1, 16, Palette.LineGrey * a);
 
             float hook = UiMotion.Between(clock, 0.85f, 0.4f);
             Gfx.Text(sb, Game.StoryFont, "You do not play the notes.", 86, 296, Palette.Highlight * hook, TextSize.Story);
@@ -740,9 +740,9 @@ namespace Tacetno433.Screens
             Gfx.TextVertical(sb, Game.Font, "SILENCE  IS  ALSO  A  SOUND", 1236, 90, Palette.PaperDim * (0.8f * a), TextSize.Label);
             Gfx.Rect(sb, 1222, 76, 1, 480, Palette.LineGrey * (0.4f * a));
 
-            Gfx.TextRight(sb, Game.BigFont, "No.433", 1190, 600, Palette.Paper * (0.8f * a), TextSize.Subtitle);
-            Ornament.Barcode(sb, 1060, 646, 130, 22, Palette.PaperDim * (0.6f * a));
-            Gfx.TextSpacedRight(sb, Game.Font, "FOUR MINUTES  THIRTY THREE SECONDS", 1190, 676, Palette.LineGrey * a, TextSize.Tiny, 2f);
+            //NOT CLUTTERED : No.433 stands alone on the bottom line's height (the barcode and FOUR MINUTES THIRTY THREE SECONDS
+            //under it repeated the logo's 4'33)
+            Gfx.TextRight(sb, Game.BigFont, "No.433", 1190, 652, Palette.Paper * (0.8f * a), TextSize.Subtitle);
         }
 
         //Footer : controls and build tag

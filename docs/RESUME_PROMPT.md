@@ -64,6 +64,8 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 
 ## สถานะล่าสุด (2 พ.ย.)
 
+**✅ 3 พ.ย. แชทเดียวกัน NOT CLUTTERED (`BETA1_DIRECTION.md` 59 คำต่อคำ `USER_BRIEFS.md` 13.157 ถึง 13.159)** : ไล่ polish ทุกหน้าให้ UI ไม่รก ตัดป้ายซ้ำ (ONE ENEMY ATTACK เทา FLOOR ซ้ำ เลขโรมัน ของตกแต่งหน้า Title) / .exe ใหม่ / **ถัดไป** : ผู้ใช้ลองแล้วชี้หน้าที่ยังรก
+
 **✅ 3 พ.ย. แชทเดียวกัน INSTRUMENT READ (`BETA1_DIRECTION.md` 58 คำต่อคำ `USER_BRIEFS.md` 13.154 ถึง 13.156)** : นักดนตรีทั้ง 5 คนวางชิ้นตามโครงเครื่องดนตรี (ไวโอลิน ฟลุต ทิมปานี เชลโล ฮอร์น `Core/Figure.Band.cs`) ผู้ใช้เห็นภาพ 4 ตัวแรกแล้วบอก "ทำออกมาดีมาก" / สายเรืองสั่นตอนเล่น / .exe ใหม่ / ⚠️ polish ทั้งเกมทำได้แค่ส่วนตัวละครกับข้อความ ถามผู้ใช้ว่าจะ polish ตรงไหนต่อ
 
 **✅ 3 พ.ย. แชท /system LAPTOP (`BETA1_DIRECTION.md` 57 คำต่อคำ `USER_BRIEFS.md` 13.150 ถึง 13.153)** : เต็มจอลื่นขึ้นเกือบ 2 เท่าภาพเหมือนเดิม (ART PIXELS DOWN WIDE STRAIGHT ON) / F3 FPS นับภาพจริง / SETTINGS GRAPHICS AUTO HIGH MEDIUM LOW / โหมด NEWBIE | NORMAL | HARD (`TurnBattle.Ease` `BattleRules` MODES) NORMAL ช้าลงง่ายลงนิดหน่อย / THE GUIDE ในไฟต์และทุกหน้าของรัน NEWBIE ชั้น 1 2 (`Screens/BattleScreen.Guide.cs` `Core/PageGuide.cs`) / Tutorial มี FIRST LOOK กรอบชี้ WHY / คำกติกาเป็นสี (`Core/MarkWords.cs`) / ภาษาไม่ปน + ANY NUMBERS (`Data/Lang.cs`) / ป้ายเป้าในปุ่มท่า / turncheck 221/221 savecheck 46/46 / .exe ใหม่ `Build/TACET4'33.zip` / ⚠️ ยังไม่ได้เปิดบน Windows / **ถัดไป** : ถามผลลองบนโน้ตบุ๊ค (FPS ใน F3 ระดับ GRAPHICS ที่ AUTO เลือก) / ผู้ใช้ชี้หน้าที่ข้อความยังรก (13.153) / ปรับความยาก NEWBIE NORMAL ตามที่เล่นจริง

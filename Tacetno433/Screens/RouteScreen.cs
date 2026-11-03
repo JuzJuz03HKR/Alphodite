@@ -901,7 +901,7 @@ namespace Tacetno433.Screens
 
             Ui.Command(sb, bandButton, "THE BAND", "TAB", bandMotion, 1f, false);
 
-            Gfx.TextSpacedRight(sb, Game.Font, run.FloorShort, 1244, 640, Palette.PaperDim, TextSize.Label, 3f);
+            //NOT CLUTTERED (3 Nov, the user 13.158) : the floor is named once, at the top left (FLOOR 1  PRELUDE), not again here
             Gfx.TextSpacedRight(sb, Game.Font, "ARROWS  CHOOSE   /   ENTER  GO", 1244, 670, Palette.LineGrey, TextSize.Tiny, 2f);
         }
     }

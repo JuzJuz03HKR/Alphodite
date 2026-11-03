@@ -51,7 +51,6 @@ namespace Tacetno433.Screens
         private Rectangle cancelButton = new Rectangle(40, 654, 170, 44);
         private const float RollTime = 1.1f;
 
-        private static string[] numerals = { "I", "II", "III", "IV" };
 
         //Event State
         private GameEvent ev;
@@ -517,8 +516,9 @@ namespace Tacetno433.Screens
                 }
 
                 Color text = Color.Lerp(Palette.Paper, Palette.Ink, e);
-                Gfx.Text(sb, Game.BigFont, numerals[i], r.X + 24, r.Y + 10, Color.Lerp(Palette.PaperDim, Palette.InkSoft, e) * a, TextSize.Small);
-                Gfx.Text(sb, Game.StoryFont, c.Text, r.X + 70, r.Y + 15, text * a, TextSize.Story);
+                //NOT CLUTTERED (3 Nov, the user 13.158 13.159) : one number per way, the key on its left (1 2 3). The roman
+                //numeral inside said the same thing a second time, so the words start where it stood
+                Gfx.Text(sb, Game.StoryFont, c.Text, r.X + 34, r.Y + 15, text * a, TextSize.Story);
 
                 //Tags : from the right edge, what the way gives (REWARD TAGS, filled), then what it costs (a check, shards, life).
                 //They turn dark with the words while the plate fills with ink.
