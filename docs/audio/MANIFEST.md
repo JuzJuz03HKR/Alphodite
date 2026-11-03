@@ -3,6 +3,8 @@
 
 **DARK PASS (3 Nov, the user : the bright, cute and winning sounds go dark, gloomy and fierce like the music)** : after make_sounds.py, `python3 docs/audio/darken_sounds.py` pitches 15 chime and UI sounds down, cuts their highs, adds a cold echo (and a low hit under victory, run_complete, finale_ready, rehearse), and takes victory.ogg and shop.ogg two semitones down. Same sources and licences as below.
 
+**MAESTRO SOUNDS (3 Nov, the user : the maestros' FINALE sound like lightning, glass and light)** : `python3 docs/audio/maestro_sounds.py <folder of the pre DARK PASS wavs>` rebuilds finale_storm (a lightning crack, a long thunder roll, a hit), finale_prism (glass breaking with pieces falling at other pitches) and finale_holy (a rising shine, the impact, a long glow, a deep hum) only from the recordings listed below (thunder 01, BreakGlass_01 and _02, the spell impacts, VSCO 2 CE).
+
 Labels : FREE = someone else's CC0 or CC-BY file, cut and levelled here / TEAM FREE = free sounds the team found and checked (13.138), never in the repo / BORROWED = other games' (playtest only, never in the repo, none yet) / OURS = made here (none yet : ready made first, 13.134)
 
 | file | label | made of | seconds |
