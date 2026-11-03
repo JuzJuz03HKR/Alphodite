@@ -55,6 +55,30 @@ namespace Tacetno433.Core
         //Shift : where an extra copy is drawn (ECHO, the stage draws it more than once), page pixels
         public Vector2 Shift;
 
+        //Is Boss : one of the six bosses (they get a BOSS RIM)
+        public bool IsBoss { get { return Of != Sort.Musician && design >= Requiem; } }
+
+        //BOSS RIM (3 Nov, the user : "take the examples from Worldless") : Worldless's great foes are dark shapes with a line of
+        //light all round their edge, so their outline reads from far off. Ours : into the GLOW picture the boss's silhouette is
+        //drawn eight times round itself in the rim's light (Shapes.SilhouetteColor, Shapes.Offset); its black silhouette drawn
+        //after on top keeps only the ring outside it, and the bloom makes that ring glow. Brighter once the shell has broken,
+        //where a black body on the black hole needs it most (BossRimLight, BossRimBroken, BossRimWidth in Data/BattleRules.cs).
+        public void DrawRim(float alpha)
+        {
+            if (alpha <= 0.005f || !IsBoss) return;
+            Shapes.Silhouette = true;
+            Shapes.SilhouetteColor = Color.White * (ShellOn ? BattleRules.BossRimLight : BattleRules.BossRimBroken);
+            for (int i = 0; i < 8; i++)
+            {
+                float turn = i * MathHelper.PiOver4;
+                Shapes.Offset = new Vector2((float)Math.Cos(turn), (float)Math.Sin(turn)) * BattleRules.BossRimWidth;
+                DrawTacet(alpha, 0f, 1f, 0f);
+            }
+            Shapes.Offset = Vector2.Zero;
+            Shapes.SilhouetteColor = Color.Black;
+            Shapes.Silhouette = false;
+        }
+
         //Behind : HOLE LIGHT (D7, 2 Nov). How dark it is behind this figure, 0..1, set by the battle stage each frame (0 on
         //every other page). A black shell over the hole's black would vanish, so there the hole's light catches its rim : the
         //rim grows brighter and wider instead of sinking into the dark (FigureHoleRim, FigureHoleEdge in Data/BattleRules.cs).
@@ -1009,12 +1033,73 @@ namespace Tacetno433.Core
             {
                 float run = k == crackSeen - 1 ? MathHelper.Clamp(crackClock / BattleRules.FigureCrackTime, 0f, 1f) : 1f;
                 int o = k * 6;
-                Vector2 a = S(cracks[o], cracks[o + 1]), b = S(cracks[o + 2], cracks[o + 3]), c = S(cracks[o + 4], cracks[o + 5]);
-                line[0] = a;
-                line[1] = Vector2.Lerp(a, b, Math.Min(1f, run * 2f));
-                int n = 2;
-                if (run > 0.5f) line[n++] = Vector2.Lerp(b, c, (run - 0.5f) * 2f);
-                LightLine(n, 1.1f * lookK + 0.4f, white);
+                line[0] = S(cracks[o], cracks[o + 1]);
+                line[1] = S(cracks[o + 2], cracks[o + 3]);
+                line[2] = S(cracks[o + 4], cracks[o + 5]);
+                Shatter(3, 1.1f * lookK + 0.4f, white, run, design * 10 + k);
+            }
+        }
+
+        //SHATTER (3 Nov, the user : the cracks were lines and looked like a cartoon; let the shell break into pieces, the
+        //pieces gone) : along a crack's way (the n points in line, on the page) the shell is broken out in chips, each a
+        //jagged piece of six corners, longer along the crack. What shows in the gap is what the shell held : the light inside
+        //a black shell (TACET keeps the light in), the dark inside a white monument. The broken edge round each gap (its lip)
+        //is drawn first a little bigger : light on a black shell, a shadow on a white one. width : the old crack line's width
+        //(the chips grow from it), run : how much of the way is broken yet (the newest crack runs across), seed : its shapes.
+        private static readonly Vector2[] chipCorner = new Vector2[6];
+        private static readonly Vector2[] chipTri = new Vector2[3];
+
+        private void Shatter(int n, float width, Color c, float run, int seed)
+        {
+            if (n < 2 || c.A == 0) return;
+            bool lightInside = c.R > c.A * 0.5f;                                   // a light colour : a black shell broken open
+            Color gap = lightInside ? c * BattleRules.ShatterGlow : c;
+            Color lip = lightInside ? c : Color.Black * (BattleRules.ShatterShadow * c.A / 255f);
+            float size = width * BattleRules.ShatterSize;
+
+            float total = 0f;
+            for (int i = 0; i + 1 < n; i++) total += Vector2.Distance(line[i], line[i + 1]);
+            if (total < 0.5f) return;
+            int count = Math.Max(2, (int)(total / (size * 1.9f)));              // apart : pieces, not one long tear
+            for (int pass = 0; pass < 2; pass++)                                   // every lip first, then every gap over them
+            {
+                for (int j = 0; j <= count; j++)
+                {
+                    float d = total * j / count;
+                    if (d > total * run + 0.01f) break;
+                    int s = 0;                                                     // the point at distance d along the way
+                    float left = d;
+                    while (s + 2 < n && left > Vector2.Distance(line[s], line[s + 1])) { left -= Vector2.Distance(line[s], line[s + 1]); s++; }
+                    Vector2 way = line[s + 1] - line[s];
+                    float len = way.Length();
+                    if (len < 0.001f) continue;
+                    way /= len;
+                    Vector2 at = line[s] + way * Math.Min(left, len);
+                    float r = size * (0.5f + 0.7f * Hash(seed, j));
+                    float tip = (Hash(seed + 3, j) - 0.5f) * 1.4f;                 // each piece turned its own way,
+                    Vector2 turned = new Vector2(way.X * (float)Math.Cos(tip) - way.Y * (float)Math.Sin(tip), way.X * (float)Math.Sin(tip) + way.Y * (float)Math.Cos(tip));
+                    Vector2 off = new Vector2(-way.Y, way.X) * ((Hash(seed + 5, j) - 0.5f) * size * 1.2f);   //   off the line a little
+                    Chip(at + off, turned, r * 1.3f, r * 0.8f, seed * 31 + j, pass == 0 ? lip : gap, pass == 0 ? 1.2f : 1f);
+                }
+            }
+        }
+
+        //Chip : one jagged gap, along way, in colour, grown by grow (its lip)
+        private static void Chip(Vector2 at, Vector2 way, float along, float across, int seed, Color colour, float grow)
+        {
+            Vector2 side = new Vector2(-way.Y, way.X);
+            for (int i = 0; i < chipCorner.Length; i++)
+            {
+                float a = (i + 0.4f * (Hash(seed, i) - 0.5f)) * MathHelper.TwoPi / chipCorner.Length;
+                float k = (0.55f + 0.45f * Hash(seed + 7, i)) * grow;
+                chipCorner[i] = way * ((float)Math.Cos(a) * along * k) + side * ((float)Math.Sin(a) * across * k);
+            }
+            for (int i = 0; i < chipCorner.Length; i++)                           // a fan from the middle : any jagged shape fills
+            {
+                chipTri[0] = at;
+                chipTri[1] = at + chipCorner[i];
+                chipTri[2] = at + chipCorner[(i + 1) % chipCorner.Length];
+                Shapes.Fill(chipTri, 3, colour);
             }
         }
 
@@ -1306,11 +1391,12 @@ namespace Tacetno433.Core
                 if (white ? k >= crackSeen : (k >= 2 && k >= crackSeen)) break;
                 int n = cracks[k].Length / 2;
                 for (int i = 0; i < n; i++) line[i] = S(cracks[k][i * 2], cracks[k][i * 2 + 1]);
-                LightLine(n, (white ? 1.4f : 1.6f) * lookK, c);
+                float run = k == crackSeen - 1 ? MathHelper.Clamp(crackClock / BattleRules.FigureCrackTime, 0f, 1f) : 1f;
+                Shatter(n, (white ? 1.4f : 1.6f) * lookK, c, run, design * 10 + k);       // SHATTER
             }
         }
 
-        //Blade : a curved piece of the sketch between two cubic curves (a scythe, a tail, the ends of a blindfold). The first runs
+        //Blade : a curved piece of the sketch between two cubic curves (a scythe, a tail). The first runs
         //from root to tip, the second back from tip to root. Drawn as one stroke along the middle as wide as the gap, because
         //the fan of Shapes.Fill would spill out of its hollow side. rim : a shell's pale rim first (cloth has none).
         private void Blade(Vector2 a0, Vector2 a1, Vector2 a2, Vector2 a3, Vector2 b0, Vector2 b1, Vector2 b2, Vector2 b3, Color fill, bool rim)
@@ -1429,7 +1515,7 @@ namespace Tacetno433.Core
         private void CrownCrack(int k, Color c, float width)
         {
             for (int i = 0; i < 5; i++) line[i] = S(CrownCracks[k * 10 + i * 2], CrownCracks[k * 10 + i * 2 + 1]);
-            LightLine(5, width * lookK, c);
+            Shatter(5, width * lookK, c, 1f, 70 + k);                               // SHATTER
         }
 
         //======================================================================================
@@ -1538,7 +1624,7 @@ namespace Tacetno433.Core
         private void RequiemCrack(int k, Color c, float width)
         {
             for (int i = 0; i < 4; i++) line[i] = S(RequiemCracks[k * 8 + i * 2], RequiemCracks[k * 8 + i * 2 + 1]);
-            LightLine(4, width * lookK, c);
+            Shatter(4, width * lookK, c, 1f, 80 + k);                               // SHATTER
         }
 
         //======================================================================================
@@ -1783,12 +1869,10 @@ namespace Tacetno433.Core
             Vector2 keep = Shift;                                                 // the head and its blindfold tip to listen (the Head spring's own move)
             Shift += body[Head].At - Local(0f, -0.8f) - (body[Chest].At - Local(0f, -0.5f));
             BossHead(120, 88, 16f, 20f, alpha);
-            float flap = (float)Math.Sin(clock * 2.2f + seed) * 2.5f;            // the blindfold's two ends in the air
-            Blade(S(102, 82), S(86, 86), S(76, 96 + flap * 0.5f), S(66, 112 + flap),
-                  S(71, 114 + flap), S(80, 100 + flap * 0.5f), S(90, 92), S(102, 89), ink, false);
-            Blade(S(102, 86), S(90, 94), S(84, 104 + flap * 0.5f), S(80, 118 + flap * 0.8f),
-                  S(85, 119 + flap * 0.8f), S(88, 106 + flap * 0.5f), S(94, 98), S(103, 91), ink, false);
+            //THE WRAP (3 Nov, the user : no tails hanging down, it looked like a ninja; a cloth wound round the eyes) : two turns
+            //of cloth round the head, the second a little tilted so its edge shows under the first, no knot, no ends
             Shapes.Box(S(120, 84.5f), 36f * lookK, 9f * lookK, lookLean, ink);   // the blindfold
+            Shapes.Box(S(120, 88f), 35f * lookK, 4.5f * lookK, lookLean - 0.14f, ink);   //   its second turn
             Shapes.Line(S(104, 79), S(136, 79), 1.2f * lookK, Color.White * alpha);   //   light leaking at its edges
             Shapes.Line(S(104, 90.5f), S(136, 90.5f), 1f * lookK, Color.White * alpha);
             Shift = keep;

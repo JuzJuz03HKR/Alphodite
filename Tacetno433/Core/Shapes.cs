@@ -89,6 +89,11 @@ namespace Tacetno433.Core
         //way into the GLOW picture hides the light behind it (TACET's hole, its seam) whatever its own colours are.
         public static bool Silhouette;
 
+        //BOSS RIM (3 Nov, from Worldless) : SILHOUETTE in this colour instead of black, and every corner moved by Offset (page
+        //pixels). A figure drawn a few times round itself, then once in black on top, leaves a ring of light : its rim.
+        public static Color SilhouetteColor = Color.Black;
+        public static Vector2 Offset;
+
         //MIRROR (round 6 part 4) : the shapes upside down under a floor line, fading out as they go down, like a figure seen
         //in a glossy black floor (the lid of a piano). MirrorAt turns it on for one figure, MirrorOff turns it off.
         private static bool mirror;
@@ -110,7 +115,8 @@ namespace Tacetno433.Core
         //Corner : one corner of a triangle. SILHOUETTE and MIRROR change it here, so every shape gets them without knowing.
         private static short Corner(Vector2 at, Color color)
         {
-            if (Silhouette) color = Color.Black * (color.A / 255f);
+            if (Silhouette) color = SilhouetteColor * (color.A / 255f);
+            at += Offset;
             if (mirror)
             {
                 float up = mirrorFloor - at.Y;                                      // as high above the floor as it shows deep in it

@@ -74,8 +74,10 @@ patch('Tacetno433/Screens/BattleScreen.cs',
 # 3 PERFECT on every note by itself : TACET_AUTO=1
 patch('Tacetno433/Screens/BattleScreen.cs',
 '''            TellBlows(n, now);                                         // ONE NOTE ONE BLOW : the wind up as the ring closes (BattleScreen.Stage.cs)
+            SoundCues(now);                                            // BLOCK E : PARRY CUE, TACET's notes swing in (BattleScreen.Sound.cs)
             if (n.Kind == NoteKind.Roll)''',
 '''            TellBlows(n, now);                                         // ONE NOTE ONE BLOW : the wind up as the ring closes (BattleScreen.Stage.cs)
+            SoundCues(now);                                            // BLOCK E : PARRY CUE, TACET's notes swing in (BattleScreen.Sound.cs)
             if (System.Environment.GetEnvironmentVariable("TACET_AUTO") == "1" && n.Kind != NoteKind.Roll && now >= n.Due)
             {
                 lastWay = n.Kind == NoteKind.Spark ? Flick.Right : n.Way;

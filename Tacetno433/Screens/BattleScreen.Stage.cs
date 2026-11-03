@@ -1442,6 +1442,7 @@ namespace Tacetno433.Screens
                 float alpha, light, flash, mark;
                 FigureLookOf(e, out alpha, out light, out flash, out mark);
                 figure.Shift = Vector2.Zero;
+                figure.DrawRim(alpha);                                                // BOSS RIM : the ring of light first (Figure.Tacet.cs)
                 figure.DrawSilhouette(alpha);
             }
             Shapes.End();

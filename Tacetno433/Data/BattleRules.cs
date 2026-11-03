@@ -655,6 +655,12 @@
         public static float AttackRibbon = 1f;                           // RIBBON (Worldless, 3 Nov) : the light trail behind a weapon's tip (0 = none)
         public static float AttackRibbonFrom = 120f;                      //   seen once the tip ran more than this far over its trail (page pixels)
         public static float AttackRibbonFull = 240f;                     //   full once it ran this far
+        public static float ShatterSize = 4.5f;                          // SHATTER (3 Nov, the user : cracks broken into pieces, not lines) : a chip's size, times the old crack line's width
+        public static float ShatterGlow = 0.45f;                         //   a black shell's gap shows the light inside this bright (its lip full)
+        public static float ShatterShadow = 0.45f;                       //   a white monument's gap has a shadow lip this dark
+        public static float BossRimWidth = 3f;                           // BOSS RIM (Worldless, 3 Nov) : the line of light round a boss's edge, how wide (pixels)
+        public static float BossRimLight = 0.5f;                         //   how bright on the white monument
+        public static float BossRimBroken = 0.95f;                       //   and once its shell has broken (a black body on the black hole)
         public static float BossWingsLight = 0.85f;                      // WINGS (Worldless, 3 Nov) : the crescent blades behind a boss, how strong
         public static float AttackBusyBack = 0.6f;                       // the stage waits for a blow to be this far home (or a hurt to end) before the next musician comes in
         public static float AttackWaitMost = 1.2f;                       //   but never longer than this (seconds)
