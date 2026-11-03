@@ -27,6 +27,7 @@ namespace Tacetno433.Core
 
         private static int hoverMotif = -1;
         private static bool hoverLife;           // BAND LIFE : the pointer is on the LIFE chip
+        private const string HardWord = "HARD";  // HARD MODE : the top bar's mark (3 Nov)
         private static readonly Rectangle lifeChip = new Rectangle(846, 6, 158, 52);
         private const int LifeBarsW = 150;
         private const int LifeBarGap = 4;
@@ -58,12 +59,15 @@ namespace Tacetno433.Core
             Gfx.Text(sb, Ui.BigFont, run.BandName.Length > 0 ? run.BandName : "UNNAMED ENSEMBLE", 32, 8, Palette.Paper, TextSize.Small);
             Gfx.TextSpaced(sb, Ui.Font, run.Conductor.Name, 34, 40, Palette.LineGrey, TextSize.Tiny, 2.5f);
 
-            //ENCORE : the run's level after the conductor's name, nothing on a first concert (NORMAL or MAESTRO until 1 Nov)
-            if (run.Encore > 0)
+            //HARD MODE and ENCORE : the run's mode and level after the conductor's name, nothing on a first NORMAL concert
+            float modeX = 34 + Gfx.SpacedWidth(Ui.Font, run.Conductor.Name, TextSize.Tiny, 2.5f) + 16;
+            if (run.Hard)
             {
-                float modeX = 34 + Gfx.SpacedWidth(Ui.Font, run.Conductor.Name, TextSize.Tiny, 2.5f) + 16;
-                Gfx.TextSpaced(sb, Ui.Font, Encore.Labels[run.Encore], modeX, 40, Palette.Highlight, TextSize.Tiny, 2.5f);
+                Gfx.TextSpaced(sb, Ui.Font, HardWord, modeX, 40, Palette.Paper, TextSize.Tiny, 2.5f);
+                modeX += Gfx.SpacedWidth(Ui.Font, HardWord, TextSize.Tiny, 2.5f) + 12;
             }
+            if (run.Encore > 0)
+                Gfx.TextSpaced(sb, Ui.Font, Encore.Labels[run.Encore], modeX, 40, Palette.Highlight, TextSize.Tiny, 2.5f);
 
             //Title
             if (title.Length > 0)

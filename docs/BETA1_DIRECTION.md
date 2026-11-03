@@ -3304,4 +3304,5 @@ solution กับ content ของ Visual Studio (zip) / เปิด repo pub
 - **ศัตรู** : THE NAMELESS MASTER บอสที่อ่อนสุด `TurnHp` 230 เป็น 255 (บอสอื่น 250) / WHITE NOISE กลุ่มที่แรงสุด `TurnHp` 110 เป็น 95
 - **เงินเฟ้อ** (ผู้ใช้บอกไว้ 1 พ.ย.) : `RankShards` S A B C จาก x2 1.5 1.25 1 เป็น x1.6 1.35 1.15 1
 - **HARD MODE** (`BattleRules` HardTurnDamage 1.3 HardEnemyLife 1.25 HardShards 0.8 + วงแหวนเร็วกับช่วงตีแคบแบบ ENCORE 2) : หน้าโปรไฟล์วาทยากร เหนือ ENCORE มุมขวาล่าง ปุ่ม NORMAL | HARD คลิกหรือกด M จำไว้ใน settings (`Settings.Hard`) ติดไปกับรัน (`RunState.Hard` เซฟ `hard=`) ซ้อนกับ ENCORE ได้ / ตัวจำลองช่องที่สองเปลี่ยนจาก MAESTRO เป็น HARD (STRONG ชนะ 0 ใน 3 seed, EXPERT ราว 25)
+- ✅ **ป้าย HARD** (3 พ.ย. แชทต่อมา) : แถบบนระหว่างรันทุกหน้า มุมซ้ายบน บรรทัดชื่อวาทยากร มีคำ HARD สีขาวต่อท้าย (ก่อน ENCORE ถ้ามี) `RunHud.DrawTop`
 - turncheck 220/220 (ค่าที่คาดไว้ 49 ข้อเปลี่ยนตามตัวเลขใหม่ ไม่มีค่าจริงเท็จข้อไหนเปลี่ยน) savecheck 45/45 / `docs/TACET_Balance.xlsx` แท็บ Turn สร้างใหม่
