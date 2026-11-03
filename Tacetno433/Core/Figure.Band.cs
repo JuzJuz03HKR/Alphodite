@@ -1026,13 +1026,22 @@ namespace Tacetno433.Core
             Sickle(T(92, 104), T(102, 130), T(92, 156), 7.5f * k, white);
             Sickle(T(132, 104), T(122, 130), T(132, 156), 7.5f * k, grey);
 
-            //F HOLE : the light. Paying in life dims it, the smoke rises out of it
+            //THE VIOLIN (3 Nov, the user 13.154 : "read more as the instrument, still abstract and figurative") : the upper and the
+            //lower bout float over and under the C bouts, so the pieces stand in the outline of a violin's body, never joined.
+            //The neck runs up to the head, the bridge stands between the f holes, two strings cross the body to the tailpiece.
+            Sickle(T(95, 101), T(112, 87), T(129, 101), 6f * k, grey);
+            Sickle(T(93, 160), T(112, 183), T(131, 160), 7f * k, white);
+            Shapes.Line(T(112, 86), Hd(112, 58), 3.2f * k, deep);
+            Shapes.Kite(T(112, 176), T(112, 161), 5.5f * k, 0.3f, deep);
+            Color violinString = C(Tint, drawAlpha * StringShine());
+            Shapes.Line(T(110.4f, 165), T(111, 88), 0.7f * k, violinString);
+            Shapes.Line(T(113.6f, 165), T(113, 88), 0.7f * k, violinString);
+            Shapes.Box(T(112, 140), 13f * k, 2.4f * k, TA(0f), white);
+
+            //F HOLES : the light, one each side of the bridge. Paying in life dims them, the smoke rises out of them
             Color hole = Color.Lerp(pale, C(new Color(120, 30, 46), drawAlpha), 0.75f * bleed);
-            int n = Cubic(T(115, 115), T(107, 124), T(119, 137), T(109, 147), 12, line, 0);
-            for (int i = 0; i < n; i++) lineW[i] = (1.6f + 1.4f * (float)Math.Sin(i / (float)(n - 1) * MathHelper.Pi)) * k;
-            Shapes.Stroke(line, lineW, n, hole, hole, false);
-            Shapes.Circle(T(115, 115), 2.2f * k, hole);
-            Shapes.Circle(T(109, 147), 2.2f * k, hole);
+            FHole(T(108.5f, 116), T(103, 124), T(110.5f, 137), T(104, 146), hole, 0.8f);
+            FHole(T(115.5f, 116), T(121, 124), T(113.5f, 137), T(120, 146), hole, 0.8f);
             if (bleed > 0f && !silhouette) DrawSmoke(T(112, 131));
 
             if (!floating) Limb(T(124, 106), body[HandA].At, TW(1.57f) * (8f * k), legend.Limb * k, 1.4f * k, white);
@@ -1229,13 +1238,21 @@ namespace Tacetno433.Core
             Bow3(T(104, 96), T(98, 141), T(106, 186), 1.5f * k, grey);
             Bow3(T(120, 96), T(126, 141), T(118, 186), 1.5f * k, deep);
 
-            //The flute : the line of her body, an arch at its top, the collar over it
-            Shapes.Line(T(112, 90), T(112, 198), 3.2f * k, white);
+            //The flute : the line of her body, an arch at its top, the collar over it.
+            //THE FLUTE (3 Nov, the user 13.154) : the tube is a tube now, its far side in shadow, the joints of its three parts
+            //(head, body, foot) as bands in her colour, the lip plate round the blow hole and the thin rod of the keys beside them
+            Shapes.Line(T(112, 90), T(112, 198), 5.2f * k, white);
+            Shapes.Line(T(113.6f, 92), T(113.6f, 196), 1.5f * k, deep);
+            Shapes.Line(T(108.5f, 107), T(115.5f, 107), 1.6f * k, edge);
+            Shapes.Line(T(108.5f, 183), T(115.5f, 183), 1.6f * k, edge);
+            Shapes.Line(T(118f, 111), T(118f, 185), 0.9f * k, grey);
+            for (int i = 0; i < 6; i++) Shapes.Line(T(114.5f, 113 + i * 14), T(118f, 113 + i * 14), 0.8f * k, grey);
             Bow3(T(106, 95), T(112, 86), T(118, 95), 1.6f * k, white);
             line[0] = T(105, 77); line[1] = T(119, 77); line[2] = T(112, 88);
             Shapes.Fill(line, 3, white);
 
-            //BLOW HOLE : the light
+            //BLOW HOLE : the light, on its lip plate
+            Shapes.Ellipse(T(112, 99), 6.4f * k, 4.6f * k, TA(0f), white, grey);
             Shapes.Ellipse(T(112, 99), 4f * k, 3f * k, TA(0f), pale, pale);
             Shapes.Ellipse(T(112, 99), 2.4f * k, 1.5f * k, TA(0f), C(HoleDark, drawAlpha), C(HoleDark, drawAlpha));
 
@@ -1405,6 +1422,21 @@ namespace Tacetno433.Core
             Shapes.Stroke(line, lineW, n, edge, edge, false);
             if (Legendary(Cues.Stars2) && !silhouette) DrawDrumWaves();
 
+            //THE TIMPANI (3 Nov, the user 13.156 : PFUNDT too, like the other four) : the tension rods down the front of the bowl,
+            //each with its lug, the copper counter hoop over the front of the rim, and the post and the tuning pedal under it
+            for (int i = 0; i < 6; i++)
+            {
+                float a = MathHelper.Pi * (i + 0.5f) / 6f;
+                float x = 112f + 35.5f * (float)Math.Cos(a);
+                float y = 112f + 7.6f * (float)Math.Sin(a);
+                float drop = 15f + 5f * (float)Math.Sin(a);                       // the rods in the middle reach a little lower
+                Shapes.Line(T(x, y), T(x * 0.96f + 112f * 0.04f, y + drop), 1.2f * k, grey);
+                Shapes.Box(T(x * 0.96f + 112f * 0.04f, y + drop + 1.5f), 3.4f * k, 4.2f * k, TA(0f), edge);
+            }
+            EllipseLine(T(112, 112), 35.5f * k, 7.6f * k, TA(0f), 0f, MathHelper.Pi, 2.4f * k, edge);
+            Shapes.Line(T(112, 190), T(112, 204), 2.6f * k, deep);
+            Shapes.Box(T(112, 207), 17f * k, 3.2f * k, TA(0.12f), grey);
+
             //THE SKIN : the light, beating
             Shapes.Ellipse(T(112, 112), 34f * k, 7f * k, TA(0f), C(HoleDark, drawAlpha), C(HoleDark, drawAlpha));
             EllipseLine(T(112, 112), 34f * k, 7f * k, TA(0f), 0f, MathHelper.TwoPi, 1.7f * k, white);
@@ -1545,7 +1577,21 @@ namespace Tacetno433.Core
 
             if (!floating) Limb(T(134, 80), body[HandA].At, TW(1.2f) * (6f * k), legend.Limb * k, 2.4f * k, white);
 
-            //Head : a diamond, its far half in shadow, a slit of light down its middle
+            //THE CELLO (3 Nov, the user 13.154) : one f hole on the far side, the bridge, two strings from the tailpiece up
+            FHole(T(101, 136), T(95, 146), T(104, 158), T(97, 168), C(Tint, drawAlpha * 0.5f), 0.9f);
+            Color celloString = C(Tint, drawAlpha * StringShine() * 0.85f);
+            Shapes.Line(T(110, 196), T(110.6f, 78), 0.8f * k, celloString);
+            Shapes.Line(T(114, 196), T(113.4f, 78), 0.8f * k, celloString);
+            Shapes.Box(T(112, 154), 17f * k, 2.8f * k, TA(0f), white);
+            Shapes.Kite(T(112, 200), T(112, 182), 7f * k, 0.3f, deep);
+
+            //Head : a diamond, its far half in shadow, a slit of light down its middle. THE CELLO : the neck under it, two pegs
+            //and the scroll curled on top
+            Shapes.Line(Hd(112, 60), T(112, 78), 4.2f * k, deep);
+            Shapes.Box(Hd(103.5f, 31), 6f * k, 2.2f * k, TA(0f), grey);
+            Shapes.Box(Hd(120.5f, 31), 6f * k, 2.2f * k, TA(0f), grey);
+            Shapes.Ring(Hd(112, 17), 4.6f * k, 1.6f * k, white);
+            Shapes.Circle(Hd(113.2f, 17.6f), 1.5f * k, edge);
             line[0] = Hd(112, 24); line[1] = Hd(112, 64); line[2] = Hd(100, 44);
             Shapes.Fill(line, 3, white);
             line[0] = Hd(112, 24); line[1] = Hd(124, 44); line[2] = Hd(112, 64);
@@ -1562,13 +1608,14 @@ namespace Tacetno433.Core
         //Slab Half : one half of DUPORT's slab (-1 the back, 1 the front), the cello's waist cut in, into the array
         private int SlabHalf(int side, Vector2[] into)
         {
+            //THE CELLO (3 Nov, the user 13.154) : a cello's outline instead of the cut slab, the round upper bout, the C bout of
+            //the waist and the wider lower bout, the same height (72 to 206) so the scar and the spike stay where they were
             float s = side;
-            into[0] = T(112, 72);
-            into[1] = T(112 + s * 24f, 72);
-            into[2] = T(112 + s * 29f, 110);
-            int n = Cubic(T(112 + s * 29f, 110), T(112 + s * 16f, 118), T(112 + s * 16f, 132), T(112 + s * 29f, 140), 9, into, 2);
-            into[n++] = T(112 + s * 24f, 206);
-            into[n++] = T(112, 206);
+            into[0] = T(112, 73);
+            int n = Cubic(T(112, 73), T(112 + s * 17f, 71), T(112 + s * 28f, 80), T(112 + s * 27f, 103), 8, into, 1);
+            n = CubicMore(T(112 + s * 27f, 103), T(112 + s * 16f, 112), T(112 + s * 16f, 133), T(112 + s * 30f, 143), 9, into, n);
+            n = CubicMore(T(112 + s * 30f, 143), T(112 + s * 37f, 166), T(112 + s * 31f, 203), T(112 + s * 9f, 206), 10, into, n);
+            into[n++] = T(112, 207);
             return n;
         }
 
@@ -1671,6 +1718,9 @@ namespace Tacetno433.Core
             Shapes.Ring(bell, 18f * k, 0.9f * k, C(Tint, drawAlpha * 0.55f));
             Shapes.Circle(bell, 5f * k, pale);
 
+            //THE HORN (3 Nov, the user 13.154) : the tube widens from the coil up into the bell, so the sun reads as a horn's bell
+            Shapes.Taper(T(101, 126), Hd(100, 88), 2.4f * k, 10f * k, brass * 0.85f);
+
             //Back hand, back foot (the heel up, mid stride)
             Shapes.Circle(body[HandB].At, 3.2f * k, grey);
             if (!floating)
@@ -1682,8 +1732,16 @@ namespace Tacetno433.Core
             if (!floating) Limb(T(124, 138), body[FootB].At, TW(0f) * (4f * k), legend.Limb * k * 1.3f, 1.2f * k, white);
             DropShape(body[FootB].At, TA(MathHelper.PiOver2), 10.5f * k, 11f * k, 0f, white, white);
 
-            //The pipe from the head down to the coil
+            //The pipe from the head down to the coil. THE HORN : its mouthpiece at the head, three round valves on the pipe
             Bow3(Hd(122, 73), T(128, 100), T(121, 118), 1.3f * k, C(Tint, drawAlpha * 0.8f));
+            Shapes.Circle(Hd(122, 73), 2.2f * k, brass);
+            for (int v = 0; v < 3; v++)
+            {
+                Vector2 valve = T(132.5f - v * 1.2f, 96f + v * 8f);
+                Shapes.Circle(valve, 3.4f * k, C(HoleDark, drawAlpha));
+                Shapes.Ring(valve, 3.4f * k, 1.1f * k, brass);
+                Shapes.Circle(valve, 1.2f * k, pale);
+            }
 
             //THE COIL : round the waist (CHAKRAM throws it at the enemy and catches it again, WHIRLWIND doubles it)
             float thrown = Cues.Button == 2 ? pose.Throw : 0f;
@@ -1921,6 +1979,24 @@ namespace Tacetno433.Core
             Shapes.Bend(a, b * 2f - (a + c) * 0.5f, c, n, line);
             for (int i = 0; i < n; i++) lineW[i] = width * (float)Math.Pow(Math.Sin(i / (float)(n - 1) * MathHelper.Pi), 0.8);
             Shapes.Stroke(line, lineW, n, color, color, false);
+        }
+
+        //String Shine : how bright the strings across the body are, softly lit at rest, ringing (a fast shimmer) while this
+        //musician plays a phrase of blows (POLISH, 3 Nov : the instrument sounds when the legend plays)
+        private float StringShine()
+        {
+            if (!Blowing) return 0.5f;
+            return 0.75f + 0.25f * (float)Math.Sin(clock * 40f + seed);
+        }
+
+        //F Hole : the S of a string instrument's sound hole, thick in its middle, a dot at each end (THE VIOLIN, THE CELLO)
+        private void FHole(Vector2 a, Vector2 b, Vector2 c, Vector2 d, Color color, float size)
+        {
+            int n = Cubic(a, b, c, d, 12, line, 0);
+            for (int i = 0; i < n; i++) lineW[i] = (1.6f + 1.4f * (float)Math.Sin(i / (float)(n - 1) * MathHelper.Pi)) * k * size;
+            Shapes.Stroke(line, lineW, n, color, color, false);
+            Shapes.Circle(a, 2.2f * k * size, color);
+            Shapes.Circle(d, 2.2f * k * size, color);
         }
 
         //Bow 3 : a thin curve of one width from a to c through b
