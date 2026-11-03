@@ -5,6 +5,8 @@
 
 ## 🔥 งานส่งด่วนที่สุด (2 พ.ย. ผู้ใช้ `USER_BRIEFS.md` 13.143 13.144) : ทำก่อนทุกอย่าง แผนและลำดับ `docs/BETA1_DIRECTION.md` 54 · เวลา 1 ชั่วโมงครึ่ง ข้อความทุกชิ้นสั้นกระชับ · แก้เกม 3 จุด → exe zip + README + tag v1.0.0 → teaser 15-20 วิ → Asset Content → เอกสารกระบวนการทำงาน → สไลด์ Canva
 
+- **3 พ.ย. หลังส่งงาน (`BETA1_DIRECTION.md` 55 56 `RESUME_PROMPT.md` สถานะล่าสุด)** : balance + โหมด NORMAL/HARD / WORLDLESS PASS (แสงพาดพื้น ท่าฟัน STRIKE ขอบแสงทุกตัว รอยแตกเป็นเศษ ผ้าพันตา CANTOR ผมพลิ้ว สีธาตุสด) / เสียง MAESTRO กับ DARK PASS / **ตัวเกมล่าสุด `Build/TACET4'33.zip` บน Beta1 ทำใหม่ทุกครั้งที่ผู้ใช้สั่ง** (สำเนา net8.0 `dotnet publish -c Release -r win-x64 --self-contained true`)
+
 ## 00. BETA 1 (28 ต.ค.) : ทำให้สุดเหมือนเกมพร้อมขาย เริ่มจากฉากต่อสู้ใหม่ อ่านก่อนข้อ 0
 
 - **ทำงานบน branch `Beta1`** (แตกจาก `Alpha7` `9c567d9` ผู้ใช้เลือก 28 ต.ค.) · `Alpha7` เก็บไว้เป็นเกมผลัดตาฉบับเต็มล่าสุด (มี .exe แล้ว)
