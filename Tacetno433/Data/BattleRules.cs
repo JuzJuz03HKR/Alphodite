@@ -662,6 +662,9 @@
         //strikes and the light happens on the enemy. Strings SLASH, winds SHOT, percussion SMASH, the SIGNATURE CROSS.
         public static float HitSize = 105f;               // the size of a blow's light (pixels), more for a stronger blow
         public static float HitTierSize = 0.12f;          // WEAPON TIERS (29 Oct) : each tier of the striker's weapon makes it this much bigger
+        public static float FloorGlareWidth = 560f;       // FLOOR GLARE (3 Nov, from Worldless) : how wide a blow's line of light runs along the floor (pixels)
+        public static float FloorGlareHeight = 10f;       // FLOOR GLARE : the hot band's height (two hazes under it, 3 and 6 times this)
+        public static float FloorGlareTime = 0.5f;        // FLOOR GLARE : seconds until it is gone
         public static float HitCrossLength = 1500f;       // CROSS : how far the SIGNATURE's two cuts reach each way
         public static float HitImpactTurn = 0.07f;        // IMPACT FRAME (round 6 : more impact, a little longer) : the world turned over (seconds)
         public static float HitImpactFlash = 0.05f;       //   then a frame of white

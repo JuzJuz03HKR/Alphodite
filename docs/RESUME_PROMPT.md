@@ -64,7 +64,7 @@ commit/push ขึ้น Beta1 เมื่อฉันสั่ง ยังไ
 
 ## สถานะล่าสุด (2 พ.ย.)
 
-**✅ 3 พ.ย. BALANCE + HARD MODE + ตัวเกม v1.1.0 (`BETA1_DIRECTION.md` 56)** : วาทยากร 28/38/32 นักดนตรี เงิน โหมด NORMAL/HARD หน้าโปรไฟล์วาทยากร (M) turncheck 220/220 savecheck 45/45 / ⚠️ ผู้ใช้ยังไม่ได้ลอง v1.1.0 บน Windows / ✅ ป้าย HARD บนแถบบนระหว่างรัน (3 พ.ย. แชทต่อมา `Core/RunHud.cs` ใต้ชื่อวง ต่อท้ายชื่อวาทยากร ก่อน ENCORE) / ถัดไป : ท่าทางนักดนตรีแบบ Worldless (`Core/Figure.cs` Attack Feel), แสงบนพื้นตอนโดน (`Core/HitFx.cs`), รูปร่างบอสรายตัว (`Core/Figure.Tacet.cs`), ซ่อม `probe_patch.py` ข้อ TellBlows / ผู้ใช้ปิดแชทตอน token เหลือ 2%
+**✅ 3 พ.ย. BALANCE + HARD MODE + ตัวเกม v1.1.0 (`BETA1_DIRECTION.md` 56)** : วาทยากร 28/38/32 นักดนตรี เงิน โหมด NORMAL/HARD หน้าโปรไฟล์วาทยากร (M) turncheck 220/220 savecheck 45/45 / ⚠️ ผู้ใช้ยังไม่ได้ลอง v1.1.0 บน Windows / ✅ ป้าย HARD บนแถบบนระหว่างรัน (3 พ.ย. แชทต่อมา `Core/RunHud.cs` ใต้ชื่อวง ต่อท้ายชื่อวาทยากร ก่อน ENCORE) / ✅ FLOOR GLARE แสงพาดพื้นตอนโดนแบบ Worldless (`Core/HitFx.Floor.cs` `BETA1_DIRECTION.md` 55) / ถัดไป : ท่าทางนักดนตรีแบบ Worldless (`Core/Figure.cs` Attack Feel), รูปร่างบอสรายตัว (`Core/Figure.Tacet.cs`), ซ่อม `probe_patch.py` ข้อ TellBlows / ผู้ใช้ปิดแชทตอน token เหลือ 2%
 
 **⏳ 3 พ.ย. polish หลังส่ง (`BETA1_DIRECTION.md` 55)** : เสียงโทนมืด เสียง FINALE ฟ้าผ่า กระจก แสง ริบบิ้นแสงตามอาวุธ ปีกเสี้ยวกับวงแหวนของบอส เสร็จแล้ว / ที่เหลือ : ซ่อมเครื่องมือถ่ายท่า แล้วดูริบบิ้นตอนฟันจริง ท่าทางนักดนตรีแบบ Worldless แสงบนพื้นตอนโดน
 

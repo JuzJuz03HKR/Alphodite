@@ -259,6 +259,7 @@ namespace Tacetno433.Core
         //way, so the mark on the enemy follows the player's hand (Flick.None : the blow's own slant, as before).
         public void Hit(HitStyle style, Rectangle box, float power, HitColors c, int tier = 0, Flick swing = Flick.None)
         {
+            AddGlare(box, power, tier, c);                                           // FLOOR GLARE : every blow lights the floor (HitFx.Floor.cs)
             if (SkillHit(style, box, power, c, tier, swing)) return;                // a legend's own skill (HitFx.Skills.cs)
             if (FinaleHit(style, box, power)) return;                                // a conductor's FINALE (HitFx.Finale.cs)
             Vector2 at = new Vector2(box.Center.X, box.Y + box.Height * 0.45f);
@@ -636,6 +637,7 @@ namespace Tacetno433.Core
             focusAge += dt;
             UpdateSkills(dt, frozen);                                                 // the skills' own pieces (HitFx.Skills.cs)
             UpdateFinale(dt, frozen);                                                 // the FINALE's glass and months (HitFx.Finale.cs)
+            UpdateGlares(dt);                                                         // FLOOR GLARE (HitFx.Floor.cs)
 
             //Pending blows land when their wait is over (the clock runs through the hit stop, they are part of it)
             for (int i = 0; i < pending.Length; i++)
@@ -738,6 +740,7 @@ namespace Tacetno433.Core
             for (int i = 0; i < bursts.Length; i++) bursts[i].On = false;
             for (int i = 0; i < rings.Length; i++) rings[i].On = false;
             for (int i = 0; i < bits.Length; i++) bits[i].On = false;
+            ClearGlares();
             for (int i = 0; i < twinkles.Length; i++) twinkles[i].On = false;
             for (int i = 0; i < flames.Length; i++) flames[i].On = false;
             for (int i = 0; i < bolts.Length; i++) bolts[i].On = false;
@@ -756,6 +759,7 @@ namespace Tacetno433.Core
         public void DrawGlow(SpriteBatch sb)
         {
             DrawFocus(sb);
+            DrawGlares(sb);                                                           // FLOOR GLARE under the blow's other lights
             for (int i = 0; i < flames.Length; i++) if (flames[i].On && flames[i].Age >= 0f) DrawFlame(sb, flames[i]);
             DrawSkills(sb);                                                           // the skills' own pieces under the cuts
             DrawFinale(sb);                                                           // the FINALE's cracks, glass and months
