@@ -488,7 +488,15 @@
         public static float FigureCarry = 60f;            // a figure that jumps further than this in one frame takes its chains with it
         public static float FigureParryTime = 0.45f;      // a PARRY holds the guard this long
         public static float FigureGlow = 0.5f;            // the band's weapon and core light in the GLOW picture
-        public static float FigureBandShade = 0.62f;      // LIT : the band's colours are laid this dark, the stage light on the one in front brings them to white
+        public static float FigureBandShade = 0.7f;       // LIT : the band's colours are laid this dark, the stage light on the one in front brings them to white
+        public static float HairWave = 0.014f;            // FLOWING HAIR (3 Nov) : how far a strand of hair waves at its tip, a share of the figure's height
+        public static float HairWaves = 1.3f;             //   how many waves along one strand
+        public static float HairWaveSpeed = 3.2f;         //   how fast the waves run down it (radians a second)
+        public static float FigureTintShade = 0.95f;      // STAND OUT (3 Nov, the user : our characters looked faded) : a legend's own colour is laid only this dark
+        public static float FigureBandRim = 0.75f;        //   a legend's rim of light in its own colour, how bright (GLOW picture, the bloom softens it)
+        public static float FigureBandRimWidth = 2.5f;    //   and how wide (page pixels)
+        public static float FigureTacetGlowRim = 0.4f;    //   every TACET's white rim of light (a boss's : BossRim*)
+        public static float FigureTacetRimWidth = 2f;     //   and how wide
         public static float FigureLightShade = 0.9f;      // LIGHT (round 6) : what gives light on a legend (the f hole, a head of light) is laid only this dark
         public static float FigureBandScale = 0.74f;      // WHOLE LEGEND (round 6) : the legend in front is drawn this share of its box's height, so all of it shows
         public static float FigureBandLift = 0.26f;       //   standing this share of the box's height over the box's bottom (which is under the commands)

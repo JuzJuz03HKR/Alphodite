@@ -921,6 +921,15 @@ namespace Tacetno433.Core
             return new Color((byte)(c.R * shade), (byte)(c.G * shade), (byte)(c.B * shade), c.A) * alpha;
         }
 
+        //CT : the legend's own colour (STAND OUT, the user 3 Nov : our characters looked faded). Darkened much less than the
+        //white body, so the element reads at once on the dark stage (BattleRules.FigureTintShade)
+        private Color CT(Color c, float alpha)
+        {
+            if (silhouette) return Color.Black * (alpha * c.A / 255f);
+            float shade = BattleRules.FigureTintShade;
+            return new Color((byte)(c.R * shade), (byte)(c.G * shade), (byte)(c.B * shade), c.A) * alpha;
+        }
+
         //CL : a colour that gives light (where the sound comes out, a head of light) : darkened much less than the body, so the
         //light stands out on the figure before the bloom even adds its glow (LIGHT, BattleRules.FigureLightShade)
         private Color CL(Color c, float alpha)
@@ -966,7 +975,7 @@ namespace Tacetno433.Core
             white = C(Color.Lerp(BodyTop, Color.White, flash), alpha);
             grey = C(Color.Lerp(BodyLow, Color.White, flash), alpha);
             deep = C(Color.Lerp(BodyDeep, Color.White, flash), alpha);
-            edge = C(Color.Lerp(Tint, Hot, flash), alpha);
+            edge = CT(Color.Lerp(Tint, Hot, flash), alpha);                        // STAND OUT : the legend's colour kept bright
             pale = CL(Color.Lerp(Hot, Color.White, 0.25f + 0.75f * flash), alpha);
 
             switch (legend.Weapon)
@@ -1059,8 +1068,53 @@ namespace Tacetno433.Core
                 for (int i = 0; i < n; i++) lineW[i] = MathHelper.Lerp(chainWidth[c] * 1.15f, chainWidth[c] * 0.55f, i / (float)Math.Max(1, chains[c].Count - 1)) * Height;
                 Color from = lit ? C(Color.Lerp(BodyLow, new Color(255, 179, 194), life), drawAlpha) : C(BodyTop, drawAlpha * (0.78f - c * 0.12f));
                 Color to = lit ? C(Color.Lerp(BodyLow, new Color(255, 120, 150), life), drawAlpha * 0.9f) : from;
-                Shapes.Stroke(chains[c].At, lineW, n, from, to, false);
+                int m = FlowHair(chains[c].At, n, c);                              // FLOWING HAIR
+                Shapes.Stroke(flow, flowW, m, from, to, false);
             }
+        }
+
+        //FLOWING HAIR (3 Nov, the user : the hair should be flowing wavy lines, it was still angular) : a strand's chain points
+        //joined by curves, four steps between two links, and a slow wave running down it from root to tip, stronger toward the
+        //tip, like hair lifted by the air (BattleRules.HairWave*). Reads the strand's n points and lineW's widths, fills flow
+        //and flowW, returns how many points.
+        //ADVANCED PART : CATMULL-ROM. Between links b and c, with a before and d after, the curve
+        //p(t) = 0.5 (2b + (c - a)t + (2a - 5b + 4c - d)t^2 + (3b - a - 3c + d)t^3) passes through every link and turns smoothly
+        //at each one (Vector2.CatmullRom), so twelve links read as one curl instead of twelve straight pieces.
+        private static readonly Vector2[] flow = new Vector2[Shapes.MaxPoints];
+        private static readonly float[] flowW = new float[Shapes.MaxPoints];
+        private static readonly Vector2[] flowOff = new Vector2[Shapes.MaxPoints];
+
+        private int FlowHair(Vector2[] p, int n, int strand)
+        {
+            const int steps = 4;
+            int m = 0;
+            for (int i = 0; i + 1 < n && m + steps < flow.Length; i++)
+            {
+                Vector2 a = p[Math.Max(0, i - 1)], b = p[i], c = p[i + 1], d = p[Math.Min(n - 1, i + 2)];
+                for (int s = 0; s < steps; s++)
+                {
+                    float t = s / (float)steps;
+                    flow[m] = Vector2.CatmullRom(a, b, c, d, t);
+                    flowW[m] = MathHelper.Lerp(lineW[i], lineW[i + 1], t);
+                    m++;
+                }
+            }
+            flow[m] = p[n - 1];
+            flowW[m] = lineW[n - 1];
+            m++;
+
+            //The wave : each point pushed sideways from the strand's way, nothing at the root, most at the tip
+            for (int j = 0; j < m; j++)
+            {
+                Vector2 way = flow[Math.Min(m - 1, j + 1)] - flow[Math.Max(0, j - 1)];
+                float u = j / (float)Math.Max(1, m - 1);
+                if (way.LengthSquared() < 0.0001f) { flowOff[j] = Vector2.Zero; continue; }
+                way.Normalize();
+                float wave = (float)Math.Sin(u * BattleRules.HairWaves * MathHelper.TwoPi - clock * BattleRules.HairWaveSpeed + strand * 1.3f + seed);
+                flowOff[j] = new Vector2(-way.Y, way.X) * (wave * BattleRules.HairWave * Height * u);
+            }
+            for (int j = 0; j < m; j++) flow[j] += flowOff[j];
+            return m;
         }
 
         //Life Glow : how bright the LIFE STRING is (its life, a flicker when low, dimmed by THE DEVIL'S BARGAIN)
@@ -1256,9 +1310,10 @@ namespace Tacetno433.Core
                     float t = i / (float)(ch.Count - 1);
                     lineW[i] = chainWidth[c] * Height * (0.35f + 0.65f * (float)Math.Sin(Math.Min(1f, t * 1.6f + 0.15f) * MathHelper.Pi * 0.5f + 0.0f)) * (1f - t * 0.7f);
                 }
-                Shapes.Stroke(ch.At, lineW, ch.Count, C(Tint, drawAlpha * 0.85f), C(Tint, drawAlpha * 0.25f), false);
-                for (int i = 0; i < ch.Count; i++) lineW[i] *= 0.28f;
-                Shapes.Stroke(ch.At, lineW, ch.Count, C(Hot, drawAlpha * 0.6f), C(Hot, 0f), false);
+                int m = FlowHair(ch.At, ch.Count, c);                              // FLOWING HAIR
+                Shapes.Stroke(flow, flowW, m, C(Tint, drawAlpha * 0.85f), C(Tint, drawAlpha * 0.25f), false);
+                for (int i = 0; i < m; i++) flowW[i] *= 0.28f;
+                Shapes.Stroke(flow, flowW, m, C(Hot, drawAlpha * 0.6f), C(Hot, 0f), false);
             }
         }
 

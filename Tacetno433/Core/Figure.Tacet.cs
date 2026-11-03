@@ -63,17 +63,34 @@ namespace Tacetno433.Core
         //drawn eight times round itself in the rim's light (Shapes.SilhouetteColor, Shapes.Offset); its black silhouette drawn
         //after on top keeps only the ring outside it, and the bloom makes that ring glow. Brighter once the shell has broken,
         //where a black body on the black hole needs it most (BossRimLight, BossRimBroken, BossRimWidth in Data/BattleRules.cs).
+        //STAND OUT (the user 3 Nov : characters and enemies should stand out and still belong to the stage) : every figure gets
+        //a rim the same way. A legend's in its own colour (its element), every TACET's white (the light it keeps in), a
+        //boss's widest. The rim is light in the GLOW picture, so the bloom softens it into the stage's own light.
         public void DrawRim(float alpha)
         {
-            if (alpha <= 0.005f || !IsBoss) return;
+            if (alpha <= 0.005f) return;
             Shapes.Silhouette = true;
-            Shapes.SilhouetteColor = Color.White * (ShellOn ? BattleRules.BossRimLight : BattleRules.BossRimBroken);
+            float width;
+            if (Of == Sort.Musician)
+            {
+                Shapes.SilhouetteColor = Tint * BattleRules.FigureBandRim;
+                width = BattleRules.FigureBandRimWidth;
+                silhouette = true;                                                 // the band's own colours black, Shapes paints them
+            }
+            else
+            {
+                float light = IsBoss ? (ShellOn ? BattleRules.BossRimLight : BattleRules.BossRimBroken) : BattleRules.FigureTacetGlowRim;
+                Shapes.SilhouetteColor = Color.White * light;
+                width = IsBoss ? BattleRules.BossRimWidth : BattleRules.FigureTacetRimWidth;
+            }
             for (int i = 0; i < 8; i++)
             {
                 float turn = i * MathHelper.PiOver4;
-                Shapes.Offset = new Vector2((float)Math.Cos(turn), (float)Math.Sin(turn)) * BattleRules.BossRimWidth;
-                DrawTacet(alpha, 0f, 1f, 0f);
+                Shapes.Offset = new Vector2((float)Math.Cos(turn), (float)Math.Sin(turn)) * width;
+                if (Of == Sort.Musician) DrawBand(alpha, 0f);
+                else DrawTacet(alpha, 0f, 1f, 0f);
             }
+            silhouette = false;
             Shapes.Offset = Vector2.Zero;
             Shapes.SilhouetteColor = Color.Black;
             Shapes.Silhouette = false;

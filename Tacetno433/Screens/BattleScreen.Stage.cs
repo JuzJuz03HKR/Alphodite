@@ -1467,6 +1467,7 @@ namespace Tacetno433.Screens
             float sink = looks.TryGetValue(fore, out down) && down.Fall > 0f ? Smooth(down.Fall) : 1f;
             float a = SwapAlpha() * (fore.Down ? MathHelper.Lerp(1f, BattleRules.StageDownFade, sink) : 1f);
             Shapes.Begin(device, Layer(cam, 3), Sharp.Dot);
+            figure.DrawRim(a);                                                    // STAND OUT : the legend's rim in its colour (Figure.Tacet.cs)
             figure.DrawSilhouette(a);
             Shapes.End();
         }
