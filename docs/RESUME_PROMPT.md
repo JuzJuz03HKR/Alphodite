@@ -21,7 +21,7 @@ Claude มองไม่เห็นว่า context ใกล้เต็ม�
 
 | เริ่ม | งาน | ไฟล์ที่แตะ |
 |---|---|---|
-| (ว่าง) | | |
+| 3 พ.ย. แชท /system LAPTOP | เกมแลคบนโน้ตบุ๊คจอใหญ่ / NORMAL ง่ายลงช้าลง / บั๊กภาษาไทยอังกฤษ / คำอธิบายง่ายขึ้นมีสีคำ | `Core/PostChain.cs` `Core/Sharp.cs` `TacetGame.cs` `Core/Settings.cs` `Data/BattleRules.cs` `Data/Lang.cs` `Core/Gfx.cs` `Data/Words.cs` `Content/Text/thai.txt` `Screens/SettingsScreen.cs` `Core/DebugShots.Turn.cs` |
 
 ---
 
