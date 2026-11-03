@@ -31,6 +31,17 @@ namespace Tacetno433.Screens
     //are written out line by line. A new shelf comes in the same way.
     public class ShopScreen : GameScreen
     {
+        //GUIDE (NEWBIE MODE, 3 Nov) : the shop
+        private const string GuideShop = "Spend SHARDS here. A GIFT works by itself in every fight. A STAR makes one move stronger.";
+        public override string GuideLine
+        {
+            get { return GuideShop; }
+        }
+        public override Rectangle GuideBox
+        {
+            get { return new Rectangle(296, 470, 420, 62); }
+        }
+
         //THE STAGE TURNS (13.122) : the run's conductor's weather in this page's sky (Core/ConductorWeather.cs)
         public override bool ShowsWeather
         {

@@ -490,12 +490,16 @@ namespace Tacetno433.Core
             return Math.Min(3, BattleState.RankIndexOf(BattleState.RankScoreOf(simPerfects, simNotes, kept)));
         }
 
+        //Sim Ease : TACET_SIM_EASE, the EASE of the first mode (1 NORMAL unless set), to set the modes against each other
+        private static readonly int SimEase = int.TryParse(Environment.GetEnvironmentVariable("TACET_SIM_EASE"), out int simEase) ? simEase : 1;
+
         //Sim Fight : one fight to the end with the player's habit, the whole band on the field
         private static TurnBattle SimFight(List<Musician> band, List<Enemy> enemies, int floor, SimPlayer player, int[] startHp, Random rng, TurnKit kit, bool maestro)
         {
             TurnBattle b = new TurnBattle(band, enemies, floor, rng, startHp, 0);
             b.Kit = kit;
             b.Hard = maestro;                                            // the second mode of the simulation is HARD MODE (3 Nov)
+            b.Ease = maestro ? 0 : SimEase;                              // EASE (3 Nov) : the first mode is NORMAL (TACET_SIM_EASE 0 = the raw rules, 2 = NEWBIE)
 
             for (int step = 0; step < 900 && b.Step != TurnStep.Won && b.Step != TurnStep.Lost; step++)
             {

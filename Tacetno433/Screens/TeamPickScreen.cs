@@ -19,6 +19,17 @@ namespace Tacetno433.Screens
     //Until 29 Oct new faces were rolled at every floor and the BENCH held the rest (RecruitScreen, CALL).
     public class TeamPickScreen : GameScreen
     {
+        //GUIDE (NEWBIE MODE, 3 Nov) : the audition
+        private const string GuidePick = "Pick 3 musicians. They play every fight of the run. A mix of attack, guard and heal is easiest.";
+        public override string GuideLine
+        {
+            get { return GuidePick; }
+        }
+        public override Rectangle GuideBox
+        {
+            get { return new Rectangle(20, 14, 440, 58); }
+        }
+
         //THE STAGE TURNS (13.122) : the run's conductor's weather in this page's sky (Core/ConductorWeather.cs)
         public override bool ShowsWeather
         {

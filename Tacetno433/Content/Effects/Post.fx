@@ -65,6 +65,7 @@ sampler2D NoiseSampler : register(s4) = sampler_state
     AddressU = Wrap; AddressV = Wrap;
 };
 
+
 float2 Step;            // Blur : one pixel of the source, along the blur's direction (in UV)
 float BloomThreshold;   // Composite : how bright a pixel must be before it glows
 float BloomStrength;    //             how strong the glow is
@@ -78,6 +79,8 @@ float Flash;            //             IMPACT FRAME : the frame of white, then i
 float Blur;             //             IMPACT FRAME : the world smeared towards the blow (ZOOM BLUR, 0..1)
 float2 Center;          //             IMPACT FRAME : where the blow landed (0..1 of the screen)
 float Lod;              // Down : which copy of SCENE and GLOW is the page's own size (0 in the 1280 x 720 window)
+float2 Texel;           // Down Wide : one real pixel of SCENE (1 / its size)
+float Spread;           //             the real pixels between its taps (the screen's real pixels per game pixel)
 
 // SPACE CUT (Beta1 block D, 2 Nov) : up to four cuts that split the picture of the world for a moment (Core/HitFx.Skills.cs,
 // FANNY's FINALE in Core/HitFx.Finale.cs)
@@ -86,6 +89,7 @@ float4 CutTints[4];     //             rgb the colour of its edges, a its half l
 float4 CutShapes[4];    //             x how far the two halves slide along it, y how wide the black gap is (screen heights),
                         //             z how open (0 = closed, 1 = wide), w PRISM : 0 = its edges in its own colour, 1 = the rainbow runs along them
 float CutFall;          //             THE BREAK : how far the pieces between whole cuts have dropped (screen heights, 0 = none)
+float CutsOn;           //             1 while any cut is open or falling (3 Nov : without one CutUV skips its work, every pixel)
 
 struct VertexShaderOutput
 {
@@ -147,6 +151,7 @@ float2 CutUV(float2 uv, out float dark, out float3 edge)
     float2 moved = uv;
     dark = 0.0;
     edge = float3(0.0, 0.0, 0.0);
+    [branch] if (CutsOn < 0.5) return moved;                     // no cut this frame : nothing to work out (most frames)
     [unroll] for (int i = 0; i < 4; i++)
     {
         float2 dir = Cuts[i].zw;
@@ -200,6 +205,28 @@ float4 DownPS(VertexShaderOutput input) : COLOR0
     float3 light = tex2D(LightSampler, input.UV).rgb * 2.0;
     float3 glow = tex2Dlod(GlowSampler, float4(input.UV, 0.0, Lod)).rgb;
     return float4(scene * light + glow, 1.0);
+}
+
+//Down Wide (3 Nov, the user 13.150 : lag in full screen) : the same quarter size picture on a screen bigger than the page,
+//without the smaller copies (MIPMAPS) the card had to make of SCENE and GLOW every frame, which cost as much as a whole
+//pass of the screen. Each pixel here stands for 4 x 4 game pixels, so it reads that square at 4 x 4 points one game pixel
+//apart, each point already the average of the 2 x 2 real pixels round it (the smooth sampler), and takes the mean. The
+//blur after it softens the rest, so the glow comes out as before.
+float4 DownWidePS(VertexShaderOutput input) : COLOR0
+{
+    float3 scene = float3(0.0, 0.0, 0.0);
+    float3 glow = float3(0.0, 0.0, 0.0);
+    [unroll] for (int y = 0; y < 4; y++)
+    {
+        [unroll] for (int x = 0; x < 4; x++)
+        {
+            float2 uv = input.UV + (float2(x, y) - 1.5) * Spread * Texel;
+            scene += tex2Dlod(SceneSampler, float4(uv, 0.0, 0.0)).rgb;
+            glow += tex2Dlod(GlowSampler, float4(uv, 0.0, 0.0)).rgb;
+        }
+    }
+    float3 light = tex2D(LightSampler, input.UV).rgb * 2.0;
+    return float4(scene * (light / 16.0) + glow / 16.0, 1.0);
 }
 
 //Blur : nine taps along Step, the middle one counting most (a Gaussian bell)
@@ -289,6 +316,11 @@ float4 CompositePS(VertexShaderOutput input) : COLOR0
 technique Down
 {
     pass P0 { PixelShader = compile PS_SHADERMODEL DownPS(); }
+};
+
+technique DownWide
+{
+    pass P0 { PixelShader = compile PS_SHADERMODEL DownWidePS(); }
 };
 
 technique Blur

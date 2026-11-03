@@ -1,7 +1,7 @@
 # THAI WORD LIST (Data/Lang.cs) : the English exactly as the game has it, a TAB, then the Thai. "\\n" is a new line.
-Your turn. Press ENTER (PLAY) : the whole band attacks.	ตาของเรา กด ENTER (PLAY) ทั้งวงโจมตีพร้อมกัน
-Its turn. Hold the left button and swipe the arrow's way as the ring closes.	ตาของศัตรู กดเมาส์ซ้ายค้างไว้ แล้วตวัดตามลูกศรตอนวงแหวนหดถึง
-Click a musician, then 2 or 3 : a skill. Skills cost BREATH.	คลิกนักดนตรี แล้วกด 2 หรือ 3 เพื่อใช้สกิล สกิลใช้ BREATH
+Lesson 1, PLAY : press ENTER (PLAY). Your whole band attacks TACET.	บทที่ 1 PLAY : กด ENTER (PLAY) ทั้งวงจะโจมตี TACET
+Lesson 2, BLOCK : TACET attacks. Hold the left button, swipe the arrow's way as the ring closes.	บทที่ 2 ปัด : TACET โจมตีมา กดเมาส์ซ้ายค้าง แล้วตวัดตามลูกศรตอนวงหดถึง
+Lesson 3, SKILL : click a musician, then 2 or 3. A skill costs BREATH (the diamonds, bottom right).	บทที่ 3 สกิล : คลิกนักดนตรี แล้วกด 2 หรือ 3 สกิลใช้ BREATH (เพชรมุมขวาล่าง)
 CLICK A MUSICIAN, THEN AN ENEMY OR A SKILL   /   ENTER = PLAY	คลิกนักดนตรี แล้วคลิกศัตรูหรือสกิล   /   ENTER = เล่นตานี้
 That is the whole fight. Now win it.	นี่คือทั้งหมดของการต่อสู้ ทีนี้ชนะให้ได้
 = loses this much life at the end of its turn, then 1 less	= เสียเลือดเท่านี้ตอนจบตาของมัน แล้วลดลงทีละ 1
@@ -28,9 +28,9 @@ MUTED : NO SKILLS THIS TURN, ATTACK STILL WORKS	MUTED : ตานี้ใช้
 DECREE : A SKILL THIS TURN HURTS WHOEVER PLAYS IT	DECREE : ตานี้ใครใช้สกิลจะเจ็บเอง
 DECREE : AN ATTACK THIS TURN HURTS WHOEVER PLAYS IT (NO MOVE = ATTACK)	DECREE : ตานี้ใครใช้ ATTACK จะเจ็บเอง (ไม่เลือกท่า = ATTACK)
 A skill is a few notes. Swipe each arrow as its ring closes.	สกิลมีโน้ตหลายตัว ตวัดตามลูกศรแต่ละตัวตอนวงแหวนหดถึง
-Its next attack ends in a HOLD. Press ENTER and get ready.	การโจมตีถัดไปของมันจบด้วย HOLD กด ENTER แล้วเตรียมตัว
+Lesson 4, HOLD : its next attack ends in a HOLD. Press ENTER and get ready.	บทที่ 4 HOLD : การโจมตีครั้งหน้าจบด้วย HOLD กด ENTER แล้วเตรียมตัว
 HOLD : swipe it, then keep the button down until it ends.	HOLD : ตวัด แล้วกดเมาส์ค้างไว้จนจบ
-The diamonds are full. Press SPACE for the FINALE.	เพชรเต็มแล้ว กด SPACE เพื่อใช้ FINALE
+Lesson 5, FINALE : the diamonds are full. Press SPACE.	บทที่ 5 FINALE : เพชรเต็มแล้ว กด SPACE
 4 swipes : DOWN, LEFT, RIGHT, UP.	ตวัด 4 ครั้ง : ลง ซ้าย ขวา ขึ้น
 The hall is full. Nobody makes a sound.	โรงเต็มทุกที่นั่ง ไม่มีใครส่งเสียง
 Somewhere, a note was left unfinished.	ที่ไหนสักแห่ง มีโน้ตที่ยังเล่นไม่จบ
@@ -311,26 +311,26 @@ Every musician gets 1 VOLUME per note.	นักดนตรีทุกคน�
 3 throws, a new enemy each. Hit again = half.	ขว้าง 3 ครั้ง เปลี่ยนเป้าทุกครั้ง โดนตัวเดิมซ้ำ = ครึ่งเดียว
 Hits every enemy. Hold it = harder.	โดนศัตรูทุกตัว ค้างไว้ = แรงขึ้น
 2 big hits and a roll. Big STUN.	ตีหนัก 2 ครั้งกับโน้ตรัว STUN เยอะ
-loses this much life at the end of its turn, then 1 less	เสียเลือดเท่านี้ตอนจบตาของมัน แล้วลดลงทีละ 1
-every point hits 15 percent harder. A MISS loses it all	ทุกแต้มตีแรงขึ้น 15 เปอร์เซ็นต์ โดน MISS แล้วหายหมด
-fills the bar under its life. Full, it is STUNNED	เติมแถบใต้เลือดของมัน เต็มเมื่อไหร่ มันจะ STUNNED
-it loses its next turn and takes 50 percent more damage	เสียตาถัดไป และโดนแรงขึ้น 50 เปอร์เซ็นต์
-no skills for this many turns. ATTACK still works	ใช้สกิลไม่ได้ตามจำนวนตานี้ ATTACK ยังใช้ได้
-takes half of every hit until their next turn	รับความเสียหายแค่ครึ่งเดียวจนถึงตาถัดไปของเขา
-takes the band's damage before its life. IL CANNONE goes through	รับความเสียหายจากวงก่อนเลือด IL CANNONE ทะลุได้
-this turn it gains this much ARMOR and does not attack	ตานี้มันได้ ARMOR เท่านี้ และไม่โจมตี
-their next skill is easier to swipe and hits harder	สกิลถัดไปของเขาตวัดง่ายขึ้นและแรงขึ้น
-DUPORT stands in front and takes their hits	DUPORT ยืนบังข้างหน้าและรับการโจมตีแทน
-their next move plays again	ท่าถัดไปของเขาเล่นซ้ำอีกครั้ง
-its notes hit the marked musician. Swipe back to block them	โน้ตของมันพุ่งใส่นักดนตรีที่ถูกเล็ง ตวัดกลับเพื่อปัด
-next turn one big note. STUN it or hit it with TIMPANI ROLL to break it	ตาหน้ามาโน้ตใหญ่ 1 ตัว ทำให้ STUN หรือตีด้วย TIMPANI ROLL เพื่อทำลาย
-its CHARGE was broken, the big note will not come	CHARGE ของมันพังแล้ว โน้ตใหญ่จะไม่มา
-it moves in the middle of your turn	มันแทรกเข้ามากลางตาของเรา
-this turn it heals instead of attacking	ตานี้มันฟื้นเลือดแทนการโจมตี
-its notes hit every musician standing	โน้ตของมันโดนนักดนตรีทุกคนที่ยังยืนอยู่
-the boss's own big move. Block every note and it is STUNNED	ท่าใหญ่ของบอส ปัดได้ทุกโน้ต มันจะ STUNNED
+loses this much life at the end of its turn, then 1 less	เสียเลือดทุกครั้งที่จบตาของมัน แล้วเบาลงทีละ 1 จนหมด
+every point hits 15 percent harder. A MISS loses it all	ยิ่งมีแต้มมาก ยิ่งตีแรง (แต้มละ 15 เปอร์เซ็นต์) แต่ MISS ครั้งเดียวหายหมด
+fills the bar under its life. Full, it is STUNNED	เติมแถบใต้หลอดเลือดศัตรู แถบเต็มเมื่อไหร่ ศัตรูจะ STUNNED
+it loses its next turn and takes 50 percent more damage	ศัตรูข้ามตาถัดไป (ไม่ได้โจมตี) และโดนตีแรงขึ้น 50 เปอร์เซ็นต์
+no skills for this many turns. ATTACK still works	ใช้สกิลไม่ได้ชั่วคราว (ตามตัวเลข) แต่ยังกด ATTACK ได้
+takes half of every hit until their next turn	โดนตีเจ็บแค่ครึ่งเดียว จนถึงตาถัดไปของเขา
+takes the band's damage before its life. IL CANNONE goes through	เกราะของศัตรู ต้องตีให้เกราะแตกก่อนถึงจะโดนเลือด (IL CANNONE ทะลุเกราะ)
+this turn it gains this much ARMOR and does not attack	ตานี้ศัตรูเพิ่มเกราะ ARMOR (ตามตัวเลข) และไม่โจมตี
+their next skill is easier to swipe and hits harder	สกิลครั้งถัดไปของเขา ตวัดง่ายขึ้นและแรงขึ้น
+DUPORT stands in front and takes their hits	DUPORT ยืนบังให้ และรับการโจมตีแทนเพื่อน
+their next move plays again	ท่าถัดไปของเขาจะเล่นซ้ำอีกรอบ
+its notes hit the marked musician. Swipe back to block them	ศัตรูจะตีนักดนตรีที่เล็งไว้ ตวัดสวนทีละโน้ตเพื่อปัด
+next turn one big note. STUN it or hit it with TIMPANI ROLL to break it	ตาหน้าศัตรูจะตีแรงมาก 1 ที ทำให้มัน STUN หรือตีด้วย TIMPANI ROLL เพื่อยกเลิก
+its CHARGE was broken, the big note will not come	CHARGE ถูกทำลายแล้ว ท่าตีแรงจะไม่มา
+it moves in the middle of your turn	ศัตรูตัวนี้แทรกโจมตีกลางตาของเรา
+this turn it heals instead of attacking	ตานี้ศัตรูฟื้นเลือดแทนการโจมตี
+its notes hit every musician standing	โน้ตของมันโดนนักดนตรีทุกคนพร้อมกัน
+the boss's own big move. Block every note and it is STUNNED	ท่าไม้ตายของบอส ปัดให้ได้ทุกโน้ต บอสจะ STUNNED
 the conductor's big move. PERFECTs fill the diamonds, SPACE plays it. It breaks every CHARGE and gives FORTE	ท่าใหญ่ของวาทยากร PERFECT เติมเพชร กด SPACE เพื่อใช้ ทำลายทุก CHARGE และให้ FORTE
-comes right after the note before it. Swipe its arrow, fast	มาติดๆ หลังโน้ตตัวก่อน ตวัดตามลูกศรให้ไว
+comes right after the note before it. Swipe its arrow, fast	มาติดกับโน้ตตัวก่อน ตวัดตามลูกศรให้เร็ว
 5 PERFECTs in a row by one musician. Their next move is bigger	นักดนตรีคนเดียวได้ PERFECT ติดกัน 5 ครั้ง ท่าถัดไปของเขาจะแรงขึ้น
 after a FINALE the band hits 25 percent harder this TURN	หลัง FINALE วงตีแรงขึ้น 25 เปอร์เซ็นต์ใน TURN นี้
 PERFECTs in a row. Every 10 make the band hit 5 percent harder	PERFECT ติดกัน ทุก 10 ครั้งวงตีแรงขึ้น 5 เปอร์เซ็นต์
@@ -493,3 +493,54 @@ While its court stands it takes half.	ระหว่างที่ข้าร
 TACET took the music. Lead your band down into the silence and bring it back.	TACET กลืนดนตรีไปหมดแล้ว พาวงลงไปในความเงียบ แล้วนำดนตรีกลับมา
 The deeper you go, the louder the silence plays.	ยิ่งลงลึก ความเงียบยิ่งบรรเลงดังขึ้น
 At the bottom waits what the silence made of you.	ที่ก้นหลุม สิ่งที่ความเงียบสร้างขึ้นจากตัวคุณกำลังรออยู่
+If the game stutters, pick a lower one. The stage is drawn smaller and stretched, the words stay sharp. AUTO steps down by itself when it sees the game slow down.	ถ้าเกมกระตุก เลือกระดับต่ำลง ฉากจะวาดเล็กลงแล้วขยาย ตัวหนังสือยังคมเหมือนเดิม AUTO จะลดให้เองเมื่อเห็นว่าเกมช้าลง
+Help on every page of floors 1 and 2. Softer fights.	มีตัวช่วยทุกหน้าในชั้น 1 และ 2 ไฟต์ง่ายลง
+The game as it is meant to be played.	เกมแบบที่ตั้งใจให้เล่น
+Harder hits, tougher enemies, tight timing.	ศัตรูตีแรงขึ้น อึดขึ้น จังหวะตวัดแคบลง
+TOO EARLY : wait for the ring	เร็วไป : รอให้วงหดมาถึงก่อน
+TOO LATE : swipe a little sooner	ช้าไป : ตวัดให้เร็วขึ้นอีกนิด
+WRONG WAY : follow the arrow	ผิดทาง : ตวัดไปทางเดียวกับลูกศร
+NO SWIPE : swipe as the ring closes	ไม่ได้ตวัด : ตวัดตอนวงหดถึงลูกศร
+HOLD LONGER : keep the button down	ค้างให้นานขึ้น : กดปุ่มค้างไว้
+SHAKE FASTER	เขย่าให้เร็วขึ้น
+TOP LEFT : your band of three. The bar on each card is their LIFE.	มุมซ้ายบน : วงของเรา 3 คน แถบบนการ์ดแต่ละใบคือ LIFE (เลือด) ของเขา
+RIGHT : TACET, the enemy. The number is how hard it hits next, the arrows are the notes you will block.	ด้านขวา : TACET ศัตรู ตัวเลขคือแรงที่มันจะตีครั้งหน้า ลูกศรคือโน้ตที่เราต้องปัด
+BOTTOM : the moves of the musician picked. PLAY starts the turn.	ด้านล่าง : ท่าของนักดนตรีที่เลือกอยู่ กด PLAY เพื่อเริ่มตา
+CLICK OR ENTER : NEXT	คลิก หรือ ENTER : ต่อไป
+Your FINALE is full. Press SPACE, then swipe DOWN, LEFT, RIGHT, UP.	FINALE เต็มแล้ว กด SPACE แล้วตวัด ลง ซ้าย ขวา ขึ้น
+An enemy is charging a big hit. Block it PERFECT, or fill its STUN bar first.	ศัตรูกำลัง CHARGE ท่าตีแรง ปัดให้ได้ PERFECT หรือเติมแถบ STUN ให้เต็มก่อน
+An enemy has ARMOR : hits break the ARMOR before its life.	ศัตรูมี ARMOR : ต้องตีเกราะให้แตกก่อน ถึงจะโดนเลือด
+A musician is low on LIFE. A green skill heals.	มีนักดนตรีเลือดน้อย ใช้สกิลสีเขียวเพื่อ HEAL
+You have BREATH : click a musician, then 2 or 3 for a skill.	มี BREATH พอแล้ว คลิกนักดนตรี แล้วกด 2 หรือ 3 เพื่อใช้สกิล
+Press ENTER (PLAY) : the band plays its moves.	กด ENTER (PLAY) : วงจะเล่นท่าที่เลือกไว้
+Block : swipe the arrow's way as the ring closes. PERFECT = no damage.	ปัด : ตวัดตามลูกศรตอนวงหดถึง PERFECT = ไม่เสียเลือด
+Swipe each arrow as its ring closes. PERFECT hits harder.	ตวัดตามลูกศรทีละตัวตอนวงหดถึง PERFECT ตีแรงกว่า
+ROLL : shake the baton fast until the bar is full.	ROLL : เขย่าไม้บาตองเร็วๆ จนแถบเต็ม
+SPARK : one more quick swipe right after, any way.	SPARK : ตวัดซ้ำอีกครั้งทันที ทางไหนก็ได้
+RUSH : the next arrow comes right away. Be quick.	RUSH : ลูกศรถัดไปมาติดๆ ตวัดให้ไว
+Pick a room on the next row. FIGHT gives a STAR, REST heals, ? is a surprise. The boss waits at the end.	เลือกห้องในแถวถัดไป FIGHT ได้ STAR  REST ฟื้นเลือด  ? คือเรื่องที่เดาไม่ได้ บอสรออยู่สุดทาง
+Your band is hurt. A REST room heals it, or keep going and play safe.	วงบาดเจ็บอยู่ เข้าห้อง REST เพื่อฟื้นเลือด หรือเดินต่อแบบระวังตัว
+Pick 3 musicians. They play every fight of the run. A mix of attack, guard and heal is easiest.	เลือกนักดนตรี 3 คน เล่นทุกไฟต์ตลอดรัน ผสมสายตี สายป้องกัน สายฮีล เล่นง่ายที่สุด
+Spend SHARDS here. A GIFT works by itself in every fight. A STAR makes one move stronger.	ใช้ SHARDS ที่นี่ GIFT ทำงานเองทุกไฟต์ STAR ทำให้ท่าหนึ่งแรงขึ้น
+Give the STAR to one move. It gets stronger. 3 STARS turn it into its legend form.	ให้ STAR กับท่าหนึ่งท่า ท่านั้นจะแรงขึ้น ครบ 3 STARS กลายเป็นร่างในตำนาน
+Pick one : heal the band, or a STAR for one move. Hurt? Heal first.	เลือกหนึ่งอย่าง : ฟื้นเลือดวง หรือรับ STAR ให้ท่าหนึ่ง ถ้าวงเจ็บอยู่ ฟื้นเลือดก่อน
+Pick one GIFT. It works by itself in every fight for the rest of the run.	เลือก GIFT หนึ่งชิ้น ทำงานเองทุกไฟต์จนจบรัน
+Each way has a price and a prize. The tags on the right of each way say both.	ทุกทางมีราคาและรางวัล ป้ายด้านขวาของแต่ละทางบอกไว้ทั้งสองอย่าง
+A free STAR for the ATTACK of one musician. Pick the one you use most.	ได้ STAR ฟรีให้ ATTACK ของนักดนตรีหนึ่งคน เลือกคนที่ใช้บ่อยที่สุด
+SHARDS are spent in the SHOP. More PERFECTs and more LIFE left = a better RANK = more SHARDS.	SHARDS ใช้ซื้อของใน SHOP  ได้ PERFECT เยอะและเหลือเลือดมาก = RANK ดีขึ้น = SHARDS มากขึ้น
+Three of them play with you for the whole run. Every one of them is in every fight.	3 คนนี้จะเล่นกับเราตลอดรัน ทุกคนลงทุกไฟต์
+Point at a column to read it. The first one you pick stands in front.	ชี้ที่เสาเพื่ออ่านรายละเอียด คนแรกที่เลือกจะยืนหน้าสุด
+The small icon is their mark. Gifts with the same icon are made for them.	ไอคอนเล็กคือเครื่องหมายของเขา GIFT ที่มีไอคอนเดียวกันทำมาเพื่อเขา
+One move of the band gets a star. Free, once.	ท่าหนึ่งของวงได้ STAR ฟรี ครั้งเดียว
+Taken. The free star of this room is gone.	รับไปแล้ว STAR ฟรีของห้องนี้หมดแล้ว
+One more star for SHARDS. Each one costs more than the last.	ซื้อ STAR เพิ่มด้วย SHARDS ยิ่งซื้อยิ่งแพงขึ้น
+No more stars to buy before this boss.	ไม่มี STAR ให้ซื้อแล้วก่อนเจอบอสนี้
+The band rests in the wings.   LIFE +21	วงพักหลังเวที   LIFE +21
+The boss waits on the other side of the curtain.	บอสรออยู่หลังม่าน
+REQUIEM waits on the other side of the curtain.	REQUIEM รออยู่หลังม่าน
+THE NAMELESS MASTER waits on the other side of the curtain.	THE NAMELESS MASTER รออยู่หลังม่าน
+THE DEVIL'S STRING waits on the other side of the curtain.	THE DEVIL'S STRING รออยู่หลังม่าน
+THE DEAF CROWN waits on the other side of the curtain.	THE DEAF CROWN รออยู่หลังม่าน
+THE STAFF waits on the other side of the curtain.	THE STAFF รออยู่หลังม่าน
+THE BLIND CANTOR waits on the other side of the curtain.	THE BLIND CANTOR รออยู่หลังม่าน
+The whole band gets back 40 percent of its life.	ทั้งวงได้เลือดคืน 40 เปอร์เซ็นต์

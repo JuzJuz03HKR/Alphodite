@@ -18,6 +18,13 @@ namespace Tacetno433.Screens
     //A lamp hangs over the bench, the room around it dark (the user : white, black and grey, colour only on the characters).
     public class LuthierScreen : GameScreen
     {
+        //GUIDE (NEWBIE MODE, 3 Nov) : the workshop
+        private const string GuideWorkshop = "A free STAR for the ATTACK of one musician. Pick the one you use most.";
+        public override string GuideLine
+        {
+            get { return GuideWorkshop; }
+        }
+
         //THE STAGE TURNS (13.122) : the run's conductor's weather in this page's sky (Core/ConductorWeather.cs)
         public override bool ShowsWeather
         {

@@ -274,19 +274,30 @@ namespace Tacetno433.Core
         //Draw Glow : the light of the dark into the GLOW (the target is set and cleared already), then the cracks
         public void DrawGlow(GraphicsDevice device, SpriteBatch sb, Texture2D back)
         {
-            if (Fx.VoidReady)
-            {
-                Effect e = Fx.Void;
-                Setup(e);
-                e.CurrentTechnique = e.Techniques["VoidGlow"];
-                sb.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.PointClamp, null, null, e);
-                device.SamplerStates[1] = SamplerState.LinearWrap;
-                sb.Draw(back, Vector2.Zero, Color.White);
-                sb.End();
-                device.Textures[1] = null;
-            }
-            else return;                                   // the old rift has its own light, and no hole to crack
+            if (!Fx.VoidReady) return;                     // the old rift has its own light, and no hole to crack
+            DrawGlowLight(device, sb, back);
+            DrawGlowParts(sb);
+        }
 
+        //Draw Glow Light : the shader's light alone, over the whole of the target set now (back gives the size : the full
+        //BACK on a page, the battle's ART PIXELS picture, Core/PostChain.cs)
+        public void DrawGlowLight(GraphicsDevice device, SpriteBatch sb, Texture2D back)
+        {
+            if (!Fx.VoidReady) return;
+            Effect e = Fx.Void;
+            Setup(e);
+            e.CurrentTechnique = e.Techniques["VoidGlow"];
+            sb.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.PointClamp, null, null, e);
+            device.SamplerStates[1] = SamplerState.LinearWrap;
+            sb.Draw(back, Vector2.Zero, Color.White);
+            sb.End();
+            device.Textures[1] = null;
+        }
+
+        //Draw Glow Parts : the cracks and the bright DEBRIS, in game pixels at the screen's size
+        public void DrawGlowParts(SpriteBatch sb)
+        {
+            if (!Fx.VoidReady) return;
             sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.PointClamp, null, null, null, Sharp.Transform);
             DrawCracks(sb);
             DrawDebris(sb, true);

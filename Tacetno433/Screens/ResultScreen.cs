@@ -32,6 +32,13 @@ namespace Tacetno433.Screens
     //It is not there to be studied, just to look back at what was played.
     public class ResultScreen : GameScreen
     {
+        //GUIDE (NEWBIE MODE, 3 Nov) : after a won fight
+        private const string GuideResult = "SHARDS are spent in the SHOP. More PERFECTs and more LIFE left = a better RANK = more SHARDS.";
+        public override string GuideLine
+        {
+            get { return GuideResult; }
+        }
+
         private Rectangle continueButton = new Rectangle(490, 630, 300, 52);
         private UiMotion continueMotion = new UiMotion();
         private const int LedgerX = 110;

@@ -14,10 +14,8 @@ namespace Tacetno433.Core
         public static float Sfx = 0.8f;
         public static float Music = 0.55f;
 
-        //Language : 0 English, 1 Thai.
-        //NOTHING IS TRANSLATED YET. The page only remembers which one was picked, because
-        //the fonts in the game hold English letters only. When Thai text arrives, every
-        //screen reads its words through this number.
+        //Language : 0 English, 1 Thai (THAI TEXT, Data/Lang.cs). The game reads it once as it starts (Lang.Active) : a change
+        //on the settings page starts the game again, a change from the pause menu waits for the next start.
         public static int Language;
         public static string[] LanguageNames = { "ENGLISH", "THAI" };
 
@@ -45,6 +43,27 @@ namespace Tacetno433.Core
 
         //Hard : HARD MODE for the next run (3 Nov, the user : NORMAL and HARD back), picked on the conductor's page
         public static bool Hard;
+
+        //Newbie : NEWBIE MODE for the next run (3 Nov, the user 13.151 : an easy mode with help on the first two floors),
+        //picked on the conductor's page beside NORMAL and HARD. Never on together with Hard.
+        public static bool Newbie;
+
+        //Graphics (3 Nov, the user 13.150 : "an 8 GB laptop lags in full screen, the small window is smooth") : how big the
+        //world is drawn (WORLD SCALE, Core/Sharp.cs). The words and buttons are always drawn at the screen's own size.
+        //   0 AUTO    starts sharp, and steps down by itself when frames go missing (TacetGame.WatchFrames), remembered
+        //   1 HIGH    the world at the screen's own size
+        //   2 MEDIUM  the world at GraphicsShares[1] of it, stretched smoothly
+        //   3 LOW     GraphicsShares[2]
+        public static int Graphics;
+        public static int AutoGraphics;                  // AUTO : the level it stepped down to, 0 HIGH, 1 MEDIUM, 2 LOW (saved)
+        public static string[] GraphicsNames = { "AUTO", "HIGH", "MEDIUM", "LOW" };
+        public static readonly float[] GraphicsShares = { 1f, 0.67f, 0.5f };
+
+        //Graphics Level : the level in use now, 0 HIGH to 2 LOW
+        public static int GraphicsLevel
+        {
+            get { return Graphics == 0 ? System.Math.Max(0, System.Math.Min(2, AutoGraphics)) : Graphics - 1; }
+        }
 
         //Last Band Name : LAST NAME KEPT (Beta1 1 Nov, docs/BETA1_DIRECTION.md 29 item 10), the name the last run's band was
         //given, so the next run's name page starts with it (ENTER keeps it). "" when the band went unnamed.

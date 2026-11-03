@@ -247,7 +247,7 @@ namespace Tacetno433.Data
                 Recipe = new int[] { 3, 3, 0 },     // the strings carry it
                 Turn = TurnKit.Beethoven,
                 TurnPassiveName = "THE CLOSER THE LOUDER",
-                TurnPassiveText = "The less life the band has left, the harder it hits, up to 50 percent.",
+                TurnPassiveText = "The less life the band has left, the harder it hits, up to " + (int)System.Math.Round(BattleRules.TurnBeethovenMost * 100) + " percent.",   // 3 Nov : was written 50, the rule says 80
                 TurnSignatureName = "LIGHTNING",
                 TurnSignatureText = "4 swipes : strikes every enemy and fills its " + Words.Stun + " bar. Better swipes, bigger strike. Grows at each boss.",
                 TurnSignatureGrown = new[] { "STORM", "STORM II" },   // the storm of the Pastoral (Symphony No. 6, its fourth movement) : more bolts
@@ -396,7 +396,8 @@ namespace Tacetno433.Data
                 Stamina = 5, PushPower = 5, Perk = ConductorPerk.None, Move = SignatureMove.AbsolutePitch,   // the old duel plays her plain
                 Turn = TurnKit.Fanny,
                 TurnPassiveName = "TWO VOICES",
-                TurnPassiveText = "The voices take turns, one musician each : FANNY hits 25 percent harder, ??? heals 50 percent more.",
+                TurnPassiveText = "The voices take turns, one musician each : FANNY hits " + (int)System.Math.Round(BattleRules.TurnFannyScale * 100)
+                                + " percent harder, ??? heals " + (int)System.Math.Round((BattleRules.TurnFelixHeal - 1f) * 100) + " percent more.",   // 3 Nov : was written 25 and 50, the rules say 20 and 30
                 TurnSignatureName = "DUET",
                 TurnSignatureText = "4 swipes : FANNY strikes every enemy while ??? heals every musician. Grows at each boss.",
                 TurnSignatureGrown = new[] { "DAS JAHR", "DAS JAHR II" },   // The Year (1841), Fanny's twelve months for piano : CRESCENDO, then more

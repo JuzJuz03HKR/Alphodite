@@ -549,7 +549,7 @@ namespace Tacetno433.Core
         //Whole : where a line of text starts, on a whole pixel so the letters are not smeared. In the window that is a
         //whole game pixel, as it always was. On a bigger screen it is a whole REAL pixel (SHARP SCREEN), which is finer,
         //so spaced out letters keep even gaps.
-        private static float Whole(float v)
+        public static float Whole(float v)
         {
             return Sharp.Scale == 1f ? (int)v : Sharp.Snap(v);
         }
@@ -681,7 +681,9 @@ namespace Tacetno433.Core
 #if DEBUG
             See(s);
 #endif
-            Put(sb, font, Lang.Of(s), x, y, color, 0f, Vector2.Zero, scale);
+            s = Lang.Of(s);
+            if (MarkWords.Draw(sb, font, s, x, y, color, scale)) return;            // MARK WORDS (3 Nov) : the rule words in colour
+            Put(sb, font, s, x, y, color, 0f, Vector2.Zero, scale);
         }
 
         //Draw Text Centered : text centred on a point

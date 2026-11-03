@@ -47,6 +47,9 @@ namespace Tacetno433.Core
         //Thai (block F3, 2 Nov) : "--thai" takes the pictures with the game in Thai (TacetGame puts Settings.Language to 1)
         public static bool Thai;
 
+        //Newbie (3 Nov) : "--newbie" takes the pictures of a run in NEWBIE MODE (its GUIDE on floors 1 and 2)
+        public static bool Newbie;
+
         //Args Parse : called from Program before the game is made
         public static void Parse(string[] args)
         {
@@ -54,6 +57,7 @@ namespace Tacetno433.Core
             {
                 if (args[i] == "--steady") Steady = true;
                 if (args[i] == "--thai") Thai = true;
+                if (args[i] == "--newbie") Newbie = true;
                 if (args[i] == "--seen") Gfx.Seen = new HashSet<string>();          // SEEN (block F3) : write seen.txt at the end
             }
             for (int i = 0; i < args.Length - 1; i++)
@@ -61,6 +65,7 @@ namespace Tacetno433.Core
                 if (args[i] == "--out") outDir = args[i + 1];
                 if (args[i] == "--scale") Scale = float.Parse(args[i + 1], System.Globalization.CultureInfo.InvariantCulture);
                 if (args[i] == "--figure") Figure.Level = int.Parse(args[i + 1]);                  // MATH ART (1 Nov) : "--figure 2" the simple bodies
+                if (args[i] == "--graphics") Settings.Graphics = int.Parse(args[i + 1]);            // GRAPHICS (3 Nov) : "--graphics 2" pictures at MEDIUM
 
                 if (args[i] == "--shots")
                 {
@@ -409,6 +414,7 @@ namespace Tacetno433.Core
             run.Chosen = run.Options[Math.Min(1, run.Options.Length - 1)];
             run.CurrentEvent = EventList.All[2];
             run.Encore = 3;                                                             // ENCORE is kept too (MAESTRO MODE until 1 Nov)
+            run.Newbie = true;                                                          // NEWBIE MODE is kept too (3 Nov)
             run.WingsRested = true;                                                     // THE WINGS (BOSSES) : rested, the free star taken, 2 bought
             run.WingsFreeStar = true;
             run.WingsBought = 2;
@@ -442,6 +448,7 @@ namespace Tacetno433.Core
                 report += Same("band", run.BandName, back.BandName);
                 report += Same("floor / stage", run.Floor + "/" + run.Stage + "/" + run.StagesThisFloor, back.Floor + "/" + back.Stage + "/" + back.StagesThisFloor);
                 report += Same("encore", run.Encore.ToString(), back.Encore.ToString());
+                report += Same("newbie / hard", run.Newbie + "/" + run.Hard, back.Newbie + "/" + back.Hard);   // NEWBIE MODE (3 Nov)
                 report += Same("shards / dice", run.Shards + "/" + run.PlaceSeed, back.Shards + "/" + back.PlaceSeed);
                 report += Same("stamina", run.StaminaValue, back.StaminaValue);
                 report += Same("record", run.BattlesWon + "/" + run.PerfectsTotal + "/" + run.BestCombo, back.BattlesWon + "/" + back.PerfectsTotal + "/" + back.BestCombo);
@@ -1310,6 +1317,7 @@ namespace Tacetno433.Core
             Conductor sample = BattleRules.TurnBattleOn ? ConductorList.Shown[0] : ConductorList.All[2];      // Alpha 7 : THE UNHEARING, the turn battle hides THE INFERNO
             run.Start(ownConductor ? ConductorList.All[ShotConductor(name)] : sample, game.StoryFont, RouteNodeInfo.CaptionWrapWidth);
             run.BandName = "THE SILENT CHOIR";
+            run.Newbie = Newbie;                                                         // NEWBIE MODE (3 Nov) : --newbie
 
             //The Band : THE BAND OF THREE (29 Oct), PAGANINI violin, QUANTZ flute and PFUNDT timpani. The audition starts
             //with nobody picked (teampick), or with these three already picked (teampickfull, the page picks the run's band).

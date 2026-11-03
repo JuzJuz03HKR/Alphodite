@@ -54,6 +54,22 @@ namespace Tacetno433.Core
         private static RenderTarget2D softA;
         private static RenderTarget2D softB;
 
+        //ART PIXELS (3 Nov, the user 13.150 13.152 : "the picture stays beautiful and a weak computer still plays it smooth") :
+        //TACET's dark (Content/Effects/Void.fx) is worked out for whole pixels of art, blocks of 2 x 2 game pixels : every
+        //screen pixel of a block gets the same colour (its ArtPixel). Drawn at the screen's size, the shader worked the same
+        //block out again for every pixel in it, 4 times over in the window and 9 times in full screen on 1920 x 1080, twice
+        //a frame (the dark, then its light), and those were the heaviest passes of the frame. In the battle the dark is now
+        //worked out once a block, into ArtDark (640 x 360, one pixel a block), and laid onto the screen's picture with no
+        //smoothing (PointClamp), so every block comes out exactly as before. Its backdrop is read at the blocks only, so it is
+        //drawn at that size too (ArtBack). The other pages read their backdrop finely (Void.fx Fine) and keep the full BACK.
+        public static RenderTarget2D ArtBack;
+        private static RenderTarget2D artDark;           // the dark itself (BeginArtDark)
+        private static RenderTarget2D artLight;          // the dark's light (BeginArtLight), into GLOW
+
+        //Made At : the real pixels per game pixel the big pictures were made at (WORLD SCALE, Core/Sharp.cs : the world may be
+        //smaller than the screen). ShowFinal reads FINAL's pixels with it, so FINAL fills the page whatever its size.
+        public static float MadeAt = 1f;
+
         //Light Scale : the light map is half the size of the page, so lights are drawn through this
         public static readonly Matrix LightScale = Matrix.CreateScale(0.5f);
 
@@ -68,10 +84,12 @@ namespace Tacetno433.Core
             Release();
             int w = Sharp.Width;
             int h = Sharp.Height;
+            MadeAt = Sharp.Scale;
 
-            //SHARP SCREEN : on a screen bigger than the page, SCENE and GLOW keep smaller copies of themselves (MIPMAPS, the
-            //card makes them each frame), so the Down pass can read them at the page's own 1280 x 720 (see Down)
-            bool shrinks = Sharp.Scale > 1f;
+            //SHARP SCREEN : on a screen bigger than the page, SCENE and GLOW kept smaller copies of themselves (MIPMAPS, the
+            //card made them each frame), so the Down pass could read them at the page's own 1280 x 720. DOWN WIDE (3 Nov,
+            //Post.fx) reads the full size pictures at sixteen points instead, so the copies are only made for an older Post.fx.
+            bool shrinks = Sharp.Scale > 1f && (Fx.Post == null || Fx.Post.Techniques["DownWide"] == null);
             Back = new RenderTarget2D(device, w, h);
             Scene = new RenderTarget2D(device, w, h, shrinks, SurfaceFormat.Color, DepthFormat.None);
             Light = new RenderTarget2D(device, W / 2, H / 2);
@@ -79,6 +97,9 @@ namespace Tacetno433.Core
             Final = new RenderTarget2D(device, w, h);
             softA = new RenderTarget2D(device, W / 4, H / 4);
             softB = new RenderTarget2D(device, W / 4, H / 4);
+            ArtBack = new RenderTarget2D(device, W / 2, H / 2);
+            artDark = new RenderTarget2D(device, W / 2, H / 2);
+            artLight = new RenderTarget2D(device, W / 2, H / 2);
         }
 
         //Release : give the pictures back to the card (before making them at a new size)
@@ -91,6 +112,55 @@ namespace Tacetno433.Core
             if (Final != null) Final.Dispose();
             if (softA != null) softA.Dispose();
             if (softB != null) softB.Dispose();
+            if (ArtBack != null) ArtBack.Dispose();
+            if (artDark != null) artDark.Dispose();
+            if (artLight != null) artLight.Dispose();
+        }
+
+        //Begin Art Back : the battle's backdrop at one pixel per pixel of art (ART PIXELS). EndArtBack after it.
+        public static void BeginArtBack(GraphicsDevice device)
+        {
+            device.SetRenderTarget(ArtBack);
+            device.Clear(Palette.Void);
+            Sharp.UseScale(0.5f);
+        }
+
+        public static void EndArtBack()
+        {
+            Sharp.UseWorld();
+        }
+
+        //Begin Art Dark : the small picture the dark is worked out into (it stays there for UNDER until Finish)
+        public static void BeginArtDark(GraphicsDevice device)
+        {
+            device.SetRenderTarget(artDark);
+            device.Clear(Palette.Void);
+        }
+
+        //Begin Art Light : the small picture the dark's light is worked out into, black first
+        public static void BeginArtLight(GraphicsDevice device)
+        {
+            device.SetRenderTarget(artLight);
+            device.Clear(Color.Black);
+        }
+
+        //Put Art : a small picture laid over the whole of the target now set, each of its pixels a block of the screen,
+        //unsmoothed. The dark over SCENE (PutArtDark, when there is no UNDER), its light into GLOW (PutArtLight).
+        public static void PutArtDark(SpriteBatch sb)
+        {
+            PutArt(sb, artDark, BlendState.Opaque);
+        }
+
+        public static void PutArtLight(SpriteBatch sb)
+        {
+            PutArt(sb, artLight, BlendState.Additive);
+        }
+
+        private static void PutArt(SpriteBatch sb, Texture2D art, BlendState blend)
+        {
+            sb.Begin(SpriteSortMode.Deferred, blend, SamplerState.PointClamp);
+            sb.Draw(art, new Rectangle(0, 0, Sharp.Width, Sharp.Height), Color.White);
+            sb.End();
         }
 
         //Begin Back : the backdrop and the floor, before TACET's dark is laid over them
@@ -246,6 +316,7 @@ namespace Tacetno433.Core
         //Show Final : FINAL onto the frame, pushed in by zoom round the point at (game pixels, 1 = no push).
         //SHARP SCREEN : FINAL is as big as the real screen and the frame's batch turns game pixels into real ones, so it
         //is drawn at one Dot per pixel of FINAL : its own pixels land one on one, nothing is stretched.
+        //WORLD SCALE (3 Nov) : FINAL made smaller than the screen (MadeAt under Sharp.Scale) is stretched onto it, smoothly.
         public static void ShowFinal(SpriteBatch sb, Vector2 at, float zoom, Color tint)
         {
             ShowFinal(sb, at, zoom, 0f, Vector2.Zero, tint);
@@ -255,7 +326,7 @@ namespace Tacetno433.Core
         //The battle's camera that moves with the baton (Core/StageCamera.cs, Beta1 29 Oct) frames the world through this.
         public static void ShowFinal(SpriteBatch sb, Vector2 at, float zoom, float turn, Vector2 shift, Color tint)
         {
-            sb.Draw(Final, at + shift, null, tint, turn, at * Sharp.Scale, zoom * Sharp.Dot, SpriteEffects.None, 0f);
+            sb.Draw(Final, at + shift, null, tint, turn, at * MadeAt, zoom / MadeAt, SpriteEffects.None, 0f);
         }
 
         //Finish : SCENE and LIGHT MAP into FINAL. focus 0..1 is the QTE FOCUS, engulf 0..1 how far TACET's dark
@@ -285,7 +356,13 @@ namespace Tacetno433.Core
             //level : log2 of Sharp.Scale, 0.58 at 1.5, 1 at 2), so the glow is made from the same picture as in the window
             //and looks the same, instead of from a few scattered pixels of a much bigger one (which would flicker).
             device.SetRenderTarget(softA);
-            post.CurrentTechnique = post.Techniques["Down"];
+            EffectTechnique wide = Sharp.Scale > 1f ? post.Techniques["DownWide"] : null;        // DOWN WIDE (3 Nov)
+            post.CurrentTechnique = wide ?? post.Techniques["Down"];
+            if (wide != null)
+            {
+                post.Parameters["Texel"].SetValue(new Vector2(1f / Scene.Width, 1f / Scene.Height));
+                post.Parameters["Spread"].SetValue(Sharp.Scale);
+            }
             post.Parameters["LightTexture"].SetValue(Light);
             post.Parameters["GlowTexture"].SetValue(Glow);
             EffectParameter lod = post.Parameters["Lod"];
@@ -328,6 +405,8 @@ namespace Tacetno433.Core
                 post.Parameters["CutShapes"].SetValue(cutShape);
                 EffectParameter fall = post.Parameters["CutFall"];
                 if (fall != null) fall.SetValue(cutFall);
+                EffectParameter on = post.Parameters["CutsOn"];
+                if (on != null) on.SetValue(AnyCut() ? 1f : 0f);
             }
             cutFall = 0f;
             System.Array.Clear(cutWhere, 0, MostCuts);                                   //   used once : the next frame sets its own
@@ -340,6 +419,16 @@ namespace Tacetno433.Core
             device.SamplerStates[4] = SamplerState.LinearWrap;
             sb.Draw(Scene, Vector2.Zero, Color.White);
             sb.End();
+        }
+
+
+        //Any Cut : a cut open this frame (its z, how open) or THE BREAK's pieces falling. Post.fx skips the cuts' sums without.
+        private static bool AnyCut()
+        {
+            if (cutFall > 0.0001f) return true;
+            for (int i = 0; i < MostCuts; i++)
+                if (cutShape[i].Z > 0.0001f) return true;
+            return false;
         }
 
         private static void Blur(GraphicsDevice device, SpriteBatch sb, RenderTarget2D from, RenderTarget2D to, Vector2 step)

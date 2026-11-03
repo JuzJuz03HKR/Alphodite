@@ -47,8 +47,27 @@ namespace Tacetno433.Screens
         private Rectangle lastButton = new Rectangle(400, 614, 50, 50);    // the arrows either side of TAKE THE BATON
         private Rectangle nextButton = new Rectangle(830, 614, 50, 50);
         private Rectangle modeBox = new Rectangle(976, 612, 234, 38);      // ENCORE (1 Nov, MAESTRO MODE's switch until then)
-        private Rectangle hardBox = new Rectangle(976, 556, 234, 30);      // HARD MODE (3 Nov) : NORMAL or HARD
-        private static readonly string[] ModeNames = { "NORMAL", "HARD" };
+        private Rectangle hardBox = new Rectangle(976, 556, 234, 30);      // HARD MODE (3 Nov) : NEWBIE, NORMAL or HARD
+        private static readonly string[] ModeNames = { "NEWBIE", "NORMAL", "HARD" };
+        //Mode Notes : what each mode means, one short line under the picker (NEWBIE MODE, the user 13.151)
+        private static readonly string[] ModeNotes =
+        {
+            "Help on every page of floors 1 and 2. Softer fights.",
+            "The game as it is meant to be played.",
+            "Harder hits, tougher enemies, tight timing."
+        };
+
+        //Mode Now : 0 NEWBIE, 1 NORMAL, 2 HARD (Settings.Newbie and Settings.Hard, never both)
+        private static int ModeNow
+        {
+            get { return Settings.Hard ? 2 : (Settings.Newbie ? 0 : 1); }
+        }
+
+        private static void SetMode(int mode)
+        {
+            Settings.Newbie = mode == 0;
+            Settings.Hard = mode == 2;
+        }
 
         //Detail Data
         private int index;
@@ -201,11 +220,11 @@ namespace Tacetno433.Screens
             //Detail ENCORE : this conductor's level for the run, the same picker as the gallery (once they have won a run)
             ConductorSelectScreen.EncoreInput(c, modeBox);
 
-            //Detail HARD MODE : click a half, or M to swap
+            //Detail MODE : click a third, or M for the next one (NEWBIE, NORMAL, HARD)
             if (Input.KeyPressed(Keys.M) || Input.ClickedOn(hardBox))
             {
-                bool hardHalf = Input.MousePos.X >= hardBox.Center.X;
-                Settings.Hard = Input.KeyPressed(Keys.M) ? !Settings.Hard : hardHalf;
+                int third = Math.Max(0, Math.Min(2, (int)((Input.MousePos.X - hardBox.X) * 3f / hardBox.Width)));
+                SetMode(Input.KeyPressed(Keys.M) ? (ModeNow + 1) % 3 : third);
                 SaveFile.SaveSettings();
                 SoundBank.Play(Sfx.UiMove);
             }
@@ -245,7 +264,8 @@ namespace Tacetno433.Screens
             Game.CurrentRun = new RunState();
             Game.CurrentRun.Start(c, Game.StoryFont, RouteNodeInfo.CaptionWrapWidth);
             Game.CurrentRun.Encore = Encore.Picked(c);
-            Game.CurrentRun.Hard = Settings.Hard;                                        // HARD MODE (3 Nov)                                   // ENCORE, 0 until this conductor has won a run
+            Game.CurrentRun.Hard = Settings.Hard;                                        // HARD MODE (3 Nov)
+            Game.CurrentRun.Newbie = Settings.Newbie && !Settings.Hard;                  // NEWBIE MODE (3 Nov)                                   // ENCORE, 0 until this conductor has won a run
             SoundBank.Play(Sfx.UiConfirm);
             Game.Screens.SweepNext(chooseButton.Center.ToVector2(), RingSweep.Kind.Light);     // RING SWEEP : the run begins
             Game.Screens.Change(new TeamPickScreen());
@@ -490,21 +510,25 @@ namespace Tacetno433.Screens
         }
 
         //Letterbox : two black bars, the cheapest way to make a screen feel like a film shot
-        //Draw Mode (HARD MODE, 3 Nov) : NORMAL | HARD over the ENCORE picker, the picked half filled, M on the right
+        //Draw Mode (HARD MODE, 3 Nov, NEWBIE MODE 3 Nov) : NEWBIE | NORMAL | HARD over the ENCORE picker, the picked third filled,
+        //M on the right, and what the picked one means under it
         private void DrawMode(SpriteBatch sb, float alpha)
         {
             if (alpha <= 0f) return;
-            for (int i = 0; i < 2; i++)
+            int mode = ModeNow;
+            int w = hardBox.Width / 3;
+            for (int i = 0; i < 3; i++)
             {
-                int w = hardBox.Width / 2;
-                Rectangle cell = new Rectangle(hardBox.X + i * w, hardBox.Y, i == 1 ? hardBox.Right - hardBox.X - w : w, hardBox.Height);
-                bool picked = (i == 1) == Settings.Hard;
-                if (picked) Gfx.Rect(sb, cell, (i == 1 ? Palette.Accent : Palette.Paper) * alpha);
+                Rectangle cell = new Rectangle(hardBox.X + i * w, hardBox.Y, i == 2 ? hardBox.Right - hardBox.X - 2 * w : w, hardBox.Height);
+                bool picked = i == mode;
+                if (picked) Gfx.Rect(sb, cell, (i == 2 ? Palette.Accent : Palette.Paper) * alpha);
                 Color ink = picked ? Palette.Ink : (Input.MouseOver(cell) ? Palette.Paper : Palette.PaperDim);
                 Gfx.TextCentered(sb, Ui.Font, ModeNames[i], cell.Center.X, cell.Center.Y, ink * alpha, TextSize.Label);
             }
             Gfx.RectOutline(sb, hardBox, (Input.MouseOver(hardBox) ? Palette.Highlight : Palette.LineGrey) * alpha, 1);
             Ui.KeyChipRight(sb, "M", hardBox.Right, hardBox.Y - 13, Palette.PaperDim * alpha);
+            string note = ModeNotes[mode];
+            Gfx.TextRight(sb, Ui.Font, note, hardBox.Right, hardBox.Bottom + 4, Palette.PaperDim * alpha, Gfx.FitScale(Ui.Font, note, TextSize.Tiny, hardBox.Width + 120));
         }
 
         private void DrawLetterbox(SpriteBatch sb)

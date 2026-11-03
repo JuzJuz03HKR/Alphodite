@@ -24,6 +24,17 @@ namespace Tacetno433.Screens
     //(30 to 31 Oct the same cards showed the band's PATH steps too. REHEARSAL took their place, Screens/RehearsalScreen.cs.)
     public class MotifRewardScreen : GameScreen
     {
+        //GUIDE (NEWBIE MODE, 3 Nov) : the gifts
+        private const string GuideGift = "Pick one GIFT. It works by itself in every fight for the rest of the run.";
+        public override string GuideLine
+        {
+            get { return GuideGift; }
+        }
+        public override Rectangle GuideBox
+        {
+            get { return new Rectangle(880, 600, 380, 58); }
+        }
+
         //THE STAGE TURNS (13.122) : the run's conductor's weather in this page's sky (Core/ConductorWeather.cs)
         public override bool ShowsWeather
         {

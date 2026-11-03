@@ -55,6 +55,17 @@ namespace Tacetno433
         private int frameCount;
         private float frameTimer;
         private int shownFps;
+        private int shownUps;
+
+        //WATCH FRAMES (3 Nov, the user 13.150 : "the game lags but FPS says 60 all the time") : FPS used to count Updates.
+        //MonoGame keeps the game's clock at 60 Updates a second, and when drawing falls behind it runs two Updates for one
+        //picture and skips the picture between (IsFixedTimeStep), so the count said 60 while the screen showed 40.
+        //Now FPS counts the pictures really drawn, on a real clock, and AUTO graphics watches the same count.
+        private readonly System.Diagnostics.Stopwatch frameClock = System.Diagnostics.Stopwatch.StartNew();
+        private int drawnThisSecond;
+        private double watchStart;
+        private int slowSeconds;                 // seconds in a row under BattleRules.AutoGraphicsFps
+        private double calmUntil = 4.0;          // nothing is judged before this (the clock's seconds) : the start, a step down
 
         //Frame Cost (F3, Beta1) : measured while the debug line is on, shown once a second
         private System.Diagnostics.Stopwatch updateWatch = new System.Diagnostics.Stopwatch();
@@ -320,6 +331,7 @@ namespace Tacetno433
             }
             SoundBank.Update(dt);                        // BLOCK E : the music's fades and DUCK
             Ornament.UpdateGrain(dt);
+            WatchFrames(active);
             if (DebugShots.Active) Input.PretendPress = Keys.None;     // a pretend key lasts one update, even when a slow frame runs several
             if (showDebug) updateMsSum += updateWatch.Elapsed.TotalMilliseconds;
             UpdateDebug(dt);
@@ -333,7 +345,39 @@ namespace Tacetno433
             return Screens.Current != null && Screens.Current.CanPause && !Screens.Busy && CurrentRun != null;
         }
 
-        //Debug Update : count frames and read how much memory is in use
+        //Watch Frames : once a second, how many pictures were drawn (FPS), and AUTO GRAPHICS : when the pictures stay under
+        //BattleRules.AutoGraphicsFps for AutoGraphicsSeconds seconds in a row while the game is in front and no page is
+        //changing (loading a page can stall a frame), the world steps down one level (HIGH, MEDIUM, LOW, Core/Sharp.cs
+        //WORLD SCALE). The level is saved, so the next start on this machine begins there. Choosing AUTO again on the
+        //settings page starts it from HIGH.
+        private void WatchFrames(bool active)
+        {
+            Sharp.WorldShare = Settings.GraphicsShares[Settings.GraphicsLevel];
+            double now = frameClock.Elapsed.TotalSeconds;
+            double span = now - watchStart;
+            if (span < 1.0) return;
+            shownFps = (int)Math.Round(drawnThisSecond / span);
+            drawnThisSecond = 0;
+            watchStart = now;
+
+            bool judge = Settings.Graphics == 0 && Settings.AutoGraphics < 2 && active && !DebugShots.Active
+                         && !Screens.Busy && !Pause.Open && now >= calmUntil;
+            if (!judge)
+            {
+                slowSeconds = 0;
+                if (!active || Screens.Busy) calmUntil = Math.Max(calmUntil, now + 1.0);   // a second to settle after
+                return;
+            }
+            slowSeconds = shownFps < BattleRules.AutoGraphicsFps ? slowSeconds + 1 : 0;
+            if (slowSeconds < BattleRules.AutoGraphicsSeconds) return;
+
+            Settings.AutoGraphics++;
+            SaveFile.SaveSettings();
+            slowSeconds = 0;
+            calmUntil = now + 3.0;
+        }
+
+        //Debug Update : count updates and read how much memory is in use
         private void UpdateDebug(float dt)
         {
             if (Input.KeyPressed(Keys.F3)) showDebug = !showDebug;
@@ -344,7 +388,7 @@ namespace Tacetno433
 
             if (frameTimer >= 1f)
             {
-                shownFps = frameCount;
+                shownUps = frameCount;
                 //false means "do not force a collection", we only want to read the number
                 shownMemory = GC.GetTotalMemory(false) / 1048576f;
                 shownUpdateMs = (float)(updateMsSum / System.Math.Max(1, frameCount));
@@ -360,12 +404,20 @@ namespace Tacetno433
         {
             //Frame Timer (F3) : how long drawing takes, read in the debug line
             if (showDebug) drawWatch.Restart();
+            drawnThisSecond++;                           // WATCH FRAMES : a picture really drawn
 
             //Pre Draw (Beta1) : a page that builds its picture in layers does it first (see Core/PostChain.cs)
             Screens.PreDraw(spriteBatch);
 
-            //Developer Capture : the tool has its own picture to draw into
-            GraphicsDevice.SetRenderTarget(DebugShots.Active ? DebugShots.Target : screen);
+            //Developer Capture : the tool has its own picture to draw into.
+            //STRAIGHT ON (3 Nov, the user 13.150) : when the picture fills the whole window (the 1280 x 720 window, full screen
+            //on a 16 : 9 monitor) the page is drawn straight onto the window, saving a full screen copy every frame. A window
+            //of another shape still goes through the screen picture, which is then centred between black bars.
+            int backW = GraphicsDevice.PresentationParameters.BackBufferWidth;
+            int backH = GraphicsDevice.PresentationParameters.BackBufferHeight;
+            bool straight = !DebugShots.Active && view.X == 0 && view.Y == 0 && view.Width == backW && view.Height == backH
+                            && screen.Width == backW && screen.Height == backH;
+            GraphicsDevice.SetRenderTarget(DebugShots.Active ? DebugShots.Target : (straight ? null : screen));
 
             GraphicsDevice.Clear(Palette.Void);
 
@@ -383,19 +435,21 @@ namespace Tacetno433
             {
                 //Debug numbers are built here on purpose. They only exist while F3 is on,
                 //so the string work never happens during normal play.
-                string line = "FPS " + shownFps + "   MEM " + shownMemory.ToString("0.0") + " MB"
+                string line = "FPS " + shownFps + " (UPDATES " + shownUps + ")   MEM " + shownMemory.ToString("0.0") + " MB"
                             + "   SFX " + SoundBank.LoadedSfx + "   MUSIC " + SoundBank.LoadedMusic + "   BORROWED " + SoundBank.LoadedBorrowed + "   BAND " + SoundBank.LoadedBand
                             + "   PHRASE " + SoundBank.LoadedPhrase + "   INSTR " + SoundBank.LoadedInstruments
                             + "   HAND " + HandArt.LoadedPoses + "   ART " + ArtBank.Loaded + "   UI " + UiArt.Loaded + "   BATTLE " + FrameArt.Loaded   // block C item 5 : the art the game found, by folder
                             + "   PIXEL " + CharacterArt.Loaded
-                            + "   VIEW " + Sharp.Width + " x " + Sharp.Height;           // SHARP SCREEN : the real size the page is drawn at
+                            + "   VIEW " + Sharp.Width + " x " + Sharp.Height            // SHARP SCREEN : the real size the page is drawn at
+                            + "   WORLD " + (int)(ScreenW * Sharp.WorldScale) + " x " + (int)(ScreenH * Sharp.WorldScale)   // WORLD SCALE (3 Nov)
+                            + " " + Settings.GraphicsNames[Settings.Graphics] + (Settings.Graphics == 0 ? " " + Settings.GraphicsNames[1 + Settings.GraphicsLevel] : "");
                 //Optimize (Beta1) : the cost of a frame. DRAW = draw calls last frame, GC = collections so far (gen 0 / 1 / 2),
                 //FX = whether the shaders loaded. Watch these before and after adding an effect.
                 string cost = "UPDATE " + shownUpdateMs.ToString("0.00") + " ms   DRAW " + shownDrawMs.ToString("0.00") + " ms   CALLS " + shownCalls
                             + "   SPRITES " + shownSprites + "   TARGETS " + shownTargets
                             + "   GC " + GC.CollectionCount(0) + " / " + GC.CollectionCount(1) + " / " + GC.CollectionCount(2)
                             + "   FX " + (Fx.Ready ? "ON" : "OFF");
-                Gfx.Rect(spriteBatch, 0, 0, 980, 46, Color.Black * 0.8f);
+                Gfx.Rect(spriteBatch, 0, 0, 1180, 46, Color.Black * 0.8f);
                 Gfx.Text(spriteBatch, Font, line, 8, 3, Palette.Highlight, TextSize.Body);
                 Gfx.Text(spriteBatch, Font, cost, 8, 25, Palette.Highlight, TextSize.Body);
             }
@@ -407,7 +461,7 @@ namespace Tacetno433
             {
                 DebugShots.AfterDraw(this);
             }
-            else
+            else if (!straight)
             {
                 //Window Fit : black around the picture, then the picture itself. It is already the size of the view, so
                 //its pixels land one on one (PointClamp copies them as they are). Only a screen past Sharp.MaxScale

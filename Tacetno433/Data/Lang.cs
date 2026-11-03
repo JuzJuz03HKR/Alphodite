@@ -27,24 +27,102 @@ namespace Tacetno433.Data
         public static int Count { get { return table.Count; } }
         public static int Swapped;                       // how many strings Apply swapped (F3 shows it)
 
-        //Thai : the player picked Thai and the word list loaded
+        //Active : the language the game started in (0 English, 1 Thai), read once by Load.
+        //ONE LANGUAGE A START (3 Nov, the user 13.150 : "Thai and English are buggy, sometimes translated, sometimes not") :
+        //Of used to read Settings.Language every time it was asked, while the game's data had been swapped once at start
+        //(Apply). Changing the language in the pause menu (which waits for the next start) turned every line written into
+        //the pages over at once and left every line of the data as it was, so the two languages mixed on the same page.
+        //Now the whole game keeps the language it started in until it starts again.
+        public static int Active;
+
+        //Thai : the game started in Thai and the word list loaded
         public static bool Thai
         {
-            get { return Settings.Language == 1 && table.Count > 0; }
+            get { return Active == 1 && table.Count > 0; }
         }
 
-        //Of : the line in the player's language, the same line when the list does not have it
+        //Of : the line in the game's language, the same line when the list does not have it
         public static string Of(string s)
         {
-            if (s == null || Settings.Language != 1 || table.Count == 0) return s;
+            if (s == null || Active != 1 || table.Count == 0) return s;
             string t;
-            return table.TryGetValue(s, out t) ? t : s;
+            if (table.TryGetValue(s, out t)) return t;
+            return OfNumbers(s);
+        }
+
+        //======================================================================================
+        //ANY NUMBERS (3 Nov, the user 13.150 : "sometimes translated, sometimes not") : a line with a number in it was only found
+        //when its number was the one in the list. Every balance change (a skill costing 4 life instead of 6, a passive up to 80
+        //percent instead of 50) turned its line back to English, and a line made with a number of the moment (LIFE +21) never
+        //had one. So every line of the list that holds numbers is also kept as a PATTERN, its numbers taken out (#), and a line
+        //the list does not have is looked for by its pattern : found, its own numbers go into the Thai one after another.
+        //ADVANCED PART : working the pattern out makes strings, so each line asked for is answered once and remembered
+        //(answered), and the pages never pay for it twice. The memory is capped for pages that write a new number every frame.
+        //======================================================================================
+        private static readonly Dictionary<string, string> patterns = new Dictionary<string, string>();
+        private static readonly Dictionary<string, string> answered = new Dictionary<string, string>();
+        private const int MostAnswered = 8000;
+        private static readonly System.Text.RegularExpressions.Regex number = new System.Text.RegularExpressions.Regex(@"\d+(\.\d+)?");
+
+        //Pattern : s with every number turned into #, and how many there were
+        private static string Pattern(string s, out int count)
+        {
+            int found = 0;
+            string p = number.Replace(s, m => { found++; return "#"; });
+            count = found;
+            return p;
+        }
+
+        private static bool HasDigit(string s)
+        {
+            for (int i = 0; i < s.Length; i++)
+                if (s[i] >= '0' && s[i] <= '9') return true;
+            return false;
+        }
+
+        //Learn Pattern : one pair of the list, when both sides hold the same count of numbers
+        private static void LearnPattern(string en, string th)
+        {
+            if (!HasDigit(en)) return;
+            int enCount;
+            int thCount;
+            string key = Pattern(en, out enCount);
+            string value = Pattern(th, out thCount);
+            if (enCount == thCount && !patterns.ContainsKey(key)) patterns[key] = value;
+        }
+
+        //Of Numbers : the line found by its pattern, its own numbers put in (or the line itself)
+        private static string OfNumbers(string s)
+        {
+            if (patterns.Count == 0 || !HasDigit(s)) return s;
+            string done;
+            if (answered.TryGetValue(s, out done)) return done;
+            int count;
+            string thai;
+            done = s;
+            if (patterns.TryGetValue(Pattern(s, out count), out thai))
+            {
+                System.Text.RegularExpressions.MatchCollection numbers = number.Matches(s);
+                System.Text.StringBuilder b = new System.Text.StringBuilder(thai.Length + 8);
+                int next = 0;
+                for (int i = 0; i < thai.Length; i++)
+                {
+                    if (thai[i] == '#' && next < numbers.Count) b.Append(numbers[next++].Value);
+                    else b.Append(thai[i]);
+                }
+                done = b.ToString();
+            }
+            if (answered.Count < MostAnswered) answered[s] = done;
+            return done;
         }
 
         //Load : read the word list (a missing file leaves the game English)
         public static void Load(string path)
         {
+            Active = Settings.Language;
             table.Clear();
+            patterns.Clear();
+            answered.Clear();
             if (!File.Exists(path)) return;
             foreach (string raw in File.ReadAllLines(path))
             {
@@ -54,6 +132,7 @@ namespace Tacetno433.Data
                 string en = raw.Substring(0, tab).Replace("\\n", "\n");
                 string th = raw.Substring(tab + 1).Replace("\\n", "\n");
                 table[en] = th;
+                LearnPattern(en, th);                                          // ANY NUMBERS
             }
         }
 

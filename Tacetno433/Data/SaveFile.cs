@@ -114,6 +114,9 @@ namespace Tacetno433.Data
             lines.Add("shake=" + (Settings.ScreenShake ? 1 : 0));                     // block D item 9 (2 Nov), an older file without them reads ON
             lines.Add("weather=" + (Settings.StageWeather ? 1 : 0));
             lines.Add("hard=" + (Settings.Hard ? 1 : 0));            // HARD MODE (3 Nov)
+            lines.Add("newbie=" + (Settings.Newbie ? 1 : 0));        // NEWBIE MODE (3 Nov)
+            lines.Add("graphics=" + Settings.Graphics);              // GRAPHICS (3 Nov) : AUTO, HIGH, MEDIUM, LOW
+            lines.Add("autographics=" + Settings.AutoGraphics);      //   the level AUTO stepped down to
             lines.Add("lastband=" + Settings.LastBandName);                  // LAST NAME KEPT (1 Nov), an older file without it reads ""
             lines.Add("practice=" + (Settings.PracticeOffered ? 1 : 0));     // THE FIRST REHEARSAL (2 Nov), an older file without it asks once
             Write(SettingsPath, lines);
@@ -167,6 +170,9 @@ namespace Tacetno433.Data
             Settings.ScreenShake = GetInt(v, "shake", 1) == 1;
             Settings.StageWeather = GetInt(v, "weather", 1) == 1;
             Settings.Hard = GetInt(v, "hard", 0) == 1;
+            Settings.Newbie = !Settings.Hard && GetInt(v, "newbie", 0) == 1;
+            Settings.Graphics = Math.Max(0, Math.Min(3, GetInt(v, "graphics", 0)));
+            Settings.AutoGraphics = Math.Max(0, Math.Min(2, GetInt(v, "autographics", 0)));
             Settings.LastBandName = GetText(v, "lastband");
             Settings.PracticeOffered = GetInt(v, "practice", 0) == 1;
         }
@@ -187,6 +193,7 @@ namespace Tacetno433.Data
             lines.Add("stage=" + run.Stage);
             lines.Add("stages=" + run.StagesThisFloor);
             lines.Add("encore=" + run.Encore);
+            lines.Add("newbie=" + (run.Newbie ? 1 : 0));             // NEWBIE MODE (3 Nov)
             lines.Add("hard=" + (run.Hard ? 1 : 0));                 // HARD MODE (3 Nov)                      // ENCORE (1 Nov), maestro= until then
             lines.Add("shards=" + run.Shards);
             lines.Add("placeseed=" + run.PlaceSeed);                // the shop's shelves and the treasure (29 Oct), the same after CONTINUE
@@ -297,6 +304,7 @@ namespace Tacetno433.Data
             int oldMaestro = GetInt(v, "maestro", 0) == 1 ? BattleRules.EncoreTiming : 0;
             run.Encore = Math.Max(0, Math.Min(BattleRules.EncoreTop, GetInt(v, "encore", oldMaestro)));
             run.Hard = GetInt(v, "hard", 0) == 1;
+            run.Newbie = !run.Hard && GetInt(v, "newbie", 0) == 1;     // NEWBIE MODE (3 Nov), an older save reads NORMAL
             run.Shards = GetInt(v, "shards", 0);
             run.PlaceSeed = GetInt(v, "placeseed", 0);
             run.MaxStamina = GetInt(v, "maxstamina", run.MaxStamina);

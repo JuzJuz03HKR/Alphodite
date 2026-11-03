@@ -19,6 +19,35 @@ namespace Tacetno433.Data
     //======================================================================================
     public static class Words
     {
+        //MARKED (3 Nov, the user 13.150 : "colour the words, the special words have to be easy to understand") : the rule words
+        //drawn in a colour of their own wherever a sentence uses them (Core/MarkWords.cs), the colour saying what kind of thing
+        //it is. The kinds : 0 harms the enemy (red, the ATTACK skills' colour), 1 protects (blue, DEFEND), 2 heals (green,
+        //HEAL), 3 makes the band stronger (gold, BOOST), 4 stops the enemy (lavender), 5 what you gain or spend (warm white).
+        //A longer word comes before a shorter one it holds (BIG ATTACK before ATTACK, STUNNED before STUN).
+        public static readonly string[] Marked =
+        {
+            "BIG ATTACK", "ARMOR UP", "PHASE 2", "STUNNED", "CHARGED",
+            "ATTACKS", "ATTACK", "BURN", "CHARGE",
+            "ARMOR", "GUARD", "SHIELD", "BLOCK",
+            "HEAL", "HEALS", "LIFE",
+            "VOLUME", "FOCUS", "FORTE", "ECHO", "SOLO", "COMBO",
+            "STUN", "MUTED", "BROKEN",
+            "BREATH", "FINALE", "PERFECT", "STARS", "STAR", "GIFTS", "GIFT", "SHARDS", "HOLD", "ROLL", "SPARK", "RUSH"
+        };
+        //Unmarked : names that hold a rule word and stay one colour (a skill's name is a name)
+        public static readonly string[] Unmarked = { "TIMPANI ROLL" };
+
+        public static readonly int[] MarkedKind =
+        {
+            0, 1, 0, 4, 0,
+            0, 0, 0, 0,
+            1, 1, 1, 1,
+            2, 2, 2,
+            3, 3, 3, 3, 3, 3,
+            4, 4, 4,
+            5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
+        };
+
         //Statuses and the STUN bar
         public const string Burn = "BURN";            // DISSONANCE in the code : life lost at the end of each of its turns, then 1 less
         public const string Volume = "VOLUME";        // CRESCENDO in the code : every point hits harder, a MISS loses it all

@@ -36,11 +36,64 @@ namespace Tacetno433.Core
         //Set : called by TacetGame whenever the window changes size (and by DebugShots for its pictures)
         public static void Set(float scale)
         {
-            Scale = MathHelper.Clamp(scale, 0.25f, MaxScale);
+            pageScale = MathHelper.Clamp(scale, 0.25f, MaxScale);
+            Apply(pageScale);
+        }
+
+        private static void Apply(float scale)
+        {
+            Scale = scale;
             Dot = 1f / Scale;
             Width = (int)(TacetGame.ScreenW * Scale);
             Height = (int)(TacetGame.ScreenH * Scale);
             Transform = Matrix.CreateScale(Scale, Scale, 1f);
+        }
+
+        //======================================================================================
+        //WORLD SCALE (3 Nov, the user : "on an 8 GB laptop the game lags, the small window is smooth")
+        //======================================================================================
+        //The heavy part of a frame is the WORLD : the pictures of Core/PostChain.cs (the backdrop, TACET's dark, the fighters,
+        //their glow, the bloom) are full screen pictures run through shaders several times a frame, so their cost grows with
+        //every pixel of the screen. Full screen on 1920 x 1080 has 2.25 times the pixels of the 1280 x 720 window, and a
+        //laptop's graphics chip that keeps up with the window falls behind there.
+        //So the world may be drawn smaller than the screen (WorldShare of it) and stretched onto it smoothly, while the
+        //words, numbers and buttons on top stay at the screen's own size, sharp. GRAPHICS on the settings page picks the
+        //share (Settings.Graphics), AUTO lowers it by itself when frames go missing (TacetGame.WatchFrames).
+        //   UseWorld  Scale, Dot, Width, Height and Transform become the world's : everything drawn into the world's
+        //             pictures (a page's PreDraw, PostChain.DrawPage) works in the world's real pixels without knowing it
+        //   UseFull   back to the screen's own, for the words and buttons drawn on top
+        //ADVANCED PART : nothing in the pages changes. They all draw in game pixels through Sharp.Transform and measure with
+        //Sharp.Dot and Sharp.Scale, so switching these numbers between the two halves of the frame is enough.
+        public static float WorldShare = 1f;
+        private static float pageScale = 1f;
+
+        public static float PageScale
+        {
+            get { return pageScale; }
+        }
+
+        //World Scale : real pixels per game pixel in the world's pictures (never more than the screen's own)
+        public static float WorldScale
+        {
+            get { return MathHelper.Clamp(pageScale * WorldShare, 0.25f, pageScale); }
+        }
+
+        public static void UseWorld()
+        {
+            float world = WorldScale;
+            if (world != Scale) Apply(world);
+        }
+
+        public static void UseFull()
+        {
+            if (pageScale != Scale) Apply(pageScale);
+        }
+
+        //Use Scale : any other size for a moment (ART PIXELS, Core/PostChain.cs : the battle's backdrop drawn at one real pixel
+        //per pixel of art, 0.5). UseWorld or UseFull puts it back.
+        public static void UseScale(float scale)
+        {
+            if (scale != Scale) Apply(scale);
         }
 
         //Snap : v (game pixels) moved onto the nearest real pixel. Math.Round, so at Scale 1 it is the old rounding exactly.

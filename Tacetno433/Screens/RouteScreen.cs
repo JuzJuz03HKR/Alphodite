@@ -29,6 +29,25 @@ namespace Tacetno433.Screens
     //TAB (or the button) opens the band page. ESC opens the pause menu, like every page of a run. Arriving here saves the run.
     public class RouteScreen : GameScreen
     {
+        //GUIDE (NEWBIE MODE, 3 Nov, Core/PageGuide.cs) : what the map is for, and a REST when the band is hurt
+        private const string GuideMap = "Pick a room on the next row. FIGHT gives a STAR, REST heals, ? is a surprise. The boss waits at the end.";
+        private const string GuideHurt = "Your band is hurt. A REST room heals it, or keep going and play safe.";
+        public override string GuideLine
+        {
+            get
+            {
+                RunState r = Game.CurrentRun;
+                if (r == null) return null;
+                int max = 0;
+                for (int i = 0; i < r.Roster.Count; i++) max += r.MaxLifeOf(r.Roster[i]);
+                return max > 0 && r.BandLife() * 2 < max ? GuideHurt : GuideMap;
+            }
+        }
+        public override Rectangle GuideBox
+        {
+            get { return new Rectangle(28, 500, 300, 118); }
+        }
+
         //THE STAGE TURNS (13.122) : the run's conductor's weather in this page's sky (Core/ConductorWeather.cs)
         public override bool ShowsWeather
         {

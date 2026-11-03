@@ -110,6 +110,19 @@ namespace Tacetno433.Core
         //Dark : TACET's dark on this page (Core/TacetVoid.cs), or null. A page that has one places it in its Update.
         public TacetVoid Dark;
 
+        //Guide Line : NEWBIE MODE (3 Nov, the user 13.151 : help and advice on every page of the first two floors). What this page
+        //is for and what would help now, one or two short lines, or null for none. Core/PageGuide.cs draws it in GuideBox.
+        //Only a page of a NEWBIE run on floors 1 and 2 shows it (RunState.Guided). A line must be one of the page's constants.
+        public virtual string GuideLine
+        {
+            get { return null; }
+        }
+
+        public virtual Rectangle GuideBox
+        {
+            get { return PageGuide.DefaultBox; }
+        }
+
         //Has World : true for a page split in two. DrawWorld is the stage : it is lit, it glows, the vignette darkens
         //its corners. Draw is then only the words and buttons, laid crisp on top. A page that says false goes through
         //the lens whole (a soft stage light, bloom and vignette).
@@ -294,6 +307,7 @@ namespace Tacetno433.Core
             if (fadingOut) return;
 
             if (current != null) current.Update(dt);
+            if (current != null && game.CurrentRun != null && game.CurrentRun.Guided) PageGuide.Prepare(current.GuideLine, current.GuideBox);   // NEWBIE MODE
         }
 
         //Shows Grain : whether the page on screen wants the film grain over it
@@ -307,8 +321,21 @@ namespace Tacetno433.Core
         public void PreDraw(SpriteBatch sb)
         {
             if (current == null) return;
+
+            //WORLD SCALE (3 Nov, Core/Sharp.cs) : the world's pictures are drawn at the world's size, which GRAPHICS may set
+            //below the screen's. A page with its own lens (the battle) builds only its world in PreDraw. Any other page's
+            //PreDraw makes pictures of its own (the reward's 3D cards) at the screen's size, so only THE LENS is narrowed.
+            if (current.OwnLens)
+            {
+                Sharp.UseWorld();
+                current.PreDraw(sb);
+                Sharp.UseFull();
+                return;
+            }
             current.PreDraw(sb);
-            if (!current.OwnLens) PostChain.DrawPage(game.GraphicsDevice, sb, current, time);
+            Sharp.UseWorld();
+            PostChain.DrawPage(game.GraphicsDevice, sb, current, time);
+            Sharp.UseFull();
         }
 
         //Screen Draw : the active screen, then the cover on top while it is moving
@@ -322,6 +349,7 @@ namespace Tacetno433.Core
                     PostChain.ShowPage(sb, current.Lens, LightsUp);
                     if (current.HasWorld) current.Draw(sb);       // the words and buttons, crisp on top
                 }
+                if (game.CurrentRun != null && game.CurrentRun.Guided) PageGuide.Draw(sb, current.GuideLine, current.GuideBox, LightsUp);   // NEWBIE MODE
             }
             if (fade <= 0f) return;
 

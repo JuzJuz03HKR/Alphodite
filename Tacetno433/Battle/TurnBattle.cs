@@ -278,6 +278,63 @@ namespace Tacetno433.Battle
             }
         }
 
+        //EASE (3 Nov, the user 13.150 "NORMAL a little too hard and too fast", 13.151 "a NEWBIE mode") : 0 the raw numbers of
+        //BattleRules (HARD, and turncheck's fights), 1 NORMAL, 2 NEWBIE (BattleRules MODES). Set by the battle page from the run.
+        //The enemies' life is cut once when it is set, their notes softened as they are planned, the timing widened (Judge)
+        //and the ring slowed (TimeScale, read by the battle page), never on the tight timing of HARD or ENCORE 2.
+        private int ease;
+        public int Ease
+        {
+            get { return ease; }
+            set
+            {
+                int was = ease;
+                ease = Math.Max(0, Math.Min(2, value));
+                float life = LifeShare(ease) / LifeShare(was);
+                if (life != 1f)
+                    for (int i = 0; i < Enemies.Count; i++)
+                    {
+                        Fighter e = Enemies[i];
+                        bool full = e.Hp >= e.MaxHp;
+                        e.MaxHp = Math.Max(1, (int)Math.Round(e.MaxHp * life));
+                        e.Hp = full ? e.MaxHp : Math.Min(e.Hp, e.MaxHp);
+                    }
+                for (int i = 0; i < Enemies.Count; i++)
+                    if (!Enemies[i].Down && Enemies[i].Planned) PlanIntent(Enemies[i]);
+            }
+        }
+
+        private static float LifeShare(int ease)
+        {
+            return ease == 2 ? BattleRules.NewbieLife : (ease == 1 ? BattleRules.NormalLife : 1f);
+        }
+
+        //Ease Hit : TACET's notes x this
+        private float EaseHit
+        {
+            get { return ease == 2 ? BattleRules.NewbieHit : (ease == 1 ? BattleRules.NormalHit : 1f); }
+        }
+
+        //Time Scale : the ring and the gaps between notes x this (the battle page reads it)
+        public float TimeScale
+        {
+            get
+            {
+                if (TightTiming) return 1f;
+                return ease == 2 ? BattleRules.NewbieTime : (ease == 1 ? BattleRules.NormalTime : 1f);
+            }
+        }
+
+        //Ease Window : seconds added to PERFECT and GOOD
+        private float EaseWindow
+        {
+            get
+            {
+                if (TightTiming) return 0f;
+                return ease == 2 ? BattleRules.NewbieWindow : (ease == 1 ? BattleRules.NormalWindow : 0f);
+            }
+        }
+
         private int encore;
         public int Encore
         {
@@ -733,6 +790,7 @@ namespace Tacetno433.Battle
             int power = e.TurnPower > 0 ? e.TurnPower : e.SongNotePower();                  // SongNotePower = the average of its Pattern notes
             float encoreHit = encore >= BattleRules.EncoreHits ? BattleRules.MaestroTurnDamage : 1f;    // ENCORE 1 (the old MAESTRO number)
             if (hard) encoreHit *= BattleRules.HardTurnDamage;                                          // HARD MODE
+            encoreHit *= EaseHit;                                                                       // EASE : NORMAL, NEWBIE
             int hit = Math.Max(1, (int)Math.Round(power * BattleRules.TurnNoteDamage * BattleRules.TurnFloorDamage[Floor - 1] * encoreHit));
 
             //CHARGE : the wind up plays nothing and shows the blow to come. The blow is ONE note of its phrase, TurnChargePower
@@ -2301,7 +2359,7 @@ namespace Tacetno433.Battle
         //A parry happens on the enemy's turn, every other swipe on a musician's (the one who is up).
         public Grade Judge(float offset, bool rightWay)
         {
-            float steady = Has(MotifId.SteadyPulse) ? BattleRules.SteadyWindowBonus : 0f;           // STEADY PULSE
+            float steady = (Has(MotifId.SteadyPulse) ? BattleRules.SteadyWindowBonus : 0f) + EaseWindow;   // STEADY PULSE, EASE
             float perfect = (TightTiming ? BattleRules.MaestroPerfectWindow : BattleRules.PerfectWindow) + steady;   // ENCORE 2
             float good = (TightTiming ? BattleRules.MaestroGoodWindow : BattleRules.GoodWindow) + steady;
             bool parry = Step == TurnStep.EnemyTurn;
@@ -2343,7 +2401,7 @@ namespace Tacetno433.Battle
         {
             get
             {
-                float late = (TightTiming ? BattleRules.MaestroGoodWindow : BattleRules.GoodWindow) + (Has(MotifId.SteadyPulse) ? BattleRules.SteadyWindowBonus : 0f);   // ENCORE 2
+                float late = (TightTiming ? BattleRules.MaestroGoodWindow : BattleRules.GoodWindow) + (Has(MotifId.SteadyPulse) ? BattleRules.SteadyWindowBonus : 0f) + EaseWindow;   // ENCORE 2, EASE
                 if (Step == TurnStep.EnemyTurn && Kit == TurnKit.Lully) late += BattleRules.TurnLullyWindow;                       // STEADY HAND
                 return late;
             }

@@ -982,22 +982,48 @@ namespace Tacetno433.Screens
             stageCam = cam;
             dark.Place(cam, Horizon);
 
-            //BACK : the movement's backdrop and the floor, alone
-            PostChain.BeginBack(device);
-            DrawBackdrop(sb, cam);
+            //BACK : the movement's backdrop and the floor, alone.
+            //ART PIXELS (3 Nov, Core/PostChain.cs) : with the shaders, the backdrop and TACET's dark are worked out once for
+            //every block of 2 x 2 game pixels into small pictures, then laid onto the screen's picture unsmoothed. The same
+            //blocks as before, a ninth of the work in full screen. Without shaders, the old full size path.
+            bool art = Fx.VoidReady;
+            if (art)
+            {
+                PostChain.BeginArtBack(device);
+                DrawBackdrop(sb, cam);
+                PostChain.EndArtBack();
+                PostChain.BeginArtDark(device);
+                dark.DrawScene(device, sb, PostChain.ArtBack);
+            }
+            else
+            {
+                PostChain.BeginBack(device);
+                DrawBackdrop(sb, cam);
+            }
 
             //SCENE : BACK seen through TACET's dark, then the fighters in front of it
             PostChain.BeginScene(device);
-            dark.DrawScene(device, sb, PostChain.Back);
+            if (art) PostChain.PutArtDark(sb);
+            else dark.DrawScene(device, sb, PostChain.Back);
             DrawFighters(sb, cam);
 
             PostChain.BeginLights(device, sb, MoodAmbient(BattleRules.StageAmbient));      // THE STAGE TURNS : darker under a STORM or a night
             DrawStageLights(sb, cam);
             PostChain.EndLights(sb);
 
-            //GLOW : the light of the dark, then the effects of the blows
+            //GLOW : the light of the dark, then the effects of the blows (ART PIXELS : the light worked out small as well)
+            if (art)
+            {
+                PostChain.BeginArtLight(device);
+                dark.DrawGlowLight(device, sb, PostChain.ArtBack);
+            }
             PostChain.BeginGlowTarget(device);
-            dark.DrawGlow(device, sb, PostChain.Back);
+            if (art)
+            {
+                PostChain.PutArtLight(sb);
+                dark.DrawGlowParts(sb);
+            }
+            else dark.DrawGlow(device, sb, PostChain.Back);
             DrawMoodBack(sb, cam);                                // THE STAGE TURNS : the conductor's sky after a FINALE (BattleScreen.Finale.cs)
             DrawFrontSilhouette(device, cam);                     // MATH ART : the musician in front hides the seam's light behind it
             DrawTacetSilhouettes(device, cam);                    //   and TACET's figures hide the hole's light behind them

@@ -50,13 +50,14 @@ namespace Tacetno433.Screens
         private const int RowClear = 7;                     // CLEAR FIGHT (Beta1 step 6, BETA1_DIRECTION 3.6)
         private const int RowShake = 8;                     // SCREEN SHAKE (block D item 9, 2 Nov)
         private const int RowWeather = 9;                   // STAGE WEATHER (block D item 9)
-        private const int RowCount = 10;
+        private const int RowGraphics = 10;                 // GRAPHICS (3 Nov, the user 13.150 : lag on a laptop, Core/Sharp.cs WORLD SCALE)
+        private const int RowCount = 11;
 
         //Settings Layout
         private const int SpineX = 262;                     // the thin line the rows hang on, each row's circle sits on it
         private const int RowY = 92;                        // the top of the first row
-        private const int RowStep = 52;                     // (60 until the graphics rows came, 2 Nov)
-        private const int RowH = 56;
+        private const int RowStep = 48;                     // (60 until the graphics rows came, 2 Nov, 52 until GRAPHICS, 3 Nov)
+        private const int RowH = 48;
         private const int RowLeft = 200;                    // the row's box for the mouse, from here ...
         private const int RowRight = 900;                   // ... to here
         private const int TrackX = 560;
@@ -67,7 +68,7 @@ namespace Tacetno433.Screens
         private static readonly Vector2 Hole = new Vector2(1085f, 96f);
         private const float HoleRadius = 30f;
 
-        private static string[] rowIndex = { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10" };
+        private static string[] rowIndex = { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11" };
         private static string[] rowNames =
         {
             "MASTER VOLUME",
@@ -79,7 +80,8 @@ namespace Tacetno433.Screens
             "LESS FLASHING",
             "CLEAR FIGHT",
             "SCREEN SHAKE",
-            "STAGE WEATHER"
+            "STAGE WEATHER",
+            "GRAPHICS"
         };
         private static string[] offOn = { "OFF", "ON" };
 
@@ -97,7 +99,8 @@ namespace Tacetno433.Screens
             "Turns down the white flashes and the shaking of big hits, and leaves out the frame where the picture turns black and white. For anyone who finds flashing light hard to look at.",
             "A fight that is easier to read : bigger numbers, a solid plate behind every name and attack, each attack says who it is for, and the rest goes darker while you swing. The rules stay the same. Turn it on and off to compare.",
             "The fight's camera shakes with every big blow. Off stops the shaking only, the camera still moves in on the action.",
-            "Your conductor's weather over the stage and the pages of a run : the storm's rain, the rainbow light, the sky of stars. Off leaves the stage plain."
+            "Your conductor's weather over the stage and the pages of a run : the storm's rain, the rainbow light, the sky of stars. Off leaves the stage plain.",
+            "If the game stutters, pick a lower one. The stage is drawn smaller and stretched, the words stay sharp. AUTO steps down by itself when it sees the game slow down."
         };
         private static string savedNote =
             "Options are saved the moment you leave this page, and come back the next time the game starts.";
@@ -105,7 +108,6 @@ namespace Tacetno433.Screens
             "Hold the left button and stroke the baton, any way, on every flash. The first two strokes are practice.";
 
         private string[] helpWrapped = new string[RowCount];
-        private int languageAtStart = Settings.Language;   // THAI TEXT : the language when the page opened
         private string savedWrapped = "";
         private string testWrapped = "";
 
@@ -119,6 +121,7 @@ namespace Tacetno433.Screens
         private Rectangle[] clearBoxes = new Rectangle[2];  // CLEAR FIGHT : OFF, ON
         private Rectangle[] shakeBoxes = new Rectangle[2];  // SCREEN SHAKE : OFF, ON
         private Rectangle[] weatherBoxes = new Rectangle[2]; // STAGE WEATHER : OFF, ON
+        private Rectangle[] graphicsBoxes = new Rectangle[4]; // GRAPHICS : AUTO, HIGH, MEDIUM, LOW
         private Rectangle timingTrack;
         private Rectangle timingGrab;
         private Rectangle testChip;
@@ -197,6 +200,8 @@ namespace Tacetno433.Screens
                 shakeBoxes[k] = new Rectangle(TrackX + k * 88, rowBoxes[RowShake].Center.Y - 16, 76, 32);
                 weatherBoxes[k] = new Rectangle(TrackX + k * 88, rowBoxes[RowWeather].Center.Y - 16, 76, 32);
             }
+            for (int k = 0; k < 4; k++)
+                graphicsBoxes[k] = new Rectangle(TrackX + k * 84, rowBoxes[RowGraphics].Center.Y - 16, 78, 32);
 
             int timing = rowBoxes[RowTiming].Center.Y;
             timingTrack = new Rectangle(TrackX, timing - 8, 150, 16);
@@ -284,7 +289,7 @@ namespace Tacetno433.Screens
                 SoundBank.Play(Sfx.UiBack);
                 SaveFile.SaveSettings();
                 if (fromPause) Closed = true;
-                else if (Settings.Language != languageAtStart) Game.Restart();   // THAI TEXT : a new language, a fresh start
+                else if (Settings.Language != Lang.Active) Game.Restart();   // THAI TEXT : a new language (here or earlier in the pause menu), a fresh start
                 else Game.Screens.Change(new TitleScreen());
             }
         }
@@ -419,6 +424,8 @@ namespace Tacetno433.Screens
                     if (Input.MouseOver(shakeBoxes[k])) { selected = RowShake; SetShake(k == 1); }
                     if (Input.MouseOver(weatherBoxes[k])) { selected = RowWeather; SetWeather(k == 1); }
                 }
+                for (int k = 0; k < 4; k++)
+                    if (Input.MouseOver(graphicsBoxes[k])) { selected = RowGraphics; SetGraphics(k); }
                 if (Input.MouseOver(timingGrab)) { dragging = RowTiming; selected = RowTiming; }
                 if (Input.MouseOver(testChip)) { StartTest(); return; }
             }
@@ -447,6 +454,7 @@ namespace Tacetno433.Screens
             else if (row == RowClear) SetClear(dir > 0);
             else if (row == RowShake) SetShake(dir > 0);
             else if (row == RowWeather) SetWeather(dir > 0);
+            else if (row == RowGraphics) SetGraphics(Math.Max(0, Math.Min(3, Settings.Graphics + dir)));
             else SetFullscreen(dir > 0);
         }
 
@@ -459,6 +467,7 @@ namespace Tacetno433.Screens
             else if (row == RowClear) SetClear(!Settings.ClearFight);
             else if (row == RowShake) SetShake(!Settings.ScreenShake);
             else if (row == RowWeather) SetWeather(!Settings.StageWeather);
+            else if (row == RowGraphics) SetGraphics((Settings.Graphics + 1) % 4);
             else if (row == RowTiming) StartTest();
             if (row >= RowLanguage) rowMotion[row].Press();
         }
@@ -528,6 +537,15 @@ namespace Tacetno433.Screens
         {
             if (Settings.StageWeather == on) return;
             Settings.StageWeather = on;
+            SoundBank.Play(Sfx.UiConfirm);
+        }
+
+        //Set Graphics : GRAPHICS (3 Nov). Picking AUTO again lets it start from HIGH and judge this machine afresh.
+        private void SetGraphics(int id)
+        {
+            if (Settings.Graphics == id) return;
+            Settings.Graphics = id;
+            if (id == 0) Settings.AutoGraphics = 0;
             SoundBank.Play(Sfx.UiConfirm);
         }
 
@@ -647,6 +665,7 @@ namespace Tacetno433.Screens
             else if (i == RowClear) DrawSwitchRow(sb, clearBoxes, Settings.ClearFight, "BIGGER  NUMBERS", 57, on, a);
             else if (i == RowShake) DrawSwitchRow(sb, shakeBoxes, Settings.ScreenShake, "CAMERA  SHAKES", 63, on, a);
             else if (i == RowWeather) DrawSwitchRow(sb, weatherBoxes, Settings.StageWeather, "CONDUCTOR'S  SKY", 69, on, a);
+            else if (i == RowGraphics) DrawGraphicsRow(sb, on, a);
             else DrawTimingRow(sb, on, a);
         }
 
@@ -664,6 +683,19 @@ namespace Tacetno433.Screens
         {
             for (int k = 0; k < 2; k++)
                 Ui.Choice(sb, langBoxes[k], Settings.LanguageNames[k], Settings.Language == k, on, Input.MouseOver(langBoxes[k]), 7 + k * 4, a);
+        }
+
+        //Graphics Row : AUTO HIGH MEDIUM LOW, the chosen one on its plate. Under AUTO the level it is using is lit too, a
+        //thin line under its word.
+        private void DrawGraphicsRow(SpriteBatch sb, bool on, float a)
+        {
+            for (int k = 0; k < 4; k++)
+                Ui.Choice(sb, graphicsBoxes[k], Settings.GraphicsNames[k], Settings.Graphics == k, on, Input.MouseOver(graphicsBoxes[k]), 75 + k * 4, a);
+            if (Settings.Graphics == 0)
+            {
+                Rectangle used = graphicsBoxes[1 + Settings.GraphicsLevel];
+                Gfx.Rect(sb, used.X + 10, used.Bottom + 3, used.Width - 20, 2, Palette.Accent * a);
+            }
         }
 
         //Switch Row : OFF and ON, the one in use on its plate, and what it means at the right

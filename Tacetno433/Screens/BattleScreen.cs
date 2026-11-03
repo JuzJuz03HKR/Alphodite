@@ -189,13 +189,13 @@ namespace Tacetno433.Screens
         //PRACTICE : what the card says, and which of the five lessons are done. THE FIRST REHEARSAL (Beta1 2 Nov, block F,
         //docs/BETA1_DIRECTION.md 49) : TUTORIAL on the title page opens this fight straight away, so everything is learned on the
         //real fight's own page. One line at a time, plain words, the key to press in it.
-        private const string CoachPlay = "Your turn. Press ENTER (" + Words.Play + ") : the whole band attacks.";
-        private const string CoachParry = "Its turn. Hold the left button and swipe the arrow's way as the ring closes.";
-        private const string CoachSkill = "Click a musician, then 2 or 3 : a skill. Skills cost BREATH.";
+        private const string CoachPlay = "Lesson 1, PLAY : press ENTER (" + Words.Play + "). Your whole band attacks TACET.";
+        private const string CoachParry = "Lesson 2, BLOCK : TACET attacks. Hold the left button, swipe the arrow's way as the ring closes.";
+        private const string CoachSkill = "Lesson 3, SKILL : click a musician, then 2 or 3. A skill costs BREATH (the diamonds, bottom right).";
         private const string CoachSkillSwipe = "A skill is a few notes. Swipe each arrow as its ring closes.";
-        private const string CoachHoldNext = "Its next attack ends in a HOLD. Press ENTER and get ready.";
+        private const string CoachHoldNext = "Lesson 4, HOLD : its next attack ends in a HOLD. Press ENTER and get ready.";
         private const string CoachHold = "HOLD : swipe it, then keep the button down until it ends.";
-        private const string CoachSignature = "The diamonds are full. Press SPACE for the " + Words.Finale + ".";
+        private const string CoachSignature = "Lesson 5, " + Words.Finale + " : the diamonds are full. Press SPACE.";
         private const string CoachSignatureSwipe = "4 swipes : DOWN, LEFT, RIGHT, UP.";
         private const string CoachWin = "That is the whole fight. Now win it.";
         private static readonly Rectangle coachBox = new Rectangle(240, 140, 800, 56);  // under THE BAND's cards (until 2 Nov it lay over them, the ones it told you to click)
@@ -254,9 +254,11 @@ namespace Tacetno433.Screens
             if (practice)
             {
                 PracticeLoad();
+                LoadGuide();                                                             // THE GUIDE (BattleScreen.Guide.cs)
                 return;
             }
             run = Game.CurrentRun;
+            LoadGuide();
 
             //The Band : THE BAND OF THREE, all of them on the field, in the BAND page's order (Beta1, RunState.Lineup)
             List<Musician> band = run.Lineup();
@@ -274,7 +276,8 @@ namespace Tacetno433.Screens
             battle = new TurnBattle(band, enemies, run.Floor, run.Rng, life, Archive.Level(Archive.Life) * BattleRules.ArchiveLifePerLevel);
             battle.GiveMotifs(run.Motifs);                                                   // the motifs the band carries
             battle.Encore = run.Encore;
-            battle.Hard = run.Hard;                                                          // HARD MODE (3 Nov)                                                      // ENCORE (1 Nov, MAESTRO MODE until then)
+            battle.Hard = run.Hard;                                                          // HARD MODE (3 Nov)
+            battle.Ease = run.Hard ? 0 : (run.Newbie ? 2 : 1);                               // EASE (3 Nov) : NORMAL, NEWBIE                                                      // ENCORE (1 Nov, MAESTRO MODE until then)
             battle.Kit = run.Conductor.Turn;                                                 // the conductor's PASSIVE and SIGNATURE
 
             //ARCHIVE : DEEP BREATH and WARM UP, bought between runs (step 7)
@@ -300,6 +303,10 @@ namespace Tacetno433.Screens
             }
             List<Musician> band = new List<Musician> { MusicianList.All[0], MusicianList.All[1], MusicianList.All[2] };
             battle = new TurnBattle(band, new List<Enemy> { EnemyList.Practice }, 1, new Random());
+            int practiceLife = battle.Enemies[0].MaxHp;                                      // kept : the five lessons need its whole life
+            battle.Ease = 2;                                                                 // EASE : the practice plays NEWBIE's slow ring and wide timing
+            battle.Enemies[0].MaxHp = practiceLife;
+            battle.Enemies[0].Hp = practiceLife;
             battle.Kit = TurnKit.Beethoven;
             for (int i = 0; i < ConductorList.All.Length; i++)
                 if (ConductorList.All[i].Turn == TurnKit.Beethoven) signatureName = ConductorList.All[i].TurnSignatureName;
@@ -371,7 +378,7 @@ namespace Tacetno433.Screens
         //Ring Time : how long a ring takes to close (quicker from ENCORE 2, as MAESTRO MODE was)
         private float RingTime
         {
-            get { return battle.TightTiming ? BattleRules.MaestroTurnRingTime : BattleRules.TurnRingTime; }
+            get { return battle.TightTiming ? BattleRules.MaestroTurnRingTime : BattleRules.TurnRingTime * battle.TimeScale; }   // EASE
         }
 
         //======================================================================================
@@ -440,6 +447,7 @@ namespace Tacetno433.Screens
                 }
                 UpdateCoach();
             }
+            UpdateGuide(dt);                                                             // THE GUIDE : NEWBIE's advice, the point
 
             if (UpdateBoss(dt))                                                          // BOSS SHOW : a moment holds the fight
             {
@@ -544,6 +552,7 @@ namespace Tacetno433.Screens
             hover = null;
             hoverSkill = null;
             hoverCommand = -1;
+            if (UpdateIntro()) return;                                                   // THE GUIDE : FIRST LOOK, read before the first lesson
 
             //SIGNATURE : SPACE, or a click on the gauge
             if (battle.CanSignature && (Input.KeyPressed(Keys.Space) || Input.ClickedOn(signatureBox)))
@@ -862,14 +871,15 @@ namespace Tacetno433.Screens
         {
             float due = RingTime;
             bool fast = what == SwipeFor.Parry && battle.Current != null && battle.Current.IntentFast;   // UNFINISHED
-            float gap = BattleRules.TurnNoteGap * (fast ? BattleRules.TurnFastGap : 1f);
+            float slow = battle.TimeScale;                                                   // EASE : NORMAL and NEWBIE give more time
+            float gap = BattleRules.TurnNoteGap * (fast ? BattleRules.TurnFastGap : 1f) * slow;
             for (int i = 0; i < notes.Count; i++)
             {
                 if (i > 0)
                 {
                     NoteKind before = notes[i - 1].Kind;
-                    if (notes[i].Kind == NoteKind.Spark) due += BattleRules.TurnSparkGap;
-                    else if (notes[i].Kind == NoteKind.Rush) due += BattleRules.TurnRushGap;               // RUSH (BLOCK G) : right on its heels
+                    if (notes[i].Kind == NoteKind.Spark) due += BattleRules.TurnSparkGap * slow;
+                    else if (notes[i].Kind == NoteKind.Rush) due += BattleRules.TurnRushGap * slow;        // RUSH (BLOCK G) : right on its heels
                     else due += gap * GapAt(what, i);                                                       // THE NINTH : uneven
                     if (before == NoteKind.Hold) due += BattleRules.TurnHoldTime;
                     if (before == NoteKind.Roll) due += BattleRules.TurnRollTime;
@@ -963,8 +973,10 @@ namespace Tacetno433.Screens
                 {
                     missKept = true;
                     missGrade = grade;
+                    whyKept = WhyOf(grade, offset, rightWay);                            // THE GUIDE : WHY
                     return;
                 }
+                why = WhyOf(grade, offset, rightWay);
 
                 qteEffects.SpawnSlash(gesture.From, gesture.To, grade == Grade.Perfect ? 1f : 0.55f);
 
@@ -985,8 +997,8 @@ namespace Tacetno433.Screens
             }
             else if (now > n.Due + battle.LateLimit)
             {
-                if (missKept) Land(missGrade, 1f);                     // only a stroke the wrong way or too early came
-                else Land(Grade.Hesitate, 0f);                         // no swipe at all
+                if (missKept) { why = whyKept; Land(missGrade, 1f); }  // only a stroke the wrong way or too early came
+                else { why = WhyNone; Land(Grade.Hesitate, 0f); }      // no swipe at all
             }
         }
 
@@ -1015,6 +1027,7 @@ namespace Tacetno433.Screens
                 holding = false;
                 SoundBank.StopLoop();                                  // BLOCK E : the held strings stop with the hand
                 if (practice && holdDown >= BattleRules.TurnHoldTime * 0.75f) Learn(Lesson.Hold);   // THE FIRST REHEARSAL : held most of the way
+                if (holdDown < BattleRules.TurnHoldTime * BattleRules.TurnParryHoldPerfect) why = WhyHold;   // THE GUIDE : WHY
                 Land(holdGrade, holdDown / BattleRules.TurnHoldTime);
             }
         }
@@ -1045,7 +1058,9 @@ namespace Tacetno433.Screens
             if (now >= n.Due + BattleRules.TurnRollTime)
             {
                 rolling = false;
-                Land(battle.RollGrade(shakes), 1f);
+                Grade rolled = battle.RollGrade(shakes);
+                why = rolled == Grade.Perfect ? "" : WhyShake;                           // THE GUIDE : WHY
+                Land(rolled, 1f);
             }
         }
 
@@ -1056,6 +1071,7 @@ namespace Tacetno433.Screens
             if (swipeFor == SwipeFor.Parry && notes[next].Kind == NoteKind.Hold)
                 grade = battle.HeldGrade(grade, hold);                                   // THE SILENCE GROWS (BLOCK G) : a heavy blow is held back to the end
             grade = battle.Forgive(grade);                                               // SPARE STRINGS (GIFT) : the first MISS is a GOOD
+            if (grade == Grade.Perfect) why = "";                                        // THE GUIDE : nothing to explain
             missKept = false;
             notesPlayed++;                                                               // RANK
             if (notes[next].Kind != NoteKind.Hold || !(grade == Grade.Perfect || grade == Grade.Good) || hold <= 0f) SoundLand(grade);   // BLOCK E (a held note rang as it landed)
@@ -2179,7 +2195,7 @@ namespace Tacetno433.Screens
             DrawBottom(sb, planning);
             DrawFriendRow(sb);                                                    // FRIEND PICK : the friends a skill can go to, over the commands
             DrawSkillCard(sb);
-            if (practice) DrawCoach(sb);
+            DrawGuide(sb);                                                                // THE GUIDE : PRACTICE's card, NEWBIE's advice, WHY
             if (bondLine.Length > 0 && bondTime < BattleRules.TurnBondLineTime) DrawBondLine(sb);   // BONDS
             DrawTip(sb);                                                                             // MARKS AND AIM : what an icon is
 

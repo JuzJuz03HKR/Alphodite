@@ -48,6 +48,17 @@ namespace Tacetno433.Core
             TurnBattle b = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
             report += Same("life", "45/39/54/80", b.Party[0].Hp + "/" + b.Party[1].Hp + "/" + b.Party[2].Hp + "/" + b.Enemies[0].Hp);
             report += Same("plan first", "Plan 1 3 True", b.Step + " " + b.Round + " " + b.Breath + " " + (b.Current == null));
+
+            //EASE (3 Nov, BattleRules MODES) : NORMAL 0.97 of TACET's life, its notes 0.95, PERFECT 0.015 wider and the ring
+            //1.15 times slower. NEWBIE 0.75, 0.5, 0.05 wider, 1.35 slower. HUSH 80 life, 8 a note raw : NORMAL 78 and 8 (7.6),
+            //NEWBIE 60 and 4. A swipe 0.11 seconds off is GOOD raw, PERFECT on NORMAL. 0.14 off is PERFECT on NEWBIE.
+            TurnBattle eased = new TurnBattle(band, new List<Enemy> { hush }, 1, new Random(433));
+            string rawJudge = eased.Judge(0.11f, true).ToString();
+            eased.Ease = 1;
+            string normal = eased.Enemies[0].MaxHp + " " + eased.Enemies[0].IntentNotes[0] + " " + eased.Judge(0.11f, true) + " " + (int)Math.Round(eased.TimeScale * 100);
+            eased.Ease = 2;
+            string newbie = eased.Enemies[0].MaxHp + " " + eased.Enemies[0].IntentNotes[0] + " " + eased.Judge(0.14f, true) + " " + (int)Math.Round(eased.TimeScale * 100);
+            report += Same("ease", "Good / 78 8 Perfect 115 / 60 4 Perfect 135", rawJudge + " / " + normal + " / " + newbie);
             List<Fighter> preview = new List<Fighter>();
             List<BarMove> previewMoves = new List<BarMove>();
             b.PreviewOrder(preview, previewMoves);

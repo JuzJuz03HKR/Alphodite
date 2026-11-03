@@ -21,6 +21,17 @@ namespace Tacetno433.Screens
     //piece by piece, and the choices light up like the menus when pointed at.
     public class EventScreen : GameScreen
     {
+        //GUIDE (NEWBIE MODE, 3 Nov) : a place of the unknown path
+        private const string GuideEvent = "Each way has a price and a prize. The tags on the right of each way say both.";
+        public override string GuideLine
+        {
+            get { return GuideEvent; }
+        }
+        public override Rectangle GuideBox
+        {
+            get { return new Rectangle(660, 560, 600, 56); }
+        }
+
         //THE STAGE TURNS (13.122) : the run's conductor's weather in this page's sky (Core/ConductorWeather.cs)
         public override bool ShowsWeather
         {

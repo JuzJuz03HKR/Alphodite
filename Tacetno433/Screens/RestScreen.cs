@@ -26,6 +26,17 @@ namespace Tacetno433.Screens
     //three choices rise in one after another, and pointing at one lifts it into the lamp's light.
     public class RestScreen : GameScreen
     {
+        //GUIDE (NEWBIE MODE, 3 Nov) : the rest, and THE WINGS before a boss
+        private const string GuideRest = "Pick one : heal the band, or a STAR for one move. Hurt? Heal first.";
+        public override string GuideLine
+        {
+            get { return GuideRest; }
+        }
+        public override Rectangle GuideBox
+        {
+            get { return new Rectangle(330, 664, 620, 48); }
+        }
+
         //THE STAGE TURNS (13.122) : the run's conductor's weather in this page's sky (Core/ConductorWeather.cs)
         public override bool ShowsWeather
         {

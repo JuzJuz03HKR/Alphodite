@@ -325,6 +325,26 @@
         public static float HardEnemyLife = 1.25f;     // every enemy has this much more life
         public static float HardShards = 0.8f;         // shards after a fight, this share
 
+        //MODES (3 Nov, the user 13.150 "NORMAL a little too hard and too fast" and 13.151 "a NEWBIE mode, help all the time on
+        //the first two floors, the third played alone, an easy mode"). TurnBattle.Ease, set by the battle page from the run :
+        //the numbers above are the raw rules (HARD plays them with the HARD numbers on top, turncheck plays them as they are),
+        //NORMAL and NEWBIE scale them down. TIME stretches the ring and the gaps between notes (never on the tight timing of
+        //HARD or ENCORE 2), WINDOW widens PERFECT and GOOD by that many seconds, HIT and LIFE are TACET's notes and life.
+        public static float NormalTime = 1.15f;        // NORMAL : the ring 1.1 -> 1.27 seconds, a gap 0.55 -> 0.63
+        public static float NormalWindow = 0.015f;     //          PERFECT 0.10 -> 0.115, GOOD 0.22 -> 0.235
+        public static float NormalHit = 0.95f;
+        public static float NormalLife = 0.97f;
+        public static float NewbieTime = 1.35f;        // NEWBIE : the ring 1.49 seconds, a gap 0.74
+        public static float NewbieWindow = 0.05f;      //          PERFECT 0.15, GOOD 0.27
+        public static float NewbieHit = 0.5f;
+        public static float NewbieLife = 0.75f;
+        public static int NewbieGuidedFloors = 2;      // NEWBIE : the help on these first floors, the last one is played alone
+
+        //AUTO GRAPHICS (3 Nov, the user 13.150 : lag on an 8 GB laptop in full screen, TacetGame.WatchFrames) : under this many
+        //pictures a second for this many seconds in a row, GRAPHICS AUTO draws the world one level smaller (Core/Sharp.cs)
+        public static int AutoGraphicsFps = 50;
+        public static int AutoGraphicsSeconds = 3;
+
         public const int EncoreTop = 5;
         public const int EncoreHits = 1;               // TACET's notes hit MaestroTurnDamage harder
         public const int EncoreTiming = 2;             // the ring closes in MaestroTurnRingTime, with the Maestro windows and shakes

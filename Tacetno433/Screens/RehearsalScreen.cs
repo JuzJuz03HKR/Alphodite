@@ -22,6 +22,17 @@ namespace Tacetno433.Screens
     //Its look is a first one : the VFX of a new star and of a legend wait for the user's references (16.14 point 5).
     public class RehearsalScreen : GameScreen
     {
+        //GUIDE (NEWBIE MODE, 3 Nov) : the rehearsal
+        private const string GuideStar = "Give the STAR to one move. It gets stronger. 3 STARS turn it into its legend form.";
+        public override string GuideLine
+        {
+            get { return GuideStar; }
+        }
+        public override Rectangle GuideBox
+        {
+            get { return new Rectangle(24, 66, 420, 58); }
+        }
+
         //THE STAGE TURNS (13.122) : the run's conductor's weather in this page's sky (Core/ConductorWeather.cs)
         public override bool ShowsWeather
         {
